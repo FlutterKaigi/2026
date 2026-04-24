@@ -1,0 +1,9 @@
+name: flutterkaigi_2026
+description: FlutterKaigi 2026 monorepo workspace (website + app).
+publish_to: none
+
+environment:
+  sdk: ">=3.11.0 <4.0.0"
+
+dev_dependencies:
+  melos: ^6.0.0
