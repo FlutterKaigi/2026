@@ -13,32 +13,10 @@
 
 include: package:lints/recommended.yaml
 
-analyzer:
-#   exclude:
-#     - path/to/excluded/files/**
-
-# Jaspr has a custom analyzer plugin 'jaspr_lints', which is enabled here.
-#
-# You can toggle Jaspr specific lint rules in the 'diagnostics' section below.
-plugins:
-  jaspr_lints:
-    version: ^0.7.0
-    diagnostics:
-      prefer_html_components: true
-      sort_children_last: true
-      styles_ordering: true
-
-# Uncomment the following section to enable or disable additional rules.
-
-# linter:
-#   rules:
-#     camel_case_types: true
-
-# For more information about the core and recommended set of lints, see
-# https://dart.dev/go/core-lints
+# Plugins for jaspr (jaspr_lints) are declared at the workspace root
+# analysis_options.yaml (Dart pub workspaces requires plugins at the root).
 
 formatter:
-  # Change this to your preferred line length.
   page_width: 120
   trailing_commas: preserve
 

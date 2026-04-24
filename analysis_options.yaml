@@ -1,0 +1,15 @@
+include: package:lints/recommended.yaml
+
+# jaspr_lints must live at the workspace root (Dart pub workspaces requirement).
+# It reports jaspr-specific diagnostics; in non-jaspr packages it is a no-op.
+plugins:
+  jaspr_lints:
+    version: ^0.7.0
+    diagnostics:
+      prefer_html_components: true
+      sort_children_last: true
+      styles_ordering: true
+
+formatter:
+  page_width: 120
+  trailing_commas: preserve

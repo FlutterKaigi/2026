@@ -17,7 +17,6 @@ class Home extends StatefulComponent {
 }
 
 class HomeState extends State<Home> {
-
   @override
   void initState() {
     super.initState();

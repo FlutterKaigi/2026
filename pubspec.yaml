@@ -5,5 +5,48 @@ publish_to: none
 environment:
   sdk: ">=3.11.0 <4.0.0"
 
+workspace:
+  - apps/website
+  # When apps/app is created, add it here:
+  # - apps/app
+
 dev_dependencies:
-  melos: ^6.0.0
+  melos: ^7.0.0
+
+melos:
+  scripts:
+    analyze:website:
+      run: melos exec --scope=website -- fvm dart analyze .
+      description: Run dart analyze on the jaspr website
+
+    analyze:app:
+      run: melos exec --scope=app -- fvm flutter analyze .
+      description: Run flutter analyze on the Flutter app (no-op if app not created yet)
+
+    analyze:
+      run: melos run analyze:website && melos run analyze:app
+      description: Analyze all packages (website + app)
+
+    format:
+      run: melos exec -- fvm dart format .
+      description: Format all packages
+
+    test:website:
+      run: melos exec --scope=website --dir-exists=test -- fvm dart test
+      description: Run tests in the jaspr website
+
+    test:app:
+      run: melos exec --scope=app --dir-exists=test -- fvm flutter test
+      description: Run tests in the Flutter app (uses flutter test for widget tests)
+
+    test:
+      run: melos run test:website && melos run test:app
+      description: Run all tests (website + app)
+
+    website:serve:
+      run: melos exec --scope=website -- fvm dart run jaspr_cli:jaspr serve
+      description: Serve the jaspr website in dev mode
+
+    website:build:
+      run: melos exec --scope=website -- fvm dart run jaspr_cli:jaspr build
+      description: Build the jaspr website for production
