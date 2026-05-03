@@ -50,3 +50,9 @@ melos:
     website:build:
       run: melos exec --scope=website -- fvm dart run jaspr_cli:jaspr build
       description: Build the jaspr website for production
+
+    website:start:
+      run: |
+        melos run website:build
+        deno run --no-prompt -N -R=apps/website/build/jaspr jsr:@std/http/file-server ./apps/website/build/jaspr
+      description: Build the jaspr website and serve the built files with a simple file server (requires Deno to be installed)
