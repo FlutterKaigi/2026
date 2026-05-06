@@ -82,9 +82,7 @@ Map<String, String> tokenFontCss(
   String? fluidVw,
 }) {
   final maxPx = '${t.fontSize}px';
-  final size = (fluidMin != null && fluidVw != null)
-      ? 'clamp($fluidMin, $fluidVw, $maxPx)'
-      : maxPx;
+  final size = (fluidMin != null && fluidVw != null) ? 'clamp($fluidMin, $fluidVw, $maxPx)' : maxPx;
   final ratio = t.lineHeight / t.fontSize;
   return {
     'font-size': size,

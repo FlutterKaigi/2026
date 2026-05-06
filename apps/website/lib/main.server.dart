@@ -30,6 +30,11 @@ void main() {
           '&family=Poppins:wght@400;500;600;700;900'
           '&display=swap',
         ),
+        css.import(
+          'https://fonts.googleapis.com/css2'
+          '?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900'
+          '&display=swap',
+        ),
         css('*, *::before, *::after').styles(
           boxSizing: .borderBox,
         ),
@@ -40,7 +45,7 @@ void main() {
           margin: .zero,
           fontFamily: uiFontFamily,
           color: onBrand,
-          backgroundColor: deepNavy,
+          backgroundColor: surface,
           raw: const {'overflow-x': 'hidden'},
         ),
         css('h1, h2, h3, h4, p').styles(margin: .zero),

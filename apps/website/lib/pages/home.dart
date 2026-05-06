@@ -3,12 +3,14 @@ import 'package:jaspr/jaspr.dart';
 
 import '../constants/generated_tokens.dart';
 import '../constants/theme.dart';
+import '../l10n/strings.dart';
 
 class Home extends StatelessComponent {
   const Home({super.key});
 
   @override
   Component build(BuildContext context) {
+    final strings = LocaleScope.stringsOf(context);
     return section(classes: 'hero', [
       div(classes: 'hero__title', [
         h1(classes: 'hero__headline', [
@@ -41,20 +43,35 @@ class Home extends StatelessComponent {
               alt: '',
               attributes: const {'aria-hidden': 'true'},
             ),
-            p(classes: 'hero__meta-text', [.text('浜松町コンベンションホール')]),
+            p(classes: 'hero__meta-text', [.text(strings.venue)]),
           ]),
         ]),
       ]),
-      div(classes: 'hero__logo', [
-        img(
-          src: 'images/logo.svg',
-          alt: 'FlutterKaigi 2026',
-          attributes: const {'aria-hidden': 'true'},
+      div(classes: 'hero__brand', [
+        div(classes: 'hero__logo', [
+          img(
+            src: 'images/logo.svg',
+            alt: 'FlutterKaigi 2026',
+            attributes: const {'aria-hidden': 'true'},
+          ),
+        ]),
+        a(
+          href: strings.latestUpdatesCtaUrl,
+          target: Target.blank,
+          classes: 'hero__cta',
+          [
+            span([.text(strings.latestUpdatesCta)]),
+            span(
+              classes: 'hero__cta-arrow',
+              attributes: const {'aria-hidden': 'true'},
+              [.text('→')],
+            ),
+          ],
         ),
       ]),
       div(classes: 'hero__slogan', [
-        p(classes: 'hero__slogan-en', [.text('Assemble')]),
-        p(classes: 'hero__slogan-ja', [.text('会って、話して、熱くなる')]),
+        p(classes: 'hero__slogan-headline', [.text('Assemble')]),
+        p(classes: 'hero__slogan-tagline', [.text(strings.heroTagline)]),
       ]),
     ]);
   }
@@ -67,7 +84,7 @@ class Home extends StatelessComponent {
         display: .flex,
         flex: const Flex(grow: 1),
         width: 100.percent,
-        minHeight: 90.vh,
+        minHeight: 720.px,
         overflow: .hidden,
         padding: .symmetric(horizontal: 4.em, vertical: 4.em),
         color: onBrand,
@@ -111,7 +128,8 @@ class Home extends StatelessComponent {
             display: .flex,
             flexDirection: .column,
             gap: Gap.row(0.5.em),
-            raw: tokenFontCss(fontM3TitleLarge),
+            fontFamily: displayFontFamily,
+            raw: tokenFontCss(fontM3TitleMedium),
           ),
           css('.hero__meta-row').styles(
             display: .flex,
@@ -134,13 +152,19 @@ class Home extends StatelessComponent {
           ),
         ]),
       ]),
+      css('.hero__brand').styles(
+        position: .absolute(top: 50.percent, left: 50.percent),
+        display: .flex,
+        flexDirection: .column,
+        alignItems: .center,
+        gap: Gap.row(1.5.em),
+        raw: const {'transform': 'translate(-50%, -50%)'},
+      ),
       css('.hero__logo', [
         css('&').styles(
-          position: .absolute(top: 50.percent, left: 50.percent),
           display: .flex,
           alignItems: .center,
           justifyContent: .center,
-          raw: const {'transform': 'translate(-50%, -50%)'},
         ),
         css('img').styles(
           width: 28.vw,
@@ -153,7 +177,6 @@ class Home extends StatelessComponent {
       ]),
       css('.hero__cta', [
         css('&').styles(
-          position: .absolute(bottom: 3.em, left: 50.percent),
           display: .flex,
           alignItems: .center,
           gap: Gap.column(0.5.em),
@@ -166,14 +189,13 @@ class Home extends StatelessComponent {
           textDecoration: TextDecoration(line: .none),
           raw: {
             ...tokenFontCss(fontM3LabelLarge),
-            'transform': 'translateX(-50%)',
             'box-shadow': '0 8px 24px rgba(0, 0, 0, 0.18)',
             'transition': 'transform 150ms ease, box-shadow 150ms ease',
           },
         ),
         css('&:hover').styles(
           raw: const {
-            'transform': 'translateX(-50%) translateY(-2px)',
+            'transform': 'translateY(-2px)',
             'box-shadow': '0 12px 28px rgba(0, 0, 0, 0.22)',
           },
         ),
@@ -192,14 +214,14 @@ class Home extends StatelessComponent {
           gap: Gap.row(0.25.em),
           textAlign: .end,
           zIndex: const ZIndex(2),
+          fontFamily: displayFontFamily,
         ),
-        css('.hero__slogan-en').styles(
+        css('.hero__slogan-headline').styles(
           raw: tokenFontCss(
             fontMainvisualEnglishConcept,
           ),
         ),
-        css('.hero__slogan-ja').styles(
-          fontFamily: uiFontFamily,
+        css('.hero__slogan-tagline').styles(
           raw: tokenFontCss(
             fontMainvisualJapanese,
           ),
@@ -219,12 +241,7 @@ class Home extends StatelessComponent {
             maxWidth: 60.percent,
           ),
         ]),
-        css('.hero__logo', [
-          css('&').styles(
-            raw: const {'transform': 'translate(-50%, -50%)'},
-          ),
-          css('img').styles(width: 38.vw, minWidth: 220.px),
-        ]),
+        css('.hero__logo img').styles(width: 38.vw, minWidth: 220.px),
         css('.hero__slogan').styles(
           raw: const {'bottom': '2em', 'right': '2em'},
         ),
@@ -255,30 +272,15 @@ class Home extends StatelessComponent {
           css('.hero__headline').styles(alignItems: .center),
           css('.hero__meta').styles(alignItems: .center),
         ]),
-        css('.hero__logo', [
-          css('&').styles(
-            raw: const {
-              'position': 'static',
-              'top': 'auto',
-              'left': 'auto',
-              'transform': 'none',
-            },
-          ),
-          css('img').styles(width: 70.percent, maxWidth: 280.px),
-        ]),
-        css('.hero__cta', [
-          css('&').styles(
-            raw: const {
-              'position': 'static',
-              'bottom': 'auto',
-              'left': 'auto',
-              'transform': 'none',
-            },
-          ),
-          css('&:hover').styles(
-            raw: const {'transform': 'translateY(-2px)'},
-          ),
-        ]),
+        css('.hero__brand').styles(
+          raw: const {
+            'position': 'static',
+            'top': 'auto',
+            'left': 'auto',
+            'transform': 'none',
+          },
+        ),
+        css('.hero__logo img').styles(width: 70.percent, maxWidth: 280.px),
         css('.hero__slogan').styles(
           alignItems: .center,
           textAlign: .center,

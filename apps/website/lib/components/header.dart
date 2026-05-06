@@ -3,6 +3,7 @@ import 'package:jaspr/jaspr.dart';
 
 import '../constants/generated_tokens.dart';
 import '../constants/theme.dart';
+import '../l10n/strings.dart';
 
 class Header extends StatelessComponent {
   const Header({super.key});
@@ -17,22 +18,25 @@ class Header extends StatelessComponent {
 
   @override
   Component build(BuildContext context) {
+    final strings = LocaleScope.stringsOf(context);
     return header([
-      a(href: '/', classes: 'brand', [.text('FlutterKaigi 2026')]),
+      a(href: strings.locale.homePath, classes: 'brand', [.text('FlutterKaigi 2026')]),
       nav(
         classes: 'nav',
         attributes: const {'aria-label': 'Primary'},
         [
-          for (final item in _navItems)
-            a(href: item.href, classes: 'nav__link', [.text(item.label)]),
+          for (final item in _navItems) a(href: item.href, classes: 'nav__link', [.text(item.label)]),
         ],
       ),
       div(classes: 'actions', [
         // a(href: '#tickets', classes: 'btn btn--primary', [.text('Get Tickets')]),
         a(
-          href: '#lang',
-          classes: 'lang',
-          attributes: const {'aria-label': 'Language'},
+          href: strings.other.homePath,
+          classes: 'lang lang--${strings.locale.code}',
+          attributes: {
+            'aria-label': 'Switch to ${strings.languageToggleLabel}',
+            'hreflang': strings.other.code,
+          },
           [
             img(
               classes: 'lang__icon',
@@ -40,7 +44,11 @@ class Header extends StatelessComponent {
               alt: '',
               attributes: const {'aria-hidden': 'true'},
             ),
-            span(classes: 'lang__label', [.text('EN / JA')]),
+            span(classes: 'lang__label', [
+              span(classes: 'lang__option lang__option--en', [.text('EN')]),
+              span(classes: 'lang__separator', [.text(' / ')]),
+              span(classes: 'lang__option lang__option--ja', [.text('JA')]),
+            ]),
           ],
         ),
       ]),
@@ -56,7 +64,7 @@ class Header extends StatelessComponent {
         width: 100.percent,
         padding: .symmetric(horizontal: 2.em, vertical: 1.em),
         alignItems: .center,
-        backgroundColor: surface,
+        backgroundColor: onBrand,
         color: onSurface,
         zIndex: const ZIndex(10),
         gap: Gap.column(1.5.em),
@@ -154,6 +162,18 @@ class Header extends StatelessComponent {
           width: 1.1.em,
           height: 1.1.em,
         ),
+        css('&.lang--ja .lang__option--ja').styles(
+          raw: const {
+            'text-decoration': 'underline',
+            'text-underline-offset': '0.2em',
+          },
+        ),
+        css('&.lang--en .lang__option--en').styles(
+          raw: const {
+            'text-decoration': 'underline',
+            'text-underline-offset': '0.2em',
+          },
+        ),
       ]),
     ]),
 
@@ -170,11 +190,13 @@ class Header extends StatelessComponent {
         // Drop the Get Tickets CTA on mobile so brand + language switch fit comfortably.
         css('.btn.btn--primary').styles(raw: const {'display': 'none'}),
         css('.lang', [
-          css('&').styles(padding: .all(0.45.em)),
+          css('&').styles(
+            border: Border.none,
+            padding: .all(0.45.em),
+          ),
           css('.lang__label').styles(raw: const {'display': 'none'}),
         ]),
       ]),
     ]),
   ];
 }
-
