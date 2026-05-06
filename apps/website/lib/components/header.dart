@@ -27,19 +27,23 @@ class Header extends StatelessComponent {
             a(href: item.href, classes: 'nav__link', [.text(item.label)]),
         ],
       ),
-      // TODO: Create Action
-      // div(classes: 'actions', [
-      //   a(href: '#tickets', classes: 'btn btn--primary', [.text('Get Tickets')]),
-      //   a(
-      //     href: '#lang',
-      //     classes: 'lang',
-      //     attributes: const {'aria-label': 'Language'},
-      //     [
-      //       _GlobeIcon(),
-      //       span(classes: 'lang__label', [.text('EN / JA')]),
-      //     ],
-      //   ),
-      // ]),
+      div(classes: 'actions', [
+        // a(href: '#tickets', classes: 'btn btn--primary', [.text('Get Tickets')]),
+        a(
+          href: '#lang',
+          classes: 'lang',
+          attributes: const {'aria-label': 'Language'},
+          [
+            img(
+              classes: 'lang__icon',
+              src: 'images/icons/icon.svg',
+              alt: '',
+              attributes: const {'aria-hidden': 'true'},
+            ),
+            span(classes: 'lang__label', [.text('EN / JA')]),
+          ],
+        ),
+      ]),
     ]);
   }
 
@@ -139,14 +143,14 @@ class Header extends StatelessComponent {
           radius: .circular(999.px),
           border: Border.all(style: BorderStyle.solid, color: outlineColor, width: 1.px),
           raw: {
-            ...tokenFontCss(fontM3LabelLarge),
+            ...tokenFontCss(fontM3LabelMedium),
             'transition': 'background-color 150ms ease',
           },
         ),
         css('&:hover').styles(
           backgroundColor: const Color('#1D1B2010'),
         ),
-        css('svg').styles(
+        css('.lang__icon').styles(
           width: 1.1.em,
           height: 1.1.em,
         ),
@@ -174,32 +178,3 @@ class Header extends StatelessComponent {
   ];
 }
 
-class _GlobeIcon extends StatelessComponent {
-  const _GlobeIcon();
-
-  @override
-  Component build(BuildContext context) {
-    return svg(
-      viewBox: '0 0 24 24',
-      width: 24.px,
-      height: 24.px,
-      attributes: const {
-        'fill': 'none',
-        'stroke': 'currentColor',
-        'stroke-width': '1.6',
-        'stroke-linecap': 'round',
-        'stroke-linejoin': 'round',
-        'aria-hidden': 'true',
-      },
-      [
-        circle([], cx: '12', cy: '12', r: '9'),
-        Component.element(
-          tag: 'ellipse',
-          attributes: const {'cx': '12', 'cy': '12', 'rx': '4', 'ry': '9'},
-          children: const [],
-        ),
-        line([], x1: '3', y1: '12', x2: '21', y2: '12'),
-      ],
-    );
-  }
-}
