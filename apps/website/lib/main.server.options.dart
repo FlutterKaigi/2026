@@ -5,9 +5,7 @@
 // Generated with jaspr_builder
 
 import 'package:jaspr/server.dart';
-import 'package:website/components/counter.dart' as _counter;
 import 'package:website/components/header.dart' as _header;
-import 'package:website/pages/about.dart' as _about;
 import 'package:website/pages/home.dart' as _home;
 import 'package:website/app.dart' as _app;
 
@@ -29,14 +27,10 @@ import 'package:website/app.dart' as _app;
 /// ```
 ServerOptions get defaultServerOptions => ServerOptions(
   clientId: 'main.client.dart.js',
-  clients: {
-    _about.About: ClientTarget<_about.About>('about'),
-    _home.Home: ClientTarget<_home.Home>('home'),
-  },
+
   styles: () => [
-    ..._counter.CounterState.styles,
     ..._header.Header.styles,
-    ..._about.About.styles,
+    ..._home.Home.styles,
     ..._app.App.styles,
   ],
 );
