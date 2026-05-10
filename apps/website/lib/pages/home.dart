@@ -96,8 +96,9 @@ class Home extends StatelessComponent {
           display: .flex,
           flexDirection: .column,
           gap: Gap.row(1.5.em),
-          maxWidth: 50.percent,
           zIndex: const ZIndex(2),
+          // right を使ってロゴ（中央配置・幅28vw）と重ならないようにする
+          raw: const {'right': 'calc(50% + 16vw)'},
         ),
         css('.hero__headline', [
           css('&').styles(
@@ -138,7 +139,10 @@ class Home extends StatelessComponent {
             alignItems: .center,
             gap: Gap.column(0.5.em),
           ),
-          css('.hero__meta-text').styles(color: onBrand),
+          css('.hero__meta-text').styles(
+            color: onBrand,
+            raw: const {'word-break': 'auto-phrase', 'overflow-wrap': 'anywhere'},
+          ),
           css('.hero__meta-text sup').styles(
             fontWeight: tokenWeight(fontM3LabelSmall.fontWeight),
             raw: const {
@@ -239,8 +243,7 @@ class Home extends StatelessComponent {
         ),
         css('.hero__title', [
           css('&').styles(
-            raw: const {'top': '2em', 'left': '2em'},
-            maxWidth: 60.percent,
+            raw: const {'top': '2em', 'left': '2em', 'right': 'calc(50% + 21vw)'},
           ),
         ]),
         css('.hero__logo img').styles(width: 38.vw, minWidth: 220.px),
@@ -271,8 +274,19 @@ class Home extends StatelessComponent {
               'left': 'auto',
             },
           ),
-          css('.hero__headline').styles(alignItems: .center),
-          css('.hero__meta').styles(alignItems: .center),
+          css('.hero__headline', [
+            css('&').styles(alignItems: .center),
+            css('.hero__headline-line--brand').styles(
+              raw: const {'font-size': 'clamp(1.8rem, 8.5vw, 3rem)'},
+            ),
+            css('.hero__headline-line--year').styles(
+              raw: const {'font-size': 'clamp(2rem, 10vw, 3.5rem)'},
+            ),
+          ]),
+          css('.hero__meta').styles(
+            alignItems: .center,
+            raw: const {'font-size': 'clamp(0.9rem, 3.5vw, 1.3rem)'},
+          ),
         ]),
         css('.hero__brand').styles(
           raw: const {
