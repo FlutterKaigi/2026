@@ -22,16 +22,20 @@ class Strings {
 
   String get heroTagline => switch (locale) {
     AppLocale.ja => '会って、話して、熱くなる',
-    AppLocale.en => 'Meet, Talk, Ignite.',
+    AppLocale.en => 'Meet, Talk, Get Fired Up.',
   };
 
   String get latestUpdatesCta => switch (locale) {
-    _ => 'FlutterKaigi 2026 開催のお知らせ',
-    // AppLocale.en => 'Get Latest Updates',
+    AppLocale.ja => 'FlutterKaigi 2026 開催のお知らせ',
+    AppLocale.en => 'FlutterKaigi 2026 Opportunities Guide',
   };
 
-  final latestUpdatesCtaUrl =
-      'https://medium.com/flutterkaigi/flutterkaigi-2026-%E9%96%8B%E5%82%AC%E3%81%AE%E3%81%8A%E7%9F%A5%E3%82%89%E3%81%9B-f78a1421fe08';
+  String get latestUpdatesCtaUrl => switch (locale) {
+    AppLocale.ja =>
+      'https://medium.com/flutterkaigi/flutterkaigi-2026-opportunities-guide-ja-0e8cdb0a4acb',
+    AppLocale.en =>
+      'https://medium.com/flutterkaigi/flutterkaigi-2026-opportunities-guide-en-1e5bd6c14461',
+  };
 
   AppLocale get other => switch (locale) {
     AppLocale.ja => AppLocale.en,
