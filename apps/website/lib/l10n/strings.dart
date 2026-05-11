@@ -26,8 +26,8 @@ class Strings {
   };
 
   String get latestUpdatesCta => switch (locale) {
-    AppLocale.ja => 'FlutterKaigi 2026 開催のお知らせ',
-    AppLocale.en => 'FlutterKaigi 2026 Opportunities Guide',
+    AppLocale.ja => 'FlutterKaigi 2026 スポンサー募集について',
+    AppLocale.en => 'FlutterKaigi 2026 Sponsorship Opportunities',
   };
 
   String get latestUpdatesCtaUrl => switch (locale) {
