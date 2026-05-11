@@ -2,8 +2,7 @@ import 'package:jaspr/jaspr.dart';
 
 enum AppLocale {
   ja(code: 'ja', homePath: '/'),
-  en(code: 'en', homePath: '/en')
-  ;
+  en(code: 'en', homePath: '/en');
 
   const AppLocale({required this.code, required this.homePath});
 

@@ -86,18 +86,19 @@ class Home extends StatelessComponent {
         width: 100.percent,
         minHeight: 720.px,
         overflow: .hidden,
-        padding: .symmetric(horizontal: 4.em, vertical: 4.em),
+        padding: .symmetric(horizontal: 2.em, vertical: 2.em),
         color: onBrand,
         raw: const {'background': heroGradient},
       ),
       css('.hero__title', [
         css('&').styles(
-          position: .absolute(top: 3.em, left: 3.em),
+          position: .absolute(top: 2.em, left: 2.em),
           display: .flex,
           flexDirection: .column,
           gap: Gap.row(1.5.em),
-          maxWidth: 50.percent,
           zIndex: const ZIndex(2),
+          // right を使ってロゴ（中央配置・幅28vw）と重ならないようにする
+          raw: const {'right': 'calc(50% + 16vw)'},
         ),
         css('.hero__headline', [
           css('&').styles(
@@ -109,16 +110,18 @@ class Home extends StatelessComponent {
           css('.hero__headline-line').styles(display: .block),
           // Per-line sizing anchored to mainvisual tokens (60/72px max).
           css('.hero__headline-line--brand').styles(
+            fontWeight: FontWeight.w600,
             raw: tokenFontCss(
               fontMainvisualEnglishFlutterkaigi,
-              fluidMin: '2rem',
+              fluidMin: '4.5rem',
               fluidVw: '7vw',
             ),
           ),
           css('.hero__headline-line--year').styles(
+            fontWeight: FontWeight.w600,
             raw: tokenFontCss(
               fontMainvisualEnglish2026,
-              fluidMin: '2.25rem',
+              fluidMin: '5rem',
               fluidVw: '8vw',
             ),
           ),
@@ -129,14 +132,17 @@ class Home extends StatelessComponent {
             flexDirection: .column,
             gap: Gap.row(0.5.em),
             fontFamily: displayFontFamily,
-            raw: tokenFontCss(fontM3TitleMedium),
+            raw: tokenFontCss(fontM3TitleMedium, fluidMin: '1.5rem', fluidVw: '2.5vw'),
           ),
           css('.hero__meta-row').styles(
             display: .flex,
             alignItems: .center,
             gap: Gap.column(0.5.em),
           ),
-          css('.hero__meta-text').styles(color: onBrand),
+          css('.hero__meta-text').styles(
+            color: onBrand,
+            raw: const {'word-break': 'auto-phrase', 'overflow-wrap': 'anywhere'},
+          ),
           css('.hero__meta-text sup').styles(
             fontWeight: tokenWeight(fontM3LabelSmall.fontWeight),
             raw: const {
@@ -146,8 +152,8 @@ class Home extends StatelessComponent {
             },
           ),
           css('.hero__meta-icon').styles(
-            width: 1.4.em,
-            height: 1.4.em,
+            width: 1.em,
+            height: 1.em,
             raw: const {'flex-shrink': '0'},
           ),
         ]),
@@ -211,7 +217,7 @@ class Home extends StatelessComponent {
           display: .flex,
           flexDirection: .column,
           alignItems: .center,
-          gap: Gap.row(0.25.em),
+          gap: Gap.row(0.5.em),
           textAlign: .end,
           zIndex: const ZIndex(2),
           fontFamily: displayFontFamily,
@@ -237,8 +243,7 @@ class Home extends StatelessComponent {
         ),
         css('.hero__title', [
           css('&').styles(
-            raw: const {'top': '2em', 'left': '2em'},
-            maxWidth: 60.percent,
+            raw: const {'top': '2em', 'left': '2em', 'right': 'calc(50% + 21vw)'},
           ),
         ]),
         css('.hero__logo img').styles(width: 38.vw, minWidth: 220.px),
@@ -269,8 +274,19 @@ class Home extends StatelessComponent {
               'left': 'auto',
             },
           ),
-          css('.hero__headline').styles(alignItems: .center),
-          css('.hero__meta').styles(alignItems: .center),
+          css('.hero__headline', [
+            css('&').styles(alignItems: .center),
+            css('.hero__headline-line--brand').styles(
+              raw: const {'font-size': 'clamp(1.8rem, 8.5vw, 3rem)'},
+            ),
+            css('.hero__headline-line--year').styles(
+              raw: const {'font-size': 'clamp(2rem, 10vw, 3.5rem)'},
+            ),
+          ]),
+          css('.hero__meta').styles(
+            alignItems: .center,
+            raw: const {'font-size': 'clamp(0.9rem, 3.5vw, 1.3rem)'},
+          ),
         ]),
         css('.hero__brand').styles(
           raw: const {
