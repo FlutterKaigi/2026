@@ -84,11 +84,13 @@ class Home extends StatelessComponent {
         display: .flex,
         flex: const Flex(grow: 1),
         width: 100.percent,
-        minHeight: 720.px,
         overflow: .hidden,
         padding: .symmetric(horizontal: 2.em, vertical: 2.em),
         color: onBrand,
-        raw: const {'background': heroGradient},
+        raw: const {
+          'background': heroGradient,
+          'min-height': 'calc(100dvh - var(--header-h, 4rem))',
+        },
       ),
       css('.hero__title', [
         css('&').styles(

@@ -2,6 +2,7 @@ import 'package:jaspr/dom.dart';
 import 'package:jaspr/jaspr.dart';
 import 'package:jaspr_router/jaspr_router.dart';
 
+import 'components/footer.dart';
 import 'components/header.dart';
 import 'l10n/strings.dart';
 import 'pages/home.dart';
@@ -29,6 +30,7 @@ class App extends StatelessComponent {
 
   @css
   static List<StyleRule> get styles => [
+    css(':root').styles(raw: const {'--header-h': '4rem'}),
     css('.main').styles(
       display: .flex,
       flexDirection: .column,
@@ -49,6 +51,7 @@ class _Shell extends StatelessComponent {
       child: div(classes: 'main', [
         const Header(),
         const Home(),
+        const Footer(),
       ]),
     );
   }
