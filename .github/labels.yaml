@@ -1,0 +1,73 @@
+# Category Labels
+- name: "category/documentation"
+  color: "#A0AEC0"
+  description: "Documentation related tasks"
+- name: "category/github"
+  color: "#181717"
+  description: "GitHub related tasks"
+- name: "category/dependencies"
+  color: "#0366D6"
+  description: "Dependencies related tasks"
+
+# Size Labels
+- name: "size/XXL"
+  color: "#D73A49"
+  description: "Double extra large"
+- name: "size/XL"
+  color: "#EA6A3E"
+  description: "Extra large"
+- name: "size/L"
+  color: "#FB8F44"
+  description: "Large"
+- name: "size/M"
+  color: "#D4B036"
+  description: "Medium"
+- name: "size/S"
+  color: "#81C347"
+  description: "Small"
+- name: "size/XS"
+  color: "#2DA44E"
+  description: "Extra small"
+
+# Difficulty Labels
+- name: "difficulty/hard"
+  color: "#800080"
+  description: "Requires significant effort or expertise"
+- name: "difficulty/medium"
+  color: "#FFA500"
+  description: "Moderately challenging; some effort required"
+- name: "difficulty/easy"
+  color: "#90EE90"
+  description: "Simple to complete with minimal effort"
+
+# Dependabot Labels
+- name: "dependabot/github-actions"
+  color: "#181717"
+  description: "Updates to GitHub Actions via Dependabot"
+
+# Contributor Labels
+- name: "contributor/internal"
+  color: "#2DA44E"
+  description: "Handled by internal team members"
+- name: "contributor/external"
+  color: "#DB61A2"
+  description: "Open for external contributors"
+
+# Team Labels
+- name: "team/app"
+  color: "#1A7F37"
+  description: "Owned by the app team"
+- name: "team/website"
+  color: "#8250DF"
+  description: "Owned by the website team"
+- name: "team/infra"
+  color: "#0969DA"
+  description: "Owned by the infra team"
+
+# Contribution Labels
+- name: "contributions welcome"
+  color: "#0075CA"
+  description: "Open for contributions"
+- name: "good first issue"
+  color: "#7058E0"
+  description: "Good for newcomers"
