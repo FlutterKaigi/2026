@@ -29,7 +29,7 @@ void main() {
         link(rel: 'apple-touch-icon', href: '/favicon-180.png'),
         link(rel: 'manifest', href: '/manifest.webmanifest'),
         meta(name: 'theme-color', content: colorKeycolorsPrimaryHex),
-        // OGP (pattern: ~/dev/my_proj/2025/apps/website/lib/main.dart)
+        // OGP
         meta(
           attributes: {
             'property': 'og:title',
