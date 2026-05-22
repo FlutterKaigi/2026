@@ -3,7 +3,7 @@
 Monorepo for the FlutterKaigi 2026 website and app.
 
 - `apps/website/` — jaspr static site
-- `apps/app/` — Flutter app (iOS / Android, bundle ID `jp.flutterkaigi.conf2026`)
+- `apps/app/` — Flutter app (iOS / Android)
 - `packages/` — shared Dart packages (none yet)
 
 Managed with [melos](https://melos.invertase.dev/) (v7) on top of Dart pub workspaces, with Flutter pinned by [FVM](https://fvm.app/).
@@ -45,18 +45,8 @@ The pinned Flutter version is `3.41.7` (see `.fvmrc`).
 
 Per-target variants are also available: `analyze:website`, `analyze:app`, `test:website`, `test:app`.
 
-## Running the Flutter app
-
-```bash
-cd apps/app
-fvm flutter run
-```
-
-iOS で初回ビルドする場合は `ios/` ディレクトリで `pod install` が必要になることがあります。
-
 ## Layout notes
 
 - **Melos config lives in the root `pubspec.yaml`** under the `melos:` key (melos 7 convention). Package membership is controlled by the root `workspace:` list, and scripts are defined under `melos.scripts:`. There is intentionally no separate `melos.yaml`.
 - **`analysis_options.yaml` at the repo root** declares analyzer plugins (e.g., `jaspr_lints`). Dart pub workspaces require plugins at the workspace root, not inside sub-packages.
 - **`pubspec.lock` is a single file at the repo root** (pub workspaces merges resolution). Sub-packages should not have their own `pubspec.lock`; delete it if one gets generated.
-- **New sub-packages must declare `resolution: workspace`** in their own `pubspec.yaml` (Dart pub workspaces requirement). Otherwise pub treats them as standalone and tries to write a per-package `pubspec.lock`.
