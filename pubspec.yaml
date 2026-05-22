@@ -7,8 +7,7 @@ environment:
 
 workspace:
   - apps/website
-  # When apps/app is created, add it here:
-  # - apps/app
+  - apps/app
 
 dev_dependencies:
   melos: ^7.0.0
