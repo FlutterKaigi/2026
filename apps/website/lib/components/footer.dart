@@ -32,7 +32,7 @@ class Footer extends StatelessComponent {
     return footer([
       div(classes: 'footer__brand', [
         a(
-          href: strings.locale.homePath,
+          href: strings.locale.linkHref,
           classes: 'footer__brand-name',
           [.text('FlutterKaigi 2026')],
         ),

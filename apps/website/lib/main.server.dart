@@ -10,6 +10,7 @@ import 'package:jaspr/server.dart';
 
 // Imports the [App] component.
 import 'app.dart';
+import 'constants/build_config.dart';
 import 'constants/generated_tokens.dart';
 import 'constants/theme.dart';
 // This file is generated automatically by Jaspr, do not remove or edit.
@@ -23,11 +24,13 @@ void main() {
   runApp(
     Document(
       title: 'FlutterKaigi 2026',
+      base: baseHref,
       head: [
-        link(rel: 'icon', href: '/favicon.ico', attributes: {'sizes': 'any'}),
-        link(rel: 'icon', href: '/favicon.svg', attributes: {'type': 'image/svg+xml'}),
-        link(rel: 'apple-touch-icon', href: '/favicon-180.png'),
-        link(rel: 'manifest', href: '/manifest.webmanifest'),
+        if (isPreviewBuild) meta(name: 'robots', content: 'noindex,nofollow'),
+        link(rel: 'icon', href: 'favicon.ico', attributes: {'sizes': 'any'}),
+        link(rel: 'icon', href: 'favicon.svg', attributes: {'type': 'image/svg+xml'}),
+        link(rel: 'apple-touch-icon', href: 'favicon-180.png'),
+        link(rel: 'manifest', href: 'manifest.webmanifest'),
         meta(name: 'theme-color', content: colorKeycolorsPrimaryHex),
         // OGP
         meta(
