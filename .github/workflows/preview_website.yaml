@@ -1,0 +1,48 @@
+name: PR Preview Website
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+    paths:
+      - apps/website/**
+      - .github/workflows/preview_website.yaml
+
+concurrency:
+  group: preview-${{ github.event.number }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - if: github.event.action != 'closed'
+        id: flutter-version
+        run: echo "version=$(jq -r .flutter .fvmrc)" >> "$GITHUB_OUTPUT"
+
+      - if: github.event.action != 'closed'
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version: ${{ steps.flutter-version.outputs.version }}
+          channel: stable
+          cache: true
+
+      - if: github.event.action != 'closed'
+        run: dart pub get
+
+      - if: github.event.action != 'closed'
+        working-directory: apps/website
+        run: dart run jaspr_cli:jaspr build --dart-define=BASE_HREF=/pr-preview/pr-${{ github.event.number }}/
+
+      - uses: rossjrw/pr-preview-action@ffa7509e91a3ec8dfc2e5536c4d5c1acdf7a6de9 # v1.8.1
+        with:
+          source-dir: apps/website/build/jaspr
+          preview-branch: gh-pages
+          umbrella-dir: pr-preview
+          action: auto

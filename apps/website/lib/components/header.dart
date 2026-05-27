@@ -20,7 +20,7 @@ class Header extends StatelessComponent {
   Component build(BuildContext context) {
     final strings = LocaleScope.stringsOf(context);
     return header([
-      a(href: strings.locale.homePath, classes: 'brand', [.text('FlutterKaigi 2026')]),
+      a(href: strings.locale.linkHref, classes: 'brand', [.text('FlutterKaigi 2026')]),
       nav(
         classes: 'nav',
         attributes: const {'aria-label': 'Primary'},
@@ -31,7 +31,7 @@ class Header extends StatelessComponent {
       div(classes: 'actions', [
         // a(href: '#tickets', classes: 'btn btn--primary', [.text('Get Tickets')]),
         a(
-          href: strings.other.homePath,
+          href: strings.other.linkHref,
           classes: 'lang lang--${strings.locale.code}',
           attributes: {
             'aria-label': 'Switch to ${strings.languageToggleLabel}',
