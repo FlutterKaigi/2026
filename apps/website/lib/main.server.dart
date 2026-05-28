@@ -67,6 +67,24 @@ void main() {
         ),
         meta(name: 'twitter:card', content: 'summary_large_image'),
         meta(name: 'twitter:site', content: '@FlutterKaigi'),
+        script(
+          src: 'https://www.googletagmanager.com/gtag/js?id=G-0FZ58E7XNG',
+          async: true,
+        ),
+        // ignore: prefer_html_methods
+        const DomComponent(
+          tag: 'script',
+          children: [
+            RawText('''
+window.dataLayer = window.dataLayer || [];
+function gtag() {
+  dataLayer.push(arguments);
+}
+gtag('js', new Date());
+gtag('config', 'G-0FZ58E7XNG');
+'''),
+          ],
+        ),
       ],
       styles: [
         css.import(
