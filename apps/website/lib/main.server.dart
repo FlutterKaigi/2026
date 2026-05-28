@@ -71,11 +71,8 @@ void main() {
           src: 'https://www.googletagmanager.com/gtag/js?id=G-0FZ58E7XNG',
           async: true,
         ),
-        // ignore: prefer_html_methods
-        const DomComponent(
-          tag: 'script',
-          children: [
-            RawText('''
+        script([], [
+          raw('''
 window.dataLayer = window.dataLayer || [];
 function gtag() {
   dataLayer.push(arguments);
