@@ -71,8 +71,9 @@ void main() {
           src: 'https://www.googletagmanager.com/gtag/js?id=G-0FZ58E7XNG',
           async: true,
         ),
-        script([], [
-          raw('''
+        script(
+          children: [
+            RawText('''
 window.dataLayer = window.dataLayer || [];
 function gtag() {
   dataLayer.push(arguments);
