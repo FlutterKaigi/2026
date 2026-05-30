@@ -10,6 +10,7 @@ import 'package:jaspr/server.dart';
 
 // Imports the [App] component.
 import 'app.dart';
+import 'constants/build_config.dart';
 import 'constants/generated_tokens.dart';
 import 'constants/theme.dart';
 // This file is generated automatically by Jaspr, do not remove or edit.
@@ -23,12 +24,49 @@ void main() {
   runApp(
     Document(
       title: 'FlutterKaigi 2026',
+      base: baseHref,
       head: [
-        link(rel: 'icon', href: '/favicon.ico', attributes: {'sizes': 'any'}),
-        link(rel: 'icon', href: '/favicon.svg', attributes: {'type': 'image/svg+xml'}),
-        link(rel: 'apple-touch-icon', href: '/favicon-180.png'),
-        link(rel: 'manifest', href: '/manifest.webmanifest'),
+        if (isPreviewBuild) meta(name: 'robots', content: 'noindex,nofollow'),
+        link(rel: 'icon', href: 'favicon.ico', attributes: {'sizes': 'any'}),
+        link(rel: 'icon', href: 'favicon.svg', attributes: {'type': 'image/svg+xml'}),
+        link(rel: 'apple-touch-icon', href: 'favicon-180.png'),
+        link(rel: 'manifest', href: 'manifest.webmanifest'),
         meta(name: 'theme-color', content: colorKeycolorsPrimaryHex),
+        // OGP
+        meta(
+          attributes: {
+            'property': 'og:title',
+            'content': 'FlutterKaigi 2026',
+          },
+        ),
+        meta(
+          attributes: {
+            'property': 'og:description',
+            'content':
+                '2026年、日本国内でFlutterをメインに扱う技術カンファレンス。'
+                'FlutterやDartの深い知見を持つ開発者によるセッションを多数企画します。',
+          },
+        ),
+        meta(
+          attributes: {
+            'property': 'og:image',
+            'content': 'https://2026.flutterkaigi.jp/images/ogp.png',
+          },
+        ),
+        meta(
+          attributes: {
+            'property': 'og:type',
+            'content': 'website',
+          },
+        ),
+        meta(
+          attributes: {
+            'property': 'og:url',
+            'content': 'https://2026.flutterkaigi.jp/',
+          },
+        ),
+        meta(name: 'twitter:card', content: 'summary_large_image'),
+        meta(name: 'twitter:site', content: '@FlutterKaigi'),
       ],
       styles: [
         css.import(

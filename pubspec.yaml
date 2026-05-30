@@ -7,8 +7,7 @@ environment:
 
 workspace:
   - apps/website
-  # When apps/app is created, add it here:
-  # - apps/app
+  - apps/app
 
 dev_dependencies:
   melos: ^7.0.0
@@ -21,7 +20,7 @@ melos:
 
     analyze:app:
       run: melos exec --scope=app -- fvm flutter analyze .
-      description: Run flutter analyze on the Flutter app (no-op if app not created yet)
+      description: Run flutter analyze on the Flutter app
 
     analyze:
       run: melos run analyze:website && melos run analyze:app

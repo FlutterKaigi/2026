@@ -3,7 +3,7 @@
 Monorepo for the FlutterKaigi 2026 website and app.
 
 - `apps/website/` — jaspr static site
-- `apps/app/` — Flutter app (added later by the mobile maintainer)
+- `apps/app/` — Flutter app (iOS / Android)
 - `packages/` — shared Dart packages (none yet)
 
 Managed with [melos](https://melos.invertase.dev/) (v7) on top of Dart pub workspaces, with Flutter pinned by [FVM](https://fvm.app/).
@@ -44,40 +44,6 @@ The pinned Flutter version is `3.41.7` (see `.fvmrc`).
 | `fvm dart run melos test` | Run tests across all packages (website with `dart test`, app with `flutter test`) |
 
 Per-target variants are also available: `analyze:website`, `analyze:app`, `test:website`, `test:app`.
-
-## Adding the Flutter app
-
-When the Flutter maintainer joins, they need to:
-
-1. **Create the app** in the correct location:
-
-    ```bash
-    cd apps
-    fvm flutter create app
-    ```
-
-2. **Declare the app as a workspace member**. Edit the top-level `pubspec.yaml` and add `apps/app` to the `workspace:` list:
-
-    ```yaml
-    workspace:
-      - apps/website
-      - apps/app
-    ```
-
-3. **Mark the app package as a workspace resolution target**. Edit `apps/app/pubspec.yaml` and add `resolution: workspace` near the top (Dart pub workspaces requirement):
-
-    ```yaml
-    name: app
-    resolution: workspace
-    environment:
-      sdk: ">=3.11.0 <4.0.0"
-      flutter: ">=3.41.0"
-    # ...
-    ```
-
-4. **Delete the generated `pubspec.lock` inside `apps/app/`** — there is only one shared lockfile at the repo root with Dart pub workspaces.
-
-5. **Re-run** `fvm dart pub get` at the repo root. `fvm dart run melos analyze` and `fvm dart run melos test` will now include the app automatically.
 
 ## Layout notes
 

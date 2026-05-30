@@ -1,14 +1,28 @@
 import 'package:jaspr/jaspr.dart';
 
-enum AppLocale {
-  ja(code: 'ja', homePath: '/'),
-  en(code: 'en', homePath: '/en')
-  ;
+import '../constants/build_config.dart';
 
-  const AppLocale({required this.code, required this.homePath});
+enum AppLocale {
+  ja(code: 'ja', homePath: '/', relativeHref: ''),
+  en(code: 'en', homePath: '/en', relativeHref: 'en/');
+
+  const AppLocale({
+    required this.code,
+    required this.homePath,
+    required this.relativeHref,
+  });
 
   final String code;
+
+  /// Absolute path used as the Jaspr Router route definition (drives SSG output dirs).
   final String homePath;
+
+  /// Path relative to `baseHref`. Combined into [linkHref] to produce navigation targets.
+  final String relativeHref;
+
+  /// Hyperlink target for navigation. Prefixed with `baseHref` so the same markup
+  /// works for both production (`/`) and PR previews (`/pr-preview/pr-N/`).
+  String get linkHref => '$baseHref$relativeHref';
 }
 
 class Strings {
