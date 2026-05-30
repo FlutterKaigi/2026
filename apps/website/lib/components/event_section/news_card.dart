@@ -61,11 +61,11 @@ class NewsCard extends StatelessComponent {
         display: .flex,
         flexDirection: .column,
         padding: .all(49.px),
-        backgroundColor: const Color('#FFDAD6'),
+        backgroundColor: secondaryContainer,
         radius: .circular(24.px),
         border: Border.all(
           style: BorderStyle.solid,
-          color: const Color('#D9C3C94D'),
+          color: eventCardBorderNews,
           width: 1.px,
         ),
         raw: const {'gap': '32px'},
@@ -81,7 +81,7 @@ class NewsCard extends StatelessComponent {
           width: 44.px,
           height: 44.px,
           radius: .circular(16.px),
-          backgroundColor: const Color('#FFB4AB'),
+          backgroundColor: eventNewsIconBg,
           alignItems: .center,
           justifyContent: .center,
           raw: const {'flex-shrink': '0'},
@@ -89,7 +89,7 @@ class NewsCard extends StatelessComponent {
         css('img').styles(width: 20.px, height: 20.px),
       ]),
       css('.news-card__title').styles(
-        color: const Color('#1D1A25'),
+        color: onSurface,
         fontFamily: uiFontFamily,
         fontWeight: .w500,
         raw: const {'font-size': '22px', 'line-height': '28px'},
@@ -106,7 +106,7 @@ class NewsCard extends StatelessComponent {
         gap: Gap.row(4.px),
       ),
       css('.news-card__date').styles(
-        color: const Color('#1D1A25'),
+        color: onSurface,
         fontFamily: uiFontFamily,
         fontWeight: .w500,
         raw: const {
@@ -118,7 +118,7 @@ class NewsCard extends StatelessComponent {
       ),
       css('.news-card__link', [
         css('&').styles(
-          color: const Color('#1D1A25'),
+          color: onSurface,
           fontFamily: uiFontFamily,
           fontWeight: .w400,
           textDecoration: const TextDecoration(
@@ -131,7 +131,7 @@ class NewsCard extends StatelessComponent {
             'transition': 'color 150ms ease',
           },
         ),
-        css('&:hover').styles(color: const Color('#73332F')),
+        css('&:hover').styles(color: onSecondaryContainer),
       ]),
       css('.news-card__cta-wrap').styles(
         display: .flex,
@@ -143,7 +143,7 @@ class NewsCard extends StatelessComponent {
           alignItems: .center,
           gap: Gap.column(8.px),
           padding: .symmetric(horizontal: 24.px, vertical: 16.px),
-          color: const Color('#73332F'),
+          color: onSecondaryContainer,
           fontFamily: uiFontFamily,
           fontWeight: .w500,
           radius: .circular(100.px),
@@ -155,9 +155,8 @@ class NewsCard extends StatelessComponent {
             'transition': 'background-color 150ms ease',
           },
         ),
-        css('&:hover').styles(
-          backgroundColor: const Color('#73332F1A'),
-        ),
+        // M3 State Layer (Hover 10%) — onSecondaryContainer 由来のオーバーレイ。
+        css('&:hover').styles(backgroundColor: onSecondaryContainerHover),
         css('.news-card__cta-arrow').styles(
           raw: const {'font-size': '24px', 'line-height': '24px'},
         ),

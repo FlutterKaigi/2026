@@ -51,14 +51,7 @@ class EventInfoCard extends StatelessComponent {
         p(classes: 'event-info-card__label', [
           .text(strings.eventInfoTicketsLabel),
         ]),
-        span(
-          classes: 'event-info-card__cta',
-          attributes: {
-            'role': 'button',
-            'aria-disabled': 'true',
-            'aria-label': strings.eventInfoTicketsAriaLabel,
-            'tabindex': '-1',
-          },
+        button(
           [
             img(
               classes: 'event-info-card__cta-icon',
@@ -76,6 +69,10 @@ class EventInfoCard extends StatelessComponent {
                 )),
               ]),
           ],
+          classes: 'event-info-card__cta',
+          type: ButtonType.button,
+          disabled: true,
+          attributes: {'aria-label': strings.eventInfoTicketsAriaLabel},
         ),
       ]),
     ]);
@@ -88,11 +85,11 @@ class EventInfoCard extends StatelessComponent {
         display: .flex,
         flexDirection: .column,
         padding: .all(49.px),
-        backgroundColor: const Color('#EDE5F5'),
+        backgroundColor: eventCardSurfaceInfo,
         radius: .circular(24.px),
         border: Border.all(
           style: BorderStyle.solid,
-          color: const Color('#CBC3D94D'),
+          color: eventCardBorder,
           width: 1.px,
         ),
         raw: const {'gap': '32px', 'min-height': '330px'},
@@ -108,7 +105,7 @@ class EventInfoCard extends StatelessComponent {
           width: 44.px,
           height: 44.px,
           radius: .circular(16.px),
-          backgroundColor: const Color('#E9DDFF'),
+          backgroundColor: primaryContainer,
           alignItems: .center,
           justifyContent: .center,
           raw: const {'flex-shrink': '0'},
@@ -116,7 +113,7 @@ class EventInfoCard extends StatelessComponent {
         css('img').styles(width: 20.px, height: 20.px),
       ]),
       css('.event-info-card__title').styles(
-        color: const Color('#1D1A25'),
+        color: onSurface,
         fontFamily: uiFontFamily,
         fontWeight: .w500,
         raw: const {'font-size': '22px', 'line-height': '28px'},
@@ -137,7 +134,7 @@ class EventInfoCard extends StatelessComponent {
         raw: const {'min-width': '0'},
       ),
       css('.event-info-card__label').styles(
-        color: const Color('#494456'),
+        color: onSurfaceVariant,
         fontFamily: uiFontFamily,
         fontWeight: .w500,
         raw: const {
@@ -149,7 +146,7 @@ class EventInfoCard extends StatelessComponent {
       ),
       // DATE: 主役級サイズ。日本語が長い場合に備えて clamp と word-break で安全側。
       css('.event-info-card__date-value').styles(
-        color: const Color('#1D1A25'),
+        color: onSurface,
         fontFamily: uiFontFamily,
         fontWeight: .w500,
         raw: const {
@@ -161,7 +158,7 @@ class EventInfoCard extends StatelessComponent {
         },
       ),
       css('.event-info-card__value').styles(
-        color: const Color('#1D1A25'),
+        color: onSurface,
         fontFamily: uiFontFamily,
         fontWeight: .w400,
         raw: const {'font-size': '22px', 'line-height': '28px'},
@@ -172,6 +169,7 @@ class EventInfoCard extends StatelessComponent {
         gap: Gap.row(8.px),
       ),
       // Disabled CTA：時計アイコン+ラベル+販売開始日のmeta行。
+      // `<button disabled>` 標準 disabled でブラウザのキーボード操作・aria 伝達を任せる。
       // デスクトップは inline-flex で内容幅、タブレット以下はカード幅いっぱい。
       css('.event-info-card__cta', [
         css('&').styles(
@@ -179,11 +177,12 @@ class EventInfoCard extends StatelessComponent {
           padding: .symmetric(horizontal: 20.px, vertical: 12.px),
           alignItems: .center,
           gap: Gap.column(10.px),
-          backgroundColor: const Color('#65558F66'),
-          color: const Color('#FFFFFFE6'),
+          backgroundColor: eventCtaDisabledBg,
+          color: eventCtaDisabledFg,
           fontFamily: uiFontFamily,
           fontWeight: .w500,
           radius: .circular(8.px),
+          border: Border.all(style: BorderStyle.none),
           raw: const {
             'font-size': '14px',
             'line-height': '20px',
@@ -193,6 +192,11 @@ class EventInfoCard extends StatelessComponent {
             'user-select': 'none',
             'margin-top': '4px',
             'flex-wrap': 'wrap',
+            // `<button disabled>` のブラウザ既定（不透明度低下・色変化）を打ち消す。
+            'opacity': '1',
+            '-webkit-appearance': 'none',
+            'appearance': 'none',
+            'text-align': 'left',
           },
         ),
         css('.event-info-card__cta-icon').styles(

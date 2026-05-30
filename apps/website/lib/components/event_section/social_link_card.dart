@@ -51,11 +51,11 @@ class SocialLinkCard extends StatelessComponent {
         padding: .symmetric(horizontal: 25.px, vertical: 25.px),
         alignItems: .center,
         justifyContent: .spaceBetween,
-        backgroundColor: const Color('#F8F1FF'),
+        backgroundColor: eventCardSurfaceSocial,
         radius: .circular(24.px),
         border: Border.all(
           style: BorderStyle.solid,
-          color: const Color('#CBC3D933'),
+          color: eventCardBorderSocial,
           width: 1.px,
         ),
         textDecoration: const TextDecoration(line: TextDecorationLine.none),
@@ -81,7 +81,7 @@ class SocialLinkCard extends StatelessComponent {
           width: 48.px,
           height: 48.px,
           radius: .circular(999.px),
-          backgroundColor: const Color('#E9DDFF'),
+          backgroundColor: primaryContainer,
           alignItems: .center,
           justifyContent: .center,
           raw: const {'flex-shrink': '0'},
@@ -94,7 +94,7 @@ class SocialLinkCard extends StatelessComponent {
         gap: Gap.row(0.px),
       ),
       css('.social-link-card__label').styles(
-        color: const Color('#1D1A25'),
+        color: onSurface,
         fontFamily: uiFontFamily,
         fontWeight: .w500,
         raw: const {
@@ -104,7 +104,7 @@ class SocialLinkCard extends StatelessComponent {
         },
       ),
       css('.social-link-card__handle').styles(
-        color: const Color('#494456'),
+        color: onSurfaceVariant,
         fontFamily: uiFontFamily,
         fontWeight: .w400,
         raw: const {
@@ -114,7 +114,7 @@ class SocialLinkCard extends StatelessComponent {
         },
       ),
       css('.social-link-card__arrow').styles(
-        color: const Color('#494456'),
+        color: onSurfaceVariant,
         raw: const {'font-size': '16px', 'line-height': '1'},
       ),
     ]),
