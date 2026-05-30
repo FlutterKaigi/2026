@@ -2,7 +2,8 @@ import 'package:jaspr/jaspr.dart';
 
 enum AppLocale {
   ja(code: 'ja', homePath: '/'),
-  en(code: 'en', homePath: '/en');
+  en(code: 'en', homePath: '/en')
+  ;
 
   const AppLocale({required this.code, required this.homePath});
 
@@ -21,9 +22,11 @@ class Strings {
   };
 
   String get heroTagline => switch (locale) {
-    AppLocale.ja => '会って、話して、熱くなる。〜Assemble〜',
-    AppLocale.en => 'Meet, Talk, Get Fired Up. 〜Assemble〜',
+    AppLocale.ja => '会って、話して、熱くなる',
+    AppLocale.en => 'Meet, Talk, Get Fired Up.',
   };
+
+  String get heroThemeName => '〜Assemble〜';
 
   String get latestUpdatesCta => switch (locale) {
     AppLocale.ja => 'FlutterKaigi 2026 スポンサー募集について',

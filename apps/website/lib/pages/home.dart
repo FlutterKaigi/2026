@@ -70,7 +70,8 @@ class Home extends StatelessComponent {
         ),
       ]),
       div(classes: 'hero__slogan', [
-        p(classes: 'hero__slogan-theme', [.text(strings.heroTagline)]),
+        p(classes: 'hero__slogan-tagline', [.text(strings.heroTagline)]),
+        p(classes: 'hero__slogan-theme', [.text(strings.heroThemeName)]),
       ]),
     ]);
   }
@@ -223,7 +224,13 @@ class Home extends StatelessComponent {
           zIndex: const ZIndex(2),
           fontFamily: displayFontFamily,
         ),
+        css('.hero__slogan-tagline').styles(
+          raw: tokenFontCss(
+            fontMainvisualJapanese,
+          ),
+        ),
         css('.hero__slogan-theme').styles(
+          textAlign: .center,
           raw: tokenFontCss(
             fontMainvisualJapanese,
           ),
