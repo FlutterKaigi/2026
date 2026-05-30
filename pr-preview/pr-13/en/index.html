@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base href="/pr-preview/pr-13/"/>
+    <meta charset="utf-8"/>
+    <style>
+      @import url(https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Poppins:wght@400;500;600;700;900&display=swap);
+      @import url(https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap);
+      *, *::before, *::after {
+        box-sizing: border-box;
+      }
+      html, body {
+        width: 100%;
+        min-height: 100vh;
+        padding: 0;
+        margin: 0;
+        color: #FFFFFF;
+        font-family: 'Noto Sans JP', sans-serif;
+        background-color: #FDF7FF;
+        overflow-x: hidden;
+      }
+      h1, h2, h3, h4, p {
+        margin: 0;
+      }
+    </style>
+    <meta name="robots" content="noindex,nofollow"/>
+    <link sizes="any" href="favicon.ico" rel="icon"/>
+    <link type="image/svg+xml" href="favicon.svg" rel="icon"/>
+    <link href="favicon-180.png" rel="apple-touch-icon"/>
+    <link href="manifest.webmanifest" rel="manifest"/>
+    <meta name="theme-color" content="#6200EA"/>
+    <meta property="og:title" content="FlutterKaigi 2026"/>
+    <meta property="og:description" content="2026年、日本国内でFlutterをメインに扱う技術カンファレンス。FlutterやDartの深い知見を持つ開発者によるセッションを多数企画します。"/>
+    <meta property="og:image" content="https://2026.flutterkaigi.jp/images/ogp.png"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:url" content="https://2026.flutterkaigi.jp/"/>
+    <meta name="twitter:card" content="summary_large_image"/>
+    <meta name="twitter:site" content="@FlutterKaigi"/>
+    <!--$-->
+    <title>FlutterKaigi 2026</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <!--/-->
+    <script src="main.client.dart.js" defer></script>
+    <style>
+      footer {
+        display: flex;
+        width: 100%;
+        padding: 2.5em 2em;
+        flex-direction: column;
+        align-items: center;
+        row-gap: 2em;
+        color: #1D1B20;
+        background-color: #FDF7FF;
+        border-top: 1px solid rgba(29, 27, 32, 0.08);
+        text-align: center;
+      }
+      footer a {
+        text-decoration: underline;
+      }
+      footer .footer__nav {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        row-gap: 1.5em;
+      }
+      footer .footer__nav .footer__nav-row {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 1.5em;
+      }
+      footer .footer__nav .footer__link {
+        color: #64748B;
+        font-family: 'Noto Sans JP', sans-serif;
+        font-size: 0.75rem;
+        transition: color 150ms ease;
+      }
+      footer .footer__nav .footer__link:hover {
+        color: #6200EA;
+      }
+      footer .footer__legal {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      footer .footer__legal .footer__copyright {
+        color: #64748B;
+        font-family: 'Noto Sans JP', sans-serif;
+        font-size: 0.75rem;
+        line-height: 1.95;
+      }
+      footer .footer__legal .footer__trademark {
+        color: #64748B;
+        font-family: 'Noto Sans JP', sans-serif;
+        font-size: 0.625rem;
+        line-height: 1.95;
+      }
+      @media all and (max-width: 720px) {
+        footer {
+          padding: 2em 1.25em;
+          row-gap: 2em;
+        }
+      }
+      header {
+        display: flex;
+        position: sticky;
+        top: 0px;
+        z-index: 10;
+        width: 100%;
+        padding: 1em 2em;
+        align-items: center;
+        column-gap: 1.5em;
+        color: #1D1B20;
+        background-color: #FFFFFF;
+        box-shadow: 0 1px 0 rgba(29, 27, 32, 0.08);
+      }
+      header a {
+        text-decoration: none;
+      }
+      header .brand {
+        color: #1D1B20;
+        font-family: 'Poppins', 'Noto Sans JP', sans-serif;
+        font-weight: 700;
+        font-size: 1.125rem;
+        line-height: 1.273;
+        min-width: 0;
+        flex-shrink: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      header .actions {
+        display: flex;
+        align-items: center;
+        column-gap: 0.75em;
+        margin-left: auto;
+      }
+      header .nav {
+        display: flex;
+        justify-content: center;
+        column-gap: 2.5em;
+        flex-grow: 1;
+      }
+      header .nav .nav__link {
+        color: #1D1B20;
+        font-family: 'Noto Sans JP', sans-serif;
+        font-weight: 500;
+        font-size: 14px;
+        line-height: 1.429;
+        letter-spacing: 0.1px;
+        transition: color 150ms ease;
+      }
+      header .nav .nav__link:hover {
+        color: #6200EA;
+      }
+      header .btn {
+        display: flex;
+        padding: 0.6em 1.25em;
+        border-radius: 999px;
+        align-items: center;
+        font-family: 'Noto Sans JP', sans-serif;
+        font-weight: 600;
+        font-size: 14px;
+        line-height: 1.429;
+        letter-spacing: 0.1px;
+        transition: background-color 150ms ease;
+      }
+      header .btn.btn--primary {
+        color: #FFFFFF;
+        background-color: #6200EA;
+      }
+      header .btn.btn--primary:hover {
+        background-color: #5000C8;
+      }
+      header .lang {
+        display: flex;
+        padding: 0.5em 1em;
+        border: solid #7A757F 1px;
+        border-radius: 999px;
+        align-items: center;
+        column-gap: 0.4em;
+        color: #1D1B20;
+        font-family: 'Noto Sans JP', sans-serif;
+        font-weight: 500;
+        font-size: 12px;
+        line-height: 1.333;
+        letter-spacing: 0.5px;
+        transition: background-color 150ms ease;
+      }
+      header .lang:hover {
+        background-color: #1D1B2010;
+      }
+      header .lang .lang__icon {
+        width: 1.1em;
+        height: 1.1em;
+      }
+      header .lang.lang--ja .lang__option--ja {
+        text-decoration: underline;
+        text-underline-offset: 0.2em;
+      }
+      header .lang.lang--en .lang__option--en {
+        text-decoration: underline;
+        text-underline-offset: 0.2em;
+      }
+      @media all and (max-width: 960px) {
+        header .nav {
+          display: none;
+        }
+      }
+      @media all and (max-width: 720px) {
+        header {
+          padding: 0.6em 0.75em;
+          column-gap: 0.5em;
+        }
+        header .brand {
+          font-size: 0.95rem;
+        }
+        header .btn.btn--primary {
+          display: none;
+        }
+        header .lang {
+          padding: 0.45em;
+          border: none;
+        }
+        header .lang .lang__label {
+          display: none;
+        }
+      }
+      .hero {
+        display: flex;
+        position: relative;
+        width: 100%;
+        padding: 2em 2em;
+        overflow: hidden;
+        flex-grow: 1;
+        color: #FFFFFF;
+        background: linear-gradient(135deg, #FF0055 0%, #6200EA 55%, #001155 100%);
+        min-height: calc(100dvh - var(--header-h, 4rem));
+      }
+      .hero .hero__title {
+        display: flex;
+        position: absolute;
+        top: 2em;
+        left: 2em;
+        z-index: 2;
+        flex-direction: column;
+        row-gap: 1.5em;
+        right: calc(50% + 16vw);
+      }
+      .hero .hero__title .hero__headline {
+        display: flex;
+        flex-direction: column;
+        font-family: 'Poppins', 'Noto Sans JP', sans-serif;
+        font-weight: 500;
+      }
+      .hero .hero__title .hero__headline .hero__headline-line {
+        display: block;
+      }
+      .hero .hero__title .hero__headline .hero__headline-line--brand {
+        font-weight: 600;
+        font-size: clamp(4.5rem, 7vw, 60px);
+        line-height: 1.200;
+      }
+      .hero .hero__title .hero__headline .hero__headline-line--year {
+        font-weight: 600;
+        font-size: clamp(5rem, 8vw, 72px);
+        line-height: 1.200;
+      }
+      .hero .hero__title .hero__meta {
+        display: flex;
+        flex-direction: column;
+        row-gap: 0.5em;
+        font-family: 'Poppins', 'Noto Sans JP', sans-serif;
+        font-size: clamp(1.5rem, 2.5vw, 16px);
+        line-height: 1.500;
+        letter-spacing: 0.15px;
+      }
+      .hero .hero__title .hero__meta .hero__meta-row {
+        display: flex;
+        align-items: center;
+        column-gap: 0.5em;
+      }
+      .hero .hero__title .hero__meta .hero__meta-text {
+        color: #FFFFFF;
+        word-break: auto-phrase;
+        overflow-wrap: anywhere;
+      }
+      .hero .hero__title .hero__meta .hero__meta-text sup {
+        font-weight: 500;
+        font-size: 0.55em;
+        letter-spacing: 0.05em;
+        vertical-align: super;
+      }
+      .hero .hero__title .hero__meta .hero__meta-icon {
+        width: 1em;
+        height: 1em;
+        flex-shrink: 0;
+      }
+      .hero .hero__brand {
+        display: flex;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        flex-direction: column;
+        align-items: center;
+        row-gap: 1.5em;
+        transform: translate(-50%, -50%);
+      }
+      .hero .hero__logo {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      .hero .hero__logo img {
+        width: 28vw;
+        height: auto;
+        min-width: 280px;
+        max-width: 460px;
+        filter: drop-shadow(12px 12px 10px #00000040);
+      }
+      .hero .hero__cta {
+        display: flex;
+        padding: 0.85em 1.5em;
+        border-radius: 999px;
+        align-items: center;
+        column-gap: 0.5em;
+        color: #6200EA;
+        font-family: 'Noto Sans JP', sans-serif;
+        font-weight: 500;
+        text-decoration: none;
+        background-color: #FFFFFF;
+        font-size: 14px;
+        line-height: 1.429;
+        letter-spacing: 0.1px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+        transition: transform 150ms ease, box-shadow 150ms ease;
+      }
+      .hero .hero__cta:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
+      }
+      .hero .hero__cta .hero__cta-arrow {
+        font-family: 'Poppins', 'Noto Sans JP', sans-serif;
+        font-weight: 500;
+        font-size: 1.1em;
+      }
+      .hero .hero__slogan {
+        display: flex;
+        position: absolute;
+        bottom: 2.5em;
+        right: 3em;
+        z-index: 2;
+        flex-direction: column;
+        align-items: center;
+        row-gap: 0.5em;
+        text-align: end;
+        font-family: 'Poppins', 'Noto Sans JP', sans-serif;
+      }
+      .hero .hero__slogan .hero__slogan-headline {
+        font-size: 40px;
+        line-height: 1.200;
+      }
+      .hero .hero__slogan .hero__slogan-tagline {
+        font-size: 32px;
+        line-height: 1.200;
+      }
+      @media all and (max-width: 960px) {
+        .hero {
+          padding: 3em 2em;
+        }
+        .hero .hero__title {
+          top: 2em;
+          left: 2em;
+          right: calc(50% + 21vw);
+        }
+        .hero .hero__logo img {
+          width: 38vw;
+          min-width: 220px;
+        }
+        .hero .hero__slogan {
+          bottom: 2em;
+          right: 2em;
+        }
+      }
+      @media all and (max-width: 640px) {
+        .hero {
+          padding: 2em 1em;
+          flex-direction: column;
+          justify-content: start;
+          align-items: center;
+          row-gap: 2em;
+        }
+        .hero .hero__title {
+          max-width: 100%;
+          align-items: center;
+          text-align: center;
+          position: static;
+          top: auto;
+          left: auto;
+        }
+        .hero .hero__title .hero__headline {
+          align-items: center;
+        }
+        .hero .hero__title .hero__headline .hero__headline-line--brand {
+          font-size: clamp(1.8rem, 8.5vw, 3rem);
+        }
+        .hero .hero__title .hero__headline .hero__headline-line--year {
+          font-size: clamp(2rem, 10vw, 3.5rem);
+        }
+        .hero .hero__title .hero__meta {
+          align-items: center;
+          font-size: clamp(0.9rem, 3.5vw, 1.3rem);
+        }
+        .hero .hero__brand {
+          position: static;
+          top: auto;
+          left: auto;
+          transform: none;
+        }
+        .hero .hero__logo img {
+          width: 70%;
+          max-width: 280px;
+        }
+        .hero .hero__slogan {
+          align-items: center;
+          text-align: center;
+          position: static;
+          bottom: auto;
+          right: auto;
+        }
+      }
+      :root {
+        --header-h: 4rem;
+      }
+      .main {
+        display: flex;
+        min-height: 100vh;
+        flex-direction: column;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="main">
+      <header>
+        <a class="brand" href="/pr-preview/pr-13/en/">FlutterKaigi 2026</a>
+        <nav class="nav" aria-label="Primary"></nav>
+        <div class="actions">
+          <a class="lang lang--en" aria-label="Switch to 日本語" hreflang="ja" href="/pr-preview/pr-13/">
+            <img class="lang__icon" aria-hidden="true" alt src="images/icons/icon.svg"/>
+            <span class="lang__label"><span class="lang__option lang__option--en">EN</span><span class="lang__separator"> / </span><span class="lang__option lang__option--ja">JA</span></span>
+          </a>
+        </div>
+      </header>
+      <section class="hero">
+        <div class="hero__title">
+          <h1 class="hero__headline">
+            <span class="hero__headline-line hero__headline-line--brand">FlutterKaigi</span><span class="hero__headline-line hero__headline-line--year">2026</span>
+          </h1>
+          <div class="hero__meta">
+            <div class="hero__meta-row">
+              <img class="hero__meta-icon" aria-hidden="true" alt src="images/icons/calendar_paper.svg"/>
+              <p class="hero__meta-text">10.29<sup>THU</sup> – 30<sup>FRI</sup></p>
+            </div>
+            <div class="hero__meta-row">
+              <img class="hero__meta-icon" aria-hidden="true" alt src="images/icons/map_pin.svg"/>
+              <p class="hero__meta-text">Hamamatsucho Convention Hall</p>
+            </div>
+          </div>
+        </div>
+        <div class="hero__brand">
+          <div class="hero__logo"><img aria-hidden="true" alt="FlutterKaigi 2026" src="images/logo.svg"/></div>
+          <a class="hero__cta" href="https://medium.com/flutterkaigi/flutterkaigi-2026-opportunities-guide-en-1e5bd6c14461" target="_blank">
+            <span>FlutterKaigi 2026 Sponsorship Opportunities</span>
+            <span class="hero__cta-arrow" aria-hidden="true">→</span>
+          </a>
+        </div>
+        <div class="hero__slogan">
+          <p class="hero__slogan-headline">Assemble</p>
+          <p class="hero__slogan-tagline">Meet, Talk, Get Fired Up.</p>
+        </div>
+      </section>
+      <footer>
+        <nav class="footer__nav" aria-label="Footer">
+          <div class="footer__nav-row">
+            <a class="footer__link" href="https://2025.flutterkaigi.jp/" target="_blank">2025</a>
+            <a class="footer__link" href="https://2024.flutterkaigi.jp/" target="_blank">2024</a>
+            <a class="footer__link" href="https://2023.flutterkaigi.jp/" target="_blank">2023</a>
+            <a class="footer__link" href="https://2022.flutterkaigi.jp/" target="_blank">2022</a>
+            <a class="footer__link" href="https://2021.flutterkaigi.jp/" target="_blank">2021</a>
+          </div>
+          <div class="footer__nav-row">
+            <a class="footer__link" href="https://x.com/FlutterKaigi" target="_blank">X</a>
+            <a class="footer__link" href="https://github.com/FlutterKaigi" target="_blank">GitHub</a>
+            <a class="footer__link" href="https://discord.gg/flutterkaigi" target="_blank">Discord</a>
+            <a class="footer__link" href="https://medium.com/flutterkaigi" target="_blank">Medium</a>
+          </div>
+          <div class="footer__nav-row">
+            <a class="footer__link" href="https://docs.flutterkaigi.jp/Code-of-Conduct" target="_blank">Code of Conduct</a>
+            <a class="footer__link" href="https://docs.flutterkaigi.jp/Privacy-Policy" target="_blank">Privacy Policy</a>
+            <a class="footer__link" href="https://docs.flutterkaigi.jp/Exclusion-of-Anti-Social-Forces" target="_blank">Exclusion of Anti-Social Forces</a>
+            <a class="footer__link" href="https://docs.google.com/forms/d/e/1FAIpQLSdXjVagTv38Co0A0nwjm5V3k5V3FZZCsB7F-wFQbJxonp5pFg/viewform?usp=publish-editor" target="_blank">Contact</a>
+            <a class="footer__link" href="https://github.com/FlutterKaigi/2026" target="_blank">Repository</a>
+          </div>
+        </nav>
+        <div class="footer__legal">
+          <p class="footer__copyright">© 2021 - 2026 FlutterKaigi Executive Committee.</p>
+          <p class="footer__trademark">
+            Flutter and the related logo are trademarks of Google LLC. FlutterKaigi is not affiliated with or otherwise sponsored by Google LLC.
+          </p>
+          <p class="footer__trademark">The Flutter name and the Flutter logo are trademarks of Google LLC.</p>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>
