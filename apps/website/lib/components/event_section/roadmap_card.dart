@@ -5,6 +5,8 @@ import '../../constants/roadmap_milestones.dart';
 import '../../constants/theme.dart';
 import '../../l10n/strings.dart';
 
+/// Roadmap タイムライン。Figma 準拠で「Conference Day だけプライマリーで強調」
+/// する静的表示。動的な「現在地」判定は持たないため SSG 完結。
 class RoadmapCard extends StatelessComponent {
   const RoadmapCard({super.key});
 
@@ -12,7 +14,6 @@ class RoadmapCard extends StatelessComponent {
   Component build(BuildContext context) {
     final locale = LocaleScope.of(context);
     final strings = Strings(locale);
-    final now = DateTime.now();
 
     return article(classes: 'roadmap-card', [
       div(classes: 'roadmap-card__head', [
@@ -27,12 +28,7 @@ class RoadmapCard extends StatelessComponent {
       ]),
       div(classes: 'roadmap-card__timeline', [
         ol(classes: 'roadmap-card__list', [
-          for (final m in eventRoadmap)
-            _milestoneItem(
-              m: m,
-              status: milestoneStatus(m, now, all: eventRoadmap),
-              locale: locale,
-            ),
+          for (final m in eventRoadmap) _milestoneItem(m: m, locale: locale),
         ]),
       ]),
     ]);
@@ -40,14 +36,12 @@ class RoadmapCard extends StatelessComponent {
 
   Component _milestoneItem({
     required RoadmapMilestone m,
-    required MilestoneStatus status,
     required AppLocale locale,
   }) {
-    final cls = switch (status) {
-      MilestoneStatus.past => 'roadmap-card__item roadmap-card__item--past',
-      MilestoneStatus.upNext => 'roadmap-card__item roadmap-card__item--upnext',
-      MilestoneStatus.future => 'roadmap-card__item',
-    };
+    final isPrimary = m.gate == MilestoneGate.conference;
+    final cls = isPrimary
+        ? 'roadmap-card__item roadmap-card__item--primary'
+        : 'roadmap-card__item';
     return li(classes: cls, [
       span(
         classes: 'roadmap-card__dot',
@@ -66,11 +60,11 @@ class RoadmapCard extends StatelessComponent {
         display: .flex,
         flexDirection: .column,
         padding: .all(33.px),
-        backgroundColor: const Color('#F3EBFB'),
+        backgroundColor: eventCardSurfaceRoadmap,
         radius: .circular(24.px),
         border: Border.all(
           style: BorderStyle.solid,
-          color: const Color('#CBC3D94D'),
+          color: eventCardBorder,
           width: 1.px,
         ),
         raw: const {'min-height': '330px', 'height': '100%'},
@@ -87,7 +81,7 @@ class RoadmapCard extends StatelessComponent {
           width: 44.px,
           height: 44.px,
           radius: .circular(16.px),
-          backgroundColor: const Color('#D4E3FF'),
+          backgroundColor: tertiaryContainer,
           alignItems: .center,
           justifyContent: .center,
           raw: const {'flex-shrink': '0'},
@@ -95,7 +89,7 @@ class RoadmapCard extends StatelessComponent {
         css('img').styles(width: 20.px, height: 20.px),
       ]),
       css('.roadmap-card__title').styles(
-        color: const Color('#1D1A25'),
+        color: onSurface,
         fontFamily: uiFontFamily,
         fontWeight: .w500,
         raw: const {'font-size': '22px', 'line-height': '28px'},
@@ -119,7 +113,7 @@ class RoadmapCard extends StatelessComponent {
         css('&::before').styles(
           position: .absolute(top: 6.px, bottom: 6.px, left: 5.px),
           width: 2.px,
-          backgroundColor: const Color('#CBC3D980'),
+          backgroundColor: eventRoadmapTimeline,
           raw: const {'content': '""'},
         ),
       ]),
@@ -131,56 +125,38 @@ class RoadmapCard extends StatelessComponent {
           gap: Gap.row(4.px),
           raw: const {'padding-left': '32px'},
         ),
-        // 既定（future）状態の dot は赤茶系。
+        // 既定の dot：secondary（赤茶系）の単色。
         css('.roadmap-card__dot').styles(
           position: .absolute(top: 6.px, left: 0.px),
           width: 12.px,
           height: 12.px,
           radius: .circular(999.px),
-          backgroundColor: const Color('#904A45'),
+          backgroundColor: secondary,
           border: Border.all(
             style: BorderStyle.solid,
-            color: const Color('#F3EBFB'),
+            color: eventCardSurfaceRoadmap,
             width: 4.px,
           ),
           raw: const {
             'box-sizing': 'content-box',
             'margin-left': '-4px',
-            'transition': 'transform 200ms ease',
           },
         ),
-        // 過去：dot を彩度の低いグレーに、テキストも muted に。
-        css('&--past', [
+        // Conference Day だけ primary 強調＋外周のリング、名前も濃紫で w500。
+        css('&--primary', [
           css('.roadmap-card__dot').styles(
-            backgroundColor: const Color('#CBC3D9'),
-            border: Border.all(
-              style: BorderStyle.solid,
-              color: const Color('#F3EBFB'),
-              width: 4.px,
-            ),
-          ),
-          css('.roadmap-card__date').styles(
-            raw: const {'opacity': '0.55'},
-          ),
-          css('.roadmap-card__name').styles(
-            raw: const {'opacity': '0.55'},
-          ),
-        ]),
-        // 次に到来：紫の強アクセント＋外周のリング演出。
-        css('&--upnext', [
-          css('.roadmap-card__dot').styles(
-            backgroundColor: const Color('#65558F'),
+            backgroundColor: primary,
             raw: const {
               'box-shadow': '0 0 0 4px rgba(101, 85, 143, 0.18)',
             },
           ),
           css('.roadmap-card__name').styles(
-            color: const Color('#21005D'),
+            color: eventRoadmapEmphasis,
             fontWeight: .w500,
           ),
         ]),
         css('.roadmap-card__date').styles(
-          color: const Color('#494456'),
+          color: onSurfaceVariant,
           fontFamily: uiFontFamily,
           fontWeight: .w400,
           raw: const {
@@ -190,7 +166,7 @@ class RoadmapCard extends StatelessComponent {
           },
         ),
         css('.roadmap-card__name').styles(
-          color: const Color('#1D1A25'),
+          color: onSurface,
           fontFamily: uiFontFamily,
           fontWeight: .w400,
           raw: const {
