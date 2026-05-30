@@ -51,10 +51,19 @@ class Strings {
   };
 
   String get footerCopyright => switch (locale) {
-    AppLocale.ja =>
-      '© 2026 FlutterKaigi 実行委員会. Flutter および関連するロゴは Google LLC の商標です。当イベントは Google LLC の承認または提携を受けておりません。',
-    AppLocale.en =>
-      '© 2026 FlutterKaigi Executive Committee. Flutter and the related logo are trademarks of Google LLC. We are not endorsed by or affiliated with Google LLC.',
+    AppLocale.ja => '© 2021 - 2026 FlutterKaigi 実行委員会.',
+    AppLocale.en => '© 2021 - 2026 FlutterKaigi Executive Committee.',
+  };
+
+  List<String> get footerTrademark => switch (locale) {
+    AppLocale.ja => const [
+      'Flutter および関連するロゴは Google LLC の商標です。FlutterKaigi は Google LLC の承認または提携を受けておりません。',
+      'Flutter の名称およびロゴは Google LLC の商標です。',
+    ],
+    AppLocale.en => const [
+      'Flutter and the related logo are trademarks of Google LLC. FlutterKaigi is not affiliated with or otherwise sponsored by Google LLC.',
+      'The Flutter name and the Flutter logo are trademarks of Google LLC.',
+    ],
   };
 
   String get footerCodeOfConduct => switch (locale) {
