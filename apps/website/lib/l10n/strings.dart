@@ -21,8 +21,8 @@ class Strings {
   };
 
   String get heroTagline => switch (locale) {
-    AppLocale.ja => '会って、話して、熱くなる',
-    AppLocale.en => 'Meet, Talk, Get Fired Up.',
+    AppLocale.ja => '会って、話して、熱くなる。〜Assemble〜',
+    AppLocale.en => 'Meet, Talk, Get Fired Up. 〜Assemble〜',
   };
 
   String get latestUpdatesCta => switch (locale) {

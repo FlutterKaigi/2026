@@ -70,8 +70,7 @@ class Home extends StatelessComponent {
         ),
       ]),
       div(classes: 'hero__slogan', [
-        p(classes: 'hero__slogan-headline', [.text('Assemble')]),
-        p(classes: 'hero__slogan-tagline', [.text(strings.heroTagline)]),
+        p(classes: 'hero__slogan-theme', [.text(strings.heroTagline)]),
       ]),
     ]);
   }
@@ -110,17 +109,17 @@ class Home extends StatelessComponent {
             fontWeight: tokenWeight(fontMainvisualEnglish2026.fontWeight),
           ),
           css('.hero__headline-line').styles(display: .block),
-          // Per-line sizing anchored to mainvisual tokens (60/72px max).
+          // Both lines share the 2026 mainvisual token (72px max) and bold weight.
           css('.hero__headline-line--brand').styles(
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w700,
             raw: tokenFontCss(
-              fontMainvisualEnglishFlutterkaigi,
-              fluidMin: '4.5rem',
-              fluidVw: '7vw',
+              fontMainvisualEnglish2026,
+              fluidMin: '5rem',
+              fluidVw: '8vw',
             ),
           ),
           css('.hero__headline-line--year').styles(
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w700,
             raw: tokenFontCss(
               fontMainvisualEnglish2026,
               fluidMin: '5rem',
@@ -224,12 +223,7 @@ class Home extends StatelessComponent {
           zIndex: const ZIndex(2),
           fontFamily: displayFontFamily,
         ),
-        css('.hero__slogan-headline').styles(
-          raw: tokenFontCss(
-            fontMainvisualEnglishConcept,
-          ),
-        ),
-        css('.hero__slogan-tagline').styles(
+        css('.hero__slogan-theme').styles(
           raw: tokenFontCss(
             fontMainvisualJapanese,
           ),
@@ -279,7 +273,7 @@ class Home extends StatelessComponent {
           css('.hero__headline', [
             css('&').styles(alignItems: .center),
             css('.hero__headline-line--brand').styles(
-              raw: const {'font-size': 'clamp(1.8rem, 8.5vw, 3rem)'},
+              raw: const {'font-size': 'clamp(2rem, 10vw, 3.5rem)'},
             ),
             css('.hero__headline-line--year').styles(
               raw: const {'font-size': 'clamp(2rem, 10vw, 3.5rem)'},
