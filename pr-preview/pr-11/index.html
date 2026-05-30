@@ -72,7 +72,7 @@
         height: 20px;
       }
       .event-info-card .event-info-card__title {
-        color: #1D1A25;
+        color: #1D1B20;
         font-family: 'Noto Sans JP', sans-serif;
         font-weight: 500;
         font-size: 22px;
@@ -90,7 +90,7 @@
         min-width: 0;
       }
       .event-info-card .event-info-card__label {
-        color: #494456;
+        color: #49454E;
         font-family: 'Noto Sans JP', sans-serif;
         font-weight: 500;
         font-size: 11px;
@@ -99,7 +99,7 @@
         text-transform: uppercase;
       }
       .event-info-card .event-info-card__date-value {
-        color: #1D1A25;
+        color: #1D1B20;
         font-family: 'Noto Sans JP', sans-serif;
         font-weight: 500;
         font-size: clamp(22px, 2.2vw, 28px);
@@ -109,7 +109,7 @@
         overflow-wrap: anywhere;
       }
       .event-info-card .event-info-card__value {
-        color: #1D1A25;
+        color: #1D1B20;
         font-family: 'Noto Sans JP', sans-serif;
         font-weight: 400;
         font-size: 22px;
@@ -123,6 +123,7 @@
       .event-info-card .event-info-card__cta {
         display: inline-flex;
         padding: 12px 20px;
+        border: none;
         border-radius: 8px;
         align-items: center;
         column-gap: 10px;
@@ -138,6 +139,10 @@
         user-select: none;
         margin-top: 4px;
         flex-wrap: wrap;
+        opacity: 1;
+        -webkit-appearance: none;
+        appearance: none;
+        text-align: left;
       }
       .event-info-card .event-info-card__cta .event-info-card__cta-icon {
         width: 16px;
@@ -213,7 +218,7 @@
         height: 20px;
       }
       .news-card .news-card__title {
-        color: #1D1A25;
+        color: #1D1B20;
         font-family: 'Noto Sans JP', sans-serif;
         font-weight: 500;
         font-size: 22px;
@@ -233,7 +238,7 @@
         row-gap: 4px;
       }
       .news-card .news-card__date {
-        color: #1D1A25;
+        color: #1D1B20;
         font-family: 'Noto Sans JP', sans-serif;
         font-weight: 500;
         font-size: 11px;
@@ -242,7 +247,7 @@
         text-transform: uppercase;
       }
       .news-card .news-card__link {
-        color: #1D1A25;
+        color: #1D1B20;
         font-family: 'Noto Sans JP', sans-serif;
         font-weight: 400;
         text-decoration: underline;
@@ -326,7 +331,7 @@
         height: 20px;
       }
       .roadmap-card .roadmap-card__title {
-        color: #1D1A25;
+        color: #1D1B20;
         font-family: 'Noto Sans JP', sans-serif;
         font-weight: 500;
         font-size: 22px;
@@ -372,28 +377,17 @@
         background-color: #904A45;
         box-sizing: content-box;
         margin-left: -4px;
-        transition: transform 200ms ease;
       }
-      .roadmap-card .roadmap-card__item--past .roadmap-card__dot {
-        border: solid #F3EBFB 4px;
-        background-color: #CBC3D9;
-      }
-      .roadmap-card .roadmap-card__item--past .roadmap-card__date {
-        opacity: 0.55;
-      }
-      .roadmap-card .roadmap-card__item--past .roadmap-card__name {
-        opacity: 0.55;
-      }
-      .roadmap-card .roadmap-card__item--upnext .roadmap-card__dot {
+      .roadmap-card .roadmap-card__item--primary .roadmap-card__dot {
         background-color: #65558F;
         box-shadow: 0 0 0 4px rgba(101, 85, 143, 0.18);
       }
-      .roadmap-card .roadmap-card__item--upnext .roadmap-card__name {
+      .roadmap-card .roadmap-card__item--primary .roadmap-card__name {
         color: #21005D;
         font-weight: 500;
       }
       .roadmap-card .roadmap-card__item .roadmap-card__date {
-        color: #494456;
+        color: #49454E;
         font-family: 'Noto Sans JP', sans-serif;
         font-weight: 400;
         font-size: 11px;
@@ -401,7 +395,7 @@
         letter-spacing: 0.5px;
       }
       .roadmap-card .roadmap-card__item .roadmap-card__name {
-        color: #1D1A25;
+        color: #1D1B20;
         font-family: 'Noto Sans JP', sans-serif;
         font-weight: 400;
         font-size: 16px;
@@ -455,7 +449,7 @@
         row-gap: 0px;
       }
       .social-link-card .social-link-card__label {
-        color: #1D1A25;
+        color: #1D1B20;
         font-family: 'Noto Sans JP', sans-serif;
         font-weight: 500;
         font-size: 16px;
@@ -463,7 +457,7 @@
         letter-spacing: 0.15px;
       }
       .social-link-card .social-link-card__handle {
-        color: #494456;
+        color: #49454E;
         font-family: 'Noto Sans JP', sans-serif;
         font-weight: 400;
         font-size: 12px;
@@ -471,7 +465,7 @@
         letter-spacing: 0.4px;
       }
       .social-link-card .social-link-card__arrow {
-        color: #494456;
+        color: #49454E;
         font-size: 16px;
         line-height: 1;
       }
@@ -1018,7 +1012,11 @@
               </div>
               <div class="event-info-card__tickets">
                 <p class="event-info-card__label">チケット</p>
-                <span class="event-info-card__cta" role="button" aria-disabled="true" aria-label="チケット販売は準備中です" tabindex="-1"><img class="event-info-card__cta-icon" aria-hidden="true" alt src="images/icons/hourglass.svg"/><span class="event-info-card__cta-label">Coming soon...</span><span class="event-info-card__cta-meta">2026年7月26日 販売開始</span></span>
+                <button class="event-info-card__cta" aria-label="チケット販売は準備中です" disabled type="button">
+                  <img class="event-info-card__cta-icon" aria-hidden="true" alt src="images/icons/hourglass.svg"/>
+                  <span class="event-info-card__cta-label">Coming soon...</span>
+                  <span class="event-info-card__cta-meta">2026年7月26日 販売開始</span>
+                </button>
               </div>
             </article>
           </div>
@@ -1030,13 +1028,13 @@
               </div>
               <div class="roadmap-card__timeline">
                 <ol class="roadmap-card__list">
-                  <li class="roadmap-card__item roadmap-card__item--past">
+                  <li class="roadmap-card__item">
                     <span class="roadmap-card__dot" aria-hidden="true"></span><p class="roadmap-card__date">2026年5月15日</p><p class="roadmap-card__name">スポンサー募集開始</p>
                   </li>
-                  <li class="roadmap-card__item roadmap-card__item--upnext">
+                  <li class="roadmap-card__item">
                     <span class="roadmap-card__dot" aria-hidden="true"></span><p class="roadmap-card__date">2026年7月26日</p><p class="roadmap-card__name">チケット販売開始</p>
                   </li>
-                  <li class="roadmap-card__item">
+                  <li class="roadmap-card__item roadmap-card__item--primary">
                     <span class="roadmap-card__dot" aria-hidden="true"></span><p class="roadmap-card__date">2026年10月29日 – 30日</p><p class="roadmap-card__name">カンファレンス開催</p>
                   </li>
                 </ol>
