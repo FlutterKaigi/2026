@@ -40,6 +40,69 @@ class Strings {
     AppLocale.en => 'Meet, Talk, Get Fired Up.',
   };
 
+  // ── Event section ───────────────────────────────────────────────────
+
+  String get eventInfoCardTitle => switch (locale) {
+    AppLocale.ja => 'Event Information',
+    AppLocale.en => 'Event Information',
+  };
+
+  String get eventInfoDateLabel => switch (locale) {
+    AppLocale.ja => '日程',
+    AppLocale.en => 'DATE',
+  };
+
+  String get eventInfoVenueLabel => switch (locale) {
+    AppLocale.ja => '会場',
+    AppLocale.en => 'VENUE',
+  };
+
+  String get eventInfoTicketsLabel => switch (locale) {
+    AppLocale.ja => 'チケット',
+    AppLocale.en => 'TICKETS',
+  };
+
+  String get eventInfoGetTicketsCta => switch (locale) {
+    AppLocale.ja => 'チケットを購入',
+    AppLocale.en => 'Get Tickets',
+  };
+
+  String get eventInfoSubmitSessionCta => switch (locale) {
+    AppLocale.ja => 'セッションを応募',
+    AppLocale.en => 'Submit Your Session',
+  };
+
+  String get eventInfoComingSoon => switch (locale) {
+    AppLocale.ja => 'Coming soon...',
+    AppLocale.en => 'Coming soon...',
+  };
+
+  /// `date` 部分はマイルストーン側のロケール対応済み文字列を埋め込む。
+  String eventInfoTicketsOpensAt(String date) => switch (locale) {
+    AppLocale.ja => '$date 販売開始',
+    AppLocale.en => 'Opens $date',
+  };
+
+  String get eventInfoTicketsAriaLabel => switch (locale) {
+    AppLocale.ja => 'チケット販売は準備中です',
+    AppLocale.en => 'Tickets are not on sale yet',
+  };
+
+  String get roadmapCardTitle => switch (locale) {
+    AppLocale.ja => 'Roadmap',
+    AppLocale.en => 'Roadmap',
+  };
+
+  String get newsCardTitle => switch (locale) {
+    AppLocale.ja => 'News',
+    AppLocale.en => 'News',
+  };
+
+  String get newsViewAllCta => switch (locale) {
+    AppLocale.ja => 'すべてのニュースを見る',
+    AppLocale.en => 'View All News',
+  };
+
   String get latestUpdatesCta => switch (locale) {
     AppLocale.ja => 'FlutterKaigi 2026 スポンサー募集について',
     AppLocale.en => 'FlutterKaigi 2026 Sponsorship Opportunities',

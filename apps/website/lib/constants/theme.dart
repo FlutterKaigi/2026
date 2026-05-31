@@ -33,6 +33,42 @@ const onSurface = colorDeeppurpleSysLightOnSurface;
 const onSurfaceVariant = colorDeeppurpleSysLightOnSurfaceVariant;
 const outlineColor = colorDeeppurpleSysLightOutline;
 
+// ── M3 light-surface content roles (used by event-section cards) ──────
+const primary = colorDeeppurpleSysLightPrimary;
+const primaryContainer = colorDeeppurpleSysLightPrimaryContainer;
+const secondary = colorDeeppurpleSysLightSecondary;
+const secondaryContainer = colorDeeppurpleSysLightSecondaryContainer;
+const onSecondaryContainer = colorDeeppurpleSysLightOnSecondaryContainer;
+const tertiaryContainer = colorDeeppurpleSysLightTertiaryContainer;
+
+// ── M3 state-layer overlays (Hover 8% / Focus 10% / Pressed 16%) ──────
+const onSecondaryContainerHover =
+    colorDeeppurpleStateLayersLightOnsecondarycontainerOpacity010;
+
+// ── Event section brand accents (Figma-derived, no M3 semantic match) ──
+// Bento Grid のカード階層やインパクト演出のため Figma で個別に選定された
+// ブランド拡張色。生成トークン側にロールが無いため、ここで名前を付けて
+// 一元管理する（将来 `color.tokens.json` 側で定義され直す可能性あり）。
+const eventCardSurfaceInfo = Color('#EDE5F5');
+const eventCardSurfaceRoadmap = Color('#F3EBFB');
+const eventCardSurfaceSocial = Color('#F8F1FF');
+
+const eventCardBorder = Color('#CBC3D94D'); // 30% — Info / Roadmap
+const eventCardBorderSocial = Color('#CBC3D933'); // 20% — Social
+const eventCardBorderNews = Color('#D9C3C94D'); // News
+
+const eventRoadmapTimeline = Color('#CBC3D980'); // 50% タイムライン縦線
+const eventRoadmapEmphasis = Color('#21005D'); // Conference 強調の名前色
+
+// TODO(design): `#FFB4AB` は M3 ダークモードの Error と同値。
+// 「ライト面の coral accent」として意図して選定されたかをデザイナーに確認。
+const eventNewsIconBg = Color('#FFB4AB');
+
+// Disabled CTA：M3 State Layer (8/10/16%) に該当する非活性塗りロールが無いため
+// primary を 40% / onPrimary(白) を 90% に透過したカスタム値で表現している。
+const eventCtaDisabledBg = Color('#65558F66');
+const eventCtaDisabledFg = Color('#FFFFFFE6');
+
 // ── Hero gradient ─────────────────────────────────────────────────────
 /// CSS `background` value for the hero. Built from brand-color hex tokens so
 /// it stays in sync with the design tokens.
