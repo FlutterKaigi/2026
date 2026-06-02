@@ -5,7 +5,19 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/provider/environment.dart';
 import 'feature/news/provider/news_provider.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  final environment = Environment.fromEnvironment();
+  final firestoreHostParts = environment.firestoreHost.split(':');
+  await FirebaseInitializer.ensureInitialized(
+    projectId: environment.firebaseProjectId,
+    host: firestoreHostParts.first,
+    firestorePort: firestoreHostParts.length > 1
+        ? int.parse(firestoreHostParts[1])
+        : 8080,
+  );
+
   runApp(const ProviderScope(child: NewsSampleApp()));
 }
 

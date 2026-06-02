@@ -1,16 +1,17 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 /// Converts a Firestore timestamp into a [DateTime].
 ///
-/// `FirebaseDataClient` already decodes `timestampValue` into a [DateTime],
-/// but payloads that bypass the client (seed JSON, raw REST responses) may
-/// still carry ISO-8601 strings. This converter accepts both shapes so the
-/// same model can be built from either source.
+/// `cloud_firestore` returns timestamp fields as [Timestamp]. Payloads that
+/// bypass the SDK (seed JSON, tests) may instead carry an [DateTime] or an
+/// ISO-8601 string, so this converter accepts all three shapes.
 class FirestoreDateTimeConverter implements JsonConverter<DateTime, Object?> {
   const FirestoreDateTimeConverter();
 
   @override
   DateTime fromJson(Object? json) {
+    if (json is Timestamp) return json.toDate();
     if (json is DateTime) return json;
     if (json is String && json.isNotEmpty) return DateTime.parse(json);
     throw FormatException('Expected a Firestore timestamp, but got: $json');

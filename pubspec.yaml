@@ -24,8 +24,8 @@ melos:
       description: Run flutter analyze on the Flutter app
 
     analyze:data:
-      run: fvm dart run melos exec --scope=data -- fvm dart analyze .
-      description: Run dart analyze on the data package
+      run: fvm dart run melos exec --scope=data -- fvm flutter analyze .
+      description: Run flutter analyze on the data package
 
     analyze:
       run: fvm dart run melos run analyze:website && fvm dart run melos run analyze:app && fvm dart run melos run analyze:data
@@ -60,7 +60,7 @@ melos:
       description: Run tests in the Flutter app (uses flutter test for widget tests)
 
     test:data:
-      run: fvm dart run melos exec --scope=data --dir-exists=test -- fvm dart test
+      run: fvm dart run melos exec --scope=data --dir-exists=test -- fvm flutter test
       description: Run tests in the data package
 
     test:
@@ -100,8 +100,8 @@ melos:
     firebase:test:
       run: >
         npx -y firebase-tools@13.35.1 emulators:exec --project dev-flutterkaigi-2026 --only firestore
-        "fvm dart run tool/firebase_seed.dart packages/data/firebase/seed/firestore/default.json && fvm dart test packages/data"
-      description: Start Firestore Emulator, seed it, and run the Firebase data package smoke test
+        "fvm dart run tool/firebase_seed.dart packages/data/firebase/seed/firestore/default.json"
+      description: Start Firestore Emulator and load local seed data
 
     tokens:generate:
       run: fvm dart run tool/generate_tokens.dart

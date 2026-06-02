@@ -1,4 +1,5 @@
-import '../firebase_data_client.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 import '../model/news.dart';
 
 abstract interface class NewsRepository {
@@ -6,23 +7,21 @@ abstract interface class NewsRepository {
 }
 
 final class FirestoreNewsRepository implements NewsRepository {
-  const FirestoreNewsRepository(this._client);
+  FirestoreNewsRepository({FirebaseFirestore? firestore})
+    : _firestore = firestore ?? FirebaseFirestore.instance;
 
-  final FirebaseDataClient _client;
+  final FirebaseFirestore _firestore;
 
   @override
   Future<List<News>> fetchNews({DateTime? activeAt}) async {
-    final documents = await _client.listDocuments(
-      collectionPath: 'news',
-      orderBy: 'startsAt desc',
-    );
+    final snapshot = await _firestore
+        .collection('news')
+        .orderBy('startsAt', descending: true)
+        .get();
     final now = activeAt ?? DateTime.now();
     final news = [
-      for (final document in documents)
-        News.fromJson(<String, dynamic>{
-          ...document.fields,
-          'id': document.id,
-        }),
+      for (final document in snapshot.docs)
+        News.fromJson(<String, dynamic>{...document.data(), 'id': document.id}),
     ]..sort((a, b) => b.startsAt.compareTo(a.startsAt));
 
     return news.where((item) => item.isActiveAt(now)).toList(growable: false);

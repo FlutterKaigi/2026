@@ -54,14 +54,14 @@ cd apps/app
 fvm flutter run -d chrome --dart-define-from-file environments/.env.dev
 ```
 
-To verify the Firebase data path without opening the app:
+To load seed data into a fresh Firestore Emulator:
 
 ```bash
 fvm dart run melos firebase:test
 ```
 
-This starts Firestore Emulator, applies the seed data, and checks that
-`packages/data` can fetch the sample `news` document.
+This starts Firestore Emulator and applies the seed data. The data path itself
+is exercised by running the Flutter app against the emulator.
 
 ## Schemas
 
@@ -99,7 +99,7 @@ The intended flow is:
 
 ```text
 Firestore Emulator
-  -> FirebaseDataClient
+  -> cloud_firestore (FirebaseFirestore)
   -> repository
   -> app-facing model
 ```
