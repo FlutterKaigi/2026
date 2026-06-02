@@ -23,8 +23,7 @@ ui-debug.log
 
 # IDE / OS
 .idea/
-.vscode/
-!.vscode/
+.vscode/*
 !.vscode/launch.json
 !.vscode/tasks.json
 *.iml
