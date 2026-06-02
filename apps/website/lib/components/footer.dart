@@ -17,6 +17,7 @@ class Footer extends StatelessComponent {
   ];
 
   static const _repositoryUrl = 'https://github.com/FlutterKaigi/2026';
+  static const _footerTextColor = Color('#64748B');
 
   @override
   Component build(BuildContext context) {
@@ -30,14 +31,6 @@ class Footer extends StatelessComponent {
     ];
 
     return footer([
-      div(classes: 'footer__brand', [
-        a(
-          href: strings.locale.linkHref,
-          classes: 'footer__brand-name',
-          [.text('FlutterKaigi 2026')],
-        ),
-        p(classes: 'footer__copyright', [.text(strings.footerCopyright)]),
-      ]),
       nav(
         classes: 'footer__nav',
         attributes: const {'aria-label': 'Footer'},
@@ -71,6 +64,10 @@ class Footer extends StatelessComponent {
           ]),
         ],
       ),
+      div(classes: 'footer__legal', [
+        p(classes: 'footer__copyright', [.text(strings.footerCopyright)]),
+        for (final line in strings.footerTrademark) p(classes: 'footer__trademark', [.text(line)]),
+      ]),
     ]);
   }
 
@@ -79,69 +76,71 @@ class Footer extends StatelessComponent {
     css('footer', [
       css('&').styles(
         display: .flex,
+        flexDirection: .column,
+        alignItems: .center,
         width: 100.percent,
         padding: .symmetric(horizontal: 2.em, vertical: 2.5.em),
         backgroundColor: surface,
         color: onSurface,
-        gap: Gap.column(2.em),
-        raw: const {'border-top': '1px solid rgba(29, 27, 32, 0.08)'},
+        gap: Gap.row(2.em),
+        raw: const {
+          'border-top': '1px solid rgba(29, 27, 32, 0.08)',
+          'text-align': 'center',
+        },
       ),
       css('a').styles(
-        textDecoration: const TextDecoration(line: TextDecorationLine.none),
+        textDecoration: const TextDecoration(line: TextDecorationLine.underline),
       ),
-      css('.footer__brand', [
-        css('&').styles(
-          display: .flex,
-          flexDirection: .column,
-          gap: Gap.row(0.75.em),
-          raw: const {'flex-shrink': '0', 'max-width': '380px'},
-        ),
-        css('.footer__brand-name').styles(
-          color: onSurface,
-          fontFamily: displayFontFamily,
-          fontWeight: .w700,
-          raw: const {'font-size': '1.125rem'},
-        ),
-        css('.footer__copyright').styles(
-          color: onSurfaceVariant,
-          fontFamily: uiFontFamily,
-          raw: const {'font-size': '0.75rem', 'line-height': '1.6'},
-        ),
-      ]),
       css('.footer__nav', [
         css('&').styles(
           display: .flex,
           flexDirection: .column,
-          gap: Gap.row(1.em),
-          raw: const {'margin-left': 'auto'},
+          alignItems: .center,
+          gap: Gap.row(1.5.em),
         ),
         css('.footer__nav-row').styles(
           display: .flex,
+          justifyContent: .center,
           raw: const {
             'flex-wrap': 'wrap',
-            'gap': '0.5em 1.5em',
+            'gap': '1.5em',
           },
         ),
         css('.footer__link').styles(
-          color: onSurfaceVariant,
+          color: _footerTextColor,
           fontFamily: uiFontFamily,
           raw: const {
-            'font-size': '0.875rem',
+            'font-size': '0.75rem',
             'transition': 'color 150ms ease',
           },
         ),
         css('.footer__link:hover').styles(color: deepPurple),
+      ]),
+      css('.footer__legal', [
+        css('&').styles(
+          display: .flex,
+          flexDirection: .column,
+          alignItems: .center,
+        ),
+        css('.footer__copyright').styles(
+          color: _footerTextColor,
+          fontFamily: uiFontFamily,
+          raw: const {'font-size': '0.75rem', 'line-height': '1.95'},
+        ),
+        css('.footer__trademark').styles(
+          color: _footerTextColor,
+          fontFamily: uiFontFamily,
+          raw: const {'font-size': '0.625rem', 'line-height': '1.95'},
+        ),
       ]),
     ]),
 
     css.media(MediaQuery.all(maxWidth: 720.px), [
       css('footer', [
         css('&').styles(
-          flexDirection: .column,
           gap: Gap.row(2.em),
           padding: .symmetric(horizontal: 1.25.em, vertical: 2.em),
         ),
-        css('.footer__nav').styles(raw: const {'margin-left': '0'}),
       ]),
     ]),
   ];

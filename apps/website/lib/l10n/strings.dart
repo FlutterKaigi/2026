@@ -43,6 +43,69 @@ class Strings {
 
   String get heroThemeName => '〜Assemble〜';
 
+  // ── Event section ───────────────────────────────────────────────────
+
+  String get eventInfoCardTitle => switch (locale) {
+    AppLocale.ja => 'Event Information',
+    AppLocale.en => 'Event Information',
+  };
+
+  String get eventInfoDateLabel => switch (locale) {
+    AppLocale.ja => '日程',
+    AppLocale.en => 'DATE',
+  };
+
+  String get eventInfoVenueLabel => switch (locale) {
+    AppLocale.ja => '会場',
+    AppLocale.en => 'VENUE',
+  };
+
+  String get eventInfoTicketsLabel => switch (locale) {
+    AppLocale.ja => 'チケット',
+    AppLocale.en => 'TICKETS',
+  };
+
+  String get eventInfoGetTicketsCta => switch (locale) {
+    AppLocale.ja => 'チケットを購入',
+    AppLocale.en => 'Get Tickets',
+  };
+
+  String get eventInfoSubmitSessionCta => switch (locale) {
+    AppLocale.ja => 'セッションを応募',
+    AppLocale.en => 'Submit Your Session',
+  };
+
+  String get eventInfoComingSoon => switch (locale) {
+    AppLocale.ja => 'Coming soon...',
+    AppLocale.en => 'Coming soon...',
+  };
+
+  /// `date` 部分はマイルストーン側のロケール対応済み文字列を埋め込む。
+  String eventInfoTicketsOpensAt(String date) => switch (locale) {
+    AppLocale.ja => '$date 販売開始',
+    AppLocale.en => 'Opens $date',
+  };
+
+  String get eventInfoTicketsAriaLabel => switch (locale) {
+    AppLocale.ja => 'チケット販売は準備中です',
+    AppLocale.en => 'Tickets are not on sale yet',
+  };
+
+  String get roadmapCardTitle => switch (locale) {
+    AppLocale.ja => 'Roadmap',
+    AppLocale.en => 'Roadmap',
+  };
+
+  String get newsCardTitle => switch (locale) {
+    AppLocale.ja => 'News',
+    AppLocale.en => 'News',
+  };
+
+  String get newsViewAllCta => switch (locale) {
+    AppLocale.ja => 'すべてのニュースを見る',
+    AppLocale.en => 'View All News',
+  };
+
   String get latestUpdatesCta => switch (locale) {
     AppLocale.ja => 'FlutterKaigi 2026 スポンサー募集について',
     AppLocale.en => 'FlutterKaigi 2026 Sponsorship Opportunities',
@@ -54,10 +117,19 @@ class Strings {
   };
 
   String get footerCopyright => switch (locale) {
-    AppLocale.ja =>
-      '© 2026 FlutterKaigi 実行委員会. Flutter および関連するロゴは Google LLC の商標です。当イベントは Google LLC の承認または提携を受けておりません。',
-    AppLocale.en =>
-      '© 2026 FlutterKaigi Executive Committee. Flutter and the related logo are trademarks of Google LLC. We are not endorsed by or affiliated with Google LLC.',
+    AppLocale.ja => '© 2021 - 2026 FlutterKaigi 実行委員会.',
+    AppLocale.en => '© 2021 - 2026 FlutterKaigi Executive Committee.',
+  };
+
+  List<String> get footerTrademark => switch (locale) {
+    AppLocale.ja => const [
+      'Flutter および関連するロゴは Google LLC の商標です。FlutterKaigi は Google LLC の承認または提携を受けておりません。',
+      'Flutter の名称およびロゴは Google LLC の商標です。',
+    ],
+    AppLocale.en => const [
+      'Flutter and the related logo are trademarks of Google LLC. FlutterKaigi is not affiliated with or otherwise sponsored by Google LLC.',
+      'The Flutter name and the Flutter logo are trademarks of Google LLC.',
+    ],
   };
 
   String get footerCodeOfConduct => switch (locale) {

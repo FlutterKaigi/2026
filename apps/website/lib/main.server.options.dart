@@ -5,6 +5,14 @@
 // Generated with jaspr_builder
 
 import 'package:jaspr/server.dart';
+import 'package:website/components/event_section/event_info_card.dart'
+    as _event_info_card;
+import 'package:website/components/event_section/news_card.dart' as _news_card;
+import 'package:website/components/event_section/roadmap_card.dart'
+    as _roadmap_card;
+import 'package:website/components/event_section/social_link_card.dart'
+    as _social_link_card;
+import 'package:website/components/event_section.dart' as _event_section;
 import 'package:website/components/footer.dart' as _footer;
 import 'package:website/components/header.dart' as _header;
 import 'package:website/pages/home.dart' as _home;
@@ -30,6 +38,11 @@ ServerOptions get defaultServerOptions => ServerOptions(
   clientId: 'main.client.dart.js',
 
   styles: () => [
+    ..._event_info_card.EventInfoCard.styles,
+    ..._news_card.NewsCard.styles,
+    ..._roadmap_card.RoadmapCard.styles,
+    ..._social_link_card.SocialLinkCard.styles,
+    ..._event_section.EventSection.styles,
     ..._footer.Footer.styles,
     ..._header.Header.styles,
     ..._home.Home.styles,

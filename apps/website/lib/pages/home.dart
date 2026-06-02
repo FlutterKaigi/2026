@@ -1,6 +1,7 @@
 import 'package:jaspr/dom.dart';
 import 'package:jaspr/jaspr.dart';
 
+import '../components/event_section.dart';
 import '../constants/generated_tokens.dart';
 import '../constants/theme.dart';
 import '../l10n/strings.dart';
@@ -11,7 +12,8 @@ class Home extends StatelessComponent {
   @override
   Component build(BuildContext context) {
     final strings = LocaleScope.stringsOf(context);
-    return section(classes: 'hero', [
+    return Component.fragment([
+      section(classes: 'hero', [
       div(classes: 'hero__title', [
         h1(classes: 'hero__headline', [
           span(classes: 'hero__headline-line hero__headline-line--brand', [
@@ -73,6 +75,8 @@ class Home extends StatelessComponent {
         p(classes: 'hero__slogan-tagline', [.text(strings.heroTagline)]),
         p(classes: 'hero__slogan-theme', [.text(strings.heroThemeName)]),
       ]),
+    ]),
+    const EventSection(),
     ]);
   }
 
