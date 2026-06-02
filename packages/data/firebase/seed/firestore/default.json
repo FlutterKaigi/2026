@@ -1,0 +1,18 @@
+{
+  "projectId": "dev-flutterkaigi-2026",
+  "documents": [
+    {
+      "path": "news/sponsorship-guide",
+      "schema": "news",
+      "data": {
+        "title": "FlutterKaigi 2026 スポンサー募集について",
+        "url": "https://medium.com/flutterkaigi/flutterkaigi-2026-opportunities-guide-ja-0e8cdb0a4acb",
+        "startsAt": "2026-05-01T09:00:00+09:00",
+        "endsAt": null,
+        "status": "published",
+        "createdAt": "2026-06-02T00:00:00+09:00",
+        "updatedAt": "2026-06-02T00:00:00+09:00"
+      }
+    }
+  ]
+}
