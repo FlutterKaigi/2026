@@ -1,0 +1,67 @@
+// ignore_for_file: do_not_use_environment
+
+import 'package:flutter/foundation.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+part 'environment.freezed.dart';
+part 'environment.g.dart';
+
+@Riverpod(keepAlive: true)
+Environment environment(Ref ref) => Environment.fromEnvironment();
+
+@freezed
+abstract class Environment with _$Environment {
+  const Environment._();
+
+  const factory Environment({
+    required String appIdSuffix,
+    required String appName,
+    required Flavor flavor,
+    required String firebaseProjectId,
+    required String firestoreEmulatorHost,
+    required String androidFirestoreEmulatorHost,
+  }) = _Environment;
+
+  factory Environment.fromEnvironment() => Environment(
+    appIdSuffix: const String.fromEnvironment('APP_ID_SUFFIX'),
+    appName: const String.fromEnvironment(
+      'APP_NAME',
+      defaultValue: '[DEV] FlutterKaigi 2026',
+    ),
+    flavor: Flavor.values.firstWhere(
+      (e) =>
+          e.shortName ==
+          const String.fromEnvironment('FLAVOR', defaultValue: 'dev'),
+    ),
+    firebaseProjectId: const String.fromEnvironment(
+      'FIREBASE_PROJECT_ID',
+      defaultValue: 'dev-flutterkaigi-2026',
+    ),
+    firestoreEmulatorHost: const String.fromEnvironment(
+      'FIRESTORE_EMULATOR_HOST',
+      defaultValue: 'localhost:8080',
+    ),
+    androidFirestoreEmulatorHost: const String.fromEnvironment(
+      'FIRESTORE_EMULATOR_HOST_ANDROID',
+      defaultValue: '10.0.2.2:8080',
+    ),
+  );
+
+  String get firestoreHost {
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+      return androidFirestoreEmulatorHost;
+    }
+    return firestoreEmulatorHost;
+  }
+}
+
+enum Flavor {
+  production('prod'),
+  staging('stg'),
+  develop('dev');
+
+  const Flavor(this.shortName);
+
+  final String shortName;
+}
