@@ -9,8 +9,23 @@ docs/superpowers/
 pubspec.lock
 build/
 
+# Firebase Emulator local state
+.firebaserc
+.firebase/
+packages/data/firebase/emulator-data/
+firebase-debug.log
+firestore-debug.log
+storage-debug.log
+ui-debug.log
+.env
+.env.local
+.env.*.local
+
 # IDE / OS
 .idea/
 .vscode/
+!.vscode/
+!.vscode/launch.json
+!.vscode/tasks.json
 *.iml
 .DS_Store
