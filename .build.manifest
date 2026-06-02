@@ -7,8 +7,14 @@ favicon-maskable.png
 favicon.ico
 favicon.svg
 images/icons/calendar_paper.svg
+images/icons/event_info.svg
+images/icons/hourglass.svg
 images/icons/icon.svg
 images/icons/map_pin.svg
+images/icons/medium.svg
+images/icons/news.svg
+images/icons/roadmap.svg
+images/icons/x.svg
 images/logo.svg
 images/ogp.png
 main.client.dart.js
@@ -33,6 +39,11 @@ packages/vm_service/src/DEPENDENCIES.md
 packages/vm_service/src/README.md
 packages/web/fix_data.yaml
 packages/website/app.styles.json
+packages/website/components/event_section.styles.json
+packages/website/components/event_section/event_info_card.styles.json
+packages/website/components/event_section/news_card.styles.json
+packages/website/components/event_section/roadmap_card.styles.json
+packages/website/components/event_section/social_link_card.styles.json
 packages/website/components/footer.styles.json
 packages/website/components/header.styles.json
 packages/website/pages/home.styles.json
