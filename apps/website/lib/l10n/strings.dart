@@ -4,7 +4,8 @@ import '../constants/build_config.dart';
 
 enum AppLocale {
   ja(code: 'ja', homePath: '/', relativeHref: ''),
-  en(code: 'en', homePath: '/en', relativeHref: 'en/');
+  en(code: 'en', homePath: '/en', relativeHref: 'en/')
+  ;
 
   const AppLocale({
     required this.code,
@@ -36,9 +37,11 @@ class Strings {
   };
 
   String get heroTagline => switch (locale) {
-    AppLocale.ja => '会って、話して、熱くなる',
-    AppLocale.en => 'Meet, Talk, Get Fired Up.',
+    AppLocale.ja => '会って、話して、熱くなる。',
+    AppLocale.en => 'Connect, Converse, Ignite.',
   };
+
+  String get heroThemeName => '〜Assemble〜';
 
   // ── Event section ───────────────────────────────────────────────────
 
