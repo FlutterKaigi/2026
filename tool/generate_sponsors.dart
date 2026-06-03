@@ -352,14 +352,23 @@ void _writeDart(List<_Sponsor> sponsors) {
 }
 
 void _format(String path) {
-  final fmt = Process.runSync('fvm', ['dart', 'format', path]);
-  if (fmt.exitCode != 0) {
-    // Fall back to a plain dart on PATH (CI may not use fvm wrapper here).
-    final fmt2 = Process.runSync('dart', ['format', path]);
-    if (fmt2.exitCode != 0) {
-      stderr.writeln('warning: dart format failed for $path');
+  // Format with whatever is available; never fail the build over formatting.
+  // Try `dart` first (present in CI), then `fvm dart` (local fvm setups).
+  // `Process.runSync` throws (not just non-zero) when the executable is
+  // missing, so each candidate is guarded.
+  const candidates = [
+    ['dart', 'format'],
+    ['fvm', 'dart', 'format'],
+  ];
+  for (final cmd in candidates) {
+    try {
+      final r = Process.runSync(cmd.first, [...cmd.skip(1), path]);
+      if (r.exitCode == 0) return;
+    } on ProcessException {
+      // Executable not found — try the next candidate.
     }
   }
+  stderr.writeln('warning: could not run `dart format` on $path; left unformatted.');
 }
 
 /// Single-quoted Dart string literal with the necessary escapes. Non-ASCII is
