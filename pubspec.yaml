@@ -11,6 +11,8 @@ workspace:
 
 dev_dependencies:
   melos: ^7.0.0
+  http: ^1.2.0
+  image: ^4.2.0
 
 melos:
   scripts:
@@ -43,12 +45,12 @@ melos:
       description: Run all tests (website + app)
 
     website:serve:
-      run: melos exec --scope=website -- fvm dart run jaspr_cli:jaspr serve
-      description: Serve the jaspr website in dev mode
+      run: melos run sponsors:generate && melos exec --scope=website -- fvm dart run jaspr_cli:jaspr serve
+      description: Serve the jaspr website in dev mode (regenerates sponsor data first)
 
     website:build:
-      run: melos exec --scope=website -- make build
-      description: Build the jaspr website for production
+      run: melos run sponsors:generate && melos exec --scope=website -- make build
+      description: Build the jaspr website for production (regenerates sponsor data first)
 
     website:start:
       run: |
@@ -59,3 +61,7 @@ melos:
     tokens:generate:
       run: fvm dart run tool/generate_tokens.dart
       description: Regenerate apps/website/lib/constants/generated_tokens.dart from docs/design-system/tokens/
+
+    sponsors:generate:
+      run: fvm dart run tool/generate_sponsors.dart
+      description: Regenerate apps/website/lib/constants/generated_sponsors.dart (+ web/images/sponsors/) from the tracc API or the sample fixture. Git-ignored output.
