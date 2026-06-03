@@ -5,6 +5,7 @@ on:
     types: [opened, synchronize, reopened, closed]
     paths:
       - apps/website/**
+      - tool/**
       - .github/workflows/preview_website.yaml
 
 concurrency:
@@ -35,6 +36,12 @@ jobs:
 
       - if: github.event.action != 'closed'
         run: dart pub get
+
+      # Previews use placeholder sponsors (the sample fixture); no API secrets
+      # are passed, so no real sponsor data is ever built into a PR preview.
+      - if: github.event.action != 'closed'
+        name: Generate sponsor data (placeholders)
+        run: dart run tool/generate_sponsors.dart
 
       - if: github.event.action != 'closed'
         working-directory: apps/website
