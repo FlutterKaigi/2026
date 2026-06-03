@@ -26,6 +26,7 @@ class Header extends StatelessComponent {
         attributes: const {'aria-label': 'Primary'},
         [
           for (final item in _navItems) a(href: item.href, classes: 'nav__link', [.text(item.label)]),
+          a(href: strings.locale.sponsorsAnchorHref, classes: 'nav__link', [.text(strings.sponsorsNav)]),
         ],
       ),
       div(classes: 'actions', [
