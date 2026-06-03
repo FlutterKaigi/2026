@@ -24,6 +24,17 @@ enum AppLocale {
   /// Hyperlink target for navigation. Prefixed with `baseHref` so the same markup
   /// works for both production (`/`) and PR previews (`/pr-preview/pr-N/`).
   String get linkHref => '$baseHref$relativeHref';
+
+  /// Jaspr Router route path (absolute, **no** baseHref) for a sponsor detail
+  /// page — this drives the SSG output directory.
+  String sponsorRoutePath(String slug) =>
+      '${homePath == '/' ? '' : homePath}/sponsors/$slug';
+
+  /// Navigation href (baseHref-prefixed) for a sponsor detail page.
+  String sponsorHref(String slug) => '${linkHref}sponsors/$slug';
+
+  /// Navigation href to the Sponsors section on the home page.
+  String get sponsorsAnchorHref => '$linkHref#sponsors';
 }
 
 class Strings {
@@ -114,6 +125,36 @@ class Strings {
   String get latestUpdatesCtaUrl => switch (locale) {
     AppLocale.ja => 'https://medium.com/flutterkaigi/flutterkaigi-2026-opportunities-guide-ja-0e8cdb0a4acb',
     AppLocale.en => 'https://medium.com/flutterkaigi/flutterkaigi-2026-opportunities-guide-en-1e5bd6c14461',
+  };
+
+  // ── Sponsors ────────────────────────────────────────────────────────
+
+  String get sponsorsNav => 'Sponsors';
+
+  String get sponsorsTitle => 'Sponsors';
+
+  String get sponsorsSubtitle => switch (locale) {
+    AppLocale.ja => 'FlutterKaigi 2026 を支えてくださるスポンサーの皆様',
+    AppLocale.en => 'The sponsors supporting FlutterKaigi 2026',
+  };
+
+  /// Accessible label for a sponsor logo tile linking to its detail page.
+  String sponsorCardAriaLabel(String name) => switch (locale) {
+    AppLocale.ja => '$name の詳細を見る',
+    AppLocale.en => 'View details for $name',
+  };
+
+  String get sponsorBackToList => switch (locale) {
+    AppLocale.ja => 'スポンサー一覧に戻る',
+    AppLocale.en => 'Back to Sponsors',
+  };
+
+  String get sponsorConnectHeading => 'Connect';
+
+  /// Tier badge text on the detail page (CSS upper-cases it).
+  String sponsorTierBadge(String tierLabel) => switch (locale) {
+    AppLocale.ja => '$tierLabel スポンサー',
+    AppLocale.en => '$tierLabel Sponsor',
   };
 
   String get footerCopyright => switch (locale) {
