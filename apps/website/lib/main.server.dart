@@ -32,39 +32,10 @@ void main() {
         link(rel: 'apple-touch-icon', href: 'favicon-180.png'),
         link(rel: 'manifest', href: 'manifest.webmanifest'),
         meta(name: 'theme-color', content: colorKeycolorsPrimaryHex),
-        // OGP
-        meta(
-          attributes: {
-            'property': 'og:title',
-            'content': 'FlutterKaigi 2026',
-          },
-        ),
-        meta(
-          attributes: {
-            'property': 'og:description',
-            'content':
-                '2026年、日本国内でFlutterをメインに扱う技術カンファレンス。'
-                'FlutterやDartの深い知見を持つ開発者によるセッションを多数企画します。',
-          },
-        ),
-        meta(
-          attributes: {
-            'property': 'og:image',
-            'content': 'https://2026.flutterkaigi.jp/images/ogp.png',
-          },
-        ),
-        meta(
-          attributes: {
-            'property': 'og:type',
-            'content': 'website',
-          },
-        ),
-        meta(
-          attributes: {
-            'property': 'og:url',
-            'content': 'https://2026.flutterkaigi.jp/',
-          },
-        ),
+        // Page-specific OGP (`og:*`) and the meta description are injected per
+        // route via `Document.head()` (see `SiteHead` and `SponsorDetailPage`),
+        // so every generated page carries its own share card without duplicate
+        // tags. Only the locale-agnostic Twitter hints remain here.
         meta(name: 'twitter:card', content: 'summary_large_image'),
         meta(name: 'twitter:site', content: '@FlutterKaigi'),
       ],
