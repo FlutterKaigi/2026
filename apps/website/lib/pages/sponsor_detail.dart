@@ -2,6 +2,7 @@ import 'package:jaspr/dom.dart';
 import 'package:jaspr/jaspr.dart';
 
 import '../components/meta.dart';
+import '../constants/build_config.dart';
 import '../constants/site.dart';
 import '../constants/sponsors.dart';
 import '../constants/theme.dart';
@@ -36,7 +37,7 @@ class SponsorDetailPage extends StatelessComponent {
           ogMeta('og:description', _clip(sponsor.prText, 200)),
           ogMeta('og:image', _absUrl(sponsor.ogpImage)),
           ogMeta('og:type', 'article'),
-          ogMeta('og:url', '$siteOrigin${locale.sponsorRoutePath(sponsor.slug)}/'),
+          ogMeta('og:url', '$siteOrigin${locale.sponsorHref(sponsor.slug)}/'),
         ],
       ),
       section(classes: 'sponsor-detail', [
@@ -339,4 +340,4 @@ String _clip(String s, int max) {
 
 /// Absolute URL for an OGP asset path (or a passthrough remote URL).
 String _absUrl(String asset) =>
-    asset.startsWith('http') ? asset : '$siteOrigin/$asset';
+    asset.startsWith('http') ? asset : '$siteOrigin$baseHref$asset';

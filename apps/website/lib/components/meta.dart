@@ -1,6 +1,7 @@
 import 'package:jaspr/dom.dart';
 import 'package:jaspr/jaspr.dart';
 
+import '../constants/build_config.dart';
 import '../constants/site.dart';
 import '../l10n/strings.dart';
 
@@ -27,15 +28,16 @@ class SiteHead extends StatelessComponent {
   @override
   Component build(BuildContext context) {
     final locale = LocaleScope.of(context);
-    final url = locale == AppLocale.ja ? '$siteOrigin/' : '$siteOrigin/en/';
+    // Absolute URLs honor baseHref so they resolve on PR previews too
+    // (e.g. .../pr-preview/pr-N/) — not just on production.
     return Document.head(
       meta: const {'description': _defaultDescription},
       children: [
         ogMeta('og:title', 'FlutterKaigi 2026'),
         ogMeta('og:description', _defaultDescription),
-        ogMeta('og:image', '$siteOrigin/images/ogp.png'),
+        ogMeta('og:image', '$siteOrigin${baseHref}images/ogp.png'),
         ogMeta('og:type', 'website'),
-        ogMeta('og:url', url),
+        ogMeta('og:url', '$siteOrigin${locale.linkHref}'),
       ],
     );
   }
