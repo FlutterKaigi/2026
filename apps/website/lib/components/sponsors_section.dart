@@ -155,6 +155,13 @@ class SponsorsSection extends StatelessComponent {
         css('&.sponsor-card--sm').styles(
           raw: const {'width': 'clamp(84px, 18vw, 96px)'},
         ),
+        // Individual sponsors are shown as circular tiles. The card chrome is
+        // circular via border-radius; the logo itself is masked to a circle at
+        // generation time (baked transparency), avoiding a replaced-<img>
+        // clipping quirk that otherwise rendered an octagon.
+        css('&.sponsor-card--circle').styles(
+          raw: const {'border-radius': '50%'},
+        ),
       ]),
     ]),
 
@@ -191,7 +198,8 @@ class _SponsorLogoCard extends StatelessComponent {
   Component build(BuildContext context) {
     return a(
       href: strings.locale.sponsorHref(sponsor.slug),
-      classes: 'sponsor-card ${_sizeClass(sponsor.tier)}',
+      classes: 'sponsor-card ${_sizeClass(sponsor.tier)}'
+          '${sponsor.tier == SponsorTier.individual ? ' sponsor-card--circle' : ''}',
       attributes: {'aria-label': strings.sponsorCardAriaLabel(sponsor.name)},
       [
         img(src: sponsor.squareLogo, alt: sponsor.name, attributes: const {'loading': 'lazy'}),

@@ -165,7 +165,16 @@ Future<void> _processImages(_Sponsor s, img.Image ogpBase) async {
 
   logo ??= _placeholderLogo(s.name, _squarePx, _squarePx);
 
-  final square = _containCanvas(logo, _squarePx, _squarePx, padFrac: 0.12);
+  // Individual sponsors render as circular tiles: fill the square (no padding)
+  // so the inscribed circle mask yields a true circle, not an octagon.
+  final isIndividual = s.tier == _Tier.individual;
+  final square = _containCanvas(
+    logo,
+    _squarePx,
+    _squarePx,
+    padFrac: isIndividual ? 0.0 : 0.12,
+  );
+  if (isIndividual) _applyCircleMask(square);
   _writePng('${s.slug}-square.png', square);
   s.squareLogo = '$_assetPrefix/${s.slug}-square.png';
 
@@ -221,6 +230,20 @@ img.Image _containCanvas(img.Image src, int w, int h, {double padFrac = 0.0}) {
     dstY: ((h - fitted.height) / 2).round(),
   );
   return canvas;
+}
+
+/// Makes pixels outside the inscribed circle transparent, turning a square
+/// asset into a circular one (used for individual sponsors).
+void _applyCircleMask(img.Image image) {
+  final cx = (image.width - 1) / 2.0;
+  final cy = (image.height - 1) / 2.0;
+  final radius = (image.width < image.height ? image.width : image.height) / 2.0;
+  final r2 = radius * radius;
+  for (final p in image) {
+    final dx = p.x - cx;
+    final dy = p.y - cy;
+    if (dx * dx + dy * dy > r2) p.setRgba(p.r, p.g, p.b, 0);
+  }
 }
 
 /// Builds the 1200x630 OGP image: the branded base with the sponsor logo on a

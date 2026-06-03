@@ -217,8 +217,9 @@ class SponsorDetailPage extends StatelessComponent {
         css('&.badge--bronze').styles(
           raw: const {'background': 'linear-gradient(90deg, #C7864F 0%, #A86B3C 100%)'},
         ),
+        // Tool shares Individual's purple (per design feedback).
         css('&.badge--tool').styles(
-          raw: const {'background': 'linear-gradient(90deg, #5C6BC0 0%, #4F5BB0 100%)'},
+          raw: const {'background': 'linear-gradient(90deg, #7E57C2 0%, #65558F 100%)'},
         ),
         css('&.badge--student').styles(
           raw: const {'background': 'linear-gradient(90deg, #2E9E5B 0%, #228A4C 100%)'},
