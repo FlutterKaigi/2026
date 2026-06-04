@@ -1,0 +1,19 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "app-dev-debug",
+      "cwd": "apps/app",
+      "request": "launch",
+      "program": "lib/main.dart",
+      "type": "dart",
+      "args": [
+        "--dart-define-from-file",
+        "environments/.env.dev",
+        "--web-experimental-hot-reload",
+        "--web-port",
+        "3000"
+      ]
+    }
+  ]
+}
