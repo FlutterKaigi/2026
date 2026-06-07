@@ -32,6 +32,8 @@ void main() {
         link(rel: 'apple-touch-icon', href: 'favicon-180.png'),
         link(rel: 'manifest', href: 'manifest.webmanifest'),
         meta(name: 'theme-color', content: colorKeycolorsPrimaryHex),
+        // Safari の電話番号自動検出（数値列のリンク化）を無効化。
+        meta(name: 'format-detection', content: 'telephone=no'),
         // OGP
         meta(
           attributes: {
