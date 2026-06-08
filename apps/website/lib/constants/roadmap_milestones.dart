@@ -45,8 +45,8 @@ const eventRoadmap = <RoadmapMilestone>[
     gate: MilestoneGate.sponsors,
   ),
   RoadmapMilestone(
-    dateJa: '2026年7月26日',
-    dateEn: 'July 26, 2026',
+    dateJa: '2026年7月27日',
+    dateEn: 'July 27, 2026',
     titleJa: 'チケット販売開始',
     titleEn: 'Ticket Sales Open',
     gate: MilestoneGate.tickets,
