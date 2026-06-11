@@ -4,7 +4,9 @@ Monorepo for the FlutterKaigi 2026 website and app.
 
 - `apps/website/` — jaspr static site
 - `apps/app/` — Flutter app (iOS / Android)
+- `apps/broadcaster/` — Flutter desktop tool that streams venue audio to the captions server
 - `packages/` — shared Dart packages
+- `services/captions_server/` — pure Dart live-captions server (WebSocket audio in, translated captions out)
 
 Managed with [melos](https://melos.invertase.dev/) (v7) on top of Dart pub workspaces, with Flutter pinned by [FVM](https://fvm.app/).
 
@@ -44,6 +46,9 @@ The pinned Flutter version is `3.41.7` (see `.fvmrc`).
 | `fvm dart run melos firebase:schema:validate` | Validate Firebase seed data against the sample schema |
 | `fvm dart run melos firebase:seed` | Seed the running Firestore emulator with sample data |
 | `fvm dart run melos firebase:test` | Start Firestore Emulator and load local seed data |
+| `fvm dart run melos captions:serve` | Run the captions server locally on port 8082 (fake transcriber + echo translator) |
+| `fvm dart run melos captions:serve:live` | Run the captions server with real Gemini transcription + translation (set `GEMINI_API_KEY` via env or `services/captions_server/config.local.json`) |
+| `fvm dart run melos captions:smoke` | Stream synthetic audio to the running captions server and check captions are returned (pass a PCM16/16kHz/mono WAV path for real speech) |
 | `cd apps/app && fvm flutter run -d chrome --dart-define-from-file environments/.env.dev` | Run the Flutter app with dev environment variables |
 | `fvm dart run melos gen` | Regenerate Freezed/build_runner outputs for `apps/app` and `packages/data` |
 | `fvm dart run melos analyze` | Analyze all packages (website with `dart analyze`; app and `packages/data` with `flutter analyze`) |

@@ -9,6 +9,8 @@ workspace:
   - apps/website
   - apps/app
   - packages/data
+  - services/captions_server
+  - apps/broadcaster
 
 dev_dependencies:
   melos: ^7.0.0
@@ -27,9 +29,17 @@ melos:
       run: fvm dart run melos exec --scope=data -- fvm flutter analyze .
       description: Run flutter analyze on the data package
 
+    analyze:captions_server:
+      run: fvm dart run melos exec --scope=captions_server -- fvm dart analyze .
+      description: Run dart analyze on the captions server
+
+    analyze:broadcaster:
+      run: fvm dart run melos exec --scope=broadcaster -- fvm flutter analyze .
+      description: Run flutter analyze on the broadcaster app
+
     analyze:
-      run: fvm dart run melos run analyze:website && fvm dart run melos run analyze:app && fvm dart run melos run analyze:data
-      description: Analyze all packages (website + app + shared packages)
+      run: fvm dart run melos run analyze:website && fvm dart run melos run analyze:app && fvm dart run melos run analyze:data && fvm dart run melos run analyze:captions_server && fvm dart run melos run analyze:broadcaster
+      description: Analyze all packages (website + app + shared packages + services)
 
     format:
       run: fvm dart run melos exec -- fvm dart format .
@@ -63,9 +73,13 @@ melos:
       run: fvm dart run melos exec --scope=data --dir-exists=test -- fvm flutter test
       description: Run tests in the data package
 
+    test:captions_server:
+      run: fvm dart run melos exec --scope=captions_server --dir-exists=test -- fvm dart test
+      description: Run tests in the captions server
+
     test:
-      run: fvm dart run melos run test:website && fvm dart run melos run test:app && fvm dart run melos run test:data
-      description: Run all tests (website + app + shared packages)
+      run: fvm dart run melos run test:website && fvm dart run melos run test:app && fvm dart run melos run test:data && fvm dart run melos run test:captions_server
+      description: Run all tests (website + app + shared packages + services)
 
     website:serve:
       run: fvm dart run melos exec --scope=website -- fvm dart run jaspr_cli:jaspr serve
@@ -102,6 +116,18 @@ melos:
         npx -y firebase-tools@13.35.1 emulators:exec --project dev-flutterkaigi-2026 --only firestore
         "fvm dart run tool/firebase_seed.dart packages/data/firebase/seed/firestore/default.json"
       description: Start Firestore Emulator and load local seed data
+
+    captions:serve:
+      run: fvm dart run melos exec --scope=captions_server -- PORT=8082 fvm dart run bin/server.dart
+      description: Run the captions server locally on port 8082 (fake transcriber + echo translator + console sink)
+
+    captions:smoke:
+      run: fvm dart run melos exec --scope=captions_server -- fvm dart run tool/smoke_client.dart ws://localhost:8082/v1/ingest/room-a
+      description: Stream synthetic audio to a running captions server and verify it returns caption frames
+
+    captions:serve:live:
+      run: fvm dart run melos exec --scope=captions_server -- CAPTIONS_TRANSCRIBER=gemini CAPTIONS_TRANSLATOR=gemini PORT=8082 fvm dart run bin/server.dart
+      description: Run the captions server with real Gemini transcription + translation (requires GEMINI_API_KEY in the environment)
 
     tokens:generate:
       run: fvm dart run tool/generate_tokens.dart
