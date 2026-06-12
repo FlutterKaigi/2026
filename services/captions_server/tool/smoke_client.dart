@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:math' as math;
 import 'dart:typed_data';
 
+import 'package:captions_server/captions_server.dart';
 import 'package:web_socket_channel/io.dart';
 
 /// Headless smoke client (§6.7).
@@ -16,20 +17,29 @@ import 'package:web_socket_channel/io.dart';
 /// (PCM16 / 16kHz / mono — e.g. from `afconvert -f WAVE -d LEI16@16000 -c 1`)
 /// it sends the file and requires one. Exits 0 on success, non-zero otherwise.
 Future<void> main(List<String> args) async {
-  final url = args.isNotEmpty ? args.first : 'ws://localhost:8082/v1/ingest/room-a';
-  final token = Platform.environment['INGEST_TOKEN'] ?? 'dev-token';
+  final url = args.isNotEmpty
+      ? args.first
+      : 'ws://localhost:8082/v1/ingest/room-a';
+  final token = Config.load().ingestToken;
   final wavPath = args.length > 1 ? args[1] : null;
 
-  final List<Uint8List>? fileChunks = wavPath == null ? null : _readWavChunks(wavPath);
+  final List<Uint8List>? fileChunks = wavPath == null
+      ? null
+      : _readWavChunks(wavPath);
   final requiredCaptions = fileChunks == null ? 2 : 1;
   final totalChunks = fileChunks?.length ?? 100;
   if (fileChunks != null) {
-    stdout.writeln('streaming $wavPath (${(totalChunks / 10).toStringAsFixed(1)}s) at real-time pace');
+    stdout.writeln(
+      'streaming $wavPath (${(totalChunks / 10).toStringAsFixed(1)}s) at real-time pace',
+    );
   }
 
   final IOWebSocketChannel channel;
   try {
-    channel = IOWebSocketChannel.connect(Uri.parse(url), headers: {'Authorization': 'Bearer $token'});
+    channel = IOWebSocketChannel.connect(
+      Uri.parse(url),
+      headers: {'Authorization': 'Bearer $token'},
+    );
     await channel.ready;
   } catch (e) {
     stderr.writeln('smoke FAILED: could not connect to $url: $e');
@@ -50,8 +60,12 @@ Future<void> main(List<String> args) async {
           stdout.writeln('interim seq=${data['seq']} "${data['srcText']}"');
         case 'caption':
           captionCount++;
-          stdout.writeln('caption seq=${data['seq']} ja="${data['ja']}" en="${data['en']}"');
-          if (captionCount >= requiredCaptions && !done.isCompleted) done.complete();
+          stdout.writeln(
+            'caption seq=${data['seq']} ja="${data['ja']}" en="${data['en']}"',
+          );
+          if (captionCount >= requiredCaptions && !done.isCompleted) {
+            done.complete();
+          }
         case 'error':
           stderr.writeln('error: ${data['code']} ${data['message']}');
       }
@@ -60,18 +74,24 @@ Future<void> main(List<String> args) async {
       if (!done.isCompleted) done.completeError(e);
     },
     onDone: () {
-      if (!done.isCompleted) done.completeError(StateError('socket closed before $requiredCaptions caption(s)'));
+      if (!done.isCompleted) {
+        done.completeError(
+          StateError('socket closed before $requiredCaptions caption(s)'),
+        );
+      }
     },
   );
 
   // hello
-  channel.sink.add(jsonEncode({
-    'type': 'hello',
-    'sampleRate': 16000,
-    'channels': 1,
-    'format': 'pcm16le',
-    'sourceLang': 'ja-JP',
-  }));
+  channel.sink.add(
+    jsonEncode({
+      'type': 'hello',
+      'sampleRate': 16000,
+      'channels': 1,
+      'format': 'pcm16le',
+      'sourceLang': 'ja-JP',
+    }),
+  );
 
   // 100ms chunks (1600 samples = 3200 bytes) at real-time pace: either WAV file
   // slices or a generated 440Hz sine.
@@ -94,14 +114,20 @@ Future<void> main(List<String> args) async {
     final bytes = Uint8List(samplesPerChunk * 2);
     final view = ByteData.view(bytes.buffer);
     for (var i = 0; i < samplesPerChunk; i++) {
-      view.setInt16(i * 2, (math.sin(phase) * 0.3 * 32767).round(), Endian.little);
+      view.setInt16(
+        i * 2,
+        (math.sin(phase) * 0.3 * 32767).round(),
+        Endian.little,
+      );
       phase += step;
     }
     channel.sink.add(bytes);
   });
 
   // Stream duration plus grace for transcription/translation round-trips.
-  final timeout = Duration(milliseconds: totalChunks * chunkMs) + const Duration(seconds: 25);
+  final timeout =
+      Duration(milliseconds: totalChunks * chunkMs) +
+      const Duration(seconds: 25);
   try {
     await done.future.timeout(timeout);
     timer.cancel();
@@ -127,7 +153,8 @@ List<Uint8List> _readWavChunks(String path) {
     exit(1);
   }
 
-  String ascii(int offset) => String.fromCharCodes(bytes.sublist(offset, offset + 4));
+  String ascii(int offset) =>
+      String.fromCharCodes(bytes.sublist(offset, offset + 4));
   if (bytes.length < 44 || ascii(0) != 'RIFF' || ascii(8) != 'WAVE') {
     stderr.writeln('smoke FAILED: $path is not a WAV file');
     exit(1);
@@ -146,13 +173,19 @@ List<Uint8List> _readWavChunks(String path) {
       final rate = view.getUint32(offset + 12, Endian.little);
       final bits = view.getUint16(offset + 22, Endian.little);
       if (format != 1 || channels != 1 || rate != 16000 || bits != 16) {
-        stderr.writeln('smoke FAILED: $path must be PCM16 / 16kHz / mono (got '
-            'format=$format channels=$channels rate=$rate bits=$bits). Convert with:\n'
-            '  afconvert -f WAVE -d LEI16@16000 -c 1 <input> <output.wav>');
+        stderr.writeln(
+          'smoke FAILED: $path must be PCM16 / 16kHz / mono (got '
+          'format=$format channels=$channels rate=$rate bits=$bits). Convert with:\n'
+          '  afconvert -f WAVE -d LEI16@16000 -c 1 <input> <output.wav>',
+        );
         exit(1);
       }
     } else if (id == 'data') {
-      data = Uint8List.sublistView(bytes, offset + 8, math.min(offset + 8 + size, bytes.length));
+      data = Uint8List.sublistView(
+        bytes,
+        offset + 8,
+        math.min(offset + 8 + size, bytes.length),
+      );
       break;
     }
     offset += 8 + size + (size.isOdd ? 1 : 0);

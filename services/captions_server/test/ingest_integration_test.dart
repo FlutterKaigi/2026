@@ -29,13 +29,16 @@ void main() {
     expect(res.body, 'ok');
   });
 
-  test('rejects ingest with a wrong bearer token (401, before upgrade)', () async {
-    final res = await http.get(
-      Uri.parse('http://localhost:$port/v1/ingest/room-a'),
-      headers: {'Authorization': 'Bearer wrong-token'},
-    );
-    expect(res.statusCode, 401);
-  });
+  test(
+    'rejects ingest with a wrong bearer token (401, before upgrade)',
+    () async {
+      final res = await http.get(
+        Uri.parse('http://localhost:$port/v1/ingest/room-a'),
+        headers: {'Authorization': 'Bearer wrong-token'},
+      );
+      expect(res.statusCode, 401);
+    },
+  );
 
   test('hello -> audio -> >=2 caption frames -> clean close', () async {
     final channel = IOWebSocketChannel.connect(
@@ -48,27 +51,28 @@ void main() {
     var captionCount = 0;
     final twoCaptions = Completer<void>();
 
-    channel.stream.listen(
-      (message) {
-        final data = jsonDecode(message as String) as Map<String, Object?>;
-        switch (data['type']) {
-          case 'ready':
-            gotReady = true;
-          case 'caption':
-            captionCount++;
-            if (captionCount >= 2 && !twoCaptions.isCompleted) twoCaptions.complete();
-        }
-      },
-      cancelOnError: false,
-    );
+    channel.stream.listen((message) {
+      final data = jsonDecode(message as String) as Map<String, Object?>;
+      switch (data['type']) {
+        case 'ready':
+          gotReady = true;
+        case 'caption':
+          captionCount++;
+          if (captionCount >= 2 && !twoCaptions.isCompleted) {
+            twoCaptions.complete();
+          }
+      }
+    }, cancelOnError: false);
 
-    channel.sink.add(jsonEncode({
-      'type': 'hello',
-      'sampleRate': 16000,
-      'channels': 1,
-      'format': 'pcm16le',
-      'sourceLang': 'ja-JP',
-    }));
+    channel.sink.add(
+      jsonEncode({
+        'type': 'hello',
+        'sampleRate': 16000,
+        'channels': 1,
+        'format': 'pcm16le',
+        'sourceLang': 'ja-JP',
+      }),
+    );
 
     // Pump synthetic audio quickly; the fake transcriber is content-agnostic.
     final pump = Timer.periodic(const Duration(milliseconds: 5), (t) {

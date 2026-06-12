@@ -59,7 +59,11 @@ void _runConnection({
   var started = false;
   var closed = false;
 
-  void closeWith({required String code, required String message, int wsCode = 1008}) {
+  void closeWith({
+    required String code,
+    required String message,
+    int wsCode = 1008,
+  }) {
     if (closed) return;
     closed = true;
     channel.sink.add(encodeError(code: code, message: message));
@@ -85,7 +89,10 @@ void _runConnection({
 
         started = true;
         channel.sink.add(encodeReady());
-        logEvent('ingest_ready', {'roomId': roomId, 'sourceLang': hello.sourceLang});
+        logEvent('ingest_ready', {
+          'roomId': roomId,
+          'sourceLang': hello.sourceLang,
+        });
 
         final pipeline = CaptionPipeline(
           roomId: roomId,
@@ -97,16 +104,28 @@ void _runConnection({
             if (!closed) channel.sink.add(frame);
           },
         );
-        unawaited(pipeline.run(audio.stream).then((_) {
-          logEvent('ingest_done', {'roomId': roomId});
-          if (!closed) {
-            closed = true;
-            channel.sink.close(1000);
-          }
-        }).catchError((Object e) {
-          logEvent('pipeline_error', {'roomId': roomId, 'error': '$e'}, 'error');
-          closeWith(code: 'internal', message: 'pipeline error', wsCode: 1011);
-        }));
+        unawaited(
+          pipeline
+              .run(audio.stream)
+              .then((_) {
+                logEvent('ingest_done', {'roomId': roomId});
+                if (!closed) {
+                  closed = true;
+                  channel.sink.close(1000);
+                }
+              })
+              .catchError((Object e) {
+                logEvent('pipeline_error', {
+                  'roomId': roomId,
+                  'error': '$e',
+                }, 'error');
+                closeWith(
+                  code: 'internal',
+                  message: 'pipeline error',
+                  wsCode: 1011,
+                );
+              }),
+        );
         return;
       }
 
@@ -116,7 +135,10 @@ void _runConnection({
       }
     },
     onError: (Object e, StackTrace st) {
-      logEvent('ingest_socket_error', {'roomId': roomId, 'error': '$e'}, 'error');
+      logEvent('ingest_socket_error', {
+        'roomId': roomId,
+        'error': '$e',
+      }, 'error');
       if (!audio.isClosed) audio.close();
     },
     onDone: () {

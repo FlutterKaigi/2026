@@ -46,9 +46,10 @@ The pinned Flutter version is `3.41.7` (see `.fvmrc`).
 | `fvm dart run melos firebase:schema:validate` | Validate Firebase seed data against the sample schema |
 | `fvm dart run melos firebase:seed` | Seed the running Firestore emulator with sample data |
 | `fvm dart run melos firebase:test` | Start Firestore Emulator and load local seed data |
-| `fvm dart run melos captions:serve` | Run the captions server locally on port 8082 (fake transcriber + echo translator) |
-| `fvm dart run melos captions:serve:live` | Run the captions server with real Gemini transcription + translation (set `GEMINI_API_KEY` via env or `services/captions_server/config.local.json`) |
+| `fvm dart run melos captions:serve` | Run the captions server with `services/captions_server/environments/env.dev` |
+| `fvm dart run melos captions:serve:live` | Run the captions server with Gemini transcription + translation, using `services/captions_server/environments/env.dev` |
 | `fvm dart run melos captions:smoke` | Stream synthetic audio to the running captions server and check captions are returned (pass a PCM16/16kHz/mono WAV path for real speech) |
+| `fvm dart run melos broadcaster:run:local` | Run the broadcaster app with `apps/broadcaster/environments/.env.dev` |
 | `cd apps/app && fvm flutter run -d chrome --dart-define-from-file environments/.env.dev` | Run the Flutter app with dev environment variables |
 | `fvm dart run melos gen` | Regenerate Freezed/build_runner outputs for `apps/app` and `packages/data` |
 | `fvm dart run melos analyze` | Analyze all packages (website with `dart analyze`; app and `packages/data` with `flutter analyze`) |
@@ -65,6 +66,8 @@ Firebase configuration lives at the repository root and under `packages/data/fir
 - `firebase.json` is kept at the repository root for Firebase CLI discovery.
 - Firestore/Storage rules, indexes, schemas, and seed data live under `packages/data/firebase/`.
 - App dev environment variables live in `apps/app/environments/.env.dev` and are passed with `--dart-define-from-file`.
+- Broadcaster dev environment variables live in `apps/broadcaster/environments/.env.dev` and are passed with `--dart-define-from-file`.
+- Captions server dev environment variables live in `services/captions_server/environments/env.dev` and are selected with `-DCAPTIONS_CONFIG=environments/env.dev`.
 - VS Code launch/tasks live in `.vscode/` and only define local/dev commands.
 - `packages/data/firebase/schemas/firestore/news.schema.json` is the only sample schema for now. Add more schemas only when product code needs them.
 - `packages/data/firebase/seed/firestore/default.json` contains reviewable local sample data.

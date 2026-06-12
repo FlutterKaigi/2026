@@ -30,9 +30,22 @@ class BroadcasterPage extends StatefulWidget {
 }
 
 class _BroadcasterPageState extends State<BroadcasterPage> {
-  final _serverUrl = TextEditingController(text: 'ws://localhost:8082');
-  final _roomId = TextEditingController(text: 'room-a');
-  final _token = TextEditingController(text: 'dev-token');
+  static const _defaultServerUrl = String.fromEnvironment(
+    'CAPTIONS_SERVER_URL',
+    defaultValue: 'ws://localhost:8082',
+  );
+  static const _defaultRoomId = String.fromEnvironment(
+    'CAPTIONS_ROOM_ID',
+    defaultValue: 'room-a',
+  );
+  static const _defaultToken = String.fromEnvironment(
+    'INGEST_TOKEN',
+    defaultValue: 'dev-token',
+  );
+
+  final _serverUrl = TextEditingController(text: _defaultServerUrl);
+  final _roomId = TextEditingController(text: _defaultRoomId);
+  final _token = TextEditingController(text: _defaultToken);
 
   final AudioCapture _audio = AudioCapture();
   late final Uplink _uplink;
@@ -95,7 +108,11 @@ class _BroadcasterPageState extends State<BroadcasterPage> {
         setState(() => _captionText = '${message['ja']}\n${message['en']}');
       case 'error':
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('server error: ${message['code']} ${message['message']}')),
+          SnackBar(
+            content: Text(
+              'server error: ${message['code']} ${message['message']}',
+            ),
+          ),
         );
     }
   }
@@ -105,7 +122,9 @@ class _BroadcasterPageState extends State<BroadcasterPage> {
     final granted = await _audio.hasPermission();
     if (!mounted) return;
     if (!granted) {
-      messenger.showSnackBar(const SnackBar(content: Text('マイク/ライン入力の権限がありません。')));
+      messenger.showSnackBar(
+        const SnackBar(content: Text('マイク/ライン入力の権限がありません。')),
+      );
       return;
     }
 
@@ -157,18 +176,18 @@ class _BroadcasterPageState extends State<BroadcasterPage> {
   }
 
   String get _linkLabel => switch (_link) {
-        LinkState.disconnected => '未接続',
-        LinkState.connecting => '接続中…',
-        LinkState.connected => '接続済み',
-        LinkState.reconnectWaiting => '再接続待ち…',
-      };
+    LinkState.disconnected => '未接続',
+    LinkState.connecting => '接続中…',
+    LinkState.connected => '接続済み',
+    LinkState.reconnectWaiting => '再接続待ち…',
+  };
 
   Color get _linkColor => switch (_link) {
-        LinkState.connected => Colors.green,
-        LinkState.connecting => Colors.orange,
-        LinkState.reconnectWaiting => Colors.red,
-        LinkState.disconnected => Colors.grey,
-      };
+    LinkState.connected => Colors.green,
+    LinkState.connecting => Colors.orange,
+    LinkState.reconnectWaiting => Colors.red,
+    LinkState.disconnected => Colors.grey,
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -181,7 +200,10 @@ class _BroadcasterPageState extends State<BroadcasterPage> {
             TextField(
               controller: _serverUrl,
               enabled: !_running,
-              decoration: const InputDecoration(labelText: 'Server URL', border: OutlineInputBorder()),
+              decoration: const InputDecoration(
+                labelText: 'Server URL',
+                border: OutlineInputBorder(),
+              ),
             ),
             const SizedBox(height: 12),
             Row(
@@ -190,7 +212,10 @@ class _BroadcasterPageState extends State<BroadcasterPage> {
                   child: TextField(
                     controller: _roomId,
                     enabled: !_running,
-                    decoration: const InputDecoration(labelText: 'Room ID', border: OutlineInputBorder()),
+                    decoration: const InputDecoration(
+                      labelText: 'Room ID',
+                      border: OutlineInputBorder(),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -198,7 +223,10 @@ class _BroadcasterPageState extends State<BroadcasterPage> {
                   child: TextField(
                     controller: _token,
                     enabled: !_running,
-                    decoration: const InputDecoration(labelText: 'Token', border: OutlineInputBorder()),
+                    decoration: const InputDecoration(
+                      labelText: 'Token',
+                      border: OutlineInputBorder(),
+                    ),
                   ),
                 ),
               ],
@@ -210,11 +238,20 @@ class _BroadcasterPageState extends State<BroadcasterPage> {
                   child: DropdownButtonFormField<InputDevice>(
                     initialValue: _device,
                     isExpanded: true,
-                    decoration: const InputDecoration(labelText: 'Input device', border: OutlineInputBorder()),
+                    decoration: const InputDecoration(
+                      labelText: 'Input device',
+                      border: OutlineInputBorder(),
+                    ),
                     items: [
-                      for (final d in _devices) DropdownMenuItem(value: d, child: Text(d.label, overflow: TextOverflow.ellipsis)),
+                      for (final d in _devices)
+                        DropdownMenuItem(
+                          value: d,
+                          child: Text(d.label, overflow: TextOverflow.ellipsis),
+                        ),
                     ],
-                    onChanged: _running ? null : (d) => setState(() => _device = d),
+                    onChanged: _running
+                        ? null
+                        : (d) => setState(() => _device = d),
                   ),
                 ),
                 IconButton(
@@ -245,7 +282,10 @@ class _BroadcasterPageState extends State<BroadcasterPage> {
               ],
             ),
             const SizedBox(height: 16),
-            Text('送信レート: $_bytesPerSec bytes/sec', style: Theme.of(context).textTheme.bodyMedium),
+            Text(
+              '送信レート: $_bytesPerSec bytes/sec',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
             const SizedBox(height: 8),
             Row(
               children: [

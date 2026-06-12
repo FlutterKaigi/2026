@@ -40,7 +40,9 @@ class Uplink {
   }
 
   Uri _ingestUri() {
-    final base = _serverUrl.endsWith('/') ? _serverUrl.substring(0, _serverUrl.length - 1) : _serverUrl;
+    final base = _serverUrl.endsWith('/')
+        ? _serverUrl.substring(0, _serverUrl.length - 1)
+        : _serverUrl;
     return Uri.parse('$base/v1/ingest/$_roomId');
   }
 
@@ -76,13 +78,15 @@ class Uplink {
       _channel = channel;
       _attempt = 0;
       _setState(LinkState.connected);
-      channel.sink.add(jsonEncode({
-        'type': 'hello',
-        'sampleRate': 16000,
-        'channels': 1,
-        'format': 'pcm16le',
-        'sourceLang': _sourceLang,
-      }));
+      channel.sink.add(
+        jsonEncode({
+          'type': 'hello',
+          'sampleRate': 16000,
+          'channels': 1,
+          'format': 'pcm16le',
+          'sourceLang': _sourceLang,
+        }),
+      );
       _sub = channel.stream.listen(
         (data) {
           if (data is! String) return;
@@ -111,10 +115,16 @@ class Uplink {
       return;
     }
     _attempt++;
-    final delaySeconds = (1 << (_attempt - 1).clamp(0, 5)).clamp(1, 30); // 1,2,4,8,16,30
+    final delaySeconds = (1 << (_attempt - 1).clamp(0, 5)).clamp(
+      1,
+      30,
+    ); // 1,2,4,8,16,30
     _setState(LinkState.reconnectWaiting);
     _reconnectTimer?.cancel();
-    _reconnectTimer = Timer(Duration(seconds: delaySeconds), () => unawaited(_connect()));
+    _reconnectTimer = Timer(
+      Duration(seconds: delaySeconds),
+      () => unawaited(_connect()),
+    );
   }
 
   /// Sends a binary audio chunk when connected; drops it otherwise.
