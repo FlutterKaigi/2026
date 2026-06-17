@@ -107,13 +107,13 @@ class Strings {
   };
 
   String get latestUpdatesCta => switch (locale) {
-    AppLocale.ja => 'FlutterKaigi 2026 スポンサー募集について',
-    AppLocale.en => 'FlutterKaigi 2026 Sponsorship Opportunities',
+    AppLocale.ja => 'FlutterKaigi 2026 セッション募集について',
+    AppLocale.en => 'FlutterKaigi 2026 Call for Proposals',
   };
 
   String get latestUpdatesCtaUrl => switch (locale) {
-    AppLocale.ja => 'https://medium.com/flutterkaigi/flutterkaigi-2026-opportunities-guide-ja-0e8cdb0a4acb',
-    AppLocale.en => 'https://medium.com/flutterkaigi/flutterkaigi-2026-opportunities-guide-en-1e5bd6c14461',
+    AppLocale.ja => 'https://medium.com/@shotashirai1719/ea8978e0fd89',
+    AppLocale.en => 'https://medium.com/@shotashirai1719/3fda9a01121d',
   };
 
   String get footerCopyright => switch (locale) {

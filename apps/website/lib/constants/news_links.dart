@@ -25,6 +25,11 @@ class NewsLink {
 
 const _newsJa = <NewsLink>[
   NewsLink(
+    date: '2026年6月17日',
+    title: 'FlutterKaigi 2026 セッション募集について',
+    url: 'https://medium.com/@shotashirai1719/ea8978e0fd89',
+  ),
+  NewsLink(
     date: '2026年5月11日',
     title: 'FlutterKaigi 2026 スポンサー募集について',
     url: 'https://medium.com/flutterkaigi/flutterkaigi-2026-opportunities-guide-ja-0e8cdb0a4acb',
@@ -37,6 +42,11 @@ const _newsJa = <NewsLink>[
 ];
 
 const _newsEn = <NewsLink>[
+  NewsLink(
+    date: 'JUN 17, 2026',
+    title: 'FlutterKaigi 2026 Call for Proposals',
+    url: 'https://medium.com/@shotashirai1719/3fda9a01121d',
+  ),
   NewsLink(
     date: 'MAY 11, 2026',
     title: 'FlutterKaigi 2026 Sponsorship Opportunities',

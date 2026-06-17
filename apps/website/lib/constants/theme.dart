@@ -36,6 +36,7 @@ const outlineColor = colorDeeppurpleSysLightOutline;
 // ── M3 light-surface content roles (used by event-section cards) ──────
 const primary = colorDeeppurpleSysLightPrimary;
 const primaryContainer = colorDeeppurpleSysLightPrimaryContainer;
+const onPrimaryContainer = colorDeeppurpleSysLightOnPrimaryContainer;
 const secondary = colorDeeppurpleSysLightSecondary;
 const secondaryContainer = colorDeeppurpleSysLightSecondaryContainer;
 const onSecondaryContainer = colorDeeppurpleSysLightOnSecondaryContainer;
