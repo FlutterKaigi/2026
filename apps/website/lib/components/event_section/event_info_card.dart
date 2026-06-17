@@ -86,7 +86,6 @@ class EventInfoCard extends StatelessComponent {
             href: 'https://sessionize.com/flutterkaigi-2026/',
             target: Target.blank,
             classes: 'event-info-card__cta event-info-card__cta--active',
-            attributes: {'aria-label': strings.eventInfoSubmitSessionCta},
           ),
         ]),
       ]),
@@ -229,7 +228,20 @@ class EventInfoCard extends StatelessComponent {
         css('&.event-info-card__cta--active').styles(
           backgroundColor: primaryContainer,
           color: onPrimaryContainer,
-          raw: const {'cursor': 'pointer'},
+          raw: const {
+            'cursor': 'pointer',
+            'transition': 'background-color 150ms ease',
+          },
+        ),
+        // M3 State Layer (Hover 8%) — onPrimaryContainer 由来のオーバーレイを
+        // 単色の primaryContainer 上に重ねる。background-color の差し替えだと
+        // 半透明色の背後にカード面が透けるため、linear-gradient で塗り重ねる。
+        css('&.event-info-card__cta--active:hover').styles(
+          raw: const {
+            'background-image':
+                'linear-gradient('
+                '$onPrimaryContainerHoverHex, $onPrimaryContainerHoverHex)',
+          },
         ),
         css('.event-info-card__cta-icon').styles(
           width: 16.px,
