@@ -48,6 +48,7 @@
         border: solid #CBC3D94D 1px;
         border-radius: 24px;
         flex-direction: column;
+        justify-content: space-between;
         background-color: #EDE5F5;
         gap: 32px;
         min-height: 330px;
@@ -120,6 +121,13 @@
         flex-direction: column;
         row-gap: 8px;
       }
+      .event-info-card .event-info-card__cta-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        margin-top: 4px;
+        gap: 16px 24px;
+      }
       .event-info-card .event-info-card__cta {
         display: inline-flex;
         padding: 12px 20px;
@@ -137,12 +145,21 @@
         align-self: flex-start;
         cursor: not-allowed;
         user-select: none;
-        margin-top: 4px;
         flex-wrap: wrap;
         opacity: 1;
         -webkit-appearance: none;
         appearance: none;
         text-align: left;
+        text-decoration: none;
+      }
+      .event-info-card .event-info-card__cta.event-info-card__cta--active {
+        color: #4D3D75;
+        background-color: #E9DDFF;
+        cursor: pointer;
+        transition: background-color 150ms ease;
+      }
+      .event-info-card .event-info-card__cta.event-info-card__cta--active:hover {
+        background-image: linear-gradient(#4D3D7514, #4D3D7514);
       }
       .event-info-card .event-info-card__cta .event-info-card__cta-icon {
         width: 16px;
@@ -974,10 +991,7 @@
         </div>
         <div class="hero__brand">
           <div class="hero__logo"><img aria-hidden="true" alt="FlutterKaigi 2026" src="images/logo.svg"/></div>
-          <a class="hero__cta" href="https://medium.com/flutterkaigi/flutterkaigi-2026-opportunities-guide-en-1e5bd6c14461" target="_blank">
-            <span>FlutterKaigi 2026 Sponsorship Opportunities</span>
-            <span class="hero__cta-arrow" aria-hidden="true">→</span>
-          </a>
+          <a class="hero__cta" href="https://medium.com/flutterkaigi/a-guide-to-submitting-a-proposal-for-flutterkaigi-2026-3fda9a01121d" target="_blank"><span>Session Submissions Now Open!</span><span class="hero__cta-arrow" aria-hidden="true">→</span></a>
         </div>
         <div class="hero__slogan">
           <p class="hero__slogan-tagline">Connect, Converse, Ignite.</p>
@@ -993,6 +1007,9 @@
                 <h2 class="news-card__title">News</h2>
               </div>
               <ul class="news-card__list">
+                <li class="news-card__item">
+                  <p class="news-card__date">JUN 17, 2026</p><a class="news-card__link" href="https://medium.com/flutterkaigi/a-guide-to-submitting-a-proposal-for-flutterkaigi-2026-3fda9a01121d" target="_blank">A Guide to Submitting a Proposal for FlutterKaigi 2026</a>
+                </li>
                 <li class="news-card__item">
                   <p class="news-card__date">MAY 11, 2026</p><a class="news-card__link" href="https://medium.com/flutterkaigi/flutterkaigi-2026-opportunities-guide-en-1e5bd6c14461" target="_blank">FlutterKaigi 2026 Sponsorship Opportunities</a>
                 </li>
@@ -1023,11 +1040,14 @@
               </div>
               <div class="event-info-card__tickets">
                 <p class="event-info-card__label">TICKETS</p>
-                <button class="event-info-card__cta" aria-label="Tickets are not on sale yet" disabled type="button">
-                  <img class="event-info-card__cta-icon" aria-hidden="true" alt src="images/icons/hourglass.svg"/>
-                  <span class="event-info-card__cta-label">Coming soon...</span>
-                  <span class="event-info-card__cta-meta">Opens July 27, 2026</span>
-                </button>
+                <div class="event-info-card__cta-row">
+                  <button class="event-info-card__cta" aria-label="Tickets are not on sale yet" disabled type="button">
+                    <img class="event-info-card__cta-icon" aria-hidden="true" alt src="images/icons/hourglass.svg"/>
+                    <span class="event-info-card__cta-label">Coming soon...</span>
+                    <span class="event-info-card__cta-meta">Opens July 27, 2026</span>
+                  </button>
+                  <a class="event-info-card__cta event-info-card__cta--active" href="https://sessionize.com/flutterkaigi-2026/" target="_blank"><span class="event-info-card__cta-label">Submit Your Session</span></a>
+                </div>
               </div>
             </article>
           </div>
@@ -1041,6 +1061,9 @@
                 <ol class="roadmap-card__list">
                   <li class="roadmap-card__item">
                     <span class="roadmap-card__dot" aria-hidden="true"></span><p class="roadmap-card__date">May 15, 2026</p><p class="roadmap-card__name">Call for Sponsors Opens</p>
+                  </li>
+                  <li class="roadmap-card__item">
+                    <span class="roadmap-card__dot" aria-hidden="true"></span><p class="roadmap-card__date">June 17, 2026</p><p class="roadmap-card__name">Call for Proposals Opens</p>
                   </li>
                   <li class="roadmap-card__item">
                     <span class="roadmap-card__dot" aria-hidden="true"></span><p class="roadmap-card__date">July 27, 2026</p><p class="roadmap-card__name">Ticket Sales Open</p>

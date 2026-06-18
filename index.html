@@ -48,6 +48,7 @@
         border: solid #CBC3D94D 1px;
         border-radius: 24px;
         flex-direction: column;
+        justify-content: space-between;
         background-color: #EDE5F5;
         gap: 32px;
         min-height: 330px;
@@ -120,6 +121,13 @@
         flex-direction: column;
         row-gap: 8px;
       }
+      .event-info-card .event-info-card__cta-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        margin-top: 4px;
+        gap: 16px 24px;
+      }
       .event-info-card .event-info-card__cta {
         display: inline-flex;
         padding: 12px 20px;
@@ -137,12 +145,21 @@
         align-self: flex-start;
         cursor: not-allowed;
         user-select: none;
-        margin-top: 4px;
         flex-wrap: wrap;
         opacity: 1;
         -webkit-appearance: none;
         appearance: none;
         text-align: left;
+        text-decoration: none;
+      }
+      .event-info-card .event-info-card__cta.event-info-card__cta--active {
+        color: #4D3D75;
+        background-color: #E9DDFF;
+        cursor: pointer;
+        transition: background-color 150ms ease;
+      }
+      .event-info-card .event-info-card__cta.event-info-card__cta--active:hover {
+        background-image: linear-gradient(#4D3D7514, #4D3D7514);
       }
       .event-info-card .event-info-card__cta .event-info-card__cta-icon {
         width: 16px;
@@ -974,7 +991,7 @@
         </div>
         <div class="hero__brand">
           <div class="hero__logo"><img aria-hidden="true" alt="FlutterKaigi 2026" src="images/logo.svg"/></div>
-          <a class="hero__cta" href="https://medium.com/flutterkaigi/flutterkaigi-2026-opportunities-guide-ja-0e8cdb0a4acb" target="_blank"><span>FlutterKaigi 2026 スポンサー募集について</span><span class="hero__cta-arrow" aria-hidden="true">→</span></a>
+          <a class="hero__cta" href="https://medium.com/flutterkaigi/flutterkaigi-2026-%E3%83%97%E3%83%AD%E3%83%9D%E3%83%BC%E3%82%B6%E3%83%AB%E5%BF%9C%E5%8B%9F%E3%81%AE%E3%82%B9%E3%82%B9%E3%83%A1-ea8978e0fd89" target="_blank"><span>セッション応募受付中!</span><span class="hero__cta-arrow" aria-hidden="true">→</span></a>
         </div>
         <div class="hero__slogan"><p class="hero__slogan-tagline">会って、話して、熱くなる。</p><p class="hero__slogan-theme">〜Assemble〜</p></div>
       </section>
@@ -987,6 +1004,9 @@
                 <h2 class="news-card__title">News</h2>
               </div>
               <ul class="news-card__list">
+                <li class="news-card__item">
+                  <p class="news-card__date">2026年6月17日</p><a class="news-card__link" href="https://medium.com/flutterkaigi/flutterkaigi-2026-%E3%83%97%E3%83%AD%E3%83%9D%E3%83%BC%E3%82%B6%E3%83%AB%E5%BF%9C%E5%8B%9F%E3%81%AE%E3%82%B9%E3%82%B9%E3%83%A1-ea8978e0fd89" target="_blank">FlutterKaigi 2026 プロポーザル応募のススメ</a>
+                </li>
                 <li class="news-card__item">
                   <p class="news-card__date">2026年5月11日</p><a class="news-card__link" href="https://medium.com/flutterkaigi/flutterkaigi-2026-opportunities-guide-ja-0e8cdb0a4acb" target="_blank">FlutterKaigi 2026 スポンサー募集について</a>
                 </li>
@@ -1011,11 +1031,14 @@
               </div>
               <div class="event-info-card__tickets">
                 <p class="event-info-card__label">チケット</p>
-                <button class="event-info-card__cta" aria-label="チケット販売は準備中です" disabled type="button">
-                  <img class="event-info-card__cta-icon" aria-hidden="true" alt src="images/icons/hourglass.svg"/>
-                  <span class="event-info-card__cta-label">Coming soon...</span>
-                  <span class="event-info-card__cta-meta">2026年7月27日 販売開始</span>
-                </button>
+                <div class="event-info-card__cta-row">
+                  <button class="event-info-card__cta" aria-label="チケット販売は準備中です" disabled type="button">
+                    <img class="event-info-card__cta-icon" aria-hidden="true" alt src="images/icons/hourglass.svg"/>
+                    <span class="event-info-card__cta-label">Coming soon...</span>
+                    <span class="event-info-card__cta-meta">2026年7月27日 販売開始</span>
+                  </button>
+                  <a class="event-info-card__cta event-info-card__cta--active" href="https://sessionize.com/flutterkaigi-2026/" target="_blank"><span class="event-info-card__cta-label">セッションを応募</span></a>
+                </div>
               </div>
             </article>
           </div>
@@ -1029,6 +1052,9 @@
                 <ol class="roadmap-card__list">
                   <li class="roadmap-card__item">
                     <span class="roadmap-card__dot" aria-hidden="true"></span><p class="roadmap-card__date">2026年5月15日</p><p class="roadmap-card__name">スポンサー募集開始</p>
+                  </li>
+                  <li class="roadmap-card__item">
+                    <span class="roadmap-card__dot" aria-hidden="true"></span><p class="roadmap-card__date">2026年6月17日</p><p class="roadmap-card__name">セッション募集開始</p>
                   </li>
                   <li class="roadmap-card__item">
                     <span class="roadmap-card__dot" aria-hidden="true"></span><p class="roadmap-card__date">2026年7月27日</p><p class="roadmap-card__name">チケット販売開始</p>
