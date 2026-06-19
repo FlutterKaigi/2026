@@ -1,0 +1,15 @@
+"$schema" = "node_modules/wrangler/config-schema.json"
+name = "flutterkaigi-2026-website"
+account_id = "cdd8f59359fe226645e7b541cdc53b57"
+compatibility_date = "2026-06-01"
+preview_urls = true
+
+[assets]
+directory = "./build/jaspr"
+
+[route]
+custom_domain = true
+pattern = "2026.flutterkaigi.jp"
+
+[observability]
+enabled = true
