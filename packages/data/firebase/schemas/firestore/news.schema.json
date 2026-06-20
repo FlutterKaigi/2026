@@ -5,27 +5,29 @@
   "description": "Sample Firestore document schema for public news items.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["title", "status", "startsAt", "createdAt", "updatedAt"],
+  "required": ["title", "url", "publishedAt", "createdAt", "updatedAt"],
   "properties": {
     "title": {
-      "type": "string",
-      "minLength": 1
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ja", "en"],
+      "properties": {
+        "ja": { "type": "string", "minLength": 1 },
+        "en": { "type": "string", "minLength": 1 }
+      }
     },
     "url": {
-      "type": ["string", "null"],
-      "format": "uri"
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ja", "en"],
+      "properties": {
+        "ja": { "type": "string", "format": "uri" },
+        "en": { "type": "string", "format": "uri" }
+      }
     },
-    "startsAt": {
+    "publishedAt": {
       "type": "string",
       "format": "date-time"
-    },
-    "endsAt": {
-      "type": ["string", "null"],
-      "format": "date-time"
-    },
-    "status": {
-      "type": "string",
-      "enum": ["draft", "published", "archived"]
     },
     "createdAt": {
       "type": "string",

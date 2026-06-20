@@ -18,20 +18,18 @@ class FirestoreDateTimeConverter implements JsonConverter<DateTime, Object?> {
   }
 
   @override
-  Object? toJson(DateTime object) => object.toIso8601String();
+  Object? toJson(DateTime object) => Timestamp.fromDate(object);
 }
 
 /// Nullable counterpart of [FirestoreDateTimeConverter].
-class FirestoreNullableDateTimeConverter
-    implements JsonConverter<DateTime?, Object?> {
+class FirestoreNullableDateTimeConverter implements JsonConverter<DateTime?, Object?> {
   const FirestoreNullableDateTimeConverter();
 
   @override
-  DateTime? fromJson(Object? json) =>
-      json == null ? null : const FirestoreDateTimeConverter().fromJson(json);
+  DateTime? fromJson(Object? json) => json == null ? null : const FirestoreDateTimeConverter().fromJson(json);
 
   @override
-  Object? toJson(DateTime? object) => object?.toIso8601String();
+  Object? toJson(DateTime? object) => object == null ? null : Timestamp.fromDate(object);
 }
 
 /// Converts a Firestore string field into a [Uri].
@@ -57,8 +55,7 @@ class FirestoreNullableUriConverter implements JsonConverter<Uri?, Object?> {
   const FirestoreNullableUriConverter();
 
   @override
-  Uri? fromJson(Object? json) =>
-      json == null ? null : const FirestoreUriConverter().fromJson(json);
+  Uri? fromJson(Object? json) => json == null ? null : const FirestoreUriConverter().fromJson(json);
 
   @override
   Object? toJson(Uri? object) => object?.toString();

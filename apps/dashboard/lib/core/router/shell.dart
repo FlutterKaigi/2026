@@ -3,7 +3,12 @@ part of 'router.dart';
 @TypedShellRoute<AppShellRoute>(
   routes: [
     TypedGoRoute<HomeRoute>(path: AppPaths.home),
-    TypedGoRoute<NewsListRoute>(path: AppPaths.news),
+    TypedGoRoute<NewsListRoute>(
+      path: AppPaths.news,
+      routes: [
+        TypedGoRoute<NewsEditRoute>(path: AppPaths.newsEdit),
+      ],
+    ),
     TypedGoRoute<VenueListRoute>(path: AppPaths.venues),
     TypedGoRoute<SpeakerListRoute>(path: AppPaths.speakers),
     TypedGoRoute<StaffMemberListRoute>(path: AppPaths.staff),

@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$News {
 
- String get id; String get title; NewsStatus get status;@FirestoreDateTimeConverter() DateTime get startsAt;@FirestoreDateTimeConverter() DateTime get createdAt;@FirestoreDateTimeConverter() DateTime get updatedAt;@FirestoreNullableUriConverter() Uri? get url;@FirestoreNullableDateTimeConverter() DateTime? get endsAt;
+ String get id; LocaleMap get title; LocaleMap get url;@FirestoreDateTimeConverter() DateTime get publishedAt;@FirestoreDateTimeConverter() DateTime get createdAt;@FirestoreDateTimeConverter() DateTime get updatedAt;
 /// Create a copy of News
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $NewsCopyWith<News> get copyWith => _$NewsCopyWithImpl<News>(this as News, _$ide
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is News&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.status, status) || other.status == status)&&(identical(other.startsAt, startsAt) || other.startsAt == startsAt)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.url, url) || other.url == url)&&(identical(other.endsAt, endsAt) || other.endsAt == endsAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is News&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.url, url) || other.url == url)&&(identical(other.publishedAt, publishedAt) || other.publishedAt == publishedAt)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,title,status,startsAt,createdAt,updatedAt,url,endsAt);
+int get hashCode => Object.hash(runtimeType,id,title,url,publishedAt,createdAt,updatedAt);
 
 @override
 String toString() {
-  return 'News(id: $id, title: $title, status: $status, startsAt: $startsAt, createdAt: $createdAt, updatedAt: $updatedAt, url: $url, endsAt: $endsAt)';
+  return 'News(id: $id, title: $title, url: $url, publishedAt: $publishedAt, createdAt: $createdAt, updatedAt: $updatedAt)';
 }
 
 
@@ -48,11 +48,11 @@ abstract mixin class $NewsCopyWith<$Res>  {
   factory $NewsCopyWith(News value, $Res Function(News) _then) = _$NewsCopyWithImpl;
 @useResult
 $Res call({
- String id, String title, NewsStatus status,@FirestoreDateTimeConverter() DateTime startsAt,@FirestoreDateTimeConverter() DateTime createdAt,@FirestoreDateTimeConverter() DateTime updatedAt,@FirestoreNullableUriConverter() Uri? url,@FirestoreNullableDateTimeConverter() DateTime? endsAt
+ String id, LocaleMap title, LocaleMap url,@FirestoreDateTimeConverter() DateTime publishedAt,@FirestoreDateTimeConverter() DateTime createdAt,@FirestoreDateTimeConverter() DateTime updatedAt
 });
 
 
-
+$LocaleMapCopyWith<$Res> get title;$LocaleMapCopyWith<$Res> get url;
 
 }
 /// @nodoc
@@ -65,20 +65,36 @@ class _$NewsCopyWithImpl<$Res>
 
 /// Create a copy of News
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? title = null,Object? status = null,Object? startsAt = null,Object? createdAt = null,Object? updatedAt = null,Object? url = freezed,Object? endsAt = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? title = null,Object? url = null,Object? publishedAt = null,Object? createdAt = null,Object? updatedAt = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
-as String,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
-as NewsStatus,startsAt: null == startsAt ? _self.startsAt : startsAt // ignore: cast_nullable_to_non_nullable
+as LocaleMap,url: null == url ? _self.url : url // ignore: cast_nullable_to_non_nullable
+as LocaleMap,publishedAt: null == publishedAt ? _self.publishedAt : publishedAt // ignore: cast_nullable_to_non_nullable
 as DateTime,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
-as DateTime,url: freezed == url ? _self.url : url // ignore: cast_nullable_to_non_nullable
-as Uri?,endsAt: freezed == endsAt ? _self.endsAt : endsAt // ignore: cast_nullable_to_non_nullable
-as DateTime?,
+as DateTime,
   ));
 }
-
+/// Create a copy of News
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$LocaleMapCopyWith<$Res> get title {
+  
+  return $LocaleMapCopyWith<$Res>(_self.title, (value) {
+    return _then(_self.copyWith(title: value));
+  });
+}/// Create a copy of News
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$LocaleMapCopyWith<$Res> get url {
+  
+  return $LocaleMapCopyWith<$Res>(_self.url, (value) {
+    return _then(_self.copyWith(url: value));
+  });
+}
 }
 
 
@@ -160,10 +176,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String title,  NewsStatus status, @FirestoreDateTimeConverter()  DateTime startsAt, @FirestoreDateTimeConverter()  DateTime createdAt, @FirestoreDateTimeConverter()  DateTime updatedAt, @FirestoreNullableUriConverter()  Uri? url, @FirestoreNullableDateTimeConverter()  DateTime? endsAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  LocaleMap title,  LocaleMap url, @FirestoreDateTimeConverter()  DateTime publishedAt, @FirestoreDateTimeConverter()  DateTime createdAt, @FirestoreDateTimeConverter()  DateTime updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _News() when $default != null:
-return $default(_that.id,_that.title,_that.status,_that.startsAt,_that.createdAt,_that.updatedAt,_that.url,_that.endsAt);case _:
+return $default(_that.id,_that.title,_that.url,_that.publishedAt,_that.createdAt,_that.updatedAt);case _:
   return orElse();
 
 }
@@ -181,10 +197,10 @@ return $default(_that.id,_that.title,_that.status,_that.startsAt,_that.createdAt
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String title,  NewsStatus status, @FirestoreDateTimeConverter()  DateTime startsAt, @FirestoreDateTimeConverter()  DateTime createdAt, @FirestoreDateTimeConverter()  DateTime updatedAt, @FirestoreNullableUriConverter()  Uri? url, @FirestoreNullableDateTimeConverter()  DateTime? endsAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  LocaleMap title,  LocaleMap url, @FirestoreDateTimeConverter()  DateTime publishedAt, @FirestoreDateTimeConverter()  DateTime createdAt, @FirestoreDateTimeConverter()  DateTime updatedAt)  $default,) {final _that = this;
 switch (_that) {
 case _News():
-return $default(_that.id,_that.title,_that.status,_that.startsAt,_that.createdAt,_that.updatedAt,_that.url,_that.endsAt);case _:
+return $default(_that.id,_that.title,_that.url,_that.publishedAt,_that.createdAt,_that.updatedAt);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -201,10 +217,10 @@ return $default(_that.id,_that.title,_that.status,_that.startsAt,_that.createdAt
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String title,  NewsStatus status, @FirestoreDateTimeConverter()  DateTime startsAt, @FirestoreDateTimeConverter()  DateTime createdAt, @FirestoreDateTimeConverter()  DateTime updatedAt, @FirestoreNullableUriConverter()  Uri? url, @FirestoreNullableDateTimeConverter()  DateTime? endsAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  LocaleMap title,  LocaleMap url, @FirestoreDateTimeConverter()  DateTime publishedAt, @FirestoreDateTimeConverter()  DateTime createdAt, @FirestoreDateTimeConverter()  DateTime updatedAt)?  $default,) {final _that = this;
 switch (_that) {
 case _News() when $default != null:
-return $default(_that.id,_that.title,_that.status,_that.startsAt,_that.createdAt,_that.updatedAt,_that.url,_that.endsAt);case _:
+return $default(_that.id,_that.title,_that.url,_that.publishedAt,_that.createdAt,_that.updatedAt);case _:
   return null;
 
 }
@@ -216,17 +232,15 @@ return $default(_that.id,_that.title,_that.status,_that.startsAt,_that.createdAt
 @JsonSerializable()
 
 class _News extends News {
-  const _News({required this.id, required this.title, required this.status, @FirestoreDateTimeConverter() required this.startsAt, @FirestoreDateTimeConverter() required this.createdAt, @FirestoreDateTimeConverter() required this.updatedAt, @FirestoreNullableUriConverter() this.url, @FirestoreNullableDateTimeConverter() this.endsAt}): super._();
+  const _News({required this.id, required this.title, required this.url, @FirestoreDateTimeConverter() required this.publishedAt, @FirestoreDateTimeConverter() required this.createdAt, @FirestoreDateTimeConverter() required this.updatedAt}): super._();
   factory _News.fromJson(Map<String, dynamic> json) => _$NewsFromJson(json);
 
 @override final  String id;
-@override final  String title;
-@override final  NewsStatus status;
-@override@FirestoreDateTimeConverter() final  DateTime startsAt;
+@override final  LocaleMap title;
+@override final  LocaleMap url;
+@override@FirestoreDateTimeConverter() final  DateTime publishedAt;
 @override@FirestoreDateTimeConverter() final  DateTime createdAt;
 @override@FirestoreDateTimeConverter() final  DateTime updatedAt;
-@override@FirestoreNullableUriConverter() final  Uri? url;
-@override@FirestoreNullableDateTimeConverter() final  DateTime? endsAt;
 
 /// Create a copy of News
 /// with the given fields replaced by the non-null parameter values.
@@ -241,16 +255,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _News&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.status, status) || other.status == status)&&(identical(other.startsAt, startsAt) || other.startsAt == startsAt)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.url, url) || other.url == url)&&(identical(other.endsAt, endsAt) || other.endsAt == endsAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _News&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.url, url) || other.url == url)&&(identical(other.publishedAt, publishedAt) || other.publishedAt == publishedAt)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,title,status,startsAt,createdAt,updatedAt,url,endsAt);
+int get hashCode => Object.hash(runtimeType,id,title,url,publishedAt,createdAt,updatedAt);
 
 @override
 String toString() {
-  return 'News(id: $id, title: $title, status: $status, startsAt: $startsAt, createdAt: $createdAt, updatedAt: $updatedAt, url: $url, endsAt: $endsAt)';
+  return 'News(id: $id, title: $title, url: $url, publishedAt: $publishedAt, createdAt: $createdAt, updatedAt: $updatedAt)';
 }
 
 
@@ -261,11 +275,11 @@ abstract mixin class _$NewsCopyWith<$Res> implements $NewsCopyWith<$Res> {
   factory _$NewsCopyWith(_News value, $Res Function(_News) _then) = __$NewsCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String title, NewsStatus status,@FirestoreDateTimeConverter() DateTime startsAt,@FirestoreDateTimeConverter() DateTime createdAt,@FirestoreDateTimeConverter() DateTime updatedAt,@FirestoreNullableUriConverter() Uri? url,@FirestoreNullableDateTimeConverter() DateTime? endsAt
+ String id, LocaleMap title, LocaleMap url,@FirestoreDateTimeConverter() DateTime publishedAt,@FirestoreDateTimeConverter() DateTime createdAt,@FirestoreDateTimeConverter() DateTime updatedAt
 });
 
 
-
+@override $LocaleMapCopyWith<$Res> get title;@override $LocaleMapCopyWith<$Res> get url;
 
 }
 /// @nodoc
@@ -278,21 +292,37 @@ class __$NewsCopyWithImpl<$Res>
 
 /// Create a copy of News
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? title = null,Object? status = null,Object? startsAt = null,Object? createdAt = null,Object? updatedAt = null,Object? url = freezed,Object? endsAt = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? title = null,Object? url = null,Object? publishedAt = null,Object? createdAt = null,Object? updatedAt = null,}) {
   return _then(_News(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
-as String,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
-as NewsStatus,startsAt: null == startsAt ? _self.startsAt : startsAt // ignore: cast_nullable_to_non_nullable
+as LocaleMap,url: null == url ? _self.url : url // ignore: cast_nullable_to_non_nullable
+as LocaleMap,publishedAt: null == publishedAt ? _self.publishedAt : publishedAt // ignore: cast_nullable_to_non_nullable
 as DateTime,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
-as DateTime,url: freezed == url ? _self.url : url // ignore: cast_nullable_to_non_nullable
-as Uri?,endsAt: freezed == endsAt ? _self.endsAt : endsAt // ignore: cast_nullable_to_non_nullable
-as DateTime?,
+as DateTime,
   ));
 }
 
-
+/// Create a copy of News
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$LocaleMapCopyWith<$Res> get title {
+  
+  return $LocaleMapCopyWith<$Res>(_self.title, (value) {
+    return _then(_self.copyWith(title: value));
+  });
+}/// Create a copy of News
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$LocaleMapCopyWith<$Res> get url {
+  
+  return $LocaleMapCopyWith<$Res>(_self.url, (value) {
+    return _then(_self.copyWith(url: value));
+  });
+}
 }
 
 // dart format on
