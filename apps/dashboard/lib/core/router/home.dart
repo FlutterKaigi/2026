@@ -1,6 +1,5 @@
 part of 'router.dart';
 
-@TypedGoRoute<HomeRoute>(path: '/')
 class HomeRoute extends GoRouteData with $HomeRoute {
   const HomeRoute();
 

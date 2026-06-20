@@ -1,12 +1,11 @@
-import 'package:dashboard/core/firebase/stg/firebase_options_stg.dart' as stg;
-import 'package:dashboard/core/firebase/stg/firebase_options_stg.dart' as prod;
+import 'package:dashboard/firebase_options_prod.dart' as prod;
+import 'package:dashboard/firebase_options_stg.dart' as stg;
 import 'package:data/firebase_options.dart';
 
 enum Flavor {
   dev,
   stg,
-  prod
-  ;
+  prod;
 
   static Flavor get current {
     const flavor = String.fromEnvironment('FLAVOR');
