@@ -21,7 +21,12 @@ part of 'router.dart';
         TypedGoRoute<SpeakerEditRoute>(path: AppPaths.speakerEdit),
       ],
     ),
-    TypedGoRoute<StaffMemberListRoute>(path: AppPaths.staff),
+    TypedGoRoute<StaffMemberListRoute>(
+      path: AppPaths.staff,
+      routes: [
+        TypedGoRoute<StaffMemberEditRoute>(path: AppPaths.staffMemberEdit),
+      ],
+    ),
     TypedGoRoute<TimelineEventListRoute>(path: AppPaths.timeline),
     TypedGoRoute<SessionListRoute>(path: AppPaths.sessions),
   ],

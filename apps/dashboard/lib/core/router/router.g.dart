@@ -59,6 +59,12 @@ RouteBase get $appShellRoute => ShellRouteData.$route(
     GoRouteData.$route(
       path: '/staff',
       factory: $StaffMemberListRoute._fromState,
+      routes: [
+        GoRouteData.$route(
+          path: 'edit',
+          factory: $StaffMemberEditRoute._fromState,
+        ),
+      ],
     ),
     GoRouteData.$route(
       path: '/timeline',
@@ -251,6 +257,31 @@ mixin $StaffMemberListRoute on GoRouteData {
 
   @override
   void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $StaffMemberEditRoute on GoRouteData {
+  static StaffMemberEditRoute _fromState(GoRouterState state) =>
+      StaffMemberEditRoute($extra: state.extra as StaffMember?);
+
+  StaffMemberEditRoute get _self => this as StaffMemberEditRoute;
+
+  @override
+  String get location => GoRouteData.$location('/staff/edit');
+
+  @override
+  void go(BuildContext context) => context.go(location, extra: _self.$extra);
+
+  @override
+  Future<T?> push<T>(BuildContext context) =>
+      context.push<T>(location, extra: _self.$extra);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location, extra: _self.$extra);
+
+  @override
+  void replace(BuildContext context) =>
+      context.replace(location, extra: _self.$extra);
 }
 
 mixin $TimelineEventListRoute on GoRouteData {

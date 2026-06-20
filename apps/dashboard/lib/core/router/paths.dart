@@ -7,6 +7,7 @@ abstract final class AppPaths {
   static const speakers = '/speakers';
   static const speakerEdit = 'edit';
   static const staff = '/staff';
+  static const staffMemberEdit = 'edit';
   static const timeline = '/timeline';
   static const sessions = '/sessions';
 }
