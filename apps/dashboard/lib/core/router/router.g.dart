@@ -42,7 +42,13 @@ RouteBase get $appShellRoute => ShellRouteData.$route(
         GoRouteData.$route(path: 'edit', factory: $NewsEditRoute._fromState),
       ],
     ),
-    GoRouteData.$route(path: '/venues', factory: $VenueListRoute._fromState),
+    GoRouteData.$route(
+      path: '/venues',
+      factory: $VenueListRoute._fromState,
+      routes: [
+        GoRouteData.$route(path: 'edit', factory: $VenueEditRoute._fromState),
+      ],
+    ),
     GoRouteData.$route(
       path: '/speakers',
       factory: $SpeakerListRoute._fromState,
@@ -150,6 +156,31 @@ mixin $VenueListRoute on GoRouteData {
 
   @override
   void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $VenueEditRoute on GoRouteData {
+  static VenueEditRoute _fromState(GoRouterState state) =>
+      VenueEditRoute($extra: state.extra as Venue?);
+
+  VenueEditRoute get _self => this as VenueEditRoute;
+
+  @override
+  String get location => GoRouteData.$location('/venues/edit');
+
+  @override
+  void go(BuildContext context) => context.go(location, extra: _self.$extra);
+
+  @override
+  Future<T?> push<T>(BuildContext context) =>
+      context.push<T>(location, extra: _self.$extra);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location, extra: _self.$extra);
+
+  @override
+  void replace(BuildContext context) =>
+      context.replace(location, extra: _self.$extra);
 }
 
 mixin $SpeakerListRoute on GoRouteData {

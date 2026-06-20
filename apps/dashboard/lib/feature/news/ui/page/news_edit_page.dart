@@ -1,7 +1,7 @@
 import 'package:dashboard/core/extension/build_context_extension.dart';
 import 'package:dashboard/core/ui/date_time_field.dart';
 import 'package:dashboard/core/ui/form_action_bar.dart';
-import 'package:dashboard/core/ui/outlined_text_form_field.dart';
+import 'package:dashboard/core/ui/locale_map_field.dart';
 import 'package:dashboard/feature/news/data/provider/news_repository.dart';
 import 'package:data/data.dart';
 import 'package:flutter/material.dart';
@@ -78,18 +78,12 @@ class NewsEditPage extends HookConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('タイトル *', style: Theme.of(context).textTheme.labelLarge),
-                    const SizedBox(height: 8),
-                    OutlinedTextFormField(
-                      controller: titleJaController,
-                      labelText: '日本語',
-                      validator: (v) => (v == null || v.trim().isEmpty) ? '日本語タイトルを入力してください' : null,
-                    ),
-                    const SizedBox(height: 8),
-                    OutlinedTextFormField(
-                      controller: titleEnController,
-                      labelText: 'English',
-                      validator: (v) => (v == null || v.trim().isEmpty) ? 'English title is required' : null,
+                    LocaleMapField(
+                      label: 'タイトル *',
+                      jaController: titleJaController,
+                      enController: titleEnController,
+                      jaValidator: (v) => (v == null || v.trim().isEmpty) ? '日本語タイトルを入力してください' : null,
+                      enValidator: (v) => (v == null || v.trim().isEmpty) ? 'English title is required' : null,
                     ),
                     const SizedBox(height: 24),
                     DateTimeField(
@@ -98,25 +92,17 @@ class NewsEditPage extends HookConsumerWidget {
                       onTap: pickPublishedAt,
                     ),
                     const SizedBox(height: 24),
-                    Text('URL *', style: Theme.of(context).textTheme.labelLarge),
-                    const SizedBox(height: 8),
-                    OutlinedTextFormField(
-                      controller: urlJaController,
-                      labelText: '日本語',
-                      hintText: 'https://example.com/ja',
-                      validator: (v) {
+                    LocaleMapField(
+                      label: 'URL *',
+                      jaController: urlJaController,
+                      enController: urlEnController,
+                      jaValidator: (v) {
                         if (v == null || v.trim().isEmpty) return '日本語URLを入力してください';
                         final uri = Uri.tryParse(v.trim());
                         if (uri == null || !uri.hasScheme) return '有効なURLを入力してください';
                         return null;
                       },
-                    ),
-                    const SizedBox(height: 8),
-                    OutlinedTextFormField(
-                      controller: urlEnController,
-                      labelText: 'English',
-                      hintText: 'https://example.com/en',
-                      validator: (v) {
+                      enValidator: (v) {
                         if (v == null || v.trim().isEmpty) return 'English URL is required';
                         final uri = Uri.tryParse(v.trim());
                         if (uri == null || !uri.hasScheme) return 'Please enter a valid URL';

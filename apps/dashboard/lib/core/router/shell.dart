@@ -9,7 +9,12 @@ part of 'router.dart';
         TypedGoRoute<NewsEditRoute>(path: AppPaths.newsEdit),
       ],
     ),
-    TypedGoRoute<VenueListRoute>(path: AppPaths.venues),
+    TypedGoRoute<VenueListRoute>(
+      path: AppPaths.venues,
+      routes: [
+        TypedGoRoute<VenueEditRoute>(path: AppPaths.venueEdit),
+      ],
+    ),
     TypedGoRoute<SpeakerListRoute>(path: AppPaths.speakers),
     TypedGoRoute<StaffMemberListRoute>(path: AppPaths.staff),
     TypedGoRoute<TimelineEventListRoute>(path: AppPaths.timeline),
