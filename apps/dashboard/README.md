@@ -1,17 +1,36 @@
 # dashboard
 
-A new Flutter project.
+FlutterKaigi 2026 管理ダッシュボード（Flutter Web）。
 
-## Getting Started
+## セットアップ
 
-This project is a starting point for a Flutter application.
+stg / prod に接続するには `flutterfire configure` で設定ファイルを生成する必要がある（gitignore されているため各自実行が必要）。
 
-A few resources to get you started if this is your first Flutter project:
+```bash
+cd apps/dashboard
+flutterfire configure
+```
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+dev 環境はエミュレータに接続するため設定ファイル不要。`fvm dart run melos dashboard:run:dev` でそのまま起動できる。
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## 環境
+
+| FLAVOR | 接続先 |
+| --- | --- |
+| `dev` | Firebase エミュレータ（ローカル） |
+| `stg` | Firebase Staging プロジェクト |
+| `prod` | Firebase Production プロジェクト |
+
+## よく使うコマンド
+
+モノレポルートから実行する。
+
+| コマンド | 用途 |
+| --- | --- |
+| `fvm dart run melos dashboard:run:dev` | Chrome で起動（dev / エミュレータ） |
+| `fvm dart run melos dashboard:run:stg` | Chrome で起動（stg） |
+| `fvm dart run melos dashboard:run:prod` | Chrome で起動（prod） |
+| `fvm dart run melos dashboard:build:dev` | web 向けにビルド（dev） |
+| `fvm dart run melos dashboard:build:stg` | web 向けにビルド（stg） |
+| `fvm dart run melos dashboard:build:prod` | web 向けにビルド（prod） |
+

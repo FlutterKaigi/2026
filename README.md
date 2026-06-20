@@ -41,8 +41,12 @@ The pinned Flutter version is `3.41.7` (see `.fvmrc`).
 | --- | --- |
 | `fvm dart run melos website:serve` | Run the jaspr website dev server on `http://localhost:8080` |
 | `fvm dart run melos website:build` | Build the jaspr website to `apps/website/build/jaspr/` |
-| `fvm dart run melos dashboard:run` | Run the dashboard app in Chrome |
-| `fvm dart run melos dashboard:build` | Build the dashboard app to `apps/dashboard/build/web/` |
+| `fvm dart run melos dashboard:run:dev` | Run the dashboard app in Chrome (dev / emulator) |
+| `fvm dart run melos dashboard:run:stg` | Run the dashboard app in Chrome (stg) |
+| `fvm dart run melos dashboard:run:prod` | Run the dashboard app in Chrome (prod) |
+| `fvm dart run melos dashboard:build:dev` | Build the dashboard app for web (dev / emulator) |
+| `fvm dart run melos dashboard:build:stg` | Build the dashboard app for web (stg) |
+| `fvm dart run melos dashboard:build:prod` | Build the dashboard app for web (prod) |
 | `fvm dart run melos firebase:emulators` | Run Firebase Emulator Suite for local development |
 | `fvm dart run melos firebase:schema:validate` | Validate Firebase seed data against the sample schema |
 | `fvm dart run melos firebase:seed` | Seed the running Firestore emulator with sample data |

@@ -1,6 +1,6 @@
 name: dashboard
 description: "FlutterKaigi 2026 管理ダッシュボード"
-publish_to: 'none'
+publish_to: "none"
 resolution: workspace
 
 environment:
@@ -9,8 +9,12 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_web_plugins:
+    sdk: flutter
 
-  cupertino_icons: ^1.0.8
+  # Shared data layer
+  data:
+    path: ../../packages/data
 
 dev_dependencies:
   flutter_test:

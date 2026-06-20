@@ -16,12 +16,13 @@ final class FirebaseInitializer {
 
   static bool _emulatorConfigured = false;
 
-  /// Initializes the default [FirebaseApp] and points Firestore and Auth at
-  /// the local emulator suite.
+  /// Initializes the default [FirebaseApp], and optionally wires Firestore and
+  /// Auth to the local emulator suite.
   ///
-  /// [options] defaults to dummy local options that are sufficient for the
-  /// emulators. After `flutterfire configure` generates `firebase_options.dart`
-  /// you can pass `DefaultFirebaseOptions.currentPlatform` instead.
+  /// When [options] is `null`, Firestore and Auth are wired to the local
+  /// emulator suite. Pass `DefaultFirebaseOptions.currentPlatform` from a
+  /// `flutterfire configure`-generated `firebase_options.dart` to use a real
+  /// Firebase project instead.
   ///
   /// Safe to call more than once: Firebase is only initialized when no app
   /// exists yet, and the emulator wiring is applied a single time.
@@ -38,7 +39,7 @@ final class FirebaseInitializer {
       );
     }
 
-    if (_emulatorConfigured) {
+    if (options != null || _emulatorConfigured) {
       return;
     }
     _emulatorConfigured = true;

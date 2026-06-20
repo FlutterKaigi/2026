@@ -90,13 +90,29 @@ melos:
         && deno run --no-prompt -N -R=apps/website/build/jaspr jsr:@std/http/file-server ./apps/website/build/jaspr
       description: Build the jaspr website and serve the built files with a simple file server (requires Deno to be installed)
 
-    dashboard:run:
-      run: fvm dart run melos exec --scope=dashboard -- fvm flutter run -d chrome
-      description: Run the dashboard app in Chrome
+    dashboard:run:dev:
+      run: fvm dart run melos exec --scope=dashboard -- fvm flutter run -d chrome --dart-define=FLAVOR=dev
+      description: Run the dashboard app in Chrome (dev / emulator)
 
-    dashboard:build:
-      run: fvm dart run melos exec --scope=dashboard -- fvm flutter build web
-      description: Build the dashboard app for web
+    dashboard:run:stg:
+      run: fvm dart run melos exec --scope=dashboard -- fvm flutter run -d chrome --dart-define=FLAVOR=stg
+      description: Run the dashboard app in Chrome (stg)
+
+    dashboard:run:prod:
+      run: fvm dart run melos exec --scope=dashboard -- fvm flutter run -d chrome --dart-define=FLAVOR=prod
+      description: Run the dashboard app in Chrome (prod)
+
+    dashboard:build:dev:
+      run: fvm dart run melos exec --scope=dashboard -- fvm flutter build web --dart-define=FLAVOR=dev
+      description: Build the dashboard app for web (dev / emulator)
+
+    dashboard:build:stg:
+      run: fvm dart run melos exec --scope=dashboard -- fvm flutter build web --dart-define=FLAVOR=stg
+      description: Build the dashboard app for web (stg)
+
+    dashboard:build:prod:
+      run: fvm dart run melos exec --scope=dashboard -- fvm flutter build web --dart-define=FLAVOR=prod
+      description: Build the dashboard app for web (prod)
 
     firebase:start:
       run: npx -y firebase-tools@13.35.1 emulators:start --project dev-flutterkaigi-2026
