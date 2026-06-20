@@ -1,9 +1,10 @@
 # FlutterKaigi 2026
 
-Monorepo for the FlutterKaigi 2026 website and app.
+Monorepo for the FlutterKaigi 2026 website, app, and dashboard.
 
 - `apps/website/` — jaspr static site
 - `apps/app/` — Flutter app (iOS / Android)
+- `apps/dashboard/` — Flutter web app (dashboard)
 - `packages/` — shared Dart packages
 
 Managed with [melos](https://melos.invertase.dev/) (v7) on top of Dart pub workspaces, with Flutter pinned by [FVM](https://fvm.app/).
@@ -40,17 +41,19 @@ The pinned Flutter version is `3.41.7` (see `.fvmrc`).
 | --- | --- |
 | `fvm dart run melos website:serve` | Run the jaspr website dev server on `http://localhost:8080` |
 | `fvm dart run melos website:build` | Build the jaspr website to `apps/website/build/jaspr/` |
+| `fvm dart run melos dashboard:run` | Run the dashboard app in Chrome |
+| `fvm dart run melos dashboard:build` | Build the dashboard app to `apps/dashboard/build/web/` |
 | `fvm dart run melos firebase:emulators` | Run Firebase Emulator Suite for local development |
 | `fvm dart run melos firebase:schema:validate` | Validate Firebase seed data against the sample schema |
 | `fvm dart run melos firebase:seed` | Seed the running Firestore emulator with sample data |
 | `fvm dart run melos firebase:test` | Start Firestore Emulator and load local seed data |
 | `cd apps/app && fvm flutter run -d chrome --dart-define-from-file environments/.env.dev` | Run the Flutter app with dev environment variables |
 | `fvm dart run melos gen` | Regenerate Freezed/build_runner outputs for `apps/app` and `packages/data` |
-| `fvm dart run melos analyze` | Analyze all packages (website with `dart analyze`; app and `packages/data` with `flutter analyze`) |
+| `fvm dart run melos analyze` | Analyze all packages (website with `dart analyze`; app, dashboard, and `packages/data` with `flutter analyze`) |
 | `fvm dart run melos format` | `dart format` across all packages |
-| `fvm dart run melos test` | Run tests across all packages (website with `dart test`; app and `packages/data` with `flutter test`) |
+| `fvm dart run melos test` | Run tests across all packages (website with `dart test`; app, dashboard, and `packages/data` with `flutter test`) |
 
-Per-target variants are also available: `analyze:website`, `analyze:app`, `test:website`, `test:app`.
+Per-target variants are also available: `analyze:website`, `analyze:app`, `analyze:dashboard`, `test:website`, `test:app`, `test:dashboard`.
 
 ## Firebase local development
 
