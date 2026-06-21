@@ -6,17 +6,49 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    function isAdmin() {
-      return signedIn() && request.auth.token.admin == true;
+    function hasAdminAccess() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    match /admins/{uid} {
+      allow read, write: if false;
     }
 
     match /news/{newsId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if hasAdminAccess();
     }
 
-    match /{document=**} {
-      allow read, write: if false;
+    match /venues/{venueId} {
+      allow read: if true;
+      allow write: if hasAdminAccess();
     }
+
+    match /speakers/{speakerId} {
+      allow read: if true;
+      allow write: if hasAdminAccess();
+    }
+
+    match /staffMembers/{staffMemberId} {
+      allow read: if true;
+      allow write: if hasAdminAccess();
+    }
+
+    match /timelineEvents/{timelineEventId} {
+      allow read: if true;
+      allow write: if hasAdminAccess();
+    }
+
+    match /sessions/{sessionId} {
+      allow read: if true;
+      allow write: if hasAdminAccess();
+    }
+
+    match /sponsors/{sponsorId} {
+      allow read: if true;
+      allow write: if hasAdminAccess();
+    }
+
   }
 }
