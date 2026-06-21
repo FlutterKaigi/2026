@@ -12,4 +12,6 @@ abstract final class AppPaths {
   static const timelineEventEdit = 'edit';
   static const sessions = '/sessions';
   static const sessionEdit = 'edit';
+  static const sponsors = '/sponsors';
+  static const sponsorEdit = 'edit';
 }

@@ -39,6 +39,12 @@ part of 'router.dart';
         TypedGoRoute<SessionEditRoute>(path: AppPaths.sessionEdit),
       ],
     ),
+    TypedGoRoute<SponsorListRoute>(
+      path: AppPaths.sponsors,
+      routes: [
+        TypedGoRoute<SponsorEditRoute>(path: AppPaths.sponsorEdit),
+      ],
+    ),
   ],
 )
 class AppShellRoute extends ShellRouteData {

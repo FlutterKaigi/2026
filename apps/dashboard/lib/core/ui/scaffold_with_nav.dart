@@ -88,6 +88,7 @@ const _navItems = [
   _NavItem(label: 'スタッフ', icon: Icons.group, path: AppPaths.staff),
   _NavItem(label: 'タイムライン', icon: Icons.schedule, path: AppPaths.timeline),
   _NavItem(label: 'セッション', icon: Icons.event, path: AppPaths.sessions),
+  _NavItem(label: 'スポンサー', icon: Icons.business, path: AppPaths.sponsors),
 ];
 
 class _SideNav extends StatelessWidget {

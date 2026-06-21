@@ -83,6 +83,13 @@ RouteBase get $appShellRoute => ShellRouteData.$route(
         GoRouteData.$route(path: 'edit', factory: $SessionEditRoute._fromState),
       ],
     ),
+    GoRouteData.$route(
+      path: '/sponsors',
+      factory: $SponsorListRoute._fromState,
+      routes: [
+        GoRouteData.$route(path: 'edit', factory: $SponsorEditRoute._fromState),
+      ],
+    ),
   ],
 );
 
@@ -368,6 +375,52 @@ mixin $SessionEditRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/sessions/edit');
+
+  @override
+  void go(BuildContext context) => context.go(location, extra: _self.$extra);
+
+  @override
+  Future<T?> push<T>(BuildContext context) =>
+      context.push<T>(location, extra: _self.$extra);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location, extra: _self.$extra);
+
+  @override
+  void replace(BuildContext context) =>
+      context.replace(location, extra: _self.$extra);
+}
+
+mixin $SponsorListRoute on GoRouteData {
+  static SponsorListRoute _fromState(GoRouterState state) =>
+      const SponsorListRoute();
+
+  @override
+  String get location => GoRouteData.$location('/sponsors');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $SponsorEditRoute on GoRouteData {
+  static SponsorEditRoute _fromState(GoRouterState state) =>
+      SponsorEditRoute($extra: state.extra as Sponsor?);
+
+  SponsorEditRoute get _self => this as SponsorEditRoute;
+
+  @override
+  String get location => GoRouteData.$location('/sponsors/edit');
 
   @override
   void go(BuildContext context) => context.go(location, extra: _self.$extra);

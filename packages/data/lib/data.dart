@@ -5,6 +5,7 @@ export 'src/model/sns_link.dart' show SnsLink;
 export 'src/model/speaker.dart' show Speaker;
 export 'src/model/staff_member.dart' show StaffMember;
 export 'src/model/session.dart' show Session;
+export 'src/model/sponsor.dart' show Sponsor;
 export 'src/model/timeline_event.dart' show TimelineEvent;
 export 'src/model/venue.dart' show Venue;
 export 'src/repository/auth_repository.dart' show FirebaseAuthRepository, AuthRepository;
@@ -12,5 +13,6 @@ export 'src/repository/news_repository.dart' show FirestoreNewsRepository, NewsR
 export 'src/repository/speaker_repository.dart' show FirestoreSpeakerRepository, SpeakerRepository;
 export 'src/repository/staff_member_repository.dart' show FirestoreStaffMemberRepository, StaffMemberRepository;
 export 'src/repository/session_repository.dart' show FirestoreSessionRepository, SessionRepository;
+export 'src/repository/sponsor_repository.dart' show FirestoreSponsorRepository, SponsorRepository;
 export 'src/repository/timeline_event_repository.dart' show FirestoreTimelineEventRepository, TimelineEventRepository;
 export 'src/repository/venue_repository.dart' show FirestoreVenueRepository, VenueRepository;
