@@ -33,7 +33,12 @@ part of 'router.dart';
         TypedGoRoute<TimelineEventEditRoute>(path: AppPaths.timelineEventEdit),
       ],
     ),
-    TypedGoRoute<SessionListRoute>(path: AppPaths.sessions),
+    TypedGoRoute<SessionListRoute>(
+      path: AppPaths.sessions,
+      routes: [
+        TypedGoRoute<SessionEditRoute>(path: AppPaths.sessionEdit),
+      ],
+    ),
   ],
 )
 class AppShellRoute extends ShellRouteData {
