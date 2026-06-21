@@ -9,5 +9,6 @@ abstract final class AppPaths {
   static const staff = '/staff';
   static const staffMemberEdit = 'edit';
   static const timeline = '/timeline';
+  static const timelineEventEdit = 'edit';
   static const sessions = '/sessions';
 }
