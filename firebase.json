@@ -1,4 +1,18 @@
 {
+  "hosting": {
+    "public": "apps/dashboard/build/web",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  },
   "firestore": {
     "rules": "packages/data/firebase/firestore.rules",
     "indexes": "packages/data/firebase/firestore.indexes.json"

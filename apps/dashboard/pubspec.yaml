@@ -23,6 +23,9 @@ dependencies:
   # routing
   go_router: ^17.3.0
 
+  # security
+  firebase_app_check: ^0.4.5
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

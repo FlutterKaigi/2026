@@ -33,4 +33,17 @@ dev 環境はエミュレータに接続するため設定ファイル不要。`
 | `fvm dart run melos dashboard:build:dev` | web 向けにビルド（dev） |
 | `fvm dart run melos dashboard:build:stg` | web 向けにビルド（stg） |
 | `fvm dart run melos dashboard:build:prod` | web 向けにビルド（prod） |
+| `fvm dart run melos dashboard:deploy:stg` | ビルド → Firebase Hosting へデプロイ（stg） |
+| `fvm dart run melos dashboard:deploy:prod` | ビルド → Firebase Hosting へデプロイ（prod） |
+
+## デプロイ
+
+Firebase Hosting へのデプロイは `dashboard:deploy:stg` / `dashboard:deploy:prod` スクリプトで行う。
+内部でビルドと `firebase deploy --only hosting` を順に実行する。
+
+事前に Firebase CLI でログインしていること。
+
+```bash
+firebase login
+```
 

@@ -19,4 +19,11 @@ class Env {
     Flavor.stg => stg.DefaultFirebaseOptions.currentPlatform,
     Flavor.prod => prod.DefaultFirebaseOptions.currentPlatform,
   };
+
+  // reCAPTCHA v3 サイトキー（公開鍵）。dev はエミュレータのため App Check 不要。
+  static String? get appCheckSiteKey => switch (Flavor.current) {
+    Flavor.dev => null,
+    Flavor.stg => '6LfWai0tAAAAAIUGeAnHvjG8urMNLcNzDYhjfkXh',
+    Flavor.prod => '6LdAui0tAAAAAIHn1By_OC-crL4qvl8KACa8_p1n',
+  };
 }

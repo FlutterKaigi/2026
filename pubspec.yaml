@@ -114,6 +114,18 @@ melos:
       run: fvm dart run melos exec --scope=dashboard -- fvm flutter build web --dart-define=FLAVOR=prod
       description: Build the dashboard app for web (prod)
 
+    dashboard:deploy:stg:
+      run: >
+        fvm dart run melos run dashboard:build:stg
+        && npx -y firebase-tools@13.35.1 deploy --only hosting --project flutterkaigi-2026-stg
+      description: Build and deploy the dashboard to Firebase Hosting (stg)
+
+    dashboard:deploy:prod:
+      run: >
+        fvm dart run melos run dashboard:build:prod
+        && npx -y firebase-tools@13.35.1 deploy --only hosting --project flutterkaigi-2026-283db
+      description: Build and deploy the dashboard to Firebase Hosting (prod)
+
     firebase:start:
       run: npx -y firebase-tools@13.35.1 emulators:start --project dev-flutterkaigi-2026
       description: Start Firebase Emulator Suite for local development
