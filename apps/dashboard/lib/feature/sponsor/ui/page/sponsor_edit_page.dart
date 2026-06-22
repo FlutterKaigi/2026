@@ -29,6 +29,7 @@ class SponsorEditPage extends HookConsumerWidget {
     final websiteUrlController = useTextEditingController(text: sponsor?.websiteUrl ?? '');
     final recruitUrlController = useTextEditingController(text: sponsor?.recruitUrl ?? '');
     final jobBoardUrlController = useTextEditingController(text: sponsor?.jobBoardUrl ?? '');
+    final tier = useState(sponsor?.tier ?? SponsorTier.platinum);
     final isSaving = useState(false);
 
     Future<void> save() async {
@@ -41,6 +42,7 @@ class SponsorEditPage extends HookConsumerWidget {
           nameKana: nameKanaController.text.trim().isEmpty ? null : nameKanaController.text.trim(),
           description: LocaleMap(ja: descJaController.text.trim(), en: descEnController.text.trim()),
           logoUrl: logoUrlController.text.trim(),
+          tier: tier.value,
           xUrl: xUrlController.text.trim().isEmpty ? null : xUrlController.text.trim(),
           websiteUrl: websiteUrlController.text.trim().isEmpty ? null : websiteUrlController.text.trim(),
           recruitUrl: recruitUrlController.text.trim().isEmpty ? null : recruitUrlController.text.trim(),
@@ -108,6 +110,15 @@ class SponsorEditPage extends HookConsumerWidget {
                       controller: descEnController,
                       decoration: const InputDecoration(labelText: 'English', border: OutlineInputBorder()),
                       maxLines: 4,
+                    ),
+                    const SizedBox(height: 24),
+                    DropdownButtonFormField<SponsorTier>(
+                      initialValue: tier.value,
+                      decoration: const InputDecoration(labelText: 'スポンサーティア *', border: OutlineInputBorder()),
+                      items: SponsorTier.values.map((t) => DropdownMenuItem(value: t, child: Text(t.name))).toList(),
+                      onChanged: (v) {
+                        if (v != null) tier.value = v;
+                      },
                     ),
                     const SizedBox(height: 24),
                     OutlinedTextFormField(

@@ -44,7 +44,9 @@ class SponsorListPage extends ConsumerWidget {
                     final sponsor = sponsors[index];
                     return ListTile(
                       title: Text(sponsor.name.ja),
-                      subtitle: sponsor.nameKana != null ? Text(sponsor.nameKana!) : null,
+                      subtitle: Text(
+                        [sponsor.tier.name, if (sponsor.nameKana != null) sponsor.nameKana!].join(' ・ '),
+                      ),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [

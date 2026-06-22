@@ -5,7 +5,7 @@ export 'src/model/sns_link.dart' show SnsLink;
 export 'src/model/speaker.dart' show Speaker;
 export 'src/model/staff_member.dart' show StaffMember;
 export 'src/model/session.dart' show Session;
-export 'src/model/sponsor.dart' show Sponsor;
+export 'src/model/sponsor.dart' show Sponsor, SponsorTier;
 export 'src/model/timeline_event.dart' show TimelineEvent;
 export 'src/model/venue.dart' show Venue;
 export 'src/repository/auth_repository.dart' show FirebaseAuthRepository, AuthRepository;
