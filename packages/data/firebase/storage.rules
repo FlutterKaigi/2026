@@ -8,6 +8,8 @@ service firebase.storage {
 
     function hasAdminAccess() {
       return signedIn()
+        && request.auth.token.email_verified == true
+        && request.auth.token.email.matches('^[^@]+@flutterkaigi[.]jp$')
         && firestore.exists(/databases/(default)/documents/admins/$(request.auth.uid));
     }
 
