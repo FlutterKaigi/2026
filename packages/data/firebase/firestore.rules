@@ -50,5 +50,10 @@ service cloud.firestore {
       allow write: if hasAdminAccess();
     }
 
+    // 未定義のパスを明示的に拒否（多層防御）。
+    // Firestore はデフォルトで拒否するが、コレクション追加時の取りこぼしを防ぐため明示する。
+    match /{document=**} {
+      allow read, write: if false;
+    }
   }
 }
