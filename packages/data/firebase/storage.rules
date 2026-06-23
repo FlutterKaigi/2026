@@ -6,13 +6,14 @@ service firebase.storage {
       return request.auth != null;
     }
 
-    function isAdmin() {
-      return signedIn() && request.auth.token.admin == true;
+    function hasAdminAccess() {
+      return signedIn()
+        && firestore.exists(/databases/(default)/documents/admins/$(request.auth.uid));
     }
 
     match /public/{allPaths=**} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if hasAdminAccess();
     }
 
     match /{allPaths=**} {
