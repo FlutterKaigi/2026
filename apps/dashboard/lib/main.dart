@@ -1,5 +1,6 @@
 import 'package:data/data.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -13,7 +14,9 @@ void main() async {
   final siteKey = Env.appCheckSiteKey;
   if (siteKey != null) {
     await FirebaseAppCheck.instance.activate(
-      providerWeb: ReCaptchaEnterpriseProvider(siteKey),
+      providerWeb: kDebugMode
+          ? WebDebugProvider()
+          : ReCaptchaEnterpriseProvider(siteKey),
     );
   }
   usePathUrlStrategy();
