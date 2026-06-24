@@ -1,164 +1,65 @@
 {
-  "_comment": "Fake sample data for local/preview builds. Real sponsor data is fetched from the tracc API at production build time only and is never committed. logoUrl is intentionally empty so the generator synthesizes offline-safe placeholder logos.",
+  "_comment": "Fake sample data for offline/preview builds, shaped like the packages/data `Sponsor` Firestore model. Used only when the Firestore emulator/project is unreachable. logoUrl is intentionally empty so the generator synthesizes offline-safe placeholder logos. Never real sponsor data.",
   "sponsors": [
     {
-      "id": "smpl-pt-01",
-      "conferenceId": "flutterkaigi-2026",
-      "company": {
-        "id": "co-acme",
-        "name": "Acme Robotics",
-        "logoUrl": "",
-        "links": [
-          { "url": "https://example.com/acme", "title": "acme.example.com", "type": "other" },
-          { "url": "https://x.com/example", "title": "@acme_robotics", "type": "x" },
-          { "url": "https://example.com/acme/careers", "title": "採用情報", "type": "recruit" }
-        ]
+      "id": "sample-acme",
+      "name": { "ja": "Acme Robotics", "en": "Acme Robotics" },
+      "nameKana": "アクメロボティクス",
+      "description": {
+        "ja": "Acme Robotics は産業用ロボットの制御基盤を Flutter で構築しています。FlutterKaigi 2026 では、現場のエンジニアと最新の知見を共有できることを楽しみにしています。",
+        "en": "Acme Robotics builds industrial robot control platforms with Flutter. We look forward to sharing the latest insights with engineers at FlutterKaigi 2026."
       },
-      "year": 2026,
+      "logoUrl": "",
       "tier": "platinum",
-      "prText": "Acme Robotics は産業用ロボットの制御基盤を Flutter で構築しています。FlutterKaigi 2026 では、現場のエンジニアと最新の知見を共有できることを楽しみにしています。",
-      "slug": "acme-robotics",
-      "benefits": ["booth", "logo-large"]
+      "websiteUrl": "https://example.com/acme",
+      "xUrl": "https://x.com/example",
+      "recruitUrl": "https://example.com/acme/careers",
+      "createdAt": "2026-01-10T00:00:00Z",
+      "updatedAt": "2026-01-10T00:00:00Z"
     },
     {
-      "id": "smpl-pt-02",
-      "conferenceId": "flutterkaigi-2026",
-      "company": {
-        "id": "co-nimbus",
-        "name": "Nimbus Cloud",
-        "logoUrl": "",
-        "links": [
-          { "url": "https://example.com/nimbus", "title": "nimbus.example.com", "type": "other" },
-          { "url": "https://x.com/example2", "title": "@nimbus", "type": "x" }
-        ]
+      "id": "sample-nimbus",
+      "name": { "ja": "Nimbus Cloud", "en": "Nimbus Cloud" },
+      "nameKana": "ニンバスクラウド",
+      "description": {
+        "ja": "Nimbus Cloud はマルチプラットフォーム向けのバックエンドを提供します。Dart/Flutter チームを募集中です。",
+        "en": "Nimbus Cloud provides backends for multi-platform apps. Our Dart/Flutter team is hiring."
       },
-      "year": 2026,
-      "tier": "platinum",
-      "prText": "Nimbus Cloud はマルチプラットフォーム向けのバックエンドを提供します。Dart/Flutter チームを募集中です。",
-      "slug": "nimbus-cloud",
-      "benefits": []
+      "logoUrl": "",
+      "tier": "gold",
+      "websiteUrl": "https://example.com/nimbus",
+      "xUrl": "https://x.com/example2",
+      "createdAt": "2026-01-20T00:00:00Z",
+      "updatedAt": "2026-01-20T00:00:00Z"
     },
     {
-      "id": "smpl-pt-03",
-      "conferenceId": "flutterkaigi-2026",
-      "company": {
-        "id": "co-quantum",
-        "name": "Quantum Foundry",
-        "logoUrl": "",
-        "links": [{ "url": "https://example.com/quantum", "title": "quantum.example.com", "type": "other" }]
+      "id": "sample-orbit",
+      "name": { "ja": "Orbit Labs", "en": "Orbit Labs" },
+      "nameKana": "オービットラボ",
+      "description": {
+        "ja": "Orbit Labs はモバイルアプリの分析基盤を開発しています。",
+        "en": "Orbit Labs develops analytics platforms for mobile apps."
       },
-      "year": 2026,
-      "tier": "platinum",
-      "prText": "Quantum Foundry は次世代の開発ツールチェーンを研究しています。",
-      "slug": "quantum-foundry",
-      "benefits": []
+      "logoUrl": "",
+      "tier": "silver",
+      "websiteUrl": "https://example.com/orbit",
+      "createdAt": "2026-02-01T00:00:00Z",
+      "updatedAt": "2026-02-01T00:00:00Z"
     },
     {
-      "id": "smpl-gd-01",
-      "conferenceId": "flutterkaigi-2026",
-      "company": { "id": "co-orbit", "name": "Orbit Labs", "logoUrl": "", "links": [{ "url": "https://example.com/orbit", "title": "orbit.example.com", "type": "other" }] },
-      "year": 2026, "tier": "gold",
-      "prText": "Orbit Labs はモバイル体験のためのデザインシステムを提供します。",
-      "slug": "orbit-labs", "benefits": []
-    },
-    {
-      "id": "smpl-gd-02",
-      "conferenceId": "flutterkaigi-2026",
-      "company": { "id": "co-pulse", "name": "Pulse Analytics", "logoUrl": "", "links": [{ "url": "https://x.com/example3", "title": "@pulse", "type": "x" }] },
-      "year": 2026, "tier": "gold",
-      "prText": "Pulse Analytics はリアルタイム分析基盤を提供します。",
-      "slug": "pulse-analytics", "benefits": []
-    },
-    {
-      "id": "smpl-gd-03",
-      "conferenceId": "flutterkaigi-2026",
-      "company": { "id": "co-fern", "name": "Fern Studio", "logoUrl": "", "links": [] },
-      "year": 2026, "tier": "gold",
-      "prText": "Fern Studio はプロダクト開発の伴走支援を行っています。",
-      "slug": "fern-studio", "benefits": []
-    },
-    {
-      "id": "smpl-gd-04",
-      "conferenceId": "flutterkaigi-2026",
-      "company": { "id": "co-vertex", "name": "Vertex Mobile", "logoUrl": "", "links": [{ "url": "https://example.com/vertex/careers", "title": "Careers", "type": "recruit" }] },
-      "year": 2026, "tier": "gold",
-      "prText": "Vertex Mobile はクロスプラットフォームアプリの受託開発を行っています。",
-      "slug": "vertex-mobile", "benefits": []
-    },
-    {
-      "id": "smpl-sv-01", "conferenceId": "flutterkaigi-2026",
-      "company": { "id": "co-maple", "name": "Maple Soft", "logoUrl": "", "links": [] },
-      "year": 2026, "tier": "silver", "prText": "Maple Soft の紹介文です。", "slug": "maple-soft", "benefits": []
-    },
-    {
-      "id": "smpl-sv-02", "conferenceId": "flutterkaigi-2026",
-      "company": { "id": "co-cobalt", "name": "Cobalt Inc", "logoUrl": "", "links": [] },
-      "year": 2026, "tier": "silver", "prText": "Cobalt Inc の紹介文です。", "slug": "cobalt-inc", "benefits": []
-    },
-    {
-      "id": "smpl-sv-03", "conferenceId": "flutterkaigi-2026",
-      "company": { "id": "co-river", "name": "River Systems", "logoUrl": "", "links": [] },
-      "year": 2026, "tier": "silver", "prText": "River Systems の紹介文です。", "slug": "river-systems", "benefits": []
-    },
-    {
-      "id": "smpl-bz-01", "conferenceId": "flutterkaigi-2026",
-      "company": { "id": "co-amber", "name": "Amber Works", "logoUrl": "", "links": [] },
-      "year": 2026, "tier": "bronze", "prText": "Amber Works の紹介文です。", "slug": "amber-works", "benefits": []
-    },
-    {
-      "id": "smpl-bz-02", "conferenceId": "flutterkaigi-2026",
-      "company": { "id": "co-slate", "name": "Slate & Co", "logoUrl": "", "links": [] },
-      "year": 2026, "tier": "bronze", "prText": "Slate & Co の紹介文です。", "slug": "slate-co", "benefits": []
-    },
-    {
-      "id": "smpl-tl-01", "conferenceId": "flutterkaigi-2026",
-      "company": { "id": "co-forge", "name": "Forge Tools", "logoUrl": "", "links": [{ "url": "https://example.com/forge", "title": "forge.example.com", "type": "other" }] },
-      "year": 2026, "tier": "tool", "prText": "Forge Tools は開発者向けの CI/CD を提供します。", "slug": "forge-tools", "benefits": []
-    },
-    {
-      "id": "smpl-tl-02", "conferenceId": "flutterkaigi-2026",
-      "company": { "id": "co-lens", "name": "Lens IDE", "logoUrl": "", "links": [] },
-      "year": 2026, "tier": "tool", "prText": "Lens IDE の紹介文です。", "slug": "lens-ide", "benefits": []
-    },
-    {
-      "id": "smpl-st-01", "conferenceId": "flutterkaigi-2026",
-      "company": { "id": "co-campus", "name": "Campus Dev Circle", "logoUrl": "", "links": [] },
-      "year": 2026, "tier": "student", "prText": "Campus Dev Circle の紹介文です。", "slug": "campus-dev-circle", "benefits": []
-    },
-    {
-      "id": "smpl-st-02", "conferenceId": "flutterkaigi-2026",
-      "company": { "id": "co-quad", "name": "Quad Lab", "logoUrl": "", "links": [] },
-      "year": 2026, "tier": "student", "prText": "Quad Lab の紹介文です。", "slug": "quad-lab", "benefits": []
-    },
-    {
-      "id": "smpl-cm-01", "conferenceId": "flutterkaigi-2026",
-      "company": { "id": "co-flutterjp", "name": "Flutter 部", "logoUrl": "", "links": [] },
-      "year": 2026, "tier": "community", "prText": "Flutter 部 の紹介文です。", "slug": "flutter-bu", "benefits": []
-    },
-    {
-      "id": "smpl-cm-02", "conferenceId": "flutterkaigi-2026",
-      "company": { "id": "co-dartmeetup", "name": "Dart Meetup", "logoUrl": "", "links": [] },
-      "year": 2026, "tier": "community", "prText": "Dart Meetup の紹介文です。", "slug": "dart-meetup", "benefits": []
-    },
-    {
-      "id": "smpl-in-01", "conferenceId": "flutterkaigi-2026",
-      "company": { "id": "co-ind1", "name": "Taro Y", "logoUrl": "", "links": [] },
-      "year": 2026, "tier": "individual", "prText": "個人スポンサーの応援メッセージです。", "slug": "taro-y", "benefits": []
-    },
-    {
-      "id": "smpl-in-02", "conferenceId": "flutterkaigi-2026",
-      "company": { "id": "co-ind2", "name": "Hanako S", "logoUrl": "", "links": [] },
-      "year": 2026, "tier": "individual", "prText": "個人スポンサーの応援メッセージです。", "slug": "hanako-s", "benefits": []
-    },
-    {
-      "id": "smpl-in-03", "conferenceId": "flutterkaigi-2026",
-      "company": { "id": "co-ind3", "name": "Ken N", "logoUrl": "", "links": [] },
-      "year": 2026, "tier": "individual", "prText": "個人スポンサーの応援メッセージです。", "slug": "ken-n", "benefits": []
-    },
-    {
-      "id": "smpl-in-04", "conferenceId": "flutterkaigi-2026",
-      "company": { "id": "co-ind4", "name": "Mei T", "logoUrl": "", "links": [] },
-      "year": 2026, "tier": "individual", "prText": "個人スポンサーの応援メッセージです。", "slug": "mei-t", "benefits": []
+      "id": "sample-pixel",
+      "name": { "ja": "Pixel Forge", "en": "Pixel Forge" },
+      "nameKana": "ピクセルフォージ",
+      "description": {
+        "ja": "Pixel Forge は UI コンポーネントライブラリを提供しています。",
+        "en": "Pixel Forge offers UI component libraries."
+      },
+      "logoUrl": "",
+      "tier": "bronze",
+      "websiteUrl": "https://example.com/pixel",
+      "xUrl": "https://x.com/example3",
+      "createdAt": "2026-02-15T00:00:00Z",
+      "updatedAt": "2026-02-15T00:00:00Z"
     }
   ]
 }

@@ -1,22 +1,35 @@
 /// Generates `apps/website/lib/constants/generated_sponsors.dart` and the
 /// processed sponsor images under `apps/website/web/images/sponsors/` from the
-/// tracc API (production) or a local sample fixture (local/preview).
+/// `sponsors` Firestore collection managed by `packages/data` (the same data
+/// the admin dashboard writes), or a local sample fixture as a fallback.
 ///
-/// Both outputs are **git-ignored** and regenerated on every build, so real
-/// sponsor data never enters the git history (see `.gitignore`).
+/// Both outputs are **git-ignored** and regenerated on every build, so sponsor
+/// data is never committed to the git history (see `.gitignore`).
 ///
 /// Run via:
 ///
 /// ```sh
-/// fvm dart run melos sponsors:generate          # uses the sample fixture
-/// SPONSORS_API_URL=... TRACC_API_KEY=... \
-///   fvm dart run tool/generate_sponsors.dart     # fetches the real API
+/// # Local: reads the Firestore emulator (start it + seed first, e.g.
+/// #   fvm dart run melos firebase:start  /  fvm dart run melos firebase:seed)
+/// fvm dart run melos sponsors:generate
+///
+/// # STG / prod: point at the real project over HTTPS.
+/// FIREBASE_PROJECT_ID=flutterkaigi-2026-stg \
+///   FIRESTORE_HOST=firestore.googleapis.com \
+///   FIRESTORE_ACCESS_TOKEN=$(gcloud auth print-access-token) \
+///   fvm dart run tool/generate_sponsors.dart
 /// ```
 ///
-/// Data source selection:
-///   - If `SPONSORS_API_URL` is set, GET it with `Authorization: Bearer
-///     $TRACC_API_KEY` (when present) and parse the response.
-///   - Otherwise fall back to `tool/sponsors/sample_sponsors.json`.
+/// Data source (Firestore REST API, mirroring `tool/firebase_seed.dart`):
+///   - `FIREBASE_PROJECT_ID`     — defaults to `dev-flutterkaigi-2026`.
+///   - `FIRESTORE_EMULATOR_HOST` — when set (or the host is localhost), talk to
+///     the emulator over HTTP with the `owner` bearer token.
+///   - `FIRESTORE_HOST`          — explicit host for a real project (HTTPS).
+///   - `FIRESTORE_ACCESS_TOKEN`  — OAuth bearer token for a real project.
+///   - `FIRESTORE_API_KEY`       — optional `?key=` for a real project.
+///   - If Firestore is unreachable, fall back to `tool/sponsors/sample_sponsors.json`
+///     so offline/preview builds still render placeholders. A *reachable but
+///     empty* collection yields an empty site (no fake data).
 ///
 /// Logo handling (raster sources — PNG/JPG/WebP):
 ///   - square (home grid) + wide (detail banner) variants are written as PNG.
@@ -39,6 +52,10 @@ const _outFile = 'apps/website/lib/constants/generated_sponsors.dart';
 const _imagesOutDir = 'apps/website/web/images/sponsors';
 const _ogpBasePath = 'apps/website/web/images/sponsor_ogp_base.png';
 const _sampleFile = 'tool/sponsors/sample_sponsors.json';
+
+// Firestore defaults — kept in sync with tool/firebase_seed.dart.
+const _defaultProjectId = 'dev-flutterkaigi-2026';
+const _defaultFirestoreHost = 'localhost:8080';
 
 // Asset paths are written relative to the site base href.
 const _assetPrefix = 'images/sponsors';
@@ -81,48 +98,81 @@ Future<void> main(List<String> args) async {
 // ── Data loading ──────────────────────────────────────────────────────────
 
 Future<List<_Sponsor>> _loadSponsors() async {
-  final apiUrl = Platform.environment['SPONSORS_API_URL'];
-
-  if (apiUrl != null && apiUrl.trim().isNotEmpty) {
-    try {
-      final apiKey = Platform.environment['TRACC_API_KEY'];
-      stdout.writeln('Fetching sponsors from API: $apiUrl');
-      final resp = await http
-          .get(
-            Uri.parse(apiUrl),
-            headers: {
-              'Accept': 'application/json',
-              if (apiKey != null && apiKey.isNotEmpty)
-                'Authorization': 'Bearer $apiKey',
-            },
-          )
-          .timeout(const Duration(seconds: 30));
-      if (resp.statusCode != 200) {
-        throw HttpException('Sponsor API returned ${resp.statusCode}');
-      }
-      final decoded = jsonDecode(utf8.decode(resp.bodyBytes));
-      final sponsors = _extractList(decoded).map(_Sponsor.fromJson).toList();
-      stdout.writeln('Loaded ${sponsors.length} sponsor(s) from the API.');
-      return sponsors;
-    } catch (e) {
-      // The API may be unreachable or not yet provisioned (e.g. no key yet).
-      // Fall back to the sample fixture so the build still succeeds and the
-      // preview renders placeholder sponsors instead of failing.
-      stderr.writeln(
-        'warning: could not load sponsors from the API ($e).\n'
-        'Falling back to the sample fixture — placeholder sponsors will be shown.',
-      );
-    }
-  } else {
-    stdout.writeln('SPONSORS_API_URL not set — using sample fixture $_sampleFile');
+  try {
+    final sponsors = await _fetchFirestoreSponsors();
+    stdout.writeln('Loaded ${sponsors.length} sponsor(s) from Firestore.');
+    // A reachable but empty collection is a valid state (e.g. data not seeded
+    // yet) — emit an empty site rather than masking it with fake placeholders.
+    return _dedupeSlugs(sponsors);
+  } catch (e) {
+    stderr.writeln(
+      'warning: could not load sponsors from Firestore ($e).\n'
+      'Falling back to $_sampleFile — placeholder sponsors will be shown.',
+    );
+    return _dedupeSlugs(_loadSampleSponsors());
   }
+}
 
-  return _loadSampleSponsors();
+/// Fetches every document in the `sponsors` collection via the Firestore REST
+/// API and maps each to the website [_Sponsor] model.
+///
+/// Talks to the local emulator by default; set the `FIRESTORE_*` /
+/// `FIREBASE_PROJECT_ID` env vars (see the library doc) to target STG/prod.
+Future<List<_Sponsor>> _fetchFirestoreSponsors() async {
+  final projectId = Platform.environment['FIREBASE_PROJECT_ID'] ?? _defaultProjectId;
+  final emulatorHost = Platform.environment['FIRESTORE_EMULATOR_HOST'];
+  final host = _normalizeHost(
+    Platform.environment['FIRESTORE_HOST'] ?? emulatorHost ?? _defaultFirestoreHost,
+  );
+  final isEmulator = emulatorHost != null || host.startsWith('localhost') || host.startsWith('127.0.0.1');
+  final scheme = isEmulator ? 'http' : 'https';
+  final token = Platform.environment['FIRESTORE_ACCESS_TOKEN'];
+  final apiKey = Platform.environment['FIRESTORE_API_KEY'];
+
+  stdout.writeln(
+    'Fetching sponsors from Firestore '
+    '($scheme://$host, project $projectId${isEmulator ? ', emulator' : ''}).',
+  );
+
+  final headers = <String, String>{
+    'Accept': 'application/json',
+    if (isEmulator)
+      'Authorization': 'Bearer owner'
+    else if (token != null && token.isNotEmpty)
+      'Authorization': 'Bearer $token',
+  };
+
+  final base =
+      '$scheme://$host/v1/projects/${Uri.encodeComponent(projectId)}'
+      '/databases/(default)/documents/sponsors';
+
+  final sponsors = <_Sponsor>[];
+  String? pageToken;
+  do {
+    final query = <String>[
+      'pageSize=300',
+      if (pageToken != null && pageToken.isNotEmpty) 'pageToken=${Uri.encodeComponent(pageToken)}',
+      if (apiKey != null && apiKey.isNotEmpty) 'key=${Uri.encodeComponent(apiKey)}',
+    ];
+    final uri = Uri.parse('$base?${query.join('&')}');
+    final resp = await http.get(uri, headers: headers).timeout(const Duration(seconds: 30));
+    if (resp.statusCode != 200) {
+      throw HttpException('Firestore returned ${resp.statusCode}: ${resp.body}');
+    }
+    final decoded = jsonDecode(utf8.decode(resp.bodyBytes)) as Map<String, dynamic>;
+    final docs = (decoded['documents'] as List?) ?? const [];
+    for (final doc in docs.whereType<Map<String, dynamic>>()) {
+      sponsors.add(_Sponsor.fromModel(_decodeFirestoreDoc(doc)));
+    }
+    pageToken = decoded['nextPageToken'] as String?;
+  } while (pageToken != null && pageToken.isNotEmpty);
+
+  return sponsors;
 }
 
 List<_Sponsor> _loadSampleSponsors() {
   final decoded = jsonDecode(File(_sampleFile).readAsStringSync());
-  return _extractList(decoded).map(_Sponsor.fromJson).toList();
+  return _extractList(decoded).map(_Sponsor.fromModel).toList();
 }
 
 /// Accepts a bare array or a `{sponsors|data|items: [...]}` envelope.
@@ -135,6 +185,67 @@ List<Map<String, dynamic>> _extractList(Object? decoded) {
     _ => const <dynamic>[],
   };
   return list.whereType<Map<String, dynamic>>().toList();
+}
+
+/// Ensures every sponsor has a unique [_Sponsor.slug] (slugs derived from names
+/// can collide); appends `-2`, `-3`, … to later duplicates so detail-page
+/// routes (`sponsors/{slug}`) never clash.
+List<_Sponsor> _dedupeSlugs(List<_Sponsor> sponsors) {
+  final counts = <String, int>{};
+  for (final s in sponsors) {
+    final n = (counts[s.slug] ?? 0) + 1;
+    counts[s.slug] = n;
+    if (n > 1) s.slug = '${s.slug}-$n';
+  }
+  return sponsors;
+}
+
+String _normalizeHost(String host) {
+  var value = host.trim().replaceFirst(RegExp(r'^https?://'), '');
+  while (value.endsWith('/')) {
+    value = value.substring(0, value.length - 1);
+  }
+  return value;
+}
+
+// ── Firestore REST decoding (inverse of tool/firebase_seed.dart) ────────────
+
+/// Decodes a Firestore REST document (`{name, fields, ...}`) into a plain map
+/// of the `packages/data` `Sponsor` model, injecting the doc id.
+Map<String, dynamic> _decodeFirestoreDoc(Map<String, dynamic> doc) {
+  final name = (doc['name'] ?? '').toString();
+  final id = name.contains('/') ? name.split('/').last : name;
+  final fields = (doc['fields'] as Map?)?.cast<String, dynamic>() ?? const {};
+  return {
+    for (final e in fields.entries) e.key: _decodeFirestoreValue(e.value),
+    'id': id,
+  };
+}
+
+/// Inverse of `_encodeFirestoreValue` in `tool/firebase_seed.dart`.
+Object? _decodeFirestoreValue(Object? value) {
+  final m = (value as Map?)?.cast<String, dynamic>();
+  if (m == null) return null;
+  if (m.containsKey('nullValue')) return null;
+  if (m.containsKey('booleanValue')) return m['booleanValue'];
+  if (m.containsKey('integerValue')) {
+    return int.tryParse(m['integerValue'].toString());
+  }
+  if (m.containsKey('doubleValue')) return m['doubleValue'];
+  if (m.containsKey('timestampValue')) return m['timestampValue'];
+  if (m.containsKey('stringValue')) return m['stringValue'];
+  if (m.containsKey('referenceValue')) return m['referenceValue'];
+  if (m.containsKey('mapValue')) {
+    final fields = ((m['mapValue'] as Map?)?['fields'] as Map?)?.cast<String, dynamic>() ?? const {};
+    return {
+      for (final e in fields.entries) e.key: _decodeFirestoreValue(e.value),
+    };
+  }
+  if (m.containsKey('arrayValue')) {
+    final values = ((m['arrayValue'] as Map?)?['values'] as List?) ?? const [];
+    return values.map(_decodeFirestoreValue).toList();
+  }
+  return null;
 }
 
 // ── Image processing ────────────────────────────────────────────────────────
@@ -188,9 +299,7 @@ Future<void> _processImages(_Sponsor s, img.Image ogpBase) async {
 }
 
 Future<Uint8List> _fetchBytes(String url) async {
-  final resp = await http
-      .get(Uri.parse(url))
-      .timeout(const Duration(seconds: 20));
+  final resp = await http.get(Uri.parse(url)).timeout(const Duration(seconds: 20));
   if (resp.statusCode != 200) {
     throw HttpException('status ${resp.statusCode}');
   }
@@ -203,9 +312,7 @@ void _writePng(String name, img.Image image) {
 
 /// Scales [src] to fit within [maxW]x[maxH] preserving aspect ratio.
 img.Image _scaleToFit(img.Image src, int maxW, int maxH) {
-  final scale = (maxW / src.width) < (maxH / src.height)
-      ? maxW / src.width
-      : maxH / src.height;
+  final scale = (maxW / src.width) < (maxH / src.height) ? maxW / src.width : maxH / src.height;
   final w = (src.width * scale).round().clamp(1, maxW);
   final h = (src.height * scale).round().clamp(1, maxH);
   return img.copyResize(
@@ -335,7 +442,8 @@ String _initials(String name) {
 void _writeDart(List<_Sponsor> sponsors) {
   final out = StringBuffer()
     ..writeln('// GENERATED FILE — do not edit by hand and do not commit.')
-    ..writeln('// Source of truth: tracc API (prod) or tool/sponsors/sample_sponsors.json.')
+    ..writeln('// Source of truth: the `sponsors` Firestore collection (packages/data),')
+    ..writeln('// or tool/sponsors/sample_sponsors.json when Firestore is unreachable.')
     ..writeln('// Regenerate via: fvm dart run melos sponsors:generate')
     ..writeln('// ignore_for_file: lines_longer_than_80_chars, directives_ordering')
     ..writeln()
@@ -435,36 +543,48 @@ class _Sponsor {
     required this.year,
   });
 
-  factory _Sponsor.fromJson(Map<String, dynamic> m) {
-    final company = (m['company'] as Map<String, dynamic>?) ?? const {};
-    final name = (company['name'] ?? m['name'] ?? '').toString();
-    final links = ((company['links'] ?? m['links'] ?? const []) as List)
-        .whereType<Map<String, dynamic>>()
-        .map(
-          (l) => _Link(
-            url: (l['url'] ?? '').toString(),
-            title: (l['title'] ?? l['url'] ?? '').toString(),
-            type: _LinkType.parse((l['type'] ?? '').toString()),
-          ),
-        )
-        .where((l) => l.url.isNotEmpty)
-        .toList();
-    final slug = (m['slug'] ?? '').toString().trim();
+  /// Maps a decoded `packages/data` `Sponsor` document to the website model.
+  ///
+  /// The Firestore model differs from the site model: names/descriptions are
+  /// [LocaleMap]s (the site renders a single string, so the JA value is used,
+  /// falling back to EN) and links are discrete URL fields rather than a list.
+  /// The slug — which the Firestore model lacks — is derived from the name.
+  factory _Sponsor.fromModel(Map<String, dynamic> m) {
+    final id = (m['id'] ?? '').toString();
+    final name = _localeMap(m['name']);
+    final nameJa = _firstNonEmpty([name['ja'], name['en']]);
+    final nameEn = _firstNonEmpty([name['en'], name['ja']]);
+    final description = _localeMap(m['description']);
+    final prText = _firstNonEmpty([description['ja'], description['en']]);
+
+    final links = <_Link>[];
+    void addLink(Object? url, String title, _LinkType type) {
+      final u = (url ?? '').toString().trim();
+      if (u.isNotEmpty) links.add(_Link(url: u, title: title, type: type));
+    }
+
+    // Order mirrors the detail page's expected priority: site, social, careers.
+    addLink(m['websiteUrl'], 'Web', _LinkType.other);
+    addLink(m['xUrl'], 'X', _LinkType.x);
+    addLink(m['recruitUrl'], '採用情報', _LinkType.recruit);
+    addLink(m['jobBoardUrl'], '採用一覧', _LinkType.recruit);
+
+    final slugSeed = nameEn.isNotEmpty ? nameEn : (nameJa.isNotEmpty ? nameJa : id);
     return _Sponsor(
-      id: (m['id'] ?? '').toString(),
-      slug: slug.isNotEmpty ? slug : _slugify(name),
+      id: id,
+      slug: _slugify(slugSeed),
       tier: _Tier.parse((m['tier'] ?? '').toString()),
-      name: name,
-      logoUrl: (company['logoUrl'] ?? m['logoUrl'] ?? '').toString(),
-      prText: (m['prText'] ?? '').toString(),
+      name: nameJa,
+      logoUrl: (m['logoUrl'] ?? '').toString(),
+      prText: prText,
       links: links,
-      benefits: ((m['benefits'] ?? const []) as List).map((e) => e.toString()).toList(),
-      year: (m['year'] is int) ? m['year'] as int : 2026,
+      benefits: const [],
+      year: _yearOf(m['createdAt']),
     );
   }
 
   final String id;
-  final String slug;
+  String slug;
   final _Tier tier;
   final String name;
   final String logoUrl;
@@ -495,7 +615,8 @@ enum _Tier {
   tool('Tool'),
   student('Student'),
   community('Community'),
-  individual('Individual');
+  individual('Individual')
+  ;
 
   const _Tier(this.label);
   final String label;
@@ -517,22 +638,29 @@ enum _Tier {
 }
 
 /// Mirrors `SponsorLinkType`.
-enum _LinkType {
-  x,
-  recruit,
-  other;
+enum _LinkType { x, recruit, other }
 
-  static _LinkType parse(String raw) => switch (raw.toLowerCase().trim()) {
-    'x' || 'twitter' => _LinkType.x,
-    'recruit' || 'careers' || 'jobs' => _LinkType.recruit,
-    _ => _LinkType.other,
+String _slugify(String name) {
+  final s = name.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), '-').replaceAll(RegExp(r'^-+|-+$'), '');
+  return s.isNotEmpty ? s : 'sponsor';
+}
+
+/// Coerces a value into a `{ja, en}` string map (Firestore `LocaleMap`).
+Map<String, String> _localeMap(Object? value) {
+  final m = (value as Map?) ?? const {};
+  return {
+    for (final e in m.entries) e.key.toString(): (e.value ?? '').toString(),
   };
 }
 
-String _slugify(String name) {
-  final s = name
-      .toLowerCase()
-      .replaceAll(RegExp(r'[^a-z0-9]+'), '-')
-      .replaceAll(RegExp(r'^-+|-+$'), '');
-  return s.isNotEmpty ? s : 'sponsor';
+String _firstNonEmpty(List<String?> candidates) =>
+    candidates.firstWhere((c) => c != null && c.trim().isNotEmpty, orElse: () => '')!.trim();
+
+/// Year derived from an ISO-8601 `createdAt` timestamp; defaults to 2026.
+int _yearOf(Object? createdAt) {
+  if (createdAt is String) {
+    final dt = DateTime.tryParse(createdAt);
+    if (dt != null) return dt.year;
+  }
+  return 2026;
 }
