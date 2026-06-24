@@ -1,30 +1,69 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:flutter/material.dart';
+import 'package:app/core/provider/environment.dart';
+import 'package:app/feature/news/provider/news_provider.dart';
+import 'package:app/main.dart';
+import 'package:data/data.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:app/main.dart';
-
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  testWidgets('shows news fetched from repository', (tester) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          environmentProvider.overrideWithValue(
+            const Environment(
+              appIdSuffix: '.dev',
+              appName: '[DEV] FlutterKaigi 2026',
+              flavor: Flavor.develop,
+              firebaseProjectId: 'dev-flutterkaigi-2026',
+              firestoreEmulatorHost: 'localhost:8080',
+              androidFirestoreEmulatorHost: '10.0.2.2:8080',
+            ),
+          ),
+          newsRepositoryProvider.overrideWithValue(
+            _FakeNewsRepository([
+              News(
+                id: 'sample',
+                title: const LocaleMap(
+                  ja: 'FlutterKaigi 2026 スポンサー募集について',
+                  en: 'About FlutterKaigi 2026 Sponsorship',
+                ),
+                publishedAt: DateTime.parse('2026-05-01T09:00:00+09:00'),
+                createdAt: DateTime.parse('2026-06-02T00:00:00+09:00'),
+                updatedAt: DateTime.parse('2026-06-02T00:00:00+09:00'),
+                url: const LocaleMap(
+                  ja: 'https://medium.com/flutterkaigi/flutterkaigi-2026-opportunities-guide-ja-0e8cdb0a4acb',
+                  en: 'https://medium.com/flutterkaigi/flutterkaigi-2026-opportunities-guide-en-0e8cdb0a4acb',
+                ),
+              ),
+            ]),
+          ),
+        ],
+        child: const NewsSampleApp(),
+      ),
+    );
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    await tester.pumpAndSettle();
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
-
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    expect(find.text('FlutterKaigi 2026 スポンサー募集について'), findsOneWidget);
+    expect(find.textContaining('medium.com/flutterkaigi'), findsOneWidget);
   });
+}
+
+final class _FakeNewsRepository implements NewsRepository {
+  const _FakeNewsRepository(this._news);
+
+  final List<News> _news;
+
+  @override
+  Future<List<News>> fetchNews() async => _news;
+
+  @override
+  Stream<List<News>> watchAll() => Stream.value(_news);
+
+  @override
+  Future<void> save(News news) async {}
+
+  @override
+  Future<void> delete(String id) async {}
 }

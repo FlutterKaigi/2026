@@ -1,0 +1,25 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function hasAdminAccess() {
+      return signedIn()
+        && request.auth.token.email_verified == true
+        && request.auth.token.email.matches('^[^@]+@flutterkaigi[.]jp$')
+        && firestore.exists(/databases/(default)/documents/admins/$(request.auth.uid));
+    }
+
+    match /public/{allPaths=**} {
+      allow read: if true;
+      allow write: if hasAdminAccess();
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

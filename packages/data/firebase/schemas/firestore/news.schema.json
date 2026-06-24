@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/FlutterKaigi/2026/packages/data/firebase/schemas/firestore/news.schema.json",
+  "title": "News",
+  "description": "Sample Firestore document schema for public news items.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["title", "url", "publishedAt", "createdAt", "updatedAt"],
+  "properties": {
+    "title": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ja", "en"],
+      "properties": {
+        "ja": { "type": "string", "minLength": 1 },
+        "en": { "type": "string", "minLength": 1 }
+      }
+    },
+    "url": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ja", "en"],
+      "properties": {
+        "ja": { "type": "string", "format": "uri" },
+        "en": { "type": "string", "format": "uri" }
+      }
+    },
+    "publishedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

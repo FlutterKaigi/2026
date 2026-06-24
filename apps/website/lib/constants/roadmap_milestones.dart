@@ -29,11 +29,15 @@ class RoadmapMilestone {
   /// 他コンポーネント（CTA 等）と連動させるためのタグ。
   final MilestoneGate? gate;
 
-  String dateFor(AppLocale locale) =>
-      switch (locale) { AppLocale.ja => dateJa, AppLocale.en => dateEn };
+  String dateFor(AppLocale locale) => switch (locale) {
+    AppLocale.ja => dateJa,
+    AppLocale.en => dateEn,
+  };
 
-  String titleFor(AppLocale locale) =>
-      switch (locale) { AppLocale.ja => titleJa, AppLocale.en => titleEn };
+  String titleFor(AppLocale locale) => switch (locale) {
+    AppLocale.ja => titleJa,
+    AppLocale.en => titleEn,
+  };
 }
 
 const eventRoadmap = <RoadmapMilestone>[
@@ -45,8 +49,15 @@ const eventRoadmap = <RoadmapMilestone>[
     gate: MilestoneGate.sponsors,
   ),
   RoadmapMilestone(
-    dateJa: '2026年7月26日',
-    dateEn: 'July 26, 2026',
+    dateJa: '2026年6月17日',
+    dateEn: 'June 17, 2026',
+    titleJa: 'セッション募集開始',
+    titleEn: 'Call for Proposals Opens',
+    gate: MilestoneGate.sessions,
+  ),
+  RoadmapMilestone(
+    dateJa: '2026年7月27日',
+    dateEn: 'July 27, 2026',
     titleJa: 'チケット販売開始',
     titleEn: 'Ticket Sales Open',
     gate: MilestoneGate.tickets,

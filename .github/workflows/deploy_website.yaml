@@ -1,24 +1,29 @@
-name: Deploy website to GitHub Pages
+name: Deploy website to Cloudflare Workers
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - apps/website/**
+      - .github/workflows/deploy_website.yaml
   workflow_dispatch:
 
 concurrency:
-  group: pages
+  group: deploy-website
   cancel-in-progress: false
 
 permissions: {}
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
-      - run: echo "version=$(jq -r .flutter .fvmrc)" >> "$GITHUB_OUTPUT"
-        id: flutter-version
+      - id: flutter-version
+        run: echo "version=$(jq -r .flutter .fvmrc)" >> "$GITHUB_OUTPUT"
 
       - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
         with:
@@ -28,24 +33,11 @@ jobs:
 
       - run: dart pub get
 
-      # Generate the (git-ignored) sponsor data + images from the tracc API.
-      # If the API secrets are absent or unreachable, the generator falls back
-      # to the sample fixture so the build still succeeds with placeholders.
-      - name: Generate sponsor data
-        run: dart run tool/generate_sponsors.dart
-        env:
-          SPONSORS_API_URL: ${{ secrets.SPONSORS_API_URL }}
-          TRACC_API_KEY: ${{ secrets.TRACC_API_KEY }}
-
       - working-directory: apps/website
         run: dart run jaspr_cli:jaspr build
 
-      # Publish to the `gh-pages` branch alongside `/pr-preview/pr-*/` previews
-      # written by rossjrw/pr-preview-action. `clean-exclude` keeps active
-      # previews untouched, and `force: false` rebases rather than overwriting.
-      - uses: JamesIves/github-pages-deploy-action@d92aa235d04922e8f08b40ce78cc5442fcfbfa2f # v4.8.0
+      - uses: cloudflare/wrangler-action@ebbaa1584979971c8614a24965b4405ff95890e0 # v4.0.0
         with:
-          folder: apps/website/build/jaspr
-          branch: gh-pages
-          clean-exclude: pr-preview
-          force: false
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          workingDirectory: apps/website
+          command: deploy

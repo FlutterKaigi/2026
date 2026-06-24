@@ -51,29 +51,43 @@ class EventInfoCard extends StatelessComponent {
         p(classes: 'event-info-card__label', [
           .text(strings.eventInfoTicketsLabel),
         ]),
-        button(
-          [
-            img(
-              classes: 'event-info-card__cta-icon',
-              src: 'images/icons/hourglass.svg',
-              alt: '',
-              attributes: const {'aria-hidden': 'true'},
-            ),
-            span(classes: 'event-info-card__cta-label', [
-              .text(strings.eventInfoComingSoon),
-            ]),
-            if (ticketsOpen != null)
-              span(classes: 'event-info-card__cta-meta', [
-                .text(strings.eventInfoTicketsOpensAt(
-                  ticketsOpen.dateFor(locale),
-                )),
+        div(classes: 'event-info-card__cta-row', [
+          button(
+            [
+              img(
+                classes: 'event-info-card__cta-icon',
+                src: 'images/icons/hourglass.svg',
+                alt: '',
+                attributes: const {'aria-hidden': 'true'},
+              ),
+              span(classes: 'event-info-card__cta-label', [
+                .text(strings.eventInfoComingSoon),
               ]),
-          ],
-          classes: 'event-info-card__cta',
-          type: ButtonType.button,
-          disabled: true,
-          attributes: {'aria-label': strings.eventInfoTicketsAriaLabel},
-        ),
+              if (ticketsOpen != null)
+                span(classes: 'event-info-card__cta-meta', [
+                  .text(
+                    strings.eventInfoTicketsOpensAt(
+                      ticketsOpen.dateFor(locale),
+                    ),
+                  ),
+                ]),
+            ],
+            classes: 'event-info-card__cta',
+            type: ButtonType.button,
+            disabled: true,
+            attributes: {'aria-label': strings.eventInfoTicketsAriaLabel},
+          ),
+          a(
+            [
+              span(classes: 'event-info-card__cta-label', [
+                .text(strings.eventInfoSubmitSessionCta),
+              ]),
+            ],
+            href: 'https://sessionize.com/flutterkaigi-2026/',
+            target: Target.blank,
+            classes: 'event-info-card__cta event-info-card__cta--active',
+          ),
+        ]),
       ]),
     ]);
   }
@@ -84,6 +98,10 @@ class EventInfoCard extends StatelessComponent {
       css('&').styles(
         display: .flex,
         flexDirection: .column,
+        // 隣の Roadmap が背高（マイルストーン件数で伸縮）でも、stretch で
+        // 引き伸ばされた余白を各ブロック間に均等配分して間延びを防ぐ。
+        // gap は最小間隔として残るので、伸ばされない時のレイアウトは不変。
+        justifyContent: .spaceBetween,
         padding: .all(49.px),
         backgroundColor: eventCardSurfaceInfo,
         radius: .circular(24.px),
@@ -122,8 +140,7 @@ class EventInfoCard extends StatelessComponent {
       css('.event-info-card__rows').styles(
         display: .grid,
         raw: const {
-          'grid-template-columns':
-              'repeat(auto-fit, minmax(min(100%, 320px), 1fr))',
+          'grid-template-columns': 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))',
           'gap': '24px 32px',
         },
       ),
@@ -168,6 +185,14 @@ class EventInfoCard extends StatelessComponent {
         flexDirection: .column,
         gap: Gap.row(8.px),
       ),
+      // CTA 群：横並び。幅が足りなければ自動で折り返す。
+      // row-gap も持たせ、縦積み（レスポンシブ時）でもボタン間に間隔を確保する。
+      css('.event-info-card__cta-row').styles(
+        display: .flex,
+        flexWrap: .wrap,
+        alignItems: .center,
+        raw: const {'margin-top': '4px', 'gap': '16px 24px'},
+      ),
       // Disabled CTA：時計アイコン+ラベル+販売開始日のmeta行。
       // `<button disabled>` 標準 disabled でブラウザのキーボード操作・aria 伝達を任せる。
       // デスクトップは inline-flex で内容幅、タブレット以下はカード幅いっぱい。
@@ -190,13 +215,32 @@ class EventInfoCard extends StatelessComponent {
             'align-self': 'flex-start',
             'cursor': 'not-allowed',
             'user-select': 'none',
-            'margin-top': '4px',
             'flex-wrap': 'wrap',
             // `<button disabled>` のブラウザ既定（不透明度低下・色変化）を打ち消す。
             'opacity': '1',
             '-webkit-appearance': 'none',
             'appearance': 'none',
             'text-align': 'left',
+            'text-decoration': 'none',
+          },
+        ),
+        // セッション応募 CTA：活性リンク。クリック可能であることを示す。
+        css('&.event-info-card__cta--active').styles(
+          backgroundColor: primaryContainer,
+          color: onPrimaryContainer,
+          raw: const {
+            'cursor': 'pointer',
+            'transition': 'background-color 150ms ease',
+          },
+        ),
+        // M3 State Layer (Hover 8%) — onPrimaryContainer 由来のオーバーレイを
+        // 単色の primaryContainer 上に重ねる。background-color の差し替えだと
+        // 半透明色の背後にカード面が透けるため、linear-gradient で塗り重ねる。
+        css('&.event-info-card__cta--active:hover').styles(
+          raw: const {
+            'background-image':
+                'linear-gradient('
+                '$onPrimaryContainerHoverHex, $onPrimaryContainerHoverHex)',
           },
         ),
         css('.event-info-card__cta-icon').styles(

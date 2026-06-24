@@ -1,0 +1,20 @@
+{
+    "flutter": {
+        "platforms": {
+            "dart": {
+                "lib/firebase_options_stg.dart": {
+                    "projectId": "flutterkaigi-2026-stg",
+                    "configurations": {
+                        "web": "1:277863920280:web:dca1620b080025f87c16ed"
+                    }
+                },
+                "lib/firebase_options_prod.dart": {
+                    "projectId": "flutterkaigi-2026-283db",
+                    "configurations": {
+                        "web": "1:87250640393:web:fdf130fb894f79bfa362d8"
+                    }
+                }
+            }
+        }
+    }
+}

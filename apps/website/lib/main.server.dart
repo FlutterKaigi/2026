@@ -32,12 +32,28 @@ void main() {
         link(rel: 'apple-touch-icon', href: 'favicon-180.png'),
         link(rel: 'manifest', href: 'manifest.webmanifest'),
         meta(name: 'theme-color', content: colorKeycolorsPrimaryHex),
+        // Safari の電話番号自動検出（数値列のリンク化）を無効化。
+        meta(name: 'format-detection', content: 'telephone=no'),
         // Page-specific OGP (`og:*`) and the meta description are injected per
         // route via `Document.head()` (see `SiteHead` and `SponsorDetailPage`),
         // so every generated page carries its own share card without duplicate
         // tags. Only the locale-agnostic Twitter hints remain here.
         meta(name: 'twitter:card', content: 'summary_large_image'),
         meta(name: 'twitter:site', content: '@FlutterKaigi'),
+        script(
+          src: 'https://www.googletagmanager.com/gtag/js?id=G-0FZ58E7XNG',
+          async: true,
+        ),
+        script(
+          content: '''
+window.dataLayer = window.dataLayer || [];
+function gtag() {
+  dataLayer.push(arguments);
+}
+gtag('js', new Date());
+gtag('config', 'G-0FZ58E7XNG');
+''',
+        ),
       ],
       styles: [
         css.import(
