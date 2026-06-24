@@ -31,9 +31,8 @@ class App extends StatelessComponent {
           for (final sponsor in generatedSponsors)
             Route(
               path: locale.sponsorRoutePath(sponsor.slug),
-              title: '${sponsor.name} | FlutterKaigi 2026',
-              builder: (context, state) =>
-                  _SponsorShell(locale: locale, sponsor: sponsor),
+              title: '${sponsor.name.resolve(locale)} | FlutterKaigi 2026',
+              builder: (context, state) => _SponsorShell(locale: locale, sponsor: sponsor),
             ),
         ],
       ],

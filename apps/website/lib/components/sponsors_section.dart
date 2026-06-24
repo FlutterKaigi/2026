@@ -29,8 +29,7 @@ class SponsorsSection extends StatelessComponent {
           div(classes: 'sponsors-tier', [
             h3(classes: 'sponsors-tier__heading', [.text(entry.key.label)]),
             div(classes: 'sponsors-tier__grid', [
-              for (final sponsor in entry.value)
-                _SponsorLogoCard(sponsor: sponsor, strings: strings),
+              for (final sponsor in entry.value) _SponsorLogoCard(sponsor: sponsor, strings: strings),
             ]),
           ]),
       ]),
@@ -196,13 +195,15 @@ class _SponsorLogoCard extends StatelessComponent {
 
   @override
   Component build(BuildContext context) {
+    final name = sponsor.name.resolve(strings.locale);
     return a(
       href: strings.locale.sponsorHref(sponsor.slug),
-      classes: 'sponsor-card ${_sizeClass(sponsor.tier)}'
+      classes:
+          'sponsor-card ${_sizeClass(sponsor.tier)}'
           '${sponsor.tier == SponsorTier.individual ? ' sponsor-card--circle' : ''}',
-      attributes: {'aria-label': strings.sponsorCardAriaLabel(sponsor.name)},
+      attributes: {'aria-label': strings.sponsorCardAriaLabel(name)},
       [
-        img(src: sponsor.squareLogo, alt: sponsor.name, attributes: const {'loading': 'lazy'}),
+        img(src: sponsor.squareLogo, alt: name, attributes: const {'loading': 'lazy'}),
       ],
     );
   }

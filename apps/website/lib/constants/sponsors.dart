@@ -1,10 +1,33 @@
 /// Sponsor domain model + tier metadata.
 ///
 /// This file is hand-written and checked into git. The *data* itself lives in
-/// `generated_sponsors.dart`, which is generated at build time from the tracc
-/// API (or a sample fixture) by `tool/generate_sponsors.dart` and is **never**
-/// committed — see `.gitignore`. Keep this file free of any real sponsor data.
+/// `generated_sponsors.dart`, which is generated at build time from the
+/// `sponsors` Firestore collection (packages/data) — or a sample fixture —
+/// by `tool/generate_sponsors.dart` and is **never** committed (see
+/// `.gitignore`). Keep this file free of any real sponsor data.
 library;
+
+import '../l10n/strings.dart';
+
+/// A string carried in both site locales.
+///
+/// [resolve] returns the value for the requested locale, falling back to the
+/// other locale when one side is empty — so a sponsor that supplied only
+/// Japanese still renders something on the English page, and vice versa.
+class LocalizedText {
+  const LocalizedText({this.ja = '', this.en = ''});
+
+  final String ja;
+  final String en;
+
+  String resolve(AppLocale locale) {
+    final (primary, fallback) = switch (locale) {
+      AppLocale.ja => (ja, en),
+      AppLocale.en => (en, ja),
+    };
+    return primary.trim().isNotEmpty ? primary : fallback;
+  }
+}
 
 /// Sponsorship tiers, in the order they are displayed on the site.
 ///
@@ -18,7 +41,8 @@ enum SponsorTier {
   tool(label: 'Tool', logoBox: 144),
   student(label: 'Student', logoBox: 144),
   community(label: 'Community', logoBox: 144),
-  individual(label: 'Individual', logoBox: 96);
+  individual(label: 'Individual', logoBox: 96)
+  ;
 
   const SponsorTier({required this.label, required this.logoBox});
 
@@ -33,7 +57,8 @@ enum SponsorTier {
 enum SponsorLinkType {
   x,
   recruit,
-  other;
+  other
+  ;
 
   static SponsorLinkType parse(String? raw) => switch (raw?.toLowerCase().trim()) {
     'x' || 'twitter' => SponsorLinkType.x,
@@ -76,8 +101,12 @@ class Sponsor {
   /// URL-safe identifier; the detail page lives at `sponsors/{slug}`.
   final String slug;
   final SponsorTier tier;
-  final String name;
-  final String prText;
+
+  /// Company / sponsor name, localized (ja/en) with fallback — see [LocalizedText].
+  final LocalizedText name;
+
+  /// PR / description text, localized (ja/en) with fallback — see [LocalizedText].
+  final LocalizedText prText;
   final List<SponsorLink> links;
 
   /// Square logo asset (home grid). Path relative to base href, or a remote URL.

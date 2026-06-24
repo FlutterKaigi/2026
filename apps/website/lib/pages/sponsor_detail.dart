@@ -28,13 +28,15 @@ class SponsorDetailPage extends StatelessComponent {
   Component build(BuildContext context) {
     final strings = LocaleScope.stringsOf(context);
     final locale = strings.locale;
+    final name = sponsor.name.resolve(locale);
+    final prText = sponsor.prText.resolve(locale);
 
     return Component.fragment([
       Document.head(
-        meta: {'description': _clip(sponsor.prText, 160)},
+        meta: {'description': _clip(prText, 160)},
         children: [
-          ogMeta('og:title', '${sponsor.name} | FlutterKaigi 2026'),
-          ogMeta('og:description', _clip(sponsor.prText, 200)),
+          ogMeta('og:title', '$name | FlutterKaigi 2026'),
+          ogMeta('og:description', _clip(prText, 200)),
           ogMeta('og:image', _absUrl(sponsor.ogpImage)),
           ogMeta('og:type', 'article'),
           ogMeta('og:url', '$siteOrigin${locale.sponsorHref(sponsor.slug)}/'),
@@ -58,7 +60,7 @@ class SponsorDetailPage extends StatelessComponent {
             img(
               classes: 'sponsor-detail__logo',
               src: sponsor.wideLogo,
-              alt: sponsor.name,
+              alt: name,
             ),
           ]),
           div(classes: 'sponsor-detail__body', [
@@ -67,7 +69,7 @@ class SponsorDetailPage extends StatelessComponent {
                 classes: 'sponsor-detail__badge badge--${sponsor.tier.name}',
                 [.text(strings.sponsorTierBadge(sponsor.tier.label))],
               ),
-              h1(classes: 'sponsor-detail__name', [.text(sponsor.name)]),
+              h1(classes: 'sponsor-detail__name', [.text(name)]),
               if (sponsor.links.isNotEmpty)
                 div(classes: 'sponsor-detail__links', [
                   h2(classes: 'sponsor-detail__links-title', [
@@ -100,7 +102,7 @@ class SponsorDetailPage extends StatelessComponent {
                 ]),
             ]),
             div(classes: 'sponsor-detail__desc', [
-              div(classes: 'sponsor-detail__pr', [.text(sponsor.prText)]),
+              div(classes: 'sponsor-detail__pr', [.text(prText)]),
             ]),
           ]),
         ]),
@@ -340,5 +342,4 @@ String _clip(String s, int max) {
 }
 
 /// Absolute URL for an OGP asset path (or a passthrough remote URL).
-String _absUrl(String asset) =>
-    asset.startsWith('http') ? asset : '$siteOrigin$baseHref$asset';
+String _absUrl(String asset) => asset.startsWith('http') ? asset : '$siteOrigin$baseHref$asset';

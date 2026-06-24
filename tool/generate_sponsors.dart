@@ -258,10 +258,10 @@ Future<void> _processImages(_Sponsor s, img.Image ogpBase) async {
       final bytes = await _fetchBytes(url);
       logo = img.decodeImage(bytes);
       if (logo == null) {
-        stderr.writeln('warning: could not decode logo for "${s.name}" ($url)');
+        stderr.writeln('warning: could not decode logo for "${s.displayName}" ($url)');
       }
     } catch (e) {
-      stderr.writeln('warning: could not fetch logo for "${s.name}" ($url): $e');
+      stderr.writeln('warning: could not fetch logo for "${s.displayName}" ($url): $e');
     }
   }
 
@@ -274,7 +274,7 @@ Future<void> _processImages(_Sponsor s, img.Image ogpBase) async {
     return;
   }
 
-  logo ??= _placeholderLogo(s.name, _squarePx, _squarePx);
+  logo ??= _placeholderLogo(s.displayName, _squarePx, _squarePx);
 
   // Individual sponsors render as circular tiles: fill the square (no padding)
   // so the inscribed circle mask yields a true circle, not an octagon.
@@ -457,8 +457,8 @@ void _writeDart(List<_Sponsor> sponsors) {
       ..writeln('    id: ${_str(s.id)},')
       ..writeln('    slug: ${_str(s.slug)},')
       ..writeln('    tier: SponsorTier.${s.tier.name},')
-      ..writeln('    name: ${_str(s.name)},')
-      ..writeln('    prText: ${_str(s.prText)},')
+      ..writeln('    name: LocalizedText(ja: ${_str(s.nameJa)}, en: ${_str(s.nameEn)}),')
+      ..writeln('    prText: LocalizedText(ja: ${_str(s.prTextJa)}, en: ${_str(s.prTextEn)}),')
       ..writeln('    links: [');
     for (final l in s.links) {
       out.writeln(
@@ -535,9 +535,11 @@ class _Sponsor {
     required this.id,
     required this.slug,
     required this.tier,
-    required this.name,
+    required this.nameJa,
+    required this.nameEn,
     required this.logoUrl,
-    required this.prText,
+    required this.prTextJa,
+    required this.prTextEn,
     required this.links,
     required this.benefits,
     required this.year,
@@ -546,16 +548,20 @@ class _Sponsor {
   /// Maps a decoded `packages/data` `Sponsor` document to the website model.
   ///
   /// The Firestore model differs from the site model: names/descriptions are
-  /// [LocaleMap]s (the site renders a single string, so the JA value is used,
-  /// falling back to EN) and links are discrete URL fields rather than a list.
-  /// The slug — which the Firestore model lacks — is derived from the name.
+  /// [LocaleMap]s (kept as ja/en pairs here and emitted as `LocalizedText`, so
+  /// the site resolves them per locale) and links are discrete URL fields
+  /// rather than a list. The slug — which the Firestore model lacks — is
+  /// derived from the name (English preferred for an ASCII slug).
   factory _Sponsor.fromModel(Map<String, dynamic> m) {
     final id = (m['id'] ?? '').toString();
     final name = _localeMap(m['name']);
+    // Fall back across locales so a sponsor with only one language still has
+    // both fields populated (the site's per-locale resolve also falls back).
     final nameJa = _firstNonEmpty([name['ja'], name['en']]);
     final nameEn = _firstNonEmpty([name['en'], name['ja']]);
     final description = _localeMap(m['description']);
-    final prText = _firstNonEmpty([description['ja'], description['en']]);
+    final prTextJa = _firstNonEmpty([description['ja'], description['en']]);
+    final prTextEn = _firstNonEmpty([description['en'], description['ja']]);
 
     final links = <_Link>[];
     void addLink(Object? url, String title, _LinkType type) {
@@ -574,9 +580,11 @@ class _Sponsor {
       id: id,
       slug: _slugify(slugSeed),
       tier: _Tier.parse((m['tier'] ?? '').toString()),
-      name: nameJa,
+      nameJa: nameJa,
+      nameEn: nameEn,
       logoUrl: (m['logoUrl'] ?? '').toString(),
-      prText: prText,
+      prTextJa: prTextJa,
+      prTextEn: prTextEn,
       links: links,
       benefits: const [],
       year: _yearOf(m['createdAt']),
@@ -586,12 +594,17 @@ class _Sponsor {
   final String id;
   String slug;
   final _Tier tier;
-  final String name;
+  final String nameJa;
+  final String nameEn;
   final String logoUrl;
-  final String prText;
+  final String prTextJa;
+  final String prTextEn;
   final List<_Link> links;
   final List<String> benefits;
   final int year;
+
+  /// Display name for offline placeholder logos / warnings (JA preferred).
+  String get displayName => nameJa.isNotEmpty ? nameJa : nameEn;
 
   // Filled in during image processing.
   String squareLogo = '';
