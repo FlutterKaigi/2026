@@ -258,10 +258,10 @@ Future<void> _processImages(_Sponsor s, img.Image ogpBase) async {
       final bytes = await _fetchBytes(url);
       logo = img.decodeImage(bytes);
       if (logo == null) {
-        stderr.writeln('warning: could not decode logo for "${s.displayName}" ($url)');
+        stderr.writeln('warning: could not decode logo for sponsor ${s.slug} ($url)');
       }
     } catch (e) {
-      stderr.writeln('warning: could not fetch logo for "${s.displayName}" ($url): $e');
+      stderr.writeln('warning: could not fetch logo for sponsor ${s.slug} ($url): $e');
     }
   }
 
@@ -551,7 +551,9 @@ class _Sponsor {
   /// [LocaleMap]s (kept as ja/en pairs here and emitted as `LocalizedText`, so
   /// the site resolves them per locale) and links are discrete URL fields
   /// rather than a list. The slug — which the Firestore model lacks — is
-  /// derived from the name (English preferred for an ASCII slug).
+  /// derived from the opaque Firestore document id, **not** the name, so the
+  /// sponsor's name never leaks into URLs, routing tables, or CI build logs
+  /// (a privacy requirement: leave no name trace once the event is over).
   factory _Sponsor.fromModel(Map<String, dynamic> m) {
     final id = (m['id'] ?? '').toString();
     final name = _localeMap(m['name']);
@@ -575,10 +577,9 @@ class _Sponsor {
     addLink(m['recruitUrl'], '採用情報', _LinkType.recruit);
     addLink(m['jobBoardUrl'], '採用一覧', _LinkType.recruit);
 
-    final slugSeed = nameEn.isNotEmpty ? nameEn : (nameJa.isNotEmpty ? nameJa : id);
     return _Sponsor(
       id: id,
-      slug: _slugify(slugSeed),
+      slug: _slugFromId(id),
       tier: _Tier.parse((m['tier'] ?? '').toString()),
       nameJa: nameJa,
       nameEn: nameEn,
@@ -653,8 +654,12 @@ enum _Tier {
 /// Mirrors `SponsorLinkType`.
 enum _LinkType { x, recruit, other }
 
-String _slugify(String name) {
-  final s = name.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), '-').replaceAll(RegExp(r'^-+|-+$'), '');
+/// Slug from the opaque Firestore document id. Auto-generated Firestore ids are
+/// already URL-safe (`[A-Za-z0-9]`); case is preserved so distinct ids never
+/// collide. Any stray character is replaced with `-`. Deliberately name-free —
+/// see [_Sponsor.fromModel].
+String _slugFromId(String id) {
+  final s = id.replaceAll(RegExp(r'[^A-Za-z0-9_-]+'), '-').replaceAll(RegExp(r'^-+|-+$'), '');
   return s.isNotEmpty ? s : 'sponsor';
 }
 
