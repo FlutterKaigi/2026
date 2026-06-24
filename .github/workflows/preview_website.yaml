@@ -33,6 +33,17 @@ jobs:
 
       - run: dart pub get
 
+      # Generate the (git-ignored) sponsor data + images from the STG Firestore
+      # project (packages/data `sponsors` collection, public read). If the vars
+      # are unset or Firestore is unreachable, the generator falls back to the
+      # sample fixture so the preview still builds with placeholders.
+      - name: Generate sponsor data
+        run: dart run tool/generate_sponsors.dart
+        env:
+          FIREBASE_PROJECT_ID: ${{ vars.STG_FIREBASE_PROJECT_ID }}
+          FIRESTORE_HOST: firestore.googleapis.com
+          FIRESTORE_API_KEY: ${{ secrets.STG_FIREBASE_API_KEY }}
+
       - working-directory: apps/website
         run: dart run jaspr_cli:jaspr build
 
