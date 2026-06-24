@@ -1,5 +1,5 @@
 name: flutterkaigi_2026
-description: FlutterKaigi 2026 monorepo workspace (website + app).
+description: FlutterKaigi 2026 monorepo workspace (website + app + dashboard).
 publish_to: none
 
 environment:
@@ -8,6 +8,7 @@ environment:
 workspace:
   - apps/website
   - apps/app
+  - apps/dashboard
   - packages/data
 
 dev_dependencies:
@@ -23,13 +24,17 @@ melos:
       run: fvm dart run melos exec --scope=app -- fvm flutter analyze .
       description: Run flutter analyze on the Flutter app
 
+    analyze:dashboard:
+      run: fvm dart run melos exec --scope=dashboard -- fvm flutter analyze .
+      description: Run flutter analyze on the dashboard app
+
     analyze:data:
       run: fvm dart run melos exec --scope=data -- fvm flutter analyze .
       description: Run flutter analyze on the data package
 
     analyze:
-      run: fvm dart run melos run analyze:website && fvm dart run melos run analyze:app && fvm dart run melos run analyze:data
-      description: Analyze all packages (website + app + shared packages)
+      run: fvm dart run melos run analyze:website && fvm dart run melos run analyze:app && fvm dart run melos run analyze:dashboard && fvm dart run melos run analyze:data
+      description: Analyze all packages (website + app + dashboard + shared packages)
 
     format:
       run: fvm dart run melos exec -- fvm dart format .
@@ -59,13 +64,17 @@ melos:
       run: fvm dart run melos exec --scope=app --dir-exists=test -- fvm flutter test
       description: Run tests in the Flutter app (uses flutter test for widget tests)
 
+    test:dashboard:
+      run: fvm dart run melos exec --scope=dashboard --dir-exists=test -- fvm flutter test
+      description: Run tests in the dashboard app (uses flutter test for widget tests)
+
     test:data:
       run: fvm dart run melos exec --scope=data --dir-exists=test -- fvm flutter test
       description: Run tests in the data package
 
     test:
-      run: fvm dart run melos run test:website && fvm dart run melos run test:app && fvm dart run melos run test:data
-      description: Run all tests (website + app + shared packages)
+      run: fvm dart run melos run test:website && fvm dart run melos run test:app && fvm dart run melos run test:dashboard && fvm dart run melos run test:data
+      description: Run all tests (website + app + dashboard + shared packages)
 
     website:serve:
       run: fvm dart run melos exec --scope=website -- fvm dart run jaspr_cli:jaspr serve
@@ -80,6 +89,42 @@ melos:
         fvm dart run melos run website:build \
         && deno run --no-prompt -N -R=apps/website/build/jaspr jsr:@std/http/file-server ./apps/website/build/jaspr
       description: Build the jaspr website and serve the built files with a simple file server (requires Deno to be installed)
+
+    dashboard:run:dev:
+      run: fvm dart run melos exec --scope=dashboard -- fvm flutter run -d chrome --dart-define=FLAVOR=dev
+      description: Run the dashboard app in Chrome (dev / emulator)
+
+    dashboard:run:stg:
+      run: fvm dart run melos exec --scope=dashboard -- fvm flutter run -d chrome --dart-define=FLAVOR=stg
+      description: Run the dashboard app in Chrome (stg)
+
+    dashboard:run:prod:
+      run: fvm dart run melos exec --scope=dashboard -- fvm flutter run -d chrome --dart-define=FLAVOR=prod
+      description: Run the dashboard app in Chrome (prod)
+
+    dashboard:build:dev:
+      run: fvm dart run melos exec --scope=dashboard -- fvm flutter build web --dart-define=FLAVOR=dev
+      description: Build the dashboard app for web (dev / emulator)
+
+    dashboard:build:stg:
+      run: fvm dart run melos exec --scope=dashboard -- fvm flutter build web --dart-define=FLAVOR=stg
+      description: Build the dashboard app for web (stg)
+
+    dashboard:build:prod:
+      run: fvm dart run melos exec --scope=dashboard -- fvm flutter build web --dart-define=FLAVOR=prod
+      description: Build the dashboard app for web (prod)
+
+    dashboard:deploy:stg:
+      run: >
+        fvm dart run melos run dashboard:build:stg
+        && npx -y firebase-tools@13.35.1 deploy --only hosting --project flutterkaigi-2026-stg
+      description: Build and deploy the dashboard to Firebase Hosting (stg)
+
+    dashboard:deploy:prod:
+      run: >
+        fvm dart run melos run dashboard:build:prod
+        && npx -y firebase-tools@13.35.1 deploy --only hosting --project flutterkaigi-2026-283db
+      description: Build and deploy the dashboard to Firebase Hosting (prod)
 
     firebase:start:
       run: npx -y firebase-tools@13.35.1 emulators:start --project dev-flutterkaigi-2026

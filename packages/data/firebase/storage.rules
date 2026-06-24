@@ -6,13 +6,16 @@ service firebase.storage {
       return request.auth != null;
     }
 
-    function isAdmin() {
-      return signedIn() && request.auth.token.admin == true;
+    function hasAdminAccess() {
+      return signedIn()
+        && request.auth.token.email_verified == true
+        && request.auth.token.email.matches('^[^@]+@flutterkaigi[.]jp$')
+        && firestore.exists(/databases/(default)/documents/admins/$(request.auth.uid));
     }
 
     match /public/{allPaths=**} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if hasAdminAccess();
     }
 
     match /{allPaths=**} {

@@ -102,22 +102,22 @@ class _NewsTile extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              news.title,
+              news.title.ja,
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w700,
               ),
             ),
             const SizedBox(height: 8),
             Text(
-              news.startsAt.toLocal().toString(),
+              news.publishedAt.toLocal().toString(),
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
-            if (news.url case final url?) ...[
+            if (news.url.ja.isNotEmpty) ...[
               const SizedBox(height: 8),
               Text(
-                url.toString(),
+                news.url.ja,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.primary,
                 ),

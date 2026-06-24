@@ -1,0 +1,25 @@
+# 管理ダッシュボードは内部ツール。検索エンジン・AI クローラの巡回を全面的に拒否する。
+User-agent: *
+Disallow: /
+
+# AI / LLM 学習クローラ（* で概ねカバーされるが、専用トークンのみ尊重するものを明示）
+User-agent: GPTBot
+Disallow: /
+
+User-agent: ClaudeBot
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: PerplexityBot
+Disallow: /
+
+User-agent: Bytespider
+Disallow: /

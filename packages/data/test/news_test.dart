@@ -4,50 +4,36 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('News.fromJson', () {
-    test('decodes Firestore Timestamp fields into DateTime', () {
-      final startsAt = DateTime.utc(2026, 5, 1, 9);
+    test('Timestamp フィールドを DateTime に変換する', () {
+      final publishedAt = DateTime.utc(2026, 5, 1, 9);
       final news = News.fromJson(<String, dynamic>{
-        'id': 'sponsorship-guide',
-        'title': 'Sample',
-        'status': 'published',
-        'startsAt': Timestamp.fromDate(startsAt),
-        'createdAt': Timestamp.fromDate(startsAt),
-        'updatedAt': Timestamp.fromDate(startsAt),
-        'url': 'https://example.com',
-        'endsAt': null,
+        'id': 'news-001',
+        'title': {'ja': '日本語タイトル', 'en': 'English Title'},
+        'publishedAt': Timestamp.fromDate(publishedAt),
+        'createdAt': Timestamp.fromDate(publishedAt),
+        'updatedAt': Timestamp.fromDate(publishedAt),
+        'url': {'ja': '', 'en': ''},
       });
 
-      expect(news.startsAt.isAtSameMomentAs(startsAt), isTrue);
-      expect(news.url, Uri.parse('https://example.com'));
-      expect(news.endsAt, isNull);
-    });
-  });
-
-  group('News.isActiveAt', () {
-    final base = DateTime.utc(2026, 5, 1);
-    News build({NewsStatus status = NewsStatus.published, DateTime? endsAt}) {
-      return News(
-        id: 'x',
-        title: 't',
-        status: status,
-        startsAt: base,
-        createdAt: base,
-        updatedAt: base,
-        endsAt: endsAt,
-      );
-    }
-
-    test('published item within range is active', () {
-      expect(build().isActiveAt(base.add(const Duration(days: 1))), isTrue);
+      expect(news.publishedAt.isAtSameMomentAs(publishedAt), isTrue);
+      expect(news.title.ja, '日本語タイトル');
+      expect(news.title.en, 'English Title');
+      expect(news.url.ja, '');
     });
 
-    test('draft item is inactive', () {
-      expect(build(status: NewsStatus.draft).isActiveAt(base), isFalse);
-    });
+    test('url が LocaleMap として変換される', () {
+      final publishedAt = DateTime.utc(2026, 5, 1, 9);
+      final news = News.fromJson(<String, dynamic>{
+        'id': 'news-002',
+        'title': {'ja': 'タイトル', 'en': 'Title'},
+        'publishedAt': Timestamp.fromDate(publishedAt),
+        'createdAt': Timestamp.fromDate(publishedAt),
+        'updatedAt': Timestamp.fromDate(publishedAt),
+        'url': {'ja': 'https://example.com/ja', 'en': 'https://example.com/en'},
+      });
 
-    test('item past endsAt is inactive', () {
-      final ended = build(endsAt: base.add(const Duration(days: 1)));
-      expect(ended.isActiveAt(base.add(const Duration(days: 2))), isFalse);
+      expect(news.url.ja, 'https://example.com/ja');
+      expect(news.url.en, 'https://example.com/en');
     });
   });
 }

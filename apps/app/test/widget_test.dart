@@ -24,13 +24,16 @@ void main() {
             _FakeNewsRepository([
               News(
                 id: 'sample',
-                title: 'FlutterKaigi 2026 スポンサー募集について',
-                status: NewsStatus.published,
-                startsAt: DateTime.parse('2026-05-01T09:00:00+09:00'),
+                title: const LocaleMap(
+                  ja: 'FlutterKaigi 2026 スポンサー募集について',
+                  en: 'About FlutterKaigi 2026 Sponsorship',
+                ),
+                publishedAt: DateTime.parse('2026-05-01T09:00:00+09:00'),
                 createdAt: DateTime.parse('2026-06-02T00:00:00+09:00'),
                 updatedAt: DateTime.parse('2026-06-02T00:00:00+09:00'),
-                url: Uri.parse(
-                  'https://medium.com/flutterkaigi/flutterkaigi-2026-opportunities-guide-ja-0e8cdb0a4acb',
+                url: const LocaleMap(
+                  ja: 'https://medium.com/flutterkaigi/flutterkaigi-2026-opportunities-guide-ja-0e8cdb0a4acb',
+                  en: 'https://medium.com/flutterkaigi/flutterkaigi-2026-opportunities-guide-en-0e8cdb0a4acb',
                 ),
               ),
             ]),
@@ -54,4 +57,13 @@ final class _FakeNewsRepository implements NewsRepository {
 
   @override
   Future<List<News>> fetchNews() async => _news;
+
+  @override
+  Stream<List<News>> watchAll() => Stream.value(_news);
+
+  @override
+  Future<void> save(News news) async {}
+
+  @override
+  Future<void> delete(String id) async {}
 }
