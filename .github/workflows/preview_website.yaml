@@ -18,7 +18,9 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions:
+      contents: read
       pull-requests: write
+      id-token: write # Workload Identity Federation (OIDC) for Firestore auth.
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
@@ -33,16 +35,31 @@ jobs:
 
       - run: dart pub get
 
+      # Authenticate to GCP via Workload Identity Federation (keyless). A
+      # service-account access token bypasses App Check enforcement (App Check
+      # only gates clients, not trusted backends), so the generator can read the
+      # STG `sponsors` collection. Skipped until the WIF vars are configured —
+      # then the generator falls back to the sample fixture (placeholders).
+      - id: auth
+        if: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER_STG != '' }}
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3
+        with:
+          project_id: ${{ vars.STG_FIREBASE_PROJECT_ID }}
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER_STG }}
+          service_account: ${{ vars.GCP_SERVICE_ACCOUNT_STG }}
+          token_format: access_token
+          access_token_scopes: https://www.googleapis.com/auth/datastore
+
       # Generate the (git-ignored) sponsor data + images from the STG Firestore
-      # project (packages/data `sponsors` collection, public read). If the vars
-      # are unset or Firestore is unreachable, the generator falls back to the
-      # sample fixture so the preview still builds with placeholders.
+      # project (packages/data `sponsors` collection). With no token (WIF not yet
+      # configured) or if Firestore is unreachable, the generator falls back to
+      # the sample fixture so the preview still builds with placeholders.
       - name: Generate sponsor data
         run: dart run tool/generate_sponsors.dart
         env:
           FIREBASE_PROJECT_ID: ${{ vars.STG_FIREBASE_PROJECT_ID }}
           FIRESTORE_HOST: firestore.googleapis.com
-          FIRESTORE_API_KEY: ${{ secrets.STG_FIREBASE_API_KEY }}
+          FIRESTORE_ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
 
       - working-directory: apps/website
         run: dart run jaspr_cli:jaspr build
