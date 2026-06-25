@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/FlutterKaigi/2026/packages/data/firebase/schemas/firestore/sponsor.schema.json",
+  "title": "Sponsor",
+  "description": "Firestore document schema for the `sponsors` collection.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["name", "description", "logoUrl", "tier", "createdAt", "updatedAt"],
+  "properties": {
+    "name": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ja", "en"],
+      "properties": {
+        "ja": { "type": "string", "minLength": 1 },
+        "en": { "type": "string", "minLength": 1 }
+      }
+    },
+    "nameKana": {
+      "type": ["string", "null"]
+    },
+    "description": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ja", "en"],
+      "properties": {
+        "ja": { "type": "string" },
+        "en": { "type": "string" }
+      }
+    },
+    "logoUrl": {
+      "type": "string",
+      "format": "uri"
+    },
+    "tier": {
+      "type": "string",
+      "enum": ["platinum", "gold", "silver", "bronze"]
+    },
+    "xUrl": {
+      "type": ["string", "null"],
+      "format": "uri"
+    },
+    "websiteUrl": {
+      "type": ["string", "null"],
+      "format": "uri"
+    },
+    "recruitUrl": {
+      "type": ["string", "null"],
+      "format": "uri"
+    },
+    "jobBoardUrl": {
+      "type": ["string", "null"],
+      "format": "uri"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

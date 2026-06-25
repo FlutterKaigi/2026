@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/FlutterKaigi/2026/packages/data/firebase/schemas/firestore/speaker.schema.json",
+  "title": "Speaker",
+  "description": "Firestore document schema for the `speakers` collection.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["name", "createdAt", "updatedAt"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "avatarUrl": {
+      "type": ["string", "null"],
+      "format": "uri"
+    },
+    "xId": {
+      "type": ["string", "null"]
+    },
+    "bio": {
+      "type": ["string", "null"]
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}
