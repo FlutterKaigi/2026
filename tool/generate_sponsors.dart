@@ -279,11 +279,14 @@ Future<void> _processImages(_Sponsor s, img.Image ogpBase) async {
   // Individual sponsors render as circular tiles: fill the square (no padding)
   // so the inscribed circle mask yields a true circle, not an octagon.
   final isIndividual = s.tier == _Tier.individual;
+  // Non-individual logos keep ~10% breathing room on every side (e.g. a
+  // 412×412 logo on a 512×512 canvas). Individuals fill the square so the
+  // inscribed-circle mask yields a true circle.
   final square = _containCanvas(
     logo,
     _squarePx,
     _squarePx,
-    padFrac: isIndividual ? 0.0 : 0.12,
+    padFrac: isIndividual ? 0.0 : 0.2,
   );
   if (isIndividual) _applyCircleMask(square);
   _writePng('${s.slug}-square.png', square);

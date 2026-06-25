@@ -18,18 +18,14 @@ class SponsorDetailPage extends StatelessComponent {
 
   final Sponsor sponsor;
 
-  static String _linkIcon(SponsorLinkType type) => switch (type) {
-    SponsorLinkType.x => 'images/icons/sponsor_x.svg',
-    SponsorLinkType.recruit => 'images/icons/sponsor_briefcase.svg',
-    SponsorLinkType.other => 'images/icons/sponsor_globe.svg',
-  };
-
   @override
   Component build(BuildContext context) {
     final strings = LocaleScope.stringsOf(context);
     final locale = strings.locale;
     final name = sponsor.name.resolve(locale);
-    final prText = sponsor.prText.resolve(locale);
+    // Trim stray leading/trailing whitespace; inner line breaks are preserved
+    // by the `white-space: pre-wrap` styling on the PR block.
+    final prText = sponsor.prText.resolve(locale).trim();
 
     return Component.fragment([
       Document.head(
@@ -47,6 +43,14 @@ class SponsorDetailPage extends StatelessComponent {
           a(
             href: locale.sponsorsAnchorHref,
             classes: 'sponsor-detail__back',
+            // Static multipage site: there's no client router, but browsers
+            // natively restore scroll position on Back. So when the visitor
+            // arrived from within the site (history exists), go back to restore
+            // the exact list scroll position; otherwise fall through to the
+            // #sponsors anchor (e.g. opened directly / from an external link).
+            attributes: const {
+              'onclick': 'if(window.history.length>1){window.history.back();return false;}',
+            },
             [
               span(
                 classes: 'sponsor-detail__back-arrow',
@@ -62,6 +66,23 @@ class SponsorDetailPage extends StatelessComponent {
               src: sponsor.wideLogo,
               alt: name,
             ),
+            if (sponsor.links.isNotEmpty)
+              div(classes: 'sponsor-detail__banner-links', [
+                for (final link in sponsor.links)
+                  a(
+                    href: link.url,
+                    target: Target.blank,
+                    classes: 'sponsor-detail__banner-link',
+                    attributes: {'rel': 'noopener noreferrer', 'aria-label': link.title},
+                    [
+                      img(
+                        src: sponsorLinkIconAsset(link.type),
+                        alt: '',
+                        attributes: const {'aria-hidden': 'true'},
+                      ),
+                    ],
+                  ),
+              ]),
           ]),
           div(classes: 'sponsor-detail__body', [
             div(classes: 'sponsor-detail__meta', [
@@ -85,12 +106,12 @@ class SponsorDetailPage extends StatelessComponent {
                         [
                           span(classes: 'sponsor-link__icon', [
                             img(
-                              src: _linkIcon(link.type),
+                              src: sponsorLinkIconAsset(link.type),
                               alt: '',
                               attributes: const {'aria-hidden': 'true'},
                             ),
                           ]),
-                          span(classes: 'sponsor-link__title', [.text(link.title)]),
+                          span(classes: 'sponsor-link__title', [.text(link.url)]),
                           span(
                             classes: 'sponsor-link__ext',
                             attributes: const {'aria-hidden': 'true'},
@@ -145,12 +166,15 @@ class SponsorDetailPage extends StatelessComponent {
         css('.sponsor-detail__back-arrow').styles(raw: const {'font-size': '18px'}),
       ]),
 
-      // Logo banner.
+      // Logo banner: logo centered with ~10% breathing room, optional row of
+      // icon-only links (X / website / recruit) centered beneath it.
       css('.sponsor-detail__banner', [
         css('&').styles(
           display: .flex,
+          flexDirection: .column,
           alignItems: .center,
           justifyContent: .center,
+          gap: Gap.row(20.px),
           width: 100.percent,
           backgroundColor: onBrand,
           radius: .circular(16.px),
@@ -166,11 +190,46 @@ class SponsorDetailPage extends StatelessComponent {
         ),
         css('.sponsor-detail__logo').styles(
           raw: const {
-            'max-width': '86%',
-            'max-height': 'clamp(150px, 22vw, 280px)',
+            'max-width': '80%',
+            'max-height': 'clamp(140px, 20vw, 260px)',
             'object-fit': 'contain',
           },
         ),
+        css('.sponsor-detail__banner-links').styles(
+          display: .flex,
+          alignItems: .center,
+          justifyContent: .center,
+          flexWrap: .wrap,
+          gap: Gap(row: 12.px, column: 12.px),
+        ),
+        css('.sponsor-detail__banner-link', [
+          css('&').styles(
+            display: .flex,
+            alignItems: .center,
+            justifyContent: .center,
+            width: 44.px,
+            height: 44.px,
+            color: const Color('#494456'),
+            radius: .circular(999.px),
+            border: Border.all(
+              style: BorderStyle.solid,
+              color: const Color('#CBC3D9'),
+              width: 1.px,
+            ),
+            raw: const {
+              'flex-shrink': '0',
+              'background-color': '#F3EBFB',
+              'transition': 'transform 150ms ease, background-color 150ms ease',
+            },
+          ),
+          css('&:hover').styles(
+            raw: const {'transform': 'translateY(-2px)', 'background-color': '#FFFFFF'},
+          ),
+          css('&:focus-visible').styles(
+            raw: const {'outline': '3px solid #65558F', 'outline-offset': '2px'},
+          ),
+          css('img').styles(width: 20.px, height: 20.px),
+        ]),
       ]),
 
       // Two-column body.

@@ -21,14 +21,14 @@ class Header extends StatelessComponent {
     final strings = LocaleScope.stringsOf(context);
     return header([
       a(href: strings.locale.linkHref, classes: 'brand', [.text('FlutterKaigi 2026')]),
-      nav(
-        classes: 'nav',
-        attributes: const {'aria-label': 'Primary'},
-        [
-          for (final item in _navItems) a(href: item.href, classes: 'nav__link', [.text(item.label)]),
-          a(href: strings.locale.sponsorsAnchorHref, classes: 'nav__link', [.text(strings.sponsorsNav)]),
-        ],
-      ),
+      if (_navItems.isNotEmpty)
+        nav(
+          classes: 'nav',
+          attributes: const {'aria-label': 'Primary'},
+          [
+            for (final item in _navItems) a(href: item.href, classes: 'nav__link', [.text(item.label)]),
+          ],
+        ),
       div(classes: 'actions', [
         // a(href: '#tickets', classes: 'btn btn--primary', [.text('Get Tickets')]),
         a(

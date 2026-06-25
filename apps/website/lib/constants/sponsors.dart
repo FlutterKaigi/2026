@@ -76,6 +76,14 @@ class SponsorLink {
   final SponsorLinkType type;
 }
 
+/// Icon asset (relative to the site base href) used to represent a link of the
+/// given [type] — shared by the home logo wall and the detail banner.
+String sponsorLinkIconAsset(SponsorLinkType type) => switch (type) {
+  SponsorLinkType.x => 'images/icons/sponsor_x.svg',
+  SponsorLinkType.recruit => 'images/icons/sponsor_briefcase.svg',
+  SponsorLinkType.other => 'images/icons/sponsor_globe.svg',
+};
+
 /// A sponsor as rendered on the site.
 ///
 /// Logo/OGP fields are *asset paths* relative to the site base href (e.g.
