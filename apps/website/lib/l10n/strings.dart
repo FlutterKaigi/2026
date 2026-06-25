@@ -35,6 +35,9 @@ enum AppLocale {
 
   /// Navigation href to the Sponsors section on the home page.
   String get sponsorsAnchorHref => '$linkHref#sponsors';
+
+  /// The other supported locale (the site ships exactly two).
+  AppLocale get other => this == AppLocale.ja ? AppLocale.en : AppLocale.ja;
 }
 
 class Strings {
@@ -213,10 +216,7 @@ class Strings {
 
   String get footerRepository => 'Repository';
 
-  AppLocale get other => switch (locale) {
-    AppLocale.ja => AppLocale.en,
-    AppLocale.en => AppLocale.ja,
-  };
+  AppLocale get other => locale.other;
 
   String get languageToggleLabel => switch (other) {
     AppLocale.ja => '日本語',

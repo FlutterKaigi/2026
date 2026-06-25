@@ -66,23 +66,6 @@ class SponsorDetailPage extends StatelessComponent {
               src: sponsor.wideLogo,
               alt: name,
             ),
-            if (sponsor.links.isNotEmpty)
-              div(classes: 'sponsor-detail__banner-links', [
-                for (final link in sponsor.links)
-                  a(
-                    href: link.url,
-                    target: Target.blank,
-                    classes: 'sponsor-detail__banner-link',
-                    attributes: {'rel': 'noopener noreferrer', 'aria-label': link.title},
-                    [
-                      img(
-                        src: sponsorLinkIconAsset(link.type),
-                        alt: '',
-                        attributes: const {'aria-hidden': 'true'},
-                      ),
-                    ],
-                  ),
-              ]),
           ]),
           div(classes: 'sponsor-detail__body', [
             div(classes: 'sponsor-detail__meta', [
@@ -166,15 +149,12 @@ class SponsorDetailPage extends StatelessComponent {
         css('.sponsor-detail__back-arrow').styles(raw: const {'font-size': '18px'}),
       ]),
 
-      // Logo banner: logo centered with ~10% breathing room, optional row of
-      // icon-only links (X / website / recruit) centered beneath it.
+      // Logo banner: logo centered with ~10% breathing room.
       css('.sponsor-detail__banner', [
         css('&').styles(
           display: .flex,
-          flexDirection: .column,
           alignItems: .center,
           justifyContent: .center,
-          gap: Gap.row(20.px),
           width: 100.percent,
           backgroundColor: onBrand,
           radius: .circular(16.px),
@@ -195,41 +175,6 @@ class SponsorDetailPage extends StatelessComponent {
             'object-fit': 'contain',
           },
         ),
-        css('.sponsor-detail__banner-links').styles(
-          display: .flex,
-          alignItems: .center,
-          justifyContent: .center,
-          flexWrap: .wrap,
-          gap: Gap(row: 12.px, column: 12.px),
-        ),
-        css('.sponsor-detail__banner-link', [
-          css('&').styles(
-            display: .flex,
-            alignItems: .center,
-            justifyContent: .center,
-            width: 44.px,
-            height: 44.px,
-            color: const Color('#494456'),
-            radius: .circular(999.px),
-            border: Border.all(
-              style: BorderStyle.solid,
-              color: const Color('#CBC3D9'),
-              width: 1.px,
-            ),
-            raw: const {
-              'flex-shrink': '0',
-              'background-color': '#F3EBFB',
-              'transition': 'transform 150ms ease, background-color 150ms ease',
-            },
-          ),
-          css('&:hover').styles(
-            raw: const {'transform': 'translateY(-2px)', 'background-color': '#FFFFFF'},
-          ),
-          css('&:focus-visible').styles(
-            raw: const {'outline': '3px solid #65558F', 'outline-offset': '2px'},
-          ),
-          css('img').styles(width: 20.px, height: 20.px),
-        ]),
       ]),
 
       // Two-column body.

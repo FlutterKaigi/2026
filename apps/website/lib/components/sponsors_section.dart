@@ -47,7 +47,8 @@ class SponsorsSection extends StatelessComponent {
         justifyContent: .center,
         width: 100.percent,
         padding: .symmetric(horizontal: 24.px, vertical: 128.px),
-        backgroundColor: onBrand, // white
+        // Match the Event Information section's tinted background.
+        raw: const {'background-color': '#FDF7FF'},
       ),
       css('.sponsors-section__inner').styles(
         display: .flex,
@@ -100,7 +101,6 @@ class SponsorsSection extends StatelessComponent {
           raw: const {'font-size': '22px', 'line-height': '28px'},
         ),
         css('.sponsors-tier__grid').styles(
-          alignItems: .start,
           display: .flex,
           justifyContent: .center,
           width: 100.percent,
@@ -108,68 +108,12 @@ class SponsorsSection extends StatelessComponent {
         ),
       ]),
 
-      // ── Logo cell: square logo tile + optional social icon links ───────
-      css('.sponsor-cell', [
-        css('&').styles(
-          display: .flex,
-          flexDirection: .column,
-          alignItems: .center,
-          gap: Gap.row(10.px),
-          raw: const {'flex-shrink': '0'},
-        ),
-        // Tier sizes (fluid via clamp). The tile squares itself via aspect-ratio.
-        css('&.sponsor-cell--xl').styles(raw: const {'width': 'clamp(180px, 38vw, 256px)'}),
-        css('&.sponsor-cell--lg').styles(raw: const {'width': 'clamp(150px, 30vw, 192px)'}),
-        css('&.sponsor-cell--md').styles(raw: const {'width': 'clamp(112px, 24vw, 144px)'}),
-        css('&.sponsor-cell--sm').styles(raw: const {'width': 'clamp(84px, 18vw, 96px)'}),
-
-        // Icon-only link row beneath the logo.
-        css('.sponsor-cell__links').styles(
-          display: .flex,
-          alignItems: .center,
-          justifyContent: .center,
-          flexWrap: .wrap,
-          width: 100.percent,
-          gap: Gap.all(8.px),
-        ),
-        css('.sponsor-cell__link', [
-          css('&').styles(
-            display: .flex,
-            alignItems: .center,
-            justifyContent: .center,
-            width: 32.px,
-            height: 32.px,
-            color: const Color('#494456'),
-            radius: .circular(999.px),
-            border: Border.all(
-              style: BorderStyle.solid,
-              color: const Color('#CBC3D9'),
-              width: 1.px,
-            ),
-            textDecoration: const TextDecoration(line: TextDecorationLine.none),
-            raw: const {
-              'flex-shrink': '0',
-              'background-color': '#F3EBFB',
-              'transition': 'transform 150ms ease, background-color 150ms ease',
-            },
-          ),
-          css('&:hover').styles(
-            raw: const {'transform': 'translateY(-2px)', 'background-color': '#FFFFFF'},
-          ),
-          css('&:focus-visible').styles(
-            raw: const {'outline': '3px solid #65558F', 'outline-offset': '2px'},
-          ),
-          css('img').styles(width: 16.px, height: 16.px),
-        ]),
-      ]),
-
-      // ── Logo tile ──────────────────────────────────────────────────────
+      // ── Logo card ───────────────────────────────────────────────────
       css('.sponsor-card', [
         css('&').styles(
           display: .flex,
           alignItems: .center,
           justifyContent: .center,
-          width: 100.percent,
           padding: .all(1.px),
           backgroundColor: onBrand,
           radius: .circular(16.px),
@@ -200,6 +144,19 @@ class SponsorsSection extends StatelessComponent {
           width: 100.percent,
           height: 100.percent,
           raw: const {'object-fit': 'contain'},
+        ),
+        // Tier sizes (fluid via clamp, square via aspect-ratio).
+        css('&.sponsor-card--xl').styles(
+          raw: const {'width': 'clamp(180px, 38vw, 256px)'},
+        ),
+        css('&.sponsor-card--lg').styles(
+          raw: const {'width': 'clamp(150px, 30vw, 192px)'},
+        ),
+        css('&.sponsor-card--md').styles(
+          raw: const {'width': 'clamp(112px, 24vw, 144px)'},
+        ),
+        css('&.sponsor-card--sm').styles(
+          raw: const {'width': 'clamp(84px, 18vw, 96px)'},
         ),
         // Individual sponsors are shown as circular tiles. The card chrome is
         // circular via border-radius; the logo itself is masked to a circle at
@@ -234,45 +191,24 @@ class _SponsorLogoCard extends StatelessComponent {
   final Strings strings;
 
   static String _sizeClass(SponsorTier tier) => switch (tier) {
-    SponsorTier.platinum => 'sponsor-cell--xl',
-    SponsorTier.gold => 'sponsor-cell--lg',
-    SponsorTier.individual => 'sponsor-cell--sm',
-    _ => 'sponsor-cell--md',
+    SponsorTier.platinum => 'sponsor-card--xl',
+    SponsorTier.gold => 'sponsor-card--lg',
+    SponsorTier.individual => 'sponsor-card--sm',
+    _ => 'sponsor-card--md',
   };
 
   @override
   Component build(BuildContext context) {
     final name = sponsor.name.resolve(strings.locale);
-    final isCircle = sponsor.tier == SponsorTier.individual;
-    return div(classes: 'sponsor-cell ${_sizeClass(sponsor.tier)}', [
-      a(
-        href: strings.locale.sponsorHref(sponsor.slug),
-        classes: 'sponsor-card${isCircle ? ' sponsor-card--circle' : ''}',
-        attributes: {'aria-label': strings.sponsorCardAriaLabel(name)},
-        [
-          img(src: sponsor.squareLogo, alt: name, attributes: const {'loading': 'lazy'}),
-        ],
-      ),
-      // Below the logo: only the links this sponsor actually supplied, as
-      // icon-only buttons, centered. Order follows the generator
-      // (website → X → recruit → job board).
-      if (sponsor.links.isNotEmpty)
-        div(classes: 'sponsor-cell__links', [
-          for (final link in sponsor.links)
-            a(
-              href: link.url,
-              target: Target.blank,
-              classes: 'sponsor-cell__link',
-              attributes: {'rel': 'noopener noreferrer', 'aria-label': link.title},
-              [
-                img(
-                  src: sponsorLinkIconAsset(link.type),
-                  alt: '',
-                  attributes: const {'aria-hidden': 'true'},
-                ),
-              ],
-            ),
-        ]),
-    ]);
+    return a(
+      href: strings.locale.sponsorHref(sponsor.slug),
+      classes:
+          'sponsor-card ${_sizeClass(sponsor.tier)}'
+          '${sponsor.tier == SponsorTier.individual ? ' sponsor-card--circle' : ''}',
+      attributes: {'aria-label': strings.sponsorCardAriaLabel(name)},
+      [
+        img(src: sponsor.squareLogo, alt: name, attributes: const {'loading': 'lazy'}),
+      ],
+    );
   }
 }

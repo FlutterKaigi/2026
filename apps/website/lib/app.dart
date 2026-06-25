@@ -60,7 +60,7 @@ class _HomeShell extends StatelessComponent {
     return LocaleScope(
       locale: locale,
       child: div(classes: 'main', [
-        const Header(),
+        Header(altLocaleHref: locale.other.linkHref),
         const SiteHead(),
         const Home(),
         const Footer(),
@@ -80,7 +80,7 @@ class _SponsorShell extends StatelessComponent {
     return LocaleScope(
       locale: locale,
       child: div(classes: 'main', [
-        const Header(),
+        Header(altLocaleHref: locale.other.sponsorHref(sponsor.slug)),
         SponsorDetailPage(sponsor: sponsor),
         const Footer(),
       ]),

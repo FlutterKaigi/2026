@@ -6,7 +6,12 @@ import '../constants/theme.dart';
 import '../l10n/strings.dart';
 
 class Header extends StatelessComponent {
-  const Header({super.key});
+  const Header({this.altLocaleHref, super.key});
+
+  /// Navigation target for the language switch — the equivalent page in the
+  /// *other* locale. When null, falls back to the other locale's home (used on
+  /// pages where there's no per-locale counterpart).
+  final String? altLocaleHref;
 
   static const _navItems = <({String label, String href})>[
     // TODO: Create link
@@ -32,7 +37,7 @@ class Header extends StatelessComponent {
       div(classes: 'actions', [
         // a(href: '#tickets', classes: 'btn btn--primary', [.text('Get Tickets')]),
         a(
-          href: strings.other.linkHref,
+          href: altLocaleHref ?? strings.other.linkHref,
           classes: 'lang lang--${strings.locale.code}',
           attributes: {
             'aria-label': 'Switch to ${strings.languageToggleLabel}',
