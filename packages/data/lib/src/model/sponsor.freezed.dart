@@ -15,7 +15,8 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Sponsor {
 
- String get id; LocaleMap get name; String? get nameKana; LocaleMap get description; String get logoUrl; SponsorTier get tier; String? get xUrl; String? get websiteUrl; String? get recruitUrl; String? get jobBoardUrl;@FirestoreDateTimeConverter() DateTime get createdAt;@FirestoreDateTimeConverter() DateTime get updatedAt;
+ String get id; LocaleMap get name; String? get nameKana; LocaleMap get description; String? get logoUrl; SponsorTier get tier;/// Web サイトの詳細ページのパス（`sponsors/<slug>`）に利用するスラッグ。
+ String? get slug; String? get xUrl; String? get websiteUrl; String? get recruitUrl; String? get jobBoardUrl;@FirestoreDateTimeConverter() DateTime get createdAt;@FirestoreDateTimeConverter() DateTime get updatedAt;
 /// Create a copy of Sponsor
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +29,16 @@ $SponsorCopyWith<Sponsor> get copyWith => _$SponsorCopyWithImpl<Sponsor>(this as
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Sponsor&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.nameKana, nameKana) || other.nameKana == nameKana)&&(identical(other.description, description) || other.description == description)&&(identical(other.logoUrl, logoUrl) || other.logoUrl == logoUrl)&&(identical(other.tier, tier) || other.tier == tier)&&(identical(other.xUrl, xUrl) || other.xUrl == xUrl)&&(identical(other.websiteUrl, websiteUrl) || other.websiteUrl == websiteUrl)&&(identical(other.recruitUrl, recruitUrl) || other.recruitUrl == recruitUrl)&&(identical(other.jobBoardUrl, jobBoardUrl) || other.jobBoardUrl == jobBoardUrl)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Sponsor&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.nameKana, nameKana) || other.nameKana == nameKana)&&(identical(other.description, description) || other.description == description)&&(identical(other.logoUrl, logoUrl) || other.logoUrl == logoUrl)&&(identical(other.tier, tier) || other.tier == tier)&&(identical(other.slug, slug) || other.slug == slug)&&(identical(other.xUrl, xUrl) || other.xUrl == xUrl)&&(identical(other.websiteUrl, websiteUrl) || other.websiteUrl == websiteUrl)&&(identical(other.recruitUrl, recruitUrl) || other.recruitUrl == recruitUrl)&&(identical(other.jobBoardUrl, jobBoardUrl) || other.jobBoardUrl == jobBoardUrl)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,name,nameKana,description,logoUrl,tier,xUrl,websiteUrl,recruitUrl,jobBoardUrl,createdAt,updatedAt);
+int get hashCode => Object.hash(runtimeType,id,name,nameKana,description,logoUrl,tier,slug,xUrl,websiteUrl,recruitUrl,jobBoardUrl,createdAt,updatedAt);
 
 @override
 String toString() {
-  return 'Sponsor(id: $id, name: $name, nameKana: $nameKana, description: $description, logoUrl: $logoUrl, tier: $tier, xUrl: $xUrl, websiteUrl: $websiteUrl, recruitUrl: $recruitUrl, jobBoardUrl: $jobBoardUrl, createdAt: $createdAt, updatedAt: $updatedAt)';
+  return 'Sponsor(id: $id, name: $name, nameKana: $nameKana, description: $description, logoUrl: $logoUrl, tier: $tier, slug: $slug, xUrl: $xUrl, websiteUrl: $websiteUrl, recruitUrl: $recruitUrl, jobBoardUrl: $jobBoardUrl, createdAt: $createdAt, updatedAt: $updatedAt)';
 }
 
 
@@ -48,7 +49,7 @@ abstract mixin class $SponsorCopyWith<$Res>  {
   factory $SponsorCopyWith(Sponsor value, $Res Function(Sponsor) _then) = _$SponsorCopyWithImpl;
 @useResult
 $Res call({
- String id, LocaleMap name, String? nameKana, LocaleMap description, String logoUrl, SponsorTier tier, String? xUrl, String? websiteUrl, String? recruitUrl, String? jobBoardUrl,@FirestoreDateTimeConverter() DateTime createdAt,@FirestoreDateTimeConverter() DateTime updatedAt
+ String id, LocaleMap name, String? nameKana, LocaleMap description, String? logoUrl, SponsorTier tier, String? slug, String? xUrl, String? websiteUrl, String? recruitUrl, String? jobBoardUrl,@FirestoreDateTimeConverter() DateTime createdAt,@FirestoreDateTimeConverter() DateTime updatedAt
 });
 
 
@@ -65,15 +66,16 @@ class _$SponsorCopyWithImpl<$Res>
 
 /// Create a copy of Sponsor
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? nameKana = freezed,Object? description = null,Object? logoUrl = null,Object? tier = null,Object? xUrl = freezed,Object? websiteUrl = freezed,Object? recruitUrl = freezed,Object? jobBoardUrl = freezed,Object? createdAt = null,Object? updatedAt = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? nameKana = freezed,Object? description = null,Object? logoUrl = freezed,Object? tier = null,Object? slug = freezed,Object? xUrl = freezed,Object? websiteUrl = freezed,Object? recruitUrl = freezed,Object? jobBoardUrl = freezed,Object? createdAt = null,Object? updatedAt = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as LocaleMap,nameKana: freezed == nameKana ? _self.nameKana : nameKana // ignore: cast_nullable_to_non_nullable
 as String?,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
-as LocaleMap,logoUrl: null == logoUrl ? _self.logoUrl : logoUrl // ignore: cast_nullable_to_non_nullable
-as String,tier: null == tier ? _self.tier : tier // ignore: cast_nullable_to_non_nullable
-as SponsorTier,xUrl: freezed == xUrl ? _self.xUrl : xUrl // ignore: cast_nullable_to_non_nullable
+as LocaleMap,logoUrl: freezed == logoUrl ? _self.logoUrl : logoUrl // ignore: cast_nullable_to_non_nullable
+as String?,tier: null == tier ? _self.tier : tier // ignore: cast_nullable_to_non_nullable
+as SponsorTier,slug: freezed == slug ? _self.slug : slug // ignore: cast_nullable_to_non_nullable
+as String?,xUrl: freezed == xUrl ? _self.xUrl : xUrl // ignore: cast_nullable_to_non_nullable
 as String?,websiteUrl: freezed == websiteUrl ? _self.websiteUrl : websiteUrl // ignore: cast_nullable_to_non_nullable
 as String?,recruitUrl: freezed == recruitUrl ? _self.recruitUrl : recruitUrl // ignore: cast_nullable_to_non_nullable
 as String?,jobBoardUrl: freezed == jobBoardUrl ? _self.jobBoardUrl : jobBoardUrl // ignore: cast_nullable_to_non_nullable
@@ -182,10 +184,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  LocaleMap name,  String? nameKana,  LocaleMap description,  String logoUrl,  SponsorTier tier,  String? xUrl,  String? websiteUrl,  String? recruitUrl,  String? jobBoardUrl, @FirestoreDateTimeConverter()  DateTime createdAt, @FirestoreDateTimeConverter()  DateTime updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  LocaleMap name,  String? nameKana,  LocaleMap description,  String? logoUrl,  SponsorTier tier,  String? slug,  String? xUrl,  String? websiteUrl,  String? recruitUrl,  String? jobBoardUrl, @FirestoreDateTimeConverter()  DateTime createdAt, @FirestoreDateTimeConverter()  DateTime updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Sponsor() when $default != null:
-return $default(_that.id,_that.name,_that.nameKana,_that.description,_that.logoUrl,_that.tier,_that.xUrl,_that.websiteUrl,_that.recruitUrl,_that.jobBoardUrl,_that.createdAt,_that.updatedAt);case _:
+return $default(_that.id,_that.name,_that.nameKana,_that.description,_that.logoUrl,_that.tier,_that.slug,_that.xUrl,_that.websiteUrl,_that.recruitUrl,_that.jobBoardUrl,_that.createdAt,_that.updatedAt);case _:
   return orElse();
 
 }
@@ -203,10 +205,10 @@ return $default(_that.id,_that.name,_that.nameKana,_that.description,_that.logoU
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  LocaleMap name,  String? nameKana,  LocaleMap description,  String logoUrl,  SponsorTier tier,  String? xUrl,  String? websiteUrl,  String? recruitUrl,  String? jobBoardUrl, @FirestoreDateTimeConverter()  DateTime createdAt, @FirestoreDateTimeConverter()  DateTime updatedAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  LocaleMap name,  String? nameKana,  LocaleMap description,  String? logoUrl,  SponsorTier tier,  String? slug,  String? xUrl,  String? websiteUrl,  String? recruitUrl,  String? jobBoardUrl, @FirestoreDateTimeConverter()  DateTime createdAt, @FirestoreDateTimeConverter()  DateTime updatedAt)  $default,) {final _that = this;
 switch (_that) {
 case _Sponsor():
-return $default(_that.id,_that.name,_that.nameKana,_that.description,_that.logoUrl,_that.tier,_that.xUrl,_that.websiteUrl,_that.recruitUrl,_that.jobBoardUrl,_that.createdAt,_that.updatedAt);case _:
+return $default(_that.id,_that.name,_that.nameKana,_that.description,_that.logoUrl,_that.tier,_that.slug,_that.xUrl,_that.websiteUrl,_that.recruitUrl,_that.jobBoardUrl,_that.createdAt,_that.updatedAt);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -223,10 +225,10 @@ return $default(_that.id,_that.name,_that.nameKana,_that.description,_that.logoU
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  LocaleMap name,  String? nameKana,  LocaleMap description,  String logoUrl,  SponsorTier tier,  String? xUrl,  String? websiteUrl,  String? recruitUrl,  String? jobBoardUrl, @FirestoreDateTimeConverter()  DateTime createdAt, @FirestoreDateTimeConverter()  DateTime updatedAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  LocaleMap name,  String? nameKana,  LocaleMap description,  String? logoUrl,  SponsorTier tier,  String? slug,  String? xUrl,  String? websiteUrl,  String? recruitUrl,  String? jobBoardUrl, @FirestoreDateTimeConverter()  DateTime createdAt, @FirestoreDateTimeConverter()  DateTime updatedAt)?  $default,) {final _that = this;
 switch (_that) {
 case _Sponsor() when $default != null:
-return $default(_that.id,_that.name,_that.nameKana,_that.description,_that.logoUrl,_that.tier,_that.xUrl,_that.websiteUrl,_that.recruitUrl,_that.jobBoardUrl,_that.createdAt,_that.updatedAt);case _:
+return $default(_that.id,_that.name,_that.nameKana,_that.description,_that.logoUrl,_that.tier,_that.slug,_that.xUrl,_that.websiteUrl,_that.recruitUrl,_that.jobBoardUrl,_that.createdAt,_that.updatedAt);case _:
   return null;
 
 }
@@ -238,15 +240,17 @@ return $default(_that.id,_that.name,_that.nameKana,_that.description,_that.logoU
 @JsonSerializable()
 
 class _Sponsor extends Sponsor {
-  const _Sponsor({required this.id, required this.name, this.nameKana, required this.description, required this.logoUrl, required this.tier, this.xUrl, this.websiteUrl, this.recruitUrl, this.jobBoardUrl, @FirestoreDateTimeConverter() required this.createdAt, @FirestoreDateTimeConverter() required this.updatedAt}): super._();
+  const _Sponsor({required this.id, required this.name, this.nameKana, required this.description, this.logoUrl, required this.tier, this.slug, this.xUrl, this.websiteUrl, this.recruitUrl, this.jobBoardUrl, @FirestoreDateTimeConverter() required this.createdAt, @FirestoreDateTimeConverter() required this.updatedAt}): super._();
   factory _Sponsor.fromJson(Map<String, dynamic> json) => _$SponsorFromJson(json);
 
 @override final  String id;
 @override final  LocaleMap name;
 @override final  String? nameKana;
 @override final  LocaleMap description;
-@override final  String logoUrl;
+@override final  String? logoUrl;
 @override final  SponsorTier tier;
+/// Web サイトの詳細ページのパス（`sponsors/<slug>`）に利用するスラッグ。
+@override final  String? slug;
 @override final  String? xUrl;
 @override final  String? websiteUrl;
 @override final  String? recruitUrl;
@@ -267,16 +271,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Sponsor&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.nameKana, nameKana) || other.nameKana == nameKana)&&(identical(other.description, description) || other.description == description)&&(identical(other.logoUrl, logoUrl) || other.logoUrl == logoUrl)&&(identical(other.tier, tier) || other.tier == tier)&&(identical(other.xUrl, xUrl) || other.xUrl == xUrl)&&(identical(other.websiteUrl, websiteUrl) || other.websiteUrl == websiteUrl)&&(identical(other.recruitUrl, recruitUrl) || other.recruitUrl == recruitUrl)&&(identical(other.jobBoardUrl, jobBoardUrl) || other.jobBoardUrl == jobBoardUrl)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Sponsor&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.nameKana, nameKana) || other.nameKana == nameKana)&&(identical(other.description, description) || other.description == description)&&(identical(other.logoUrl, logoUrl) || other.logoUrl == logoUrl)&&(identical(other.tier, tier) || other.tier == tier)&&(identical(other.slug, slug) || other.slug == slug)&&(identical(other.xUrl, xUrl) || other.xUrl == xUrl)&&(identical(other.websiteUrl, websiteUrl) || other.websiteUrl == websiteUrl)&&(identical(other.recruitUrl, recruitUrl) || other.recruitUrl == recruitUrl)&&(identical(other.jobBoardUrl, jobBoardUrl) || other.jobBoardUrl == jobBoardUrl)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,name,nameKana,description,logoUrl,tier,xUrl,websiteUrl,recruitUrl,jobBoardUrl,createdAt,updatedAt);
+int get hashCode => Object.hash(runtimeType,id,name,nameKana,description,logoUrl,tier,slug,xUrl,websiteUrl,recruitUrl,jobBoardUrl,createdAt,updatedAt);
 
 @override
 String toString() {
-  return 'Sponsor(id: $id, name: $name, nameKana: $nameKana, description: $description, logoUrl: $logoUrl, tier: $tier, xUrl: $xUrl, websiteUrl: $websiteUrl, recruitUrl: $recruitUrl, jobBoardUrl: $jobBoardUrl, createdAt: $createdAt, updatedAt: $updatedAt)';
+  return 'Sponsor(id: $id, name: $name, nameKana: $nameKana, description: $description, logoUrl: $logoUrl, tier: $tier, slug: $slug, xUrl: $xUrl, websiteUrl: $websiteUrl, recruitUrl: $recruitUrl, jobBoardUrl: $jobBoardUrl, createdAt: $createdAt, updatedAt: $updatedAt)';
 }
 
 
@@ -287,7 +291,7 @@ abstract mixin class _$SponsorCopyWith<$Res> implements $SponsorCopyWith<$Res> {
   factory _$SponsorCopyWith(_Sponsor value, $Res Function(_Sponsor) _then) = __$SponsorCopyWithImpl;
 @override @useResult
 $Res call({
- String id, LocaleMap name, String? nameKana, LocaleMap description, String logoUrl, SponsorTier tier, String? xUrl, String? websiteUrl, String? recruitUrl, String? jobBoardUrl,@FirestoreDateTimeConverter() DateTime createdAt,@FirestoreDateTimeConverter() DateTime updatedAt
+ String id, LocaleMap name, String? nameKana, LocaleMap description, String? logoUrl, SponsorTier tier, String? slug, String? xUrl, String? websiteUrl, String? recruitUrl, String? jobBoardUrl,@FirestoreDateTimeConverter() DateTime createdAt,@FirestoreDateTimeConverter() DateTime updatedAt
 });
 
 
@@ -304,15 +308,16 @@ class __$SponsorCopyWithImpl<$Res>
 
 /// Create a copy of Sponsor
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? nameKana = freezed,Object? description = null,Object? logoUrl = null,Object? tier = null,Object? xUrl = freezed,Object? websiteUrl = freezed,Object? recruitUrl = freezed,Object? jobBoardUrl = freezed,Object? createdAt = null,Object? updatedAt = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? nameKana = freezed,Object? description = null,Object? logoUrl = freezed,Object? tier = null,Object? slug = freezed,Object? xUrl = freezed,Object? websiteUrl = freezed,Object? recruitUrl = freezed,Object? jobBoardUrl = freezed,Object? createdAt = null,Object? updatedAt = null,}) {
   return _then(_Sponsor(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as LocaleMap,nameKana: freezed == nameKana ? _self.nameKana : nameKana // ignore: cast_nullable_to_non_nullable
 as String?,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
-as LocaleMap,logoUrl: null == logoUrl ? _self.logoUrl : logoUrl // ignore: cast_nullable_to_non_nullable
-as String,tier: null == tier ? _self.tier : tier // ignore: cast_nullable_to_non_nullable
-as SponsorTier,xUrl: freezed == xUrl ? _self.xUrl : xUrl // ignore: cast_nullable_to_non_nullable
+as LocaleMap,logoUrl: freezed == logoUrl ? _self.logoUrl : logoUrl // ignore: cast_nullable_to_non_nullable
+as String?,tier: null == tier ? _self.tier : tier // ignore: cast_nullable_to_non_nullable
+as SponsorTier,slug: freezed == slug ? _self.slug : slug // ignore: cast_nullable_to_non_nullable
+as String?,xUrl: freezed == xUrl ? _self.xUrl : xUrl // ignore: cast_nullable_to_non_nullable
 as String?,websiteUrl: freezed == websiteUrl ? _self.websiteUrl : websiteUrl // ignore: cast_nullable_to_non_nullable
 as String?,recruitUrl: freezed == recruitUrl ? _self.recruitUrl : recruitUrl // ignore: cast_nullable_to_non_nullable
 as String?,jobBoardUrl: freezed == jobBoardUrl ? _self.jobBoardUrl : jobBoardUrl // ignore: cast_nullable_to_non_nullable

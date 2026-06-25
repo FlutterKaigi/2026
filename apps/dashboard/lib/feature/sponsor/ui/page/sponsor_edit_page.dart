@@ -25,6 +25,7 @@ class SponsorEditPage extends HookConsumerWidget {
     final descJaController = useTextEditingController(text: sponsor?.description.ja ?? '');
     final descEnController = useTextEditingController(text: sponsor?.description.en ?? '');
     final logoUrlController = useTextEditingController(text: sponsor?.logoUrl ?? '');
+    final slugController = useTextEditingController(text: sponsor?.slug ?? '');
     final xUrlController = useTextEditingController(text: sponsor?.xUrl ?? '');
     final websiteUrlController = useTextEditingController(text: sponsor?.websiteUrl ?? '');
     final recruitUrlController = useTextEditingController(text: sponsor?.recruitUrl ?? '');
@@ -41,8 +42,9 @@ class SponsorEditPage extends HookConsumerWidget {
           name: LocaleMap(ja: nameJaController.text.trim(), en: nameEnController.text.trim()),
           nameKana: nameKanaController.text.trim().isEmpty ? null : nameKanaController.text.trim(),
           description: LocaleMap(ja: descJaController.text.trim(), en: descEnController.text.trim()),
-          logoUrl: logoUrlController.text.trim(),
+          logoUrl: logoUrlController.text.trim().isEmpty ? null : logoUrlController.text.trim(),
           tier: tier.value,
+          slug: slugController.text.trim().isEmpty ? null : slugController.text.trim(),
           xUrl: xUrlController.text.trim().isEmpty ? null : xUrlController.text.trim(),
           websiteUrl: websiteUrlController.text.trim().isEmpty ? null : websiteUrlController.text.trim(),
           recruitUrl: recruitUrlController.text.trim().isEmpty ? null : recruitUrlController.text.trim(),
@@ -123,9 +125,14 @@ class SponsorEditPage extends HookConsumerWidget {
                     const SizedBox(height: 24),
                     OutlinedTextFormField(
                       controller: logoUrlController,
-                      labelText: '企業ロゴ URL *',
+                      labelText: '企業ロゴ URL',
                       hintText: 'https://example.com/logo.png',
-                      validator: (v) => (v == null || v.trim().isEmpty) ? '企業ロゴ URL を入力してください' : null,
+                    ),
+                    const SizedBox(height: 24),
+                    OutlinedTextFormField(
+                      controller: slugController,
+                      labelText: '詳細ページのパス (slug)',
+                      hintText: 'sponsors/<slug> の <slug> 部分 (例: example-platinum)',
                     ),
                     const SizedBox(height: 24),
                     Text('リンク', style: Theme.of(context).textTheme.labelLarge),

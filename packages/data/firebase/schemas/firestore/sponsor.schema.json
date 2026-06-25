@@ -5,7 +5,7 @@
   "description": "Firestore document schema for the `sponsors` collection.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["name", "description", "logoUrl", "tier", "createdAt", "updatedAt"],
+  "required": ["name", "description", "tier", "createdAt", "updatedAt"],
   "properties": {
     "name": {
       "type": "object",
@@ -29,12 +29,16 @@
       }
     },
     "logoUrl": {
-      "type": "string",
+      "type": ["string", "null"],
       "format": "uri"
     },
     "tier": {
       "type": "string",
-      "enum": ["platinum", "gold", "silver", "bronze"]
+      "enum": ["platinum", "gold", "silver", "bronze", "tool", "community", "individual"]
+    },
+    "slug": {
+      "description": "Web サイトの詳細ページのパス (`sponsors/<slug>`) に利用するスラッグ。",
+      "type": ["string", "null"]
     },
     "xUrl": {
       "type": ["string", "null"],
