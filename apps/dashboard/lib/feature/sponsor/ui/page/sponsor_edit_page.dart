@@ -91,8 +91,15 @@ class SponsorEditPage extends HookConsumerWidget {
                       label: '表示名 *',
                       jaController: nameJaController,
                       enController: nameEnController,
-                      jaValidator: (v) => (v == null || v.trim().isEmpty) ? '日本語表示名を入力してください' : null,
-                      enValidator: (v) => (v == null || v.trim().isEmpty) ? 'English name is required' : null,
+                      // 日本語・英語のいずれか一方が入力されていればよい。
+                      jaValidator: (_) =>
+                          (nameJaController.text.trim().isEmpty && nameEnController.text.trim().isEmpty)
+                          ? '日本語か英語のいずれかを入力してください'
+                          : null,
+                      enValidator: (_) =>
+                          (nameJaController.text.trim().isEmpty && nameEnController.text.trim().isEmpty)
+                          ? 'Enter the name in Japanese or English'
+                          : null,
                     ),
                     const SizedBox(height: 16),
                     OutlinedTextFormField(

@@ -12,9 +12,13 @@
       "additionalProperties": false,
       "required": ["ja", "en"],
       "properties": {
-        "ja": { "type": "string", "minLength": 1 },
-        "en": { "type": "string", "minLength": 1 }
-      }
+        "ja": { "type": "string" },
+        "en": { "type": "string" }
+      },
+      "anyOf": [
+        { "properties": { "ja": { "minLength": 1 } } },
+        { "properties": { "en": { "minLength": 1 } } }
+      ]
     },
     "nameKana": {
       "type": ["string", "null"]
