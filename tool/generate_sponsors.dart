@@ -553,8 +553,9 @@ class _Sponsor {
   /// The Firestore model differs from the site model: names/descriptions are
   /// [LocaleMap]s (kept as ja/en pairs here and emitted as `LocalizedText`, so
   /// the site resolves them per locale) and links are discrete URL fields
-  /// rather than a list. The slug — which the Firestore model lacks — is
-  /// derived from the opaque Firestore document id, **not** the name, so the
+  /// rather than a list. The detail-page slug prefers the admin-entered `slug`
+  /// field and falls back to one derived from the opaque Firestore document id
+  /// (see [_resolveSlug]); the fallback is deliberately name-free so the
   /// sponsor's name never leaks into URLs, routing tables, or CI build logs
   /// (a privacy requirement: leave no name trace once the event is over).
   factory _Sponsor.fromModel(Map<String, dynamic> m) {
@@ -582,7 +583,7 @@ class _Sponsor {
 
     return _Sponsor(
       id: id,
-      slug: _slugFromId(id),
+      slug: _resolveSlug(m['slug'], id),
       tier: _Tier.parse((m['tier'] ?? '').toString()),
       nameJa: nameJa,
       nameEn: nameEn,
@@ -630,7 +631,6 @@ enum _Tier {
   silver('Silver'),
   bronze('Bronze'),
   tool('Tool'),
-  student('Student'),
   community('Community'),
   individual('Individual')
   ;
@@ -646,7 +646,6 @@ enum _Tier {
       'silver' || 'シルバー' || '銀' => _Tier.silver,
       'bronze' || 'ブロンズ' || '銅' => _Tier.bronze,
       'tool' || 'ツール' => _Tier.tool,
-      'student' || 'スチューデント' || '学生' => _Tier.student,
       'community' || 'コミュニティ' => _Tier.community,
       'individual' || 'インディビジュアル' || '個人' => _Tier.individual,
       _ => _Tier.community,
@@ -657,10 +656,18 @@ enum _Tier {
 /// Mirrors `SponsorLinkType`.
 enum _LinkType { x, recruit, other }
 
-/// Slug from the opaque Firestore document id. Auto-generated Firestore ids are
+/// Detail-page slug: prefers the admin-entered `slug` field, falling back to
+/// one derived from the opaque document id. Both are run through [_slugFromId]
+/// so the result is always URL-safe.
+String _resolveSlug(Object? slug, String id) {
+  final provided = (slug ?? '').toString().trim();
+  return _slugFromId(provided.isNotEmpty ? provided : id);
+}
+
+/// Sanitizes a slug source to a URL-safe slug. Auto-generated Firestore ids are
 /// already URL-safe (`[A-Za-z0-9]`); case is preserved so distinct ids never
-/// collide. Any stray character is replaced with `-`. Deliberately name-free —
-/// see [_Sponsor.fromModel].
+/// collide. Any stray character is replaced with `-`. The document-id fallback
+/// is deliberately name-free — see [_Sponsor.fromModel].
 String _slugFromId(String id) {
   final s = id.replaceAll(RegExp(r'[^A-Za-z0-9_-]+'), '-').replaceAll(RegExp(r'^-+|-+$'), '');
   return s.isNotEmpty ? s : 'sponsor';

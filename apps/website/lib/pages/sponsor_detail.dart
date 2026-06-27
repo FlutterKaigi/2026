@@ -211,8 +211,16 @@ class SponsorDetailPage extends StatelessComponent {
             'background': '#65558F',
           },
         ),
+        // Platinum: a bright, cool metallic sheen (brighter than Silver) with a
+        // dark slate label so the precious-metal look stays legible.
         css('&.badge--platinum').styles(
-          raw: const {'background': 'linear-gradient(90deg, #FF9100 0%, #FB8700 100%)'},
+          color: const Color('#2B2F36'),
+          raw: const {
+            'background':
+                'linear-gradient(135deg, #D6DBE0 0%, #F2F4F6 22%, #B8BFC8 50%, #EDEFF2 78%, #C3C9D0 100%)',
+            'border': '1px solid #FFFFFFB3',
+            'box-shadow': '0 1px 2px rgba(45, 47, 56, 0.18)',
+          },
         ),
         css('&.badge--gold').styles(
           raw: const {'background': 'linear-gradient(90deg, #F4B400 0%, #E59400 100%)'},
@@ -226,9 +234,6 @@ class SponsorDetailPage extends StatelessComponent {
         // Tool shares Individual's purple (per design feedback).
         css('&.badge--tool').styles(
           raw: const {'background': 'linear-gradient(90deg, #7E57C2 0%, #65558F 100%)'},
-        ),
-        css('&.badge--student').styles(
-          raw: const {'background': 'linear-gradient(90deg, #2E9E5B 0%, #228A4C 100%)'},
         ),
         css('&.badge--community').styles(
           raw: const {'background': 'linear-gradient(90deg, #1E88E5 0%, #1565C0 100%)'},

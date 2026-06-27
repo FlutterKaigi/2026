@@ -9,7 +9,7 @@ import '../l10n/strings.dart';
 /// Home-page Sponsors section: a centered "logo wall" grouped by tier.
 ///
 /// Tiers and logo-cell sizes follow the Figma layout (node 656:2718):
-/// Platinum 256 / Gold 192 / Silver·Bronze·Tool·Student·Community 144 /
+/// Platinum 256 / Gold 192 / Silver·Bronze·Tool·Community 144 /
 /// Individual 96. Each logo links to `sponsors/{slug}`.
 class SponsorsSection extends StatelessComponent {
   const SponsorsSection({super.key});
@@ -17,9 +17,11 @@ class SponsorsSection extends StatelessComponent {
   @override
   Component build(BuildContext context) {
     final strings = LocaleScope.stringsOf(context);
-    // Order sponsors by their (opaque) Firestore document id — i.e. slug —
-    // ascending, so the wall has a stable, name-agnostic ordering within tiers.
-    final ordered = [...generatedSponsors]..sort((s1, s2) => s1.slug.compareTo(s2.slug));
+    // Order sponsors by their (opaque) Firestore document id ascending, so the
+    // wall has a stable, name-agnostic ordering within tiers. The slug now
+    // carries the admin-entered detail-page path and is no longer id-derived,
+    // so sort on the id explicitly rather than the slug.
+    final ordered = [...generatedSponsors]..sort((s1, s2) => s1.id.compareTo(s2.id));
     final byTier = groupSponsorsByTier(ordered);
 
     return section(id: 'sponsors', classes: 'sponsors-section', [
