@@ -39,6 +39,7 @@ enum SponsorTier {
   silver(label: 'Silver', logoBox: 144),
   bronze(label: 'Bronze', logoBox: 144),
   tool(label: 'Tool', logoBox: 144),
+  student(label: 'Student', logoBox: 144),
   community(label: 'Community', logoBox: 144),
   individual(label: 'Individual', logoBox: 96)
   ;

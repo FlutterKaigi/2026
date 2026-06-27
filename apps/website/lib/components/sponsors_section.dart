@@ -9,7 +9,7 @@ import '../l10n/strings.dart';
 /// Home-page Sponsors section: a centered "logo wall" grouped by tier.
 ///
 /// Tiers and logo-cell sizes follow the Figma layout (node 656:2718):
-/// Platinum 256 / Gold 192 / Silver·Bronze·Tool·Community 144 /
+/// Platinum 256 / Gold 192 / Silver·Bronze·Tool·Student·Community 144 /
 /// Individual 96. Each logo links to `sponsors/{slug}`.
 class SponsorsSection extends StatelessComponent {
   const SponsorsSection({super.key});

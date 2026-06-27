@@ -631,6 +631,7 @@ enum _Tier {
   silver('Silver'),
   bronze('Bronze'),
   tool('Tool'),
+  student('Student'),
   community('Community'),
   individual('Individual')
   ;
@@ -646,6 +647,7 @@ enum _Tier {
       'silver' || 'シルバー' || '銀' => _Tier.silver,
       'bronze' || 'ブロンズ' || '銅' => _Tier.bronze,
       'tool' || 'ツール' => _Tier.tool,
+      'student' || 'スチューデント' || '学生' => _Tier.student,
       'community' || 'コミュニティ' => _Tier.community,
       'individual' || 'インディビジュアル' || '個人' => _Tier.individual,
       _ => _Tier.community,

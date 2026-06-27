@@ -235,6 +235,9 @@ class SponsorDetailPage extends StatelessComponent {
         css('&.badge--tool').styles(
           raw: const {'background': 'linear-gradient(90deg, #7E57C2 0%, #65558F 100%)'},
         ),
+        css('&.badge--student').styles(
+          raw: const {'background': 'linear-gradient(90deg, #2E9E5B 0%, #228A4C 100%)'},
+        ),
         css('&.badge--community').styles(
           raw: const {'background': 'linear-gradient(90deg, #1E88E5 0%, #1565C0 100%)'},
         ),
