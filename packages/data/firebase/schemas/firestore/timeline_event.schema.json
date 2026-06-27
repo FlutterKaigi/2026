@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/FlutterKaigi/2026/packages/data/firebase/schemas/firestore/timeline_event.schema.json",
+  "title": "TimelineEvent",
+  "description": "Firestore document schema for the `timelineEvents` collection.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["title", "startsAt", "createdAt", "updatedAt"],
+  "properties": {
+    "title": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ja", "en"],
+      "properties": {
+        "ja": { "type": "string", "minLength": 1 },
+        "en": { "type": "string", "minLength": 1 }
+      }
+    },
+    "startsAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "endsAt": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "venueId": {
+      "type": ["string", "null"]
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

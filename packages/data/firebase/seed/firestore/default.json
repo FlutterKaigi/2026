@@ -17,6 +17,189 @@
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
       }
+    },
+    {
+      "path": "venues/hall-a",
+      "schema": "venue",
+      "data": {
+        "name": { "ja": "ホール A", "en": "Hall A" },
+        "order": 1,
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "venues/hall-b",
+      "schema": "venue",
+      "data": {
+        "name": { "ja": "ホール B", "en": "Hall B" },
+        "order": 2,
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "speakers/flutter-taro",
+      "schema": "speaker",
+      "data": {
+        "name": "Flutter Taro",
+        "avatarUrl": "https://example.com/speakers/flutter-taro.png",
+        "xId": "flutter_taro",
+        "bio": "Flutter アプリ開発に従事。",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "speakers/dart-hanako",
+      "schema": "speaker",
+      "data": {
+        "name": "Dart Hanako",
+        "avatarUrl": null,
+        "xId": null,
+        "bio": null,
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sessions/keynote",
+      "schema": "session",
+      "data": {
+        "title": { "ja": "基調講演", "en": "Keynote" },
+        "description": {
+          "ja": "FlutterKaigi 2026 の幕開けを飾る基調講演です。",
+          "en": "The opening keynote of FlutterKaigi 2026."
+        },
+        "primaryLocale": "ja",
+        "startsAt": "2026-11-14T10:00:00+09:00",
+        "endsAt": "2026-11-14T10:45:00+09:00",
+        "venueId": "hall-a",
+        "speakerIds": ["flutter-taro"],
+        "isLightningTalk": false,
+        "isBeginnersLightningTalk": false,
+        "isHandsOn": false,
+        "sessionizeUrl": null,
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sessions/lightning-talk-1",
+      "schema": "session",
+      "data": {
+        "title": { "ja": "LT: Dart の小ネタ", "en": "LT: Dart Tips" },
+        "description": {
+          "ja": "5 分で学ぶ Dart の便利な書き方。",
+          "en": "Handy Dart idioms in five minutes."
+        },
+        "primaryLocale": "ja",
+        "startsAt": "2026-11-14T13:00:00+09:00",
+        "endsAt": "2026-11-14T13:05:00+09:00",
+        "venueId": "hall-b",
+        "speakerIds": ["dart-hanako"],
+        "isLightningTalk": true,
+        "isBeginnersLightningTalk": false,
+        "isHandsOn": false,
+        "sessionizeUrl": "https://sessionize.com/example/lightning-talk-1",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "timelineEvents/opening",
+      "schema": "timeline_event",
+      "data": {
+        "title": { "ja": "開場", "en": "Doors Open" },
+        "startsAt": "2026-11-14T09:00:00+09:00",
+        "endsAt": null,
+        "venueId": null,
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "timelineEvents/lunch",
+      "schema": "timeline_event",
+      "data": {
+        "title": { "ja": "ランチ休憩", "en": "Lunch Break" },
+        "startsAt": "2026-11-14T12:00:00+09:00",
+        "endsAt": "2026-11-14T13:00:00+09:00",
+        "venueId": "hall-a",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sponsors/example-platinum",
+      "schema": "sponsor",
+      "data": {
+        "name": { "ja": "サンプル プラチナ", "en": "Sample Platinum Inc." },
+        "nameKana": "サンプルプラチナ",
+        "description": {
+          "ja": "プラチナスポンサーのサンプルです。",
+          "en": "A sample platinum sponsor."
+        },
+        "logoUrl": "https://example.com/sponsors/platinum.png",
+        "tier": "platinum",
+        "slug": "example-platinum",
+        "xUrl": "https://x.com/example_platinum",
+        "websiteUrl": "https://example.com",
+        "recruitUrl": null,
+        "jobBoardUrl": null,
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sponsors/example-gold",
+      "schema": "sponsor",
+      "data": {
+        "name": { "ja": "サンプル ゴールド", "en": "Sample Gold Inc." },
+        "nameKana": null,
+        "description": {
+          "ja": "ゴールドスポンサーのサンプルです。",
+          "en": "A sample gold sponsor."
+        },
+        "logoUrl": "https://example.com/sponsors/gold.png",
+        "tier": "gold",
+        "slug": "example-gold",
+        "xUrl": null,
+        "websiteUrl": "https://example.com",
+        "recruitUrl": null,
+        "jobBoardUrl": null,
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "staffMembers/staff-001",
+      "schema": "staff_member",
+      "data": {
+        "name": "運営 太郎",
+        "iconUrl": "https://example.com/staff/staff-001.png",
+        "greeting": "よろしくお願いします！",
+        "snsLinks": [
+          { "type": "x", "value": "https://x.com/example_staff_001" },
+          { "type": "github", "value": "https://github.com/example-staff-001" }
+        ],
+        "order": 1,
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "staffMembers/staff-002",
+      "schema": "staff_member",
+      "data": {
+        "name": "運営 花子",
+        "iconUrl": "https://example.com/staff/staff-002.png",
+        "greeting": null,
+        "snsLinks": [],
+        "order": 2,
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
     }
   ]
 }
