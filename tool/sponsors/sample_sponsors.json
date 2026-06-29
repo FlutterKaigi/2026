@@ -6,8 +6,8 @@
       "name": { "ja": "Acme Robotics", "en": "Acme Robotics" },
       "nameKana": "アクメロボティクス",
       "description": {
-        "ja": "Acme Robotics は産業用ロボットの制御基盤を Flutter で構築しています。FlutterKaigi 2026 では、現場のエンジニアと最新の知見を共有できることを楽しみにしています。",
-        "en": "Acme Robotics builds industrial robot control platforms with Flutter. We look forward to sharing the latest insights with engineers at FlutterKaigi 2026."
+        "ja": "Acme Robotics は産業用ロボットの制御基盤を Flutter で構築しています。\n\n現場のエンジニアと最新の知見を共有できることを楽しみにしています。\nぜひブースにお立ち寄りください！",
+        "en": "Acme Robotics builds industrial robot control platforms with Flutter.\n\nWe look forward to sharing the latest insights with engineers at FlutterKaigi 2026.\nPlease stop by our booth!"
       },
       "logoUrl": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAABwklEQVR4nO3bwU0DMRBAUR9SCA1AZVANndEAdALiMNJqFQmJrOfP2P/fk43mra0oWd+eXz+/h2Hd6A+wewLACQAnAJwAcALACQAnAJwAcALACQAnAJwAcALACQAnAJwAcALACQAnAJwAcALAtQD4eH/692tf3r4u/SxXVxrgkcGf36MqRDmAK4b+1/tWwigFMGv4965TBaEEQNbg712ThsABiOGfr08ioAD08CMSAQOoMvyIQkAAqg0/IhDSAaoOP8pGSAWoPvwoEwH/FrR7aQBd7v4oaxWkAHQbfpSB4BYEJwDcdICu2080extyBcBNBeh+90czV4ErAE4AOAHgBIATAE4AOAHgBIATAE4AOAHgBIATAE4AuKkAvz/hrvCTtH/ILNx0gO6rwKciFk8AuBSArtvQMk/GjYYIPpy7SakAXVbBsucDRgOE5U/IjMII25wRGwURtjslOQohbHtOeBRA2P6k/DgMIROCHnxUAiDKWg1Vhj+qAYzTcK7EqDT0Y+UAjl2xNVUdfFQaIKo+xEdqAbByAsAJACcAnABwAsAJACcAnABwAsAJACcAnABwAsAJACcAnABwAsAJACcAnABwP2JIhnOLnEX5AAAAAElFTkSuQmCC",
       "tier": "platinum",

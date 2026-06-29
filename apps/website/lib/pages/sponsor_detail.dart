@@ -23,9 +23,15 @@ class SponsorDetailPage extends StatelessComponent {
     final strings = LocaleScope.stringsOf(context);
     final locale = strings.locale;
     final name = sponsor.name.resolve(locale);
-    // Trim stray leading/trailing whitespace; inner line breaks are preserved
-    // by the `white-space: pre-wrap` styling on the PR block.
     final prText = sponsor.prText.resolve(locale).trim();
+    // Split on newlines so each line becomes its own text node joined by
+    // explicit <br>s (see the render below). We deliberately do NOT use
+    // `white-space: pre-wrap` to honour the author's line breaks: Jaspr
+    // pretty-prints the built HTML and indents a multi-line text node onto its
+    // own line, and pre-wrap would render that formatting indentation as a
+    // visible first-line indent. Explicit <br>s let the surrounding formatting
+    // whitespace collapse normally.
+    final prLines = prText.split('\n');
 
     return Component.fragment([
       Document.head(
@@ -106,7 +112,12 @@ class SponsorDetailPage extends StatelessComponent {
                 ]),
             ]),
             div(classes: 'sponsor-detail__desc', [
-              div(classes: 'sponsor-detail__pr', [.text(prText)]),
+              div(classes: 'sponsor-detail__pr', [
+                for (var i = 0; i < prLines.length; i++) ...[
+                  if (i > 0) br(),
+                  .text(prLines[i]),
+                ],
+              ]),
             ]),
           ]),
         ]),
@@ -326,7 +337,6 @@ class SponsorDetailPage extends StatelessComponent {
           raw: const {
             'font-size': '16px',
             'line-height': '1.7',
-            'white-space': 'pre-wrap',
             'overflow-wrap': 'anywhere',
           },
         ),
