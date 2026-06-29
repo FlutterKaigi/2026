@@ -159,18 +159,21 @@ class SponsorsSection extends StatelessComponent {
           height: 100.percent,
           raw: const {'object-fit': 'contain'},
         ),
-        // Tier sizes (fluid via clamp, square via aspect-ratio).
+        // Tier sizes: fixed widths (square via aspect-ratio). The logo size is
+        // intentionally NOT responsive — the grid wraps (`flex-wrap: wrap`) so
+        // narrower viewports show fewer cards per row rather than shrinking each
+        // logo. Sizes follow the Figma layout (node 656:2718).
         css('&.sponsor-card--xl').styles(
-          raw: const {'width': 'clamp(180px, 38vw, 256px)'},
+          raw: const {'width': '256px'},
         ),
         css('&.sponsor-card--lg').styles(
-          raw: const {'width': 'clamp(150px, 30vw, 192px)'},
+          raw: const {'width': '192px'},
         ),
         css('&.sponsor-card--md').styles(
-          raw: const {'width': 'clamp(112px, 24vw, 144px)'},
+          raw: const {'width': '144px'},
         ),
         css('&.sponsor-card--sm').styles(
-          raw: const {'width': 'clamp(84px, 18vw, 96px)'},
+          raw: const {'width': '96px'},
         ),
         // Individual sponsors are shown as circular tiles. The card chrome is
         // circular via border-radius; the logo itself is masked to a circle at
