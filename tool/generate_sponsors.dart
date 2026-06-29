@@ -1,7 +1,12 @@
 /// Generates `apps/website/lib/constants/generated_sponsors.dart` and the
-/// processed sponsor images under `apps/website/web/images/sponsors/` from the
+/// processed logo images under `apps/website/web/images/logos/` from the
 /// `sponsors` Firestore collection managed by `packages/data` (the same data
 /// the admin dashboard writes), or a local sample fixture as a fallback.
+///
+/// NB: the served image directory and the link-icon filenames deliberately
+/// avoid the word "sponsor" — ad blockers (EasyList et al.) network-block URLs
+/// containing it, which rendered the logos blank. Keep served asset paths
+/// neutral.
 ///
 /// Both outputs are **git-ignored** and regenerated on every build, so sponsor
 /// data is never committed to the git history (see `.gitignore`).
@@ -49,16 +54,17 @@ import 'package:http/http.dart' as http;
 import 'package:image/image.dart' as img;
 
 const _outFile = 'apps/website/lib/constants/generated_sponsors.dart';
-const _imagesOutDir = 'apps/website/web/images/sponsors';
-const _ogpBasePath = 'apps/website/web/images/sponsor_ogp_base.png';
+const _imagesOutDir = 'apps/website/web/images/logos';
+const _ogpBasePath = 'apps/website/web/images/ogp_base.png';
 const _sampleFile = 'tool/sponsors/sample_sponsors.json';
 
 // Firestore defaults — kept in sync with tool/firebase_seed.dart.
 const _defaultProjectId = 'dev-flutterkaigi-2026';
 const _defaultFirestoreHost = 'localhost:8080';
 
-// Asset paths are written relative to the site base href.
-const _assetPrefix = 'images/sponsors';
+// Asset paths are written relative to the site base href. The directory name
+// avoids "sponsor" so ad blockers don't network-block the logo requests.
+const _assetPrefix = 'images/logos';
 const _defaultOgp = 'images/ogp.png';
 
 // Output sizes.

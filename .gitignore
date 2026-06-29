@@ -32,4 +32,4 @@ ui-debug.log
 # Generated sponsor data + processed sponsor images.
 # Real sponsor info is fetched at build time and must never be committed.
 apps/website/lib/constants/generated_sponsors.dart
-apps/website/web/images/sponsors/
+apps/website/web/images/logos/

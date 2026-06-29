@@ -79,15 +79,16 @@ class SponsorLink {
 /// Icon asset (relative to the site base href) used to represent a link of the
 /// given [type] — shared by the home logo wall and the detail banner.
 String sponsorLinkIconAsset(SponsorLinkType type) => switch (type) {
-  SponsorLinkType.x => 'images/icons/sponsor_x.svg',
-  SponsorLinkType.recruit => 'images/icons/sponsor_briefcase.svg',
-  SponsorLinkType.other => 'images/icons/sponsor_globe.svg',
+  // Filenames avoid "sponsor" so ad blockers don't network-block the icons.
+  SponsorLinkType.x => 'images/icons/link_x.svg',
+  SponsorLinkType.recruit => 'images/icons/link_briefcase.svg',
+  SponsorLinkType.other => 'images/icons/link_globe.svg',
 };
 
 /// A sponsor as rendered on the site.
 ///
 /// Logo/OGP fields are *asset paths* relative to the site base href (e.g.
-/// `images/sponsors/acme-square.png`). When logo processing fails (e.g. the
+/// `images/logos/acme-square.png`). When logo processing fails (e.g. the
 /// source was an SVG), they may fall back to the remote URL / default OGP.
 class Sponsor {
   const Sponsor({
