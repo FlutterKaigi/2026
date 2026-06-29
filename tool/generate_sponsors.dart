@@ -69,8 +69,12 @@ const _defaultOgp = 'images/ogp.png';
 
 // Output sizes.
 const _squarePx = 512;
-const _wideW = 1000;
-const _wideH = 340;
+// Detail-banner logo: bounded longest side, then padded so the logo keeps ~10%
+// breathing room on every side while preserving its own aspect ratio. A fixed
+// wide canvas would letterbox square logos into a tiny center; an aspect-aware
+// canvas lets the banner CSS scale square logos up to fill the banner.
+const _bannerLogoMax = 1000;
+const _bannerPadFrac = 0.1;
 const _ogpW = 1200;
 const _ogpH = 630;
 
@@ -314,7 +318,7 @@ Future<void> _processImages(_Sponsor s, img.Image ogpBase) async {
   _writePng('${s.slug}-square.png', square);
   s.squareLogo = '$_assetPrefix/${s.slug}-square.png';
 
-  final wide = _containCanvas(logo, _wideW, _wideH, padFrac: 0.06);
+  final wide = _bannerCanvas(logo, _bannerLogoMax, _bannerPadFrac);
   _writePng('${s.slug}-wide.png', wide);
   s.wideLogo = '$_assetPrefix/${s.slug}-wide.png';
 
@@ -365,6 +369,27 @@ img.Image _containCanvas(img.Image src, int w, int h, {double padFrac = 0.0}) {
   final innerW = (w * (1 - padFrac)).round();
   final innerH = (h * (1 - padFrac)).round();
   final fitted = _scaleToFit(src, innerW, innerH);
+  final canvas = img.Image(width: w, height: h, numChannels: 4);
+  img.compositeImage(
+    canvas,
+    fitted,
+    dstX: ((w - fitted.width) / 2).round(),
+    dstY: ((h - fitted.height) / 2).round(),
+  );
+  return canvas;
+}
+
+/// Builds the detail-banner logo: [src] bounded to [maxLogo] on its longest
+/// side, centered on a transparent canvas that preserves the logo's aspect
+/// ratio with [padFrac] breathing room on every side (the logo occupies
+/// `1 - 2*padFrac` of each dimension). Unlike a fixed wide canvas, this never
+/// letterboxes a square logo into a tiny center, so the banner CSS can scale it
+/// up to fill the available height.
+img.Image _bannerCanvas(img.Image src, int maxLogo, double padFrac) {
+  final fitted = _scaleToFit(src, maxLogo, maxLogo);
+  final scale = 1 - 2 * padFrac;
+  final w = (fitted.width / scale).round();
+  final h = (fitted.height / scale).round();
   final canvas = img.Image(width: w, height: h, numChannels: 4);
   img.compositeImage(
     canvas,

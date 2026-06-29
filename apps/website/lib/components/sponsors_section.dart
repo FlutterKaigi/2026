@@ -11,6 +11,10 @@ import '../l10n/strings.dart';
 /// Tiers and logo-cell sizes follow the Figma layout (node 656:2718):
 /// Platinum 256 / Gold 192 / Silver·Bronze·Tool·Student·Community 144 /
 /// Individual 96. Each logo links to `sponsors/{slug}`.
+/// Firestore document id of Flutter (Google) — pinned to the front of the
+/// sponsor wall regardless of the default id-ascending order.
+const String _pinnedFirstId = 'D2026-015';
+
 class SponsorsSection extends StatelessComponent {
   const SponsorsSection({super.key});
 
@@ -21,7 +25,15 @@ class SponsorsSection extends StatelessComponent {
     // wall has a stable, name-agnostic ordering within tiers. The slug now
     // carries the admin-entered detail-page path and is no longer id-derived,
     // so sort on the id explicitly rather than the slug.
-    final ordered = [...generatedSponsors]..sort((s1, s2) => s1.id.compareTo(s2.id));
+    //
+    // Exception: Flutter (Google) is pinned to the front of its tier
+    // unconditionally — as the namesake sponsor it always leads the wall,
+    // regardless of where its document id falls in the ascending order.
+    final ordered = [...generatedSponsors]..sort((s1, s2) {
+      if (s1.id == _pinnedFirstId) return s2.id == _pinnedFirstId ? 0 : -1;
+      if (s2.id == _pinnedFirstId) return 1;
+      return s1.id.compareTo(s2.id);
+    });
     final byTier = groupSponsorsByTier(ordered);
 
     return section(id: 'sponsors', classes: 'sponsors-section', [
