@@ -103,14 +103,30 @@ Future<List<_Sponsor>> _loadSponsors() async {
     stdout.writeln('Loaded ${sponsors.length} sponsor(s) from Firestore.');
     // A reachable but empty collection is a valid state (e.g. data not seeded
     // yet) — emit an empty site rather than masking it with fake placeholders.
-    return _dedupeSlugs(sponsors);
+    return _dedupeSlugs(_onlyPublishable(sponsors));
   } catch (e) {
     stderr.writeln(
       'warning: could not load sponsors from Firestore ($e).\n'
       'Falling back to $_sampleFile — placeholder sponsors will be shown.',
     );
-    return _dedupeSlugs(_loadSampleSponsors());
+    return _dedupeSlugs(_onlyPublishable(_loadSampleSponsors()));
   }
+}
+
+/// Temporary publication gate: only sponsors with a configured [`logoUrl`] are
+/// listed on the site for now; logos are being collected progressively and the
+/// rest will be published as theirs arrive. Gating here (at the data source)
+/// rather than in the website UI is deliberate — the generator otherwise
+/// synthesizes branded placeholder logos that the UI cannot tell apart from
+/// real ones — and it also skips emitting the hidden sponsors' detail pages, so
+/// no orphan routes are produced. Drop this filter to publish everyone.
+List<_Sponsor> _onlyPublishable(List<_Sponsor> sponsors) {
+  final kept = sponsors.where((s) => s.logoUrl.trim().isNotEmpty).toList();
+  final dropped = sponsors.length - kept.length;
+  if (dropped > 0) {
+    stdout.writeln('Withholding $dropped sponsor(s) without a logoUrl (published progressively as logos arrive).');
+  }
+  return kept;
 }
 
 /// Fetches every document in the `sponsors` collection via the Firestore REST
@@ -302,6 +318,17 @@ Future<void> _processImages(_Sponsor s, img.Image ogpBase) async {
 }
 
 Future<Uint8List> _fetchBytes(String url) async {
+  // Inline `data:` URI (base64) — lets offline fixtures carry a real logo
+  // without a network round-trip or a committed binary asset.
+  if (url.startsWith('data:')) {
+    final comma = url.indexOf(',');
+    if (comma < 0) throw const FormatException('malformed data: URI');
+    final isBase64 = url.substring(0, comma).contains(';base64');
+    final payload = url.substring(comma + 1);
+    return Uint8List.fromList(
+      isBase64 ? base64Decode(payload) : utf8.encode(Uri.decodeComponent(payload)),
+    );
+  }
   final resp = await http.get(Uri.parse(url)).timeout(const Duration(seconds: 20));
   if (resp.statusCode != 200) {
     throw HttpException('status ${resp.statusCode}');

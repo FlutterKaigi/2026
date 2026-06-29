@@ -1,5 +1,5 @@
 {
-  "_comment": "Fake sample data for offline/preview builds, shaped like the packages/data `Sponsor` Firestore model. Used only when the Firestore emulator/project is unreachable. logoUrl is intentionally empty so the generator synthesizes offline-safe placeholder logos. Never real sponsor data.",
+  "_comment": "Fake sample data for offline/preview builds, shaped like the packages/data `Sponsor` Firestore model. Used only when the Firestore emulator/project is unreachable. The site currently publishes only sponsors with a non-empty logoUrl (logos are added progressively); entries here mirror that — some carry an inline data: URI logo (published) while others leave logoUrl empty (withheld until a logo arrives). Never real sponsor data.",
   "sponsors": [
     {
       "id": "sample-acme",
@@ -9,7 +9,7 @@
         "ja": "Acme Robotics は産業用ロボットの制御基盤を Flutter で構築しています。FlutterKaigi 2026 では、現場のエンジニアと最新の知見を共有できることを楽しみにしています。",
         "en": "Acme Robotics builds industrial robot control platforms with Flutter. We look forward to sharing the latest insights with engineers at FlutterKaigi 2026."
       },
-      "logoUrl": "",
+      "logoUrl": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAABwklEQVR4nO3bwU0DMRBAUR9SCA1AZVANndEAdALiMNJqFQmJrOfP2P/fk43mra0oWd+eXz+/h2Hd6A+wewLACQAnAJwAcALACQAnAJwAcALACQAnAJwAcALACQAnAJwAcALACQAnAJwAcALAtQD4eH/692tf3r4u/SxXVxrgkcGf36MqRDmAK4b+1/tWwigFMGv4965TBaEEQNbg712ThsABiOGfr08ioAD08CMSAQOoMvyIQkAAqg0/IhDSAaoOP8pGSAWoPvwoEwH/FrR7aQBd7v4oaxWkAHQbfpSB4BYEJwDcdICu2080extyBcBNBeh+90czV4ErAE4AOAHgBIATAE4AOAHgBIATAE4AOAHgBIATAE4AuKkAvz/hrvCTtH/ILNx0gO6rwKciFk8AuBSArtvQMk/GjYYIPpy7SakAXVbBsucDRgOE5U/IjMII25wRGwURtjslOQohbHtOeBRA2P6k/DgMIROCHnxUAiDKWg1Vhj+qAYzTcK7EqDT0Y+UAjl2xNVUdfFQaIKo+xEdqAbByAsAJACcAnABwAsAJACcAnABwAsAJACcAnABwAsAJACcAnABwAsAJACcAnABwP2JIhnOLnEX5AAAAAElFTkSuQmCC",
       "tier": "platinum",
       "slug": "acme-robotics",
       "websiteUrl": "https://example.com/acme",
@@ -26,7 +26,7 @@
         "ja": "Nimbus Cloud はマルチプラットフォーム向けのバックエンドを提供します。Dart/Flutter チームを募集中です。",
         "en": "Nimbus Cloud provides backends for multi-platform apps. Our Dart/Flutter team is hiring."
       },
-      "logoUrl": "",
+      "logoUrl": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAABwklEQVR4nO3bwU0DMRBAUR/SBw1AY1APldEAVALiMNJqFQmJrOfP2P/fk43mra0oWd8+X5+/h2Hd6A+wewLACQAnAJwAcALACQAnAJwAcALACQAnAJwAcALACQAnAJwAcALACQAnAJwAcALAtQB4ev/492u/3l4u/SxXVxrgkcGf36MqRDmAK4b+1/tWwigFMGv4965TBaEEQNbg712ThsABiOGfr08ioAD08CMSAQOoMvyIQkAAqg0/IhDSAaoOP8pGSAWoPvwoEwH/FrR7aQBd7v4oaxWkAHQbfpSB4BYEJwDcdICu2080extyBcBNBeh+90czV4ErAE4AOAHgBIATAE4AOAHgBIATAE4AOAHgBIATAE4AuKkAvz/hrvCTtH/ILNx0gO6rwKciFk8AuBSArtvQMk/GjYYIPpy7SakAXVbBsucDRgOE5U/IjMII25wRGwURtjslOQohbHtOeBRA2P6k/DgMIROCHnxUAiDKWg1Vhj+qAYzTcK7EqDT0Y+UAjl2xNVUdfFQaIKo+xEdqAbByAsAJACcAnABwAsAJACcAnABwAsAJACcAnABwAsAJACcAnABwAsAJACcAnABwP8m4hm+19RgdAAAAAElFTkSuQmCC",
       "tier": "gold",
       "websiteUrl": "https://example.com/nimbus",
       "xUrl": "https://x.com/example2",
@@ -71,7 +71,7 @@
         "ja": "Quark Tools は Flutter 開発者向けの CLI ツール群を提供しています。",
         "en": "Quark Tools provides a suite of CLI tools for Flutter developers."
       },
-      "logoUrl": "",
+      "logoUrl": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAABwklEQVR4nO3bQU7DMBBAUS96HjgQbLgYbLgQJwKxGCmKKiHReP6M/f++TTUvtqo2vj29v3wPw7rRH2D3BIATAE4AOAHgBIATAE4AOAHgBIATAE4AOAHgBIATAE4AOAHgBIATAE4AOAHgBIBrAfD19vnv1z5/vF76Wa6uNMAjgz+/R1WIcgBXDP2v962EUQpg1vDvXacKQgmArMHfuyYNgQMQwz9fn0RAAejhRyQCBlBl+BGFgABUG35EIKQDVB1+lI2QClB9+FEmAv4taPfSALrc/VHWKkgB6Db8KAPBLQhOALjpAF23n2j2NuQKgJsK0P3uj2auAlcAnABwAsAJACcAnABwAsAJACcAnABwAsAJACcAnABwUwF+f8Jd4Sdp/5BZuOkA3VeBT0UsngBwKQBdt6FlnowbDRF8OHeTUgG6rIJlzweMBgjLn5AZhRG2OSM2CiJsd0pyFELY9pzwKICw/Un5cRhCJgQ9+KgEQJS1GqoMf1QDGKfhXIlRaejHygEcu2Jrqjr4qDRAVH2Ij9QCYOUEgBMATgA4AeAEgBMATgA4AeAEgBMATgA4AeAEgBMATgA4AeAEgBMATgA4AeB+AFA0hdF2gxWLAAAAAElFTkSuQmCC",
       "tier": "tool",
       "slug": "quark-tools",
       "websiteUrl": "https://example.com/quark",
