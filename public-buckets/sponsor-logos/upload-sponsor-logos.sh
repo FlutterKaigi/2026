@@ -57,6 +57,7 @@ echo ""
 # --s3-no-check-bucket でバケット存在チェック(要 CreateBucket 権限)を省略
 rclone copy "$SOURCE_DIR" "${RCLONE_REMOTE}:${BUCKET_NAME}/${DEST_PREFIX}/" \
   --progress \
+  --exclude ".*" \
   --header-upload "Cache-Control: public, max-age=86400" \
   --s3-no-check-bucket
 
