@@ -157,6 +157,10 @@ class SponsorsSection extends StatelessComponent {
         css('img').styles(
           width: 100.percent,
           height: 100.percent,
+          // 一部のロゴ素材は外周に白いグロー（白縁のにじみ）がアルファに焼き込まれて
+          // おり、純白以外の面では灰色く浮く。img 自体に白プレートを明示し、どの面に
+          // 置かれてもグローが見えないようにする。
+          backgroundColor: onBrand,
           raw: const {'object-fit': 'contain'},
         ),
         // Tier sizes: fixed widths (square via aspect-ratio). The logo size is

@@ -188,6 +188,10 @@ class SponsorDetailPage extends StatelessComponent {
           },
         ),
         css('.sponsor-detail__logo').styles(
+          // 一部のロゴ素材は外周に白いグロー（白縁のにじみ）がアルファに焼き込まれて
+          // おり、純白以外の面では灰色く浮く。img 自体に白プレートを明示し、どの面に
+          // 置かれてもグローが見えないようにする。
+          backgroundColor: onBrand,
           raw: const {
             'max-width': '100%',
             'max-height': 'clamp(180px, 26vw, 312px)',
