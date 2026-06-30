@@ -24,7 +24,8 @@ class SponsorEditPage extends HookConsumerWidget {
     final nameKanaController = useTextEditingController(text: sponsor?.nameKana ?? '');
     final descJaController = useTextEditingController(text: sponsor?.description.ja ?? '');
     final descEnController = useTextEditingController(text: sponsor?.description.en ?? '');
-    final logoUrlController = useTextEditingController(text: sponsor?.logoUrl ?? '');
+    final primaryLogoUrlController = useTextEditingController(text: sponsor?.primaryLogoUrl ?? '');
+    final secondaryLogoUrlController = useTextEditingController(text: sponsor?.secondaryLogoUrl ?? '');
     final slugController = useTextEditingController(text: sponsor?.slug ?? '');
     final xUrlController = useTextEditingController(text: sponsor?.xUrl ?? '');
     final websiteUrlController = useTextEditingController(text: sponsor?.websiteUrl ?? '');
@@ -42,7 +43,10 @@ class SponsorEditPage extends HookConsumerWidget {
           name: LocaleMap(ja: nameJaController.text.trim(), en: nameEnController.text.trim()),
           nameKana: nameKanaController.text.trim().isEmpty ? null : nameKanaController.text.trim(),
           description: LocaleMap(ja: descJaController.text.trim(), en: descEnController.text.trim()),
-          logoUrl: logoUrlController.text.trim().isEmpty ? null : logoUrlController.text.trim(),
+          primaryLogoUrl: primaryLogoUrlController.text.trim().isEmpty ? null : primaryLogoUrlController.text.trim(),
+          secondaryLogoUrl: secondaryLogoUrlController.text.trim().isEmpty
+              ? null
+              : secondaryLogoUrlController.text.trim(),
           tier: tier.value,
           slug: slugController.text.trim().isEmpty ? null : slugController.text.trim(),
           xUrl: xUrlController.text.trim().isEmpty ? null : xUrlController.text.trim(),
@@ -131,9 +135,15 @@ class SponsorEditPage extends HookConsumerWidget {
                     ),
                     const SizedBox(height: 24),
                     OutlinedTextFormField(
-                      controller: logoUrlController,
-                      labelText: '企業ロゴ URL',
+                      controller: primaryLogoUrlController,
+                      labelText: '企業ロゴ URL (プライマリー)',
                       hintText: 'https://example.com/logo.png',
+                    ),
+                    const SizedBox(height: 8),
+                    OutlinedTextFormField(
+                      controller: secondaryLogoUrlController,
+                      labelText: '企業ロゴ URL (セカンダリー)',
+                      hintText: 'https://example.com/logo-secondary.png',
                     ),
                     const SizedBox(height: 24),
                     OutlinedTextFormField(

@@ -1,0 +1,6 @@
+# このファイルを terraform.tfvars にコピーして値を記入する。
+# terraform.tfvars は .gitignore 済み（*.tfvars 除外）なのでコミットされない。
+#
+# zone_id は Cloudflare ダッシュボードで flutterkaigi.jp を選び、
+# Overview ページ右側の「Zone ID」からコピーする。
+zone_id = "your-flutterkaigi-jp-zone-id"
