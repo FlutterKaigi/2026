@@ -136,14 +136,14 @@ class SponsorsSection extends StatelessComponent {
             width: 1.px,
           ),
           textDecoration: const TextDecoration(line: TextDecorationLine.none),
+          // No padding here: CSS percentage padding resolves against the PARENT
+          // width (same for every card) and would swamp the fixed tier widths
+          // (collapsing the logo to nothing). Breathing room is set on the <img>
+          // below, whose % sizing IS relative to this card — so it scales per tier.
           raw: const {
             'aspect-ratio': '1',
             'flex-shrink': '0',
             'overflow': 'hidden',
-            // ロゴの余白は生成時に焼き込まず表示時に確保する。各辺15%のクリア
-            // スペース（ロゴガイドライン対策）。個人スポンサーは円形クリップの
-            // ため 0 に上書きする（下の --circle 参照）。
-            'padding': '15%',
             'box-shadow': '4px 4px 2px rgba(0, 0, 0, 0.25)',
             'transition': 'transform 150ms ease, box-shadow 150ms ease',
           },
@@ -157,12 +157,14 @@ class SponsorsSection extends StatelessComponent {
         css('&:focus-visible').styles(
           raw: const {'outline': '3px solid #65558F', 'outline-offset': '2px'},
         ),
+        // Logo occupies 70% of the card (≈15% clear space each side — the
+        // breathing room formerly baked into the generated asset). % is relative
+        // to this card, so it scales correctly per tier. Centered via the card's
+        // flex alignment. White plate hides the baked white glow some logos carry
+        // (see sponsors.dart) regardless of surrounding colour.
         css('img').styles(
-          width: 100.percent,
-          height: 100.percent,
-          // 一部のロゴ素材は外周に白いグロー（白縁のにじみ）がアルファに焼き込まれて
-          // おり、純白以外の面では灰色く浮く。img 自体に白プレートを明示し、どの面に
-          // 置かれてもグローが見えないようにする。
+          width: 70.percent,
+          height: 70.percent,
           backgroundColor: onBrand,
           raw: const {'object-fit': 'contain'},
         ),
@@ -183,12 +185,17 @@ class SponsorsSection extends StatelessComponent {
           raw: const {'width': '96px'},
         ),
         // Individual sponsors are shown as circular tiles: the logo fills the
-        // tile (no breathing-room padding) and the card clips it to a circle via
-        // border-radius + the card's `overflow: hidden`. Clipping happens on the
-        // card container (not the replaced <img> itself), so it yields a true
-        // circle rather than the octagon a border-radius on the <img> produced.
+        // tile (no breathing room — overridden below) and the card clips it to a
+        // circle via border-radius + the card's `overflow: hidden`. Clipping
+        // happens on the card container (not the replaced <img> itself), so it
+        // yields a true circle rather than the octagon a border-radius on the
+        // <img> produced.
         css('&.sponsor-card--circle').styles(
-          raw: const {'border-radius': '50%', 'padding': '0'},
+          raw: const {'border-radius': '50%'},
+        ),
+        css('&.sponsor-card--circle img').styles(
+          width: 100.percent,
+          height: 100.percent,
         ),
       ]),
     ]),
