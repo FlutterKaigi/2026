@@ -37,13 +37,14 @@
 ///     empty* collection yields an empty site (no fake data).
 ///
 /// Logo handling (raster sources — PNG/JPG/WebP):
-///   - square (home grid) + wide (detail banner) variants are written as PNG.
-///   - an OGP card (1200x630) is composited over `web/images/ogp.png`.
+///   - `primaryLogoUrl` → the wide (detail banner) variant and the OGP card.
+///   - `secondaryLogoUrl` → the square (home grid) variant; falls back to the
+///     primary logo when it is unset.
+///   - variants are written as PNG; the OGP card (1200x630) is composited over
+///     `web/images/ogp.png`.
 ///   - if a logo can't be fetched/decoded (e.g. an SVG), the remote URL is used
 ///     for display and the OGP falls back to the default site image — the build
 ///     never fails because of a single bad logo.
-///   - sample entries use an empty `logoUrl`, so a branded placeholder is
-///     synthesized offline.
 library;
 
 import 'dart:convert';
@@ -123,18 +124,20 @@ Future<List<_Sponsor>> _loadSponsors() async {
   }
 }
 
-/// Temporary publication gate: only sponsors with a configured [`logoUrl`] are
-/// listed on the site for now; logos are being collected progressively and the
-/// rest will be published as theirs arrive. Gating here (at the data source)
+/// Temporary publication gate: only sponsors with a configured
+/// [`primaryLogoUrl`] are listed on the site for now; logos are being collected
+/// progressively and the rest will be published as theirs arrive. (The square
+/// home-grid logo falls back to the primary when `secondaryLogoUrl` is unset, so
+/// only the primary is required to publish.) Gating here (at the data source)
 /// rather than in the website UI is deliberate — the generator otherwise
 /// synthesizes branded placeholder logos that the UI cannot tell apart from
 /// real ones — and it also skips emitting the hidden sponsors' detail pages, so
 /// no orphan routes are produced. Drop this filter to publish everyone.
 List<_Sponsor> _onlyPublishable(List<_Sponsor> sponsors) {
-  final kept = sponsors.where((s) => s.logoUrl.trim().isNotEmpty).toList();
+  final kept = sponsors.where((s) => s.primaryLogoUrl.trim().isNotEmpty).toList();
   final dropped = sponsors.length - kept.length;
   if (dropped > 0) {
-    stdout.writeln('Withholding $dropped sponsor(s) without a logoUrl (published progressively as logos arrive).');
+    stdout.writeln('Withholding $dropped sponsor(s) without a primaryLogoUrl (published progressively as logos arrive).');
   }
   return kept;
 }
@@ -277,54 +280,78 @@ Object? _decodeFirestoreValue(Object? value) {
 // ── Image processing ────────────────────────────────────────────────────────
 
 Future<void> _processImages(_Sponsor s, img.Image ogpBase) async {
-  img.Image? logo;
-  final url = s.logoUrl.trim();
-  if (url.isNotEmpty) {
-    try {
-      final bytes = await _fetchBytes(url);
-      logo = img.decodeImage(bytes);
-      if (logo == null) {
-        stderr.writeln('warning: could not decode logo for sponsor ${s.slug} ($url)');
-      }
-    } catch (e) {
-      stderr.writeln('warning: could not fetch logo for sponsor ${s.slug} ($url): $e');
-    }
-  }
+  // Two logo sources with distinct roles (see the dashboard's primary/secondary
+  // logo fields):
+  //   - primary  → wide detail-banner variant + the OGP card.
+  //   - secondary → square home-grid variant; falls back to the primary when
+  //     unset, so a sponsor only needs the one logo to be published.
+  final primaryUrl = s.primaryLogoUrl.trim();
+  final secondaryUrl = s.secondaryLogoUrl.trim();
+  final squareUrl = secondaryUrl.isNotEmpty ? secondaryUrl : primaryUrl;
 
-  // SVG / fetch failure with a real URL: use the remote URL for display and the
-  // default OGP. (Empty URL → synthesize a branded placeholder below.)
-  if (logo == null && url.isNotEmpty) {
-    s.squareLogo = url;
-    s.wideLogo = url;
-    s.ogpImage = _defaultOgp;
-    return;
-  }
+  final primaryLogo = await _tryDecodeLogo(primaryUrl, s.slug);
+  // Avoid a second fetch/decode when the square reuses the primary source.
+  final squareLogo = squareUrl == primaryUrl
+      ? primaryLogo
+      : await _tryDecodeLogo(squareUrl, s.slug);
 
-  logo ??= _placeholderLogo(s.displayName, _squarePx, _squarePx);
-
+  // ── Square (home grid) ──
   // Individual sponsors render as circular tiles: fill the square (no padding)
-  // so the inscribed circle mask yields a true circle, not an octagon.
+  // so the inscribed circle mask yields a true circle, not an octagon. Other
+  // tiers keep ~10% breathing room on every side (e.g. a 412×412 logo on a
+  // 512×512 canvas).
   final isIndividual = s.tier == _Tier.individual;
-  // Non-individual logos keep ~10% breathing room on every side (e.g. a
-  // 412×412 logo on a 512×512 canvas). Individuals fill the square so the
-  // inscribed-circle mask yields a true circle.
-  final square = _containCanvas(
-    logo,
-    _squarePx,
-    _squarePx,
-    padFrac: isIndividual ? 0.0 : 0.2,
-  );
-  if (isIndividual) _applyCircleMask(square);
-  _writePng('${s.slug}-square.png', square);
-  s.squareLogo = '$_assetPrefix/${s.slug}-square.png';
+  final squareSrc = squareLogo ??
+      (squareUrl.isEmpty ? _placeholderLogo(s.displayName, _squarePx, _squarePx) : null);
+  if (squareSrc != null) {
+    final square = _containCanvas(
+      squareSrc,
+      _squarePx,
+      _squarePx,
+      padFrac: isIndividual ? 0.0 : 0.2,
+    );
+    if (isIndividual) _applyCircleMask(square);
+    _writePng('${s.slug}-square.png', square);
+    s.squareLogo = '$_assetPrefix/${s.slug}-square.png';
+  } else {
+    // SVG / fetch failure with a real URL: use the remote URL for display.
+    s.squareLogo = squareUrl;
+  }
 
-  final wide = _bannerCanvas(logo, _bannerLogoMax, _bannerPadFrac);
-  _writePng('${s.slug}-wide.png', wide);
-  s.wideLogo = '$_assetPrefix/${s.slug}-wide.png';
+  // ── Wide (detail banner) ──
+  if (primaryLogo != null) {
+    final wide = _bannerCanvas(primaryLogo, _bannerLogoMax, _bannerPadFrac);
+    _writePng('${s.slug}-wide.png', wide);
+    s.wideLogo = '$_assetPrefix/${s.slug}-wide.png';
+  } else {
+    s.wideLogo = primaryUrl;
+  }
 
-  final ogp = _composeOgp(ogpBase, logo);
-  _writePng('${s.slug}-ogp.png', ogp);
-  s.ogpImage = '$_assetPrefix/${s.slug}-ogp.png';
+  // ── OGP card ──
+  if (primaryLogo != null) {
+    final ogp = _composeOgp(ogpBase, primaryLogo);
+    _writePng('${s.slug}-ogp.png', ogp);
+    s.ogpImage = '$_assetPrefix/${s.slug}-ogp.png';
+  } else {
+    // Undecodable primary (e.g. SVG): fall back to the default site OGP.
+    s.ogpImage = _defaultOgp;
+  }
+}
+
+/// Fetches and decodes a raster logo, returning null (with a warning) when the
+/// URL is empty, unreachable, or not a decodable raster (e.g. an SVG).
+Future<img.Image?> _tryDecodeLogo(String url, String slug) async {
+  if (url.isEmpty) return null;
+  try {
+    final logo = img.decodeImage(await _fetchBytes(url));
+    if (logo == null) {
+      stderr.writeln('warning: could not decode logo for sponsor $slug ($url)');
+    }
+    return logo;
+  } catch (e) {
+    stderr.writeln('warning: could not fetch logo for sponsor $slug ($url): $e');
+    return null;
+  }
 }
 
 Future<Uint8List> _fetchBytes(String url) async {
@@ -598,7 +625,8 @@ class _Sponsor {
     required this.tier,
     required this.nameJa,
     required this.nameEn,
-    required this.logoUrl,
+    required this.primaryLogoUrl,
+    required this.secondaryLogoUrl,
     required this.prTextJa,
     required this.prTextEn,
     required this.links,
@@ -645,7 +673,8 @@ class _Sponsor {
       tier: _Tier.parse((m['tier'] ?? '').toString()),
       nameJa: nameJa,
       nameEn: nameEn,
-      logoUrl: (m['logoUrl'] ?? '').toString(),
+      primaryLogoUrl: (m['primaryLogoUrl'] ?? '').toString(),
+      secondaryLogoUrl: (m['secondaryLogoUrl'] ?? '').toString(),
       prTextJa: prTextJa,
       prTextEn: prTextEn,
       links: links,
@@ -659,7 +688,8 @@ class _Sponsor {
   final _Tier tier;
   final String nameJa;
   final String nameEn;
-  final String logoUrl;
+  final String primaryLogoUrl;
+  final String secondaryLogoUrl;
   final String prTextJa;
   final String prTextEn;
   final List<_Link> links;
