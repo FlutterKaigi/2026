@@ -95,6 +95,18 @@ if [ ! -f "$MANIFEST" ]; then
   printf 'timestamp\tvariant\tsource\twebp\turl\n' > "$MANIFEST"
 fi
 
+# macOS は濁点/半濁点付きのファイル名を NFD(分解形) で保存することがあり、
+# git や manifest 側の NFC(合成形) と完全一致しなくなる（例: アンドパッド の ド/パ）。
+# その場合に増分スキップが効かず再変換(UUID重複)になるため、比較・記録は常に
+# NFC に正規化して揃える。iconv の UTF-8-MAC は分解形を表す入力エンコーディングで、
+# UTF-8 へ変換すると合成形(NFC)になる（NFC 入力はそのまま保持される＝冪等）。
+to_nfc() {
+  printf '%s' "$1" | iconv -f UTF-8-MAC -t UTF-8 2>/dev/null || printf '%s' "$1"
+}
+
+# 既存 manifest の source 列(3列目)を NFC に揃えて一度だけ読み込む（比較用キー）
+MANIFEST_KEYS="$(to_nfc "$(awk -F'\t' 'NR>1{print $3}' "$MANIFEST")")"
+
 if [ "$WEBP_LOSSLESS" = "1" ]; then
   echo "変換モード   : ロスレス (lossless)"
 else
@@ -110,24 +122,28 @@ now="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 converted=0
 skipped=0
 
-# 既に manifest に記録済みの source か判定（3列目=source が完全一致なら "yes"）
+# 既に manifest に記録済みの source か判定（NFC 正規化済みキーと完全一致なら "yes"）
 is_in_manifest() {
-  awk -F'\t' -v r="$1" 'NR>1 && $3==r {print "yes"; exit}' "$MANIFEST"
+  if printf '%s\n' "$MANIFEST_KEYS" | grep -qxF -- "$1"; then
+    echo "yes"
+  fi
 }
 
 # bash 3.2 (macOS 標準) でも動くよう while-read + -print0 で走査する
 while IFS= read -r -d '' src; do
   # source/ からの相対パス（サブディレクトリを維持するため）
   rel="${src#"$SOURCE_DIR"/}"
+  # 比較・記録用のキーは NFC に正規化（実ファイルの読み込みは $src のまま使う）
+  rel_key="$(to_nfc "$rel")"
 
   # 増分: 既に変換済み(manifest に記録済み)の source はスキップ
-  if [ -n "$(is_in_manifest "$rel")" ]; then
-    echo "  - skip (変換済み): $rel"
+  if [ -n "$(is_in_manifest "$rel_key")" ]; then
+    echo "  - skip (変換済み): $rel_key"
     skipped=$((skipped + 1))
     continue
   fi
 
-  subdir="$(dirname "$rel")"
+  subdir="$(dirname "$rel_key")"
   [ "$subdir" = "." ] && subdir=""
 
   uuid="$(uuidgen | tr 'A-Z' 'a-z')"
@@ -167,14 +183,14 @@ while IFS= read -r -d '' src; do
   fi
 
   # バリアント判定: ファイル名(拡張子除く)末尾が _Secondary なら secondary、他は primary
-  base_noext="$(basename "$rel")"; base_noext="${base_noext%.*}"
+  base_noext="$(basename "$rel_key")"; base_noext="${base_noext%.*}"
   case "$(printf '%s' "$base_noext" | tr 'A-Z' 'a-z')" in
     *_secondary) variant="secondary" ;;
     *)           variant="primary" ;;
   esac
 
-  printf '%s\t%s\t%s\t%s\t%s\n' "$now" "$variant" "$rel" "$out_rel" "$PUBLIC_BASE/$out_rel" >> "$MANIFEST"
-  echo "  ✓ [$variant] $rel  →  $out_rel"
+  printf '%s\t%s\t%s\t%s\t%s\n' "$now" "$variant" "$rel_key" "$out_rel" "$PUBLIC_BASE/$out_rel" >> "$MANIFEST"
+  echo "  ✓ [$variant] $rel_key  →  $out_rel"
   converted=$((converted + 1))
 done < <(find "$SOURCE_DIR" -type f \
   \( -iname '*.svg' -o -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' \) -print0 | sort -z)
