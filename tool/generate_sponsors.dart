@@ -298,8 +298,8 @@ Future<void> _processImages(_Sponsor s, img.Image ogpBase) async {
   // ── Square (home grid) ──
   // Individual sponsors render as circular tiles: fill the square (no padding)
   // so the inscribed circle mask yields a true circle, not an octagon. Other
-  // tiers keep ~10% breathing room on every side (e.g. a 412×412 logo on a
-  // 512×512 canvas).
+  // tiers keep ~15% breathing room on every side (e.g. a 358×358 logo on a
+  // 512×512 canvas) to stay clear of common logo-guideline clear-space rules.
   final isIndividual = s.tier == _Tier.individual;
   final squareSrc = squareLogo ??
       (squareUrl.isEmpty ? _placeholderLogo(s.displayName, _squarePx, _squarePx) : null);
@@ -308,7 +308,7 @@ Future<void> _processImages(_Sponsor s, img.Image ogpBase) async {
       squareSrc,
       _squarePx,
       _squarePx,
-      padFrac: isIndividual ? 0.0 : 0.2,
+      padFrac: isIndividual ? 0.0 : 0.3,
     );
     if (isIndividual) _applyCircleMask(square);
     _writePng('${s.slug}-square.png', square);
