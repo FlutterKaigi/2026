@@ -32,6 +32,10 @@ class SponsorDetailPage extends StatelessComponent {
     // visible first-line indent. Explicit <br>s let the surrounding formatting
     // whitespace collapse normally.
     final prLines = prText.split('\n');
+    // 採用ページURL（recruit）は一旦非表示にする。ジョブボードに統一する
+    // 可能性があるため、表示するリンクから recruit タイプを除外する。
+    final visibleLinks =
+        sponsor.links.where((l) => l.type != SponsorLinkType.recruit).toList();
 
     return Component.fragment([
       Document.head(
@@ -80,13 +84,13 @@ class SponsorDetailPage extends StatelessComponent {
                 [.text(strings.sponsorTierBadge(sponsor.tier.label))],
               ),
               h1(classes: 'sponsor-detail__name', [.text(name)]),
-              if (sponsor.links.isNotEmpty)
+              if (visibleLinks.isNotEmpty)
                 div(classes: 'sponsor-detail__links', [
                   h2(classes: 'sponsor-detail__links-title', [
                     .text(strings.sponsorConnectHeading),
                   ]),
                   div(classes: 'sponsor-detail__links-list', [
-                    for (final link in sponsor.links)
+                    for (final link in visibleLinks)
                       a(
                         href: link.url,
                         target: Target.blank,
