@@ -64,5 +64,5 @@ rclone ls r2:2026-public-production
 ./public-buckets/sponsor-logos/upload-sponsor-logos.sh
 ```
 
-`logos/` 配下の画像が `r2:2026-public-production/sponsors/` にアップロードされます。
-アップロード後、数分で `https://2026-bucket.flutterkaigi.jp/sponsors/<ファイル名>` から取得可能です。
+`logos/` 配下の画像が `r2:2026-public-production/logos/` にアップロードされます。
+アップロード後、数分で `https://2026-bucket.flutterkaigi.jp/logos/<ファイル名>` から取得可能です。

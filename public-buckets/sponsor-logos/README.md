@@ -12,7 +12,7 @@ source/ に元画像(svg/png/jpg)を置く
 logos/ に <UUID>.webp を出力（対応表は logos-manifest.tsv）
         │
         ▼  upload-sponsor-logos.sh
-R2 公開バケット → https://2026-bucket.flutterkaigi.jp/sponsors/<UUID>.webp
+R2 公開バケット → https://2026-bucket.flutterkaigi.jp/logos/<UUID>.webp
 ```
 
 ファイル名は UUID にするため、公開URLからスポンサー名が推測できません。
@@ -83,12 +83,12 @@ brew install webp librsvg
 ./public-buckets/sponsor-logos/upload-sponsor-logos.sh
 ```
 
-- `logos/` 配下の画像が `r2:2026-public-production/sponsors/` にアップロードされます。
+- `logos/` 配下の画像が `r2:2026-public-production/logos/` にアップロードされます。
 - `Cache-Control: public, max-age=86400` が付与されます。
-- アップロード後、数分で `https://2026-bucket.flutterkaigi.jp/sponsors/<ファイル名>` から取得可能です。
+- アップロード後、数分で `https://2026-bucket.flutterkaigi.jp/logos/<ファイル名>` から取得可能です。
 
 ## アップロード済みファイルの確認
 
 ```bash
-rclone ls r2:2026-public-production/sponsors/
+rclone ls r2:2026-public-production/logos/
 ```

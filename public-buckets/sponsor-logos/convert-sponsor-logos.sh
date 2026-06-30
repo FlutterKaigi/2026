@@ -43,7 +43,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SOURCE_DIR="$SCRIPT_DIR/source"
 DEST_DIR="$SCRIPT_DIR/logos"
 MANIFEST="$SCRIPT_DIR/logos-manifest.tsv"
-PUBLIC_BASE="https://2026-bucket.flutterkaigi.jp/sponsors"
+PUBLIC_BASE="https://2026-bucket.flutterkaigi.jp/logos"
 
 WEBP_LOSSLESS="${WEBP_LOSSLESS:-1}"
 WEBP_QUALITY="${WEBP_QUALITY:-90}"
