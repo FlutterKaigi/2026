@@ -18,6 +18,10 @@ set -euo pipefail
 #   - rsvg-convert (svg のラスタライズ用)   : brew install librsvg
 #   - uuidgen      (macOS 標準)
 #
+# 既定は「増分変換」: manifest に未記録の source だけを変換する。
+# そのため source/ に新しい画像を足して再実行するだけで、新規分だけ
+# 変換・追記される（既存分は再変換されず UUID も維持される）。
+#
 # 使い方:
 #   # source/ に元画像を置いてから、プロジェクトルートで実行
 #   ./public-buckets/sponsor-logos/convert-sponsor-logos.sh
@@ -31,7 +35,8 @@ set -euo pipefail
 #   WEBP_QUALITY=90   ロッシー時の品質 (0-100)
 #   MAX_WIDTH=1024    出力の最大幅(px)。svg はこの幅でラスタライズ、
 #                     png/jpg はこの幅を超える場合のみ縮小（拡大はしない）
-#   CLEAN=1           実行前に logos/ の *.webp を削除してから変換する
+#   CLEAN=1           全件リビルド。logos/ の *.webp と manifest を削除し、
+#                     全 source を新しい UUID で変換し直す（増分スキップを無効化）
 # =============================================================================
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -69,8 +74,9 @@ fi
 mkdir -p "$DEST_DIR"
 
 if [ "$CLEAN" = "1" ]; then
-  echo "CLEAN=1: logos/ 配下の *.webp を削除します"
+  echo "CLEAN=1: logos/ の *.webp と manifest を削除し、全件リビルドします"
   find "$DEST_DIR" -type f -iname '*.webp' -delete
+  rm -f "$MANIFEST"
 fi
 
 # --- 対象ファイル数の確認 ---
@@ -102,11 +108,25 @@ echo ""
 
 now="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 converted=0
+skipped=0
+
+# 既に manifest に記録済みの source か判定（3列目=source が完全一致なら "yes"）
+is_in_manifest() {
+  awk -F'\t' -v r="$1" 'NR>1 && $3==r {print "yes"; exit}' "$MANIFEST"
+}
 
 # bash 3.2 (macOS 標準) でも動くよう while-read + -print0 で走査する
 while IFS= read -r -d '' src; do
   # source/ からの相対パス（サブディレクトリを維持するため）
   rel="${src#"$SOURCE_DIR"/}"
+
+  # 増分: 既に変換済み(manifest に記録済み)の source はスキップ
+  if [ -n "$(is_in_manifest "$rel")" ]; then
+    echo "  - skip (変換済み): $rel"
+    skipped=$((skipped + 1))
+    continue
+  fi
+
   subdir="$(dirname "$rel")"
   [ "$subdir" = "." ] && subdir=""
 
@@ -160,7 +180,11 @@ done < <(find "$SOURCE_DIR" -type f \
   \( -iname '*.svg' -o -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' \) -print0 | sort -z)
 
 echo ""
-echo "完了: ${converted} 件を webp に変換しました"
+if [ "$converted" -eq 0 ]; then
+  echo "新規の変換対象はありませんでした（${skipped} 件は変換済みのためスキップ）"
+else
+  echo "完了: ${converted} 件を変換 / ${skipped} 件をスキップ（変換済み）"
+fi
 echo ""
 echo "対応表 (source → 公開URL):"
 echo "  $MANIFEST"

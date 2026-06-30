@@ -61,6 +61,10 @@ brew install webp librsvg
 実行すると `logos/` に `<UUID>.webp` が出力され、`logos-manifest.tsv` に
 `変換元ファイル → UUID.webp → 公開URL` が追記されます。
 
+**増分変換がデフォルト**です。manifest に未記録の source だけが変換されるため、
+あとから `source/` にロゴを足して再実行するだけで、**新規分だけ**変換・追記されます
+（既存分は再変換されず UUID も維持）。全部やり直したいときは `CLEAN=1`。
+
 オプション（環境変数で指定）:
 
 | 変数 | 既定 | 説明 |
@@ -68,7 +72,7 @@ brew install webp librsvg
 | `WEBP_LOSSLESS` | `1` | ロスレス変換（ロゴの輪郭・透過を保持）。`0` でロッシー |
 | `WEBP_QUALITY` | `90` | ロッシー時の品質 (0-100) |
 | `MAX_WIDTH` | `1024` | 出力の最大幅(px)。svg はこの幅でラスタライズ、png/jpg はこの幅を超える場合のみ縮小（拡大はしない）。高さはアスペクト比維持 |
-| `CLEAN` | `0` | `1` で実行前に `logos/` の `*.webp` を削除 |
+| `CLEAN` | `0` | `1` で全件リビルド（`logos/` の `*.webp` と manifest を削除し、全 source を新しい UUID で変換し直す。増分スキップは無効化） |
 
 ## 3. アップロードする
 
