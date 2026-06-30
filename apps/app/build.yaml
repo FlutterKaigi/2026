@@ -1,0 +1,8 @@
+# slang は build_runner ではなく CLI(`dart run slang`)で生成する。
+# build_runner 2.15 + slang_build_runner 4.17 の組み合わせで
+# `InvalidOutputException: Asset already exists` が発生するため無効化している。
+targets:
+  $default:
+    builders:
+      slang_build_runner:
+        enabled: false

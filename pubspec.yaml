@@ -10,6 +10,7 @@ workspace:
   - apps/app
   - apps/dashboard
   - packages/data
+  - packages/flutterkaigi_lints
 
 dev_dependencies:
   melos: ^7.0.0

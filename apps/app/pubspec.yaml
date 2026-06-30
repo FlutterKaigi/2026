@@ -15,15 +15,37 @@ dependencies:
     sdk: flutter
   cupertino_icons: ^1.0.8
   freezed_annotation: ^3.1.0
-  flutter_riverpod: ^3.3.1
-  riverpod_annotation: ^4.0.2
+  hooks_riverpod: ^3.3.2
+  flutter_hooks: ^0.21.3+1
+  go_router: ^17.3.0
+  slang: ^4.17.0
+  slang_flutter: ^4.17.0
+  talker_flutter: ^5.1.16
+  shared_preferences: ^2.5.5
+  url_launcher: ^6.3.2
+  package_info_plus: ^9.0.1
+  collection: ^1.19.1
+  intl: ^0.20.2
+  flutter_localizations:
+    sdk: flutter
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^6.0.0
   build_runner: ^2.15.0
   freezed: ^3.2.5
+  go_router_builder: ^4.3.0
+  slang_build_runner: ^4.17.0
+  flutterkaigi_lints:
+    path: ../../packages/flutterkaigi_lints
 
 flutter:
   uses-material-design: true
+
+  assets:
+    - res/assets/fonts/NotoSansJP/OFL.txt
+
+  fonts:
+    - family: Noto Sans JP
+      fonts:
+        - asset: res/assets/fonts/NotoSansJP/NotoSansJP-VariableFont.ttf
