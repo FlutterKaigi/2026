@@ -665,7 +665,7 @@ class _Sponsor {
     addLink(m['websiteUrl'], 'Web', _LinkType.other);
     addLink(m['xUrl'], 'X', _LinkType.x);
     addLink(m['recruitUrl'], '採用情報', _LinkType.recruit);
-    addLink(m['jobBoardUrl'], '採用一覧', _LinkType.recruit);
+    addLink(m['jobBoardUrl'], '採用一覧', _LinkType.jobBoard);
 
     return _Sponsor(
       id: id,
@@ -744,7 +744,7 @@ enum _Tier {
 }
 
 /// Mirrors `SponsorLinkType`.
-enum _LinkType { x, recruit, other }
+enum _LinkType { x, recruit, jobBoard, other }
 
 /// Detail-page slug: prefers the admin-entered `slug` field, falling back to
 /// one derived from the opaque document id. Both are run through [_slugFromId]

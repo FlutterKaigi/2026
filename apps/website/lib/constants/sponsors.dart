@@ -57,12 +57,14 @@ enum SponsorTier {
 enum SponsorLinkType {
   x,
   recruit,
+  jobBoard,
   other
   ;
 
   static SponsorLinkType parse(String? raw) => switch (raw?.toLowerCase().trim()) {
     'x' || 'twitter' => SponsorLinkType.x,
-    'recruit' || 'careers' || 'jobs' => SponsorLinkType.recruit,
+    'recruit' || 'careers' => SponsorLinkType.recruit,
+    'jobboard' || 'jobs' => SponsorLinkType.jobBoard,
     _ => SponsorLinkType.other,
   };
 }
@@ -82,6 +84,7 @@ String sponsorLinkIconAsset(SponsorLinkType type) => switch (type) {
   // Filenames avoid "sponsor" so ad blockers don't network-block the icons.
   SponsorLinkType.x => 'images/icons/link_x.svg',
   SponsorLinkType.recruit => 'images/icons/link_briefcase.svg',
+  SponsorLinkType.jobBoard => 'images/icons/link_briefcase.svg',
   SponsorLinkType.other => 'images/icons/link_globe.svg',
 };
 
