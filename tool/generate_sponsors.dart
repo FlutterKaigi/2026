@@ -36,15 +36,17 @@
 ///     so offline/preview builds still render placeholders. A *reachable but
 ///     empty* collection yields an empty site (no fake data).
 ///
-/// Logo handling (raster sources — PNG/JPG/WebP):
-///   - `primaryLogoUrl` → the wide (detail banner) variant and the OGP card.
-///   - `secondaryLogoUrl` → the square (home grid) variant; falls back to the
-///     primary logo when it is unset.
-///   - variants are written as PNG; the OGP card (1200x630) is composited over
-///     `web/images/ogp.png`.
-///   - if a logo can't be fetched/decoded (e.g. an SVG), the remote URL is used
-///     for display and the OGP falls back to the default site image — the build
-///     never fails because of a single bad logo.
+/// Logo handling:
+///   - Display logos are used **as-is** from the public bucket: `primaryLogoUrl`
+///     → wide (detail banner), `secondaryLogoUrl` → square (home grid, falls
+///     back to primary). The bucket URL (webp) is passed straight through to the
+///     site; padding / rounded corners / circular cropping are applied in CSS at
+///     render time, NOT baked into re-rasterized PNG variants.
+///   - The OGP card (1200x630) is the one exception that is still generated
+///     server-side: it composites the primary logo onto `web/images/ogp.png` (a
+///     branded base that cannot be assembled at display time). It needs a
+///     decodable raster; an SVG / undecodable / unreachable primary falls back to
+///     the default site OGP — the build never fails because of a single bad logo.
 library;
 
 import 'dart:convert';
@@ -68,14 +70,7 @@ const _defaultFirestoreHost = 'localhost:8080';
 const _assetPrefix = 'images/logos';
 const _defaultOgp = 'images/ogp.png';
 
-// Output sizes.
-const _squarePx = 512;
-// Detail-banner logo: bounded longest side, then padded so the logo keeps ~10%
-// breathing room on every side while preserving its own aspect ratio. A fixed
-// wide canvas would letterbox square logos into a tiny center; an aspect-aware
-// canvas lets the banner CSS scale square logos up to fill the banner.
-const _bannerLogoMax = 1000;
-const _bannerPadFrac = 0.1;
+// OGP card output size (the only image still generated server-side).
 const _ogpW = 1200;
 const _ogpH = 630;
 
@@ -282,58 +277,28 @@ Object? _decodeFirestoreValue(Object? value) {
 Future<void> _processImages(_Sponsor s, img.Image ogpBase) async {
   // Two logo sources with distinct roles (see the dashboard's primary/secondary
   // logo fields):
-  //   - primary  → wide detail-banner variant + the OGP card.
-  //   - secondary → square home-grid variant; falls back to the primary when
-  //     unset, so a sponsor only needs the one logo to be published.
+  //   - primary  → wide detail-banner logo + the OGP card.
+  //   - secondary → square home-grid logo; falls back to the primary when unset,
+  //     so a sponsor only needs the one logo to be published.
   final primaryUrl = s.primaryLogoUrl.trim();
   final secondaryUrl = s.secondaryLogoUrl.trim();
-  final squareUrl = secondaryUrl.isNotEmpty ? secondaryUrl : primaryUrl;
 
-  final primaryLogo = await _tryDecodeLogo(primaryUrl, s.slug);
-  // Avoid a second fetch/decode when the square reuses the primary source.
-  final squareLogo = squareUrl == primaryUrl
-      ? primaryLogo
-      : await _tryDecodeLogo(squareUrl, s.slug);
-
-  // ── Square (home grid) ──
-  // Individual sponsors render as circular tiles: fill the square (no padding)
-  // so the inscribed circle mask yields a true circle, not an octagon. Other
-  // tiers keep ~15% breathing room on every side (e.g. a 358×358 logo on a
-  // 512×512 canvas) to stay clear of common logo-guideline clear-space rules.
-  final isIndividual = s.tier == _Tier.individual;
-  final squareSrc = squareLogo ??
-      (squareUrl.isEmpty ? _placeholderLogo(s.displayName, _squarePx, _squarePx) : null);
-  if (squareSrc != null) {
-    final square = _containCanvas(
-      squareSrc,
-      _squarePx,
-      _squarePx,
-      padFrac: isIndividual ? 0.0 : 0.3,
-    );
-    if (isIndividual) _applyCircleMask(square);
-    _writePng('${s.slug}-square.png', square);
-    s.squareLogo = '$_assetPrefix/${s.slug}-square.png';
-  } else {
-    // SVG / fetch failure with a real URL: use the remote URL for display.
-    s.squareLogo = squareUrl;
-  }
-
-  // ── Wide (detail banner) ──
-  if (primaryLogo != null) {
-    final wide = _bannerCanvas(primaryLogo, _bannerLogoMax, _bannerPadFrac);
-    _writePng('${s.slug}-wide.png', wide);
-    s.wideLogo = '$_assetPrefix/${s.slug}-wide.png';
-  } else {
-    s.wideLogo = primaryUrl;
-  }
+  // Display logos are served straight from the public bucket (webp). We no longer
+  // re-rasterize padded PNG variants — breathing room, rounded corners, and the
+  // circular crop for individual sponsors are all handled in CSS at render time.
+  s.wideLogo = primaryUrl;
+  s.squareLogo = secondaryUrl.isNotEmpty ? secondaryUrl : primaryUrl;
 
   // ── OGP card ──
+  // The one image we still build server-side: the branded 1200x630 base with the
+  // logo composited onto its white card — this can't be assembled at display
+  // time. Needs a decodable raster; an SVG/unreachable primary falls back.
+  final primaryLogo = await _tryDecodeLogo(primaryUrl, s.slug);
   if (primaryLogo != null) {
     final ogp = _composeOgp(ogpBase, primaryLogo);
     _writePng('${s.slug}-ogp.png', ogp);
     s.ogpImage = '$_assetPrefix/${s.slug}-ogp.png';
   } else {
-    // Undecodable primary (e.g. SVG): fall back to the default site OGP.
     s.ogpImage = _defaultOgp;
   }
 }
@@ -390,57 +355,6 @@ img.Image _scaleToFit(img.Image src, int maxW, int maxH) {
   );
 }
 
-/// Centers [src] (contained) on a transparent [w]x[h] canvas. [padFrac] keeps
-/// breathing room as a fraction of the canvas.
-img.Image _containCanvas(img.Image src, int w, int h, {double padFrac = 0.0}) {
-  final innerW = (w * (1 - padFrac)).round();
-  final innerH = (h * (1 - padFrac)).round();
-  final fitted = _scaleToFit(src, innerW, innerH);
-  final canvas = img.Image(width: w, height: h, numChannels: 4);
-  img.compositeImage(
-    canvas,
-    fitted,
-    dstX: ((w - fitted.width) / 2).round(),
-    dstY: ((h - fitted.height) / 2).round(),
-  );
-  return canvas;
-}
-
-/// Builds the detail-banner logo: [src] bounded to [maxLogo] on its longest
-/// side, centered on a transparent canvas that preserves the logo's aspect
-/// ratio with [padFrac] breathing room on every side (the logo occupies
-/// `1 - 2*padFrac` of each dimension). Unlike a fixed wide canvas, this never
-/// letterboxes a square logo into a tiny center, so the banner CSS can scale it
-/// up to fill the available height.
-img.Image _bannerCanvas(img.Image src, int maxLogo, double padFrac) {
-  final fitted = _scaleToFit(src, maxLogo, maxLogo);
-  final scale = 1 - 2 * padFrac;
-  final w = (fitted.width / scale).round();
-  final h = (fitted.height / scale).round();
-  final canvas = img.Image(width: w, height: h, numChannels: 4);
-  img.compositeImage(
-    canvas,
-    fitted,
-    dstX: ((w - fitted.width) / 2).round(),
-    dstY: ((h - fitted.height) / 2).round(),
-  );
-  return canvas;
-}
-
-/// Makes pixels outside the inscribed circle transparent, turning a square
-/// asset into a circular one (used for individual sponsors).
-void _applyCircleMask(img.Image image) {
-  final cx = (image.width - 1) / 2.0;
-  final cy = (image.height - 1) / 2.0;
-  final radius = (image.width < image.height ? image.width : image.height) / 2.0;
-  final r2 = radius * radius;
-  for (final p in image) {
-    final dx = p.x - cx;
-    final dy = p.y - cy;
-    if (dx * dx + dy * dy > r2) p.setRgba(p.r, p.g, p.b, 0);
-  }
-}
-
 /// Builds the 1200x630 OGP image: the branded base with the sponsor logo on a
 /// white rounded card centered in its clear area.
 img.Image _composeOgp(img.Image base, img.Image logo) {
@@ -472,57 +386,6 @@ img.Image _composeOgp(img.Image base, img.Image logo) {
   );
 
   return ogp;
-}
-
-/// Deterministic branded placeholder for sample data / missing logos.
-img.Image _placeholderLogo(String name, int w, int h) {
-  final canvas = img.Image(width: w, height: h, numChannels: 4);
-  final (r, g, b) = _brandColor(name);
-  img.fillRect(canvas, x1: 0, y1: 0, x2: w, y2: h, color: img.ColorRgb8(r, g, b), radius: 0);
-  final initials = _initials(name);
-  final font = img.arial48;
-  final textW = _approxTextWidth(initials, font);
-  img.drawString(
-    canvas,
-    initials,
-    font: font,
-    x: ((w - textW) / 2).round(),
-    y: (h - font.lineHeight) ~/ 2,
-    color: img.ColorRgb8(255, 255, 255),
-  );
-  return canvas;
-}
-
-int _approxTextWidth(String s, img.BitmapFont font) {
-  // BitmapFonts have no public measure API; approximate from line height.
-  final perChar = font.lineHeight * 0.5;
-  return (s.length * perChar).round();
-}
-
-String _initials(String name) {
-  final words = name.split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
-  if (words.isEmpty) return '?';
-  if (words.length == 1) {
-    final w = words.first;
-    return w.substring(0, w.length >= 2 ? 2 : 1).toUpperCase();
-  }
-  return (words[0][0] + words[1][0]).toUpperCase();
-}
-
-(int, int, int) _brandColor(String seed) {
-  var hash = 0;
-  for (final c in seed.codeUnits) {
-    hash = (hash * 31 + c) & 0x7fffffff;
-  }
-  // Brand-ish purples/magentas: fixed-ish hue band, varied lightness.
-  const palette = [
-    (101, 85, 143), // deep purple
-    (143, 85, 130),
-    (85, 90, 160),
-    (120, 70, 150),
-    (90, 80, 175),
-  ];
-  return palette[hash % palette.length];
 }
 
 // ── Dart emission ───────────────────────────────────────────────────────────
@@ -695,9 +558,6 @@ class _Sponsor {
   final List<_Link> links;
   final List<String> benefits;
   final int year;
-
-  /// Display name for offline placeholder logos / warnings (JA preferred).
-  String get displayName => nameJa.isNotEmpty ? nameJa : nameEn;
 
   // Filled in during image processing.
   String squareLogo = '';

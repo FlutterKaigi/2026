@@ -164,11 +164,10 @@ class SponsorDetailPage extends StatelessComponent {
         css('.sponsor-detail__back-arrow').styles(raw: const {'font-size': '18px'}),
       ]),
 
-      // Logo banner: the logo fills the banner; its ~10% breathing room on every
-      // side is baked into the generated asset (an aspect-preserving padded
-      // canvas), so a square logo scales up to the banner height instead of
-      // being letterboxed into a tiny center. A small banner padding keeps the
-      // asset clear of the rounded border.
+      // Logo banner: the logo is the bucket image used as-is (no baked padding),
+      // centered and contained. Breathing room is provided here at render time
+      // via the banner padding (clear space around the logo) plus the logo's
+      // max-height, keeping it clear of the rounded border.
       css('.sponsor-detail__banner', [
         css('&').styles(
           display: .flex,
@@ -184,7 +183,8 @@ class SponsorDetailPage extends StatelessComponent {
           ),
           raw: const {
             'min-height': 'clamp(220px, 30vw, 360px)',
-            'padding': 'clamp(12px, 2vw, 24px)',
+            // Clear space around the logo (replaces the asset's old baked ~10%).
+            'padding': 'clamp(24px, 6%, 56px)',
           },
         ),
         css('.sponsor-detail__logo').styles(

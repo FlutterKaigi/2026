@@ -128,7 +128,6 @@ class SponsorsSection extends StatelessComponent {
           display: .flex,
           alignItems: .center,
           justifyContent: .center,
-          padding: .all(1.px),
           backgroundColor: onBrand,
           radius: .circular(16.px),
           border: Border.all(
@@ -141,6 +140,10 @@ class SponsorsSection extends StatelessComponent {
             'aspect-ratio': '1',
             'flex-shrink': '0',
             'overflow': 'hidden',
+            // ロゴの余白は生成時に焼き込まず表示時に確保する。各辺15%のクリア
+            // スペース（ロゴガイドライン対策）。個人スポンサーは円形クリップの
+            // ため 0 に上書きする（下の --circle 参照）。
+            'padding': '15%',
             'box-shadow': '4px 4px 2px rgba(0, 0, 0, 0.25)',
             'transition': 'transform 150ms ease, box-shadow 150ms ease',
           },
@@ -179,12 +182,13 @@ class SponsorsSection extends StatelessComponent {
         css('&.sponsor-card--sm').styles(
           raw: const {'width': '96px'},
         ),
-        // Individual sponsors are shown as circular tiles. The card chrome is
-        // circular via border-radius; the logo itself is masked to a circle at
-        // generation time (baked transparency), avoiding a replaced-<img>
-        // clipping quirk that otherwise rendered an octagon.
+        // Individual sponsors are shown as circular tiles: the logo fills the
+        // tile (no breathing-room padding) and the card clips it to a circle via
+        // border-radius + the card's `overflow: hidden`. Clipping happens on the
+        // card container (not the replaced <img> itself), so it yields a true
+        // circle rather than the octagon a border-radius on the <img> produced.
         css('&.sponsor-card--circle').styles(
-          raw: const {'border-radius': '50%'},
+          raw: const {'border-radius': '50%', 'padding': '0'},
         ),
       ]),
     ]),
