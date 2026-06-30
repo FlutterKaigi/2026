@@ -94,19 +94,19 @@ class SponsorDetailPage extends StatelessComponent {
                       a(
                         href: link.url,
                         target: Target.blank,
-                        classes: 'sponsor-link',
+                        classes: 'connect-link',
                         attributes: const {'rel': 'noopener noreferrer'},
                         [
-                          span(classes: 'sponsor-link__icon', [
+                          span(classes: 'connect-link__icon', [
                             img(
                               src: sponsorLinkIconAsset(link.type),
                               alt: '',
                               attributes: const {'aria-hidden': 'true'},
                             ),
                           ]),
-                          span(classes: 'sponsor-link__title', [.text(link.url)]),
+                          span(classes: 'connect-link__title', [.text(link.url)]),
                           span(
-                            classes: 'sponsor-link__ext',
+                            classes: 'connect-link__ext',
                             attributes: const {'aria-hidden': 'true'},
                             [.text('↗')],
                           ),
@@ -303,7 +303,11 @@ class SponsorDetailPage extends StatelessComponent {
           flexDirection: .column,
           gap: Gap.row(8.px),
         ),
-        css('.sponsor-link', [
+        // NOTE: do NOT name these "sponsor-link" — ad blockers carry cosmetic
+        // filters (e.g. ##.sponsor-link) that set display:none on such elements,
+        // which hid every outbound link while the container stayed (empty card).
+        // Same rationale as the icon filenames in sponsors.dart (avoid "sponsor").
+        css('.connect-link', [
           css('&').styles(
             display: .flex,
             alignItems: .center,
@@ -316,7 +320,7 @@ class SponsorDetailPage extends StatelessComponent {
             raw: const {'font-size': '16px', 'transition': 'background-color 150ms ease'},
           ),
           css('&:hover').styles(raw: const {'background-color': '#FFFFFF99'}),
-          css('.sponsor-link__icon', [
+          css('.connect-link__icon', [
             css('&').styles(
               display: .flex,
               alignItems: .center,
@@ -325,10 +329,10 @@ class SponsorDetailPage extends StatelessComponent {
             ),
             css('img').styles(width: 20.px, height: 20.px),
           ]),
-          css('.sponsor-link__title').styles(
+          css('.connect-link__title').styles(
             raw: const {'flex': '1 1 auto', 'min-width': '0', 'overflow-wrap': 'anywhere'},
           ),
-          css('.sponsor-link__ext').styles(
+          css('.connect-link__ext').styles(
             color: onSurfaceVariant,
             raw: const {'font-size': '14px', 'flex-shrink': '0'},
           ),
