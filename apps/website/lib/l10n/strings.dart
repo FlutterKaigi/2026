@@ -169,10 +169,12 @@ class Strings {
     AppLocale.ja => const [
       'Flutter および関連するロゴは Google LLC の商標です。FlutterKaigi は Google LLC の承認または提携を受けておりません。',
       'Flutter の名称およびロゴは Google LLC の商標です。',
+      'RevCommは、株式会社 RevComm の登録商標または商標です。',
     ],
     AppLocale.en => const [
       'Flutter and the related logo are trademarks of Google LLC. FlutterKaigi is not affiliated with or otherwise sponsored by Google LLC.',
       'The Flutter name and the Flutter logo are trademarks of Google LLC.',
+      'RevComm is a registered trademark or trademark of RevComm Inc.',
     ],
   };
 
