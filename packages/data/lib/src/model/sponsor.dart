@@ -18,7 +18,8 @@ abstract class Sponsor with _$Sponsor {
     required LocaleMap name,
     String? nameKana,
     required LocaleMap description,
-    String? logoUrl,
+    String? primaryLogoUrl,
+    String? secondaryLogoUrl,
     required SponsorTier tier,
     /// Web サイトの詳細ページのパス（`sponsors/<slug>`）に利用するスラッグ。
     String? slug,

@@ -32,7 +32,11 @@
         "en": { "type": "string" }
       }
     },
-    "logoUrl": {
+    "primaryLogoUrl": {
+      "type": ["string", "null"],
+      "format": "uri"
+    },
+    "secondaryLogoUrl": {
       "type": ["string", "null"],
       "format": "uri"
     },
