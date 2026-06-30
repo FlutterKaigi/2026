@@ -140,7 +140,8 @@
           "ja": "プラチナスポンサーのサンプルです。",
           "en": "A sample platinum sponsor."
         },
-        "logoUrl": "https://example.com/sponsors/platinum.png",
+        "primaryLogoUrl": "https://example.com/sponsors/platinum.png",
+        "secondaryLogoUrl": "https://example.com/sponsors/platinum-secondary.png",
         "tier": "platinum",
         "slug": "example-platinum",
         "xUrl": "https://x.com/example_platinum",
@@ -161,7 +162,8 @@
           "ja": "ゴールドスポンサーのサンプルです。",
           "en": "A sample gold sponsor."
         },
-        "logoUrl": "https://example.com/sponsors/gold.png",
+        "primaryLogoUrl": "https://example.com/sponsors/gold.png",
+        "secondaryLogoUrl": null,
         "tier": "gold",
         "slug": "example-gold",
         "xUrl": null,
