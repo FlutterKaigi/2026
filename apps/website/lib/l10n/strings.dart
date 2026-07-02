@@ -24,6 +24,20 @@ enum AppLocale {
   /// Hyperlink target for navigation. Prefixed with `baseHref` so the same markup
   /// works for both production (`/`) and PR previews (`/pr-preview/pr-N/`).
   String get linkHref => '$baseHref$relativeHref';
+
+  /// Jaspr Router route path (absolute, **no** baseHref) for a sponsor detail
+  /// page — this drives the SSG output directory.
+  String sponsorRoutePath(String slug) =>
+      '${homePath == '/' ? '' : homePath}/sponsors/$slug';
+
+  /// Navigation href (baseHref-prefixed) for a sponsor detail page.
+  String sponsorHref(String slug) => '${linkHref}sponsors/$slug';
+
+  /// Navigation href to the Sponsors section on the home page.
+  String get sponsorsAnchorHref => '$linkHref#sponsors';
+
+  /// The other supported locale (the site ships exactly two).
+  AppLocale get other => this == AppLocale.ja ? AppLocale.en : AppLocale.ja;
 }
 
 class Strings {
@@ -116,6 +130,36 @@ class Strings {
     AppLocale.en => 'https://medium.com/flutterkaigi/a-guide-to-submitting-a-proposal-for-flutterkaigi-2026-3fda9a01121d',
   };
 
+  // ── Sponsors ────────────────────────────────────────────────────────
+
+  String get sponsorsNav => 'Sponsors';
+
+  String get sponsorsTitle => 'Sponsors';
+
+  String get sponsorsSubtitle => switch (locale) {
+    AppLocale.ja => 'FlutterKaigi 2026 を支えてくださるスポンサーの皆様',
+    AppLocale.en => 'The sponsors supporting FlutterKaigi 2026',
+  };
+
+  /// Accessible label for a sponsor logo tile linking to its detail page.
+  String sponsorCardAriaLabel(String name) => switch (locale) {
+    AppLocale.ja => '$name の詳細を見る',
+    AppLocale.en => 'View details for $name',
+  };
+
+  String get sponsorBackToList => switch (locale) {
+    AppLocale.ja => 'スポンサー一覧に戻る',
+    AppLocale.en => 'Back to Sponsors',
+  };
+
+  String get sponsorConnectHeading => 'Connect';
+
+  /// Tier badge text on the detail page (CSS upper-cases it).
+  String sponsorTierBadge(String tierLabel) => switch (locale) {
+    AppLocale.ja => '$tierLabel スポンサー',
+    AppLocale.en => '$tierLabel Sponsor',
+  };
+
   String get footerCopyright => switch (locale) {
     AppLocale.ja => '© 2021 - 2026 FlutterKaigi 実行委員会.',
     AppLocale.en => '© 2021 - 2026 FlutterKaigi Executive Committee.',
@@ -125,10 +169,12 @@ class Strings {
     AppLocale.ja => const [
       'Flutter および関連するロゴは Google LLC の商標です。FlutterKaigi は Google LLC の承認または提携を受けておりません。',
       'Flutter の名称およびロゴは Google LLC の商標です。',
+      'RevCommは、株式会社 RevComm の登録商標または商標です。',
     ],
     AppLocale.en => const [
       'Flutter and the related logo are trademarks of Google LLC. FlutterKaigi is not affiliated with or otherwise sponsored by Google LLC.',
       'The Flutter name and the Flutter logo are trademarks of Google LLC.',
+      'RevComm is a registered trademark or trademark of RevComm Inc.',
     ],
   };
 
@@ -172,10 +218,7 @@ class Strings {
 
   String get footerRepository => 'Repository';
 
-  AppLocale get other => switch (locale) {
-    AppLocale.ja => AppLocale.en,
-    AppLocale.en => AppLocale.ja,
-  };
+  AppLocale get other => locale.other;
 
   String get languageToggleLabel => switch (other) {
     AppLocale.ja => '日本語',

@@ -14,14 +14,14 @@ set -euo pipefail
 #   ./public-buckets/sponsor-logos/upload-sponsor-logos.sh
 #
 # アップロード後の公開URL:
-#   https://2026-bucket.flutterkaigi.jp/sponsors/<ファイル名>
+#   https://2026-bucket.flutterkaigi.jp/logos/<ファイル名>
 # =============================================================================
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SOURCE_DIR="$SCRIPT_DIR/logos"
 RCLONE_REMOTE="r2"
 BUCKET_NAME="2026-public-production"
-DEST_PREFIX="sponsors"
+DEST_PREFIX="logos"
 
 # --- 前提チェック ---
 if ! command -v rclone >/dev/null 2>&1; then
@@ -57,8 +57,10 @@ echo ""
 # --s3-no-check-bucket でバケット存在チェック(要 CreateBucket 権限)を省略
 rclone copy "$SOURCE_DIR" "${RCLONE_REMOTE}:${BUCKET_NAME}/${DEST_PREFIX}/" \
   --progress \
+  --exclude ".*" \
   --header-upload "Cache-Control: public, max-age=86400" \
   --s3-no-check-bucket
 
 echo ""
 echo "完了: https://2026-bucket.flutterkaigi.jp/${DEST_PREFIX}/<ファイル名> で取得できます"
+
