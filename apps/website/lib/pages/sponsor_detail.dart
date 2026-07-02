@@ -55,11 +55,22 @@ class SponsorDetailPage extends StatelessComponent {
             classes: 'sponsor-detail__back',
             // Static multipage site: there's no client router, but browsers
             // natively restore scroll position on Back. So when the visitor
-            // arrived from within the site (history exists), go back to restore
-            // the exact list scroll position; otherwise fall through to the
-            // #sponsors anchor (e.g. opened directly / from an external link).
+            // arrived from the list, go back to restore the exact list scroll
+            // position.
+            //
+            // BUT if the visitor switched language on this detail page, the
+            // previous history entry is the *other-language* detail page (the
+            // language switch is a plain <a href> that pushes a new entry), so
+            // history.back() would return there instead of the list. We detect
+            // that via the same-origin referrer (browsers send the full path
+            // for same-origin navigations): when it points at a sponsor detail
+            // page ('/sponsors/'), we skip back() and fall through to the
+            // #sponsors anchor, which lands on the top page's sponsor section in
+            // the *current* (switched) language. External/direct opens also fall
+            // through to the anchor.
             attributes: const {
-              'onclick': 'if(window.history.length>1){window.history.back();return false;}',
+              'onclick':
+                  'if(document.referrer.indexOf("/sponsors/")<0&&window.history.length>1){window.history.back();return false;}',
             },
             [
               span(
