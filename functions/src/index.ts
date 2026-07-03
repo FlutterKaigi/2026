@@ -98,10 +98,6 @@ export const syncSponsorsToProd = onCall(
     enforceAppCheck: !isEmulator,
     memory: "256MiB",
     timeoutSeconds: 300,
-    // 実行サービスアカウント。functions/.env の RUN_SERVICE_ACCOUNT で指定する。
-    // 未指定の場合は Compute デフォルト SA（要 compute API 有効化）が使われる。
-    // デプロイ時のソース解析でも .env が読み込まれるため process.env で参照できる。
-    serviceAccount: process.env.RUN_SERVICE_ACCOUNT || undefined,
   },
   async (request): Promise<SyncSponsorsResult> => {
     if (request.auth == null) {
