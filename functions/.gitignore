@@ -1,0 +1,12 @@
+# ビルド成果物
+lib/
+node_modules/
+
+# 接続情報・機密情報（プロジェクト ID などのデプロイ時パラメータ）は Git 管理外
+.env
+.env.*
+!.env.example
+
+# Firebase ローカル状態
+.firebase/
+*-debug.log
