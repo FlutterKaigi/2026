@@ -238,7 +238,7 @@ class _HiringCard extends StatelessComponent {
     return div(classes: 'hiring-card', [
       div(classes: 'hiring-card__logo', [
         img(
-          src: sponsor.squareLogo,
+          src: sponsor.wideLogo,
           alt: name,
           attributes: const {'loading': 'lazy'},
         ),

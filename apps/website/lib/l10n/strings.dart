@@ -62,6 +62,13 @@ class Strings {
 
   String get heroThemeName => '〜Assemble〜';
 
+  // ── Header ──────────────────────────────────────────────────────────
+
+  String get navMenuAriaLabel => switch (locale) {
+    AppLocale.ja => 'メニュー',
+    AppLocale.en => 'Navigation menu',
+  };
+
   // ── Event section ───────────────────────────────────────────────────
 
   String get eventInfoCardTitle => switch (locale) {
