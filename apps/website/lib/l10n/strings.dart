@@ -212,12 +212,6 @@ class Strings {
     AppLocale.en => 'View open roles at $name (opens in a new tab)',
   };
 
-  /// Footer link label for the Job Boards section.
-  String get footerJobBoards => switch (locale) {
-    AppLocale.ja => 'ジョブボード',
-    AppLocale.en => 'Job Boards',
-  };
-
   String get footerCodeOfConduct => switch (locale) {
     AppLocale.ja => '行動規範',
     AppLocale.en => 'Code of Conduct',
