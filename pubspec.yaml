@@ -127,12 +127,30 @@ melos:
       description: Build and deploy the dashboard to Firebase Hosting (prod)
 
     firebase:start:
-      run: npx -y firebase-tools@13.35.1 emulators:start --project dev-flutterkaigi-2026
-      description: Start Firebase Emulator Suite for local development
+      run: npx -y firebase-tools@13.35.1 emulators:start --project dev-flutterkaigi-2026 --only auth,firestore,storage
+      description: Start Firebase Emulator Suite for local development (without Functions)
+
+    firebase:start:functions:
+      run: >
+        npm --prefix functions run build
+        && npx -y firebase-tools@13.35.1 emulators:start --project dev-flutterkaigi-2026
+      description: Start Firebase Emulator Suite including Cloud Functions (requires `npm install` in functions/)
 
     firebase:emulators:
       run: fvm dart run melos run firebase:start
       description: Alias for firebase:start
+
+    functions:install:
+      run: npm --prefix functions install
+      description: Install Cloud Functions dependencies
+
+    functions:build:
+      run: npm --prefix functions run build
+      description: Type-check and build Cloud Functions (TypeScript)
+
+    functions:deploy:stg:
+      run: npx -y firebase-tools@13.35.1 deploy --only functions --project flutterkaigi-2026-stg
+      description: Deploy Cloud Functions to the STG project (requires functions/.env, see functions/README.md)
 
     firebase:schema:validate:
       run: fvm dart run tool/firebase_seed.dart --validate-only packages/data/firebase/seed/firestore/default.json

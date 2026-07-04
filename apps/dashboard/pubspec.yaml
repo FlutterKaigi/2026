@@ -26,6 +26,12 @@ dependencies:
   # security
   firebase_app_check: ^0.4.5
 
+  # cloud functions (STG → 本番 データ反映)
+  cloud_functions: ^6.0.4
+
+  # UI
+  two_dimensional_scrollables: ^0.5.3
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
