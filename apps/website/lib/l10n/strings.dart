@@ -202,8 +202,8 @@ class Strings {
 
   /// CTA label on Job Board cards and the detail page block.
   String get jobBoardsCta => switch (locale) {
-    AppLocale.ja => '採用情報を見る',
-    AppLocale.en => 'View Open Roles',
+    AppLocale.ja => '採用情報',
+    AppLocale.en => 'Open Roles',
   };
 
   /// Accessible aria-label for a Job Board CTA link.
