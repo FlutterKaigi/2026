@@ -32,6 +32,9 @@ enum AppLocale {
   /// Navigation href (baseHref-prefixed) for a sponsor detail page.
   String sponsorHref(String slug) => '${linkHref}sponsors/$slug';
 
+  /// Navigation href to the Event Info section on the home page.
+  String get eventInfoAnchorHref => '$linkHref#event-info';
+
   /// Navigation href to the Sponsors section on the home page.
   String get sponsorsAnchorHref => '$linkHref#sponsors';
 

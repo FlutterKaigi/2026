@@ -13,37 +13,25 @@ class Header extends StatelessComponent {
   /// pages where there's no per-locale counterpart).
   final String? altLocaleHref;
 
-  // 有効化済み nav アイテム。locale が必要なものは build() 内で組み立てる。
-  // TODO: Uncomment when each section is ready:
-  // (label: 'Event Info', href: '#event-info')
-  // (label: 'Timeline', href: '#timeline')
-  // (label: 'Sponsors', href: '#sponsors')
+  // TODO: Timeline を追加する場合はここに追記する。
 
   @override
   Component build(BuildContext context) {
     final strings = LocaleScope.stringsOf(context);
-    // locale 対応のアンカー href: ホーム外ページからでも正しくトップへ飛べる
-    final navItems = <({String label, String href})>[
-      (label: 'Job Boards', href: strings.locale.jobBoardsAnchorHref),
-    ];
     return header([
       a(href: strings.locale.linkHref, classes: 'brand', [.text('FlutterKaigi 2026')]),
-      if (navItems.isNotEmpty)
-        nav(
-          classes: 'nav',
-          attributes: const {'aria-label': 'Primary'},
-          [
-            for (final item in navItems)
-              a(href: item.href, classes: 'nav__link', [
-                .text(item.label),
-                span(
-                  classes: 'nav__dot',
-                  attributes: const {'aria-hidden': 'true'},
-                  [],
-                ),
-              ]),
-          ],
-        ),
+      nav(
+        classes: 'nav',
+        attributes: const {'aria-label': 'Primary'},
+        [
+          a(href: strings.locale.eventInfoAnchorHref, classes: 'nav__link', [.text('Event Info')]),
+          a(href: strings.locale.sponsorsAnchorHref, classes: 'nav__link', [.text('Sponsors')]),
+          a(href: strings.locale.jobBoardsAnchorHref, classes: 'nav__link', [
+            .text('Job Boards'),
+            span(classes: 'nav__dot', attributes: const {'aria-hidden': 'true'}, []),
+          ]),
+        ],
+      ),
       div(classes: 'actions', [
         // a(href: '#tickets', classes: 'btn btn--primary', [.text('Get Tickets')]),
         a(
