@@ -11,8 +11,10 @@ class LocalizedText {
   final String ja;
   final String en;
 
-  String forLocale(AppLocale locale) =>
-      switch (locale) { AppLocale.ja => ja, AppLocale.en => en };
+  String forLocale(AppLocale locale) => switch (locale) {
+    AppLocale.ja => ja,
+    AppLocale.en => en,
+  };
 }
 
 /// 開催日。

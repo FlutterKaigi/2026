@@ -2,6 +2,7 @@ import 'package:jaspr/dom.dart';
 import 'package:jaspr/jaspr.dart';
 
 import '../components/event_section.dart';
+import '../components/hiring_section.dart';
 import '../components/sponsors_section.dart';
 import '../constants/generated_tokens.dart';
 import '../constants/theme.dart';
@@ -15,70 +16,71 @@ class Home extends StatelessComponent {
     final strings = LocaleScope.stringsOf(context);
     return Component.fragment([
       section(classes: 'hero', [
-      div(classes: 'hero__title', [
-        h1(classes: 'hero__headline', [
-          span(classes: 'hero__headline-line hero__headline-line--brand', [
-            .text('FlutterKaigi'),
-          ]),
-          span(classes: 'hero__headline-line hero__headline-line--year', [
-            .text('2026'),
-          ]),
-        ]),
-        div(classes: 'hero__meta', [
-          div(classes: 'hero__meta-row', [
-            img(
-              classes: 'hero__meta-icon',
-              src: 'images/icons/calendar_paper.svg',
-              alt: '',
-              attributes: const {'aria-hidden': 'true'},
-            ),
-            p(classes: 'hero__meta-text', [
-              .text('10.29'),
-              _Sup('THU'),
-              .text(' – 30'),
-              _Sup('FRI'),
+        div(classes: 'hero__title', [
+          h1(classes: 'hero__headline', [
+            span(classes: 'hero__headline-line hero__headline-line--brand', [
+              .text('FlutterKaigi'),
+            ]),
+            span(classes: 'hero__headline-line hero__headline-line--year', [
+              .text('2026'),
             ]),
           ]),
-          div(classes: 'hero__meta-row', [
-            img(
-              classes: 'hero__meta-icon',
-              src: 'images/icons/map_pin.svg',
-              alt: '',
-              attributes: const {'aria-hidden': 'true'},
-            ),
-            p(classes: 'hero__meta-text', [.text(strings.venue)]),
+          div(classes: 'hero__meta', [
+            div(classes: 'hero__meta-row', [
+              img(
+                classes: 'hero__meta-icon',
+                src: 'images/icons/calendar_paper.svg',
+                alt: '',
+                attributes: const {'aria-hidden': 'true'},
+              ),
+              p(classes: 'hero__meta-text', [
+                .text('10.29'),
+                _Sup('THU'),
+                .text(' – 30'),
+                _Sup('FRI'),
+              ]),
+            ]),
+            div(classes: 'hero__meta-row', [
+              img(
+                classes: 'hero__meta-icon',
+                src: 'images/icons/map_pin.svg',
+                alt: '',
+                attributes: const {'aria-hidden': 'true'},
+              ),
+              p(classes: 'hero__meta-text', [.text(strings.venue)]),
+            ]),
           ]),
         ]),
-      ]),
-      div(classes: 'hero__brand', [
-        div(classes: 'hero__logo', [
-          img(
-            src: 'images/logo.svg',
-            alt: 'FlutterKaigi 2026',
-            attributes: const {'aria-hidden': 'true'},
+        div(classes: 'hero__brand', [
+          div(classes: 'hero__logo', [
+            img(
+              src: 'images/logo.svg',
+              alt: 'FlutterKaigi 2026',
+              attributes: const {'aria-hidden': 'true'},
+            ),
+          ]),
+          a(
+            href: strings.latestUpdatesCtaUrl,
+            target: Target.blank,
+            classes: 'hero__cta',
+            [
+              span([.text(strings.latestUpdatesCta)]),
+              span(
+                classes: 'hero__cta-arrow',
+                attributes: const {'aria-hidden': 'true'},
+                [.text('→')],
+              ),
+            ],
           ),
         ]),
-        a(
-          href: strings.latestUpdatesCtaUrl,
-          target: Target.blank,
-          classes: 'hero__cta',
-          [
-            span([.text(strings.latestUpdatesCta)]),
-            span(
-              classes: 'hero__cta-arrow',
-              attributes: const {'aria-hidden': 'true'},
-              [.text('→')],
-            ),
-          ],
-        ),
+        div(classes: 'hero__slogan', [
+          p(classes: 'hero__slogan-tagline', [.text(strings.heroTagline)]),
+          p(classes: 'hero__slogan-theme', [.text(strings.heroThemeName)]),
+        ]),
       ]),
-      div(classes: 'hero__slogan', [
-        p(classes: 'hero__slogan-tagline', [.text(strings.heroTagline)]),
-        p(classes: 'hero__slogan-theme', [.text(strings.heroThemeName)]),
-      ]),
-    ]),
-    const EventSection(),
-    const SponsorsSection(),
+      const EventSection(),
+      const SponsorsSection(),
+      const HiringSection(),
     ]);
   }
 

@@ -13,25 +13,35 @@ class Header extends StatelessComponent {
   /// pages where there's no per-locale counterpart).
   final String? altLocaleHref;
 
-  static const _navItems = <({String label, String href})>[
-    // TODO: Create link
-    // (label: 'Event Info', href: '#event-info'),
-    // (label: 'Timeline', href: '#timeline'),
-    // (label: 'Sponsors', href: '#sponsors'),
-    // (label: 'Job Board', href: '#job-board'),
-  ];
+  // 有効化済み nav アイテム。locale が必要なものは build() 内で組み立てる。
+  // TODO: Uncomment when each section is ready:
+  // (label: 'Event Info', href: '#event-info')
+  // (label: 'Timeline', href: '#timeline')
+  // (label: 'Sponsors', href: '#sponsors')
 
   @override
   Component build(BuildContext context) {
     final strings = LocaleScope.stringsOf(context);
+    // locale 対応のアンカー href: ホーム外ページからでも正しくトップへ飛べる
+    final navItems = <({String label, String href})>[
+      (label: 'Job Boards', href: strings.locale.jobBoardsAnchorHref),
+    ];
     return header([
       a(href: strings.locale.linkHref, classes: 'brand', [.text('FlutterKaigi 2026')]),
-      if (_navItems.isNotEmpty)
+      if (navItems.isNotEmpty)
         nav(
           classes: 'nav',
           attributes: const {'aria-label': 'Primary'},
           [
-            for (final item in _navItems) a(href: item.href, classes: 'nav__link', [.text(item.label)]),
+            for (final item in navItems)
+              a(href: item.href, classes: 'nav__link', [
+                .text(item.label),
+                span(
+                  classes: 'nav__dot',
+                  attributes: const {'aria-hidden': 'true'},
+                  [],
+                ),
+              ]),
           ],
         ),
       div(classes: 'actions', [
@@ -111,6 +121,7 @@ class Header extends StatelessComponent {
         ),
         css('.nav__link', [
           css('&').styles(
+            position: .relative(),
             color: onSurface,
             fontFamily: uiFontFamily,
             fontWeight: tokenWeight(fontM3LabelLarge.fontWeight),
@@ -120,6 +131,16 @@ class Header extends StatelessComponent {
             },
           ),
           css('&:hover').styles(color: deepPurple),
+          // 注目ドット: リンクの右肩に小さな Magenta Red の円を表示。
+          // class 名は "nav__dot"（広告ブロッカー対象の命名を避ける）。
+          css('.nav__dot').styles(
+            position: .absolute(top: (-3).px, right: (-7).px),
+            width: 6.px,
+            height: 6.px,
+            backgroundColor: magentaRed,
+            radius: .circular(999.px),
+            raw: const {'display': 'block', 'pointer-events': 'none'},
+          ),
         ]),
       ]),
       css('.btn', [

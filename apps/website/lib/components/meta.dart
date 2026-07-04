@@ -9,8 +9,7 @@ import '../l10n/strings.dart';
 ///
 /// OGP uses the `property` attribute (not `name`), so these are emitted as
 /// raw-attribute metas rather than via `Document.head(meta: ...)`.
-Component ogMeta(String property, String content) =>
-    meta(attributes: {'property': property, 'content': content});
+Component ogMeta(String property, String content) => meta(attributes: {'property': property, 'content': content});
 
 const String _defaultDescription =
     '2026年、日本国内でFlutterをメインに扱う技術カンファレンス。'

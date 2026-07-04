@@ -421,6 +421,9 @@ void _writeDart(List<_Sponsor> sponsors) {
       ..writeln('    squareLogo: ${_str(s.squareLogo)},')
       ..writeln('    wideLogo: ${_str(s.wideLogo)},')
       ..writeln('    ogpImage: ${_str(s.ogpImage)},');
+    if (s.jobBoardUrl != null) {
+      out.writeln('    jobBoardUrl: ${_str(s.jobBoardUrl!)},');
+    }
     if (s.benefits.isNotEmpty) {
       out.writeln('    benefits: [${s.benefits.map(_str).join(', ')}],');
     }
@@ -493,6 +496,7 @@ class _Sponsor {
     required this.prTextJa,
     required this.prTextEn,
     required this.links,
+    this.jobBoardUrl,
     required this.benefits,
     required this.year,
   });
@@ -528,7 +532,7 @@ class _Sponsor {
     addLink(m['websiteUrl'], 'Web', _LinkType.other);
     addLink(m['xUrl'], 'X', _LinkType.x);
     addLink(m['recruitUrl'], '採用情報', _LinkType.recruit);
-    addLink(m['jobBoardUrl'], '採用一覧', _LinkType.jobBoard);
+    final jobBoardUrl = (m['jobBoardUrl'] ?? '').toString().trim();
 
     return _Sponsor(
       id: id,
@@ -541,6 +545,7 @@ class _Sponsor {
       prTextJa: prTextJa,
       prTextEn: prTextEn,
       links: links,
+      jobBoardUrl: jobBoardUrl.isNotEmpty ? jobBoardUrl : null,
       benefits: const [],
       year: _yearOf(m['createdAt']),
     );
@@ -556,6 +561,7 @@ class _Sponsor {
   final String prTextJa;
   final String prTextEn;
   final List<_Link> links;
+  final String? jobBoardUrl;
   final List<String> benefits;
   final int year;
 
@@ -604,7 +610,7 @@ enum _Tier {
 }
 
 /// Mirrors `SponsorLinkType`.
-enum _LinkType { x, recruit, jobBoard, other }
+enum _LinkType { x, recruit, other }
 
 /// Detail-page slug: prefers the admin-entered `slug` field, falling back to
 /// one derived from the opaque document id. Both are run through [_slugFromId]

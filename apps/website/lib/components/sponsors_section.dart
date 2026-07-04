@@ -29,11 +29,12 @@ class SponsorsSection extends StatelessComponent {
     // Exception: Flutter (Google) is pinned to the front of its tier
     // unconditionally — as the namesake sponsor it always leads the wall,
     // regardless of where its document id falls in the ascending order.
-    final ordered = [...generatedSponsors]..sort((s1, s2) {
-      if (s1.id == _pinnedFirstId) return s2.id == _pinnedFirstId ? 0 : -1;
-      if (s2.id == _pinnedFirstId) return 1;
-      return s1.id.compareTo(s2.id);
-    });
+    final ordered = [...generatedSponsors]
+      ..sort((s1, s2) {
+        if (s1.id == _pinnedFirstId) return s2.id == _pinnedFirstId ? 0 : -1;
+        if (s2.id == _pinnedFirstId) return 1;
+        return s1.id.compareTo(s2.id);
+      });
     final byTier = groupSponsorsByTier(ordered);
 
     return section(id: 'sponsors', classes: 'sponsors-section', [

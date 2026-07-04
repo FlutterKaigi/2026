@@ -27,14 +27,16 @@ enum AppLocale {
 
   /// Jaspr Router route path (absolute, **no** baseHref) for a sponsor detail
   /// page — this drives the SSG output directory.
-  String sponsorRoutePath(String slug) =>
-      '${homePath == '/' ? '' : homePath}/sponsors/$slug';
+  String sponsorRoutePath(String slug) => '${homePath == '/' ? '' : homePath}/sponsors/$slug';
 
   /// Navigation href (baseHref-prefixed) for a sponsor detail page.
   String sponsorHref(String slug) => '${linkHref}sponsors/$slug';
 
   /// Navigation href to the Sponsors section on the home page.
   String get sponsorsAnchorHref => '$linkHref#sponsors';
+
+  /// Navigation href to the Job Boards section on the home page.
+  String get jobBoardsAnchorHref => '$linkHref#job-boards';
 
   /// The other supported locale (the site ships exactly two).
   AppLocale get other => this == AppLocale.ja ? AppLocale.en : AppLocale.ja;
@@ -126,8 +128,10 @@ class Strings {
   };
 
   String get latestUpdatesCtaUrl => switch (locale) {
-    AppLocale.ja => 'https://medium.com/flutterkaigi/flutterkaigi-2026-%E3%83%97%E3%83%AD%E3%83%9D%E3%83%BC%E3%82%B6%E3%83%AB%E5%BF%9C%E5%8B%9F%E3%81%AE%E3%82%B9%E3%82%B9%E3%83%A1-ea8978e0fd89',
-    AppLocale.en => 'https://medium.com/flutterkaigi/a-guide-to-submitting-a-proposal-for-flutterkaigi-2026-3fda9a01121d',
+    AppLocale.ja =>
+      'https://medium.com/flutterkaigi/flutterkaigi-2026-%E3%83%97%E3%83%AD%E3%83%9D%E3%83%BC%E3%82%B6%E3%83%AB%E5%BF%9C%E5%8B%9F%E3%81%AE%E3%82%B9%E3%82%B9%E3%83%A1-ea8978e0fd89',
+    AppLocale.en =>
+      'https://medium.com/flutterkaigi/a-guide-to-submitting-a-proposal-for-flutterkaigi-2026-3fda9a01121d',
   };
 
   // ── Sponsors ────────────────────────────────────────────────────────
@@ -176,6 +180,32 @@ class Strings {
       'The Flutter name and the Flutter logo are trademarks of Google LLC.',
       'RevComm is a registered trademark or trademark of RevComm Inc.',
     ],
+  };
+
+  // ── Job Boards ──────────────────────────────────────────────────────
+
+  /// Section subtitle on the home Job Boards section.
+  String get jobBoardsSubtitle => switch (locale) {
+    AppLocale.ja => 'Flutter エンジニアを募集しているスポンサー企業の求人情報をチェックしよう。',
+    AppLocale.en => 'Explore open roles at the sponsor companies hiring Flutter engineers.',
+  };
+
+  /// CTA label on Job Board cards and the detail page block.
+  String get jobBoardsCta => switch (locale) {
+    AppLocale.ja => '採用情報を見る',
+    AppLocale.en => 'View Open Roles',
+  };
+
+  /// Accessible aria-label for a Job Board CTA link.
+  String jobBoardsCardAriaLabel(String name) => switch (locale) {
+    AppLocale.ja => '$name の採用情報を見る（新しいタブで開く）',
+    AppLocale.en => 'View open roles at $name (opens in a new tab)',
+  };
+
+  /// Footer link label for the Job Boards section.
+  String get footerJobBoards => switch (locale) {
+    AppLocale.ja => 'ジョブボード',
+    AppLocale.en => 'Job Boards',
   };
 
   String get footerCodeOfConduct => switch (locale) {

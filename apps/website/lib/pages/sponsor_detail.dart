@@ -33,13 +33,14 @@ class SponsorDetailPage extends StatelessComponent {
     // whitespace collapse normally.
     final prLines = prText.split('\n');
     // Connect セクションには X と公式サイト（other）のみ表示する。
-    // recruit・jobBoard はジョブボード統一に向けて非表示。
+    // recruit は非表示（サイト上に出さない方針）。
     final visibleLinks = sponsor.links
         .where(
-          (l) =>
-              l.type == SponsorLinkType.x || l.type == SponsorLinkType.other,
+          (l) => l.type == SponsorLinkType.x || l.type == SponsorLinkType.other,
         )
         .toList();
+    // Job Boards ブロック用 URL（Firestore sponsors.jobBoardUrl を直接使用）。
+    final jobBoardUrl = sponsor.jobBoardUrl;
 
     return Component.fragment([
       Document.head(
@@ -99,6 +100,35 @@ class SponsorDetailPage extends StatelessComponent {
                 [.text(strings.sponsorTierBadge(sponsor.tier.label))],
               ),
               h1(classes: 'sponsor-detail__name', [.text(name)]),
+              if (jobBoardUrl != null)
+                div(classes: 'sponsor-detail__links', [
+                  h2(classes: 'sponsor-detail__links-title', [
+                    .text('Job Boards'),
+                  ]),
+                  div(classes: 'sponsor-detail__links-list', [
+                    a(
+                      href: jobBoardUrl,
+                      target: Target.blank,
+                      classes: 'connect-link',
+                      attributes: const {'rel': 'noopener noreferrer'},
+                      [
+                        span(classes: 'connect-link__icon', [
+                          img(
+                            src: 'images/icons/link_briefcase.svg',
+                            alt: '',
+                            attributes: const {'aria-hidden': 'true'},
+                          ),
+                        ]),
+                        span(classes: 'connect-link__title', [.text(strings.jobBoardsCta)]),
+                        span(
+                          classes: 'connect-link__ext',
+                          attributes: const {'aria-hidden': 'true'},
+                          [.text('↗')],
+                        ),
+                      ],
+                    ),
+                  ]),
+                ]),
               if (visibleLinks.isNotEmpty)
                 div(classes: 'sponsor-detail__links', [
                   h2(classes: 'sponsor-detail__links-title', [
@@ -254,8 +284,7 @@ class SponsorDetailPage extends StatelessComponent {
         css('&.badge--platinum').styles(
           color: const Color('#2B2F36'),
           raw: const {
-            'background':
-                'linear-gradient(135deg, #D6DBE0 0%, #F2F4F6 22%, #B8BFC8 50%, #EDEFF2 78%, #C3C9D0 100%)',
+            'background': 'linear-gradient(135deg, #D6DBE0 0%, #F2F4F6 22%, #B8BFC8 50%, #EDEFF2 78%, #C3C9D0 100%)',
             'border': '1px solid #FFFFFFB3',
             'box-shadow': '0 1px 2px rgba(45, 47, 56, 0.18)',
           },

@@ -57,14 +57,12 @@ enum SponsorTier {
 enum SponsorLinkType {
   x,
   recruit,
-  jobBoard,
   other
   ;
 
   static SponsorLinkType parse(String? raw) => switch (raw?.toLowerCase().trim()) {
     'x' || 'twitter' => SponsorLinkType.x,
     'recruit' || 'careers' => SponsorLinkType.recruit,
-    'jobboard' || 'jobs' => SponsorLinkType.jobBoard,
     _ => SponsorLinkType.other,
   };
 }
@@ -84,7 +82,6 @@ String sponsorLinkIconAsset(SponsorLinkType type) => switch (type) {
   // Filenames avoid "sponsor" so ad blockers don't network-block the icons.
   SponsorLinkType.x => 'images/icons/link_x.svg',
   SponsorLinkType.recruit => 'images/icons/link_briefcase.svg',
-  SponsorLinkType.jobBoard => 'images/icons/link_briefcase.svg',
   SponsorLinkType.other => 'images/icons/link_globe.svg',
 };
 
@@ -104,6 +101,7 @@ class Sponsor {
     required this.squareLogo,
     required this.wideLogo,
     required this.ogpImage,
+    this.jobBoardUrl,
     this.benefits = const [],
     this.year = 2026,
   });
@@ -120,6 +118,10 @@ class Sponsor {
   /// PR / description text, localized (ja/en) with fallback — see [LocalizedText].
   final LocalizedText prText;
   final List<SponsorLink> links;
+
+  /// Job board URL provided directly by the sponsor (from the `jobBoardUrl`
+  /// field in the `sponsors` Firestore collection). Null when not provided.
+  final String? jobBoardUrl;
 
   /// Square logo asset (home grid). Path relative to base href, or a remote URL.
   final String squareLogo;
@@ -144,4 +146,19 @@ Map<SponsorTier, List<Sponsor>> groupSponsorsByTier(List<Sponsor> sponsors) {
     if (inTier.isNotEmpty) byTier[tier] = inTier;
   }
   return byTier;
+}
+
+// ── Job Board helpers ──────────────────────────────────────────────────────
+
+/// Returns sponsors that have a non-empty [Sponsor.jobBoardUrl], sorted by
+/// [SponsorTier] declaration order (platinum → individual) then by
+/// [Sponsor.id] ascending within each tier.
+List<Sponsor> sponsorsWithJobBoard(List<Sponsor> sponsors) {
+  return [
+    ...sponsors.where((s) => s.jobBoardUrl != null && s.jobBoardUrl!.isNotEmpty),
+  ]..sort((a, b) {
+    final tierCmp = SponsorTier.values.indexOf(a.tier).compareTo(SponsorTier.values.indexOf(b.tier));
+    if (tierCmp != 0) return tierCmp;
+    return a.id.compareTo(b.id);
+  });
 }

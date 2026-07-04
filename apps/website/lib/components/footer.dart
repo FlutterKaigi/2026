@@ -51,6 +51,12 @@ class Footer extends StatelessComponent {
                 classes: 'footer__link',
                 [.text(link.label)],
               ),
+            // Job Boards セクションへのアンカーリンク（モバイルでの補完）
+            a(
+              href: strings.locale.jobBoardsAnchorHref,
+              classes: 'footer__link',
+              [.text(strings.footerJobBoards)],
+            ),
           ]),
           div(classes: 'footer__nav-row', [
             for (final link in legalLinks)
