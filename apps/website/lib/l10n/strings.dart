@@ -41,6 +41,9 @@ enum AppLocale {
   /// Navigation href to the Job Boards section on the home page.
   String get jobBoardsAnchorHref => '$linkHref#job-boards';
 
+  /// Navigation href to the Staff section on the home page.
+  String get staffAnchorHref => '$linkHref#staff';
+
   /// The other supported locale (the site ships exactly two).
   AppLocale get other => this == AppLocale.ja ? AppLocale.en : AppLocale.ja;
 }
@@ -172,6 +175,19 @@ class Strings {
   String sponsorTierBadge(String tierLabel) => switch (locale) {
     AppLocale.ja => '$tierLabel スポンサー',
     AppLocale.en => '$tierLabel Sponsor',
+  };
+
+  // ── Staff ───────────────────────────────────────────────────────────
+
+  /// Section title / nav label (kept in English in both locales, per design).
+  String get staffTitle => 'Staff';
+
+  String get staffSubtitle => 'Members building FlutterKaigi 2026';
+
+  /// Accessible label for a staff member's SNS icon link.
+  String staffSnsAriaLabel(String name, String platform) => switch (locale) {
+    AppLocale.ja => '$name の $platform を見る（新しいタブで開く）',
+    AppLocale.en => "View $name's $platform (opens in a new tab)",
   };
 
   String get footerCopyright => switch (locale) {
