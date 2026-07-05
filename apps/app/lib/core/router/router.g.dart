@@ -8,11 +8,19 @@ part of 'router.dart';
 
 List<RouteBase> get $appRoutes => [$appShellRoute];
 
-RouteBase get $appShellRoute => ShellRouteData.$route(
+RouteBase get $appShellRoute => StatefulShellRouteData.$route(
   factory: $AppShellRouteExtension._fromState,
-  routes: [
-    GoRouteData.$route(path: '/news', factory: $NewsRoute._fromState),
-    GoRouteData.$route(path: '/info', factory: $EventInfoRoute._fromState),
+  branches: [
+    StatefulShellBranchData.$branch(
+      routes: [
+        GoRouteData.$route(path: '/news', factory: $NewsRoute._fromState),
+      ],
+    ),
+    StatefulShellBranchData.$branch(
+      routes: [
+        GoRouteData.$route(path: '/info', factory: $EventInfoRoute._fromState),
+      ],
+    ),
   ],
 );
 
@@ -33,14 +41,16 @@ mixin $NewsRoute on GoRouteData {
   Future<T?> push<T>(BuildContext context) => context.push<T>(location);
 
   @override
-  void pushReplacement(BuildContext context) => context.pushReplacement(location);
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
 
   @override
   void replace(BuildContext context) => context.replace(location);
 }
 
 mixin $EventInfoRoute on GoRouteData {
-  static EventInfoRoute _fromState(GoRouterState state) => const EventInfoRoute();
+  static EventInfoRoute _fromState(GoRouterState state) =>
+      const EventInfoRoute();
 
   @override
   String get location => GoRouteData.$location('/info');
@@ -52,7 +62,8 @@ mixin $EventInfoRoute on GoRouteData {
   Future<T?> push<T>(BuildContext context) => context.push<T>(location);
 
   @override
-  void pushReplacement(BuildContext context) => context.pushReplacement(location);
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
 
   @override
   void replace(BuildContext context) => context.replace(location);

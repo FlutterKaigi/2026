@@ -3,54 +3,52 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 /// A top-level navigation destination rendered by [RootScaffold].
+///
+/// The order of destinations must match the order of the shell branches,
+/// since tabs are switched by branch index.
 class RootDestination {
   const RootDestination({
     required this.icon,
     required this.label,
-    required this.location,
   });
 
   final IconData icon;
   final String label;
-  final String location;
 }
 
 /// Adaptive application shell.
 ///
 /// Renders a [NavigationBar] on compact widths and a [NavigationRail] on
-/// medium/expanded widths, highlighting the destination whose location
-/// matches the current router location.
+/// medium/expanded widths. Tabs switch via [StatefulNavigationShell.goBranch],
+/// so the change is instant (no page transition animation) and each branch
+/// keeps its navigation and scroll state.
 class RootScaffold extends StatelessWidget {
   const RootScaffold({
-    required this.navigator,
+    required this.navigationShell,
     required this.destinations,
     super.key,
   });
 
-  final Widget navigator;
+  final StatefulNavigationShell navigationShell;
   final List<RootDestination> destinations;
 
-  int _selectedIndex(String location) {
-    final index = destinations.lastIndexWhere(
-      (destination) => location.startsWith(destination.location),
-    );
-    return index < 0 ? 0 : index;
-  }
-
-  void _onSelected(BuildContext context, int index) => context.go(destinations[index].location);
+  void _onSelected(int index) => navigationShell.goBranch(
+    index,
+    // Re-tapping the active tab resets that branch to its initial location.
+    initialLocation: index == navigationShell.currentIndex,
+  );
 
   @override
   Widget build(BuildContext context) {
-    final location = GoRouterState.of(context).matchedLocation;
-    final selectedIndex = _selectedIndex(location);
+    final selectedIndex = navigationShell.currentIndex;
     final windowSize = WindowSize.fromWidth(MediaQuery.sizeOf(context).width);
 
     if (windowSize == WindowSize.compact) {
       return Scaffold(
-        body: navigator,
+        body: navigationShell,
         bottomNavigationBar: NavigationBar(
           selectedIndex: selectedIndex,
-          onDestinationSelected: (index) => _onSelected(context, index),
+          onDestinationSelected: _onSelected,
           destinations: [
             for (final destination in destinations)
               NavigationDestination(
@@ -69,7 +67,7 @@ class RootScaffold extends StatelessWidget {
             extended: windowSize == WindowSize.expanded,
             labelType: windowSize == WindowSize.expanded ? null : NavigationRailLabelType.all,
             selectedIndex: selectedIndex,
-            onDestinationSelected: (index) => _onSelected(context, index),
+            onDestinationSelected: _onSelected,
             destinations: [
               for (final destination in destinations)
                 NavigationRailDestination(
@@ -79,7 +77,7 @@ class RootScaffold extends StatelessWidget {
             ],
           ),
           const VerticalDivider(width: 1),
-          Expanded(child: navigator),
+          Expanded(child: navigationShell),
         ],
       ),
     );
