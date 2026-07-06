@@ -1,0 +1,22 @@
+app:
+  title: FlutterKaigi 2026
+navigation:
+  news: お知らせ
+  info: イベント情報
+news:
+  title: お知らせ
+  empty: お知らせはまだありません
+  error: お知らせを取得できませんでした
+eventInfo:
+  title: イベント情報
+  version: バージョン
+  themeMode:
+    title: テーマ
+    system: システムに合わせる
+    light: ライト
+    dark: ダーク
+notFound:
+  title: ページが見つかりません
+  description: お探しのページは存在しないか、移動した可能性があります。
+common:
+  retry: 再試行
