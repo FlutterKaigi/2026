@@ -210,9 +210,9 @@ class SponsorDetailPage extends StatelessComponent {
       ]),
 
       // Logo banner: the logo is the bucket image used as-is (no baked padding),
-      // centered and contained. Breathing room is provided here at render time
-      // via the banner padding (clear space around the logo) plus the logo's
-      // max-height, keeping it clear of the rounded border.
+      // centered and contained. Clear space is a uniform 15% on every side —
+      // the logo occupies 70% of the banner in both axes, matching the
+      // sponsors-section / Job Boards logo convention.
       css('.sponsor-detail__banner', [
         css('&').styles(
           display: .flex,
@@ -226,10 +226,10 @@ class SponsorDetailPage extends StatelessComponent {
             color: const Color('#CBC3D933'),
             width: 1.px,
           ),
+          // No padding here: clear space is set on the <img> via the 70% cap so
+          // it stays a consistent 15% instead of stacking with banner padding.
           raw: const {
             'min-height': 'clamp(220px, 30vw, 360px)',
-            // Clear space around the logo (replaces the asset's old baked ~10%).
-            'padding': 'clamp(24px, 6%, 56px)',
           },
         ),
         css('.sponsor-detail__logo').styles(
@@ -239,7 +239,7 @@ class SponsorDetailPage extends StatelessComponent {
           backgroundColor: onBrand,
           raw: const {
             'max-width': '70%',
-            'max-height': 'clamp(180px, 26vw, 312px)',
+            'max-height': '70%',
             'object-fit': 'contain',
           },
         ),
