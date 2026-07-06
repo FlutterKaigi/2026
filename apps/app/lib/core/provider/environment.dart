@@ -2,18 +2,21 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 part 'environment.freezed.dart';
-part 'environment.g.dart';
 
-@Riverpod(keepAlive: true)
-Environment environment(Ref ref) => Environment.fromEnvironment();
+/// Provides the [Environment] resolved from compile-time `--dart-define`s.
+///
+/// Overridden in `main()` with the value resolved at startup so it can be read
+/// synchronously anywhere in the widget tree.
+final environmentProvider = Provider<Environment>(
+  (ref) => Environment.fromEnvironment(),
+);
 
+/// Compile-time configuration supplied via `--dart-define-from-file`.
 @freezed
 abstract class Environment with _$Environment {
-  const Environment._();
-
   const factory Environment({
     required String appIdSuffix,
     required String appName,
@@ -23,6 +26,9 @@ abstract class Environment with _$Environment {
     required String androidFirestoreEmulatorHost,
   }) = _Environment;
 
+  const Environment._();
+
+  /// Reads configuration from `--dart-define` values, defaulting to develop.
   factory Environment.fromEnvironment() => Environment(
     appIdSuffix: const String.fromEnvironment('APP_ID_SUFFIX'),
     appName: const String.fromEnvironment(
@@ -30,9 +36,7 @@ abstract class Environment with _$Environment {
       defaultValue: '[DEV] FlutterKaigi 2026',
     ),
     flavor: Flavor.values.firstWhere(
-      (e) =>
-          e.shortName ==
-          const String.fromEnvironment('FLAVOR', defaultValue: 'dev'),
+      (flavor) => flavor.shortName == const String.fromEnvironment('FLAVOR', defaultValue: 'dev'),
     ),
     firebaseProjectId: const String.fromEnvironment(
       'FIREBASE_PROJECT_ID',
@@ -48,6 +52,7 @@ abstract class Environment with _$Environment {
     ),
   );
 
+  /// The Firestore emulator host appropriate for the current platform.
   String get firestoreHost {
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
       return androidFirestoreEmulatorHost;
@@ -56,12 +61,15 @@ abstract class Environment with _$Environment {
   }
 }
 
+/// Build flavor selected at compile time through the `FLAVOR` define.
 enum Flavor {
   production('prod'),
   staging('stg'),
-  develop('dev');
+  develop('dev')
+  ;
 
   const Flavor(this.shortName);
 
+  /// The short identifier passed via `--dart-define=FLAVOR`.
   final String shortName;
 }
