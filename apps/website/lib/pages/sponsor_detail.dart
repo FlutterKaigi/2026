@@ -238,7 +238,7 @@ class SponsorDetailPage extends StatelessComponent {
           // 置かれてもグローが見えないようにする。
           backgroundColor: onBrand,
           raw: const {
-            'max-width': '100%',
+            'max-width': '70%',
             'max-height': 'clamp(180px, 26vw, 312px)',
             'object-fit': 'contain',
           },
