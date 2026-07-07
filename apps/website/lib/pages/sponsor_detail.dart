@@ -212,8 +212,9 @@ class SponsorDetailPage extends StatelessComponent {
       // Logo banner: the logo is the bucket image used as-is (no baked padding),
       // centered and contained. Horizontal clear space is 15% (logo capped at
       // 70% width, matching the sponsors-section / Job Boards convention). The
-      // height is fixed via max-height so a square logo stays contained instead
-      // of stretching the banner tall.
+      // height is fixed via max-height (≈80% of the banner min-height, so ~10%
+      // clear top/bottom) — a square logo stays contained instead of stretching
+      // the banner tall or filling it edge to edge.
       css('.sponsor-detail__banner', [
         css('&').styles(
           display: .flex,
@@ -240,7 +241,7 @@ class SponsorDetailPage extends StatelessComponent {
           backgroundColor: onBrand,
           raw: const {
             'max-width': '70%',
-            'max-height': 'clamp(180px, 26vw, 312px)',
+            'max-height': 'clamp(176px, 24vw, 288px)',
             'object-fit': 'contain',
           },
         ),
