@@ -90,6 +90,7 @@ class _Translations$eventInfo$en extends Translations$eventInfo$ja {
 	@override String get title => 'Event Info';
 	@override String get version => 'Version';
 	@override late final _Translations$eventInfo$themeMode$en themeMode = _Translations$eventInfo$themeMode$en._(_root);
+	@override late final _Translations$eventInfo$language$en language = _Translations$eventInfo$language$en._(_root);
 }
 
 // Path: notFound
@@ -126,6 +127,18 @@ class _Translations$eventInfo$themeMode$en extends Translations$eventInfo$themeM
 	@override String get dark => 'Dark';
 }
 
+// Path: eventInfo.language
+class _Translations$eventInfo$language$en extends Translations$eventInfo$language$ja {
+	_Translations$eventInfo$language$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Language';
+	@override String get japanese => '日本語';
+	@override String get english => 'English';
+}
+
 /// The flat map containing all translations for locale <en>.
 /// Only for edge cases! For simple maps, use the map function of this library.
 ///
@@ -146,6 +159,9 @@ extension on TranslationsEn {
 			'eventInfo.themeMode.system' => 'System',
 			'eventInfo.themeMode.light' => 'Light',
 			'eventInfo.themeMode.dark' => 'Dark',
+			'eventInfo.language.title' => 'Language',
+			'eventInfo.language.japanese' => '日本語',
+			'eventInfo.language.english' => 'English',
 			'notFound.title' => 'Page not found',
 			'notFound.description' => 'The page you are looking for does not exist or may have moved.',
 			'common.retry' => 'Retry',

@@ -108,6 +108,7 @@ class Translations$eventInfo$ja {
 	String get version => 'バージョン';
 
 	late final Translations$eventInfo$themeMode$ja themeMode = Translations$eventInfo$themeMode$ja.internal(_root);
+	late final Translations$eventInfo$language$ja language = Translations$eventInfo$language$ja.internal(_root);
 }
 
 // Path: notFound
@@ -158,6 +159,24 @@ class Translations$eventInfo$themeMode$ja {
 	String get dark => 'ダーク';
 }
 
+// Path: eventInfo.language
+class Translations$eventInfo$language$ja {
+	Translations$eventInfo$language$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: '表示言語'
+	String get title => '表示言語';
+
+	/// ja: '日本語'
+	String get japanese => '日本語';
+
+	/// ja: 'English'
+	String get english => 'English';
+}
+
 /// The flat map containing all translations for locale <ja>.
 /// Only for edge cases! For simple maps, use the map function of this library.
 ///
@@ -178,6 +197,9 @@ extension on Translations {
 			'eventInfo.themeMode.system' => 'システムに合わせる',
 			'eventInfo.themeMode.light' => 'ライト',
 			'eventInfo.themeMode.dark' => 'ダーク',
+			'eventInfo.language.title' => '表示言語',
+			'eventInfo.language.japanese' => '日本語',
+			'eventInfo.language.english' => 'English',
 			'notFound.title' => 'ページが見つかりません',
 			'notFound.description' => 'お探しのページは存在しないか、移動した可能性があります。',
 			'common.retry' => '再試行',

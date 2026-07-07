@@ -15,6 +15,10 @@ eventInfo:
     system: システムに合わせる
     light: ライト
     dark: ダーク
+  language:
+    title: 表示言語
+    japanese: 日本語
+    english: English
 notFound:
   title: ページが見つかりません
   description: お探しのページは存在しないか、移動した可能性があります。
