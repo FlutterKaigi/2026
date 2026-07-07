@@ -1,4 +1,5 @@
 import 'package:app/core/i18n/strings.g.dart';
+import 'package:app/core/provider/app_locale.dart';
 import 'package:app/core/provider/environment.dart';
 import 'package:app/core/provider/shared_preferences.dart';
 import 'package:app/core/ui/app.dart';
@@ -21,7 +22,8 @@ Future<void> main() async {
   });
 
   final environment = Environment.fromEnvironment();
-  await LocaleSettings.useDeviceLocale();
+  final sharedPreferences = await SharedPreferences.getInstance();
+  await initializeAppLocale(sharedPreferences);
 
   // dev (emulator): options stays null so FirebaseInitializer wires the local
   // emulator suite. For stg/prod, generate firebase_options.dart via
@@ -32,8 +34,6 @@ Future<void> main() async {
     host: hostParts.first,
     firestorePort: hostParts.length > 1 ? int.parse(hostParts[1]) : 8080,
   );
-
-  final sharedPreferences = await SharedPreferences.getInstance();
 
   runApp(
     TranslationProvider(
