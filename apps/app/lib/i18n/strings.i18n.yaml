@@ -2,11 +2,28 @@ app:
   title: FlutterKaigi 2026
 navigation:
   news: お知らせ
+  sessions: セッション
   info: イベント情報
 news:
   title: お知らせ
   empty: お知らせはまだありません
   error: お知らせを取得できませんでした
+sessionTimetable:
+  title: タイムテーブル
+  empty: タイムテーブルはまだ公開されていません
+  emptyFiltered: 選択した会場の予定はありません
+  error: タイムテーブルを取得できませんでした
+  venue:
+    all: すべて
+    unknown: 会場未定
+  speaker:
+    none: 登壇者未定
+  type:
+    regular: 通常セッション
+    lightningTalk: LT
+    beginnersLightningTalk: 初心者向けLT
+    handsOn: ハンズオン
+    event: イベント
 eventInfo:
   title: イベント情報
   version: バージョン

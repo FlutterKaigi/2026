@@ -18,6 +18,14 @@ RouteBase get $appShellRoute => StatefulShellRouteData.$route(
     ),
     StatefulShellBranchData.$branch(
       routes: [
+        GoRouteData.$route(
+          path: '/sessions',
+          factory: $SessionTimetableRoute._fromState,
+        ),
+      ],
+    ),
+    StatefulShellBranchData.$branch(
+      routes: [
         GoRouteData.$route(path: '/info', factory: $EventInfoRoute._fromState),
       ],
     ),
@@ -33,6 +41,27 @@ mixin $NewsRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/news');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $SessionTimetableRoute on GoRouteData {
+  static SessionTimetableRoute _fromState(GoRouterState state) =>
+      const SessionTimetableRoute();
+
+  @override
+  String get location => GoRouteData.$location('/sessions');
 
   @override
   void go(BuildContext context) => context.go(location);

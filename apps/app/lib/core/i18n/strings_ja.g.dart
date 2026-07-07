@@ -43,6 +43,7 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	late final Translations$app$ja app = Translations$app$ja.internal(_root);
 	late final Translations$navigation$ja navigation = Translations$navigation$ja.internal(_root);
 	late final Translations$news$ja news = Translations$news$ja.internal(_root);
+	late final Translations$sessionTimetable$ja sessionTimetable = Translations$sessionTimetable$ja.internal(_root);
 	late final Translations$eventInfo$ja eventInfo = Translations$eventInfo$ja.internal(_root);
 	late final Translations$notFound$ja notFound = Translations$notFound$ja.internal(_root);
 	late final Translations$common$ja common = Translations$common$ja.internal(_root);
@@ -71,6 +72,9 @@ class Translations$navigation$ja {
 	/// ja: 'お知らせ'
 	String get news => 'お知らせ';
 
+	/// ja: 'セッション'
+	String get sessions => 'セッション';
+
 	/// ja: 'イベント情報'
 	String get info => 'イベント情報';
 }
@@ -91,6 +95,31 @@ class Translations$news$ja {
 
 	/// ja: 'お知らせを取得できませんでした'
 	String get error => 'お知らせを取得できませんでした';
+}
+
+// Path: sessionTimetable
+class Translations$sessionTimetable$ja {
+	Translations$sessionTimetable$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'タイムテーブル'
+	String get title => 'タイムテーブル';
+
+	/// ja: 'タイムテーブルはまだ公開されていません'
+	String get empty => 'タイムテーブルはまだ公開されていません';
+
+	/// ja: '選択した会場の予定はありません'
+	String get emptyFiltered => '選択した会場の予定はありません';
+
+	/// ja: 'タイムテーブルを取得できませんでした'
+	String get error => 'タイムテーブルを取得できませんでした';
+
+	late final Translations$sessionTimetable$venue$ja venue = Translations$sessionTimetable$venue$ja.internal(_root);
+	late final Translations$sessionTimetable$speaker$ja speaker = Translations$sessionTimetable$speaker$ja.internal(_root);
+	late final Translations$sessionTimetable$type$ja type = Translations$sessionTimetable$type$ja.internal(_root);
 }
 
 // Path: eventInfo
@@ -136,6 +165,57 @@ class Translations$common$ja {
 
 	/// ja: '再試行'
 	String get retry => '再試行';
+}
+
+// Path: sessionTimetable.venue
+class Translations$sessionTimetable$venue$ja {
+	Translations$sessionTimetable$venue$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'すべて'
+	String get all => 'すべて';
+
+	/// ja: '会場未定'
+	String get unknown => '会場未定';
+}
+
+// Path: sessionTimetable.speaker
+class Translations$sessionTimetable$speaker$ja {
+	Translations$sessionTimetable$speaker$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: '登壇者未定'
+	String get none => '登壇者未定';
+}
+
+// Path: sessionTimetable.type
+class Translations$sessionTimetable$type$ja {
+	Translations$sessionTimetable$type$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: '通常セッション'
+	String get regular => '通常セッション';
+
+	/// ja: 'LT'
+	String get lightningTalk => 'LT';
+
+	/// ja: '初心者向けLT'
+	String get beginnersLightningTalk => '初心者向けLT';
+
+	/// ja: 'ハンズオン'
+	String get handsOn => 'ハンズオン';
+
+	/// ja: 'イベント'
+	String get event => 'イベント';
 }
 
 // Path: eventInfo.themeMode
@@ -187,10 +267,23 @@ extension on Translations {
 		return switch (path) {
 			'app.title' => 'FlutterKaigi 2026',
 			'navigation.news' => 'お知らせ',
+			'navigation.sessions' => 'セッション',
 			'navigation.info' => 'イベント情報',
 			'news.title' => 'お知らせ',
 			'news.empty' => 'お知らせはまだありません',
 			'news.error' => 'お知らせを取得できませんでした',
+			'sessionTimetable.title' => 'タイムテーブル',
+			'sessionTimetable.empty' => 'タイムテーブルはまだ公開されていません',
+			'sessionTimetable.emptyFiltered' => '選択した会場の予定はありません',
+			'sessionTimetable.error' => 'タイムテーブルを取得できませんでした',
+			'sessionTimetable.venue.all' => 'すべて',
+			'sessionTimetable.venue.unknown' => '会場未定',
+			'sessionTimetable.speaker.none' => '登壇者未定',
+			'sessionTimetable.type.regular' => '通常セッション',
+			'sessionTimetable.type.lightningTalk' => 'LT',
+			'sessionTimetable.type.beginnersLightningTalk' => '初心者向けLT',
+			'sessionTimetable.type.handsOn' => 'ハンズオン',
+			'sessionTimetable.type.event' => 'イベント',
 			'eventInfo.title' => 'イベント情報',
 			'eventInfo.version' => 'バージョン',
 			'eventInfo.themeMode.title' => 'テーマ',

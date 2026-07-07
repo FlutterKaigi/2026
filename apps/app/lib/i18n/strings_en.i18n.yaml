@@ -2,11 +2,28 @@ app:
   title: FlutterKaigi 2026
 navigation:
   news: News
+  sessions: Sessions
   info: Event Info
 news:
   title: News
   empty: There is no news yet
   error: Failed to load news
+sessionTimetable:
+  title: Timetable
+  empty: The timetable has not been published yet
+  emptyFiltered: There are no items for the selected venue
+  error: Failed to load timetable
+  venue:
+    all: All
+    unknown: Venue TBA
+  speaker:
+    none: Speaker TBA
+  type:
+    regular: Regular Talk
+    lightningTalk: Lightning Talk
+    beginnersLightningTalk: Beginners LT
+    handsOn: Hands-on
+    event: Event
 eventInfo:
   title: Event Info
   version: Version

@@ -42,6 +42,7 @@ class TranslationsEn extends Translations with BaseTranslations<AppLocale, Trans
 	@override late final _Translations$app$en app = _Translations$app$en._(_root);
 	@override late final _Translations$navigation$en navigation = _Translations$navigation$en._(_root);
 	@override late final _Translations$news$en news = _Translations$news$en._(_root);
+	@override late final _Translations$sessionTimetable$en sessionTimetable = _Translations$sessionTimetable$en._(_root);
 	@override late final _Translations$eventInfo$en eventInfo = _Translations$eventInfo$en._(_root);
 	@override late final _Translations$notFound$en notFound = _Translations$notFound$en._(_root);
 	@override late final _Translations$common$en common = _Translations$common$en._(_root);
@@ -65,6 +66,7 @@ class _Translations$navigation$en extends Translations$navigation$ja {
 
 	// Translations
 	@override String get news => 'News';
+	@override String get sessions => 'Sessions';
 	@override String get info => 'Event Info';
 }
 
@@ -78,6 +80,22 @@ class _Translations$news$en extends Translations$news$ja {
 	@override String get title => 'News';
 	@override String get empty => 'There is no news yet';
 	@override String get error => 'Failed to load news';
+}
+
+// Path: sessionTimetable
+class _Translations$sessionTimetable$en extends Translations$sessionTimetable$ja {
+	_Translations$sessionTimetable$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Timetable';
+	@override String get empty => 'The timetable has not been published yet';
+	@override String get emptyFiltered => 'There are no items for the selected venue';
+	@override String get error => 'Failed to load timetable';
+	@override late final _Translations$sessionTimetable$venue$en venue = _Translations$sessionTimetable$venue$en._(_root);
+	@override late final _Translations$sessionTimetable$speaker$en speaker = _Translations$sessionTimetable$speaker$en._(_root);
+	@override late final _Translations$sessionTimetable$type$en type = _Translations$sessionTimetable$type$en._(_root);
 }
 
 // Path: eventInfo
@@ -112,6 +130,41 @@ class _Translations$common$en extends Translations$common$ja {
 
 	// Translations
 	@override String get retry => 'Retry';
+}
+
+// Path: sessionTimetable.venue
+class _Translations$sessionTimetable$venue$en extends Translations$sessionTimetable$venue$ja {
+	_Translations$sessionTimetable$venue$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get all => 'All';
+	@override String get unknown => 'Venue TBA';
+}
+
+// Path: sessionTimetable.speaker
+class _Translations$sessionTimetable$speaker$en extends Translations$sessionTimetable$speaker$ja {
+	_Translations$sessionTimetable$speaker$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get none => 'Speaker TBA';
+}
+
+// Path: sessionTimetable.type
+class _Translations$sessionTimetable$type$en extends Translations$sessionTimetable$type$ja {
+	_Translations$sessionTimetable$type$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get regular => 'Regular Talk';
+	@override String get lightningTalk => 'Lightning Talk';
+	@override String get beginnersLightningTalk => 'Beginners LT';
+	@override String get handsOn => 'Hands-on';
+	@override String get event => 'Event';
 }
 
 // Path: eventInfo.themeMode
@@ -149,10 +202,23 @@ extension on TranslationsEn {
 		return switch (path) {
 			'app.title' => 'FlutterKaigi 2026',
 			'navigation.news' => 'News',
+			'navigation.sessions' => 'Sessions',
 			'navigation.info' => 'Event Info',
 			'news.title' => 'News',
 			'news.empty' => 'There is no news yet',
 			'news.error' => 'Failed to load news',
+			'sessionTimetable.title' => 'Timetable',
+			'sessionTimetable.empty' => 'The timetable has not been published yet',
+			'sessionTimetable.emptyFiltered' => 'There are no items for the selected venue',
+			'sessionTimetable.error' => 'Failed to load timetable',
+			'sessionTimetable.venue.all' => 'All',
+			'sessionTimetable.venue.unknown' => 'Venue TBA',
+			'sessionTimetable.speaker.none' => 'Speaker TBA',
+			'sessionTimetable.type.regular' => 'Regular Talk',
+			'sessionTimetable.type.lightningTalk' => 'Lightning Talk',
+			'sessionTimetable.type.beginnersLightningTalk' => 'Beginners LT',
+			'sessionTimetable.type.handsOn' => 'Hands-on',
+			'sessionTimetable.type.event' => 'Event',
 			'eventInfo.title' => 'Event Info',
 			'eventInfo.version' => 'Version',
 			'eventInfo.themeMode.title' => 'Theme',
