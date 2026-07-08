@@ -22,7 +22,10 @@
       "path": "venues/hall-a",
       "schema": "venue",
       "data": {
-        "name": { "ja": "ホール A", "en": "Hall A" },
+        "name": {
+          "ja": "ホール A",
+          "en": "Hall A"
+        },
         "order": 1,
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -32,8 +35,37 @@
       "path": "venues/hall-b",
       "schema": "venue",
       "data": {
-        "name": { "ja": "ホール B", "en": "Hall B" },
+        "name": {
+          "ja": "ホール B",
+          "en": "Hall B"
+        },
         "order": 2,
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "venues/hall-c",
+      "schema": "venue",
+      "data": {
+        "name": {
+          "ja": "ホール C",
+          "en": "Hall C"
+        },
+        "order": 3,
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "venues/hall-d",
+      "schema": "venue",
+      "data": {
+        "name": {
+          "ja": "ホール D",
+          "en": "Hall D"
+        },
+        "order": 4,
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
       }
@@ -63,19 +95,168 @@
       }
     },
     {
-      "path": "sessions/keynote",
+      "path": "speakers/riverpod-ren",
+      "schema": "speaker",
+      "data": {
+        "name": "Riverpod Ren",
+        "avatarUrl": "https://example.com/speakers/riverpod-ren.png",
+        "xId": "riverpod_ren",
+        "bio": "状態管理と大規模アプリ設計に詳しいエンジニア。",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "speakers/widget-mika",
+      "schema": "speaker",
+      "data": {
+        "name": "Widget Mika",
+        "avatarUrl": "https://example.com/speakers/widget-mika.png",
+        "xId": "widget_mika",
+        "bio": "UI 実装とデザインシステムを担当。",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "speakers/skia-sora",
+      "schema": "speaker",
+      "data": {
+        "name": "Skia Sora",
+        "avatarUrl": "https://example.com/speakers/skia-sora.png",
+        "xId": "skia_sora",
+        "bio": "レンダリングとパフォーマンス改善が専門。",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "speakers/impeller-ito",
+      "schema": "speaker",
+      "data": {
+        "name": "Impeller Ito",
+        "avatarUrl": "https://example.com/speakers/impeller-ito.png",
+        "xId": "impeller_ito",
+        "bio": "描画パイプラインとアニメーションを研究。",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "speakers/a11y-akira",
+      "schema": "speaker",
+      "data": {
+        "name": "A11y Akira",
+        "avatarUrl": "https://example.com/speakers/a11y-akira.png",
+        "xId": "a11y_akira",
+        "bio": "アクセシビリティ改善に取り組むエンジニア。",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "speakers/web-yui",
+      "schema": "speaker",
+      "data": {
+        "name": "Web Yui",
+        "avatarUrl": "https://example.com/speakers/web-yui.png",
+        "xId": "web_yui",
+        "bio": "Flutter Web と PWA の開発経験を共有。",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "speakers/platform-ken",
+      "schema": "speaker",
+      "data": {
+        "name": "Platform Ken",
+        "avatarUrl": "https://example.com/speakers/platform-ken.png",
+        "xId": "platform_ken",
+        "bio": "ネイティブ連携とマルチプラットフォーム対応が専門。",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "speakers/tool-haruka",
+      "schema": "speaker",
+      "data": {
+        "name": "Tool Haruka",
+        "avatarUrl": "https://example.com/speakers/tool-haruka.png",
+        "xId": "tool_haruka",
+        "bio": "開発ツールとCIの改善を進めている。",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "speakers/testing-nori",
+      "schema": "speaker",
+      "data": {
+        "name": "Testing Nori",
+        "avatarUrl": "https://example.com/speakers/testing-nori.png",
+        "xId": "testing_nori",
+        "bio": "テスト戦略と品質保証に詳しい。",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "speakers/design-mayu",
+      "schema": "speaker",
+      "data": {
+        "name": "Design Mayu",
+        "avatarUrl": "https://example.com/speakers/design-mayu.png",
+        "xId": "design_mayu",
+        "bio": "プロダクトデザインと実装の橋渡しを担当。",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "speakers/ai-sho",
+      "schema": "speaker",
+      "data": {
+        "name": "AI Sho",
+        "avatarUrl": "https://example.com/speakers/ai-sho.png",
+        "xId": "ai_sho",
+        "bio": "AI を活用した開発体験を探求。",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "speakers/community-rin",
+      "schema": "speaker",
+      "data": {
+        "name": "Community Rin",
+        "avatarUrl": "https://example.com/speakers/community-rin.png",
+        "xId": "community_rin",
+        "bio": "コミュニティ運営と学習支援に携わる。",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sessions/day1-keynote",
       "schema": "session",
       "data": {
-        "title": { "ja": "基調講演", "en": "Keynote" },
+        "title": {
+          "ja": "1日目: 基調講演",
+          "en": "Day 1: Keynote"
+        },
         "description": {
-          "ja": "FlutterKaigi 2026 の幕開けを飾る基調講演です。",
-          "en": "The opening keynote of FlutterKaigi 2026."
+          "ja": "1日目の「基調講演」サンプルセッションです。4ホール並行開催のタイムテーブル表示確認に使います。",
+          "en": "Day 1 sample session for Keynote. Used to verify the timetable with four parallel halls."
         },
         "primaryLocale": "ja",
-        "startsAt": "2026-11-14T10:00:00+09:00",
-        "endsAt": "2026-11-14T10:45:00+09:00",
+        "startsAt": "2026-10-29T10:15:00+09:00",
+        "endsAt": "2026-10-29T10:45:00+09:00",
         "venueId": "hall-a",
-        "speakerIds": ["flutter-taro"],
+        "speakerIds": [
+          "flutter-taro"
+        ],
         "isLightningTalk": false,
         "isBeginnersLightningTalk": false,
         "isHandsOn": false,
@@ -85,46 +266,2051 @@
       }
     },
     {
-      "path": "sessions/lightning-talk-1",
+      "path": "sessions/day1-state-management-at-scale",
       "schema": "session",
       "data": {
-        "title": { "ja": "LT: Dart の小ネタ", "en": "LT: Dart Tips" },
+        "title": {
+          "ja": "1日目: 大規模アプリの状態管理",
+          "en": "Day 1: State Management at Scale"
+        },
         "description": {
-          "ja": "5 分で学ぶ Dart の便利な書き方。",
-          "en": "Handy Dart idioms in five minutes."
+          "ja": "1日目の「大規模アプリの状態管理」サンプルセッションです。4ホール並行開催のタイムテーブル表示確認に使います。",
+          "en": "Day 1 sample session for State Management at Scale. Used to verify the timetable with four parallel halls."
         },
         "primaryLocale": "ja",
-        "startsAt": "2026-11-14T13:00:00+09:00",
-        "endsAt": "2026-11-14T13:05:00+09:00",
-        "venueId": "hall-b",
-        "speakerIds": ["dart-hanako"],
-        "isLightningTalk": true,
+        "startsAt": "2026-10-29T11:00:00+09:00",
+        "endsAt": "2026-10-29T11:30:00+09:00",
+        "venueId": "hall-a",
+        "speakerIds": [
+          "riverpod-ren"
+        ],
+        "isLightningTalk": false,
         "isBeginnersLightningTalk": false,
         "isHandsOn": false,
-        "sessionizeUrl": "https://sessionize.com/example/lightning-talk-1",
+        "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day1-state-management-at-scale",
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
       }
     },
     {
-      "path": "timelineEvents/opening",
+      "path": "sessions/day1-rendering-pipeline-deep-dive",
+      "schema": "session",
+      "data": {
+        "title": {
+          "ja": "1日目: レンダリングパイプライン深掘り",
+          "en": "Day 1: Rendering Pipeline Deep Dive"
+        },
+        "description": {
+          "ja": "1日目の「レンダリングパイプライン深掘り」サンプルセッションです。4ホール並行開催のタイムテーブル表示確認に使います。",
+          "en": "Day 1 sample session for Rendering Pipeline Deep Dive. Used to verify the timetable with four parallel halls."
+        },
+        "primaryLocale": "ja",
+        "startsAt": "2026-10-29T11:00:00+09:00",
+        "endsAt": "2026-10-29T11:30:00+09:00",
+        "venueId": "hall-b",
+        "speakerIds": [
+          "skia-sora"
+        ],
+        "isLightningTalk": false,
+        "isBeginnersLightningTalk": false,
+        "isHandsOn": false,
+        "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day1-rendering-pipeline-deep-dive",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sessions/day1-flutter-web-production",
+      "schema": "session",
+      "data": {
+        "title": {
+          "ja": "1日目: Flutter Web 本番運用の勘所",
+          "en": "Day 1: Running Flutter Web in Production"
+        },
+        "description": {
+          "ja": "1日目の「Flutter Web 本番運用の勘所」サンプルセッションです。4ホール並行開催のタイムテーブル表示確認に使います。",
+          "en": "Day 1 sample session for Running Flutter Web in Production. Used to verify the timetable with four parallel halls."
+        },
+        "primaryLocale": "ja",
+        "startsAt": "2026-10-29T11:00:00+09:00",
+        "endsAt": "2026-10-29T11:30:00+09:00",
+        "venueId": "hall-c",
+        "speakerIds": [
+          "web-yui"
+        ],
+        "isLightningTalk": false,
+        "isBeginnersLightningTalk": false,
+        "isHandsOn": false,
+        "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day1-flutter-web-production",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sessions/day1-inclusive-design-checklist",
+      "schema": "session",
+      "data": {
+        "title": {
+          "ja": "1日目: アクセシブルなUI設計チェックリスト",
+          "en": "Day 1: Inclusive Design Checklist"
+        },
+        "description": {
+          "ja": "1日目の「アクセシブルなUI設計チェックリスト」サンプルセッションです。4ホール並行開催のタイムテーブル表示確認に使います。",
+          "en": "Day 1 sample session for Inclusive Design Checklist. Used to verify the timetable with four parallel halls."
+        },
+        "primaryLocale": "ja",
+        "startsAt": "2026-10-29T11:00:00+09:00",
+        "endsAt": "2026-10-29T11:30:00+09:00",
+        "venueId": "hall-d",
+        "speakerIds": [
+          "a11y-akira"
+        ],
+        "isLightningTalk": false,
+        "isBeginnersLightningTalk": false,
+        "isHandsOn": false,
+        "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day1-inclusive-design-checklist",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sessions/day1-offline-first-data-sync",
+      "schema": "session",
+      "data": {
+        "title": {
+          "ja": "1日目: オフラインファーストなデータ同期",
+          "en": "Day 1: Offline-first Data Sync"
+        },
+        "description": {
+          "ja": "1日目の「オフラインファーストなデータ同期」サンプルセッションです。4ホール並行開催のタイムテーブル表示確認に使います。",
+          "en": "Day 1 sample session for Offline-first Data Sync. Used to verify the timetable with four parallel halls."
+        },
+        "primaryLocale": "ja",
+        "startsAt": "2026-10-29T11:45:00+09:00",
+        "endsAt": "2026-10-29T12:15:00+09:00",
+        "venueId": "hall-a",
+        "speakerIds": [
+          "platform-ken"
+        ],
+        "isLightningTalk": false,
+        "isBeginnersLightningTalk": false,
+        "isHandsOn": false,
+        "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day1-offline-first-data-sync",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sessions/day1-impeller-performance-debug",
+      "schema": "session",
+      "data": {
+        "title": {
+          "ja": "1日目: Impeller時代のパフォーマンス調査",
+          "en": "Day 1: Performance Debugging with Impeller"
+        },
+        "description": {
+          "ja": "1日目の「Impeller時代のパフォーマンス調査」サンプルセッションです。4ホール並行開催のタイムテーブル表示確認に使います。",
+          "en": "Day 1 sample session for Performance Debugging with Impeller. Used to verify the timetable with four parallel halls."
+        },
+        "primaryLocale": "ja",
+        "startsAt": "2026-10-29T11:45:00+09:00",
+        "endsAt": "2026-10-29T12:15:00+09:00",
+        "venueId": "hall-b",
+        "speakerIds": [
+          "impeller-ito"
+        ],
+        "isLightningTalk": false,
+        "isBeginnersLightningTalk": false,
+        "isHandsOn": false,
+        "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day1-impeller-performance-debug",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sessions/day1-desktop-app-packaging",
+      "schema": "session",
+      "data": {
+        "title": {
+          "ja": "1日目: デスクトップアプリ配布入門",
+          "en": "Day 1: Desktop App Packaging Basics"
+        },
+        "description": {
+          "ja": "1日目の「デスクトップアプリ配布入門」サンプルセッションです。4ホール並行開催のタイムテーブル表示確認に使います。",
+          "en": "Day 1 sample session for Desktop App Packaging Basics. Used to verify the timetable with four parallel halls."
+        },
+        "primaryLocale": "ja",
+        "startsAt": "2026-10-29T11:45:00+09:00",
+        "endsAt": "2026-10-29T12:15:00+09:00",
+        "venueId": "hall-c",
+        "speakerIds": [
+          "tool-haruka"
+        ],
+        "isLightningTalk": false,
+        "isBeginnersLightningTalk": false,
+        "isHandsOn": false,
+        "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day1-desktop-app-packaging",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sessions/day1-firebase-app-distribution",
+      "schema": "session",
+      "data": {
+        "title": {
+          "ja": "1日目: Firebaseで支えるアプリ配布",
+          "en": "Day 1: App Distribution with Firebase"
+        },
+        "description": {
+          "ja": "1日目の「Firebaseで支えるアプリ配布」サンプルセッションです。4ホール並行開催のタイムテーブル表示確認に使います。",
+          "en": "Day 1 sample session for App Distribution with Firebase. Used to verify the timetable with four parallel halls."
+        },
+        "primaryLocale": "ja",
+        "startsAt": "2026-10-29T11:45:00+09:00",
+        "endsAt": "2026-10-29T12:15:00+09:00",
+        "venueId": "hall-d",
+        "speakerIds": [
+          "dart-hanako"
+        ],
+        "isLightningTalk": false,
+        "isBeginnersLightningTalk": false,
+        "isHandsOn": false,
+        "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day1-firebase-app-distribution",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sessions/day1-architecture-for-large-teams",
+      "schema": "session",
+      "data": {
+        "title": {
+          "ja": "1日目: 大人数チームのFlutter設計",
+          "en": "Day 1: Flutter Architecture for Large Teams"
+        },
+        "description": {
+          "ja": "1日目の「大人数チームのFlutter設計」サンプルセッションです。4ホール並行開催のタイムテーブル表示確認に使います。",
+          "en": "Day 1 sample session for Flutter Architecture for Large Teams. Used to verify the timetable with four parallel halls."
+        },
+        "primaryLocale": "ja",
+        "startsAt": "2026-10-29T13:30:00+09:00",
+        "endsAt": "2026-10-29T14:00:00+09:00",
+        "venueId": "hall-a",
+        "speakerIds": [
+          "riverpod-ren",
+          "widget-mika"
+        ],
+        "isLightningTalk": false,
+        "isBeginnersLightningTalk": false,
+        "isHandsOn": false,
+        "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day1-architecture-for-large-teams",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sessions/day1-design-system-with-tokens",
+      "schema": "session",
+      "data": {
+        "title": {
+          "ja": "1日目: デザイントークンで育てるUI",
+          "en": "Day 1: Design Systems with Tokens"
+        },
+        "description": {
+          "ja": "1日目の「デザイントークンで育てるUI」サンプルセッションです。4ホール並行開催のタイムテーブル表示確認に使います。",
+          "en": "Day 1 sample session for Design Systems with Tokens. Used to verify the timetable with four parallel halls."
+        },
+        "primaryLocale": "ja",
+        "startsAt": "2026-10-29T13:30:00+09:00",
+        "endsAt": "2026-10-29T14:00:00+09:00",
+        "venueId": "hall-b",
+        "speakerIds": [
+          "design-mayu"
+        ],
+        "isLightningTalk": false,
+        "isBeginnersLightningTalk": false,
+        "isHandsOn": false,
+        "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day1-design-system-with-tokens",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sessions/day1-animations-that-feel-right",
+      "schema": "session",
+      "data": {
+        "title": {
+          "ja": "1日目: 気持ちよく動くアニメーション設計",
+          "en": "Day 1: Animations That Feel Right"
+        },
+        "description": {
+          "ja": "1日目の「気持ちよく動くアニメーション設計」サンプルセッションです。4ホール並行開催のタイムテーブル表示確認に使います。",
+          "en": "Day 1 sample session for Animations That Feel Right. Used to verify the timetable with four parallel halls."
+        },
+        "primaryLocale": "ja",
+        "startsAt": "2026-10-29T13:30:00+09:00",
+        "endsAt": "2026-10-29T14:00:00+09:00",
+        "venueId": "hall-c",
+        "speakerIds": [
+          "impeller-ito"
+        ],
+        "isLightningTalk": false,
+        "isBeginnersLightningTalk": false,
+        "isHandsOn": false,
+        "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day1-animations-that-feel-right",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sessions/day1-widget-composition-patterns",
+      "schema": "session",
+      "data": {
+        "title": {
+          "ja": "1日目: Widget構成パターン実践",
+          "en": "Day 1: Practical Widget Composition Patterns"
+        },
+        "description": {
+          "ja": "1日目の「Widget構成パターン実践」サンプルセッションです。4ホール並行開催のタイムテーブル表示確認に使います。",
+          "en": "Day 1 sample session for Practical Widget Composition Patterns. Used to verify the timetable with four parallel halls."
+        },
+        "primaryLocale": "ja",
+        "startsAt": "2026-10-29T13:30:00+09:00",
+        "endsAt": "2026-10-29T14:00:00+09:00",
+        "venueId": "hall-d",
+        "speakerIds": [
+          "widget-mika"
+        ],
+        "isLightningTalk": false,
+        "isBeginnersLightningTalk": false,
+        "isHandsOn": false,
+        "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day1-widget-composition-patterns",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sessions/day1-native-bridge-patterns",
+      "schema": "session",
+      "data": {
+        "title": {
+          "ja": "1日目: ネイティブ連携パターン集",
+          "en": "Day 1: Native Bridge Patterns"
+        },
+        "description": {
+          "ja": "1日目の「ネイティブ連携パターン集」サンプルセッションです。4ホール並行開催のタイムテーブル表示確認に使います。",
+          "en": "Day 1 sample session for Native Bridge Patterns. Used to verify the timetable with four parallel halls."
+        },
+        "primaryLocale": "ja",
+        "startsAt": "2026-10-29T14:15:00+09:00",
+        "endsAt": "2026-10-29T14:45:00+09:00",
+        "venueId": "hall-a",
+        "speakerIds": [
+          "platform-ken"
+        ],
+        "isLightningTalk": false,
+        "isBeginnersLightningTalk": false,
+        "isHandsOn": false,
+        "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day1-native-bridge-patterns",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sessions/day1-riverpod-async-pitfalls",
+      "schema": "session",
+      "data": {
+        "title": {
+          "ja": "1日目: Riverpod非同期処理の落とし穴",
+          "en": "Day 1: Riverpod Async Pitfalls"
+        },
+        "description": {
+          "ja": "1日目の「Riverpod非同期処理の落とし穴」サンプルセッションです。4ホール並行開催のタイムテーブル表示確認に使います。",
+          "en": "Day 1 sample session for Riverpod Async Pitfalls. Used to verify the timetable with four parallel halls."
+        },
+        "primaryLocale": "ja",
+        "startsAt": "2026-10-29T14:15:00+09:00",
+        "endsAt": "2026-10-29T14:45:00+09:00",
+        "venueId": "hall-b",
+        "speakerIds": [
+          "riverpod-ren"
+        ],
+        "isLightningTalk": false,
+        "isBeginnersLightningTalk": false,
+        "isHandsOn": false,
+        "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day1-riverpod-async-pitfalls",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sessions/day1-testing-strategy-2026",
+      "schema": "session",
+      "data": {
+        "title": {
+          "ja": "1日目: 2026年のFlutterテスト戦略",
+          "en": "Day 1: Flutter Testing Strategy 2026"
+        },
+        "description": {
+          "ja": "1日目の「2026年のFlutterテスト戦略」サンプルセッションです。4ホール並行開催のタイムテーブル表示確認に使います。",
+          "en": "Day 1 sample session for Flutter Testing Strategy 2026. Used to verify the timetable with four parallel halls."
+        },
+        "primaryLocale": "ja",
+        "startsAt": "2026-10-29T14:15:00+09:00",
+        "endsAt": "2026-10-29T14:45:00+09:00",
+        "venueId": "hall-c",
+        "speakerIds": [
+          "testing-nori"
+        ],
+        "isLightningTalk": false,
+        "isBeginnersLightningTalk": false,
+        "isHandsOn": false,
+        "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day1-testing-strategy-2026",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sessions/day1-accessibility-live-audit",
+      "schema": "session",
+      "data": {
+        "title": {
+          "ja": "1日目: ライブで見るアクセシビリティ改善",
+          "en": "Day 1: Accessibility Live Audit"
+        },
+        "description": {
+          "ja": "1日目の「ライブで見るアクセシビリティ改善」サンプルセッションです。4ホール並行開催のタイムテーブル表示確認に使います。",
+          "en": "Day 1 sample session for Accessibility Live Audit. Used to verify the timetable with four parallel halls."
+        },
+        "primaryLocale": "ja",
+        "startsAt": "2026-10-29T14:15:00+09:00",
+        "endsAt": "2026-10-29T14:45:00+09:00",
+        "venueId": "hall-d",
+        "speakerIds": [
+          "a11y-akira"
+        ],
+        "isLightningTalk": false,
+        "isBeginnersLightningTalk": false,
+        "isHandsOn": false,
+        "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day1-accessibility-live-audit",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sessions/day1-observability-for-flutter",
+      "schema": "session",
+      "data": {
+        "title": {
+          "ja": "1日目: Flutterアプリの可観測性",
+          "en": "Day 1: Observability for Flutter Apps"
+        },
+        "description": {
+          "ja": "1日目の「Flutterアプリの可観測性」サンプルセッションです。4ホール並行開催のタイムテーブル表示確認に使います。",
+          "en": "Day 1 sample session for Observability for Flutter Apps. Used to verify the timetable with four parallel halls."
+        },
+        "primaryLocale": "ja",
+        "startsAt": "2026-10-29T15:15:00+09:00",
+        "endsAt": "2026-10-29T15:45:00+09:00",
+        "venueId": "hall-a",
+        "speakerIds": [
+          "tool-haruka"
+        ],
+        "isLightningTalk": false,
+        "isBeginnersLightningTalk": false,
+        "isHandsOn": false,
+        "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day1-observability-for-flutter",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sessions/day1-go-router-stateful-shell",
+      "schema": "session",
+      "data": {
+        "title": {
+          "ja": "1日目: go_router StatefulShellRoute実践",
+          "en": "Day 1: Practical StatefulShellRoute with go_router"
+        },
+        "description": {
+          "ja": "1日目の「go_router StatefulShellRoute実践」サンプルセッションです。4ホール並行開催のタイムテーブル表示確認に使います。",
+          "en": "Day 1 sample session for Practical StatefulShellRoute with go_router. Used to verify the timetable with four parallel halls."
+        },
+        "primaryLocale": "ja",
+        "startsAt": "2026-10-29T15:15:00+09:00",
+        "endsAt": "2026-10-29T15:45:00+09:00",
+        "venueId": "hall-b",
+        "speakerIds": [
+          "dart-hanako"
+        ],
+        "isLightningTalk": false,
+        "isBeginnersLightningTalk": false,
+        "isHandsOn": false,
+        "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day1-go-router-stateful-shell",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sessions/day1-shader-and-custompaint",
+      "schema": "session",
+      "data": {
+        "title": {
+          "ja": "1日目: ShaderとCustomPaintの使いどころ",
+          "en": "Day 1: When to Use Shader and CustomPaint"
+        },
+        "description": {
+          "ja": "1日目の「ShaderとCustomPaintの使いどころ」サンプルセッションです。4ホール並行開催のタイムテーブル表示確認に使います。",
+          "en": "Day 1 sample session for When to Use Shader and CustomPaint. Used to verify the timetable with four parallel halls."
+        },
+        "primaryLocale": "ja",
+        "startsAt": "2026-10-29T15:15:00+09:00",
+        "endsAt": "2026-10-29T15:45:00+09:00",
+        "venueId": "hall-c",
+        "speakerIds": [
+          "skia-sora"
+        ],
+        "isLightningTalk": false,
+        "isBeginnersLightningTalk": false,
+        "isHandsOn": false,
+        "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day1-shader-and-custompaint",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sessions/day1-multi-platform-release-ops",
+      "schema": "session",
+      "data": {
+        "title": {
+          "ja": "1日目: マルチプラットフォームのリリース運用",
+          "en": "Day 1: Multi-platform Release Operations"
+        },
+        "description": {
+          "ja": "1日目の「マルチプラットフォームのリリース運用」サンプルセッションです。4ホール並行開催のタイムテーブル表示確認に使います。",
+          "en": "Day 1 sample session for Multi-platform Release Operations. Used to verify the timetable with four parallel halls."
+        },
+        "primaryLocale": "ja",
+        "startsAt": "2026-10-29T15:15:00+09:00",
+        "endsAt": "2026-10-29T15:45:00+09:00",
+        "venueId": "hall-d",
+        "speakerIds": [
+          "platform-ken"
+        ],
+        "isLightningTalk": false,
+        "isBeginnersLightningTalk": false,
+        "isHandsOn": false,
+        "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day1-multi-platform-release-ops",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sessions/day1-dart-language-updates",
+      "schema": "session",
+      "data": {
+        "title": {
+          "ja": "1日目: Dart言語アップデート実践",
+          "en": "Day 1: Practical Dart Language Updates"
+        },
+        "description": {
+          "ja": "1日目の「Dart言語アップデート実践」サンプルセッションです。4ホール並行開催のタイムテーブル表示確認に使います。",
+          "en": "Day 1 sample session for Practical Dart Language Updates. Used to verify the timetable with four parallel halls."
+        },
+        "primaryLocale": "ja",
+        "startsAt": "2026-10-29T16:00:00+09:00",
+        "endsAt": "2026-10-29T16:30:00+09:00",
+        "venueId": "hall-a",
+        "speakerIds": [
+          "flutter-taro"
+        ],
+        "isLightningTalk": false,
+        "isBeginnersLightningTalk": false,
+        "isHandsOn": false,
+        "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day1-dart-language-updates",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sessions/day1-firebase-security-rules",
+      "schema": "session",
+      "data": {
+        "title": {
+          "ja": "1日目: Firestore Security Rules再入門",
+          "en": "Day 1: Firestore Security Rules Revisited"
+        },
+        "description": {
+          "ja": "1日目の「Firestore Security Rules再入門」サンプルセッションです。4ホール並行開催のタイムテーブル表示確認に使います。",
+          "en": "Day 1 sample session for Firestore Security Rules Revisited. Used to verify the timetable with four parallel halls."
+        },
+        "primaryLocale": "ja",
+        "startsAt": "2026-10-29T16:00:00+09:00",
+        "endsAt": "2026-10-29T16:30:00+09:00",
+        "venueId": "hall-b",
+        "speakerIds": [
+          "dart-hanako"
+        ],
+        "isLightningTalk": false,
+        "isBeginnersLightningTalk": false,
+        "isHandsOn": false,
+        "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day1-firebase-security-rules",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sessions/day1-performance-budgeting",
+      "schema": "session",
+      "data": {
+        "title": {
+          "ja": "1日目: 体感品質を守るパフォーマンス予算",
+          "en": "Day 1: Performance Budgets for App Quality"
+        },
+        "description": {
+          "ja": "1日目の「体感品質を守るパフォーマンス予算」サンプルセッションです。4ホール並行開催のタイムテーブル表示確認に使います。",
+          "en": "Day 1 sample session for Performance Budgets for App Quality. Used to verify the timetable with four parallel halls."
+        },
+        "primaryLocale": "ja",
+        "startsAt": "2026-10-29T16:00:00+09:00",
+        "endsAt": "2026-10-29T16:30:00+09:00",
+        "venueId": "hall-c",
+        "speakerIds": [
+          "skia-sora"
+        ],
+        "isLightningTalk": false,
+        "isBeginnersLightningTalk": false,
+        "isHandsOn": false,
+        "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day1-performance-budgeting",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sessions/day1-localization-workflows",
+      "schema": "session",
+      "data": {
+        "title": {
+          "ja": "1日目: 多言語対応ワークフローの作り方",
+          "en": "Day 1: Building Localization Workflows"
+        },
+        "description": {
+          "ja": "1日目の「多言語対応ワークフローの作り方」サンプルセッションです。4ホール並行開催のタイムテーブル表示確認に使います。",
+          "en": "Day 1 sample session for Building Localization Workflows. Used to verify the timetable with four parallel halls."
+        },
+        "primaryLocale": "ja",
+        "startsAt": "2026-10-29T16:00:00+09:00",
+        "endsAt": "2026-10-29T16:30:00+09:00",
+        "venueId": "hall-d",
+        "speakerIds": [
+          "design-mayu"
+        ],
+        "isLightningTalk": false,
+        "isBeginnersLightningTalk": false,
+        "isHandsOn": false,
+        "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day1-localization-workflows",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sessions/day1-app-security-and-attestation",
+      "schema": "session",
+      "data": {
+        "title": {
+          "ja": "1日目: アプリ改ざん対策とAttestation",
+          "en": "Day 1: App Security and Attestation"
+        },
+        "description": {
+          "ja": "1日目の「アプリ改ざん対策とAttestation」サンプルセッションです。4ホール並行開催のタイムテーブル表示確認に使います。",
+          "en": "Day 1 sample session for App Security and Attestation. Used to verify the timetable with four parallel halls."
+        },
+        "primaryLocale": "ja",
+        "startsAt": "2026-10-29T16:45:00+09:00",
+        "endsAt": "2026-10-29T17:15:00+09:00",
+        "venueId": "hall-a",
+        "speakerIds": [
+          "platform-ken"
+        ],
+        "isLightningTalk": false,
+        "isBeginnersLightningTalk": false,
+        "isHandsOn": false,
+        "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day1-app-security-and-attestation",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sessions/day1-ai-assisted-development",
+      "schema": "session",
+      "data": {
+        "title": {
+          "ja": "1日目: AI支援開発をFlutterで活かす",
+          "en": "Day 1: AI-assisted Flutter Development"
+        },
+        "description": {
+          "ja": "1日目の「AI支援開発をFlutterで活かす」サンプルセッションです。4ホール並行開催のタイムテーブル表示確認に使います。",
+          "en": "Day 1 sample session for AI-assisted Flutter Development. Used to verify the timetable with four parallel halls."
+        },
+        "primaryLocale": "ja",
+        "startsAt": "2026-10-29T16:45:00+09:00",
+        "endsAt": "2026-10-29T17:15:00+09:00",
+        "venueId": "hall-b",
+        "speakerIds": [
+          "ai-sho"
+        ],
+        "isLightningTalk": false,
+        "isBeginnersLightningTalk": false,
+        "isHandsOn": false,
+        "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day1-ai-assisted-development",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sessions/day1-package-maintenance",
+      "schema": "session",
+      "data": {
+        "title": {
+          "ja": "1日目: 長く使われるパッケージの育て方",
+          "en": "Day 1: Maintaining Flutter Packages"
+        },
+        "description": {
+          "ja": "1日目の「長く使われるパッケージの育て方」サンプルセッションです。4ホール並行開催のタイムテーブル表示確認に使います。",
+          "en": "Day 1 sample session for Maintaining Flutter Packages. Used to verify the timetable with four parallel halls."
+        },
+        "primaryLocale": "ja",
+        "startsAt": "2026-10-29T16:45:00+09:00",
+        "endsAt": "2026-10-29T17:15:00+09:00",
+        "venueId": "hall-c",
+        "speakerIds": [
+          "tool-haruka"
+        ],
+        "isLightningTalk": false,
+        "isBeginnersLightningTalk": false,
+        "isHandsOn": false,
+        "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day1-package-maintenance",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sessions/day1-community-growth",
+      "schema": "session",
+      "data": {
+        "title": {
+          "ja": "1日目: コミュニティを育てる技術イベント運営",
+          "en": "Day 1: Growing a Flutter Community"
+        },
+        "description": {
+          "ja": "1日目の「コミュニティを育てる技術イベント運営」サンプルセッションです。4ホール並行開催のタイムテーブル表示確認に使います。",
+          "en": "Day 1 sample session for Growing a Flutter Community. Used to verify the timetable with four parallel halls."
+        },
+        "primaryLocale": "ja",
+        "startsAt": "2026-10-29T16:45:00+09:00",
+        "endsAt": "2026-10-29T17:15:00+09:00",
+        "venueId": "hall-d",
+        "speakerIds": [
+          "community-rin"
+        ],
+        "isLightningTalk": false,
+        "isBeginnersLightningTalk": false,
+        "isHandsOn": false,
+        "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day1-community-growth",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sessions/day1-lt-golden-tests",
+      "schema": "session",
+      "data": {
+        "title": {
+          "ja": "1日目: LT: Golden Testの小技",
+          "en": "Day 1: LT: Golden Test Tips"
+        },
+        "description": {
+          "ja": "1日目の「LT: Golden Testの小技」サンプルセッションです。4ホール並行開催のタイムテーブル表示確認に使います。",
+          "en": "Day 1 sample session for LT: Golden Test Tips. Used to verify the timetable with four parallel halls."
+        },
+        "primaryLocale": "ja",
+        "startsAt": "2026-10-29T17:30:00+09:00",
+        "endsAt": "2026-10-29T17:35:00+09:00",
+        "venueId": "hall-c",
+        "speakerIds": [
+          "testing-nori"
+        ],
+        "isLightningTalk": true,
+        "isBeginnersLightningTalk": false,
+        "isHandsOn": false,
+        "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day1-lt-golden-tests",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sessions/day1-lt-devtools-tips",
+      "schema": "session",
+      "data": {
+        "title": {
+          "ja": "1日目: LT: DevToolsで見る描画の癖",
+          "en": "Day 1: LT: Rendering Clues in DevTools"
+        },
+        "description": {
+          "ja": "1日目の「LT: DevToolsで見る描画の癖」サンプルセッションです。4ホール並行開催のタイムテーブル表示確認に使います。",
+          "en": "Day 1 sample session for LT: Rendering Clues in DevTools. Used to verify the timetable with four parallel halls."
+        },
+        "primaryLocale": "ja",
+        "startsAt": "2026-10-29T17:35:00+09:00",
+        "endsAt": "2026-10-29T17:40:00+09:00",
+        "venueId": "hall-c",
+        "speakerIds": [
+          "skia-sora"
+        ],
+        "isLightningTalk": true,
+        "isBeginnersLightningTalk": false,
+        "isHandsOn": false,
+        "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day1-lt-devtools-tips",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sessions/day1-lt-offline-search",
+      "schema": "session",
+      "data": {
+        "title": {
+          "ja": "1日目: LT: オフライン検索を組み込む",
+          "en": "Day 1: LT: Adding Offline Search"
+        },
+        "description": {
+          "ja": "1日目の「LT: オフライン検索を組み込む」サンプルセッションです。4ホール並行開催のタイムテーブル表示確認に使います。",
+          "en": "Day 1 sample session for LT: Adding Offline Search. Used to verify the timetable with four parallel halls."
+        },
+        "primaryLocale": "ja",
+        "startsAt": "2026-10-29T17:40:00+09:00",
+        "endsAt": "2026-10-29T17:45:00+09:00",
+        "venueId": "hall-c",
+        "speakerIds": [
+          "web-yui"
+        ],
+        "isLightningTalk": true,
+        "isBeginnersLightningTalk": false,
+        "isHandsOn": false,
+        "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day1-lt-offline-search",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sessions/day1-lt-design-tokens",
+      "schema": "session",
+      "data": {
+        "title": {
+          "ja": "1日目: LT: デザイントークン運用メモ",
+          "en": "Day 1: LT: Design Token Operations"
+        },
+        "description": {
+          "ja": "1日目の「LT: デザイントークン運用メモ」サンプルセッションです。4ホール並行開催のタイムテーブル表示確認に使います。",
+          "en": "Day 1 sample session for LT: Design Token Operations. Used to verify the timetable with four parallel halls."
+        },
+        "primaryLocale": "ja",
+        "startsAt": "2026-10-29T17:45:00+09:00",
+        "endsAt": "2026-10-29T17:50:00+09:00",
+        "venueId": "hall-c",
+        "speakerIds": [
+          "design-mayu"
+        ],
+        "isLightningTalk": true,
+        "isBeginnersLightningTalk": false,
+        "isHandsOn": false,
+        "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day1-lt-design-tokens",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sessions/day1-lt-release-notes",
+      "schema": "session",
+      "data": {
+        "title": {
+          "ja": "1日目: LT: リリースノート自動化",
+          "en": "Day 1: LT: Automating Release Notes"
+        },
+        "description": {
+          "ja": "1日目の「LT: リリースノート自動化」サンプルセッションです。4ホール並行開催のタイムテーブル表示確認に使います。",
+          "en": "Day 1 sample session for LT: Automating Release Notes. Used to verify the timetable with four parallel halls."
+        },
+        "primaryLocale": "ja",
+        "startsAt": "2026-10-29T17:50:00+09:00",
+        "endsAt": "2026-10-29T17:55:00+09:00",
+        "venueId": "hall-c",
+        "speakerIds": [
+          "tool-haruka"
+        ],
+        "isLightningTalk": true,
+        "isBeginnersLightningTalk": false,
+        "isHandsOn": false,
+        "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day1-lt-release-notes",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sessions/day2-keynote",
+      "schema": "session",
+      "data": {
+        "title": {
+          "ja": "2日目: 基調講演",
+          "en": "Day 2: Keynote"
+        },
+        "description": {
+          "ja": "2日目の「基調講演」サンプルセッションです。4ホール並行開催のタイムテーブル表示確認に使います。",
+          "en": "Day 2 sample session for Keynote. Used to verify the timetable with four parallel halls."
+        },
+        "primaryLocale": "ja",
+        "startsAt": "2026-10-30T10:15:00+09:00",
+        "endsAt": "2026-10-30T10:45:00+09:00",
+        "venueId": "hall-a",
+        "speakerIds": [
+          "flutter-taro"
+        ],
+        "isLightningTalk": false,
+        "isBeginnersLightningTalk": false,
+        "isHandsOn": false,
+        "sessionizeUrl": null,
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sessions/day2-state-management-at-scale",
+      "schema": "session",
+      "data": {
+        "title": {
+          "ja": "2日目: 大規模アプリの状態管理",
+          "en": "Day 2: State Management at Scale"
+        },
+        "description": {
+          "ja": "2日目の「大規模アプリの状態管理」サンプルセッションです。4ホール並行開催のタイムテーブル表示確認に使います。",
+          "en": "Day 2 sample session for State Management at Scale. Used to verify the timetable with four parallel halls."
+        },
+        "primaryLocale": "ja",
+        "startsAt": "2026-10-30T11:00:00+09:00",
+        "endsAt": "2026-10-30T11:30:00+09:00",
+        "venueId": "hall-a",
+        "speakerIds": [
+          "riverpod-ren"
+        ],
+        "isLightningTalk": false,
+        "isBeginnersLightningTalk": false,
+        "isHandsOn": false,
+        "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day2-state-management-at-scale",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sessions/day2-rendering-pipeline-deep-dive",
+      "schema": "session",
+      "data": {
+        "title": {
+          "ja": "2日目: レンダリングパイプライン深掘り",
+          "en": "Day 2: Rendering Pipeline Deep Dive"
+        },
+        "description": {
+          "ja": "2日目の「レンダリングパイプライン深掘り」サンプルセッションです。4ホール並行開催のタイムテーブル表示確認に使います。",
+          "en": "Day 2 sample session for Rendering Pipeline Deep Dive. Used to verify the timetable with four parallel halls."
+        },
+        "primaryLocale": "ja",
+        "startsAt": "2026-10-30T11:00:00+09:00",
+        "endsAt": "2026-10-30T11:30:00+09:00",
+        "venueId": "hall-b",
+        "speakerIds": [
+          "skia-sora"
+        ],
+        "isLightningTalk": false,
+        "isBeginnersLightningTalk": false,
+        "isHandsOn": false,
+        "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day2-rendering-pipeline-deep-dive",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sessions/day2-flutter-web-production",
+      "schema": "session",
+      "data": {
+        "title": {
+          "ja": "2日目: Flutter Web 本番運用の勘所",
+          "en": "Day 2: Running Flutter Web in Production"
+        },
+        "description": {
+          "ja": "2日目の「Flutter Web 本番運用の勘所」サンプルセッションです。4ホール並行開催のタイムテーブル表示確認に使います。",
+          "en": "Day 2 sample session for Running Flutter Web in Production. Used to verify the timetable with four parallel halls."
+        },
+        "primaryLocale": "ja",
+        "startsAt": "2026-10-30T11:00:00+09:00",
+        "endsAt": "2026-10-30T11:30:00+09:00",
+        "venueId": "hall-c",
+        "speakerIds": [
+          "web-yui"
+        ],
+        "isLightningTalk": false,
+        "isBeginnersLightningTalk": false,
+        "isHandsOn": false,
+        "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day2-flutter-web-production",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sessions/day2-inclusive-design-checklist",
+      "schema": "session",
+      "data": {
+        "title": {
+          "ja": "2日目: アクセシブルなUI設計チェックリスト",
+          "en": "Day 2: Inclusive Design Checklist"
+        },
+        "description": {
+          "ja": "2日目の「アクセシブルなUI設計チェックリスト」サンプルセッションです。4ホール並行開催のタイムテーブル表示確認に使います。",
+          "en": "Day 2 sample session for Inclusive Design Checklist. Used to verify the timetable with four parallel halls."
+        },
+        "primaryLocale": "ja",
+        "startsAt": "2026-10-30T11:00:00+09:00",
+        "endsAt": "2026-10-30T11:30:00+09:00",
+        "venueId": "hall-d",
+        "speakerIds": [
+          "a11y-akira"
+        ],
+        "isLightningTalk": false,
+        "isBeginnersLightningTalk": false,
+        "isHandsOn": false,
+        "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day2-inclusive-design-checklist",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sessions/day2-offline-first-data-sync",
+      "schema": "session",
+      "data": {
+        "title": {
+          "ja": "2日目: オフラインファーストなデータ同期",
+          "en": "Day 2: Offline-first Data Sync"
+        },
+        "description": {
+          "ja": "2日目の「オフラインファーストなデータ同期」サンプルセッションです。4ホール並行開催のタイムテーブル表示確認に使います。",
+          "en": "Day 2 sample session for Offline-first Data Sync. Used to verify the timetable with four parallel halls."
+        },
+        "primaryLocale": "ja",
+        "startsAt": "2026-10-30T11:45:00+09:00",
+        "endsAt": "2026-10-30T12:15:00+09:00",
+        "venueId": "hall-a",
+        "speakerIds": [
+          "platform-ken"
+        ],
+        "isLightningTalk": false,
+        "isBeginnersLightningTalk": false,
+        "isHandsOn": false,
+        "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day2-offline-first-data-sync",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sessions/day2-impeller-performance-debug",
+      "schema": "session",
+      "data": {
+        "title": {
+          "ja": "2日目: Impeller時代のパフォーマンス調査",
+          "en": "Day 2: Performance Debugging with Impeller"
+        },
+        "description": {
+          "ja": "2日目の「Impeller時代のパフォーマンス調査」サンプルセッションです。4ホール並行開催のタイムテーブル表示確認に使います。",
+          "en": "Day 2 sample session for Performance Debugging with Impeller. Used to verify the timetable with four parallel halls."
+        },
+        "primaryLocale": "ja",
+        "startsAt": "2026-10-30T11:45:00+09:00",
+        "endsAt": "2026-10-30T12:15:00+09:00",
+        "venueId": "hall-b",
+        "speakerIds": [
+          "impeller-ito"
+        ],
+        "isLightningTalk": false,
+        "isBeginnersLightningTalk": false,
+        "isHandsOn": false,
+        "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day2-impeller-performance-debug",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sessions/day2-desktop-app-packaging",
+      "schema": "session",
+      "data": {
+        "title": {
+          "ja": "2日目: デスクトップアプリ配布入門",
+          "en": "Day 2: Desktop App Packaging Basics"
+        },
+        "description": {
+          "ja": "2日目の「デスクトップアプリ配布入門」サンプルセッションです。4ホール並行開催のタイムテーブル表示確認に使います。",
+          "en": "Day 2 sample session for Desktop App Packaging Basics. Used to verify the timetable with four parallel halls."
+        },
+        "primaryLocale": "ja",
+        "startsAt": "2026-10-30T11:45:00+09:00",
+        "endsAt": "2026-10-30T12:15:00+09:00",
+        "venueId": "hall-c",
+        "speakerIds": [
+          "tool-haruka"
+        ],
+        "isLightningTalk": false,
+        "isBeginnersLightningTalk": false,
+        "isHandsOn": false,
+        "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day2-desktop-app-packaging",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sessions/day2-firebase-app-distribution",
+      "schema": "session",
+      "data": {
+        "title": {
+          "ja": "2日目: Firebaseで支えるアプリ配布",
+          "en": "Day 2: App Distribution with Firebase"
+        },
+        "description": {
+          "ja": "2日目の「Firebaseで支えるアプリ配布」サンプルセッションです。4ホール並行開催のタイムテーブル表示確認に使います。",
+          "en": "Day 2 sample session for App Distribution with Firebase. Used to verify the timetable with four parallel halls."
+        },
+        "primaryLocale": "ja",
+        "startsAt": "2026-10-30T11:45:00+09:00",
+        "endsAt": "2026-10-30T12:15:00+09:00",
+        "venueId": "hall-d",
+        "speakerIds": [
+          "dart-hanako"
+        ],
+        "isLightningTalk": false,
+        "isBeginnersLightningTalk": false,
+        "isHandsOn": false,
+        "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day2-firebase-app-distribution",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sessions/day2-architecture-for-large-teams",
+      "schema": "session",
+      "data": {
+        "title": {
+          "ja": "2日目: 大人数チームのFlutter設計",
+          "en": "Day 2: Flutter Architecture for Large Teams"
+        },
+        "description": {
+          "ja": "2日目の「大人数チームのFlutter設計」サンプルセッションです。4ホール並行開催のタイムテーブル表示確認に使います。",
+          "en": "Day 2 sample session for Flutter Architecture for Large Teams. Used to verify the timetable with four parallel halls."
+        },
+        "primaryLocale": "ja",
+        "startsAt": "2026-10-30T13:30:00+09:00",
+        "endsAt": "2026-10-30T14:00:00+09:00",
+        "venueId": "hall-a",
+        "speakerIds": [
+          "riverpod-ren",
+          "widget-mika"
+        ],
+        "isLightningTalk": false,
+        "isBeginnersLightningTalk": false,
+        "isHandsOn": false,
+        "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day2-architecture-for-large-teams",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sessions/day2-design-system-with-tokens",
+      "schema": "session",
+      "data": {
+        "title": {
+          "ja": "2日目: デザイントークンで育てるUI",
+          "en": "Day 2: Design Systems with Tokens"
+        },
+        "description": {
+          "ja": "2日目の「デザイントークンで育てるUI」サンプルセッションです。4ホール並行開催のタイムテーブル表示確認に使います。",
+          "en": "Day 2 sample session for Design Systems with Tokens. Used to verify the timetable with four parallel halls."
+        },
+        "primaryLocale": "ja",
+        "startsAt": "2026-10-30T13:30:00+09:00",
+        "endsAt": "2026-10-30T14:00:00+09:00",
+        "venueId": "hall-b",
+        "speakerIds": [
+          "design-mayu"
+        ],
+        "isLightningTalk": false,
+        "isBeginnersLightningTalk": false,
+        "isHandsOn": false,
+        "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day2-design-system-with-tokens",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sessions/day2-animations-that-feel-right",
+      "schema": "session",
+      "data": {
+        "title": {
+          "ja": "2日目: 気持ちよく動くアニメーション設計",
+          "en": "Day 2: Animations That Feel Right"
+        },
+        "description": {
+          "ja": "2日目の「気持ちよく動くアニメーション設計」サンプルセッションです。4ホール並行開催のタイムテーブル表示確認に使います。",
+          "en": "Day 2 sample session for Animations That Feel Right. Used to verify the timetable with four parallel halls."
+        },
+        "primaryLocale": "ja",
+        "startsAt": "2026-10-30T13:30:00+09:00",
+        "endsAt": "2026-10-30T14:00:00+09:00",
+        "venueId": "hall-c",
+        "speakerIds": [
+          "impeller-ito"
+        ],
+        "isLightningTalk": false,
+        "isBeginnersLightningTalk": false,
+        "isHandsOn": false,
+        "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day2-animations-that-feel-right",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sessions/day2-widget-composition-patterns",
+      "schema": "session",
+      "data": {
+        "title": {
+          "ja": "2日目: Widget構成パターン実践",
+          "en": "Day 2: Practical Widget Composition Patterns"
+        },
+        "description": {
+          "ja": "2日目の「Widget構成パターン実践」サンプルセッションです。4ホール並行開催のタイムテーブル表示確認に使います。",
+          "en": "Day 2 sample session for Practical Widget Composition Patterns. Used to verify the timetable with four parallel halls."
+        },
+        "primaryLocale": "ja",
+        "startsAt": "2026-10-30T13:30:00+09:00",
+        "endsAt": "2026-10-30T14:00:00+09:00",
+        "venueId": "hall-d",
+        "speakerIds": [
+          "widget-mika"
+        ],
+        "isLightningTalk": false,
+        "isBeginnersLightningTalk": false,
+        "isHandsOn": false,
+        "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day2-widget-composition-patterns",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sessions/day2-native-bridge-patterns",
+      "schema": "session",
+      "data": {
+        "title": {
+          "ja": "2日目: ネイティブ連携パターン集",
+          "en": "Day 2: Native Bridge Patterns"
+        },
+        "description": {
+          "ja": "2日目の「ネイティブ連携パターン集」サンプルセッションです。4ホール並行開催のタイムテーブル表示確認に使います。",
+          "en": "Day 2 sample session for Native Bridge Patterns. Used to verify the timetable with four parallel halls."
+        },
+        "primaryLocale": "ja",
+        "startsAt": "2026-10-30T14:15:00+09:00",
+        "endsAt": "2026-10-30T14:45:00+09:00",
+        "venueId": "hall-a",
+        "speakerIds": [
+          "platform-ken"
+        ],
+        "isLightningTalk": false,
+        "isBeginnersLightningTalk": false,
+        "isHandsOn": false,
+        "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day2-native-bridge-patterns",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sessions/day2-riverpod-async-pitfalls",
+      "schema": "session",
+      "data": {
+        "title": {
+          "ja": "2日目: Riverpod非同期処理の落とし穴",
+          "en": "Day 2: Riverpod Async Pitfalls"
+        },
+        "description": {
+          "ja": "2日目の「Riverpod非同期処理の落とし穴」サンプルセッションです。4ホール並行開催のタイムテーブル表示確認に使います。",
+          "en": "Day 2 sample session for Riverpod Async Pitfalls. Used to verify the timetable with four parallel halls."
+        },
+        "primaryLocale": "ja",
+        "startsAt": "2026-10-30T14:15:00+09:00",
+        "endsAt": "2026-10-30T14:45:00+09:00",
+        "venueId": "hall-b",
+        "speakerIds": [
+          "riverpod-ren"
+        ],
+        "isLightningTalk": false,
+        "isBeginnersLightningTalk": false,
+        "isHandsOn": false,
+        "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day2-riverpod-async-pitfalls",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sessions/day2-testing-strategy-2026",
+      "schema": "session",
+      "data": {
+        "title": {
+          "ja": "2日目: 2026年のFlutterテスト戦略",
+          "en": "Day 2: Flutter Testing Strategy 2026"
+        },
+        "description": {
+          "ja": "2日目の「2026年のFlutterテスト戦略」サンプルセッションです。4ホール並行開催のタイムテーブル表示確認に使います。",
+          "en": "Day 2 sample session for Flutter Testing Strategy 2026. Used to verify the timetable with four parallel halls."
+        },
+        "primaryLocale": "ja",
+        "startsAt": "2026-10-30T14:15:00+09:00",
+        "endsAt": "2026-10-30T14:45:00+09:00",
+        "venueId": "hall-c",
+        "speakerIds": [
+          "testing-nori"
+        ],
+        "isLightningTalk": false,
+        "isBeginnersLightningTalk": false,
+        "isHandsOn": false,
+        "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day2-testing-strategy-2026",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sessions/day2-accessibility-live-audit",
+      "schema": "session",
+      "data": {
+        "title": {
+          "ja": "2日目: ライブで見るアクセシビリティ改善",
+          "en": "Day 2: Accessibility Live Audit"
+        },
+        "description": {
+          "ja": "2日目の「ライブで見るアクセシビリティ改善」サンプルセッションです。4ホール並行開催のタイムテーブル表示確認に使います。",
+          "en": "Day 2 sample session for Accessibility Live Audit. Used to verify the timetable with four parallel halls."
+        },
+        "primaryLocale": "ja",
+        "startsAt": "2026-10-30T14:15:00+09:00",
+        "endsAt": "2026-10-30T14:45:00+09:00",
+        "venueId": "hall-d",
+        "speakerIds": [
+          "a11y-akira"
+        ],
+        "isLightningTalk": false,
+        "isBeginnersLightningTalk": false,
+        "isHandsOn": false,
+        "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day2-accessibility-live-audit",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sessions/day2-observability-for-flutter",
+      "schema": "session",
+      "data": {
+        "title": {
+          "ja": "2日目: Flutterアプリの可観測性",
+          "en": "Day 2: Observability for Flutter Apps"
+        },
+        "description": {
+          "ja": "2日目の「Flutterアプリの可観測性」サンプルセッションです。4ホール並行開催のタイムテーブル表示確認に使います。",
+          "en": "Day 2 sample session for Observability for Flutter Apps. Used to verify the timetable with four parallel halls."
+        },
+        "primaryLocale": "ja",
+        "startsAt": "2026-10-30T15:15:00+09:00",
+        "endsAt": "2026-10-30T15:45:00+09:00",
+        "venueId": "hall-a",
+        "speakerIds": [
+          "tool-haruka"
+        ],
+        "isLightningTalk": false,
+        "isBeginnersLightningTalk": false,
+        "isHandsOn": false,
+        "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day2-observability-for-flutter",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sessions/day2-go-router-stateful-shell",
+      "schema": "session",
+      "data": {
+        "title": {
+          "ja": "2日目: go_router StatefulShellRoute実践",
+          "en": "Day 2: Practical StatefulShellRoute with go_router"
+        },
+        "description": {
+          "ja": "2日目の「go_router StatefulShellRoute実践」サンプルセッションです。4ホール並行開催のタイムテーブル表示確認に使います。",
+          "en": "Day 2 sample session for Practical StatefulShellRoute with go_router. Used to verify the timetable with four parallel halls."
+        },
+        "primaryLocale": "ja",
+        "startsAt": "2026-10-30T15:15:00+09:00",
+        "endsAt": "2026-10-30T15:45:00+09:00",
+        "venueId": "hall-b",
+        "speakerIds": [
+          "dart-hanako"
+        ],
+        "isLightningTalk": false,
+        "isBeginnersLightningTalk": false,
+        "isHandsOn": false,
+        "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day2-go-router-stateful-shell",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sessions/day2-shader-and-custompaint",
+      "schema": "session",
+      "data": {
+        "title": {
+          "ja": "2日目: ShaderとCustomPaintの使いどころ",
+          "en": "Day 2: When to Use Shader and CustomPaint"
+        },
+        "description": {
+          "ja": "2日目の「ShaderとCustomPaintの使いどころ」サンプルセッションです。4ホール並行開催のタイムテーブル表示確認に使います。",
+          "en": "Day 2 sample session for When to Use Shader and CustomPaint. Used to verify the timetable with four parallel halls."
+        },
+        "primaryLocale": "ja",
+        "startsAt": "2026-10-30T15:15:00+09:00",
+        "endsAt": "2026-10-30T15:45:00+09:00",
+        "venueId": "hall-c",
+        "speakerIds": [
+          "skia-sora"
+        ],
+        "isLightningTalk": false,
+        "isBeginnersLightningTalk": false,
+        "isHandsOn": false,
+        "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day2-shader-and-custompaint",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sessions/day2-multi-platform-release-ops",
+      "schema": "session",
+      "data": {
+        "title": {
+          "ja": "2日目: マルチプラットフォームのリリース運用",
+          "en": "Day 2: Multi-platform Release Operations"
+        },
+        "description": {
+          "ja": "2日目の「マルチプラットフォームのリリース運用」サンプルセッションです。4ホール並行開催のタイムテーブル表示確認に使います。",
+          "en": "Day 2 sample session for Multi-platform Release Operations. Used to verify the timetable with four parallel halls."
+        },
+        "primaryLocale": "ja",
+        "startsAt": "2026-10-30T15:15:00+09:00",
+        "endsAt": "2026-10-30T15:45:00+09:00",
+        "venueId": "hall-d",
+        "speakerIds": [
+          "platform-ken"
+        ],
+        "isLightningTalk": false,
+        "isBeginnersLightningTalk": false,
+        "isHandsOn": false,
+        "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day2-multi-platform-release-ops",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sessions/day2-dart-language-updates",
+      "schema": "session",
+      "data": {
+        "title": {
+          "ja": "2日目: Dart言語アップデート実践",
+          "en": "Day 2: Practical Dart Language Updates"
+        },
+        "description": {
+          "ja": "2日目の「Dart言語アップデート実践」サンプルセッションです。4ホール並行開催のタイムテーブル表示確認に使います。",
+          "en": "Day 2 sample session for Practical Dart Language Updates. Used to verify the timetable with four parallel halls."
+        },
+        "primaryLocale": "ja",
+        "startsAt": "2026-10-30T16:00:00+09:00",
+        "endsAt": "2026-10-30T16:30:00+09:00",
+        "venueId": "hall-a",
+        "speakerIds": [
+          "flutter-taro"
+        ],
+        "isLightningTalk": false,
+        "isBeginnersLightningTalk": false,
+        "isHandsOn": false,
+        "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day2-dart-language-updates",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sessions/day2-firebase-security-rules",
+      "schema": "session",
+      "data": {
+        "title": {
+          "ja": "2日目: Firestore Security Rules再入門",
+          "en": "Day 2: Firestore Security Rules Revisited"
+        },
+        "description": {
+          "ja": "2日目の「Firestore Security Rules再入門」サンプルセッションです。4ホール並行開催のタイムテーブル表示確認に使います。",
+          "en": "Day 2 sample session for Firestore Security Rules Revisited. Used to verify the timetable with four parallel halls."
+        },
+        "primaryLocale": "ja",
+        "startsAt": "2026-10-30T16:00:00+09:00",
+        "endsAt": "2026-10-30T16:30:00+09:00",
+        "venueId": "hall-b",
+        "speakerIds": [
+          "dart-hanako"
+        ],
+        "isLightningTalk": false,
+        "isBeginnersLightningTalk": false,
+        "isHandsOn": false,
+        "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day2-firebase-security-rules",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sessions/day2-performance-budgeting",
+      "schema": "session",
+      "data": {
+        "title": {
+          "ja": "2日目: 体感品質を守るパフォーマンス予算",
+          "en": "Day 2: Performance Budgets for App Quality"
+        },
+        "description": {
+          "ja": "2日目の「体感品質を守るパフォーマンス予算」サンプルセッションです。4ホール並行開催のタイムテーブル表示確認に使います。",
+          "en": "Day 2 sample session for Performance Budgets for App Quality. Used to verify the timetable with four parallel halls."
+        },
+        "primaryLocale": "ja",
+        "startsAt": "2026-10-30T16:00:00+09:00",
+        "endsAt": "2026-10-30T16:30:00+09:00",
+        "venueId": "hall-c",
+        "speakerIds": [
+          "skia-sora"
+        ],
+        "isLightningTalk": false,
+        "isBeginnersLightningTalk": false,
+        "isHandsOn": false,
+        "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day2-performance-budgeting",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sessions/day2-localization-workflows",
+      "schema": "session",
+      "data": {
+        "title": {
+          "ja": "2日目: 多言語対応ワークフローの作り方",
+          "en": "Day 2: Building Localization Workflows"
+        },
+        "description": {
+          "ja": "2日目の「多言語対応ワークフローの作り方」サンプルセッションです。4ホール並行開催のタイムテーブル表示確認に使います。",
+          "en": "Day 2 sample session for Building Localization Workflows. Used to verify the timetable with four parallel halls."
+        },
+        "primaryLocale": "ja",
+        "startsAt": "2026-10-30T16:00:00+09:00",
+        "endsAt": "2026-10-30T16:30:00+09:00",
+        "venueId": "hall-d",
+        "speakerIds": [
+          "design-mayu"
+        ],
+        "isLightningTalk": false,
+        "isBeginnersLightningTalk": false,
+        "isHandsOn": false,
+        "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day2-localization-workflows",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sessions/day2-app-security-and-attestation",
+      "schema": "session",
+      "data": {
+        "title": {
+          "ja": "2日目: アプリ改ざん対策とAttestation",
+          "en": "Day 2: App Security and Attestation"
+        },
+        "description": {
+          "ja": "2日目の「アプリ改ざん対策とAttestation」サンプルセッションです。4ホール並行開催のタイムテーブル表示確認に使います。",
+          "en": "Day 2 sample session for App Security and Attestation. Used to verify the timetable with four parallel halls."
+        },
+        "primaryLocale": "ja",
+        "startsAt": "2026-10-30T16:45:00+09:00",
+        "endsAt": "2026-10-30T17:15:00+09:00",
+        "venueId": "hall-a",
+        "speakerIds": [
+          "platform-ken"
+        ],
+        "isLightningTalk": false,
+        "isBeginnersLightningTalk": false,
+        "isHandsOn": false,
+        "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day2-app-security-and-attestation",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sessions/day2-ai-assisted-development",
+      "schema": "session",
+      "data": {
+        "title": {
+          "ja": "2日目: AI支援開発をFlutterで活かす",
+          "en": "Day 2: AI-assisted Flutter Development"
+        },
+        "description": {
+          "ja": "2日目の「AI支援開発をFlutterで活かす」サンプルセッションです。4ホール並行開催のタイムテーブル表示確認に使います。",
+          "en": "Day 2 sample session for AI-assisted Flutter Development. Used to verify the timetable with four parallel halls."
+        },
+        "primaryLocale": "ja",
+        "startsAt": "2026-10-30T16:45:00+09:00",
+        "endsAt": "2026-10-30T17:15:00+09:00",
+        "venueId": "hall-b",
+        "speakerIds": [
+          "ai-sho"
+        ],
+        "isLightningTalk": false,
+        "isBeginnersLightningTalk": false,
+        "isHandsOn": false,
+        "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day2-ai-assisted-development",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sessions/day2-package-maintenance",
+      "schema": "session",
+      "data": {
+        "title": {
+          "ja": "2日目: 長く使われるパッケージの育て方",
+          "en": "Day 2: Maintaining Flutter Packages"
+        },
+        "description": {
+          "ja": "2日目の「長く使われるパッケージの育て方」サンプルセッションです。4ホール並行開催のタイムテーブル表示確認に使います。",
+          "en": "Day 2 sample session for Maintaining Flutter Packages. Used to verify the timetable with four parallel halls."
+        },
+        "primaryLocale": "ja",
+        "startsAt": "2026-10-30T16:45:00+09:00",
+        "endsAt": "2026-10-30T17:15:00+09:00",
+        "venueId": "hall-c",
+        "speakerIds": [
+          "tool-haruka"
+        ],
+        "isLightningTalk": false,
+        "isBeginnersLightningTalk": false,
+        "isHandsOn": false,
+        "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day2-package-maintenance",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sessions/day2-community-growth",
+      "schema": "session",
+      "data": {
+        "title": {
+          "ja": "2日目: コミュニティを育てる技術イベント運営",
+          "en": "Day 2: Growing a Flutter Community"
+        },
+        "description": {
+          "ja": "2日目の「コミュニティを育てる技術イベント運営」サンプルセッションです。4ホール並行開催のタイムテーブル表示確認に使います。",
+          "en": "Day 2 sample session for Growing a Flutter Community. Used to verify the timetable with four parallel halls."
+        },
+        "primaryLocale": "ja",
+        "startsAt": "2026-10-30T16:45:00+09:00",
+        "endsAt": "2026-10-30T17:15:00+09:00",
+        "venueId": "hall-d",
+        "speakerIds": [
+          "community-rin"
+        ],
+        "isLightningTalk": false,
+        "isBeginnersLightningTalk": false,
+        "isHandsOn": false,
+        "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day2-community-growth",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sessions/day2-lt-golden-tests",
+      "schema": "session",
+      "data": {
+        "title": {
+          "ja": "2日目: LT: Golden Testの小技",
+          "en": "Day 2: LT: Golden Test Tips"
+        },
+        "description": {
+          "ja": "2日目の「LT: Golden Testの小技」サンプルセッションです。4ホール並行開催のタイムテーブル表示確認に使います。",
+          "en": "Day 2 sample session for LT: Golden Test Tips. Used to verify the timetable with four parallel halls."
+        },
+        "primaryLocale": "ja",
+        "startsAt": "2026-10-30T17:30:00+09:00",
+        "endsAt": "2026-10-30T17:35:00+09:00",
+        "venueId": "hall-c",
+        "speakerIds": [
+          "testing-nori"
+        ],
+        "isLightningTalk": true,
+        "isBeginnersLightningTalk": false,
+        "isHandsOn": false,
+        "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day2-lt-golden-tests",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sessions/day2-lt-devtools-tips",
+      "schema": "session",
+      "data": {
+        "title": {
+          "ja": "2日目: LT: DevToolsで見る描画の癖",
+          "en": "Day 2: LT: Rendering Clues in DevTools"
+        },
+        "description": {
+          "ja": "2日目の「LT: DevToolsで見る描画の癖」サンプルセッションです。4ホール並行開催のタイムテーブル表示確認に使います。",
+          "en": "Day 2 sample session for LT: Rendering Clues in DevTools. Used to verify the timetable with four parallel halls."
+        },
+        "primaryLocale": "ja",
+        "startsAt": "2026-10-30T17:35:00+09:00",
+        "endsAt": "2026-10-30T17:40:00+09:00",
+        "venueId": "hall-c",
+        "speakerIds": [
+          "skia-sora"
+        ],
+        "isLightningTalk": true,
+        "isBeginnersLightningTalk": false,
+        "isHandsOn": false,
+        "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day2-lt-devtools-tips",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sessions/day2-lt-offline-search",
+      "schema": "session",
+      "data": {
+        "title": {
+          "ja": "2日目: LT: オフライン検索を組み込む",
+          "en": "Day 2: LT: Adding Offline Search"
+        },
+        "description": {
+          "ja": "2日目の「LT: オフライン検索を組み込む」サンプルセッションです。4ホール並行開催のタイムテーブル表示確認に使います。",
+          "en": "Day 2 sample session for LT: Adding Offline Search. Used to verify the timetable with four parallel halls."
+        },
+        "primaryLocale": "ja",
+        "startsAt": "2026-10-30T17:40:00+09:00",
+        "endsAt": "2026-10-30T17:45:00+09:00",
+        "venueId": "hall-c",
+        "speakerIds": [
+          "web-yui"
+        ],
+        "isLightningTalk": true,
+        "isBeginnersLightningTalk": false,
+        "isHandsOn": false,
+        "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day2-lt-offline-search",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sessions/day2-lt-design-tokens",
+      "schema": "session",
+      "data": {
+        "title": {
+          "ja": "2日目: LT: デザイントークン運用メモ",
+          "en": "Day 2: LT: Design Token Operations"
+        },
+        "description": {
+          "ja": "2日目の「LT: デザイントークン運用メモ」サンプルセッションです。4ホール並行開催のタイムテーブル表示確認に使います。",
+          "en": "Day 2 sample session for LT: Design Token Operations. Used to verify the timetable with four parallel halls."
+        },
+        "primaryLocale": "ja",
+        "startsAt": "2026-10-30T17:45:00+09:00",
+        "endsAt": "2026-10-30T17:50:00+09:00",
+        "venueId": "hall-c",
+        "speakerIds": [
+          "design-mayu"
+        ],
+        "isLightningTalk": true,
+        "isBeginnersLightningTalk": false,
+        "isHandsOn": false,
+        "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day2-lt-design-tokens",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sessions/day2-lt-release-notes",
+      "schema": "session",
+      "data": {
+        "title": {
+          "ja": "2日目: LT: リリースノート自動化",
+          "en": "Day 2: LT: Automating Release Notes"
+        },
+        "description": {
+          "ja": "2日目の「LT: リリースノート自動化」サンプルセッションです。4ホール並行開催のタイムテーブル表示確認に使います。",
+          "en": "Day 2 sample session for LT: Automating Release Notes. Used to verify the timetable with four parallel halls."
+        },
+        "primaryLocale": "ja",
+        "startsAt": "2026-10-30T17:50:00+09:00",
+        "endsAt": "2026-10-30T17:55:00+09:00",
+        "venueId": "hall-c",
+        "speakerIds": [
+          "tool-haruka"
+        ],
+        "isLightningTalk": true,
+        "isBeginnersLightningTalk": false,
+        "isHandsOn": false,
+        "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day2-lt-release-notes",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "timelineEvents/day1-doors-open",
       "schema": "timeline_event",
       "data": {
-        "title": { "ja": "開場", "en": "Doors Open" },
-        "startsAt": "2026-11-14T09:00:00+09:00",
-        "endsAt": null,
+        "title": {
+          "ja": "1日目: 開場",
+          "en": "Day 1: Doors Open"
+        },
+        "startsAt": "2026-10-29T09:00:00+09:00",
+        "endsAt": "2026-10-29T10:00:00+09:00",
         "venueId": null,
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
       }
     },
     {
-      "path": "timelineEvents/lunch",
+      "path": "timelineEvents/day1-opening",
       "schema": "timeline_event",
       "data": {
-        "title": { "ja": "ランチ休憩", "en": "Lunch Break" },
-        "startsAt": "2026-11-14T12:00:00+09:00",
-        "endsAt": "2026-11-14T13:00:00+09:00",
+        "title": {
+          "ja": "1日目: オープニング",
+          "en": "Day 1: Opening"
+        },
+        "startsAt": "2026-10-29T10:00:00+09:00",
+        "endsAt": "2026-10-29T10:15:00+09:00",
+        "venueId": "hall-a",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "timelineEvents/day1-opening-satellite",
+      "schema": "timeline_event",
+      "data": {
+        "title": {
+          "ja": "1日目: オープニング（サテライト）",
+          "en": "Day 1: Opening (Satellite)"
+        },
+        "startsAt": "2026-10-29T10:00:00+09:00",
+        "endsAt": "2026-10-29T10:15:00+09:00",
+        "venueId": "hall-b",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "timelineEvents/day1-student-support",
+      "schema": "timeline_event",
+      "data": {
+        "title": {
+          "ja": "1日目: 学生支援オリエンテーション",
+          "en": "Day 1: Student Support Orientation"
+        },
+        "startsAt": "2026-10-29T10:45:00+09:00",
+        "endsAt": "2026-10-29T12:15:00+09:00",
+        "venueId": "hall-d",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "timelineEvents/day1-lunch",
+      "schema": "timeline_event",
+      "data": {
+        "title": {
+          "ja": "1日目: ランチ休憩",
+          "en": "Day 1: Lunch Break"
+        },
+        "startsAt": "2026-10-29T12:15:00+09:00",
+        "endsAt": "2026-10-29T13:30:00+09:00",
+        "venueId": null,
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "timelineEvents/day1-afternoon-break",
+      "schema": "timeline_event",
+      "data": {
+        "title": {
+          "ja": "1日目: 午後休憩",
+          "en": "Day 1: Afternoon Break"
+        },
+        "startsAt": "2026-10-29T14:45:00+09:00",
+        "endsAt": "2026-10-29T15:15:00+09:00",
+        "venueId": null,
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "timelineEvents/day1-coffee-break",
+      "schema": "timeline_event",
+      "data": {
+        "title": {
+          "ja": "1日目: コーヒーブレイク",
+          "en": "Day 1: Coffee Break"
+        },
+        "startsAt": "2026-10-29T15:45:00+09:00",
+        "endsAt": "2026-10-29T16:00:00+09:00",
+        "venueId": null,
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "timelineEvents/day1-after-party",
+      "schema": "timeline_event",
+      "data": {
+        "title": {
+          "ja": "1日目: 懇親会",
+          "en": "Day 1: After Party"
+        },
+        "startsAt": "2026-10-29T18:30:00+09:00",
+        "endsAt": "2026-10-29T20:30:00+09:00",
+        "venueId": "hall-a",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "timelineEvents/day2-doors-open",
+      "schema": "timeline_event",
+      "data": {
+        "title": {
+          "ja": "2日目: 開場",
+          "en": "Day 2: Doors Open"
+        },
+        "startsAt": "2026-10-30T09:00:00+09:00",
+        "endsAt": "2026-10-30T10:00:00+09:00",
+        "venueId": null,
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "timelineEvents/day2-opening",
+      "schema": "timeline_event",
+      "data": {
+        "title": {
+          "ja": "2日目: オープニング",
+          "en": "Day 2: Opening"
+        },
+        "startsAt": "2026-10-30T10:00:00+09:00",
+        "endsAt": "2026-10-30T10:15:00+09:00",
+        "venueId": "hall-a",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "timelineEvents/day2-opening-satellite",
+      "schema": "timeline_event",
+      "data": {
+        "title": {
+          "ja": "2日目: オープニング（サテライト）",
+          "en": "Day 2: Opening (Satellite)"
+        },
+        "startsAt": "2026-10-30T10:00:00+09:00",
+        "endsAt": "2026-10-30T10:15:00+09:00",
+        "venueId": "hall-b",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "timelineEvents/day2-student-support",
+      "schema": "timeline_event",
+      "data": {
+        "title": {
+          "ja": "2日目: 学生支援オリエンテーション",
+          "en": "Day 2: Student Support Orientation"
+        },
+        "startsAt": "2026-10-30T10:45:00+09:00",
+        "endsAt": "2026-10-30T12:15:00+09:00",
+        "venueId": "hall-d",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "timelineEvents/day2-lunch",
+      "schema": "timeline_event",
+      "data": {
+        "title": {
+          "ja": "2日目: ランチ休憩",
+          "en": "Day 2: Lunch Break"
+        },
+        "startsAt": "2026-10-30T12:15:00+09:00",
+        "endsAt": "2026-10-30T13:30:00+09:00",
+        "venueId": null,
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "timelineEvents/day2-afternoon-break",
+      "schema": "timeline_event",
+      "data": {
+        "title": {
+          "ja": "2日目: 午後休憩",
+          "en": "Day 2: Afternoon Break"
+        },
+        "startsAt": "2026-10-30T14:45:00+09:00",
+        "endsAt": "2026-10-30T15:15:00+09:00",
+        "venueId": null,
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "timelineEvents/day2-coffee-break",
+      "schema": "timeline_event",
+      "data": {
+        "title": {
+          "ja": "2日目: コーヒーブレイク",
+          "en": "Day 2: Coffee Break"
+        },
+        "startsAt": "2026-10-30T15:45:00+09:00",
+        "endsAt": "2026-10-30T16:00:00+09:00",
+        "venueId": null,
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "timelineEvents/day2-after-party",
+      "schema": "timeline_event",
+      "data": {
+        "title": {
+          "ja": "2日目: 懇親会",
+          "en": "Day 2: After Party"
+        },
+        "startsAt": "2026-10-30T18:30:00+09:00",
+        "endsAt": "2026-10-30T20:30:00+09:00",
         "venueId": "hall-a",
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -134,7 +2320,10 @@
       "path": "sponsors/example-platinum",
       "schema": "sponsor",
       "data": {
-        "name": { "ja": "サンプル プラチナ", "en": "Sample Platinum Inc." },
+        "name": {
+          "ja": "サンプル プラチナ",
+          "en": "Sample Platinum Inc."
+        },
         "nameKana": "サンプルプラチナ",
         "description": {
           "ja": "プラチナスポンサーのサンプルです。",
@@ -156,7 +2345,10 @@
       "path": "sponsors/example-gold",
       "schema": "sponsor",
       "data": {
-        "name": { "ja": "サンプル ゴールド", "en": "Sample Gold Inc." },
+        "name": {
+          "ja": "サンプル ゴールド",
+          "en": "Sample Gold Inc."
+        },
         "nameKana": null,
         "description": {
           "ja": "ゴールドスポンサーのサンプルです。",
@@ -182,8 +2374,14 @@
         "iconUrl": "https://example.com/staff/staff-001.png",
         "greeting": "よろしくお願いします！",
         "snsLinks": [
-          { "type": "x", "value": "https://x.com/example_staff_001" },
-          { "type": "github", "value": "https://github.com/example-staff-001" }
+          {
+            "type": "x",
+            "value": "https://x.com/example_staff_001"
+          },
+          {
+            "type": "github",
+            "value": "https://github.com/example-staff-001"
+          }
         ],
         "order": 1,
         "createdAt": "2026-06-02T00:00:00Z",
