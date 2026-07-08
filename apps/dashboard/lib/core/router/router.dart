@@ -12,10 +12,14 @@ import 'package:data/news.dart';
 import 'package:data/speaker.dart';
 import 'package:data/staff_member.dart';
 import 'package:data/venue.dart';
+import 'package:dashboard/feature/quiz/ui/page/quiz_console_page.dart';
+import 'package:dashboard/feature/quiz/ui/page/quiz_event_list_page.dart';
+import 'package:dashboard/feature/quiz/ui/page/quiz_question_edit_page.dart';
 import 'package:dashboard/feature/session/ui/page/session_edit_page.dart';
 import 'package:dashboard/feature/session/ui/page/session_list_page.dart';
 import 'package:dashboard/feature/sponsor/ui/page/sponsor_edit_page.dart';
 import 'package:dashboard/feature/sponsor/ui/page/sponsor_list_page.dart';
+import 'package:data/data.dart' show QuizQuestion;
 import 'package:data/session.dart';
 import 'package:data/sponsor.dart';
 import 'package:dashboard/feature/speaker/ui/page/speaker_list_page.dart';
@@ -39,6 +43,7 @@ part 'staff_member.dart';
 part 'timeline_event.dart';
 part 'session.dart';
 part 'sponsor.dart';
+part 'quiz.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final initial = ref.read(authStateProvider);

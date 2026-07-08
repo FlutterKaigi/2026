@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 abstract interface class AuthRepository {
   Stream<User?> authStateChanges();
   Future<void> signInWithGoogle();
+  Future<void> signInAnonymously();
   Future<void> signOut();
 }
 
@@ -35,6 +36,9 @@ final class FirebaseAuthRepository implements AuthRepository {
     }
     throw UnimplementedError('サポートされていないプラットフォームです');
   }
+
+  @override
+  Future<void> signInAnonymously() => _auth.signInAnonymously();
 
   @override
   Future<void> signOut() => _auth.signOut();

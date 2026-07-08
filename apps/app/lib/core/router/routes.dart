@@ -67,3 +67,16 @@ class EventInfoRoute extends GoRouteData with $EventInfoRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) => const EventInfoPage();
 }
+
+/// `/quiz` — the quiz event screen.
+///
+/// Lives outside [AppShellRoute] so it is a full-screen page (no bottom
+/// navigation). Entered by pushing from the event info page, so the app bar
+/// back button returns there.
+@TypedGoRoute<QuizRoute>(path: '/quiz')
+class QuizRoute extends GoRouteData with $QuizRoute {
+  const QuizRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const QuizPage();
+}
