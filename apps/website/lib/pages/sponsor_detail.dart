@@ -75,7 +75,7 @@ class SponsorDetailPage extends StatelessComponent {
             // through to the anchor.
             attributes: const {
               'onclick':
-                  'if(document.referrer.indexOf("/sponsors/")<0&&window.history.length>1){window.history.back();return false;}',
+                  'if(document.referrer.startsWith(location.origin)&&document.referrer.indexOf("/sponsors/")<0&&window.history.length>1){window.history.back();return false;}',
             },
             [
               span(
