@@ -112,7 +112,13 @@ class _TimetableList extends ConsumerWidget {
               ),
             ),
           const SliverToBoxAdapter(child: _TimeFormatSelector()),
-          if (selectedDay != null) SliverToBoxAdapter(child: _FadingDaySection(day: selectedDay)),
+          if (selectedDay != null)
+            SliverToBoxAdapter(
+              child: _TimetableDayContent(
+                day: selectedDay,
+                key: ValueKey(selectedDay.date),
+              ),
+            ),
           const SliverToBoxAdapter(child: SizedBox(height: 24)),
         ],
       ),
@@ -274,43 +280,6 @@ class _AutoScrollingChoiceChipState extends State<_AutoScrollingChoiceChip> {
   }
 }
 
-class _FadingDaySection extends HookWidget {
-  const _FadingDaySection({required this.day});
-
-  final SessionTimetableDay day;
-
-  @override
-  Widget build(BuildContext context) {
-    final fadeController = useAnimationController(
-      duration: const Duration(milliseconds: 700),
-    );
-    final fadeAnimation = fadeController.drive(
-      CurveTween(curve: Curves.easeInOutCubic),
-    );
-
-    useEffect(
-      () {
-        unawaited(fadeController.forward(from: 0));
-        return null;
-      },
-      [day.date],
-    );
-
-    return AnimatedSize(
-      duration: const Duration(milliseconds: 260),
-      curve: Curves.easeOutCubic,
-      alignment: Alignment.topCenter,
-      child: FadeTransition(
-        opacity: fadeAnimation,
-        child: _TimetableDayContent(
-          day: day,
-          key: ValueKey(day.date),
-        ),
-      ),
-    );
-  }
-}
-
 class _TimetableDayContent extends ConsumerWidget {
   const _TimetableDayContent({
     required this.day,
@@ -363,11 +332,8 @@ class _DayHeader extends StatelessWidget {
         decoration: BoxDecoration(
           color: colorScheme.surfaceContainerHighest,
           border: Border.all(color: colorScheme.outlineVariant),
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(4),
-            topRight: Radius.circular(14),
-            bottomRight: Radius.circular(14),
-            bottomLeft: Radius.circular(4),
+          borderRadius: const BorderRadius.all(
+            Radius.circular(8),
           ),
         ),
         child: IntrinsicHeight(
