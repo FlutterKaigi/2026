@@ -1,26 +1,27 @@
 import 'package:app/feature/session/data/provider/session_repository.dart';
+import 'package:app/feature/session/data/provider/session_timetable_repository.dart';
 import 'package:app/feature/session/util/event_time.dart';
 import 'package:data/data.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-/// Streams sessions sorted by start time.
+/// Streams the raw Firestore `sessions` collection as [Session] models.
 final sessionListProvider = StreamProvider<List<Session>>(
   (ref) => ref.watch(sessionRepositoryProvider).watchAll(),
 );
 
 /// Streams timeline events sorted by start time.
 final sessionTimelineEventListProvider = StreamProvider<List<TimelineEvent>>(
-  (ref) => ref.watch(sessionTimelineEventRepositoryProvider).watchAll(),
+  (ref) => ref.watch(sessionTimetableTimelineEventRepositoryProvider).watchAll(),
 );
 
-/// Streams venues used by sessions and timeline events.
+/// Streams venues used to resolve timetable venue labels.
 final sessionVenueListProvider = StreamProvider<List<Venue>>(
-  (ref) => ref.watch(sessionVenueRepositoryProvider).watchAll(),
+  (ref) => ref.watch(sessionTimetableVenueRepositoryProvider).watchAll(),
 );
 
-/// Streams speakers referenced by sessions.
+/// Streams speakers used to resolve session speaker labels.
 final sessionSpeakerListProvider = StreamProvider<List<Speaker>>(
-  (ref) => ref.watch(sessionSpeakerRepositoryProvider).watchAll(),
+  (ref) => ref.watch(sessionTimetableSpeakerRepositoryProvider).watchAll(),
 );
 
 /// Holds the selected venue filter. `null` means all venues.
@@ -35,6 +36,20 @@ class SessionTimetableVenueFilterNotifier extends Notifier<String?> {
 /// Exposes the selected venue filter for the timetable.
 final sessionTimetableVenueFilterProvider = NotifierProvider<SessionTimetableVenueFilterNotifier, String?>(
   SessionTimetableVenueFilterNotifier.new,
+);
+
+/// Holds the selected event date. `null` means the first available event day.
+class SessionTimetableDayFilterNotifier extends Notifier<DateTime?> {
+  @override
+  DateTime? build() => null;
+
+  /// Selects an event-local calendar day.
+  void select(DateTime date) => state = _dateOnly(date);
+}
+
+/// Exposes the selected event date for the timetable.
+final sessionTimetableDayFilterProvider = NotifierProvider<SessionTimetableDayFilterNotifier, DateTime?>(
+  SessionTimetableDayFilterNotifier.new,
 );
 
 /// Combines Firestore collections into the data needed by the timetable UI.
@@ -63,6 +78,7 @@ final sessionTimetableProvider = Provider<AsyncValue<SessionTimetableData>>(
             venues: venueList,
             speakers: speakerList,
             selectedVenueId: ref.watch(sessionTimetableVenueFilterProvider),
+            selectedDate: ref.watch(sessionTimetableDayFilterProvider),
           ),
         ),
       _ => const AsyncLoading(),
@@ -77,6 +93,7 @@ SessionTimetableData buildSessionTimetableData({
   required List<Venue> venues,
   required List<Speaker> speakers,
   required String? selectedVenueId,
+  DateTime? selectedDate,
 }) {
   final venueById = {for (final venue in venues) venue.id: venue};
   final speakerById = {for (final speaker in speakers) speaker.id: speaker};
@@ -100,13 +117,30 @@ SessionTimetableData buildSessionTimetableData({
       ),
   ]..sort((a, b) => _compareEntries(a, b, venueById));
 
+  final availableDates = _eventDates(entries);
+  final effectiveSelectedDate = _resolveSelectedDate(
+    selectedDate,
+    availableDates,
+  );
   final filteredEntries = [
     for (final entry in entries)
       if (effectiveSelectedVenueId == null || entry.venueId == null || entry.venueId == effectiveSelectedVenueId) entry,
   ];
+  final selectedDay = effectiveSelectedDate == null
+      ? null
+      : SessionTimetableDay(
+          date: effectiveSelectedDate,
+          entries: [
+            for (final entry in filteredEntries)
+              if (_isSameDate(eventDateOnly(entry.startsAt), effectiveSelectedDate)) entry,
+          ],
+        );
 
   return SessionTimetableData(
-    days: _groupByDay(filteredEntries),
+    days: selectedDay == null ? const [] : [selectedDay],
+    availableDates: availableDates,
+    selectedDate: effectiveSelectedDate,
+    selectedDay: selectedDay,
     venues: sortedVenues,
     selectedVenueId: effectiveSelectedVenueId,
     hasAnyEntries: entries.isNotEmpty,
@@ -141,36 +175,63 @@ int _compareEntries(
   return a.id.compareTo(b.id);
 }
 
-List<SessionTimetableDay> _groupByDay(List<SessionTimetableEntry> entries) {
-  final days = <SessionTimetableDay>[];
+List<DateTime> _eventDates(List<SessionTimetableEntry> entries) {
+  final dates = <DateTime>[];
 
   for (final entry in entries) {
     final date = eventDateOnly(entry.startsAt);
-    if (days.isEmpty || days.last.date != date) {
-      days.add(SessionTimetableDay(date: date, entries: [entry]));
-    } else {
-      days.last.entries.add(entry);
+    if (dates.isEmpty || !_isSameDate(dates.last, date)) {
+      dates.add(date);
     }
   }
 
-  return days;
+  return dates;
+}
+
+DateTime? _resolveSelectedDate(DateTime? selectedDate, List<DateTime> availableDates) {
+  if (availableDates.isEmpty) {
+    return null;
+  }
+
+  if (selectedDate != null) {
+    final selectedDateOnly = _dateOnly(selectedDate);
+    for (final availableDate in availableDates) {
+      if (_isSameDate(availableDate, selectedDateOnly)) {
+        return availableDate;
+      }
+    }
+  }
+
+  return availableDates.first;
+}
+
+DateTime _dateOnly(DateTime value) => DateTime(value.year, value.month, value.day);
+
+bool _isSameDate(DateTime a, DateTime b) {
+  return a.year == b.year && a.month == b.month && a.day == b.day;
 }
 
 /// Data prepared for the session timetable page.
 final class SessionTimetableData {
   const SessionTimetableData({
     required this.days,
+    required this.availableDates,
+    required this.selectedDate,
+    required this.selectedDay,
     required this.venues,
     required this.selectedVenueId,
     required this.hasAnyEntries,
   });
 
   final List<SessionTimetableDay> days;
+  final List<DateTime> availableDates;
+  final DateTime? selectedDate;
+  final SessionTimetableDay? selectedDay;
   final List<Venue> venues;
   final String? selectedVenueId;
   final bool hasAnyEntries;
 
-  bool get isEmpty => days.every((day) => day.entries.isEmpty);
+  bool get isEmpty => selectedDay == null || selectedDay!.entries.isEmpty;
 }
 
 /// Timetable entries grouped by event-local calendar day.
@@ -182,6 +243,22 @@ final class SessionTimetableDay {
 
   final DateTime date;
   final List<SessionTimetableEntry> entries;
+
+  List<List<SessionTimetableEntry>> get entryGroups {
+    final groups = <List<SessionTimetableEntry>>[];
+
+    for (final entry in entries) {
+      if (groups.isEmpty || !entry.startsAt.isAtSameMomentAs(groups.last.first.startsAt)) {
+        groups.add([entry]);
+      } else {
+        groups.last.add(entry);
+      }
+    }
+
+    return [
+      for (final group in groups) List<SessionTimetableEntry>.unmodifiable(group),
+    ];
+  }
 }
 
 /// A single row in the timetable.
