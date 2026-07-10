@@ -27,7 +27,8 @@ const _newsJa = <NewsLink>[
   NewsLink(
     date: '2026年6月17日',
     title: 'FlutterKaigi 2026 プロポーザル応募のススメ',
-    url: 'https://medium.com/flutterkaigi/flutterkaigi-2026-%E3%83%97%E3%83%AD%E3%83%9D%E3%83%BC%E3%82%B6%E3%83%AB%E5%BF%9C%E5%8B%9F%E3%81%AE%E3%82%B9%E3%82%B9%E3%83%A1-ea8978e0fd89',
+    url:
+        'https://medium.com/flutterkaigi/flutterkaigi-2026-%E3%83%97%E3%83%AD%E3%83%9D%E3%83%BC%E3%82%B6%E3%83%AB%E5%BF%9C%E5%8B%9F%E3%81%AE%E3%82%B9%E3%82%B9%E3%83%A1-ea8978e0fd89',
   ),
   NewsLink(
     date: '2026年5月11日',

@@ -6,33 +6,41 @@ import '../constants/theme.dart';
 import '../l10n/strings.dart';
 
 class Header extends StatelessComponent {
-  const Header({super.key});
+  const Header({this.altLocaleHref, super.key});
 
-  static const _navItems = <({String label, String href})>[
-    // TODO: Create link
-    // (label: 'Event Info', href: '#event-info'),
-    // (label: 'Timeline', href: '#timeline'),
-    // (label: 'Sponsors', href: '#sponsors'),
-    // (label: 'Job Board', href: '#job-board'),
-  ];
+  /// Navigation target for the language switch — the equivalent page in the
+  /// *other* locale. When null, falls back to the other locale's home (used on
+  /// pages where there's no per-locale counterpart).
+  final String? altLocaleHref;
+
+  // TODO: Timeline を追加する場合はここに追記する。
 
   @override
   Component build(BuildContext context) {
     final strings = LocaleScope.stringsOf(context);
+    final locale = strings.locale;
+    // ナビリンク定義（desktop nav と mobile panel で共用）。
+    final navLinks = [
+      (label: 'Event Info', href: locale.eventInfoAnchorHref),
+      (label: 'Sponsors', href: locale.sponsorsAnchorHref),
+      (label: 'Job Boards', href: locale.jobBoardsAnchorHref),
+    ];
     return header([
-      a(href: strings.locale.linkHref, classes: 'brand', [.text('FlutterKaigi 2026')]),
+      a(href: locale.linkHref, classes: 'brand', [.text('FlutterKaigi 2026')]),
+      // Desktop nav（≤960px で非表示）。
       nav(
         classes: 'nav',
         attributes: const {'aria-label': 'Primary'},
         [
-          for (final item in _navItems) a(href: item.href, classes: 'nav__link', [.text(item.label)]),
+          for (final item in navLinks)
+            a(href: item.href, classes: 'nav__link', [.text(item.label)]),
         ],
       ),
       div(classes: 'actions', [
         // a(href: '#tickets', classes: 'btn btn--primary', [.text('Get Tickets')]),
         a(
-          href: strings.other.linkHref,
-          classes: 'lang lang--${strings.locale.code}',
+          href: altLocaleHref ?? strings.other.linkHref,
+          classes: 'lang lang--${locale.code}',
           attributes: {
             'aria-label': 'Switch to ${strings.languageToggleLabel}',
             'hreflang': strings.other.code,
@@ -49,6 +57,27 @@ class Header extends StatelessComponent {
               span(classes: 'lang__separator', [.text(' / ')]),
               span(classes: 'lang__option lang__option--ja', [.text('JA')]),
             ]),
+          ],
+        ),
+      ]),
+      // Mobile hamburger（>960px で非表示）。
+      // <details> を利用して JS なしで開閉を実現。アクセシビリティ上の補足:
+      // summary に aria-label を付与してスクリーンリーダーに用途を伝える。
+      // role="navigation" は panel 内の <nav> が担うため details 自体には不要。
+      details(classes: 'mob-nav', [
+        summary(
+          classes: 'mob-nav__btn',
+          attributes: {'aria-label': strings.navMenuAriaLabel},
+          [
+            span(classes: 'mob-nav__icon', attributes: const {'aria-hidden': 'true'}, []),
+          ],
+        ),
+        nav(
+          classes: 'mob-nav__panel',
+          attributes: const {'aria-label': 'Primary'},
+          [
+            for (final item in navLinks)
+              a(href: item.href, classes: 'mob-nav__link', [.text(item.label)]),
           ],
         ),
       ]),
@@ -177,8 +206,109 @@ class Header extends StatelessComponent {
       ]),
     ]),
 
+    // ── Mobile hamburger ─────────────────────────────────────────────────
+    css('.mob-nav', [
+      // モバイル専用: desktop では非表示。
+      css('&').styles(raw: const {'display': 'none'}),
+
+      // <summary> のデフォルトマーカー（▶）を消してボタン化。
+      css('.mob-nav__btn', [
+        css('&').styles(
+          display: .flex,
+          alignItems: .center,
+          justifyContent: .center,
+          width: 40.px,
+          height: 40.px,
+          color: onSurface,
+          radius: .circular(8.px),
+          raw: const {
+            'cursor': 'pointer',
+            'list-style': 'none',
+            'user-select': 'none',
+            '-webkit-appearance': 'none',
+          },
+        ),
+        css('&::-webkit-details-marker').styles(raw: const {'display': 'none'}),
+        css('&::marker').styles(raw: const {'display': 'none'}),
+        css('&:hover').styles(backgroundColor: const Color('#1D1B2010')),
+        css('&:focus-visible').styles(
+          raw: const {'outline': '2px solid #65558F', 'outline-offset': '2px'},
+        ),
+      ]),
+
+      // CSS だけで描くハンバーガーアイコン（3本線 → ✕ アニメーション）。
+      // ::before / ::after で上下の線を作り、中央線は要素本体。
+      css('.mob-nav__icon', [
+        css('&').styles(
+          display: .block,
+          position: .relative(),
+          width: 20.px,
+          height: 2.px,
+          backgroundColor: onSurface,
+          raw: const {'transition': 'background-color 200ms ease, transform 200ms ease'},
+        ),
+        css('&::before').styles(
+          position: .absolute(top: (-6).px, left: 0.px),
+          width: 100.percent,
+          height: 100.percent,
+          backgroundColor: onSurface,
+          raw: const {'content': '""', 'transition': 'top 200ms ease, transform 200ms ease'},
+        ),
+        css('&::after').styles(
+          position: .absolute(top: 6.px, left: 0.px),
+          width: 100.percent,
+          height: 100.percent,
+          backgroundColor: onSurface,
+          raw: const {'content': '""', 'transition': 'top 200ms ease, transform 200ms ease'},
+        ),
+      ]),
+
+      // open 時: 中央線を消して上下線をクロスさせて ✕ に。
+      css('&[open] .mob-nav__icon').styles(
+        raw: const {'background-color': 'transparent'},
+      ),
+      css('&[open] .mob-nav__icon::before').styles(
+        raw: const {'top': '0', 'transform': 'rotate(45deg)'},
+      ),
+      css('&[open] .mob-nav__icon::after').styles(
+        raw: const {'top': '0', 'transform': 'rotate(-45deg)'},
+      ),
+
+      // パネル: sticky header の直下に absolute で展開。
+      // header は position: sticky なので containing block になる。
+      css('.mob-nav__panel', [
+        css('&').styles(
+          position: .absolute(top: 100.percent, left: 0.px, right: 0.px),
+          display: .flex,
+          flexDirection: .column,
+          backgroundColor: onBrand,
+          raw: const {
+            'box-shadow': '0 4px 16px rgba(29, 26, 32, 0.12)',
+            'padding': '8px 16px 16px',
+            'gap': '2px',
+          },
+        ),
+        css('.mob-nav__link', [
+          css('&').styles(
+            display: .block,
+            padding: .symmetric(horizontal: 12.px, vertical: 14.px),
+            color: onSurface,
+            fontFamily: uiFontFamily,
+            fontWeight: tokenWeight(fontM3LabelLarge.fontWeight),
+            radius: .circular(8.px),
+            raw: {
+              ...tokenFontCss(fontM3LabelLarge),
+              'transition': 'background-color 150ms ease',
+            },
+          ),
+          css('&:hover').styles(backgroundColor: const Color('#1D1B2010')),
+        ]),
+      ]),
+    ]),
+
     css.media(MediaQuery.all(maxWidth: 960.px), [
       css('header .nav').styles(raw: const {'display': 'none'}),
+      css('header .mob-nav').styles(raw: const {'display': 'block'}),
     ]),
     css.media(MediaQuery.all(maxWidth: 720.px), [
       css('header', [
