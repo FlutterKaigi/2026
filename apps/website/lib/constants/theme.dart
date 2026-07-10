@@ -43,10 +43,8 @@ const onSecondaryContainer = colorDeeppurpleSysLightOnSecondaryContainer;
 const tertiaryContainer = colorDeeppurpleSysLightTertiaryContainer;
 
 // ── M3 state-layer overlays (Hover 8% / Focus 10% / Pressed 16%) ──────
-const onSecondaryContainerHover =
-    colorDeeppurpleStateLayersLightOnsecondarycontainerOpacity010;
-const onPrimaryContainerHoverHex =
-    colorDeeppurpleStateLayersLightOnprimarycontainerOpacity008Hex;
+const onSecondaryContainerHover = colorDeeppurpleStateLayersLightOnsecondarycontainerOpacity010;
+const onPrimaryContainerHoverHex = colorDeeppurpleStateLayersLightOnprimarycontainerOpacity008Hex;
 
 // ── Event section brand accents (Figma-derived, no M3 semantic match) ──
 // Bento Grid のカード階層やインパクト演出のため Figma で個別に選定された

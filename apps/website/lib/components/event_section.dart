@@ -29,9 +29,7 @@ class EventSection extends StatelessComponent {
           div(classes: 'event-section__roadmap', [const RoadmapCard()]),
           for (var i = 0; i < eventSocialCards.length; i++)
             div(
-              classes: i == 0
-                  ? 'event-section__social event-section__social--first'
-                  : 'event-section__social',
+              classes: i == 0 ? 'event-section__social event-section__social--first' : 'event-section__social',
               [SocialLinkCard(card: eventSocialCards[i])],
             ),
         ]),
