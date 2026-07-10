@@ -2,7 +2,7 @@ import 'package:dashboard/core/extension/build_context_extension.dart';
 import 'package:dashboard/core/ui/date_time_field.dart';
 import 'package:dashboard/core/ui/form_action_bar.dart';
 import 'package:dashboard/core/ui/locale_map_field.dart';
-import 'package:dashboard/feature/news/data/provider/news_repository.dart';
+import 'package:dashboard/feature/news/data/provider/news_list_repository.dart';
 import 'package:data/data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -44,7 +44,7 @@ class NewsEditPage extends HookConsumerWidget {
           createdAt: news?.createdAt ?? DateTime.now(),
           updatedAt: DateTime.now(),
         );
-        await ref.read(newsRepositoryProvider).save(newsToSave);
+        await ref.read(newsListRepositoryProvider).save(newsToSave);
         if (context.mounted) context.pop();
       } catch (e) {
         if (context.mounted) {
