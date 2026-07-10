@@ -1,5 +1,5 @@
 import 'package:app/core/i18n/strings.g.dart';
-import 'package:app/feature/news/data/provider/news_repository.dart';
+import 'package:app/feature/news/data/provider/news_list_repository.dart';
 import 'package:app/feature/news/ui/page/news_list_page.dart';
 import 'package:data/data.dart';
 import 'package:flutter/material.dart';
@@ -22,7 +22,7 @@ void main() {
       TranslationProvider(
         child: ProviderScope(
           overrides: [
-            newsRepositoryProvider.overrideWithValue(
+            newsListRepositoryProvider.overrideWithValue(
               _FakeNewsRepository([news]),
             ),
           ],

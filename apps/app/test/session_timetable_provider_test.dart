@@ -13,9 +13,18 @@ void main() {
     );
 
     expect(data.days, hasLength(1));
+    expect(data.availableDates, [DateTime(2026, 10, 31)]);
+    expect(data.selectedDate, DateTime(2026, 10, 31));
     expect(
       data.days.single.entries.map((entry) => entry.id),
       ['opening', 'room-b-session', 'room-a-session'],
+    );
+    expect(
+      data.days.single.entryGroups.map((group) => group.map((entry) => entry.id).toList()),
+      [
+        ['opening'],
+        ['room-b-session', 'room-a-session'],
+      ],
     );
     expect(data.days.single.entries.last.speakers.single.name, 'Speaker A');
   });
@@ -33,6 +42,70 @@ void main() {
       data.days.single.entries.map((entry) => entry.id),
       ['opening', 'room-a-session'],
     );
+  });
+
+  test('builds event dates dynamically and selects the first day by default', () {
+    final data = buildSessionTimetableData(
+      sessions: [..._sessions, _dayTwoSession],
+      timelineEvents: _timelineEvents,
+      venues: _venues,
+      speakers: _speakers,
+      selectedVenueId: null,
+    );
+
+    expect(
+      data.availableDates,
+      [DateTime(2026, 10, 31), DateTime(2026, 11)],
+    );
+    expect(data.selectedDate, DateTime(2026, 10, 31));
+    expect(data.days, hasLength(1));
+    expect(data.days.single.date, DateTime(2026, 10, 31));
+    expect(
+      data.selectedDay?.entries.map((entry) => entry.id),
+      ['opening', 'room-b-session', 'room-a-session'],
+    );
+  });
+
+  test('uses a separate session list for the selected event day', () {
+    final data = buildSessionTimetableData(
+      sessions: [..._sessions, _dayTwoSession],
+      timelineEvents: _timelineEvents,
+      venues: _venues,
+      speakers: _speakers,
+      selectedVenueId: null,
+      selectedDate: DateTime(2026, 11),
+    );
+
+    expect(data.selectedDate, DateTime(2026, 11));
+    expect(data.selectedDay?.date, DateTime(2026, 11));
+    expect(data.days, hasLength(1));
+    expect(data.days.single.date, DateTime(2026, 11));
+    expect(
+      data.days.single.entries.map((entry) => entry.id),
+      ['day-two-session'],
+    );
+  });
+
+  test('keeps event day buttons when venue filter has no entries on the selected day', () {
+    final data = buildSessionTimetableData(
+      sessions: [..._sessions, _dayTwoSession],
+      timelineEvents: _timelineEvents,
+      venues: _venues,
+      speakers: _speakers,
+      selectedVenueId: 'room-b',
+      selectedDate: DateTime(2026, 11),
+    );
+
+    expect(
+      data.availableDates,
+      [DateTime(2026, 10, 31), DateTime(2026, 11)],
+    );
+    expect(data.selectedVenueId, 'room-b');
+    expect(data.selectedDay?.entries, isEmpty);
+    expect(data.days, hasLength(1));
+    expect(data.days.single.date, DateTime(2026, 11));
+    expect(data.days.single.entries, isEmpty);
+    expect(data.isEmpty, isTrue);
   });
 }
 
@@ -87,6 +160,18 @@ final _sessions = [
     updatedAt: DateTime.utc(2026),
   ),
 ];
+
+final _dayTwoSession = Session(
+  id: 'day-two-session',
+  title: const LocaleMap(ja: 'Day Two Session', en: 'Day Two Session'),
+  description: const LocaleMap(ja: 'Description', en: 'Description'),
+  primaryLocale: 'en',
+  startsAt: DateTime.utc(2026, 11, 1, 1),
+  endsAt: DateTime.utc(2026, 11, 1, 2),
+  venueId: 'room-a',
+  createdAt: DateTime.utc(2026),
+  updatedAt: DateTime.utc(2026),
+);
 
 final _timelineEvents = [
   TimelineEvent(
