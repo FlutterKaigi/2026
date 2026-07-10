@@ -75,8 +75,8 @@ class Translations$navigation$ja {
 	/// ja: 'セッション'
 	String get sessions => 'セッション';
 
-	/// ja: 'イベント情報'
-	String get info => 'イベント情報';
+	/// ja: '情報'
+	String get info => '情報';
 }
 
 // Path: news
@@ -117,6 +117,7 @@ class Translations$sessionTimetable$ja {
 	/// ja: 'タイムテーブルを取得できませんでした'
 	String get error => 'タイムテーブルを取得できませんでした';
 
+	late final Translations$sessionTimetable$timeFormat$ja timeFormat = Translations$sessionTimetable$timeFormat$ja.internal(_root);
 	late final Translations$sessionTimetable$venue$ja venue = Translations$sessionTimetable$venue$ja.internal(_root);
 	late final Translations$sessionTimetable$speaker$ja speaker = Translations$sessionTimetable$speaker$ja.internal(_root);
 	late final Translations$sessionTimetable$type$ja type = Translations$sessionTimetable$type$ja.internal(_root);
@@ -130,8 +131,8 @@ class Translations$eventInfo$ja {
 
 	// Translations
 
-	/// ja: 'イベント情報'
-	String get title => 'イベント情報';
+	/// ja: '情報'
+	String get title => '情報';
 
 	/// ja: 'バージョン'
 	String get version => 'バージョン';
@@ -165,6 +166,21 @@ class Translations$common$ja {
 
 	/// ja: '再試行'
 	String get retry => '再試行';
+}
+
+// Path: sessionTimetable.timeFormat
+class Translations$sessionTimetable$timeFormat$ja {
+	Translations$sessionTimetable$timeFormat$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: '24時間'
+	String get twentyFourHour => '24時間';
+
+	/// ja: '午前/午後'
+	String get amPm => '午前/午後';
 }
 
 // Path: sessionTimetable.venue
@@ -268,7 +284,7 @@ extension on Translations {
 			'app.title' => 'FlutterKaigi 2026',
 			'navigation.news' => 'お知らせ',
 			'navigation.sessions' => 'セッション',
-			'navigation.info' => 'イベント情報',
+			'navigation.info' => '情報',
 			'news.title' => 'お知らせ',
 			'news.empty' => 'お知らせはまだありません',
 			'news.error' => 'お知らせを取得できませんでした',
@@ -276,6 +292,8 @@ extension on Translations {
 			'sessionTimetable.empty' => 'タイムテーブルはまだ公開されていません',
 			'sessionTimetable.emptyFiltered' => '選択した会場の予定はありません',
 			'sessionTimetable.error' => 'タイムテーブルを取得できませんでした',
+			'sessionTimetable.timeFormat.twentyFourHour' => '24時間',
+			'sessionTimetable.timeFormat.amPm' => '午前/午後',
 			'sessionTimetable.venue.all' => 'すべて',
 			'sessionTimetable.venue.unknown' => '会場未定',
 			'sessionTimetable.speaker.none' => '登壇者未定',
@@ -284,7 +302,7 @@ extension on Translations {
 			'sessionTimetable.type.beginnersLightningTalk' => '初心者向けLT',
 			'sessionTimetable.type.handsOn' => 'ハンズオン',
 			'sessionTimetable.type.event' => 'イベント',
-			'eventInfo.title' => 'イベント情報',
+			'eventInfo.title' => '情報',
 			'eventInfo.version' => 'バージョン',
 			'eventInfo.themeMode.title' => 'テーマ',
 			'eventInfo.themeMode.system' => 'システムに合わせる',

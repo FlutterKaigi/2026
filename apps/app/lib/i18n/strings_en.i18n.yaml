@@ -3,7 +3,7 @@ app:
 navigation:
   news: News
   sessions: Sessions
-  info: Event Info
+  info: Info
 news:
   title: News
   empty: There is no news yet
@@ -13,6 +13,9 @@ sessionTimetable:
   empty: The timetable has not been published yet
   emptyFiltered: There are no items for the selected venue
   error: Failed to load timetable
+  timeFormat:
+    twentyFourHour: 24 Hour
+    amPm: AM/PM
   venue:
     all: All
     unknown: Venue TBA
@@ -25,7 +28,7 @@ sessionTimetable:
     handsOn: Hands-on
     event: Event
 eventInfo:
-  title: Event Info
+  title: Info
   version: Version
   themeMode:
     title: Theme

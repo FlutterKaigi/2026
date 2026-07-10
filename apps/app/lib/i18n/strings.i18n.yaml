@@ -3,7 +3,7 @@ app:
 navigation:
   news: お知らせ
   sessions: セッション
-  info: イベント情報
+  info: 情報
 news:
   title: お知らせ
   empty: お知らせはまだありません
@@ -13,6 +13,9 @@ sessionTimetable:
   empty: タイムテーブルはまだ公開されていません
   emptyFiltered: 選択した会場の予定はありません
   error: タイムテーブルを取得できませんでした
+  timeFormat:
+    twentyFourHour: 24時間
+    amPm: 午前/午後
   venue:
     all: すべて
     unknown: 会場未定
@@ -25,7 +28,7 @@ sessionTimetable:
     handsOn: ハンズオン
     event: イベント
 eventInfo:
-  title: イベント情報
+  title: 情報
   version: バージョン
   themeMode:
     title: テーマ
