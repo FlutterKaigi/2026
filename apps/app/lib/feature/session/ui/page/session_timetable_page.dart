@@ -152,7 +152,7 @@ class _DaySelectorBar extends ConsumerWidget {
           for (var index = 0; index < dates.length; index++) ...[
             if (index > 0) const SizedBox(width: 8),
             _AutoScrollingChoiceChip(
-              label: Text(_formatDayButtonLabel(index)),
+              label: Text(_formatDayButtonLabel(index, dates[index])),
               selected: selectedDate != null && _isSameDate(dates[index], selectedDate!),
               onSelected: (_) => ref.read(sessionTimetableDayFilterProvider.notifier).select(dates[index]),
             ),
@@ -991,8 +991,8 @@ String _sessionTypeLabel(Translations t, Session session) {
   return t.sessionTimetable.type.regular;
 }
 
-String _formatDayButtonLabel(int dayIndex) {
-  return 'Day ${dayIndex + 1}';
+String _formatDayButtonLabel(int dayIndex, DateTime date) {
+  return 'Day ${dayIndex + 1} (${date.month}/${date.day})';
 }
 
 bool _isSameDate(DateTime a, DateTime b) {
