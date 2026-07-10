@@ -3,7 +3,6 @@ import 'dart:math' as math;
 
 import 'package:app/core/extension/locale_map_extension.dart';
 import 'package:app/core/i18n/strings.g.dart';
-import 'package:app/core/provider/root_navigation.dart';
 import 'package:app/feature/session/data/provider/session_time_format.dart';
 import 'package:app/feature/session/data/provider/session_timetable_provider.dart';
 import 'package:app/feature/session/util/event_time.dart';
@@ -49,12 +48,6 @@ class SessionTimetablePage extends HookConsumerWidget {
     final t = Translations.of(context);
     final timetable = ref.watch(sessionTimetableProvider);
     final scrollController = useScrollController();
-
-    ref.listen(rootDestinationOpenProvider, (_, next) {
-      if (next.index == RootDestinationIndex.sessions) {
-        _jumpToFirst(scrollController);
-      }
-    });
 
     return Scaffold(
       appBar: AppBar(title: Text(t.sessionTimetable.title)),
@@ -1082,12 +1075,4 @@ Future<void> _scrollChipIntoView(BuildContext context) async {
     duration: const Duration(milliseconds: 220),
     curve: Curves.easeOutCubic,
   );
-}
-
-void _jumpToFirst(ScrollController controller) {
-  if (!controller.hasClients) {
-    return;
-  }
-
-  controller.jumpTo(controller.position.minScrollExtent);
 }
