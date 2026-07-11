@@ -82,14 +82,14 @@ class _VenueMap3DViewState extends State<VenueMap3DView> {
             }
             setState(() {
               _isLoading = false;
-              _loadError = error.description;
+              _loadError = 'web-resource-error';
             });
           },
         ),
       );
       await _loadMap(updateState: false);
-    } on Object catch (error) {
-      _showLoadError('Could not initialize the map WebView: $error');
+    } on Object catch (_) {
+      _showLoadError();
     }
   }
 
@@ -102,8 +102,8 @@ class _VenueMap3DViewState extends State<VenueMap3DView> {
     }
     try {
       await _controller.loadFlutterAsset(_assetPath);
-    } on Object catch (error) {
-      _showLoadError('Could not load the local map asset: $error');
+    } on Object catch (_) {
+      _showLoadError();
     }
   }
 
@@ -111,22 +111,19 @@ class _VenueMap3DViewState extends State<VenueMap3DView> {
     unawaited(_loadMap());
   }
 
-  void _showLoadError(String message) {
+  void _showLoadError() {
     if (!mounted) {
       return;
     }
     setState(() {
       _isLoading = false;
-      _loadError = message;
+      _loadError = 'load-error';
     });
   }
 
   bool _isCriticalWebResourceError(WebResourceError error) {
     final url = error.url;
-    return error.isForMainFrame == true ||
-        url == null ||
-        url.contains(_assetPath) ||
-        url.contains('cdn.jsdelivr.net/npm/three');
+    return error.isForMainFrame == true || url == null || url.contains(_assetPath);
   }
 
   void _runMapCommand(String javaScript) {
@@ -139,7 +136,7 @@ class _VenueMap3DViewState extends State<VenueMap3DView> {
         if (!mounted) {
           return;
         }
-        setState(() => _loadError = 'Could not run map command: $error');
+        setState(() => _loadError = 'map-command-error');
       }),
     );
   }
@@ -514,7 +511,6 @@ class _MapViewport extends StatelessWidget {
                   ],
                 )
               : _MapErrorState(
-                  message: loadError!,
                   onRetry: onRetry,
                 ),
         ),
@@ -540,11 +536,9 @@ class _MapLoadingState extends StatelessWidget {
 
 class _MapErrorState extends StatelessWidget {
   const _MapErrorState({
-    required this.message,
     required this.onRetry,
   });
 
-  final String message;
   final VoidCallback onRetry;
 
   @override
@@ -583,7 +577,7 @@ class _MapErrorState extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    message,
+                    t.venueMap.loadErrorDescription,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: colorScheme.onSurfaceVariant,
                     ),
