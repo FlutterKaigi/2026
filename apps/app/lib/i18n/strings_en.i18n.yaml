@@ -4,6 +4,7 @@ navigation:
   news: News
   sessions: Sessions
   info: Info
+  venueMap: Venue Map
 news:
   title: News
   empty: There is no news yet
@@ -49,6 +50,28 @@ bookmarkedSessions:
   emptyBody: Bookmark sessions to find them here.
   openSessions: Open sessions
   error: Failed to load bookmarked sessions
+venueMap:
+  title: Venue Map
+  loadError: Could not load the venue map
+  controls:
+    view:
+      title: View
+      threeD: 3D View
+      top: Top View
+    labels:
+      title: Labels
+      hide: Hide Labels
+      show: Show Labels
+      decreaseSize: Smaller
+      increaseSize: Larger
+    highlight:
+      title: Highlight
+      mainHalls: Main Halls
+      exhibitionHalls: Exhibition Halls
+      grandHalls: Grand Halls
+      toilets: Toilets
+      elevators: Elevators
+      entrance: Entrance
 eventInfo:
   title: Info
   version: Version
