@@ -36,6 +36,14 @@ RouteBase get $appShellRoute => StatefulShellRouteData.$route(
     ),
     StatefulShellBranchData.$branch(
       routes: [
+        GoRouteData.$route(
+          path: '/venue-map',
+          factory: $VenueMapRoute._fromState,
+        ),
+      ],
+    ),
+    StatefulShellBranchData.$branch(
+      routes: [
         GoRouteData.$route(path: '/info', factory: $EventInfoRoute._fromState),
       ],
     ),
@@ -113,6 +121,25 @@ mixin $SessionDetailsRoute on GoRouteData {
   String get location => GoRouteData.$location(
     '/sessions/${Uri.encodeComponent(_self.sessionId)}',
   );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) => context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $VenueMapRoute on GoRouteData {
+  static VenueMapRoute _fromState(GoRouterState state) => const VenueMapRoute();
+
+  @override
+  String get location => GoRouteData.$location('/venue-map');
 
   @override
   void go(BuildContext context) => context.go(location);
