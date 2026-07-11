@@ -90,6 +90,7 @@ class _Translations$sessionTimetable$en extends Translations$sessionTimetable$ja
 
 	// Translations
 	@override String get title => 'Timetable';
+	@override String dayButtonLabel({required Object day, required Object date}) => 'Day ${day} (${date})';
 	@override String get empty => 'The timetable has not been published yet';
 	@override String get emptyFiltered => 'There are no items for the selected venue';
 	@override String get error => 'Failed to load timetable';
@@ -220,6 +221,7 @@ extension on TranslationsEn {
 			'news.empty' => 'There is no news yet',
 			'news.error' => 'Failed to load news',
 			'sessionTimetable.title' => 'Timetable',
+			'sessionTimetable.dayButtonLabel' => ({required Object day, required Object date}) => 'Day ${day} (${date})',
 			'sessionTimetable.empty' => 'The timetable has not been published yet',
 			'sessionTimetable.emptyFiltered' => 'There are no items for the selected venue',
 			'sessionTimetable.error' => 'Failed to load timetable',

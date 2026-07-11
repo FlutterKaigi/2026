@@ -4,6 +4,20 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('translates session day button labels', () async {
+    final ja = AppLocale.ja.buildSync();
+    final en = await AppLocale.en.build();
+
+    expect(
+      ja.sessionTimetable.dayButtonLabel(day: 1, date: '10/31'),
+      '1日目 (10/31)',
+    );
+    expect(
+      en.sessionTimetable.dayButtonLabel(day: 1, date: '10/31'),
+      'Day 1 (10/31)',
+    );
+  });
+
   group('resolvePreferredAppLocale', () {
     test('uses the first supported locale from platform preferences', () {
       final locale = resolvePreferredAppLocale([

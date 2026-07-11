@@ -108,6 +108,9 @@ class Translations$sessionTimetable$ja {
 	/// ja: 'タイムテーブル'
 	String get title => 'タイムテーブル';
 
+	/// ja: '$day日目 ($date)'
+	String dayButtonLabel({required Object day, required Object date}) => '${day}日目 (${date})';
+
 	/// ja: 'タイムテーブルはまだ公開されていません'
 	String get empty => 'タイムテーブルはまだ公開されていません';
 
@@ -289,6 +292,7 @@ extension on Translations {
 			'news.empty' => 'お知らせはまだありません',
 			'news.error' => 'お知らせを取得できませんでした',
 			'sessionTimetable.title' => 'タイムテーブル',
+			'sessionTimetable.dayButtonLabel' => ({required Object day, required Object date}) => '${day}日目 (${date})',
 			'sessionTimetable.empty' => 'タイムテーブルはまだ公開されていません',
 			'sessionTimetable.emptyFiltered' => '選択した会場の予定はありません',
 			'sessionTimetable.error' => 'タイムテーブルを取得できませんでした',

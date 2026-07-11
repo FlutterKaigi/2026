@@ -10,6 +10,7 @@ news:
   error: Failed to load news
 sessionTimetable:
   title: Timetable
+  dayButtonLabel: Day $day ($date)
   empty: The timetable has not been published yet
   emptyFiltered: There are no items for the selected venue
   error: Failed to load timetable

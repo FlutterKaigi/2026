@@ -144,6 +144,8 @@ class _DaySelectorBar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final t = Translations.of(context);
+
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
       scrollDirection: Axis.horizontal,
@@ -152,7 +154,7 @@ class _DaySelectorBar extends ConsumerWidget {
           for (var index = 0; index < dates.length; index++) ...[
             if (index > 0) const SizedBox(width: 8),
             _AutoScrollingChoiceChip(
-              label: Text(_formatDayButtonLabel(index, dates[index])),
+              label: Text(_formatDayButtonLabel(t, index, dates[index])),
               selected: selectedDate != null && _isSameDate(dates[index], selectedDate!),
               onSelected: (_) => ref.read(sessionTimetableDayFilterProvider.notifier).select(dates[index]),
             ),
@@ -991,8 +993,11 @@ String _sessionTypeLabel(Translations t, Session session) {
   return t.sessionTimetable.type.regular;
 }
 
-String _formatDayButtonLabel(int dayIndex, DateTime date) {
-  return 'Day ${dayIndex + 1} (${date.month}/${date.day})';
+String _formatDayButtonLabel(Translations t, int dayIndex, DateTime date) {
+  return t.sessionTimetable.dayButtonLabel(
+    day: dayIndex + 1,
+    date: '${date.month}/${date.day}',
+  );
 }
 
 bool _isSameDate(DateTime a, DateTime b) {

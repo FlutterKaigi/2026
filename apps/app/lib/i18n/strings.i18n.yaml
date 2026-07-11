@@ -10,6 +10,7 @@ news:
   error: お知らせを取得できませんでした
 sessionTimetable:
   title: タイムテーブル
+  dayButtonLabel: $day日目 ($date)
   empty: タイムテーブルはまだ公開されていません
   emptyFiltered: 選択した会場の予定はありません
   error: タイムテーブルを取得できませんでした
