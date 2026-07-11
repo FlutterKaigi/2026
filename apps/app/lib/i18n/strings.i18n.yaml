@@ -53,6 +53,7 @@ bookmarkedSessions:
 venueMap:
   title: 会場マップ
   loadError: 会場マップを読み込めませんでした
+  loadErrorDescription: 再試行してください。表示されない場合は、アプリを再起動してください。
   controls:
     view:
       title: 表示

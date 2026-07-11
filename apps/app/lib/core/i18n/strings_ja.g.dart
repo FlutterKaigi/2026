@@ -228,6 +228,9 @@ class Translations$venueMap$ja {
 	/// ja: '会場マップを読み込めませんでした'
 	String get loadError => '会場マップを読み込めませんでした';
 
+	/// ja: '再試行してください。表示されない場合は、アプリを再起動してください。'
+	String get loadErrorDescription => '再試行してください。表示されない場合は、アプリを再起動してください。';
+
 	late final Translations$venueMap$controls$ja controls = Translations$venueMap$controls$ja.internal(_root);
 }
 
@@ -516,6 +519,7 @@ extension on Translations {
 			'bookmarkedSessions.error' => 'ブックマークしたセッションを取得できませんでした',
 			'venueMap.title' => '会場マップ',
 			'venueMap.loadError' => '会場マップを読み込めませんでした',
+			'venueMap.loadErrorDescription' => '再試行してください。表示されない場合は、アプリを再起動してください。',
 			'venueMap.controls.view.title' => '表示',
 			'venueMap.controls.view.threeD' => '3D表示',
 			'venueMap.controls.view.top' => '上面表示',

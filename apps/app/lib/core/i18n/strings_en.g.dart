@@ -159,6 +159,7 @@ class _Translations$venueMap$en extends Translations$venueMap$ja {
 	// Translations
 	@override String get title => 'Venue Map';
 	@override String get loadError => 'Could not load the venue map';
+	@override String get loadErrorDescription => 'Please try again. If the map still does not appear, restart the app.';
 	@override late final _Translations$venueMap$controls$en controls = _Translations$venueMap$controls$en._(_root);
 }
 
@@ -372,6 +373,7 @@ extension on TranslationsEn {
 			'bookmarkedSessions.error' => 'Failed to load bookmarked sessions',
 			'venueMap.title' => 'Venue Map',
 			'venueMap.loadError' => 'Could not load the venue map',
+			'venueMap.loadErrorDescription' => 'Please try again. If the map still does not appear, restart the app.',
 			'venueMap.controls.view.title' => 'View',
 			'venueMap.controls.view.threeD' => '3D View',
 			'venueMap.controls.view.top' => 'Top View',

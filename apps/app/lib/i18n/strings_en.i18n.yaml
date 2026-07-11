@@ -53,6 +53,7 @@ bookmarkedSessions:
 venueMap:
   title: Venue Map
   loadError: Could not load the venue map
+  loadErrorDescription: Please try again. If the map still does not appear, restart the app.
   controls:
     view:
       title: View
