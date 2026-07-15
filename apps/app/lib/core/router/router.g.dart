@@ -21,6 +21,12 @@ RouteBase get $appShellRoute => StatefulShellRouteData.$route(
         GoRouteData.$route(
           path: '/sessions',
           factory: $SessionTimetableRoute._fromState,
+          routes: [
+            GoRouteData.$route(
+              path: ':sessionId',
+              factory: $SessionDetailsRoute._fromState,
+            ),
+          ],
         ),
       ],
     ),
@@ -62,6 +68,31 @@ mixin $SessionTimetableRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/sessions');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $SessionDetailsRoute on GoRouteData {
+  static SessionDetailsRoute _fromState(GoRouterState state) =>
+      SessionDetailsRoute(sessionId: state.pathParameters['sessionId']!);
+
+  SessionDetailsRoute get _self => this as SessionDetailsRoute;
+
+  @override
+  String get location => GoRouteData.$location(
+    '/sessions/${Uri.encodeComponent(_self.sessionId)}',
+  );
 
   @override
   void go(BuildContext context) => context.go(location);
