@@ -4,12 +4,15 @@ import 'package:app/core/extension/locale_map_extension.dart';
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/feature/session/data/provider/session_detail_provider.dart';
 import 'package:app/feature/session/data/provider/session_time_format.dart';
+import 'package:app/feature/session/ui/widget/session_bookmark_button.dart';
 import 'package:app/feature/session/util/event_time.dart';
 import 'package:data/data.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+const _sessionOrigin = 'https://2026.flutterkaigi.jp';
 
 class SessionDetailsContentWidget extends ConsumerWidget {
   const SessionDetailsContentWidget({
@@ -34,6 +37,14 @@ class SessionDetailsContentWidget extends ConsumerWidget {
         slivers: [
           SliverAppBar.large(
             title: Text(title),
+            actions: [
+              SessionBookmarkButton(sessionId: session.id),
+              IconButton(
+                tooltip: t.sessionDetails.share,
+                onPressed: () => unawaited(_shareSession(data, locale)),
+                icon: const Icon(Icons.share_outlined),
+              ),
+            ],
           ),
           SliverList.list(
             children: [
@@ -203,6 +214,23 @@ class _InfoChip extends StatelessWidget {
       visualDensity: VisualDensity.compact,
     );
   }
+}
+
+Future<void> _shareSession(SessionDetailData data, Locale locale) async {
+  final session = data.session;
+  final sessionUrl = Uri.parse('$_sessionOrigin/sessions/${session.id}');
+  final speakerNames = data.speakers.map((speaker) => speaker.name).join(', ');
+  final text = [
+    session.title.resolve(locale),
+    if (speakerNames.isNotEmpty) speakerNames,
+    sessionUrl.toString(),
+  ].join('\n');
+  final intentUri = Uri.https('x.com', '/intent/post', {
+    'text': text,
+    'hashtags': 'FlutterKaigi2026',
+  });
+
+  await launchUrl(intentUri, mode: LaunchMode.externalApplication);
 }
 
 Uri? _externalUri(String? rawUrl) {

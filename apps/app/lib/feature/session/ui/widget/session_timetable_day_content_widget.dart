@@ -4,11 +4,10 @@ import 'package:app/core/extension/locale_map_extension.dart';
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/feature/session/data/provider/session_time_format.dart';
 import 'package:app/feature/session/data/provider/session_timetable_provider.dart';
+import 'package:app/feature/session/ui/widget/session_card_widget.dart';
 import 'package:app/feature/session/util/event_time.dart';
-import 'package:data/data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart' hide TextDirection;
 
@@ -265,7 +264,7 @@ class _TimetableEntryCardWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return entry.isSession
-        ? _SessionCardWidget(
+        ? SessionCardWidget(
             entry: entry,
             timeFormat: timeFormat,
           )
@@ -392,84 +391,6 @@ class _ScrollEdgeFadeWidget extends StatelessWidget {
   }
 }
 
-class _SessionCardWidget extends StatelessWidget {
-  const _SessionCardWidget({
-    required this.entry,
-    required this.timeFormat,
-  });
-
-  final SessionTimetableEntry entry;
-  final EventTimeFormat timeFormat;
-
-  @override
-  Widget build(BuildContext context) {
-    final t = Translations.of(context);
-    final locale = Localizations.localeOf(context);
-    final session = entry.session!;
-    final title = session.title.resolve(locale);
-    final description = session.description.resolve(locale).trim();
-
-    return _TimetableCardWidget(
-      onTap: () => context.push('/sessions/${Uri.encodeComponent(session.id)}'),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          if (description.isNotEmpty) ...[
-            const SizedBox(height: 8),
-            Text(
-              description,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-          ],
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              _InfoChipWidget(
-                icon: Icons.sell_outlined,
-                label: _sessionTypeLabel(t, session),
-              ),
-              _InfoChipWidget(
-                icon: Icons.meeting_room_outlined,
-                label: entry.venue?.name.resolve(locale) ?? t.sessionTimetable.venue.unknown,
-              ),
-              _InfoChipWidget(
-                icon: Icons.schedule,
-                label: formatEventTimeRange(
-                  entry.startsAt,
-                  entry.endsAt,
-                  timeFormat,
-                  locale: locale.toLanguageTag(),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          if (entry.speakers.isEmpty)
-            _SpeakerPlaceholderWidget(label: t.sessionTimetable.speaker.none)
-          else
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                for (final speaker in entry.speakers) _SpeakerChipWidget(speaker: speaker),
-              ],
-            ),
-        ],
-      ),
-    );
-  }
-}
-
 class _TimelineEventCardWidget extends StatelessWidget {
   const _TimelineEventCardWidget({
     required this.entry,
@@ -591,44 +512,6 @@ class _InfoChipWidget extends StatelessWidget {
       label: Text(label),
       side: BorderSide(color: colorScheme.outlineVariant),
       visualDensity: VisualDensity.compact,
-    );
-  }
-}
-
-class _SpeakerChipWidget extends StatelessWidget {
-  const _SpeakerChipWidget({required this.speaker});
-
-  final Speaker speaker;
-
-  @override
-  Widget build(BuildContext context) {
-    final avatarUrl = speaker.avatarUrl;
-
-    return Chip(
-      avatar: CircleAvatar(
-        backgroundImage: avatarUrl == null || avatarUrl.isEmpty ? null : NetworkImage(avatarUrl),
-        child: avatarUrl == null || avatarUrl.isEmpty ? const Icon(Icons.person_outline, size: 16) : null,
-      ),
-      label: Text(speaker.name),
-      visualDensity: VisualDensity.compact,
-    );
-  }
-}
-
-class _SpeakerPlaceholderWidget extends StatelessWidget {
-  const _SpeakerPlaceholderWidget({required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        const Icon(Icons.person_outline, size: 18),
-        const SizedBox(width: 6),
-        Text(label),
-      ],
     );
   }
 }
