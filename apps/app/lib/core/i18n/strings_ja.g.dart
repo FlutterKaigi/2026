@@ -44,6 +44,7 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	late final Translations$navigation$ja navigation = Translations$navigation$ja.internal(_root);
 	late final Translations$news$ja news = Translations$news$ja.internal(_root);
 	late final Translations$sessionTimetable$ja sessionTimetable = Translations$sessionTimetable$ja.internal(_root);
+	late final Translations$sessionDetails$ja sessionDetails = Translations$sessionDetails$ja.internal(_root);
 	late final Translations$eventInfo$ja eventInfo = Translations$eventInfo$ja.internal(_root);
 	late final Translations$notFound$ja notFound = Translations$notFound$ja.internal(_root);
 	late final Translations$common$ja common = Translations$common$ja.internal(_root);
@@ -124,6 +125,42 @@ class Translations$sessionTimetable$ja {
 	late final Translations$sessionTimetable$venue$ja venue = Translations$sessionTimetable$venue$ja.internal(_root);
 	late final Translations$sessionTimetable$speaker$ja speaker = Translations$sessionTimetable$speaker$ja.internal(_root);
 	late final Translations$sessionTimetable$type$ja type = Translations$sessionTimetable$type$ja.internal(_root);
+}
+
+// Path: sessionDetails
+class Translations$sessionDetails$ja {
+	Translations$sessionDetails$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'セッション詳細'
+	String get title => 'セッション詳細';
+
+	/// ja: '概要'
+	String get description => '概要';
+
+	/// ja: '日時・会場'
+	String get schedule => '日時・会場';
+
+	/// ja: '登壇者'
+	String get speakers => '登壇者';
+
+	/// ja: 'リンク'
+	String get links => 'リンク';
+
+	/// ja: 'Sessionize'
+	String get sessionize => 'Sessionize';
+
+	/// ja: '共有'
+	String get share => '共有';
+
+	/// ja: 'セッションが見つかりませんでした'
+	String get notFound => 'セッションが見つかりませんでした';
+
+	/// ja: 'セッションを取得できませんでした'
+	String get error => 'セッションを取得できませんでした';
 }
 
 // Path: eventInfo
@@ -306,6 +343,15 @@ extension on Translations {
 			'sessionTimetable.type.beginnersLightningTalk' => '初心者向けLT',
 			'sessionTimetable.type.handsOn' => 'ハンズオン',
 			'sessionTimetable.type.event' => 'イベント',
+			'sessionDetails.title' => 'セッション詳細',
+			'sessionDetails.description' => '概要',
+			'sessionDetails.schedule' => '日時・会場',
+			'sessionDetails.speakers' => '登壇者',
+			'sessionDetails.links' => 'リンク',
+			'sessionDetails.sessionize' => 'Sessionize',
+			'sessionDetails.share' => '共有',
+			'sessionDetails.notFound' => 'セッションが見つかりませんでした',
+			'sessionDetails.error' => 'セッションを取得できませんでした',
 			'eventInfo.title' => '情報',
 			'eventInfo.version' => 'バージョン',
 			'eventInfo.themeMode.title' => 'テーマ',
