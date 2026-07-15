@@ -44,6 +44,8 @@ class TranslationsEn extends Translations with BaseTranslations<AppLocale, Trans
 	@override late final _Translations$news$en news = _Translations$news$en._(_root);
 	@override late final _Translations$sessionTimetable$en sessionTimetable = _Translations$sessionTimetable$en._(_root);
 	@override late final _Translations$sessionDetails$en sessionDetails = _Translations$sessionDetails$en._(_root);
+	@override late final _Translations$sessionBookmark$en sessionBookmark = _Translations$sessionBookmark$en._(_root);
+	@override late final _Translations$bookmarkedSessions$en bookmarkedSessions = _Translations$bookmarkedSessions$en._(_root);
 	@override late final _Translations$eventInfo$en eventInfo = _Translations$eventInfo$en._(_root);
 	@override late final _Translations$notFound$en notFound = _Translations$notFound$en._(_root);
 	@override late final _Translations$common$en common = _Translations$common$en._(_root);
@@ -116,6 +118,32 @@ class _Translations$sessionDetails$en extends Translations$sessionDetails$ja {
 	@override String get sessionize => 'Sessionize';
 	@override String get notFound => 'Session not found';
 	@override String get error => 'Failed to load session';
+}
+
+// Path: sessionBookmark
+class _Translations$sessionBookmark$en extends Translations$sessionBookmark$ja {
+	_Translations$sessionBookmark$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get openBookmarked => 'Bookmarked sessions';
+	@override String get add => 'Add bookmark';
+	@override String get remove => 'Remove bookmark';
+}
+
+// Path: bookmarkedSessions
+class _Translations$bookmarkedSessions$en extends Translations$bookmarkedSessions$ja {
+	_Translations$bookmarkedSessions$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Bookmarked Sessions';
+	@override String get emptyTitle => 'No bookmarked sessions';
+	@override String get emptyBody => 'Bookmark sessions to find them here.';
+	@override String get openSessions => 'Open sessions';
+	@override String get error => 'Failed to load bookmarked sessions';
 }
 
 // Path: eventInfo
@@ -261,6 +289,14 @@ extension on TranslationsEn {
 			'sessionDetails.sessionize' => 'Sessionize',
 			'sessionDetails.notFound' => 'Session not found',
 			'sessionDetails.error' => 'Failed to load session',
+			'sessionBookmark.openBookmarked' => 'Bookmarked sessions',
+			'sessionBookmark.add' => 'Add bookmark',
+			'sessionBookmark.remove' => 'Remove bookmark',
+			'bookmarkedSessions.title' => 'Bookmarked Sessions',
+			'bookmarkedSessions.emptyTitle' => 'No bookmarked sessions',
+			'bookmarkedSessions.emptyBody' => 'Bookmark sessions to find them here.',
+			'bookmarkedSessions.openSessions' => 'Open sessions',
+			'bookmarkedSessions.error' => 'Failed to load bookmarked sessions',
 			'eventInfo.title' => 'Info',
 			'eventInfo.version' => 'Version',
 			'eventInfo.themeMode.title' => 'Theme',

@@ -45,6 +45,8 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	late final Translations$news$ja news = Translations$news$ja.internal(_root);
 	late final Translations$sessionTimetable$ja sessionTimetable = Translations$sessionTimetable$ja.internal(_root);
 	late final Translations$sessionDetails$ja sessionDetails = Translations$sessionDetails$ja.internal(_root);
+	late final Translations$sessionBookmark$ja sessionBookmark = Translations$sessionBookmark$ja.internal(_root);
+	late final Translations$bookmarkedSessions$ja bookmarkedSessions = Translations$bookmarkedSessions$ja.internal(_root);
 	late final Translations$eventInfo$ja eventInfo = Translations$eventInfo$ja.internal(_root);
 	late final Translations$notFound$ja notFound = Translations$notFound$ja.internal(_root);
 	late final Translations$common$ja common = Translations$common$ja.internal(_root);
@@ -158,6 +160,48 @@ class Translations$sessionDetails$ja {
 
 	/// ja: 'セッションを取得できませんでした'
 	String get error => 'セッションを取得できませんでした';
+}
+
+// Path: sessionBookmark
+class Translations$sessionBookmark$ja {
+	Translations$sessionBookmark$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'ブックマークしたセッション'
+	String get openBookmarked => 'ブックマークしたセッション';
+
+	/// ja: 'ブックマークに追加'
+	String get add => 'ブックマークに追加';
+
+	/// ja: 'ブックマークから削除'
+	String get remove => 'ブックマークから削除';
+}
+
+// Path: bookmarkedSessions
+class Translations$bookmarkedSessions$ja {
+	Translations$bookmarkedSessions$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'ブックマークしたセッション'
+	String get title => 'ブックマークしたセッション';
+
+	/// ja: 'ブックマークしたセッションはありません'
+	String get emptyTitle => 'ブックマークしたセッションはありません';
+
+	/// ja: '気になるセッションをブックマークすると、ここからすぐに見つけられます'
+	String get emptyBody => '気になるセッションをブックマークすると、ここからすぐに見つけられます';
+
+	/// ja: 'タイムテーブルを開く'
+	String get openSessions => 'タイムテーブルを開く';
+
+	/// ja: 'ブックマークしたセッションを取得できませんでした'
+	String get error => 'ブックマークしたセッションを取得できませんでした';
 }
 
 // Path: eventInfo
@@ -348,6 +392,14 @@ extension on Translations {
 			'sessionDetails.sessionize' => 'Sessionize',
 			'sessionDetails.notFound' => 'セッションが見つかりませんでした',
 			'sessionDetails.error' => 'セッションを取得できませんでした',
+			'sessionBookmark.openBookmarked' => 'ブックマークしたセッション',
+			'sessionBookmark.add' => 'ブックマークに追加',
+			'sessionBookmark.remove' => 'ブックマークから削除',
+			'bookmarkedSessions.title' => 'ブックマークしたセッション',
+			'bookmarkedSessions.emptyTitle' => 'ブックマークしたセッションはありません',
+			'bookmarkedSessions.emptyBody' => '気になるセッションをブックマークすると、ここからすぐに見つけられます',
+			'bookmarkedSessions.openSessions' => 'タイムテーブルを開く',
+			'bookmarkedSessions.error' => 'ブックマークしたセッションを取得できませんでした',
 			'eventInfo.title' => '情報',
 			'eventInfo.version' => 'バージョン',
 			'eventInfo.themeMode.title' => 'テーマ',

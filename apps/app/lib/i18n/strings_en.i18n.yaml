@@ -37,6 +37,16 @@ sessionDetails:
   sessionize: Sessionize
   notFound: Session not found
   error: Failed to load session
+sessionBookmark:
+  openBookmarked: Bookmarked sessions
+  add: Add bookmark
+  remove: Remove bookmark
+bookmarkedSessions:
+  title: Bookmarked Sessions
+  emptyTitle: No bookmarked sessions
+  emptyBody: Bookmark sessions to find them here.
+  openSessions: Open sessions
+  error: Failed to load bookmarked sessions
 eventInfo:
   title: Info
   version: Version

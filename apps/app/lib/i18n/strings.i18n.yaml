@@ -37,6 +37,16 @@ sessionDetails:
   sessionize: Sessionize
   notFound: セッションが見つかりませんでした
   error: セッションを取得できませんでした
+sessionBookmark:
+  openBookmarked: ブックマークしたセッション
+  add: ブックマークに追加
+  remove: ブックマークから削除
+bookmarkedSessions:
+  title: ブックマークしたセッション
+  emptyTitle: ブックマークしたセッションはありません
+  emptyBody: 気になるセッションをブックマークすると、ここからすぐに見つけられます
+  openSessions: タイムテーブルを開く
+  error: ブックマークしたセッションを取得できませんでした
 eventInfo:
   title: 情報
   version: バージョン
