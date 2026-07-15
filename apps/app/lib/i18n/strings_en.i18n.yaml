@@ -28,6 +28,16 @@ sessionTimetable:
     beginnersLightningTalk: Beginners LT
     handsOn: Hands-on
     event: Event
+sessionDetails:
+  title: Session Details
+  description: Description
+  schedule: Schedule and Venue
+  speakers: Speakers
+  links: Links
+  sessionize: Sessionize
+  share: Share
+  notFound: Session not found
+  error: Failed to load session
 eventInfo:
   title: Info
   version: Version

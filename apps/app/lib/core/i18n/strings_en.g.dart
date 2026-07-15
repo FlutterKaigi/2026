@@ -43,6 +43,7 @@ class TranslationsEn extends Translations with BaseTranslations<AppLocale, Trans
 	@override late final _Translations$navigation$en navigation = _Translations$navigation$en._(_root);
 	@override late final _Translations$news$en news = _Translations$news$en._(_root);
 	@override late final _Translations$sessionTimetable$en sessionTimetable = _Translations$sessionTimetable$en._(_root);
+	@override late final _Translations$sessionDetails$en sessionDetails = _Translations$sessionDetails$en._(_root);
 	@override late final _Translations$eventInfo$en eventInfo = _Translations$eventInfo$en._(_root);
 	@override late final _Translations$notFound$en notFound = _Translations$notFound$en._(_root);
 	@override late final _Translations$common$en common = _Translations$common$en._(_root);
@@ -98,6 +99,24 @@ class _Translations$sessionTimetable$en extends Translations$sessionTimetable$ja
 	@override late final _Translations$sessionTimetable$venue$en venue = _Translations$sessionTimetable$venue$en._(_root);
 	@override late final _Translations$sessionTimetable$speaker$en speaker = _Translations$sessionTimetable$speaker$en._(_root);
 	@override late final _Translations$sessionTimetable$type$en type = _Translations$sessionTimetable$type$en._(_root);
+}
+
+// Path: sessionDetails
+class _Translations$sessionDetails$en extends Translations$sessionDetails$ja {
+	_Translations$sessionDetails$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Session Details';
+	@override String get description => 'Description';
+	@override String get schedule => 'Schedule and Venue';
+	@override String get speakers => 'Speakers';
+	@override String get links => 'Links';
+	@override String get sessionize => 'Sessionize';
+	@override String get share => 'Share';
+	@override String get notFound => 'Session not found';
+	@override String get error => 'Failed to load session';
 }
 
 // Path: eventInfo
@@ -235,6 +254,15 @@ extension on TranslationsEn {
 			'sessionTimetable.type.beginnersLightningTalk' => 'Beginners LT',
 			'sessionTimetable.type.handsOn' => 'Hands-on',
 			'sessionTimetable.type.event' => 'Event',
+			'sessionDetails.title' => 'Session Details',
+			'sessionDetails.description' => 'Description',
+			'sessionDetails.schedule' => 'Schedule and Venue',
+			'sessionDetails.speakers' => 'Speakers',
+			'sessionDetails.links' => 'Links',
+			'sessionDetails.sessionize' => 'Sessionize',
+			'sessionDetails.share' => 'Share',
+			'sessionDetails.notFound' => 'Session not found',
+			'sessionDetails.error' => 'Failed to load session',
 			'eventInfo.title' => 'Info',
 			'eventInfo.version' => 'Version',
 			'eventInfo.themeMode.title' => 'Theme',
