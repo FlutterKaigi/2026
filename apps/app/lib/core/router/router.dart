@@ -4,6 +4,7 @@ import 'package:app/core/ui/not_found_page.dart';
 import 'package:app/core/ui/root_scaffold.dart';
 import 'package:app/feature/event/ui/page/event_info_page.dart';
 import 'package:app/feature/news/ui/page/news_list_page.dart';
+import 'package:app/feature/session/ui/page/bookmarked_sessions_page.dart';
 import 'package:app/feature/session/ui/page/session_details_page.dart';
 import 'package:app/feature/session/ui/page/session_timetable_page.dart';
 import 'package:flutter/material.dart';

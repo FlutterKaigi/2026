@@ -15,6 +15,7 @@ part of 'router.dart';
         TypedGoRoute<SessionTimetableRoute>(
           path: '/sessions',
           routes: [
+            TypedGoRoute<BookmarkedSessionsRoute>(path: 'bookmarked'),
             TypedGoRoute<SessionDetailsRoute>(path: ':sessionId'),
           ],
         ),
@@ -85,6 +86,14 @@ class SessionTimetableRoute extends GoRouteData with $SessionTimetableRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) => const SessionTimetablePage();
+}
+
+/// `/sessions/bookmarked` — locally bookmarked sessions.
+class BookmarkedSessionsRoute extends GoRouteData with $BookmarkedSessionsRoute {
+  const BookmarkedSessionsRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const BookmarkedSessionsPage();
 }
 
 /// `/sessions/:sessionId` — session details.
