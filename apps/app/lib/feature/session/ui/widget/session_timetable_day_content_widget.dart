@@ -8,6 +8,7 @@ import 'package:app/feature/session/util/event_time.dart';
 import 'package:data/data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart' hide TextDirection;
 
@@ -399,6 +400,7 @@ class _SessionCardWidget extends StatelessWidget {
     final description = session.description.resolve(locale).trim();
 
     return _TimetableCardWidget(
+      onTap: () => context.push('/sessions/${Uri.encodeComponent(session.id)}'),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -531,23 +533,31 @@ class _TimelineEventCardWidget extends StatelessWidget {
 }
 
 class _TimetableCardWidget extends StatelessWidget {
-  const _TimetableCardWidget({required this.child});
+  const _TimetableCardWidget({
+    required this.child,
+    this.onTap,
+  });
 
   final Widget child;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
-        border: Border.all(color: colorScheme.outlineVariant),
+    return Material(
+      color: colorScheme.surface,
+      shape: RoundedRectangleBorder(
+        side: BorderSide(color: colorScheme.outlineVariant),
         borderRadius: BorderRadius.circular(8),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: child,
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: child,
+        ),
       ),
     );
   }
