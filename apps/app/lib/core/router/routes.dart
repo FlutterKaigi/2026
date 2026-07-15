@@ -11,7 +11,14 @@ part of 'router.dart';
       routes: [TypedGoRoute<NewsRoute>(path: '/news')],
     ),
     TypedStatefulShellBranch<SessionBranch>(
-      routes: [TypedGoRoute<SessionTimetableRoute>(path: '/sessions')],
+      routes: [
+        TypedGoRoute<SessionTimetableRoute>(
+          path: '/sessions',
+          routes: [
+            TypedGoRoute<SessionDetailsRoute>(path: ':sessionId'),
+          ],
+        ),
+      ],
     ),
     TypedStatefulShellBranch<EventInfoBranch>(
       routes: [TypedGoRoute<EventInfoRoute>(path: '/info')],
@@ -78,6 +85,16 @@ class SessionTimetableRoute extends GoRouteData with $SessionTimetableRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) => const SessionTimetablePage();
+}
+
+/// `/sessions/:sessionId` — session details.
+class SessionDetailsRoute extends GoRouteData with $SessionDetailsRoute {
+  const SessionDetailsRoute({required this.sessionId});
+
+  final String sessionId;
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => SessionDetailsPage(sessionId: sessionId);
 }
 
 /// `/info` — event and app information.
