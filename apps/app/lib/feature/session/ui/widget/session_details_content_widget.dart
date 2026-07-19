@@ -25,6 +25,7 @@ class SessionDetailsContentWidget extends ConsumerWidget {
     final locale = Localizations.localeOf(context);
     final session = data.session;
     final title = session.title.resolve(locale);
+    final description = session.description.resolve(locale).trim();
     final timeFormat = ref.watch(sessionTimeFormatProvider);
     final sessionizeUri = _externalUri(session.sessionizeUrl);
 
@@ -70,14 +71,16 @@ class SessionDetailsContentWidget extends ConsumerWidget {
                 _SectionHeader(title: t.sessionDetails.speakers),
                 for (final speaker in data.speakers) _SpeakerTile(speaker: speaker),
               ],
-              _SectionHeader(title: t.sessionDetails.description),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Text(
-                  session.description.resolve(locale).trim(),
-                  style: Theme.of(context).textTheme.bodyLarge,
+              if (description.isNotEmpty) ...[
+                _SectionHeader(title: t.sessionDetails.description),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Text(
+                    description,
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
                 ),
-              ),
+              ],
               _SectionHeader(title: t.sessionDetails.schedule),
               _DetailListTile(
                 icon: Icons.event_outlined,

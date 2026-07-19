@@ -43,6 +43,7 @@ void main() {
 
     expect(find.text('No Optional Fields'), findsWidgets);
     expect(find.text('登壇者'), findsNothing);
+    expect(find.text('概要'), findsNothing);
     expect(find.text('リンク'), findsNothing);
     expect(find.text('Sessionize'), findsNothing);
   });
