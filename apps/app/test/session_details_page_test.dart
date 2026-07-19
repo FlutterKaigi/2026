@@ -48,6 +48,23 @@ void main() {
     expect(find.text('Sessionize'), findsNothing);
   });
 
+  testWidgets('hides the Sessionize link when the URL is not a hosted HTTPS URL', (tester) async {
+    for (final session in [
+      _sessionWithSessionizeUrl(id: 'tel-url', sessionizeUrl: 'tel:+1234567890'),
+      _sessionWithSessionizeUrl(id: 'custom-url', sessionizeUrl: 'myapp://sessions/session-a'),
+      _sessionWithSessionizeUrl(id: 'hostless-https-url', sessionizeUrl: 'https:///sessions/session-a'),
+    ]) {
+      await _pumpSessionDetailsPage(
+        tester,
+        sessionId: session.id,
+        sessionRepository: _FakeSessionRepository([session]),
+      );
+      await _pumpProviderFrames(tester);
+
+      expect(find.text('Sessionize'), findsNothing);
+    }
+  });
+
   testWidgets('shows not found when the session ID is unknown', (tester) async {
     await _pumpSessionDetailsPage(tester, sessionId: 'missing');
     await _pumpProviderFrames(tester);
@@ -214,6 +231,22 @@ final _sessions = [
     updatedAt: DateTime.utc(2026),
   ),
 ];
+
+Session _sessionWithSessionizeUrl({
+  required String id,
+  required String sessionizeUrl,
+}) => Session(
+  id: id,
+  title: LocaleMap(ja: id, en: id),
+  description: LocaleMap(ja: id, en: id),
+  primaryLocale: 'en',
+  startsAt: DateTime.utc(2026, 10, 29, 1),
+  endsAt: DateTime.utc(2026, 10, 29, 1, 45),
+  venueId: 'hall-a',
+  sessionizeUrl: sessionizeUrl,
+  createdAt: DateTime.utc(2026),
+  updatedAt: DateTime.utc(2026),
+);
 
 final _venues = [
   Venue(

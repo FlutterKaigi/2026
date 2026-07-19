@@ -212,7 +212,7 @@ Uri? _externalUri(String? rawUrl) {
   }
 
   final uri = Uri.tryParse(trimmed);
-  if (uri == null || !uri.hasScheme) {
+  if (uri == null || uri.scheme != 'https' || uri.host.isEmpty) {
     return null;
   }
   return uri;
