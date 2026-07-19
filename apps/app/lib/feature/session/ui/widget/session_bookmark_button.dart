@@ -23,6 +23,7 @@ class SessionBookmarkButton extends ConsumerWidget {
     };
     final canToggle = bookmarkedSessionIds is AsyncData<Set<String>>;
     final label = isBookmarked ? t.sessionBookmark.remove : t.sessionBookmark.add;
+    final errorMessage = t.sessionBookmark.updateFailed;
 
     return IconButton(
       tooltip: label,
@@ -30,10 +31,37 @@ class SessionBookmarkButton extends ConsumerWidget {
       selectedIcon: const Icon(Icons.bookmark),
       icon: const Icon(Icons.bookmark_outline),
       onPressed: canToggle
-          ? () {
-              unawaited(ref.read(bookmarkedSessionIdsProvider.notifier).toggle(sessionId));
-            }
+          ? () => unawaited(
+              _toggleBookmark(
+                context: context,
+                ref: ref,
+                sessionId: sessionId,
+                errorMessage: errorMessage,
+              ),
+            )
           : null,
     );
+  }
+}
+
+Future<void> _toggleBookmark({
+  required BuildContext context,
+  required WidgetRef ref,
+  required String sessionId,
+  required String errorMessage,
+}) async {
+  try {
+    await ref.read(bookmarkedSessionIdsProvider.notifier).toggle(sessionId);
+  } on Exception {
+    if (!context.mounted) {
+      return;
+    }
+
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    messenger
+      ?..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(content: Text(errorMessage)),
+      );
   }
 }

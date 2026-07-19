@@ -105,6 +105,38 @@ void main() {
     expect(find.text('Early Session'), findsOneWidget);
   });
 
+  testWidgets('shows a SnackBar and keeps bookmark buttons enabled when bookmark persistence fails', (tester) async {
+    final repository = _FakeBookmarkedSessionIdsRepository(failWrites: true);
+    final router = _buildRouter(initialLocation: '/sessions');
+
+    await _pumpWithProviders(
+      tester,
+      MaterialApp.router(
+        routerConfig: router,
+        theme: ThemeData(splashFactory: NoSplash.splashFactory),
+        locale: const Locale('en'),
+        supportedLocales: AppLocaleUtils.supportedLocales,
+        localizationsDelegates: GlobalMaterialLocalizations.delegates,
+      ),
+      bookmarkRepository: repository,
+    );
+    await _pumpProviderFrames(tester);
+
+    await tester.tap(find.byTooltip('ブックマークに追加').first);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 250));
+
+    expect(find.text('ブックマークを更新できませんでした'), findsOneWidget);
+    expect(find.byTooltip('ブックマークから削除'), findsNothing);
+    expect(
+      tester
+          .widgetList<IconButton>(find.byType(IconButton))
+          .any((button) => button.tooltip == 'ブックマークに追加' && button.onPressed != null),
+      isTrue,
+    );
+    expect(repository.writeAttempts.single, {'early-session'});
+  });
+
   testWidgets('bookmark removal from details is reflected after returning to bookmarks', (tester) async {
     await _pumpBookmarkedRoute(tester, bookmarkedIds: const {'early-session'});
 
@@ -212,6 +244,7 @@ Future<void> _pumpBookmarkedRoute(
   Set<String> bookmarkedIds = const {},
   SessionRepository? sessionRepository,
   AsyncValue<List<Session>>? sessionListValue,
+  BookmarkedSessionIdsRepository? bookmarkRepository,
 }) async {
   final router = _buildRouter(initialLocation: '/sessions/bookmarked');
 
@@ -227,6 +260,7 @@ Future<void> _pumpBookmarkedRoute(
     bookmarkedIds: bookmarkedIds,
     sessionRepository: sessionRepository,
     sessionListValue: sessionListValue,
+    bookmarkRepository: bookmarkRepository,
   );
   await _pumpProviderFrames(tester);
 }
@@ -263,6 +297,7 @@ Future<void> _pumpWithProviders(
   Set<String> bookmarkedIds = const {},
   SessionRepository? sessionRepository,
   AsyncValue<List<Session>>? sessionListValue,
+  BookmarkedSessionIdsRepository? bookmarkRepository,
 }) async {
   final preferences = await _prepareTester(bookmarkedIds: bookmarkedIds);
 
@@ -271,6 +306,7 @@ Future<void> _pumpWithProviders(
       child: ProviderScope(
         overrides: [
           sharedPreferencesProvider.overrideWithValue(preferences),
+          if (bookmarkRepository != null) bookmarkedSessionIdsRepositoryProvider.overrideWithValue(bookmarkRepository),
           sessionRepositoryProvider.overrideWithValue(
             sessionRepository ?? _FakeSessionRepository(_sessions),
           ),
@@ -311,6 +347,32 @@ Future<void> _pumpProviderFrames(WidgetTester tester) async {
     await tester.pump();
   }
   await tester.pump(const Duration(milliseconds: 1));
+}
+
+final class _FakeBookmarkedSessionIdsRepository implements BookmarkedSessionIdsRepository {
+  _FakeBookmarkedSessionIdsRepository({
+    Set<String> initialSessionIds = const {},
+    this.failWrites = false,
+  }) : sessionIds = Set.unmodifiable(initialSessionIds);
+
+  final bool failWrites;
+  Set<String> sessionIds;
+  final writeAttempts = <Set<String>>[];
+
+  @override
+  Set<String> read() => sessionIds;
+
+  @override
+  Future<void> write(Set<String> sessionIds) async {
+    final next = Set.unmodifiable(sessionIds);
+    writeAttempts.add(next);
+
+    if (failWrites) {
+      throw const BookmarkPersistenceException();
+    }
+
+    this.sessionIds = next;
+  }
 }
 
 final _sessions = [

@@ -42,6 +42,7 @@ sessionBookmark:
   openBookmarked: Bookmarked sessions
   add: Add bookmark
   remove: Remove bookmark
+  updateFailed: Failed to update bookmark
 bookmarkedSessions:
   title: Bookmarked Sessions
   emptyTitle: No bookmarked sessions

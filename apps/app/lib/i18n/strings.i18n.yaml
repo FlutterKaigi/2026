@@ -42,6 +42,7 @@ sessionBookmark:
   openBookmarked: ブックマークしたセッション
   add: ブックマークに追加
   remove: ブックマークから削除
+  updateFailed: ブックマークを更新できませんでした
 bookmarkedSessions:
   title: ブックマークしたセッション
   emptyTitle: ブックマークしたセッションはありません

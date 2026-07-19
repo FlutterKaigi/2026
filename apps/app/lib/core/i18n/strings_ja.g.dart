@@ -181,6 +181,9 @@ class Translations$sessionBookmark$ja {
 
 	/// ja: 'ブックマークから削除'
 	String get remove => 'ブックマークから削除';
+
+	/// ja: 'ブックマークを更新できませんでした'
+	String get updateFailed => 'ブックマークを更新できませんでした';
 }
 
 // Path: bookmarkedSessions
@@ -399,6 +402,7 @@ extension on Translations {
 			'sessionBookmark.openBookmarked' => 'ブックマークしたセッション',
 			'sessionBookmark.add' => 'ブックマークに追加',
 			'sessionBookmark.remove' => 'ブックマークから削除',
+			'sessionBookmark.updateFailed' => 'ブックマークを更新できませんでした',
 			'bookmarkedSessions.title' => 'ブックマークしたセッション',
 			'bookmarkedSessions.emptyTitle' => 'ブックマークしたセッションはありません',
 			'bookmarkedSessions.emptyBody' => '気になるセッションをブックマークすると、ここからすぐに見つけられます',

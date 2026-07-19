@@ -2,6 +2,40 @@ import 'package:app/core/provider/shared_preferences.dart';
 import 'package:app/feature/session/data/provider/session_timetable_provider.dart';
 import 'package:data/data.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+final bookmarkedSessionIdsRepositoryProvider = Provider<BookmarkedSessionIdsRepository>(
+  (ref) => SharedPreferencesBookmarkedSessionIdsRepository(
+    ref.watch(sharedPreferencesProvider),
+  ),
+);
+
+abstract interface class BookmarkedSessionIdsRepository {
+  Set<String> read();
+
+  Future<void> write(Set<String> sessionIds);
+}
+
+final class SharedPreferencesBookmarkedSessionIdsRepository implements BookmarkedSessionIdsRepository {
+  const SharedPreferencesBookmarkedSessionIdsRepository(this._preferences);
+
+  static const _prefsKey = 'bookmarked_session_ids';
+
+  final SharedPreferences _preferences;
+
+  @override
+  Set<String> read() {
+    return _sortedSessionIds(_preferences.getStringList(_prefsKey) ?? const []);
+  }
+
+  @override
+  Future<void> write(Set<String> sessionIds) async {
+    final saved = await _preferences.setStringList(_prefsKey, sessionIds.toList());
+    if (!saved) {
+      throw const BookmarkPersistenceException();
+    }
+  }
+}
 
 /// Stores locally bookmarked Firestore session document IDs.
 final bookmarkedSessionIdsProvider = AsyncNotifierProvider<BookmarkedSessionIdsNotifier, Set<String>>(
@@ -9,44 +43,49 @@ final bookmarkedSessionIdsProvider = AsyncNotifierProvider<BookmarkedSessionIdsN
 );
 
 class BookmarkedSessionIdsNotifier extends AsyncNotifier<Set<String>> {
-  static const _prefsKey = 'bookmarked_session_ids';
-
   @override
   Set<String> build() {
-    final preferences = ref.watch(sharedPreferencesProvider);
-    return _sortedSessionIds(preferences.getStringList(_prefsKey) ?? const []);
+    return ref.watch(bookmarkedSessionIdsRepositoryProvider).read();
   }
 
   Future<void> add(String sessionId) async {
     final current = await future;
-    await _save({...current, sessionId});
+    await _save(current: current, sessionIds: {...current, sessionId});
   }
 
   Future<void> remove(String sessionId) async {
     final current = await future;
-    await _save({...current}..remove(sessionId));
+    await _save(
+      current: current,
+      sessionIds: {...current}..remove(sessionId),
+    );
   }
 
   Future<void> toggle(String sessionId) async {
     final current = await future;
     if (current.contains(sessionId)) {
-      await _save({...current}..remove(sessionId));
+      await _save(
+        current: current,
+        sessionIds: {...current}..remove(sessionId),
+      );
     } else {
-      await _save({...current, sessionId});
+      await _save(current: current, sessionIds: {...current, sessionId});
     }
   }
 
-  Future<void> _save(Set<String> sessionIds) async {
+  Future<void> _save({
+    required Set<String> current,
+    required Set<String> sessionIds,
+  }) async {
+    final previous = _sortedSessionIds(current);
     final next = _sortedSessionIds(sessionIds);
-    state = AsyncData(next);
 
     try {
-      final saved = await ref.read(sharedPreferencesProvider).setStringList(_prefsKey, next.toList());
-      if (!saved) {
-        throw const BookmarkPersistenceException();
-      }
+      await ref.read(bookmarkedSessionIdsRepositoryProvider).write(next);
+      state = AsyncData(next);
     } on Exception catch (error, stackTrace) {
-      state = AsyncError(error, stackTrace);
+      state = AsyncData(previous);
+      Error.throwWithStackTrace(error, stackTrace);
     }
   }
 }

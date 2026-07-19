@@ -131,6 +131,7 @@ class _Translations$sessionBookmark$en extends Translations$sessionBookmark$ja {
 	@override String get openBookmarked => 'Bookmarked sessions';
 	@override String get add => 'Add bookmark';
 	@override String get remove => 'Remove bookmark';
+	@override String get updateFailed => 'Failed to update bookmark';
 }
 
 // Path: bookmarkedSessions
@@ -294,6 +295,7 @@ extension on TranslationsEn {
 			'sessionBookmark.openBookmarked' => 'Bookmarked sessions',
 			'sessionBookmark.add' => 'Add bookmark',
 			'sessionBookmark.remove' => 'Remove bookmark',
+			'sessionBookmark.updateFailed' => 'Failed to update bookmark',
 			'bookmarkedSessions.title' => 'Bookmarked Sessions',
 			'bookmarkedSessions.emptyTitle' => 'No bookmarked sessions',
 			'bookmarkedSessions.emptyBody' => 'Bookmark sessions to find them here.',
