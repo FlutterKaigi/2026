@@ -4,6 +4,7 @@ import 'package:app/core/ui/not_found_page.dart';
 import 'package:app/core/ui/root_scaffold.dart';
 import 'package:app/feature/event/ui/page/event_info_page.dart';
 import 'package:app/feature/news/ui/page/news_list_page.dart';
+import 'package:app/feature/quiz/ui/page/quiz_event_list_page.dart';
 import 'package:app/feature/quiz/ui/page/quiz_page.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';

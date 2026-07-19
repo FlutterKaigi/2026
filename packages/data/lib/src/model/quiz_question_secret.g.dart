@@ -9,11 +9,13 @@ part of 'quiz_question_secret.dart';
 _QuizQuestionSecret _$QuizQuestionSecretFromJson(Map<String, dynamic> json) =>
     _QuizQuestionSecret(
       correctOptionIndex: (json['correctOptionIndex'] as num).toInt(),
-      explanation: json['explanation'] as String,
+      explanation: LocaleMap.fromJson(
+        json['explanation'] as Map<String, dynamic>,
+      ),
     );
 
 Map<String, dynamic> _$QuizQuestionSecretToJson(_QuizQuestionSecret instance) =>
     <String, dynamic>{
       'correctOptionIndex': instance.correctOptionIndex,
-      'explanation': instance.explanation,
+      'explanation': instance.explanation.toJson(),
     };

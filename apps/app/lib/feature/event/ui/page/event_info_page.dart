@@ -23,10 +23,10 @@ class EventInfoPage extends ConsumerWidget {
         children: [
           ListTile(
             leading: const Icon(Icons.quiz_outlined),
-            title: const Text('クイズ大会'),
-            subtitle: const Text('スポンサー提供のクイズに参加'),
+            title: Text(t.quiz.title),
+            subtitle: Text(t.quiz.entrySubtitle),
             trailing: const Icon(Icons.chevron_right),
-            onTap: () => unawaited(const QuizRoute().push(context)),
+            onTap: () => unawaited(const QuizListRoute().push<void>(context)),
           ),
           const Divider(height: 1),
           ListTile(

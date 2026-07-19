@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 
 /// クイズイベントの status を日本語ラベルにする。
 String quizEventStatusLabel(QuizEventStatus status) => switch (status) {
-  QuizEventStatus.registration => '参加登録中',
-  QuizEventStatus.teamBuilding => 'チーム編成済み',
+  QuizEventStatus.draft => '非公開',
+  QuizEventStatus.published => '公開（受付前）',
+  QuizEventStatus.registration => '参加受付中',
+  QuizEventStatus.entryClosed => '受付終了',
   QuizEventStatus.inProgress => '進行中',
   QuizEventStatus.finished => '終了',
 };
@@ -24,8 +26,10 @@ class QuizEventStatusChip extends StatelessWidget {
   final QuizEventStatus status;
 
   Color _color(ColorScheme scheme) => switch (status) {
+    QuizEventStatus.draft => scheme.onSurfaceVariant,
+    QuizEventStatus.published => scheme.tertiary,
     QuizEventStatus.registration => scheme.primary,
-    QuizEventStatus.teamBuilding => scheme.tertiary,
+    QuizEventStatus.entryClosed => scheme.error,
     QuizEventStatus.inProgress => scheme.secondary,
     QuizEventStatus.finished => scheme.outline,
   };

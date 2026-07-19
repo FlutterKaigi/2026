@@ -15,7 +15,8 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$QuizQuestionSecret {
 
- int get correctOptionIndex; String get explanation;
+ int get correctOptionIndex;/// 解説（日英）。正解発表時に question 側へコピーされる。
+ LocaleMap get explanation;
 /// Create a copy of QuizQuestionSecret
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -48,11 +49,11 @@ abstract mixin class $QuizQuestionSecretCopyWith<$Res>  {
   factory $QuizQuestionSecretCopyWith(QuizQuestionSecret value, $Res Function(QuizQuestionSecret) _then) = _$QuizQuestionSecretCopyWithImpl;
 @useResult
 $Res call({
- int correctOptionIndex, String explanation
+ int correctOptionIndex, LocaleMap explanation
 });
 
 
-
+$LocaleMapCopyWith<$Res> get explanation;
 
 }
 /// @nodoc
@@ -69,10 +70,19 @@ class _$QuizQuestionSecretCopyWithImpl<$Res>
   return _then(_self.copyWith(
 correctOptionIndex: null == correctOptionIndex ? _self.correctOptionIndex : correctOptionIndex // ignore: cast_nullable_to_non_nullable
 as int,explanation: null == explanation ? _self.explanation : explanation // ignore: cast_nullable_to_non_nullable
-as String,
+as LocaleMap,
   ));
 }
-
+/// Create a copy of QuizQuestionSecret
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$LocaleMapCopyWith<$Res> get explanation {
+  
+  return $LocaleMapCopyWith<$Res>(_self.explanation, (value) {
+    return _then(_self.copyWith(explanation: value));
+  });
+}
 }
 
 
@@ -154,7 +164,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int correctOptionIndex,  String explanation)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int correctOptionIndex,  LocaleMap explanation)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _QuizQuestionSecret() when $default != null:
 return $default(_that.correctOptionIndex,_that.explanation);case _:
@@ -175,7 +185,7 @@ return $default(_that.correctOptionIndex,_that.explanation);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int correctOptionIndex,  String explanation)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int correctOptionIndex,  LocaleMap explanation)  $default,) {final _that = this;
 switch (_that) {
 case _QuizQuestionSecret():
 return $default(_that.correctOptionIndex,_that.explanation);case _:
@@ -195,7 +205,7 @@ return $default(_that.correctOptionIndex,_that.explanation);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int correctOptionIndex,  String explanation)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int correctOptionIndex,  LocaleMap explanation)?  $default,) {final _that = this;
 switch (_that) {
 case _QuizQuestionSecret() when $default != null:
 return $default(_that.correctOptionIndex,_that.explanation);case _:
@@ -214,7 +224,8 @@ class _QuizQuestionSecret extends QuizQuestionSecret {
   factory _QuizQuestionSecret.fromJson(Map<String, dynamic> json) => _$QuizQuestionSecretFromJson(json);
 
 @override final  int correctOptionIndex;
-@override final  String explanation;
+/// 解説（日英）。正解発表時に question 側へコピーされる。
+@override final  LocaleMap explanation;
 
 /// Create a copy of QuizQuestionSecret
 /// with the given fields replaced by the non-null parameter values.
@@ -249,11 +260,11 @@ abstract mixin class _$QuizQuestionSecretCopyWith<$Res> implements $QuizQuestion
   factory _$QuizQuestionSecretCopyWith(_QuizQuestionSecret value, $Res Function(_QuizQuestionSecret) _then) = __$QuizQuestionSecretCopyWithImpl;
 @override @useResult
 $Res call({
- int correctOptionIndex, String explanation
+ int correctOptionIndex, LocaleMap explanation
 });
 
 
-
+@override $LocaleMapCopyWith<$Res> get explanation;
 
 }
 /// @nodoc
@@ -270,11 +281,20 @@ class __$QuizQuestionSecretCopyWithImpl<$Res>
   return _then(_QuizQuestionSecret(
 correctOptionIndex: null == correctOptionIndex ? _self.correctOptionIndex : correctOptionIndex // ignore: cast_nullable_to_non_nullable
 as int,explanation: null == explanation ? _self.explanation : explanation // ignore: cast_nullable_to_non_nullable
-as String,
+as LocaleMap,
   ));
 }
 
-
+/// Create a copy of QuizQuestionSecret
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$LocaleMapCopyWith<$Res> get explanation {
+  
+  return $LocaleMapCopyWith<$Res>(_self.explanation, (value) {
+    return _then(_self.copyWith(explanation: value));
+  });
+}
 }
 
 // dart format on

@@ -20,3 +20,73 @@ notFound:
   description: お探しのページは存在しないか、移動した可能性があります。
 common:
   retry: 再試行
+quiz:
+  title: クイズ大会
+  entrySubtitle: スポンサー提供のクイズに参加
+  list:
+    empty: クイズはまだありません
+    error: クイズ一覧を取得できませんでした
+    status:
+      preparing: 開催準備中
+      registration: 参加受付中
+      entryClosed: 受付終了
+      inProgress: 進行中
+      finished: 結果発表
+  errors:
+    signInFailed: サインインに失敗しました
+    eventLoadFailed: イベント情報の取得に失敗しました
+  preparing:
+    title: クイズは開催準備中です
+    description: 開始のアナウンスがあったら
+      この画面から参加できます。
+  registration:
+    subtitle: テーブル対抗のチーム戦。ニックネームで参加しよう！
+    participantCount: 現在の参加人数
+    participantUnit: 人
+    nickname: ニックネーム
+    nicknameHint: 1〜20文字
+    entryCode: 受付コード
+    entryCodeHint: 6桁の数字
+    entryCodeHelper: 会場の受付で案内しているコードを入力してください
+    join: 参加する
+    full: 定員（$max 人）に達しました
+    failed: 登録できませんでした。時間をおいて再度お試しください。
+    codeMismatch: 登録できませんでした。受付コードが正しいか確認してください。
+  waiting:
+    title: 登録完了！
+    description: チーム発表までしばらくお待ちください
+  team:
+    yourTable: あなたのテーブルは
+    table: テーブル
+    teamLabel: チーム
+    gatherHint: テーブルに集まって次の出題を待とう！
+    badge: テーブル $table・$name
+  entryClosed:
+    title: 参加受付は終了しました
+    description: クイズ大会は進行中です。
+      結果発表はこの画面でご覧いただけます。
+  question:
+    sponsoredBy: '提供: $name'
+    secondsUnit: 秒
+    locked: 回答を締め切りました
+    submitFailed: 送信できませんでした。締め切られた可能性があります。
+    answeredBy: $name が選択
+    member: メンバー
+  suspense:
+    title: 回答締切！
+    description: 正解発表をお待ちください
+  revealed:
+    title: 正解発表
+    correct: 正解！
+    wrong: 残念…
+    yourAnswer: あなたのチームの回答
+    teamScore: '現在のチームスコア: $score 点'
+  result:
+    title: 最終結果
+    table: テーブル $table
+    points: $score 点
+    yourTeam: あなたのチーム
+    yourTeamRanked: $rank 位 / $name（$score 点）
+    yourTeamUnranked: $name（$score 点）
+    perfect: $sponsor のブースへ景品を受け取りに行こう！
+    error: 結果の取得に失敗しました

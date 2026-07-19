@@ -20,3 +20,74 @@ notFound:
   description: The page you are looking for does not exist or may have moved.
 common:
   retry: Retry
+quiz:
+  title: Quiz
+  entrySubtitle: Join sponsor-provided quizzes
+  list:
+    empty: No quizzes yet
+    error: Failed to load quizzes
+    status:
+      preparing: Coming soon
+      registration: Open for entry
+      entryClosed: Entry closed
+      inProgress: In progress
+      finished: Results
+  errors:
+    signInFailed: Failed to sign in
+    eventLoadFailed: Failed to load the event
+  preparing:
+    title: The quiz is being prepared
+    description: Once it is announced,
+      you can join from this screen.
+  registration:
+    subtitle: A table-versus-table team battle. Join with a nickname!
+    participantCount: 'Participants:'
+    participantUnit: ''
+    nickname: Nickname
+    nicknameHint: 1–20 characters
+    entryCode: Entry code
+    entryCodeHint: 6-digit number
+    entryCodeHelper: Enter the code shown at the on-site reception desk
+    join: Join
+    full: Full capacity ($max participants) reached
+    failed: Could not register. Please try again later.
+    codeMismatch: Could not register. Please check the entry code.
+  waiting:
+    title: You're in!
+    description: Please wait for the team announcement
+  team:
+    yourTable: Your table is
+    table: Table
+    teamLabel: Team
+    gatherHint: Gather at your table and wait for the next question!
+    badge: Table $table・$name
+  entryClosed:
+    title: Entry is closed
+    description: The quiz is in progress.
+      Results will be shown on this screen.
+  question:
+    sponsoredBy: 'Sponsored by $name'
+    secondsUnit: s
+    locked: Answers are closed
+    submitFailed: Could not submit. The question may have closed.
+    answeredBy: Selected by $name
+    member: a member
+  suspense:
+    title: Time's up!
+    description: Waiting for the answer reveal
+  revealed:
+    title: Answer reveal
+    correct: Correct!
+    wrong: Not this time…
+    yourAnswer: Your team's answer
+    teamScore: 'Current team score: $score pts'
+  result:
+    title: Final results
+    table: Table $table
+    points: $score pts
+    yourTeam: Your team
+    yourTeamRanked: '#$rank / $name ($score pts)'
+    yourTeamUnranked: $name ($score pts)
+    perfect: Visit the $sponsor booth to claim your prize!
+    error: Failed to load results
+

@@ -53,11 +53,40 @@ service cloud.firestore {
     }
 
     match /quizEvents/{eventId} {
-      allow read: if true;
+      // 非公開（draft）のイベントは運営のみ閲覧できる。
+      // 参加者アプリの一覧クエリは isPublic == true の等価条件で絞り込み、
+      // list はその条件をクエリから証明できる（get は実ドキュメントで評価）。
+      allow get, list: if hasAdminAccess()
+        || resource.data.status != 'draft'
+        || resource.data.isPublic == true;
       allow write: if hasAdminAccess();
+
+      // 現地受付コード（運営のみ）。参加登録ルールが get() で参照する。
+      match /secret/{secretId} {
+        allow read, write: if hasAdminAccess();
+      }
+
+      // 参加登録時の受付コード申告。参加者ドキュメント作成に先立って本人が
+      // 書き込み、コードの一致はこの時点でルールが検証する。
+      // 読み取りは参加者には許可しない（コードの漏洩防止）。
+      match /entryClaims/{uid} {
+        allow read: if hasAdminAccess();
+        // 受付中のみ・本人のみ・掲示中の受付コードと一致する場合のみ書ける。
+        // 誤コードの再試行で上書きできるよう create / update とも許可する。
+        allow create, update: if request.auth != null
+          && request.auth.uid == uid
+          && get(/databases/$(database)/documents/quizEvents/$(eventId)).data.status == 'registration'
+          && request.resource.data.keys().hasOnly(['code'])
+          && request.resource.data.code is string
+          && request.resource.data.code
+             == get(/databases/$(database)/documents/quizEvents/$(eventId)/secret/entry).data.code;
+        allow delete: if hasAdminAccess();
+      }
 
       match /participants/{uid} {
         allow read: if true;
+        // 受付中のみ・本人のみ・受付コード検証済み（entryClaims が存在 = コード
+        // 一致時のみ作成できる）の場合に登録できる。
         allow create: if request.auth != null
           && request.auth.uid == uid
           && get(/databases/$(database)/documents/quizEvents/$(eventId)).data.status == 'registration'
@@ -65,7 +94,8 @@ service cloud.firestore {
           && request.resource.data.displayName is string
           && request.resource.data.displayName.size() >= 1
           && request.resource.data.displayName.size() <= 20
-          && request.resource.data.registeredAt == request.time;
+          && request.resource.data.registeredAt == request.time
+          && exists(/databases/$(database)/documents/quizEvents/$(eventId)/entryClaims/$(uid));
         allow update, delete: if hasAdminAccess();
       }
 

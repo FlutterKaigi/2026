@@ -5,6 +5,9 @@ import '../model/quiz_team.dart';
 abstract interface class QuizTeamRepository {
   Stream<List<QuizTeam>> watchAll(String eventId);
   Stream<QuizTeam?> watchById(String eventId, String teamId);
+
+  /// チーム名を変更する（運営用）。
+  Future<void> updateName(String eventId, String teamId, String name);
 }
 
 final class FirestoreQuizTeamRepository implements QuizTeamRepository {
@@ -34,5 +37,10 @@ final class FirestoreQuizTeamRepository implements QuizTeamRepository {
       if (data == null) return null;
       return QuizTeam.fromJson(<String, dynamic>{...data, 'id': snapshot.id});
     });
+  }
+
+  @override
+  Future<void> updateName(String eventId, String teamId, String name) {
+    return _collection(eventId).doc(teamId).update(<String, dynamic>{'name': name});
   }
 }

@@ -15,7 +15,10 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$QuizQuestion {
 
- String get id; String get sponsorId; int get order; String get title; List<String> get options; int get durationSeconds; QuizQuestionStatus get status;@FirestoreNullableDateTimeConverter() DateTime? get openedAt;@FirestoreNullableDateTimeConverter() DateTime? get closesAt; int? get correctOptionIndex; String? get explanation;
+ String get id; String get sponsorId; int get order;/// 問題文（日英）。参加者アプリでは端末ロケールで出し分ける。
+ LocaleMap get title;/// 選択肢（日英）。並び順が回答の index に対応する。
+ List<LocaleMap> get options; int get durationSeconds; QuizQuestionStatus get status;@FirestoreNullableDateTimeConverter() DateTime? get openedAt;@FirestoreNullableDateTimeConverter() DateTime? get closesAt; int? get correctOptionIndex;/// 解説（日英）。正解発表時に secret からコピーされる。
+ LocaleMap? get explanation;
 /// Create a copy of QuizQuestion
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -48,11 +51,11 @@ abstract mixin class $QuizQuestionCopyWith<$Res>  {
   factory $QuizQuestionCopyWith(QuizQuestion value, $Res Function(QuizQuestion) _then) = _$QuizQuestionCopyWithImpl;
 @useResult
 $Res call({
- String id, String sponsorId, int order, String title, List<String> options, int durationSeconds, QuizQuestionStatus status,@FirestoreNullableDateTimeConverter() DateTime? openedAt,@FirestoreNullableDateTimeConverter() DateTime? closesAt, int? correctOptionIndex, String? explanation
+ String id, String sponsorId, int order, LocaleMap title, List<LocaleMap> options, int durationSeconds, QuizQuestionStatus status,@FirestoreNullableDateTimeConverter() DateTime? openedAt,@FirestoreNullableDateTimeConverter() DateTime? closesAt, int? correctOptionIndex, LocaleMap? explanation
 });
 
 
-
+$LocaleMapCopyWith<$Res> get title;$LocaleMapCopyWith<$Res>? get explanation;
 
 }
 /// @nodoc
@@ -71,17 +74,38 @@ id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,sponsorId: null == sponsorId ? _self.sponsorId : sponsorId // ignore: cast_nullable_to_non_nullable
 as String,order: null == order ? _self.order : order // ignore: cast_nullable_to_non_nullable
 as int,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
-as String,options: null == options ? _self.options : options // ignore: cast_nullable_to_non_nullable
-as List<String>,durationSeconds: null == durationSeconds ? _self.durationSeconds : durationSeconds // ignore: cast_nullable_to_non_nullable
+as LocaleMap,options: null == options ? _self.options : options // ignore: cast_nullable_to_non_nullable
+as List<LocaleMap>,durationSeconds: null == durationSeconds ? _self.durationSeconds : durationSeconds // ignore: cast_nullable_to_non_nullable
 as int,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as QuizQuestionStatus,openedAt: freezed == openedAt ? _self.openedAt : openedAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,closesAt: freezed == closesAt ? _self.closesAt : closesAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,correctOptionIndex: freezed == correctOptionIndex ? _self.correctOptionIndex : correctOptionIndex // ignore: cast_nullable_to_non_nullable
 as int?,explanation: freezed == explanation ? _self.explanation : explanation // ignore: cast_nullable_to_non_nullable
-as String?,
+as LocaleMap?,
   ));
 }
+/// Create a copy of QuizQuestion
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$LocaleMapCopyWith<$Res> get title {
+  
+  return $LocaleMapCopyWith<$Res>(_self.title, (value) {
+    return _then(_self.copyWith(title: value));
+  });
+}/// Create a copy of QuizQuestion
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$LocaleMapCopyWith<$Res>? get explanation {
+    if (_self.explanation == null) {
+    return null;
+  }
 
+  return $LocaleMapCopyWith<$Res>(_self.explanation!, (value) {
+    return _then(_self.copyWith(explanation: value));
+  });
+}
 }
 
 
@@ -163,7 +187,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String sponsorId,  int order,  String title,  List<String> options,  int durationSeconds,  QuizQuestionStatus status, @FirestoreNullableDateTimeConverter()  DateTime? openedAt, @FirestoreNullableDateTimeConverter()  DateTime? closesAt,  int? correctOptionIndex,  String? explanation)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String sponsorId,  int order,  LocaleMap title,  List<LocaleMap> options,  int durationSeconds,  QuizQuestionStatus status, @FirestoreNullableDateTimeConverter()  DateTime? openedAt, @FirestoreNullableDateTimeConverter()  DateTime? closesAt,  int? correctOptionIndex,  LocaleMap? explanation)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _QuizQuestion() when $default != null:
 return $default(_that.id,_that.sponsorId,_that.order,_that.title,_that.options,_that.durationSeconds,_that.status,_that.openedAt,_that.closesAt,_that.correctOptionIndex,_that.explanation);case _:
@@ -184,7 +208,7 @@ return $default(_that.id,_that.sponsorId,_that.order,_that.title,_that.options,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String sponsorId,  int order,  String title,  List<String> options,  int durationSeconds,  QuizQuestionStatus status, @FirestoreNullableDateTimeConverter()  DateTime? openedAt, @FirestoreNullableDateTimeConverter()  DateTime? closesAt,  int? correctOptionIndex,  String? explanation)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String sponsorId,  int order,  LocaleMap title,  List<LocaleMap> options,  int durationSeconds,  QuizQuestionStatus status, @FirestoreNullableDateTimeConverter()  DateTime? openedAt, @FirestoreNullableDateTimeConverter()  DateTime? closesAt,  int? correctOptionIndex,  LocaleMap? explanation)  $default,) {final _that = this;
 switch (_that) {
 case _QuizQuestion():
 return $default(_that.id,_that.sponsorId,_that.order,_that.title,_that.options,_that.durationSeconds,_that.status,_that.openedAt,_that.closesAt,_that.correctOptionIndex,_that.explanation);case _:
@@ -204,7 +228,7 @@ return $default(_that.id,_that.sponsorId,_that.order,_that.title,_that.options,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String sponsorId,  int order,  String title,  List<String> options,  int durationSeconds,  QuizQuestionStatus status, @FirestoreNullableDateTimeConverter()  DateTime? openedAt, @FirestoreNullableDateTimeConverter()  DateTime? closesAt,  int? correctOptionIndex,  String? explanation)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String sponsorId,  int order,  LocaleMap title,  List<LocaleMap> options,  int durationSeconds,  QuizQuestionStatus status, @FirestoreNullableDateTimeConverter()  DateTime? openedAt, @FirestoreNullableDateTimeConverter()  DateTime? closesAt,  int? correctOptionIndex,  LocaleMap? explanation)?  $default,) {final _that = this;
 switch (_that) {
 case _QuizQuestion() when $default != null:
 return $default(_that.id,_that.sponsorId,_that.order,_that.title,_that.options,_that.durationSeconds,_that.status,_that.openedAt,_that.closesAt,_that.correctOptionIndex,_that.explanation);case _:
@@ -219,15 +243,18 @@ return $default(_that.id,_that.sponsorId,_that.order,_that.title,_that.options,_
 @JsonSerializable()
 
 class _QuizQuestion extends QuizQuestion {
-  const _QuizQuestion({required this.id, required this.sponsorId, required this.order, required this.title, final  List<String> options = const [], this.durationSeconds = 180, required this.status, @FirestoreNullableDateTimeConverter() this.openedAt, @FirestoreNullableDateTimeConverter() this.closesAt, this.correctOptionIndex, this.explanation}): _options = options,super._();
+  const _QuizQuestion({required this.id, required this.sponsorId, required this.order, required this.title, final  List<LocaleMap> options = const [], this.durationSeconds = 180, required this.status, @FirestoreNullableDateTimeConverter() this.openedAt, @FirestoreNullableDateTimeConverter() this.closesAt, this.correctOptionIndex, this.explanation}): _options = options,super._();
   factory _QuizQuestion.fromJson(Map<String, dynamic> json) => _$QuizQuestionFromJson(json);
 
 @override final  String id;
 @override final  String sponsorId;
 @override final  int order;
-@override final  String title;
- final  List<String> _options;
-@override@JsonKey() List<String> get options {
+/// 問題文（日英）。参加者アプリでは端末ロケールで出し分ける。
+@override final  LocaleMap title;
+/// 選択肢（日英）。並び順が回答の index に対応する。
+ final  List<LocaleMap> _options;
+/// 選択肢（日英）。並び順が回答の index に対応する。
+@override@JsonKey() List<LocaleMap> get options {
   if (_options is EqualUnmodifiableListView) return _options;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_options);
@@ -238,7 +265,8 @@ class _QuizQuestion extends QuizQuestion {
 @override@FirestoreNullableDateTimeConverter() final  DateTime? openedAt;
 @override@FirestoreNullableDateTimeConverter() final  DateTime? closesAt;
 @override final  int? correctOptionIndex;
-@override final  String? explanation;
+/// 解説（日英）。正解発表時に secret からコピーされる。
+@override final  LocaleMap? explanation;
 
 /// Create a copy of QuizQuestion
 /// with the given fields replaced by the non-null parameter values.
@@ -273,11 +301,11 @@ abstract mixin class _$QuizQuestionCopyWith<$Res> implements $QuizQuestionCopyWi
   factory _$QuizQuestionCopyWith(_QuizQuestion value, $Res Function(_QuizQuestion) _then) = __$QuizQuestionCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String sponsorId, int order, String title, List<String> options, int durationSeconds, QuizQuestionStatus status,@FirestoreNullableDateTimeConverter() DateTime? openedAt,@FirestoreNullableDateTimeConverter() DateTime? closesAt, int? correctOptionIndex, String? explanation
+ String id, String sponsorId, int order, LocaleMap title, List<LocaleMap> options, int durationSeconds, QuizQuestionStatus status,@FirestoreNullableDateTimeConverter() DateTime? openedAt,@FirestoreNullableDateTimeConverter() DateTime? closesAt, int? correctOptionIndex, LocaleMap? explanation
 });
 
 
-
+@override $LocaleMapCopyWith<$Res> get title;@override $LocaleMapCopyWith<$Res>? get explanation;
 
 }
 /// @nodoc
@@ -296,18 +324,39 @@ id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,sponsorId: null == sponsorId ? _self.sponsorId : sponsorId // ignore: cast_nullable_to_non_nullable
 as String,order: null == order ? _self.order : order // ignore: cast_nullable_to_non_nullable
 as int,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
-as String,options: null == options ? _self._options : options // ignore: cast_nullable_to_non_nullable
-as List<String>,durationSeconds: null == durationSeconds ? _self.durationSeconds : durationSeconds // ignore: cast_nullable_to_non_nullable
+as LocaleMap,options: null == options ? _self._options : options // ignore: cast_nullable_to_non_nullable
+as List<LocaleMap>,durationSeconds: null == durationSeconds ? _self.durationSeconds : durationSeconds // ignore: cast_nullable_to_non_nullable
 as int,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as QuizQuestionStatus,openedAt: freezed == openedAt ? _self.openedAt : openedAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,closesAt: freezed == closesAt ? _self.closesAt : closesAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,correctOptionIndex: freezed == correctOptionIndex ? _self.correctOptionIndex : correctOptionIndex // ignore: cast_nullable_to_non_nullable
 as int?,explanation: freezed == explanation ? _self.explanation : explanation // ignore: cast_nullable_to_non_nullable
-as String?,
+as LocaleMap?,
   ));
 }
 
+/// Create a copy of QuizQuestion
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$LocaleMapCopyWith<$Res> get title {
+  
+  return $LocaleMapCopyWith<$Res>(_self.title, (value) {
+    return _then(_self.copyWith(title: value));
+  });
+}/// Create a copy of QuizQuestion
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$LocaleMapCopyWith<$Res>? get explanation {
+    if (_self.explanation == null) {
+    return null;
+  }
 
+  return $LocaleMapCopyWith<$Res>(_self.explanation!, (value) {
+    return _then(_self.copyWith(explanation: value));
+  });
+}
 }
 
 // dart format on

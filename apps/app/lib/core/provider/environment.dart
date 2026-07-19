@@ -42,9 +42,11 @@ abstract class Environment with _$Environment {
       'FIREBASE_PROJECT_ID',
       defaultValue: 'dev-flutterkaigi-2026',
     ),
+    // localhost は IPv6 ([::1]) に解決されることがあり、127.0.0.1 のみで
+    // 待ち受けるエミュレータに gRPC が届かない。IPv4 を明示する。
     firestoreEmulatorHost: const String.fromEnvironment(
       'FIRESTORE_EMULATOR_HOST',
-      defaultValue: 'localhost:8080',
+      defaultValue: '127.0.0.1:8080',
     ),
     androidFirestoreEmulatorHost: const String.fromEnvironment(
       'FIRESTORE_EMULATOR_HOST_ANDROID',

@@ -83,24 +83,32 @@ class _QuizQuestionForm extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final formKey = useMemoized(GlobalKey<FormState>.new);
-    final titleController = useTextEditingController(text: question?.title ?? '');
+    final titleJaController = useTextEditingController(text: question?.title.ja ?? '');
+    final titleEnController = useTextEditingController(text: question?.title.en ?? '');
     final orderController = useTextEditingController(text: question?.order.toString() ?? '');
     final durationController = useTextEditingController(text: (question?.durationSeconds ?? 180).toString());
-    final explanationController = useTextEditingController(text: question?.explanation ?? '');
+    final explanationJaController = useTextEditingController(text: question?.explanation?.ja ?? '');
+    final explanationEnController = useTextEditingController(text: question?.explanation?.en ?? '');
     final sponsorId = useState<String?>(question?.sponsorId ?? (sponsorIds.isNotEmpty ? sponsorIds.first : null));
 
-    // 選択肢は 2〜4 件。デフォルトは 2 件の空欄。
-    final optionControllers = useState<List<TextEditingController>>(
+    // 選択肢は 2〜4 件（日英ペア）。デフォルトは 2 件の空欄。
+    final optionControllers = useState<List<({TextEditingController ja, TextEditingController en})>>(
       question != null && question!.options.isNotEmpty
-          ? question!.options.map((o) => TextEditingController(text: o)).toList()
-          : [TextEditingController(), TextEditingController()],
+          ? question!.options
+                .map((o) => (ja: TextEditingController(text: o.ja), en: TextEditingController(text: o.en)))
+                .toList()
+          : [
+              (ja: TextEditingController(), en: TextEditingController()),
+              (ja: TextEditingController(), en: TextEditingController()),
+            ],
     );
     final correctOptionIndex = useState<int?>(question?.correctOptionIndex);
 
     useEffect(() {
       return () {
         for (final c in optionControllers.value) {
-          c.dispose();
+          c.ja.dispose();
+          c.en.dispose();
         }
       };
     }, const []);
@@ -110,14 +118,18 @@ class _QuizQuestionForm extends HookConsumerWidget {
 
     void addOption() {
       if (optionControllers.value.length >= 4) return;
-      optionControllers.value = [...optionControllers.value, TextEditingController()];
+      optionControllers.value = [
+        ...optionControllers.value,
+        (ja: TextEditingController(), en: TextEditingController()),
+      ];
     }
 
     void removeOption(int index) {
       if (optionControllers.value.length <= 2) return;
       final removed = optionControllers.value[index];
       optionControllers.value = [...optionControllers.value]..removeAt(index);
-      removed.dispose();
+      removed.ja.dispose();
+      removed.en.dispose();
       // 正解インデックスの整合を保つ。
       final current = correctOptionIndex.value;
       if (current != null) {
@@ -140,13 +152,15 @@ class _QuizQuestionForm extends HookConsumerWidget {
         return;
       }
 
-      final options = optionControllers.value.map((c) => c.text.trim()).toList();
+      final options = optionControllers.value
+          .map((c) => LocaleMap(ja: c.ja.text.trim(), en: c.en.text.trim()))
+          .toList();
 
       final questionToSave = QuizQuestion(
         id: question?.id ?? '',
         sponsorId: sponsorId.value!,
         order: int.parse(orderController.text.trim()),
-        title: titleController.text.trim(),
+        title: LocaleMap(ja: titleJaController.text.trim(), en: titleEnController.text.trim()),
         options: options,
         durationSeconds: int.parse(durationController.text.trim()),
         // 編集は draft のみのため status は draft を維持する。
@@ -154,7 +168,10 @@ class _QuizQuestionForm extends HookConsumerWidget {
       );
       final secret = QuizQuestionSecret(
         correctOptionIndex: correctOptionIndex.value!,
-        explanation: explanationController.text.trim(),
+        explanation: LocaleMap(
+          ja: explanationJaController.text.trim(),
+          en: explanationEnController.text.trim(),
+        ),
       );
 
       try {
@@ -221,10 +238,17 @@ class _QuizQuestionForm extends HookConsumerWidget {
                     ),
                     const SizedBox(height: 24),
                     TextFormField(
-                      controller: titleController,
-                      decoration: const InputDecoration(labelText: '問題文 *', border: OutlineInputBorder()),
+                      controller: titleJaController,
+                      decoration: const InputDecoration(labelText: '問題文（日本語）*', border: OutlineInputBorder()),
                       maxLines: 3,
-                      validator: (v) => (v == null || v.trim().isEmpty) ? '問題文を入力してください' : null,
+                      validator: (v) => (v == null || v.trim().isEmpty) ? '問題文（日本語）を入力してください' : null,
+                    ),
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      controller: titleEnController,
+                      decoration: const InputDecoration(labelText: '問題文（English）*', border: OutlineInputBorder()),
+                      maxLines: 3,
+                      validator: (v) => (v == null || v.trim().isEmpty) ? 'English question text is required' : null,
                     ),
                     const SizedBox(height: 24),
                     Row(
@@ -243,22 +267,37 @@ class _QuizQuestionForm extends HookConsumerWidget {
                       Padding(
                         padding: const EdgeInsets.only(bottom: 8),
                         child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Radio<int>(
-                              value: i,
-                              // ignore: deprecated_member_use
-                              groupValue: correctOptionIndex.value,
-                              // ignore: deprecated_member_use
-                              onChanged: (v) => correctOptionIndex.value = v,
+                            Padding(
+                              padding: const EdgeInsets.only(top: 4),
+                              child: Radio<int>(
+                                value: i,
+                                // ignore: deprecated_member_use
+                                groupValue: correctOptionIndex.value,
+                                // ignore: deprecated_member_use
+                                onChanged: (v) => correctOptionIndex.value = v,
+                              ),
                             ),
                             Expanded(
                               child: TextFormField(
-                                controller: optionControllers.value[i],
+                                controller: optionControllers.value[i].ja,
                                 decoration: InputDecoration(
-                                  labelText: '選択肢 ${i + 1}',
+                                  labelText: '選択肢 ${i + 1}（日本語）',
                                   border: const OutlineInputBorder(),
                                 ),
                                 validator: (v) => (v == null || v.trim().isEmpty) ? '選択肢を入力してください' : null,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: TextFormField(
+                                controller: optionControllers.value[i].en,
+                                decoration: InputDecoration(
+                                  labelText: '選択肢 ${i + 1}（English）',
+                                  border: const OutlineInputBorder(),
+                                ),
+                                validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
                               ),
                             ),
                             IconButton(
@@ -271,8 +310,14 @@ class _QuizQuestionForm extends HookConsumerWidget {
                       ),
                     const SizedBox(height: 24),
                     TextFormField(
-                      controller: explanationController,
-                      decoration: const InputDecoration(labelText: '解説', border: OutlineInputBorder()),
+                      controller: explanationJaController,
+                      decoration: const InputDecoration(labelText: '解説（日本語）', border: OutlineInputBorder()),
+                      maxLines: 3,
+                    ),
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      controller: explanationEnController,
+                      decoration: const InputDecoration(labelText: '解説（English）', border: OutlineInputBorder()),
                       maxLines: 3,
                     ),
                     const SizedBox(height: 24),
@@ -328,7 +373,8 @@ class _ReadOnlyQuestionView extends StatelessWidget {
             const SizedBox(height: 24),
             Text('問題文', style: theme.textTheme.labelLarge),
             const SizedBox(height: 4),
-            Text(question.title, style: theme.textTheme.bodyLarge),
+            Text(question.title.ja, style: theme.textTheme.bodyLarge),
+            Text(question.title.en, style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
             const SizedBox(height: 24),
             Text('選択肢', style: theme.textTheme.labelLarge),
             const SizedBox(height: 8),
@@ -343,14 +389,14 @@ class _ReadOnlyQuestionView extends StatelessWidget {
                       size: 20,
                     ),
                     const SizedBox(width: 8),
-                    Text(question.options[i]),
+                    Text('${question.options[i].ja} / ${question.options[i].en}'),
                   ],
                 ),
               ),
             const SizedBox(height: 24),
             Text('解説', style: theme.textTheme.labelLarge),
             const SizedBox(height: 4),
-            Text(question.explanation?.isEmpty ?? true ? '(なし)' : question.explanation!),
+            Text(question.explanation == null || question.explanation!.ja.isEmpty ? '(なし)' : '${question.explanation!.ja}\n${question.explanation!.en}'),
             const SizedBox(height: 24),
             Text('制限時間: ${question.durationSeconds} 秒', style: theme.textTheme.bodyMedium),
           ],

@@ -64,8 +64,34 @@ List<int> splitIntoTeamSizes(int n) {
 }
 
 abstract interface class QuizOperationsRepository {
-  /// 参加者をシャッフルしてチーム編成し、`event.status` を `teamBuilding` にする。
+  /// イベントを公開する（`draft` → `published`）。
+  ///
+  /// 参加者アプリのイベント一覧に表示されるのはこの操作以降。
+  Future<void> publishEvent(String eventId);
+
+  /// イベントを非公開に戻す（`published` → `draft`）。受付開始前のみ可能。
+  Future<void> unpublishEvent(String eventId);
+
+  /// 参加受付を開始する（`published` → `registration`）。
+  ///
+  /// 参加者アプリに受付画面（受付コード入力つき）が表示されるのはこの操作以降。
+  Future<void> openRegistration(String eventId);
+
+  /// 参加受付を終了する（`registration` → `entryClosed`）。
+  ///
+  /// 以降の新規参加登録はセキュリティルールでも拒否される。
+  Future<void> closeRegistration(String eventId);
+
+  /// 参加者をシャッフルしてチーム編成する。受付終了（`entryClosed`）後に実行する。
   Future<void> buildTeams(String eventId);
+
+  /// 現地受付コードを購読する（運営のみ読める）。未生成なら `null` を流す。
+  Stream<String?> watchEntryCode(String eventId);
+
+  /// 現地受付コードを新規生成して保存し、生成したコードを返す。
+  ///
+  /// イベント作成直後の初回生成と、漏洩時の再生成の両方に使う。
+  Future<String> regenerateEntryCode(String eventId);
 
   /// 問題を出題する。`status = open`、`closesAt = now + durationSeconds` を設定し、
   /// 全チーム分の回答ドキュメントを事前作成する。
@@ -100,14 +126,70 @@ final class FirestoreQuizOperationsRepository implements QuizOperationsRepositor
 
   CollectionReference<Map<String, dynamic>> _answers(String eventId) => _eventRef(eventId).collection('answers');
 
+  DocumentReference<Map<String, dynamic>> _entryCodeRef(String eventId) =>
+      _eventRef(eventId).collection('secret').doc('entry');
+
+  /// ステータスを [from] のいずれかから [to] へ進める。それ以外からの遷移は拒否する。
+  Future<void> _transition(String eventId, List<QuizEventStatus> from, QuizEventStatus to) async {
+    final snapshot = await _eventRef(eventId).get();
+    final status = snapshot.data()?['status'] as String?;
+    if (!from.map(_statusValue).contains(status)) {
+      throw StateError('Cannot transition to ${_statusValue(to)} when event status is $status');
+    }
+    await _eventRef(eventId).update(<String, dynamic>{
+      'status': _statusValue(to),
+      // アプリの一覧クエリ（isPublic == true）と常に整合させる。
+      'isPublic': to != QuizEventStatus.draft,
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+  }
+
+  @override
+  Future<void> publishEvent(String eventId) =>
+      _transition(eventId, const [QuizEventStatus.draft], QuizEventStatus.published);
+
+  @override
+  Future<void> unpublishEvent(String eventId) =>
+      _transition(eventId, const [QuizEventStatus.published], QuizEventStatus.draft);
+
+  @override
+  Future<void> openRegistration(String eventId) =>
+      _transition(eventId, const [QuizEventStatus.published], QuizEventStatus.registration);
+
+  @override
+  Future<void> closeRegistration(String eventId) =>
+      _transition(eventId, const [QuizEventStatus.registration], QuizEventStatus.entryClosed);
+
+  @override
+  Stream<String?> watchEntryCode(String eventId) {
+    return _entryCodeRef(eventId).snapshots().map((snapshot) => snapshot.data()?['code'] as String?);
+  }
+
+  @override
+  Future<String> regenerateEntryCode(String eventId) async {
+    // 6 桁の数字コード。現地の掲示から手入力しやすい形式にする。
+    final code = (_random.nextInt(900000) + 100000).toString();
+    await _entryCodeRef(eventId).set(<String, dynamic>{'code': code});
+    return code;
+  }
+
   @override
   Future<void> buildTeams(String eventId) async {
     final eventSnapshot = await _eventRef(eventId).get();
     final status = eventSnapshot.data()?['status'] as String?;
-    // クイズ開始後の再編成は出題済みの回答ドキュメントと不整合になるため禁止する。
-    if (status != _statusValue(QuizEventStatus.registration) && status != _statusValue(QuizEventStatus.teamBuilding)) {
+    // 受付終了後のみ編成できる（受付中の編成は登録との競合、開始後の再編成は
+    // 出題済みの回答ドキュメントと不整合になるため禁止する）。
+    if (status != _statusValue(QuizEventStatus.entryClosed)) {
       throw StateError('Cannot build teams when event status is $status');
     }
+
+    // イベントに設定されたチーム名プール（未設定なら既定の Widget 名を使う）。
+    final namePool =
+        ((eventSnapshot.data()?['teamNamePool'] as List<dynamic>?) ?? const [])
+            .whereType<String>()
+            .where((name) => name.trim().isNotEmpty)
+            .map((name) => name.trim())
+            .toList();
 
     final snapshot = await _participants(eventId).get();
     final participants = snapshot.docs.toList()..shuffle(_random);
@@ -141,7 +223,7 @@ final class FirestoreQuizOperationsRepository implements QuizOperationsRepositor
 
       batch.set(teamRef, <String, dynamic>{
         'tableNumber': tableNumber,
-        'name': _teamName(tableNumber),
+        'name': _teamName(tableNumber, namePool),
         'memberUids': memberUids,
         'members': members,
         'score': 0,
@@ -151,7 +233,6 @@ final class FirestoreQuizOperationsRepository implements QuizOperationsRepositor
     }
 
     batch.update(_eventRef(eventId), <String, dynamic>{
-      'status': _statusValue(QuizEventStatus.teamBuilding),
       'updatedAt': FieldValue.serverTimestamp(),
     });
 
@@ -229,7 +310,8 @@ final class FirestoreQuizOperationsRepository implements QuizOperationsRepositor
       throw StateError('Secret answer not found for question: $questionId');
     }
     final correctOptionIndex = (secretData['correctOptionIndex'] as num).toInt();
-    final explanation = secretData['explanation'] as String?;
+    // 解説は LocaleMap（{ja, en} のマップ）。中身には触れずそのままコピーする。
+    final explanation = secretData['explanation'];
 
     // 当該問題の回答を採点する。
     final questionAnswers = await _answers(eventId).where('questionId', isEqualTo: questionId).get();
@@ -354,8 +436,13 @@ final class FirestoreQuizOperationsRepository implements QuizOperationsRepositor
     await batch.commit();
   }
 
-  String _teamName(int tableNumber) {
+  /// テーブル番号からチーム名を決める。イベント設定のプールを優先し、
+  /// 未設定・不足分は既定の Widget 名、それも尽きたら `Team N`。
+  String _teamName(int tableNumber, List<String> namePool) {
     final index = tableNumber - 1;
+    if (index >= 0 && index < namePool.length) {
+      return namePool[index];
+    }
     if (index >= 0 && index < quizTeamWidgetNames.length) {
       return quizTeamWidgetNames[index];
     }
@@ -363,8 +450,10 @@ final class FirestoreQuizOperationsRepository implements QuizOperationsRepositor
   }
 
   String _statusValue(QuizEventStatus status) => switch (status) {
+    QuizEventStatus.draft => 'draft',
+    QuizEventStatus.published => 'published',
     QuizEventStatus.registration => 'registration',
-    QuizEventStatus.teamBuilding => 'teamBuilding',
+    QuizEventStatus.entryClosed => 'entryClosed',
     QuizEventStatus.inProgress => 'inProgress',
     QuizEventStatus.finished => 'finished',
   };

@@ -40,3 +40,8 @@ final quizAnswersByQuestionProvider = StreamProvider.family<List<QuizAnswer>, ({
 final quizSponsorListProvider = StreamProvider<List<Sponsor>>(
   (ref) => ref.watch(sponsorRepositoryProvider).watchAll(),
 );
+
+/// 現地受付コードのリアルタイム購読（運営のみ読める）。
+final quizEntryCodeProvider = StreamProvider.family<String?, String>(
+  (ref, eventId) => ref.watch(quizOperationsRepositoryProvider).watchEntryCode(eventId),
+);

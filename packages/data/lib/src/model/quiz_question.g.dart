@@ -11,10 +11,10 @@ _QuizQuestion _$QuizQuestionFromJson(Map<String, dynamic> json) =>
       id: json['id'] as String,
       sponsorId: json['sponsorId'] as String,
       order: (json['order'] as num).toInt(),
-      title: json['title'] as String,
+      title: LocaleMap.fromJson(json['title'] as Map<String, dynamic>),
       options:
           (json['options'] as List<dynamic>?)
-              ?.map((e) => e as String)
+              ?.map((e) => LocaleMap.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const [],
       durationSeconds: (json['durationSeconds'] as num?)?.toInt() ?? 180,
@@ -26,7 +26,9 @@ _QuizQuestion _$QuizQuestionFromJson(Map<String, dynamic> json) =>
         json['closesAt'],
       ),
       correctOptionIndex: (json['correctOptionIndex'] as num?)?.toInt(),
-      explanation: json['explanation'] as String?,
+      explanation: json['explanation'] == null
+          ? null
+          : LocaleMap.fromJson(json['explanation'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$QuizQuestionToJson(_QuizQuestion instance) =>
@@ -34,8 +36,8 @@ Map<String, dynamic> _$QuizQuestionToJson(_QuizQuestion instance) =>
       'id': instance.id,
       'sponsorId': instance.sponsorId,
       'order': instance.order,
-      'title': instance.title,
-      'options': instance.options,
+      'title': instance.title.toJson(),
+      'options': instance.options.map((e) => e.toJson()).toList(),
       'durationSeconds': instance.durationSeconds,
       'status': _$QuizQuestionStatusEnumMap[instance.status]!,
       'openedAt': const FirestoreNullableDateTimeConverter().toJson(
@@ -45,7 +47,7 @@ Map<String, dynamic> _$QuizQuestionToJson(_QuizQuestion instance) =>
         instance.closesAt,
       ),
       'correctOptionIndex': instance.correctOptionIndex,
-      'explanation': instance.explanation,
+      'explanation': instance.explanation?.toJson(),
     };
 
 const _$QuizQuestionStatusEnumMap = {
