@@ -586,16 +586,3 @@ TextStyle? _timeLabelTextStyle(BuildContext context) {
     fontWeight: FontWeight.w700,
   );
 }
-
-String _sessionTypeLabel(Translations t, Session session) {
-  if (session.isHandsOn) {
-    return t.sessionTimetable.type.handsOn;
-  }
-  if (session.isBeginnersLightningTalk) {
-    return t.sessionTimetable.type.beginnersLightningTalk;
-  }
-  if (session.isLightningTalk) {
-    return t.sessionTimetable.type.lightningTalk;
-  }
-  return t.sessionTimetable.type.regular;
-}

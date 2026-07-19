@@ -35,6 +35,7 @@ sessionDetails:
   speakers: 登壇者
   links: リンク
   sessionize: Sessionize
+  share: 共有
   notFound: セッションが見つかりませんでした
   error: セッションを取得できませんでした
 sessionBookmark:

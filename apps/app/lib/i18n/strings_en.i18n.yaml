@@ -35,6 +35,7 @@ sessionDetails:
   speakers: Speakers
   links: Links
   sessionize: Sessionize
+  share: Share
   notFound: Session not found
   error: Failed to load session
 sessionBookmark:
