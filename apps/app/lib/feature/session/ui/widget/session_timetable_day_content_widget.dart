@@ -17,6 +17,7 @@ const _parallelEntryGap = 12.0;
 const _parallelScrollbarExtent = 10.0;
 const _timeLabelTopPadding = 4.0;
 const _timelineGapAfterTimeLabel = 6.0;
+const _timeColumnSafetyMargin = 4.0;
 
 class SessionTimetableDayContentWidget extends ConsumerWidget {
   const SessionTimetableDayContentWidget({
@@ -30,7 +31,18 @@ class SessionTimetableDayContentWidget extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final entryGroups = day.entryGroups;
     final timeFormat = ref.watch(sessionTimeFormatProvider);
-    final timeColumnWidth = MediaQuery.sizeOf(context).width * .1;
+    final locale = Localizations.localeOf(context).toLanguageTag();
+    final textDirection = Directionality.of(context);
+    final timeLabelStyle = _timeLabelTextStyle(context);
+    final timeColumnWidth =
+        _measureWidestSupportedTimeLabelWidth(
+          context: context,
+          timeFormat: timeFormat,
+          locale: locale,
+          style: timeLabelStyle,
+          textDirection: textDirection,
+        ) +
+        _timeColumnSafetyMargin;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -130,9 +142,7 @@ class _TimetableEntryGroupTileWidget extends StatelessWidget {
       timeFormat,
       locale: locale,
     );
-    final timeLabelStyle = Theme.of(context).textTheme.labelLarge?.copyWith(
-      fontWeight: FontWeight.w700,
-    );
+    final timeLabelStyle = _timeLabelTextStyle(context);
     final lineStartY =
         _timeLabelTopPadding +
         _measureTextHeight(
@@ -631,6 +641,57 @@ double _measureTextHeight({
   )..layout(maxWidth: maxWidth);
 
   return textPainter.height;
+}
+
+double _measureWidestSupportedTimeLabelWidth({
+  required BuildContext context,
+  required EventTimeFormat timeFormat,
+  required String locale,
+  required TextStyle? style,
+  required TextDirection textDirection,
+}) {
+  final textPainter = TextPainter(
+    text: TextSpan(
+      text: _supportedTimeLabels(timeFormat, locale).join('\n'),
+      style: style ?? DefaultTextStyle.of(context).style,
+    ),
+    textAlign: TextAlign.center,
+    textDirection: textDirection,
+    textScaler: MediaQuery.textScalerOf(context),
+  )..layout();
+
+  return textPainter.computeLineMetrics().fold<double>(
+    0,
+    (width, line) => math.max(width, line.width),
+  );
+}
+
+Iterable<String> _supportedTimeLabels(
+  EventTimeFormat timeFormat,
+  String locale,
+) sync* {
+  for (var hour = 0; hour < Duration.hoursPerDay; hour++) {
+    for (var minute = 0; minute < Duration.minutesPerHour; minute++) {
+      yield formatEventTime(
+        _eventLocalTimeCandidate(hour: hour, minute: minute),
+        timeFormat,
+        locale: locale,
+      );
+    }
+  }
+}
+
+DateTime _eventLocalTimeCandidate({
+  required int hour,
+  required int minute,
+}) {
+  return DateTime.utc(2026, 1, 1, hour, minute).subtract(eventTimeZoneOffset);
+}
+
+TextStyle? _timeLabelTextStyle(BuildContext context) {
+  return Theme.of(context).textTheme.labelLarge?.copyWith(
+    fontWeight: FontWeight.w700,
+  );
 }
 
 String _sessionTypeLabel(Translations t, Session session) {
