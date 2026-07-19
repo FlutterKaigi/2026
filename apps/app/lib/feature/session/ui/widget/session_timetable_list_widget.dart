@@ -7,49 +7,43 @@ class SessionTimetableListWidget extends StatelessWidget {
   const SessionTimetableListWidget({
     required this.data,
     required this.scrollController,
-    required this.onRefresh,
     super.key,
   });
 
   final SessionTimetableData data;
   final ScrollController scrollController;
-  final RefreshCallback onRefresh;
 
   @override
   Widget build(BuildContext context) {
     final selectedDay = data.selectedDay;
 
-    return RefreshIndicator(
-      onRefresh: onRefresh,
-      child: CustomScrollView(
-        controller: scrollController,
-        physics: const AlwaysScrollableScrollPhysics(),
-        slivers: [
-          if (data.availableDates.isNotEmpty)
-            SliverToBoxAdapter(
-              child: SessionTimetableDaySelectorBarWidget(
-                dates: data.availableDates,
-                selectedDate: data.selectedDate,
-              ),
+    return CustomScrollView(
+      controller: scrollController,
+      slivers: [
+        if (data.availableDates.isNotEmpty)
+          SliverToBoxAdapter(
+            child: SessionTimetableDaySelectorBarWidget(
+              dates: data.availableDates,
+              selectedDate: data.selectedDate,
             ),
-          if (data.venues.isNotEmpty)
-            SliverToBoxAdapter(
-              child: SessionTimetableVenueFilterBarWidget(
-                venues: data.venues,
-                selectedVenueId: data.selectedVenueId,
-              ),
+          ),
+        if (data.venues.isNotEmpty)
+          SliverToBoxAdapter(
+            child: SessionTimetableVenueFilterBarWidget(
+              venues: data.venues,
+              selectedVenueId: data.selectedVenueId,
             ),
-          const SliverToBoxAdapter(child: SessionTimetableTimeFormatSelectorWidget()),
-          if (selectedDay != null)
-            SliverToBoxAdapter(
-              child: SessionTimetableDayContentWidget(
-                day: selectedDay,
-                key: ValueKey(selectedDay.date),
-              ),
+          ),
+        const SliverToBoxAdapter(child: SessionTimetableTimeFormatSelectorWidget()),
+        if (selectedDay != null)
+          SliverToBoxAdapter(
+            child: SessionTimetableDayContentWidget(
+              day: selectedDay,
+              key: ValueKey(selectedDay.date),
             ),
-          const SliverToBoxAdapter(child: SizedBox(height: 24)),
-        ],
-      ),
+          ),
+        const SliverToBoxAdapter(child: SizedBox(height: 24)),
+      ],
     );
   }
 }
