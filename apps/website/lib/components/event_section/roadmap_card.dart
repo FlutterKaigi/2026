@@ -39,9 +39,7 @@ class RoadmapCard extends StatelessComponent {
     required AppLocale locale,
   }) {
     final isPrimary = m.gate == MilestoneGate.conference;
-    final cls = isPrimary
-        ? 'roadmap-card__item roadmap-card__item--primary'
-        : 'roadmap-card__item';
+    final cls = isPrimary ? 'roadmap-card__item roadmap-card__item--primary' : 'roadmap-card__item';
     return li(classes: cls, [
       span(
         classes: 'roadmap-card__dot',

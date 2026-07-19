@@ -6,13 +6,20 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    function isAdmin() {
-      return signedIn() && request.auth.token.admin == true;
+    function hasAdminAccess() {
+      return signedIn()
+        && request.auth.token.email_verified == true
+        && request.auth.token.email.matches('^[^@]+@flutterkaigi[.]jp$')
+        && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    match /admins/{uid} {
+      allow read, write: if false;
     }
 
     match /news/{newsId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if hasAdminAccess();
     }
 
     // Live captions are publicly readable; the captions server writes via the
@@ -22,6 +29,38 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    match /venues/{venueId} {
+      allow read: if true;
+      allow write: if hasAdminAccess();
+    }
+
+    match /speakers/{speakerId} {
+      allow read: if true;
+      allow write: if hasAdminAccess();
+    }
+
+    match /staffMembers/{staffMemberId} {
+      allow read: if true;
+      allow write: if hasAdminAccess();
+    }
+
+    match /timelineEvents/{timelineEventId} {
+      allow read: if true;
+      allow write: if hasAdminAccess();
+    }
+
+    match /sessions/{sessionId} {
+      allow read: if true;
+      allow write: if hasAdminAccess();
+    }
+
+    match /sponsors/{sponsorId} {
+      allow read: if true;
+      allow write: if hasAdminAccess();
+    }
+
+    // 未定義のパスを明示的に拒否（多層防御）。
+    // Firestore はデフォルトで拒否するが、コレクション追加時の取りこぼしを防ぐため明示する。
     match /{document=**} {
       allow read, write: if false;
     }

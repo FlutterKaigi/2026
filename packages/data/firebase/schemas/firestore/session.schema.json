@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/FlutterKaigi/2026/packages/data/firebase/schemas/firestore/session.schema.json",
+  "title": "Session",
+  "description": "Firestore document schema for the `sessions` collection.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "title",
+    "description",
+    "primaryLocale",
+    "startsAt",
+    "endsAt",
+    "venueId",
+    "createdAt",
+    "updatedAt"
+  ],
+  "properties": {
+    "title": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ja", "en"],
+      "properties": {
+        "ja": { "type": "string", "minLength": 1 },
+        "en": { "type": "string", "minLength": 1 }
+      }
+    },
+    "description": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ja", "en"],
+      "properties": {
+        "ja": { "type": "string" },
+        "en": { "type": "string" }
+      }
+    },
+    "primaryLocale": {
+      "type": "string",
+      "enum": ["ja", "en"]
+    },
+    "startsAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "endsAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "venueId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "speakerIds": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "isLightningTalk": {
+      "type": "boolean"
+    },
+    "isBeginnersLightningTalk": {
+      "type": "boolean"
+    },
+    "isHandsOn": {
+      "type": "boolean"
+    },
+    "sessionizeUrl": {
+      "type": ["string", "null"],
+      "format": "uri"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

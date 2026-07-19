@@ -12,7 +12,6 @@ class Footer extends StatelessComponent {
   static const _socialLinks = <({String label, String href})>[
     (label: 'X', href: 'https://x.com/FlutterKaigi'),
     (label: 'GitHub', href: 'https://github.com/FlutterKaigi'),
-    (label: 'Discord', href: 'https://discord.gg/flutterkaigi'),
     (label: 'Medium', href: 'https://medium.com/flutterkaigi'),
   ];
 

@@ -305,6 +305,18 @@ class _JsonSchemaValidator {
       errors.add('$path must be one of ${jsonEncode(enumValues)}.');
     }
 
+    final anyOf = schema['anyOf'];
+    if (anyOf is List) {
+      final matched = anyOf.map(_asStringMap).whereType<Map<String, Object?>>().any((sub) {
+        final subErrors = <String>[];
+        _validateValue(value, sub, path, subErrors);
+        return subErrors.isEmpty;
+      });
+      if (!matched) {
+        errors.add('$path must match at least one of the allowed schemas.');
+      }
+    }
+
     if (value is String) {
       _validateString(value, schema, path, errors);
     } else if (value is num) {

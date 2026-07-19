@@ -34,41 +34,26 @@ void main() {
         meta(name: 'theme-color', content: colorKeycolorsPrimaryHex),
         // Safari の電話番号自動検出（数値列のリンク化）を無効化。
         meta(name: 'format-detection', content: 'telephone=no'),
-        // OGP
-        meta(
-          attributes: {
-            'property': 'og:title',
-            'content': 'FlutterKaigi 2026',
-          },
-        ),
-        meta(
-          attributes: {
-            'property': 'og:description',
-            'content':
-                '2026年、日本国内でFlutterをメインに扱う技術カンファレンス。'
-                'FlutterやDartの深い知見を持つ開発者によるセッションを多数企画します。',
-          },
-        ),
-        meta(
-          attributes: {
-            'property': 'og:image',
-            'content': 'https://2026.flutterkaigi.jp/images/ogp.png',
-          },
-        ),
-        meta(
-          attributes: {
-            'property': 'og:type',
-            'content': 'website',
-          },
-        ),
-        meta(
-          attributes: {
-            'property': 'og:url',
-            'content': 'https://2026.flutterkaigi.jp/',
-          },
-        ),
+        // Page-specific OGP (`og:*`) and the meta description are injected per
+        // route via `Document.head()` (see `SiteHead` and `SponsorDetailPage`),
+        // so every generated page carries its own share card without duplicate
+        // tags. Only the locale-agnostic Twitter hints remain here.
         meta(name: 'twitter:card', content: 'summary_large_image'),
         meta(name: 'twitter:site', content: '@FlutterKaigi'),
+        script(
+          src: 'https://www.googletagmanager.com/gtag/js?id=G-0FZ58E7XNG',
+          async: true,
+        ),
+        script(
+          content: '''
+window.dataLayer = window.dataLayer || [];
+function gtag() {
+  dataLayer.push(arguments);
+}
+gtag('js', new Date());
+gtag('config', 'G-0FZ58E7XNG');
+''',
+        ),
       ],
       styles: [
         css.import(

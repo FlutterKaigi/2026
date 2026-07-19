@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/FlutterKaigi/2026/packages/data/firebase/schemas/firestore/sponsor.schema.json",
+  "title": "Sponsor",
+  "description": "Firestore document schema for the `sponsors` collection.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["name", "description", "tier", "createdAt", "updatedAt"],
+  "properties": {
+    "name": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ja", "en"],
+      "properties": {
+        "ja": { "type": "string" },
+        "en": { "type": "string" }
+      },
+      "anyOf": [
+        { "properties": { "ja": { "minLength": 1 } } },
+        { "properties": { "en": { "minLength": 1 } } }
+      ]
+    },
+    "nameKana": {
+      "type": ["string", "null"]
+    },
+    "description": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ja", "en"],
+      "properties": {
+        "ja": { "type": "string" },
+        "en": { "type": "string" }
+      }
+    },
+    "primaryLogoUrl": {
+      "type": ["string", "null"],
+      "format": "uri"
+    },
+    "secondaryLogoUrl": {
+      "type": ["string", "null"],
+      "format": "uri"
+    },
+    "tier": {
+      "type": "string",
+      "enum": ["platinum", "gold", "silver", "bronze", "tool", "community", "individual"]
+    },
+    "slug": {
+      "description": "Web サイトの詳細ページのパス (`sponsors/<slug>`) に利用するスラッグ。",
+      "type": ["string", "null"]
+    },
+    "xUrl": {
+      "type": ["string", "null"],
+      "format": "uri"
+    },
+    "websiteUrl": {
+      "type": ["string", "null"],
+      "format": "uri"
+    },
+    "recruitUrl": {
+      "type": ["string", "null"],
+      "format": "uri"
+    },
+    "jobBoardUrl": {
+      "type": ["string", "null"],
+      "format": "uri"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

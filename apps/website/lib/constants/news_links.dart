@@ -25,6 +25,12 @@ class NewsLink {
 
 const _newsJa = <NewsLink>[
   NewsLink(
+    date: '2026年6月17日',
+    title: 'FlutterKaigi 2026 プロポーザル応募のススメ',
+    url:
+        'https://medium.com/flutterkaigi/flutterkaigi-2026-%E3%83%97%E3%83%AD%E3%83%9D%E3%83%BC%E3%82%B6%E3%83%AB%E5%BF%9C%E5%8B%9F%E3%81%AE%E3%82%B9%E3%82%B9%E3%83%A1-ea8978e0fd89',
+  ),
+  NewsLink(
     date: '2026年5月11日',
     title: 'FlutterKaigi 2026 スポンサー募集について',
     url: 'https://medium.com/flutterkaigi/flutterkaigi-2026-opportunities-guide-ja-0e8cdb0a4acb',
@@ -37,6 +43,11 @@ const _newsJa = <NewsLink>[
 ];
 
 const _newsEn = <NewsLink>[
+  NewsLink(
+    date: 'JUN 17, 2026',
+    title: 'A Guide to Submitting a Proposal for FlutterKaigi 2026',
+    url: 'https://medium.com/flutterkaigi/a-guide-to-submitting-a-proposal-for-flutterkaigi-2026-3fda9a01121d',
+  ),
   NewsLink(
     date: 'MAY 11, 2026',
     title: 'FlutterKaigi 2026 Sponsorship Opportunities',

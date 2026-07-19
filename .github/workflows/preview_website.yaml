@@ -2,47 +2,84 @@ name: PR Preview Website
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened, closed]
+    types: [opened, synchronize, reopened]
     paths:
       - apps/website/**
       - .github/workflows/preview_website.yaml
 
 concurrency:
-  group: preview-${{ github.event.number }}
+  group: preview-website-${{ github.event.number }}
   cancel-in-progress: true
 
 permissions: {}
 
 jobs:
   preview:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
     permissions:
-      contents: write
+      contents: read
       pull-requests: write
+      id-token: write # Workload Identity Federation (OIDC) for Firestore auth.
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
-      - if: github.event.action != 'closed'
-        id: flutter-version
+      - id: flutter-version
         run: echo "version=$(jq -r .flutter .fvmrc)" >> "$GITHUB_OUTPUT"
 
-      - if: github.event.action != 'closed'
-        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
         with:
           flutter-version: ${{ steps.flutter-version.outputs.version }}
           channel: stable
           cache: true
 
-      - if: github.event.action != 'closed'
-        run: dart pub get
+      - run: dart pub get
 
-      - if: github.event.action != 'closed'
-        working-directory: apps/website
-        run: dart run jaspr_cli:jaspr build --dart-define=BASE_HREF=/pr-preview/pr-${{ github.event.number }}/
-
-      - uses: rossjrw/pr-preview-action@ffa7509e91a3ec8dfc2e5536c4d5c1acdf7a6de9 # v1.8.1
+      # Authenticate to GCP via Workload Identity Federation (keyless). A
+      # service-account access token bypasses App Check enforcement (App Check
+      # only gates clients, not trusted backends), so the generator can read the
+      # STG `sponsors` collection. Skipped until the WIF vars are configured —
+      # then the generator falls back to the sample fixture (placeholders).
+      - id: auth
+        if: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER_STG != '' }}
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3
         with:
-          source-dir: apps/website/build/jaspr
-          preview-branch: gh-pages
-          umbrella-dir: pr-preview
-          action: auto
+          project_id: ${{ vars.STG_FIREBASE_PROJECT_ID }}
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER_STG }}
+          service_account: ${{ vars.GCP_SERVICE_ACCOUNT_STG }}
+          token_format: access_token
+          access_token_scopes: https://www.googleapis.com/auth/datastore
+
+      # Generate the (git-ignored) sponsor data + images from the STG Firestore
+      # project (packages/data `sponsors` collection). With no token (WIF not yet
+      # configured) or if Firestore is unreachable, the generator falls back to
+      # the sample fixture so the preview still builds with placeholders.
+      - name: Generate sponsor data
+        run: dart run tool/generate_sponsors.dart
+        env:
+          FIREBASE_PROJECT_ID: ${{ vars.STG_FIREBASE_PROJECT_ID }}
+          FIRESTORE_HOST: firestore.googleapis.com
+          FIRESTORE_ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
+
+      # Empty SITE_ORIGIN → OGP `og:image`/`og:url` are emitted host-relative so
+      # they resolve against the per-version preview origin (`*.workers.dev`)
+      # rather than the production domain (where this branch's per-sponsor images
+      # are not yet deployed). Production deploy keeps the absolute default.
+      - working-directory: apps/website
+        run: dart run jaspr_cli:jaspr build --dart-define=SITE_ORIGIN=
+
+      - id: deploy
+        uses: cloudflare/wrangler-action@ebbaa1584979971c8614a24965b4405ff95890e0 # v4.0.0
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          workingDirectory: apps/website
+          command: versions upload
+
+      - uses: thollander/actions-comment-pull-request@24bffb9b452ba05a4f3f77933840a6a841d1b32b # v3.0.1
+        with:
+          message: |
+            ## 🌍 Website Preview
+            🔗 ${{ steps.deploy.outputs.deployment-url }}
+
+            🔑 Commit: `${{ github.event.pull_request.head.sha }}`
+          comment-tag: deploy-website

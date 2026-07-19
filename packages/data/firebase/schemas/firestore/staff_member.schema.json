@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/FlutterKaigi/2026/packages/data/firebase/schemas/firestore/staff_member.schema.json",
+  "title": "StaffMember",
+  "description": "Firestore document schema for the `staffMembers` collection.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["name", "iconUrl", "order", "createdAt", "updatedAt"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "iconUrl": {
+      "type": "string",
+      "format": "uri"
+    },
+    "greeting": {
+      "type": ["string", "null"]
+    },
+    "snsLinks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["type", "value"],
+        "properties": {
+          "type": { "type": "string", "minLength": 1 },
+          "value": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "order": {
+      "type": "integer"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

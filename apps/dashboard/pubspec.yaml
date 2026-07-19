@@ -1,0 +1,47 @@
+name: dashboard
+description: "FlutterKaigi 2026 管理ダッシュボード"
+publish_to: "none"
+resolution: workspace
+
+environment:
+  sdk: ^3.11.5
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_web_plugins:
+    sdk: flutter
+
+  # Shared data layer
+  data:
+    path: ../../packages/data
+
+  # state management
+  hooks_riverpod: ^3.3.2
+  flutter_hooks: ^0.21.3+1
+
+  # routing
+  go_router: ^17.3.0
+
+  # security
+  firebase_app_check: ^0.4.5
+
+  # cloud functions (STG → 本番 データ反映)
+  cloud_functions: ^6.0.4
+
+  # UI
+  two_dimensional_scrollables: ^0.5.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^6.0.0
+
+  # code generation
+  build_runner: ^2.15.0
+  go_router_builder: ^4.3.0
+
+flutter:
+
+  uses-material-design: true

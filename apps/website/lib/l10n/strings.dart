@@ -24,6 +24,25 @@ enum AppLocale {
   /// Hyperlink target for navigation. Prefixed with `baseHref` so the same markup
   /// works for both production (`/`) and PR previews (`/pr-preview/pr-N/`).
   String get linkHref => '$baseHref$relativeHref';
+
+  /// Jaspr Router route path (absolute, **no** baseHref) for a sponsor detail
+  /// page — this drives the SSG output directory.
+  String sponsorRoutePath(String slug) => '${homePath == '/' ? '' : homePath}/sponsors/$slug';
+
+  /// Navigation href (baseHref-prefixed) for a sponsor detail page.
+  String sponsorHref(String slug) => '${linkHref}sponsors/$slug';
+
+  /// Navigation href to the Event Info section on the home page.
+  String get eventInfoAnchorHref => '$linkHref#event-info';
+
+  /// Navigation href to the Sponsors section on the home page.
+  String get sponsorsAnchorHref => '$linkHref#sponsors';
+
+  /// Navigation href to the Job Boards section on the home page.
+  String get jobBoardsAnchorHref => '$linkHref#job-boards';
+
+  /// The other supported locale (the site ships exactly two).
+  AppLocale get other => this == AppLocale.ja ? AppLocale.en : AppLocale.ja;
 }
 
 class Strings {
@@ -42,6 +61,13 @@ class Strings {
   };
 
   String get heroThemeName => '〜Assemble〜';
+
+  // ── Header ──────────────────────────────────────────────────────────
+
+  String get navMenuAriaLabel => switch (locale) {
+    AppLocale.ja => 'メニュー',
+    AppLocale.en => 'Navigation menu',
+  };
 
   // ── Event section ───────────────────────────────────────────────────
 
@@ -70,9 +96,9 @@ class Strings {
     AppLocale.en => 'Get Tickets',
   };
 
-  String get eventInfoSubmitSessionCta => switch (locale) {
-    AppLocale.ja => 'セッションを応募',
-    AppLocale.en => 'Submit Your Session',
+  String get eventInfoSessionClosed => switch (locale) {
+    AppLocale.ja => 'セッション募集は終了しました',
+    AppLocale.en => 'Session Submissions Closed',
   };
 
   String get eventInfoComingSoon => switch (locale) {
@@ -112,8 +138,40 @@ class Strings {
   };
 
   String get latestUpdatesCtaUrl => switch (locale) {
-    AppLocale.ja => 'https://medium.com/flutterkaigi/flutterkaigi-2026-opportunities-guide-ja-0e8cdb0a4acb',
-    AppLocale.en => 'https://medium.com/flutterkaigi/flutterkaigi-2026-opportunities-guide-en-1e5bd6c14461',
+    AppLocale.ja =>
+      'https://medium.com/flutterkaigi/flutterkaigi-2026-opportunities-guide-ja-0e8cdb0a4acb',
+    AppLocale.en =>
+      'https://medium.com/flutterkaigi/flutterkaigi-2026-opportunities-guide-en-1e5bd6c14461',
+  };
+
+  // ── Sponsors ────────────────────────────────────────────────────────
+
+  String get sponsorsNav => 'Sponsors';
+
+  String get sponsorsTitle => 'Sponsors';
+
+  String get sponsorsSubtitle => switch (locale) {
+    AppLocale.ja => 'FlutterKaigi 2026 を支えてくださるスポンサーの皆様',
+    AppLocale.en => 'The sponsors supporting FlutterKaigi 2026',
+  };
+
+  /// Accessible label for a sponsor logo tile linking to its detail page.
+  String sponsorCardAriaLabel(String name) => switch (locale) {
+    AppLocale.ja => '$name の詳細を見る',
+    AppLocale.en => 'View details for $name',
+  };
+
+  String get sponsorBackToList => switch (locale) {
+    AppLocale.ja => 'スポンサー一覧に戻る',
+    AppLocale.en => 'Back to Sponsors',
+  };
+
+  String get sponsorConnectHeading => 'Connect';
+
+  /// Tier badge text on the detail page (CSS upper-cases it).
+  String sponsorTierBadge(String tierLabel) => switch (locale) {
+    AppLocale.ja => '$tierLabel スポンサー',
+    AppLocale.en => '$tierLabel Sponsor',
   };
 
   String get footerCopyright => switch (locale) {
@@ -125,11 +183,33 @@ class Strings {
     AppLocale.ja => const [
       'Flutter および関連するロゴは Google LLC の商標です。FlutterKaigi は Google LLC の承認または提携を受けておりません。',
       'Flutter の名称およびロゴは Google LLC の商標です。',
+      'RevCommは、株式会社 RevComm の登録商標または商標です。',
     ],
     AppLocale.en => const [
       'Flutter and the related logo are trademarks of Google LLC. FlutterKaigi is not affiliated with or otherwise sponsored by Google LLC.',
       'The Flutter name and the Flutter logo are trademarks of Google LLC.',
+      'RevComm is a registered trademark or trademark of RevComm Inc.',
     ],
+  };
+
+  // ── Job Boards ──────────────────────────────────────────────────────
+
+  /// Section subtitle on the home Job Boards section.
+  String get jobBoardsSubtitle => switch (locale) {
+    AppLocale.ja => 'Flutter エンジニアを募集しているスポンサー企業の求人情報をチェックしよう。',
+    AppLocale.en => 'Explore open roles at the sponsor companies hiring Flutter engineers.',
+  };
+
+  /// CTA label on Job Board cards and the detail page block.
+  String get jobBoardsCta => switch (locale) {
+    AppLocale.ja => '採用情報',
+    AppLocale.en => 'Open Roles',
+  };
+
+  /// Accessible aria-label for a Job Board CTA link.
+  String jobBoardsCardAriaLabel(String name) => switch (locale) {
+    AppLocale.ja => '$name の採用情報を見る（新しいタブで開く）',
+    AppLocale.en => 'View open roles at $name (opens in a new tab)',
   };
 
   String get footerCodeOfConduct => switch (locale) {
@@ -172,10 +252,7 @@ class Strings {
 
   String get footerRepository => 'Repository';
 
-  AppLocale get other => switch (locale) {
-    AppLocale.ja => AppLocale.en,
-    AppLocale.en => AppLocale.ja,
-  };
+  AppLocale get other => locale.other;
 
   String get languageToggleLabel => switch (other) {
     AppLocale.ja => '日本語',

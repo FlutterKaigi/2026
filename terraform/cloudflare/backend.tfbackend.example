@@ -1,0 +1,7 @@
+use_lockfile = true
+
+# https://dash.cloudflare.com/cdd8f59359fe226645e7b541cdc53b57/r2/api-tokens から
+# 「Object Read & Write」権限の R2 API トークンを発行して設定する。
+# このファイルを backend.tfbackend にコピーして実際の値を記入すること（backend.tfbackend は gitignore 済み）。
+access_key = "example-access-key"
+secret_key = "example-secret-key"

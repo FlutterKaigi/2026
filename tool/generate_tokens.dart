@@ -40,7 +40,7 @@ void main(List<String> args) {
     ..writeln();
 
   // ── Colors ────────────────────────────────────────────────────────
-  out.writeln('// ── Colors (${_tokensDir}/color.tokens.json) ──');
+  out.writeln('// ── Colors ($_tokensDir/color.tokens.json) ──');
   _walk(colors, const [], (path, leaf) {
     if (leaf['type'] != 'color') return;
     final hex = _normalizeHex(leaf['value'] as String);
@@ -52,7 +52,7 @@ void main(List<String> args) {
   out.writeln();
 
   // ── Font styles ───────────────────────────────────────────────────
-  out.writeln('// ── Font styles (${_tokensDir}/font.tokens.json) ──');
+  out.writeln('// ── Font styles ($_tokensDir/font.tokens.json) ──');
   _walk(fonts, const [], (path, leaf) {
     if (leaf['type'] != 'custom-fontStyle') return;
     final v = leaf['value'] as Map<String, dynamic>;
@@ -69,7 +69,7 @@ void main(List<String> args) {
   out.writeln();
 
   // ── Effects ───────────────────────────────────────────────────────
-  out.writeln('// ── Effects (${_tokensDir}/effect.tokens.json) ──');
+  out.writeln('// ── Effects ($_tokensDir/effect.tokens.json) ──');
   _walk(effects, const [], (path, leaf) {
     if (leaf['type'] != 'custom-shadow') return;
     final v = leaf['value'] as Map<String, dynamic>;
