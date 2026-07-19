@@ -1,0 +1,55 @@
+Flutter crash report.
+Please report a bug at https://github.com/flutter/flutter/issues.
+
+## command
+
+flutter analyze .
+
+## exception
+
+_Exception: Exception: analysis server exited with code 255 and output:
+[stderr] /Users/yuheisuzuki/fvm/versions/3.41.7/bin/cache/dart-sdk/bin/snapshots/analysis_server.dart.snapshot is an AOT snapshot and should be run with 'dartaotruntime'
+
+```
+```
+
+## flutter doctor
+
+```
+[✓] Flutter (Channel stable, 3.41.7, on macOS 26.5.1 25F80 darwin-arm64, locale ja-JP) [812ms]
+    • Flutter version 3.41.7 on channel stable at /Users/yuheisuzuki/fvm/versions/3.41.7
+    • Upstream repository https://github.com/flutter/flutter.git
+    • Framework revision cc0734ac71 (3 months ago), 2026-04-15 21:21:08 -0700
+    • Engine revision 59aa584fdf
+    • Dart version 3.11.5
+    • DevTools version 2.54.2
+    • Feature flags: enable-web, no-enable-linux-desktop, enable-macos-desktop, no-enable-windows-desktop, enable-android, enable-ios, cli-animations, enable-native-assets, enable-swift-package-manager, omit-legacy-version-file, enable-lldb-debugging, enable-uiscene-migration
+
+[✓] Android toolchain - develop for Android devices (Android SDK version 36.1.0-rc1) [1,834ms]
+    • Android SDK at /Users/yuheisuzuki/Library/Android/sdk
+    • Emulator version 36.1.9.0 (build_id 13823996) (CL:N/A)
+    • Platform android-36, build-tools 36.1.0-rc1
+    • Java binary at: /Applications/Android Studio.app/Contents/jbr/Contents/Home/bin/java
+      This is the JDK bundled with the latest Android Studio installation on this machine.
+      To manually set the JDK path, use: `flutter config --jdk-dir="path/to/jdk"`.
+    • Java version OpenJDK Runtime Environment (build 21.0.7+-13880790-b1038.58)
+    • All Android licenses accepted.
+
+[✓] Xcode - develop for iOS and macOS (Xcode 26.2) [1,667ms]
+    • Xcode at /Applications/Xcode-26.2.0.app/Contents/Developer
+    • Build 17C52
+    • CocoaPods version 1.16.2
+
+[✓] Chrome - develop for the web [4ms]
+    • Chrome at /Applications/Google Chrome.app/Contents/MacOS/Google Chrome
+
+[✓] Connected device (3 available) [7.4s]
+    • iPhone SE (3rd generation) (mobile) • 394A6714-AF20-4975-8A88-D743A10CCA03 • ios            • com.apple.CoreSimulator.SimRuntime.iOS-26-3 (simulator)
+    • macOS (desktop)                     • macos                                • darwin-arm64   • macOS 26.5.1 25F80 darwin-arm64
+    • Chrome (web)                        • chrome                               • web-javascript • Google Chrome 150.0.7871.47
+
+[✓] Network resources [895ms]
+    • All expected network resources are available.
+
+• No issues found!
+```

@@ -52,6 +52,92 @@ service cloud.firestore {
       allow write: if hasAdminAccess();
     }
 
+    match /quizEvents/{eventId} {
+      // 非公開（draft）のイベントは運営のみ閲覧できる。
+      // 参加者アプリの一覧クエリは isPublic == true の等価条件で絞り込み、
+      // list はその条件をクエリから証明できる（get は実ドキュメントで評価）。
+      allow get, list: if hasAdminAccess()
+        || resource.data.status != 'draft'
+        || resource.data.isPublic == true;
+      allow write: if hasAdminAccess();
+
+      // 現地受付コード（運営のみ）。参加登録ルールが get() で参照する。
+      match /secret/{secretId} {
+        allow read, write: if hasAdminAccess();
+      }
+
+      // 参加登録時の受付コード申告。参加者ドキュメント作成に先立って本人が
+      // 書き込み、コードの一致はこの時点でルールが検証する。
+      // 読み取りは参加者には許可しない（コードの漏洩防止）。
+      match /entryClaims/{uid} {
+        allow read: if hasAdminAccess();
+        // 受付中のみ・本人のみ・掲示中の受付コードと一致する場合のみ書ける。
+        // 誤コードの再試行で上書きできるよう create / update とも許可する。
+        allow create, update: if request.auth != null
+          && request.auth.uid == uid
+          && get(/databases/$(database)/documents/quizEvents/$(eventId)).data.status == 'registration'
+          && request.resource.data.keys().hasOnly(['code'])
+          && request.resource.data.code is string
+          && request.resource.data.code
+             == get(/databases/$(database)/documents/quizEvents/$(eventId)/secret/entry).data.code;
+        allow delete: if hasAdminAccess();
+      }
+
+      match /participants/{uid} {
+        allow read: if true;
+        // 受付中のみ・本人のみ・受付コード検証済み（entryClaims が存在 = コード
+        // 一致時のみ作成できる）の場合に登録できる。
+        allow create: if request.auth != null
+          && request.auth.uid == uid
+          && get(/databases/$(database)/documents/quizEvents/$(eventId)).data.status == 'registration'
+          && request.resource.data.keys().hasOnly(['displayName', 'registeredAt'])
+          && request.resource.data.displayName is string
+          && request.resource.data.displayName.size() >= 1
+          && request.resource.data.displayName.size() <= 20
+          && request.resource.data.registeredAt == request.time
+          && exists(/databases/$(database)/documents/quizEvents/$(eventId)/entryClaims/$(uid));
+        allow update, delete: if hasAdminAccess();
+      }
+
+      match /teams/{teamId} {
+        allow read: if true;
+        allow write: if hasAdminAccess();
+      }
+
+      match /questions/{questionId} {
+        // draft の問題（未出題の問題文・選択肢）は参加者から見えない。
+        allow get: if hasAdminAccess() || resource.data.status != 'draft';
+        allow list: if hasAdminAccess();
+        allow write: if hasAdminAccess();
+
+        match /secret/{secretId} {
+          allow read, write: if hasAdminAccess();
+        }
+      }
+
+      match /answers/{answerId} {
+        // 自チームの回答のみ読める（他チームの回答の覗き見防止）。
+        allow get: if hasAdminAccess()
+          || (request.auth != null
+              && request.auth.uid in get(/databases/$(database)/documents/quizEvents/$(eventId)/teams/$(resource.data.teamId)).data.memberUids);
+        allow list: if hasAdminAccess();
+        // 作成・削除は運営のみ（出題時に全チーム分を事前作成する）。
+        allow create, delete: if hasAdminAccess();
+        // 参加者は自チームの回答の選択のみ変更できる。isCorrect 等は書けない。
+        allow update: if hasAdminAccess()
+          || (request.auth != null
+              && request.auth.uid in get(/databases/$(database)/documents/quizEvents/$(eventId)/teams/$(resource.data.teamId)).data.memberUids
+              && get(/databases/$(database)/documents/quizEvents/$(eventId)/questions/$(resource.data.questionId)).data.status == 'open'
+              && request.time < get(/databases/$(database)/documents/quizEvents/$(eventId)/questions/$(resource.data.questionId)).data.closesAt
+              && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['selectedOptionIndex', 'answeredBy', 'submittedAt'])
+              && request.resource.data.selectedOptionIndex is int
+              && request.resource.data.selectedOptionIndex >= 0
+              && request.resource.data.selectedOptionIndex < get(/databases/$(database)/documents/quizEvents/$(eventId)/questions/$(resource.data.questionId)).data.options.size()
+              && request.resource.data.answeredBy == request.auth.uid
+              && request.resource.data.submittedAt == request.time);
+      }
+    }
+
     // 未定義のパスを明示的に拒否（多層防御）。
     // Firestore はデフォルトで拒否するが、コレクション追加時の取りこぼしを防ぐため明示する。
     match /{document=**} {

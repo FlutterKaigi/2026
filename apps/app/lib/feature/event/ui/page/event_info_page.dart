@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/provider/package_info.dart';
 import 'package:app/core/provider/theme_mode.dart';
+import 'package:app/core/router/router.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -20,6 +21,14 @@ class EventInfoPage extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.symmetric(vertical: 8),
         children: [
+          ListTile(
+            leading: const Icon(Icons.quiz_outlined),
+            title: Text(t.quiz.title),
+            subtitle: Text(t.quiz.entrySubtitle),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => unawaited(const QuizListRoute().push<void>(context)),
+          ),
+          const Divider(height: 1),
           ListTile(
             leading: const Icon(Icons.info_outline),
             title: Text(t.app.title),

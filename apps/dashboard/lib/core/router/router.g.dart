@@ -90,6 +90,22 @@ RouteBase get $appShellRoute => ShellRouteData.$route(
         GoRouteData.$route(path: 'edit', factory: $SponsorEditRoute._fromState),
       ],
     ),
+    GoRouteData.$route(
+      path: '/quiz',
+      factory: $QuizEventListRoute._fromState,
+      routes: [
+        GoRouteData.$route(
+          path: ':eventId',
+          factory: $QuizConsoleRoute._fromState,
+          routes: [
+            GoRouteData.$route(
+              path: 'questions/edit',
+              factory: $QuizQuestionEditRoute._fromState,
+            ),
+          ],
+        ),
+      ],
+    ),
   ],
 );
 
@@ -421,6 +437,81 @@ mixin $SponsorEditRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/sponsors/edit');
+
+  @override
+  void go(BuildContext context) => context.go(location, extra: _self.$extra);
+
+  @override
+  Future<T?> push<T>(BuildContext context) =>
+      context.push<T>(location, extra: _self.$extra);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location, extra: _self.$extra);
+
+  @override
+  void replace(BuildContext context) =>
+      context.replace(location, extra: _self.$extra);
+}
+
+mixin $QuizEventListRoute on GoRouteData {
+  static QuizEventListRoute _fromState(GoRouterState state) =>
+      const QuizEventListRoute();
+
+  @override
+  String get location => GoRouteData.$location('/quiz');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $QuizConsoleRoute on GoRouteData {
+  static QuizConsoleRoute _fromState(GoRouterState state) =>
+      QuizConsoleRoute(state.pathParameters['eventId']!);
+
+  QuizConsoleRoute get _self => this as QuizConsoleRoute;
+
+  @override
+  String get location =>
+      GoRouteData.$location('/quiz/${Uri.encodeComponent(_self.eventId)}');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $QuizQuestionEditRoute on GoRouteData {
+  static QuizQuestionEditRoute _fromState(GoRouterState state) =>
+      QuizQuestionEditRoute(
+        state.pathParameters['eventId']!,
+        $extra: state.extra as QuizQuestion?,
+      );
+
+  QuizQuestionEditRoute get _self => this as QuizQuestionEditRoute;
+
+  @override
+  String get location => GoRouteData.$location(
+    '/quiz/${Uri.encodeComponent(_self.eventId)}/questions/edit',
+  );
 
   @override
   void go(BuildContext context) => context.go(location, extra: _self.$extra);

@@ -45,6 +45,17 @@ part of 'router.dart';
         TypedGoRoute<SponsorEditRoute>(path: AppPaths.sponsorEdit),
       ],
     ),
+    TypedGoRoute<QuizEventListRoute>(
+      path: AppPaths.quiz,
+      routes: [
+        TypedGoRoute<QuizConsoleRoute>(
+          path: AppPaths.quizConsole,
+          routes: [
+            TypedGoRoute<QuizQuestionEditRoute>(path: AppPaths.quizQuestionEdit),
+          ],
+        ),
+      ],
+    ),
   ],
 )
 class AppShellRoute extends ShellRouteData {
