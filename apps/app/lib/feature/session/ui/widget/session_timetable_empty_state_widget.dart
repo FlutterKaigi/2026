@@ -7,13 +7,11 @@ class SessionTimetableEmptyStateWidget extends StatelessWidget {
   const SessionTimetableEmptyStateWidget({
     required this.data,
     required this.scrollController,
-    required this.onRefresh,
     super.key,
   });
 
   final SessionTimetableData data;
   final ScrollController scrollController;
-  final RefreshCallback onRefresh;
 
   @override
   Widget build(BuildContext context) {
@@ -22,45 +20,41 @@ class SessionTimetableEmptyStateWidget extends StatelessWidget {
         ? t.sessionTimetable.emptyFiltered
         : t.sessionTimetable.empty;
 
-    return RefreshIndicator(
-      onRefresh: onRefresh,
-      child: ListView(
-        controller: scrollController,
-        physics: const AlwaysScrollableScrollPhysics(),
-        children: [
-          if (data.availableDates.isNotEmpty)
-            SessionTimetableDaySelectorBarWidget(
-              dates: data.availableDates,
-              selectedDate: data.selectedDate,
-            ),
-          if (data.venues.isNotEmpty)
-            SessionTimetableVenueFilterBarWidget(
-              venues: data.venues,
-              selectedVenueId: data.selectedVenueId,
-            ),
-          const SessionTimetableTimeFormatSelectorWidget(),
-          Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(height: MediaQuery.sizeOf(context).height * 0.18),
-                Icon(
-                  Icons.event_busy_outlined,
-                  size: 48,
-                  color: Theme.of(context).colorScheme.outline,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  message,
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
-              ],
-            ),
+    return ListView(
+      controller: scrollController,
+      children: [
+        if (data.availableDates.isNotEmpty)
+          SessionTimetableDaySelectorBarWidget(
+            dates: data.availableDates,
+            selectedDate: data.selectedDate,
           ),
-        ],
-      ),
+        if (data.venues.isNotEmpty)
+          SessionTimetableVenueFilterBarWidget(
+            venues: data.venues,
+            selectedVenueId: data.selectedVenueId,
+          ),
+        const SessionTimetableTimeFormatSelectorWidget(),
+        Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(height: MediaQuery.sizeOf(context).height * 0.18),
+              Icon(
+                Icons.event_busy_outlined,
+                size: 48,
+                color: Theme.of(context).colorScheme.outline,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                message,
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyLarge,
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

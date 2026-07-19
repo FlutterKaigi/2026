@@ -23,15 +23,13 @@ class SessionTimetablePage extends HookConsumerWidget {
         AsyncData(:final value) when value.isEmpty => SessionTimetableEmptyStateWidget(
           data: value,
           scrollController: scrollController,
-          onRefresh: () async => _refresh(ref),
         ),
         AsyncData(:final value) => SessionTimetableListWidget(
           data: value,
           scrollController: scrollController,
-          onRefresh: () async => _refresh(ref),
         ),
         AsyncError() => SessionTimetableErrorStateWidget(
-          onRetry: () => _refresh(ref),
+          onRetry: () => _retry(ref),
         ),
         AsyncLoading() => const Center(
           child: CircularProgressIndicator.adaptive(),
@@ -40,7 +38,7 @@ class SessionTimetablePage extends HookConsumerWidget {
     );
   }
 
-  void _refresh(WidgetRef ref) {
+  void _retry(WidgetRef ref) {
     ref.invalidate(sessionListProvider);
     ref.invalidate(sessionTimelineEventListProvider);
     ref.invalidate(sessionVenueListProvider);
