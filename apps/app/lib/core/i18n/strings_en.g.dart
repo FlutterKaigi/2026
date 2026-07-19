@@ -114,7 +114,6 @@ class _Translations$sessionDetails$en extends Translations$sessionDetails$ja {
 	@override String get speakers => 'Speakers';
 	@override String get links => 'Links';
 	@override String get sessionize => 'Sessionize';
-	@override String get share => 'Share';
 	@override String get notFound => 'Session not found';
 	@override String get error => 'Failed to load session';
 }
@@ -260,7 +259,6 @@ extension on TranslationsEn {
 			'sessionDetails.speakers' => 'Speakers',
 			'sessionDetails.links' => 'Links',
 			'sessionDetails.sessionize' => 'Sessionize',
-			'sessionDetails.share' => 'Share',
 			'sessionDetails.notFound' => 'Session not found',
 			'sessionDetails.error' => 'Failed to load session',
 			'eventInfo.title' => 'Info',

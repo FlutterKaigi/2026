@@ -11,8 +11,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-const _sessionOrigin = 'https://2026.flutterkaigi.jp';
-
 class SessionDetailsContentWidget extends ConsumerWidget {
   const SessionDetailsContentWidget({
     required this.data,
@@ -35,13 +33,6 @@ class SessionDetailsContentWidget extends ConsumerWidget {
         slivers: [
           SliverAppBar.large(
             title: Text(title),
-            actions: [
-              IconButton(
-                tooltip: t.sessionDetails.share,
-                onPressed: () => unawaited(_shareSession(data, locale)),
-                icon: const Icon(Icons.share_outlined),
-              ),
-            ],
           ),
           SliverList.list(
             children: [
@@ -209,23 +200,6 @@ class _InfoChip extends StatelessWidget {
       visualDensity: VisualDensity.compact,
     );
   }
-}
-
-Future<void> _shareSession(SessionDetailData data, Locale locale) async {
-  final session = data.session;
-  final sessionUrl = Uri.parse('$_sessionOrigin/sessions/${session.id}');
-  final speakerNames = data.speakers.map((speaker) => speaker.name).join(', ');
-  final text = [
-    session.title.resolve(locale),
-    if (speakerNames.isNotEmpty) speakerNames,
-    sessionUrl.toString(),
-  ].join('\n');
-  final intentUri = Uri.https('x.com', '/intent/post', {
-    'text': text,
-    'hashtags': 'FlutterKaigi2026',
-  });
-
-  await launchUrl(intentUri, mode: LaunchMode.externalApplication);
 }
 
 Uri? _externalUri(String? rawUrl) {

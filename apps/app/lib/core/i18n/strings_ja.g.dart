@@ -153,9 +153,6 @@ class Translations$sessionDetails$ja {
 	/// ja: 'Sessionize'
 	String get sessionize => 'Sessionize';
 
-	/// ja: '共有'
-	String get share => '共有';
-
 	/// ja: 'セッションが見つかりませんでした'
 	String get notFound => 'セッションが見つかりませんでした';
 
@@ -349,7 +346,6 @@ extension on Translations {
 			'sessionDetails.speakers' => '登壇者',
 			'sessionDetails.links' => 'リンク',
 			'sessionDetails.sessionize' => 'Sessionize',
-			'sessionDetails.share' => '共有',
 			'sessionDetails.notFound' => 'セッションが見つかりませんでした',
 			'sessionDetails.error' => 'セッションを取得できませんでした',
 			'eventInfo.title' => '情報',

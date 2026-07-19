@@ -34,7 +34,7 @@ void main() {
     expect(find.text('Speaker A'), findsOneWidget);
     expect(find.text('Bio A'), findsOneWidget);
     expect(find.text('Sessionize'), findsOneWidget);
-    expect(find.byTooltip('共有'), findsOneWidget);
+    expect(find.text('https://sessionize.com/flutterkaigi-2026/session-a'), findsOneWidget);
   });
 
   testWidgets('hides optional sections when session fields are absent', (tester) async {
