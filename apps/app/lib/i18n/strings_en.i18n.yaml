@@ -2,19 +2,65 @@ app:
   title: FlutterKaigi 2026
 navigation:
   news: News
-  info: Event Info
+  sessions: Sessions
+  info: Info
 news:
   title: News
   empty: There is no news yet
   error: Failed to load news
+sessionTimetable:
+  title: Timetable
+  dayButtonLabel: Day $day ($date)
+  empty: The timetable has not been published yet
+  emptyFiltered: There are no items for the selected venue
+  error: Failed to load timetable
+  timeFormat:
+    twentyFourHour: 24 Hour
+    amPm: AM/PM
+  venue:
+    all: All
+    unknown: Venue TBA
+  speaker:
+    none: Speaker TBA
+  type:
+    regular: Regular Talk
+    lightningTalk: Lightning Talk
+    beginnersLightningTalk: Beginners LT
+    handsOn: Hands-on
+    event: Event
+sessionDetails:
+  title: Session Details
+  description: Description
+  schedule: Schedule and Venue
+  speakers: Speakers
+  links: Links
+  sessionize: Sessionize
+  share: Share
+  notFound: Session not found
+  error: Failed to load session
+sessionBookmark:
+  openBookmarked: Bookmarked sessions
+  add: Add bookmark
+  remove: Remove bookmark
+  updateFailed: Failed to update bookmark
+bookmarkedSessions:
+  title: Bookmarked Sessions
+  emptyTitle: No bookmarked sessions
+  emptyBody: Bookmark sessions to find them here.
+  openSessions: Open sessions
+  error: Failed to load bookmarked sessions
 eventInfo:
-  title: Event Info
+  title: Info
   version: Version
   themeMode:
     title: Theme
     system: System
     light: Light
     dark: Dark
+  language:
+    title: Language
+    japanese: 日本語
+    english: English
 notFound:
   title: Page not found
   description: The page you are looking for does not exist or may have moved.

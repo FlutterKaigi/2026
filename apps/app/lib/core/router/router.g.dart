@@ -18,6 +18,24 @@ RouteBase get $appShellRoute => StatefulShellRouteData.$route(
     ),
     StatefulShellBranchData.$branch(
       routes: [
+        GoRouteData.$route(
+          path: '/sessions',
+          factory: $SessionTimetableRoute._fromState,
+          routes: [
+            GoRouteData.$route(
+              path: 'bookmarked',
+              factory: $BookmarkedSessionsRoute._fromState,
+            ),
+            GoRouteData.$route(
+              path: ':sessionId',
+              factory: $SessionDetailsRoute._fromState,
+            ),
+          ],
+        ),
+      ],
+    ),
+    StatefulShellBranchData.$branch(
+      routes: [
         GoRouteData.$route(path: '/info', factory: $EventInfoRoute._fromState),
       ],
     ),
@@ -41,16 +59,76 @@ mixin $NewsRoute on GoRouteData {
   Future<T?> push<T>(BuildContext context) => context.push<T>(location);
 
   @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
+  void pushReplacement(BuildContext context) => context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $SessionTimetableRoute on GoRouteData {
+  static SessionTimetableRoute _fromState(GoRouterState state) => const SessionTimetableRoute();
+
+  @override
+  String get location => GoRouteData.$location('/sessions');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) => context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $BookmarkedSessionsRoute on GoRouteData {
+  static BookmarkedSessionsRoute _fromState(GoRouterState state) => const BookmarkedSessionsRoute();
+
+  @override
+  String get location => GoRouteData.$location('/sessions/bookmarked');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) => context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $SessionDetailsRoute on GoRouteData {
+  static SessionDetailsRoute _fromState(GoRouterState state) =>
+      SessionDetailsRoute(sessionId: state.pathParameters['sessionId']!);
+
+  SessionDetailsRoute get _self => this as SessionDetailsRoute;
+
+  @override
+  String get location => GoRouteData.$location(
+    '/sessions/${Uri.encodeComponent(_self.sessionId)}',
+  );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) => context.pushReplacement(location);
 
   @override
   void replace(BuildContext context) => context.replace(location);
 }
 
 mixin $EventInfoRoute on GoRouteData {
-  static EventInfoRoute _fromState(GoRouterState state) =>
-      const EventInfoRoute();
+  static EventInfoRoute _fromState(GoRouterState state) => const EventInfoRoute();
 
   @override
   String get location => GoRouteData.$location('/info');
@@ -62,8 +140,7 @@ mixin $EventInfoRoute on GoRouteData {
   Future<T?> push<T>(BuildContext context) => context.push<T>(location);
 
   @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
+  void pushReplacement(BuildContext context) => context.pushReplacement(location);
 
   @override
   void replace(BuildContext context) => context.replace(location);

@@ -10,6 +10,17 @@ part of 'router.dart';
     TypedStatefulShellBranch<NewsBranch>(
       routes: [TypedGoRoute<NewsRoute>(path: '/news')],
     ),
+    TypedStatefulShellBranch<SessionBranch>(
+      routes: [
+        TypedGoRoute<SessionTimetableRoute>(
+          path: '/sessions',
+          routes: [
+            TypedGoRoute<BookmarkedSessionsRoute>(path: 'bookmarked'),
+            TypedGoRoute<SessionDetailsRoute>(path: ':sessionId'),
+          ],
+        ),
+      ],
+    ),
     TypedStatefulShellBranch<EventInfoBranch>(
       routes: [TypedGoRoute<EventInfoRoute>(path: '/info')],
     ),
@@ -33,6 +44,10 @@ class AppShellRoute extends StatefulShellRouteData {
           label: t.navigation.news,
         ),
         RootDestination(
+          icon: Icons.calendar_today_outlined,
+          label: t.navigation.sessions,
+        ),
+        RootDestination(
           icon: Icons.info_outline,
           label: t.navigation.info,
         ),
@@ -47,6 +62,11 @@ class NewsBranch extends StatefulShellBranchData {
   const NewsBranch();
 }
 
+/// Branch hosting the session timetable tab.
+class SessionBranch extends StatefulShellBranchData {
+  const SessionBranch();
+}
+
 /// Branch hosting the event info tab.
 class EventInfoBranch extends StatefulShellBranchData {
   const EventInfoBranch();
@@ -58,6 +78,32 @@ class NewsRoute extends GoRouteData with $NewsRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) => const NewsListPage();
+}
+
+/// `/sessions` — the session timetable.
+class SessionTimetableRoute extends GoRouteData with $SessionTimetableRoute {
+  const SessionTimetableRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const SessionTimetablePage();
+}
+
+/// `/sessions/bookmarked` — locally bookmarked sessions.
+class BookmarkedSessionsRoute extends GoRouteData with $BookmarkedSessionsRoute {
+  const BookmarkedSessionsRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const BookmarkedSessionsPage();
+}
+
+/// `/sessions/:sessionId` — session details.
+class SessionDetailsRoute extends GoRouteData with $SessionDetailsRoute {
+  const SessionDetailsRoute({required this.sessionId});
+
+  final String sessionId;
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => SessionDetailsPage(sessionId: sessionId);
 }
 
 /// `/info` — event and app information.

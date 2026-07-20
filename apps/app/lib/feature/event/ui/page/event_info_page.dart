@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:app/core/i18n/strings.g.dart';
+import 'package:app/core/provider/app_locale.dart';
 import 'package:app/core/provider/package_info.dart';
 import 'package:app/core/provider/theme_mode.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +14,7 @@ class EventInfoPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final t = Translations.of(context);
+    final appLocale = ref.watch(appLocaleProvider);
     final packageInfo = ref.watch(packageInfoProvider);
     final themeMode = ref.watch(themeModeProvider);
     return Scaffold(
@@ -60,6 +62,32 @@ class EventInfoPage extends ConsumerWidget {
               selected: {themeMode},
               onSelectionChanged: (selection) => unawaited(
                 ref.read(themeModeProvider.notifier).set(selection.first),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
+            child: Text(
+              t.eventInfo.language.title,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: SegmentedButton<AppLocale>(
+              segments: [
+                ButtonSegment(
+                  value: AppLocale.ja,
+                  label: Text(t.eventInfo.language.japanese),
+                ),
+                ButtonSegment(
+                  value: AppLocale.en,
+                  label: Text(t.eventInfo.language.english),
+                ),
+              ],
+              selected: {appLocale},
+              onSelectionChanged: (selection) => unawaited(
+                ref.read(appLocaleProvider.notifier).set(selection.first),
               ),
             ),
           ),
