@@ -1,4 +1,5 @@
 import 'package:app/core/i18n/strings.g.dart';
+import 'package:app/core/router/router.dart';
 import 'package:app/feature/session/data/provider/session_timetable_provider.dart';
 import 'package:app/feature/session/ui/widget/session_timetable_empty_state_widget.dart';
 import 'package:app/feature/session/ui/widget/session_timetable_error_state_widget.dart';
@@ -18,7 +19,16 @@ class SessionTimetablePage extends HookConsumerWidget {
     final scrollController = useScrollController();
 
     return Scaffold(
-      appBar: AppBar(title: Text(t.sessionTimetable.title)),
+      appBar: AppBar(
+        title: Text(t.sessionTimetable.title),
+        actions: [
+          IconButton(
+            tooltip: t.sessionBookmark.openBookmarked,
+            onPressed: () => const BookmarkedSessionsRoute().push<void>(context),
+            icon: const Icon(Icons.bookmarks_outlined),
+          ),
+        ],
+      ),
       body: switch (timetable) {
         AsyncData(:final value) when value.isEmpty => SessionTimetableEmptyStateWidget(
           data: value,

@@ -28,6 +28,27 @@ sessionTimetable:
     beginnersLightningTalk: 初心者向けLT
     handsOn: ハンズオン
     event: イベント
+sessionDetails:
+  title: セッション詳細
+  description: 概要
+  schedule: 日時・会場
+  speakers: 登壇者
+  links: リンク
+  sessionize: Sessionize
+  share: 共有
+  notFound: セッションが見つかりませんでした
+  error: セッションを取得できませんでした
+sessionBookmark:
+  openBookmarked: ブックマークしたセッション
+  add: ブックマークに追加
+  remove: ブックマークから削除
+  updateFailed: ブックマークを更新できませんでした
+bookmarkedSessions:
+  title: ブックマークしたセッション
+  emptyTitle: ブックマークしたセッションはありません
+  emptyBody: 気になるセッションをブックマークすると、ここからすぐに見つけられます
+  openSessions: タイムテーブルを開く
+  error: ブックマークしたセッションを取得できませんでした
 eventInfo:
   title: 情報
   version: バージョン
