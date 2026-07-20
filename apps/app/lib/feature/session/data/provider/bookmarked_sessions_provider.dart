@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:app/core/provider/shared_preferences.dart';
 import 'package:app/feature/session/data/provider/session_timetable_provider.dart';
 import 'package:data/data.dart';
@@ -43,34 +45,44 @@ final bookmarkedSessionIdsProvider = AsyncNotifierProvider<BookmarkedSessionIdsN
 );
 
 class BookmarkedSessionIdsNotifier extends AsyncNotifier<Set<String>> {
+  Future<void> _updateQueue = Future.value();
+
   @override
   Set<String> build() {
     return ref.watch(bookmarkedSessionIdsRepositoryProvider).read();
   }
 
-  Future<void> add(String sessionId) async {
-    final current = await future;
-    await _save(current: current, sessionIds: {...current, sessionId});
-  }
+  Future<void> add(String sessionId) => _enqueueUpdate(
+    (current) => {...current, sessionId},
+  );
 
-  Future<void> remove(String sessionId) async {
-    final current = await future;
-    await _save(
-      current: current,
-      sessionIds: {...current}..remove(sessionId),
-    );
-  }
+  Future<void> remove(String sessionId) => _enqueueUpdate(
+    (current) => {...current}..remove(sessionId),
+  );
 
-  Future<void> toggle(String sessionId) async {
-    final current = await future;
-    if (current.contains(sessionId)) {
-      await _save(
-        current: current,
-        sessionIds: {...current}..remove(sessionId),
-      );
-    } else {
-      await _save(current: current, sessionIds: {...current, sessionId});
-    }
+  Future<void> toggle(String sessionId) => _enqueueUpdate(
+    (current) => current.contains(sessionId) ? ({...current}..remove(sessionId)) : {...current, sessionId},
+  );
+
+  Future<void> _enqueueUpdate(
+    Set<String> Function(Set<String> current) update,
+  ) {
+    final result = Completer<void>();
+
+    _updateQueue = _updateQueue.then((_) async {
+      try {
+        final current = await future;
+        await _save(
+          current: current,
+          sessionIds: update(current),
+        );
+        result.complete();
+      } on Object catch (error, stackTrace) {
+        result.completeError(error, stackTrace);
+      }
+    });
+
+    return result.future;
   }
 
   Future<void> _save({
@@ -83,9 +95,9 @@ class BookmarkedSessionIdsNotifier extends AsyncNotifier<Set<String>> {
     try {
       await ref.read(bookmarkedSessionIdsRepositoryProvider).write(next);
       state = AsyncData(next);
-    } on Exception catch (error, stackTrace) {
+    } on Exception {
       state = AsyncData(previous);
-      Error.throwWithStackTrace(error, stackTrace);
+      rethrow;
     }
   }
 }

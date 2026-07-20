@@ -34,11 +34,18 @@ class SessionTimetableDayContentWidget extends ConsumerWidget {
     final locale = Localizations.localeOf(context).toLanguageTag();
     final textDirection = Directionality.of(context);
     final timeLabelStyle = _timeLabelTextStyle(context);
-    final timeColumnWidth =
-        _measureWidestSupportedTimeLabelWidth(
-          context: context,
-          timeFormat: timeFormat,
+    final timeLabels = [
+      for (final entries in entryGroups)
+        formatEventTime(
+          entries.first.startsAt,
+          timeFormat,
           locale: locale,
+        ),
+    ];
+    final timeColumnWidth =
+        _measureWidestTimeLabelWidth(
+          context: context,
+          labels: timeLabels.toSet(),
           style: timeLabelStyle,
           textDirection: textDirection,
         ) +
@@ -58,6 +65,7 @@ class SessionTimetableDayContentWidget extends ConsumerWidget {
           _TimetableEntryGroupTileWidget(
             entries: entryGroups[index],
             isLast: index == entryGroups.length - 1,
+            timeLabel: timeLabels[index],
             timeFormat: timeFormat,
             timeColumnWidth: timeColumnWidth,
           ),
@@ -122,26 +130,22 @@ class _TimetableEntryGroupTileWidget extends StatelessWidget {
   const _TimetableEntryGroupTileWidget({
     required this.entries,
     required this.isLast,
+    required this.timeLabel,
     required this.timeFormat,
     required this.timeColumnWidth,
   });
 
   final List<SessionTimetableEntry> entries;
   final bool isLast;
+  final String timeLabel;
   final EventTimeFormat timeFormat;
   final double timeColumnWidth;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final locale = Localizations.localeOf(context).toLanguageTag();
     final firstEntry = entries.first;
     final textDirection = Directionality.of(context);
-    final timeLabel = formatEventTime(
-      firstEntry.startsAt,
-      timeFormat,
-      locale: locale,
-    );
     final timeLabelStyle = _timeLabelTextStyle(context);
     final lineStartY =
         _timeLabelTopPadding +
@@ -536,16 +540,15 @@ double _measureTextHeight({
   return textPainter.height;
 }
 
-double _measureWidestSupportedTimeLabelWidth({
+double _measureWidestTimeLabelWidth({
   required BuildContext context,
-  required EventTimeFormat timeFormat,
-  required String locale,
+  required Iterable<String> labels,
   required TextStyle? style,
   required TextDirection textDirection,
 }) {
   final textPainter = TextPainter(
     text: TextSpan(
-      text: _supportedTimeLabels(timeFormat, locale).join('\n'),
+      text: labels.join('\n'),
       style: style ?? DefaultTextStyle.of(context).style,
     ),
     textAlign: TextAlign.center,
@@ -557,28 +560,6 @@ double _measureWidestSupportedTimeLabelWidth({
     0,
     (width, line) => math.max(width, line.width),
   );
-}
-
-Iterable<String> _supportedTimeLabels(
-  EventTimeFormat timeFormat,
-  String locale,
-) sync* {
-  for (var hour = 0; hour < Duration.hoursPerDay; hour++) {
-    for (var minute = 0; minute < Duration.minutesPerHour; minute++) {
-      yield formatEventTime(
-        _eventLocalTimeCandidate(hour: hour, minute: minute),
-        timeFormat,
-        locale: locale,
-      );
-    }
-  }
-}
-
-DateTime _eventLocalTimeCandidate({
-  required int hour,
-  required int minute,
-}) {
-  return DateTime.utc(2026, 1, 1, hour, minute).subtract(eventTimeZoneOffset);
 }
 
 TextStyle? _timeLabelTextStyle(BuildContext context) {
