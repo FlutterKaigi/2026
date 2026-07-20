@@ -34,9 +34,12 @@ class _BroadcasterPageState extends State<BroadcasterPage> {
     'CAPTIONS_SERVER_URL',
     defaultValue: 'ws://localhost:8082',
   );
+  // Room ids equal Firestore venue ids (e.g. hall-a); the attendee app and QR
+  // codes resolve captions by venue, so a mismatched id publishes to a room
+  // nobody can find.
   static const _defaultRoomId = String.fromEnvironment(
     'CAPTIONS_ROOM_ID',
-    defaultValue: 'room-a',
+    defaultValue: 'hall-a',
   );
   static const _defaultToken = String.fromEnvironment(
     'INGEST_TOKEN',
@@ -52,6 +55,7 @@ class _BroadcasterPageState extends State<BroadcasterPage> {
 
   List<InputDevice> _devices = [];
   InputDevice? _device;
+  String _sourceLang = 'ja-JP';
 
   LinkState _link = LinkState.disconnected;
   bool _running = false;
@@ -132,6 +136,7 @@ class _BroadcasterPageState extends State<BroadcasterPage> {
       serverUrl: _serverUrl.text.trim(),
       roomId: _roomId.text.trim(),
       token: _token.text.trim(),
+      sourceLang: _sourceLang,
     );
 
     try {
@@ -213,7 +218,8 @@ class _BroadcasterPageState extends State<BroadcasterPage> {
                     controller: _roomId,
                     enabled: !_running,
                     decoration: const InputDecoration(
-                      labelText: 'Room ID',
+                      labelText: 'Room ID (= venue ID)',
+                      helperText: '会場の venueId と一致させる (例: hall-a)',
                       border: OutlineInputBorder(),
                     ),
                   ),
@@ -230,6 +236,21 @@ class _BroadcasterPageState extends State<BroadcasterPage> {
                   ),
                 ),
               ],
+            ),
+            const SizedBox(height: 12),
+            DropdownButtonFormField<String>(
+              initialValue: _sourceLang,
+              decoration: const InputDecoration(
+                labelText: 'Source language (登壇言語)',
+                border: OutlineInputBorder(),
+              ),
+              items: const [
+                DropdownMenuItem(value: 'ja-JP', child: Text('日本語 (ja-JP)')),
+                DropdownMenuItem(value: 'en-US', child: Text('English (en-US)')),
+              ],
+              onChanged: _running
+                  ? null
+                  : (lang) => setState(() => _sourceLang = lang ?? 'ja-JP'),
             ),
             const SizedBox(height: 12),
             Row(

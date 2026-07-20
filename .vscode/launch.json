@@ -67,7 +67,7 @@
       "program": "tool/smoke_client.dart",
       "type": "dart",
       "args": [
-        "ws://localhost:8082/v1/ingest/room-a"
+        "ws://localhost:8082/v1/ingest/hall-a"
       ],
       "vmAdditionalArgs": [
         "-DCAPTIONS_CONFIG=environments/env.dev"
