@@ -18,6 +18,24 @@ RouteBase get $appShellRoute => StatefulShellRouteData.$route(
     ),
     StatefulShellBranchData.$branch(
       routes: [
+        GoRouteData.$route(
+          path: '/captions',
+          factory: $LiveCaptionsRoute._fromState,
+          routes: [
+            GoRouteData.$route(
+              path: 'scan',
+              factory: $LiveCaptionScanRoute._fromState,
+            ),
+            GoRouteData.$route(
+              path: ':venueId',
+              factory: $LiveCaptionRoomRoute._fromState,
+            ),
+          ],
+        ),
+      ],
+    ),
+    StatefulShellBranchData.$branch(
+      routes: [
         GoRouteData.$route(path: '/info', factory: $EventInfoRoute._fromState),
       ],
     ),
@@ -33,6 +51,72 @@ mixin $NewsRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/news');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $LiveCaptionsRoute on GoRouteData {
+  static LiveCaptionsRoute _fromState(GoRouterState state) =>
+      const LiveCaptionsRoute();
+
+  @override
+  String get location => GoRouteData.$location('/captions');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $LiveCaptionScanRoute on GoRouteData {
+  static LiveCaptionScanRoute _fromState(GoRouterState state) =>
+      const LiveCaptionScanRoute();
+
+  @override
+  String get location => GoRouteData.$location('/captions/scan');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $LiveCaptionRoomRoute on GoRouteData {
+  static LiveCaptionRoomRoute _fromState(GoRouterState state) =>
+      LiveCaptionRoomRoute(venueId: state.pathParameters['venueId']!);
+
+  LiveCaptionRoomRoute get _self => this as LiveCaptionRoomRoute;
+
+  @override
+  String get location =>
+      GoRouteData.$location('/captions/${Uri.encodeComponent(_self.venueId)}');
 
   @override
   void go(BuildContext context) => context.go(location);

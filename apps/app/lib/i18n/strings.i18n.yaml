@@ -2,11 +2,34 @@ app:
   title: FlutterKaigi 2026
 navigation:
   news: お知らせ
+  captions: 字幕
   info: イベント情報
 news:
   title: お知らせ
   empty: お知らせはまだありません
   error: お知らせを取得できませんでした
+liveCaptions:
+  title: ライブ字幕
+  description: セッションを選ぶか、会場内の QR コードを読み取ると同時通訳字幕が表示されます
+  live: LIVE
+  sessionsEmpty: セッションはまだ公開されていません
+  sessionsError: セッション情報を取得できませんでした
+  scanQr: QR コードを読み取る
+  room:
+    notLive: 現在このルームは配信していません
+    disabled: 字幕の配信は現在停止しています
+    waiting: 字幕の配信が始まるとここに表示されます
+    empty: 字幕はまだありません
+    error: 字幕を取得できませんでした
+    original: 原文
+  scan:
+    title: QR コードを読み取る
+    instruction: 会場内に掲示された QR コードを読み取ってください
+    manualLabel: ルーム ID を直接入力
+    manualHint: hall-a
+    open: 開く
+    invalid: この QR コードからは字幕を開けません
+    cameraError: カメラを利用できません。ルーム ID を直接入力してください
 eventInfo:
   title: イベント情報
   version: バージョン

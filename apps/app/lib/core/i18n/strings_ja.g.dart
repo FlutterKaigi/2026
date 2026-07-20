@@ -43,6 +43,7 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	late final Translations$app$ja app = Translations$app$ja.internal(_root);
 	late final Translations$navigation$ja navigation = Translations$navigation$ja.internal(_root);
 	late final Translations$news$ja news = Translations$news$ja.internal(_root);
+	late final Translations$liveCaptions$ja liveCaptions = Translations$liveCaptions$ja.internal(_root);
 	late final Translations$eventInfo$ja eventInfo = Translations$eventInfo$ja.internal(_root);
 	late final Translations$notFound$ja notFound = Translations$notFound$ja.internal(_root);
 	late final Translations$common$ja common = Translations$common$ja.internal(_root);
@@ -71,6 +72,9 @@ class Translations$navigation$ja {
 	/// ja: 'お知らせ'
 	String get news => 'お知らせ';
 
+	/// ja: '字幕'
+	String get captions => '字幕';
+
 	/// ja: 'イベント情報'
 	String get info => 'イベント情報';
 }
@@ -91,6 +95,36 @@ class Translations$news$ja {
 
 	/// ja: 'お知らせを取得できませんでした'
 	String get error => 'お知らせを取得できませんでした';
+}
+
+// Path: liveCaptions
+class Translations$liveCaptions$ja {
+	Translations$liveCaptions$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'ライブ字幕'
+	String get title => 'ライブ字幕';
+
+	/// ja: 'セッションを選ぶか、会場内の QR コードを読み取ると同時通訳字幕が表示されます'
+	String get description => 'セッションを選ぶか、会場内の QR コードを読み取ると同時通訳字幕が表示されます';
+
+	/// ja: 'LIVE'
+	String get live => 'LIVE';
+
+	/// ja: 'セッションはまだ公開されていません'
+	String get sessionsEmpty => 'セッションはまだ公開されていません';
+
+	/// ja: 'セッション情報を取得できませんでした'
+	String get sessionsError => 'セッション情報を取得できませんでした';
+
+	/// ja: 'QR コードを読み取る'
+	String get scanQr => 'QR コードを読み取る';
+
+	late final Translations$liveCaptions$room$ja room = Translations$liveCaptions$room$ja.internal(_root);
+	late final Translations$liveCaptions$scan$ja scan = Translations$liveCaptions$scan$ja.internal(_root);
 }
 
 // Path: eventInfo
@@ -137,6 +171,63 @@ class Translations$common$ja {
 	String get retry => '再試行';
 }
 
+// Path: liveCaptions.room
+class Translations$liveCaptions$room$ja {
+	Translations$liveCaptions$room$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: '現在このルームは配信していません'
+	String get notLive => '現在このルームは配信していません';
+
+	/// ja: '字幕の配信は現在停止しています'
+	String get disabled => '字幕の配信は現在停止しています';
+
+	/// ja: '字幕の配信が始まるとここに表示されます'
+	String get waiting => '字幕の配信が始まるとここに表示されます';
+
+	/// ja: '字幕はまだありません'
+	String get empty => '字幕はまだありません';
+
+	/// ja: '字幕を取得できませんでした'
+	String get error => '字幕を取得できませんでした';
+
+	/// ja: '原文'
+	String get original => '原文';
+}
+
+// Path: liveCaptions.scan
+class Translations$liveCaptions$scan$ja {
+	Translations$liveCaptions$scan$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'QR コードを読み取る'
+	String get title => 'QR コードを読み取る';
+
+	/// ja: '会場内に掲示された QR コードを読み取ってください'
+	String get instruction => '会場内に掲示された QR コードを読み取ってください';
+
+	/// ja: 'ルーム ID を直接入力'
+	String get manualLabel => 'ルーム ID を直接入力';
+
+	/// ja: 'hall-a'
+	String get manualHint => 'hall-a';
+
+	/// ja: '開く'
+	String get open => '開く';
+
+	/// ja: 'この QR コードからは字幕を開けません'
+	String get invalid => 'この QR コードからは字幕を開けません';
+
+	/// ja: 'カメラを利用できません。ルーム ID を直接入力してください'
+	String get cameraError => 'カメラを利用できません。ルーム ID を直接入力してください';
+}
+
 // Path: eventInfo.themeMode
 class Translations$eventInfo$themeMode$ja {
 	Translations$eventInfo$themeMode$ja.internal(this._root);
@@ -168,10 +259,30 @@ extension on Translations {
 		return switch (path) {
 			'app.title' => 'FlutterKaigi 2026',
 			'navigation.news' => 'お知らせ',
+			'navigation.captions' => '字幕',
 			'navigation.info' => 'イベント情報',
 			'news.title' => 'お知らせ',
 			'news.empty' => 'お知らせはまだありません',
 			'news.error' => 'お知らせを取得できませんでした',
+			'liveCaptions.title' => 'ライブ字幕',
+			'liveCaptions.description' => 'セッションを選ぶか、会場内の QR コードを読み取ると同時通訳字幕が表示されます',
+			'liveCaptions.live' => 'LIVE',
+			'liveCaptions.sessionsEmpty' => 'セッションはまだ公開されていません',
+			'liveCaptions.sessionsError' => 'セッション情報を取得できませんでした',
+			'liveCaptions.scanQr' => 'QR コードを読み取る',
+			'liveCaptions.room.notLive' => '現在このルームは配信していません',
+			'liveCaptions.room.disabled' => '字幕の配信は現在停止しています',
+			'liveCaptions.room.waiting' => '字幕の配信が始まるとここに表示されます',
+			'liveCaptions.room.empty' => '字幕はまだありません',
+			'liveCaptions.room.error' => '字幕を取得できませんでした',
+			'liveCaptions.room.original' => '原文',
+			'liveCaptions.scan.title' => 'QR コードを読み取る',
+			'liveCaptions.scan.instruction' => '会場内に掲示された QR コードを読み取ってください',
+			'liveCaptions.scan.manualLabel' => 'ルーム ID を直接入力',
+			'liveCaptions.scan.manualHint' => 'hall-a',
+			'liveCaptions.scan.open' => '開く',
+			'liveCaptions.scan.invalid' => 'この QR コードからは字幕を開けません',
+			'liveCaptions.scan.cameraError' => 'カメラを利用できません。ルーム ID を直接入力してください',
 			'eventInfo.title' => 'イベント情報',
 			'eventInfo.version' => 'バージョン',
 			'eventInfo.themeMode.title' => 'テーマ',
