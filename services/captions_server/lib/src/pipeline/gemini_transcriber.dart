@@ -49,28 +49,38 @@ class GeminiTranscriber implements Transcriber {
       '明瞭な発話が含まれない場合は {"text": "", "lang": ""} を返してください。';
 
   @override
-  Stream<TranscriptEvent> transcribe(Stream<Uint8List> audio, {required String sourceLang}) async* {
+  Stream<TranscriptEvent> transcribe(
+    Stream<Uint8List> audio, {
+    required String sourceLang,
+    String? domainContext,
+  }) async* {
     final segmenter = _segmenterFactory();
     await for (final chunk in audio) {
       for (final segment in segmenter.addChunk(chunk)) {
-        final event = await _transcribeSegment(segment, sourceLang);
+        final event = await _transcribeSegment(segment, sourceLang, domainContext);
         if (event != null) yield event;
       }
     }
     final last = segmenter.flush();
     if (last != null) {
-      final event = await _transcribeSegment(last, sourceLang);
+      final event = await _transcribeSegment(last, sourceLang, domainContext);
       if (event != null) yield event;
     }
   }
 
   /// Transcribes one segment; returns null (and keeps the stream alive) on API
   /// errors or silence.
-  Future<TranscriptEvent?> _transcribeSegment(AudioSegment segment, String sourceLang) async {
+  Future<TranscriptEvent?> _transcribeSegment(AudioSegment segment, String sourceLang, String? domainContext) async {
     final body = jsonEncode({
       'systemInstruction': {
         'parts': [
-          {'text': _systemInstruction},
+          {
+            'text': domainContext == null
+                ? _systemInstruction
+                : '$_systemInstruction\n\n'
+                    '# カンファレンス情報(固有名詞はこの表記を優先すること)\n'
+                    '$domainContext',
+          },
         ],
       },
       'contents': [

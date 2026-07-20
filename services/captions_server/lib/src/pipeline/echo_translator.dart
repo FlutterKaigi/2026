@@ -8,7 +8,11 @@ class EchoTranslator implements Translator {
   const EchoTranslator();
 
   @override
-  Future<TranslationResult> translate(TranscriptEvent segment, List<CaptionSegment> recentContext) async {
+  Future<TranslationResult> translate(
+    TranscriptEvent segment,
+    List<CaptionSegment> recentContext, {
+    String? domainContext,
+  }) async {
     return TranslationResult(ja: segment.text, en: '(en) ${segment.text}');
   }
 }

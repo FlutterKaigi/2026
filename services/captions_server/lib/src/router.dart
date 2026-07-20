@@ -3,6 +3,7 @@ import 'package:shelf_router/shelf_router.dart';
 
 import 'config.dart';
 import 'ingest_handler.dart';
+import 'pipeline/session_context.dart';
 import 'pipeline/transcriber.dart';
 import 'pipeline/translator.dart';
 
@@ -12,6 +13,7 @@ Router buildRouter({
   required Transcriber transcriber,
   required Translator translator,
   required SinkFactory sinkFactory,
+  SessionContextLoader? contextLoader,
 }) {
   final router = Router();
   router.get('/healthz', (Request request) => Response.ok('ok'));
@@ -22,6 +24,7 @@ Router buildRouter({
       transcriber: transcriber,
       translator: translator,
       sinkFactory: sinkFactory,
+      contextLoader: contextLoader,
     ),
   );
   return router;

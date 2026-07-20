@@ -54,6 +54,41 @@ void main() {
     expect(captured.url.path, contains('test-model'));
   });
 
+  test('includes the domain context in the system instruction when provided', () async {
+    late http.Request captured;
+    final client = MockClient((request) async {
+      captured = request;
+      return _jsonResponse({'ja': '訳', 'en': 'text'});
+    });
+
+    await _translator(client).translate(
+      _segment,
+      const [],
+      domainContext: 'セッション名: RevenueCat で学ぶ収益化 / Monetization with RevenueCat',
+    );
+
+    final body = jsonDecode(captured.body) as Map<String, Object?>;
+    final instruction =
+        (((body['systemInstruction']! as Map)['parts'] as List).first as Map)['text']! as String;
+    expect(instruction, contains('RevenueCat'));
+    expect(instruction, contains('カンファレンス情報'));
+  });
+
+  test('omits the domain context block when not provided', () async {
+    late http.Request captured;
+    final client = MockClient((request) async {
+      captured = request;
+      return _jsonResponse({'ja': '訳', 'en': 'text'});
+    });
+
+    await _translator(client).translate(_segment, const []);
+
+    final body = jsonDecode(captured.body) as Map<String, Object?>;
+    final instruction =
+        (((body['systemInstruction']! as Map)['parts'] as List).first as Map)['text']! as String;
+    expect(instruction, isNot(contains('カンファレンス情報')));
+  });
+
   test('throws TranslationException on a non-200 response', () async {
     final client = MockClient((_) async => http.Response('quota exceeded', 429));
     expect(

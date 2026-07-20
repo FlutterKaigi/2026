@@ -11,11 +11,13 @@ import 'package:web_socket_channel/io.dart';
 void main() {
   late HttpServer server;
   late int port;
+  late _MemorySink sink;
 
   setUp(() async {
-    // Port 0 = ephemeral; fake transcriber + echo translator + console sink.
+    // Port 0 = ephemeral; fake transcriber + echo translator + memory sink.
     final config = Config.load({'PORT': '0', 'INGEST_TOKEN': 'test-token'});
-    server = await serveCaptions(config);
+    sink = _MemorySink();
+    server = await serveCaptions(config, sinkFactory: (_) => sink);
     port = server.port;
   });
 
@@ -39,6 +41,14 @@ void main() {
       expect(res.statusCode, 401);
     },
   );
+
+  test('rejects a room id that is not a venue-style slug (400)', () async {
+    final res = await http.get(
+      Uri.parse('http://localhost:$port/v1/ingest/Hall_A'),
+      headers: {'Authorization': 'Bearer test-token'},
+    );
+    expect(res.statusCode, 400);
+  });
 
   test('hello -> audio -> >=2 caption frames -> clean close', () async {
     final channel = IOWebSocketChannel.connect(
@@ -90,5 +100,33 @@ void main() {
     expect(captionCount, greaterThanOrEqualTo(2));
 
     await channel.sink.close();
+
+    // The room was marked live on hello and offline after the close.
+    await sink.wentOffline.future.timeout(const Duration(seconds: 5));
+    expect(sink.lifecycle.first, 'live:ja-JP');
+    expect(sink.lifecycle.last, 'offline');
   });
+}
+
+/// In-memory [CaptionSink] recording lifecycle transitions for assertions.
+class _MemorySink implements CaptionSink {
+  final List<String> lifecycle = [];
+  final Completer<void> wentOffline = Completer<void>();
+
+  @override
+  Future<void> markLive(String roomId, {required String sourceLang}) async {
+    lifecycle.add('live:$sourceLang');
+  }
+
+  @override
+  Future<void> markOffline(String roomId) async {
+    lifecycle.add('offline');
+    if (!wentOffline.isCompleted) wentOffline.complete();
+  }
+
+  @override
+  Future<void> writeInterim(String roomId, InterimCaption interim) async {}
+
+  @override
+  Future<void> appendSegment(String roomId, CaptionSegment segment) async {}
 }

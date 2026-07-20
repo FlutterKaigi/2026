@@ -2,7 +2,13 @@ import 'dart:typed_data';
 
 /// Streaming transcription: audio bytes → [TranscriptEvent]s.
 abstract interface class Transcriber {
-  Stream<TranscriptEvent> transcribe(Stream<Uint8List> audio, {required String sourceLang});
+  /// [domainContext] carries conference proper nouns (session title, speaker
+  /// and sponsor names) for implementations that can bias recognition with it.
+  Stream<TranscriptEvent> transcribe(
+    Stream<Uint8List> audio, {
+    required String sourceLang,
+    String? domainContext,
+  });
 }
 
 /// One transcription event. [isFinal] `false` means an interim (in-progress)

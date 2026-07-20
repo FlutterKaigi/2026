@@ -9,24 +9,28 @@ import 'package:web_socket_channel/io.dart';
 
 /// Headless smoke client (§6.7).
 ///
-/// Usage: `dart run tool/smoke_client.dart [ws-url] [path/to.wav]`
+/// Usage: `dart run tool/smoke_client.dart [ws-url] [path/to.wav] [minCaptions]`
 ///
 /// Connects to the ingest WebSocket and streams audio in 100ms chunks at
 /// real-time pace. With no WAV argument it sends ~10s of a 440Hz sine (for the
 /// fake transcriber) and requires two `caption` frames; with a WAV file
 /// (PCM16 / 16kHz / mono — e.g. from `afconvert -f WAVE -d LEI16@16000 -c 1`)
-/// it sends the file and requires one. Exits 0 on success, non-zero otherwise.
+/// it sends the file and requires one. Pass [minCaptions] to keep streaming
+/// until that many captions arrive (e.g. to watch a long clip end-to-end).
+/// Exits 0 on success, non-zero otherwise.
 Future<void> main(List<String> args) async {
   final url = args.isNotEmpty
       ? args.first
-      : 'ws://localhost:8082/v1/ingest/room-a';
+      : 'ws://localhost:8082/v1/ingest/hall-a';
   final token = Config.load().ingestToken;
   final wavPath = args.length > 1 ? args[1] : null;
 
   final List<Uint8List>? fileChunks = wavPath == null
       ? null
       : _readWavChunks(wavPath);
-  final requiredCaptions = fileChunks == null ? 2 : 1;
+  final requiredCaptions = args.length > 2
+      ? int.parse(args[2])
+      : (fileChunks == null ? 2 : 1);
   final totalChunks = fileChunks?.length ?? 100;
   if (fileChunks != null) {
     stdout.writeln(

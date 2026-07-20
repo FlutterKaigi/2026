@@ -18,6 +18,7 @@ class CaptionPipeline {
     required this.translator,
     required this.sink,
     required this.sendFrame,
+    this.domainContext,
     this.interimInterval = const Duration(seconds: 1),
     this.recentContextSize = 5,
   });
@@ -27,6 +28,9 @@ class CaptionPipeline {
   final Transcriber transcriber;
   final Translator translator;
   final CaptionSink sink;
+
+  /// Conference proper-noun context injected into Gemini prompts (nullable).
+  final String? domainContext;
 
   /// Sends a text frame to the connected client.
   final void Function(String frame) sendFrame;
@@ -46,7 +50,7 @@ class CaptionPipeline {
     var seq = 0;
 
     try {
-      await for (final event in transcriber.transcribe(audio, sourceLang: sourceLang)) {
+      await for (final event in transcriber.transcribe(audio, sourceLang: sourceLang, domainContext: domainContext)) {
         if (!event.isFinal) {
           // interim → throttle to ≤1Hz, latest value wins. The seq is the
           // upcoming segment's number.
@@ -77,7 +81,7 @@ class CaptionPipeline {
   Future<void> _handleFinal(int seq, TranscriptEvent event, List<CaptionSegment> context) async {
     final TranslationResult translation;
     try {
-      translation = await translator.translate(event, context);
+      translation = await translator.translate(event, context, domainContext: domainContext);
     } catch (e) {
       // Skip this segment but keep the pipeline alive (§5.2 step 4).
       logEvent('translate_error', {'roomId': roomId, 'seq': seq, 'error': '$e'}, 'error');

@@ -8,6 +8,16 @@ class ConsoleSink implements CaptionSink {
   const ConsoleSink();
 
   @override
+  Future<void> markLive(String roomId, {required String sourceLang}) async {
+    logEvent('caption_room_live', {'roomId': roomId, 'sourceLang': sourceLang});
+  }
+
+  @override
+  Future<void> markOffline(String roomId) async {
+    logEvent('caption_room_offline', {'roomId': roomId});
+  }
+
+  @override
   Future<void> writeInterim(String roomId, InterimCaption interim) async {
     logEvent('caption_interim', {
       'roomId': roomId,

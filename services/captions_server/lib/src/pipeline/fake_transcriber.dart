@@ -33,7 +33,11 @@ class FakeTranscriber implements Transcriber {
   ];
 
   @override
-  Stream<TranscriptEvent> transcribe(Stream<Uint8List> audio, {required String sourceLang}) async* {
+  Stream<TranscriptEvent> transcribe(
+    Stream<Uint8List> audio, {
+    required String sourceLang,
+    String? domainContext,
+  }) async* {
     final srcLang = sourceLang.split('-').first;
     var totalBytes = 0;
     var segmentIndex = 0;

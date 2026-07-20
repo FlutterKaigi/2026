@@ -7,6 +7,13 @@ import 'package:test/test.dart';
 class _MemorySink implements CaptionSink {
   final List<InterimCaption> interims = [];
   final List<CaptionSegment> segments = [];
+  final List<String> lifecycle = [];
+
+  @override
+  Future<void> markLive(String roomId, {required String sourceLang}) async => lifecycle.add('live:$sourceLang');
+
+  @override
+  Future<void> markOffline(String roomId) async => lifecycle.add('offline');
 
   @override
   Future<void> writeInterim(String roomId, InterimCaption interim) async => interims.add(interim);

@@ -47,6 +47,29 @@ GeminiTranscriber _transcriber(MockClient client) =>
     GeminiTranscriber(apiKey: 'test-key', model: 'test-model', client: client);
 
 void main() {
+  test('includes the domain context in the system instruction when provided', () async {
+    final requests = <http.Request>[];
+    final client = MockClient((request) async {
+      requests.add(request);
+      return _jsonResponse({'text': 'RevenueCat を使います。', 'lang': 'ja'});
+    });
+
+    await _transcriber(client)
+        .transcribe(
+          Stream.fromIterable(_utterance()),
+          sourceLang: 'ja-JP',
+          domainContext: 'セッション名: RevenueCat で学ぶ収益化 / Monetization with RevenueCat',
+        )
+        .toList();
+
+    expect(requests, hasLength(1));
+    final body = jsonDecode(requests.single.body) as Map<String, Object?>;
+    final instruction =
+        (((body['systemInstruction']! as Map)['parts'] as List).first as Map)['text']! as String;
+    expect(instruction, contains('RevenueCat'));
+    expect(instruction, contains('カンファレンス情報'));
+  });
+
   test('transcribes a VAD segment via Gemini and emits one final event', () async {
     final requests = <http.Request>[];
     final client = MockClient((request) async {

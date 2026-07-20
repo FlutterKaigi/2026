@@ -36,7 +36,11 @@ class GeminiTranslator implements Translator {
       '出力は {"ja": "...", "en": "..."} という JSON のみとし、余計な説明やコードフェンスを含めないでください。';
 
   @override
-  Future<TranslationResult> translate(TranscriptEvent segment, List<CaptionSegment> recentContext) async {
+  Future<TranslationResult> translate(
+    TranscriptEvent segment,
+    List<CaptionSegment> recentContext, {
+    String? domainContext,
+  }) async {
     final context = recentContext.map((s) => '- ${s.srcText}').join('\n');
     final prompt = StringBuffer()
       ..writeln('# 直近の文脈')
@@ -48,7 +52,13 @@ class GeminiTranslator implements Translator {
     final body = jsonEncode({
       'systemInstruction': {
         'parts': [
-          {'text': _systemInstruction},
+          {
+            'text': domainContext == null
+                ? _systemInstruction
+                : '$_systemInstruction\n\n'
+                    '# カンファレンス情報(固有名詞・人名・企業名はこの表記を優先すること)\n'
+                    '$domainContext',
+          },
         ],
       },
       'contents': [
