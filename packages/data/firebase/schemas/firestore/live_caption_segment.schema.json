@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/FlutterKaigi/2026/packages/data/firebase/schemas/firestore/live_caption_segment.schema.json",
+  "title": "LiveCaptionSegment",
+  "description": "Firestore document schema for `live_captions/{roomId}/segments/{segmentId}`. Append-only, written by the captions server. Document ids are `{connectionStartMs}-{seq6}` and sort chronologically across reconnections; order by document id, not by `seq` (which resets per broadcaster connection).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["seq", "srcLang", "srcText", "ja", "en", "startMs", "endMs", "createdAt"],
+  "properties": {
+    "seq": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "1-based sequence number within one broadcaster connection."
+    },
+    "srcLang": {
+      "type": "string",
+      "description": "Short language code of the source utterance (e.g. ja, en)."
+    },
+    "srcText": {
+      "type": "string",
+      "description": "Transcribed source text as spoken."
+    },
+    "ja": {
+      "type": "string",
+      "description": "Japanese translation (or the source text when spoken in Japanese)."
+    },
+    "en": {
+      "type": "string",
+      "description": "English translation (or the source text when spoken in English)."
+    },
+    "startMs": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Utterance start offset in ms since the connection started."
+    },
+    "endMs": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Utterance end offset in ms since the connection started."
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

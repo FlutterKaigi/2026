@@ -8,6 +8,8 @@ here as ISO-8601 `date-time` strings.
 
 Schemas committed so far, one per editable collection used by the dashboard:
 
+- `firestore/live_caption_room.schema.json` (`live_captions`)
+- `firestore/live_caption_segment.schema.json` (`live_captions/{roomId}/segments`)
 - `firestore/news.schema.json` (`news`)
 - `firestore/session.schema.json` (`sessions`)
 - `firestore/speaker.schema.json` (`speakers`)

@@ -202,6 +202,56 @@
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
       }
+    },
+    {
+      "path": "live_captions/hall-a",
+      "schema": "live_caption_room",
+      "data": {
+        "enabled": true,
+        "isLive": false,
+        "sourceLang": "ja-JP",
+        "interim": null,
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "live_captions/hall-a/segments/1780000000000-000001",
+      "schema": "live_caption_segment",
+      "data": {
+        "seq": 1,
+        "srcLang": "ja",
+        "srcText": "皆さんおはようございます。FlutterKaigi 2026 へようこそ。",
+        "ja": "皆さんおはようございます。FlutterKaigi 2026 へようこそ。",
+        "en": "Good morning, everyone. Welcome to FlutterKaigi 2026.",
+        "startMs": 0,
+        "endMs": 4200,
+        "createdAt": "2026-06-02T00:00:04Z"
+      }
+    },
+    {
+      "path": "live_captions/hall-a/segments/1780000000000-000002",
+      "schema": "live_caption_segment",
+      "data": {
+        "seq": 2,
+        "srcLang": "ja",
+        "srcText": "今日は Flutter アプリの設計について話します。",
+        "ja": "今日は Flutter アプリの設計について話します。",
+        "en": "Today, I will talk about architecting Flutter apps.",
+        "startMs": 4800,
+        "endMs": 8600,
+        "createdAt": "2026-06-02T00:00:09Z"
+      }
+    },
+    {
+      "path": "live_captions/hall-b",
+      "schema": "live_caption_room",
+      "data": {
+        "enabled": true,
+        "isLive": false,
+        "sourceLang": null,
+        "interim": null,
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
     }
   ]
 }
