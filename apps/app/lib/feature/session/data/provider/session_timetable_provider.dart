@@ -115,7 +115,7 @@ SessionTimetableData buildSessionTimetableData({
             if (speakerById[speakerId] != null) speakerById[speakerId]!,
         ],
       ),
-  ]..sort((a, b) => _compareEntries(a, b, venueById));
+  ]..sort((a, b) => compareSessionTimetableEntries(a, b, venueById));
 
   final availableDates = _eventDates(entries);
   final effectiveSelectedDate = _resolveSelectedDate(
@@ -155,7 +155,7 @@ int _compareVenues(Venue a, Venue b) {
   return a.id.compareTo(b.id);
 }
 
-int _compareEntries(
+int compareSessionTimetableEntries(
   SessionTimetableEntry a,
   SessionTimetableEntry b,
   Map<String, Venue> venueById,

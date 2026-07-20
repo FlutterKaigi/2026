@@ -35,8 +35,20 @@ sessionDetails:
   speakers: Speakers
   links: Links
   sessionize: Sessionize
+  share: Share
   notFound: Session not found
   error: Failed to load session
+sessionBookmark:
+  openBookmarked: Bookmarked sessions
+  add: Add bookmark
+  remove: Remove bookmark
+  updateFailed: Failed to update bookmark
+bookmarkedSessions:
+  title: Bookmarked Sessions
+  emptyTitle: No bookmarked sessions
+  emptyBody: Bookmark sessions to find them here.
+  openSessions: Open sessions
+  error: Failed to load bookmarked sessions
 eventInfo:
   title: Info
   version: Version

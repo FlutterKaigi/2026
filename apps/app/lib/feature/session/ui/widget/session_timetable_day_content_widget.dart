@@ -4,11 +4,10 @@ import 'package:app/core/extension/locale_map_extension.dart';
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/feature/session/data/provider/session_time_format.dart';
 import 'package:app/feature/session/data/provider/session_timetable_provider.dart';
+import 'package:app/feature/session/ui/widget/session_card_widget.dart';
 import 'package:app/feature/session/util/event_time.dart';
-import 'package:data/data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart' hide TextDirection;
 
@@ -35,11 +34,18 @@ class SessionTimetableDayContentWidget extends ConsumerWidget {
     final locale = Localizations.localeOf(context).toLanguageTag();
     final textDirection = Directionality.of(context);
     final timeLabelStyle = _timeLabelTextStyle(context);
-    final timeColumnWidth =
-        _measureWidestSupportedTimeLabelWidth(
-          context: context,
-          timeFormat: timeFormat,
+    final timeLabels = [
+      for (final entries in entryGroups)
+        formatEventTime(
+          entries.first.startsAt,
+          timeFormat,
           locale: locale,
+        ),
+    ];
+    final timeColumnWidth =
+        _measureWidestTimeLabelWidth(
+          context: context,
+          labels: timeLabels.toSet(),
           style: timeLabelStyle,
           textDirection: textDirection,
         ) +
@@ -59,6 +65,7 @@ class SessionTimetableDayContentWidget extends ConsumerWidget {
           _TimetableEntryGroupTileWidget(
             entries: entryGroups[index],
             isLast: index == entryGroups.length - 1,
+            timeLabel: timeLabels[index],
             timeFormat: timeFormat,
             timeColumnWidth: timeColumnWidth,
           ),
@@ -123,26 +130,22 @@ class _TimetableEntryGroupTileWidget extends StatelessWidget {
   const _TimetableEntryGroupTileWidget({
     required this.entries,
     required this.isLast,
+    required this.timeLabel,
     required this.timeFormat,
     required this.timeColumnWidth,
   });
 
   final List<SessionTimetableEntry> entries;
   final bool isLast;
+  final String timeLabel;
   final EventTimeFormat timeFormat;
   final double timeColumnWidth;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final locale = Localizations.localeOf(context).toLanguageTag();
     final firstEntry = entries.first;
     final textDirection = Directionality.of(context);
-    final timeLabel = formatEventTime(
-      firstEntry.startsAt,
-      timeFormat,
-      locale: locale,
-    );
     final timeLabelStyle = _timeLabelTextStyle(context);
     final lineStartY =
         _timeLabelTopPadding +
@@ -265,7 +268,7 @@ class _TimetableEntryCardWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return entry.isSession
-        ? _SessionCardWidget(
+        ? SessionCardWidget(
             entry: entry,
             timeFormat: timeFormat,
           )
@@ -387,84 +390,6 @@ class _ScrollEdgeFadeWidget extends StatelessWidget {
           ),
         ),
         child: const SizedBox(width: 32),
-      ),
-    );
-  }
-}
-
-class _SessionCardWidget extends StatelessWidget {
-  const _SessionCardWidget({
-    required this.entry,
-    required this.timeFormat,
-  });
-
-  final SessionTimetableEntry entry;
-  final EventTimeFormat timeFormat;
-
-  @override
-  Widget build(BuildContext context) {
-    final t = Translations.of(context);
-    final locale = Localizations.localeOf(context);
-    final session = entry.session!;
-    final title = session.title.resolve(locale);
-    final description = session.description.resolve(locale).trim();
-
-    return _TimetableCardWidget(
-      onTap: () => context.push('/sessions/${Uri.encodeComponent(session.id)}'),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          if (description.isNotEmpty) ...[
-            const SizedBox(height: 8),
-            Text(
-              description,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-          ],
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              _InfoChipWidget(
-                icon: Icons.sell_outlined,
-                label: _sessionTypeLabel(t, session),
-              ),
-              _InfoChipWidget(
-                icon: Icons.meeting_room_outlined,
-                label: entry.venue?.name.resolve(locale) ?? t.sessionTimetable.venue.unknown,
-              ),
-              _InfoChipWidget(
-                icon: Icons.schedule,
-                label: formatEventTimeRange(
-                  entry.startsAt,
-                  entry.endsAt,
-                  timeFormat,
-                  locale: locale.toLanguageTag(),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          if (entry.speakers.isEmpty)
-            _SpeakerPlaceholderWidget(label: t.sessionTimetable.speaker.none)
-          else
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                for (final speaker in entry.speakers) _SpeakerChipWidget(speaker: speaker),
-              ],
-            ),
-        ],
       ),
     );
   }
@@ -595,44 +520,6 @@ class _InfoChipWidget extends StatelessWidget {
   }
 }
 
-class _SpeakerChipWidget extends StatelessWidget {
-  const _SpeakerChipWidget({required this.speaker});
-
-  final Speaker speaker;
-
-  @override
-  Widget build(BuildContext context) {
-    final avatarUrl = speaker.avatarUrl;
-
-    return Chip(
-      avatar: CircleAvatar(
-        backgroundImage: avatarUrl == null || avatarUrl.isEmpty ? null : NetworkImage(avatarUrl),
-        child: avatarUrl == null || avatarUrl.isEmpty ? const Icon(Icons.person_outline, size: 16) : null,
-      ),
-      label: Text(speaker.name),
-      visualDensity: VisualDensity.compact,
-    );
-  }
-}
-
-class _SpeakerPlaceholderWidget extends StatelessWidget {
-  const _SpeakerPlaceholderWidget({required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        const Icon(Icons.person_outline, size: 18),
-        const SizedBox(width: 6),
-        Text(label),
-      ],
-    );
-  }
-}
-
 double _measureTextHeight({
   required BuildContext context,
   required String text,
@@ -653,16 +540,15 @@ double _measureTextHeight({
   return textPainter.height;
 }
 
-double _measureWidestSupportedTimeLabelWidth({
+double _measureWidestTimeLabelWidth({
   required BuildContext context,
-  required EventTimeFormat timeFormat,
-  required String locale,
+  required Iterable<String> labels,
   required TextStyle? style,
   required TextDirection textDirection,
 }) {
   final textPainter = TextPainter(
     text: TextSpan(
-      text: _supportedTimeLabels(timeFormat, locale).join('\n'),
+      text: labels.join('\n'),
       style: style ?? DefaultTextStyle.of(context).style,
     ),
     textAlign: TextAlign.center,
@@ -676,43 +562,8 @@ double _measureWidestSupportedTimeLabelWidth({
   );
 }
 
-Iterable<String> _supportedTimeLabels(
-  EventTimeFormat timeFormat,
-  String locale,
-) sync* {
-  for (var hour = 0; hour < Duration.hoursPerDay; hour++) {
-    for (var minute = 0; minute < Duration.minutesPerHour; minute++) {
-      yield formatEventTime(
-        _eventLocalTimeCandidate(hour: hour, minute: minute),
-        timeFormat,
-        locale: locale,
-      );
-    }
-  }
-}
-
-DateTime _eventLocalTimeCandidate({
-  required int hour,
-  required int minute,
-}) {
-  return DateTime.utc(2026, 1, 1, hour, minute).subtract(eventTimeZoneOffset);
-}
-
 TextStyle? _timeLabelTextStyle(BuildContext context) {
   return Theme.of(context).textTheme.labelLarge?.copyWith(
     fontWeight: FontWeight.w700,
   );
-}
-
-String _sessionTypeLabel(Translations t, Session session) {
-  if (session.isHandsOn) {
-    return t.sessionTimetable.type.handsOn;
-  }
-  if (session.isBeginnersLightningTalk) {
-    return t.sessionTimetable.type.beginnersLightningTalk;
-  }
-  if (session.isLightningTalk) {
-    return t.sessionTimetable.type.lightningTalk;
-  }
-  return t.sessionTimetable.type.regular;
 }
