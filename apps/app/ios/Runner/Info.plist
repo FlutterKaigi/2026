@@ -4,6 +4,19 @@
 <dict>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>会場の QR コードを読み取ってライブ字幕を表示するためにカメラを使用します。</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>jp.flutterkaigi.app2026.deeplink</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>flutterkaigi2026</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>

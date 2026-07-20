@@ -42,6 +42,7 @@ class TranslationsEn extends Translations with BaseTranslations<AppLocale, Trans
 	@override late final _Translations$app$en app = _Translations$app$en._(_root);
 	@override late final _Translations$navigation$en navigation = _Translations$navigation$en._(_root);
 	@override late final _Translations$news$en news = _Translations$news$en._(_root);
+	@override late final _Translations$liveCaptions$en liveCaptions = _Translations$liveCaptions$en._(_root);
 	@override late final _Translations$eventInfo$en eventInfo = _Translations$eventInfo$en._(_root);
 	@override late final _Translations$notFound$en notFound = _Translations$notFound$en._(_root);
 	@override late final _Translations$common$en common = _Translations$common$en._(_root);
@@ -65,6 +66,7 @@ class _Translations$navigation$en extends Translations$navigation$ja {
 
 	// Translations
 	@override String get news => 'News';
+	@override String get captions => 'Captions';
 	@override String get info => 'Event Info';
 }
 
@@ -78,6 +80,23 @@ class _Translations$news$en extends Translations$news$ja {
 	@override String get title => 'News';
 	@override String get empty => 'There is no news yet';
 	@override String get error => 'Failed to load news';
+}
+
+// Path: liveCaptions
+class _Translations$liveCaptions$en extends Translations$liveCaptions$ja {
+	_Translations$liveCaptions$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Live Captions';
+	@override String get description => 'Pick a session or scan the QR code in the room to see live translated captions';
+	@override String get live => 'LIVE';
+	@override String get sessionsEmpty => 'Sessions have not been published yet';
+	@override String get sessionsError => 'Failed to load sessions';
+	@override String get scanQr => 'Scan QR code';
+	@override late final _Translations$liveCaptions$room$en room = _Translations$liveCaptions$room$en._(_root);
+	@override late final _Translations$liveCaptions$scan$en scan = _Translations$liveCaptions$scan$en._(_root);
 }
 
 // Path: eventInfo
@@ -113,6 +132,37 @@ class _Translations$common$en extends Translations$common$ja {
 	@override String get retry => 'Retry';
 }
 
+// Path: liveCaptions.room
+class _Translations$liveCaptions$room$en extends Translations$liveCaptions$room$ja {
+	_Translations$liveCaptions$room$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get notLive => 'This room is not streaming right now';
+	@override String get disabled => 'Captions are currently turned off';
+	@override String get waiting => 'Captions will appear here once streaming starts';
+	@override String get empty => 'No captions yet';
+	@override String get error => 'Failed to load captions';
+	@override String get original => 'Original';
+}
+
+// Path: liveCaptions.scan
+class _Translations$liveCaptions$scan$en extends Translations$liveCaptions$scan$ja {
+	_Translations$liveCaptions$scan$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Scan QR code';
+	@override String get instruction => 'Scan the QR code posted in the room';
+	@override String get manualLabel => 'Enter a room ID directly';
+	@override String get manualHint => 'hall-a';
+	@override String get open => 'Open';
+	@override String get invalid => 'This QR code does not point to captions';
+	@override String get cameraError => 'Camera is unavailable. Enter the room ID directly instead';
+}
+
 // Path: eventInfo.themeMode
 class _Translations$eventInfo$themeMode$en extends Translations$eventInfo$themeMode$ja {
 	_Translations$eventInfo$themeMode$en._(TranslationsEn root) : this._root = root, super.internal(root);
@@ -136,10 +186,30 @@ extension on TranslationsEn {
 		return switch (path) {
 			'app.title' => 'FlutterKaigi 2026',
 			'navigation.news' => 'News',
+			'navigation.captions' => 'Captions',
 			'navigation.info' => 'Event Info',
 			'news.title' => 'News',
 			'news.empty' => 'There is no news yet',
 			'news.error' => 'Failed to load news',
+			'liveCaptions.title' => 'Live Captions',
+			'liveCaptions.description' => 'Pick a session or scan the QR code in the room to see live translated captions',
+			'liveCaptions.live' => 'LIVE',
+			'liveCaptions.sessionsEmpty' => 'Sessions have not been published yet',
+			'liveCaptions.sessionsError' => 'Failed to load sessions',
+			'liveCaptions.scanQr' => 'Scan QR code',
+			'liveCaptions.room.notLive' => 'This room is not streaming right now',
+			'liveCaptions.room.disabled' => 'Captions are currently turned off',
+			'liveCaptions.room.waiting' => 'Captions will appear here once streaming starts',
+			'liveCaptions.room.empty' => 'No captions yet',
+			'liveCaptions.room.error' => 'Failed to load captions',
+			'liveCaptions.room.original' => 'Original',
+			'liveCaptions.scan.title' => 'Scan QR code',
+			'liveCaptions.scan.instruction' => 'Scan the QR code posted in the room',
+			'liveCaptions.scan.manualLabel' => 'Enter a room ID directly',
+			'liveCaptions.scan.manualHint' => 'hall-a',
+			'liveCaptions.scan.open' => 'Open',
+			'liveCaptions.scan.invalid' => 'This QR code does not point to captions',
+			'liveCaptions.scan.cameraError' => 'Camera is unavailable. Enter the room ID directly instead',
 			'eventInfo.title' => 'Event Info',
 			'eventInfo.version' => 'Version',
 			'eventInfo.themeMode.title' => 'Theme',

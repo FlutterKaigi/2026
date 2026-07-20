@@ -7,13 +7,100 @@
       "request": "launch",
       "program": "lib/main.dart",
       "type": "dart",
-      "args": [
-        "--dart-define-from-file",
-        "environments/.env.dev",
+      "toolArgs": [
+        "--dart-define-from-file=environments/.env.dev",
         "--web-experimental-hot-reload",
         "--web-port",
         "3000"
       ]
+    },
+    {
+      "name": "captions-server-local",
+      "cwd": "services/captions_server",
+      "request": "launch",
+      "program": "bin/server.dart",
+      "type": "dart",
+      "vmAdditionalArgs": [
+        "-DCAPTIONS_CONFIG=environments/env.dev"
+      ]
+    },
+    {
+      "name": "captions-server-local-firestore",
+      "cwd": "services/captions_server",
+      "request": "launch",
+      "program": "bin/server.dart",
+      "type": "dart",
+      "vmAdditionalArgs": [
+        "-DCAPTIONS_CONFIG=environments/env.dev",
+        "-DCAPTIONS_SINK=firestore"
+      ]
+    },
+    {
+      "name": "captions-server-local-live",
+      "cwd": "services/captions_server",
+      "request": "launch",
+      "program": "bin/server.dart",
+      "type": "dart",
+      "vmAdditionalArgs": [
+        "-DCAPTIONS_CONFIG=environments/env.dev",
+        "-DCAPTIONS_TRANSCRIBER=gemini",
+        "-DCAPTIONS_TRANSLATOR=gemini"
+      ]
+    },
+    {
+      "name": "captions-server-local-live-firestore",
+      "cwd": "services/captions_server",
+      "request": "launch",
+      "program": "bin/server.dart",
+      "type": "dart",
+      "vmAdditionalArgs": [
+        "-DCAPTIONS_CONFIG=environments/env.dev",
+        "-DCAPTIONS_TRANSCRIBER=gemini",
+        "-DCAPTIONS_TRANSLATOR=gemini",
+        "-DCAPTIONS_SINK=firestore"
+      ]
+    },
+    {
+      "name": "captions-smoke-local",
+      "cwd": "services/captions_server",
+      "request": "launch",
+      "program": "tool/smoke_client.dart",
+      "type": "dart",
+      "args": [
+        "ws://localhost:8082/v1/ingest/hall-a"
+      ],
+      "vmAdditionalArgs": [
+        "-DCAPTIONS_CONFIG=environments/env.dev"
+      ]
+    },
+    {
+      "name": "broadcaster-local-macos",
+      "cwd": "apps/broadcaster",
+      "request": "launch",
+      "program": "lib/main.dart",
+      "type": "dart",
+      "deviceId": "macos",
+      "toolArgs": [
+        "--dart-define-from-file=environments/.env.dev"
+      ]
+    }
+  ],
+  "compounds": [
+    {
+      "name": "captions-local-stack",
+      "configurations": [
+        "captions-server-local",
+        "broadcaster-local-macos"
+      ],
+      "stopAll": true
+    },
+    {
+      "name": "captions-local-live-stack",
+      "configurations": [
+        "captions-server-local-live",
+        "broadcaster-local-macos"
+      ],
+      "stopAll": true
     }
   ]
 }

@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/FlutterKaigi/2026/packages/data/firebase/schemas/firestore/live_caption_room.schema.json",
+  "title": "LiveCaptionRoom",
+  "description": "Firestore document schema for `live_captions/{roomId}`. The room id equals the venue id (`venues/{venueId}`). Written exclusively by the captions server via the Admin SDK; clients only read.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["enabled", "isLive", "updatedAt"],
+  "properties": {
+    "enabled": {
+      "type": "boolean",
+      "description": "Manual kill switch. Operators set this to false to hide captions."
+    },
+    "isLive": {
+      "type": "boolean",
+      "description": "True while a broadcaster connection is ingesting audio."
+    },
+    "sourceLang": {
+      "type": ["string", "null"],
+      "description": "BCP-47 tag of the language being transcribed (e.g. ja-JP)."
+    },
+    "interim": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["text", "srcLang"],
+      "description": "Latest in-progress transcript, overwritten in place (≤1Hz).",
+      "properties": {
+        "text": { "type": "string" },
+        "srcLang": { "type": "string" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

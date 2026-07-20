@@ -22,6 +22,13 @@ service cloud.firestore {
       allow write: if hasAdminAccess();
     }
 
+    // Live captions are publicly readable; the captions server writes via the
+    // Admin SDK, which bypasses these rules.
+    match /live_captions/{document=**} {
+      allow read: if true;
+      allow write: if false;
+    }
+
     match /venues/{venueId} {
       allow read: if true;
       allow write: if hasAdminAccess();

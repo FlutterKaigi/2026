@@ -1,4 +1,5 @@
 export 'src/firebase/firebase_initializer.dart' show FirebaseInitializer;
+export 'src/model/live_caption.dart' show LiveCaptionInterim, LiveCaptionRoom, LiveCaptionSegment;
 export 'src/model/locale_map.dart' show LocaleMap;
 export 'src/model/news.dart' show News;
 export 'src/model/sns_link.dart' show SnsLink;
@@ -9,6 +10,7 @@ export 'src/model/sponsor.dart' show Sponsor, SponsorTier;
 export 'src/model/timeline_event.dart' show TimelineEvent;
 export 'src/model/venue.dart' show Venue;
 export 'src/repository/auth_repository.dart' show FirebaseAuthRepository, AuthRepository;
+export 'src/repository/live_captions_repository.dart' show FirestoreLiveCaptionsRepository, LiveCaptionsRepository;
 export 'src/repository/news_repository.dart' show FirestoreNewsRepository, NewsRepository;
 export 'src/repository/speaker_repository.dart' show FirestoreSpeakerRepository, SpeakerRepository;
 export 'src/repository/staff_member_repository.dart' show FirestoreStaffMemberRepository, StaffMemberRepository;

@@ -2,11 +2,34 @@ app:
   title: FlutterKaigi 2026
 navigation:
   news: News
+  captions: Captions
   info: Event Info
 news:
   title: News
   empty: There is no news yet
   error: Failed to load news
+liveCaptions:
+  title: Live Captions
+  description: Pick a session or scan the QR code in the room to see live translated captions
+  live: LIVE
+  sessionsEmpty: Sessions have not been published yet
+  sessionsError: Failed to load sessions
+  scanQr: Scan QR code
+  room:
+    notLive: This room is not streaming right now
+    disabled: Captions are currently turned off
+    waiting: Captions will appear here once streaming starts
+    empty: No captions yet
+    error: Failed to load captions
+    original: Original
+  scan:
+    title: Scan QR code
+    instruction: Scan the QR code posted in the room
+    manualLabel: Enter a room ID directly
+    manualHint: hall-a
+    open: Open
+    invalid: This QR code does not point to captions
+    cameraError: Camera is unavailable. Enter the room ID directly instead
 eventInfo:
   title: Event Info
   version: Version
