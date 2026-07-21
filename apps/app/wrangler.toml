@@ -1,0 +1,12 @@
+"$schema" = "node_modules/wrangler/config-schema.json"
+name = "flutterkaigi-2026-conference-app"
+compatibility_date = "2026-07-01"
+preview_urls = true
+
+[assets]
+directory = "./build/web"
+not_found_handling = "single-page-application"
+
+[route]
+custom_domain = true
+pattern = "2026-app.flutterkaigi.jp"

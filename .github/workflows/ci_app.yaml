@@ -1,0 +1,108 @@
+name: App CI
+
+on:
+  pull_request:
+    paths:
+      - apps/app/**
+      - packages/data/**
+      - packages/flutterkaigi_lints/**
+      - .fvmrc
+      - cspell.jsonc
+      - dprint.jsonc
+      - pubspec.yaml
+      - .github/workflows/ci_app.yaml
+  push:
+    branches:
+      - main
+    paths:
+      - apps/app/**
+      - packages/data/**
+      - packages/flutterkaigi_lints/**
+      - .fvmrc
+      - cspell.jsonc
+      - dprint.jsonc
+      - pubspec.yaml
+      - .github/workflows/ci_app.yaml
+  workflow_dispatch:
+
+concurrency:
+  group: app-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions: {}
+
+defaults:
+  run:
+    shell: bash -euo pipefail {0}
+
+jobs:
+  spelling:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Check spelling
+        uses: streetsidesoftware/cspell-action@de2a73e963e7443969755b648a1008f77033c5b2 # v8.4.0
+        with:
+          config: cspell.jsonc
+          incremental_files_only: false
+          use_cspell_files: true
+
+  style:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Check documentation and configuration formatting
+        uses: dprint/check@9cb3a2b17a8e606d37aae341e49df3654933fc23 # v2.3
+        with:
+          dprint-version: 0.55.2
+          config-path: dprint.jsonc
+
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - id: flutter-version
+        run: echo "version=$(jq -r .flutter .fvmrc)" >> "$GITHUB_OUTPUT"
+
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version: ${{ steps.flutter-version.outputs.version }}
+          channel: stable
+          cache: true
+
+      - name: Prepare Firebase options stub
+        run: cp apps/app/lib/firebase_options.stub.dart apps/app/lib/firebase_options.dart
+
+      - name: Resolve dependencies
+        run: flutter pub get
+
+      - name: Check formatting
+        run: dart format --output=none --set-exit-if-changed apps/app
+
+      - name: Analyze app
+        working-directory: apps/app
+        run: dart analyze
+
+      - name: Analyze data package
+        working-directory: packages/data
+        run: dart analyze
+
+      - name: Test app
+        working-directory: apps/app
+        run: flutter test
+
+      - name: Test data package
+        working-directory: packages/data
+        run: flutter test

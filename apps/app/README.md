@@ -1,17 +1,30 @@
-# app
+# FlutterKaigi 2026 App
 
-A new Flutter project.
+FlutterKaigi 2026のiOS、Android、Web公式アプリです。
 
-## Getting Started
+## 環境
 
-This project is a starting point for a Flutter application.
+| Flavor | 設定ファイル             | 接続先                    |
+| ------ | ------------------------ | ------------------------- |
+| `dev`  | `environments/.env.dev`  | Firebase Emulator Suite   |
+| `stg`  | `environments/.env.stg`  | `flutterkaigi-2026-stg`   |
+| `prod` | `environments/.env.prod` | `flutterkaigi-2026-283db` |
 
-A few resources to get you started if this is your first Flutter project:
+例:
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+```bash
+fvm flutter run \
+  --dart-define-from-file=environments/.env.dev
+```
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+devでanalyze/testする場合は、実値を含まないStubをGit管理外の生成先へコピーします。
+
+```bash
+cp lib/firebase_options.stub.dart lib/firebase_options.dart
+```
+
+stg/prodの配布Workflowは`apps/app`でFlutterFire CLIを実行し、Git管理外の`firebase_options.dart`とNative設定ファイルをFirebase Projectからビルド時に生成します。Firebase OptionsをRepositoryやGitHub Secretには保存しません。ローカルでstg/prodへ接続する場合のコマンドとCI認証設定は[App delivery setup](../../.github/APP_DELIVERY.md#firebase-sdk-settings)を参照してください。
+
+## 配布
+
+GitHub Actionsによる配布先、Repository Variables／Secretsの設定は[App delivery setup](../../.github/APP_DELIVERY.md)を参照してください。

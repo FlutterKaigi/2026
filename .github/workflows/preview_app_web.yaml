@@ -1,0 +1,118 @@
+name: Preview App Web
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - apps/app/**
+      - packages/data/**
+      - .fvmrc
+      - pubspec.yaml
+      - .github/workflows/preview_app_web.yaml
+  workflow_dispatch:
+
+concurrency:
+  group: preview-app-web-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions: {}
+
+defaults:
+  run:
+    shell: bash -euo pipefail {0}
+
+jobs:
+  preview:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      id-token: write
+      pull-requests: write
+    env:
+      FIREBASE_PROJECT_ID: ${{ vars.STG_FIREBASE_PROJECT_ID }}
+      FIREBASE_WEB_APP_ID: ${{ vars.STG_APP_FIREBASE_WEB_APP_ID }}
+      GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER_STG }}
+      GCP_SERVICE_ACCOUNT: ${{ vars.GCP_SERVICE_ACCOUNT_STG }}
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - id: flutter-version
+        run: echo "version=$(jq -r .flutter .fvmrc)" >> "$GITHUB_OUTPUT"
+
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version: ${{ steps.flutter-version.outputs.version }}
+          channel: stable
+          cache: true
+
+      - name: Resolve dependencies
+        run: flutter pub get
+
+      - name: Validate staging Firebase configuration
+        run: |
+          for name in FIREBASE_PROJECT_ID FIREBASE_WEB_APP_ID GCP_WORKLOAD_IDENTITY_PROVIDER GCP_SERVICE_ACCOUNT; do
+            if [ -z "${!name}" ]; then
+              echo "::error::$name is not configured as a Repository Variable."
+              exit 1
+            fi
+          done
+
+      - name: Authenticate to Firebase with Workload Identity Federation
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3
+        with:
+          project_id: ${{ vars.STG_FIREBASE_PROJECT_ID }}
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER_STG }}
+          service_account: ${{ vars.GCP_SERVICE_ACCOUNT_STG }}
+
+      - name: Install pinned Firebase configuration tools
+        run: |
+          npm install --global firebase-tools@13.35.1
+          dart pub global activate flutterfire_cli 1.4.0
+          echo "$HOME/.pub-cache/bin" >> "$GITHUB_PATH"
+
+      - name: Generate staging Firebase options
+        working-directory: apps/app
+        run: >-
+          flutterfire configure
+          --yes
+          --project="$FIREBASE_PROJECT_ID"
+          --platforms=web
+          --web-app-id="$FIREBASE_WEB_APP_ID"
+          --out=lib/firebase_options.dart
+
+      - name: Validate generated staging Firebase options
+        working-directory: apps/app
+        run: |
+          grep -Fq "projectId: '$FIREBASE_PROJECT_ID'" lib/firebase_options.dart
+          grep -Fq "appId: '$FIREBASE_WEB_APP_ID'" lib/firebase_options.dart
+
+      - name: Build staging web app
+        working-directory: apps/app
+        run: >-
+          flutter build web
+          --release
+          --dart-define-from-file=environments/.env.stg
+          --dart-define=FIREBASE_PROJECT_ID=$FIREBASE_PROJECT_ID
+          --dart-define=COMMIT_INFORMATION=${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Upload Cloudflare Workers version
+        id: deploy
+        uses: cloudflare/wrangler-action@ebbaa1584979971c8614a24965b4405ff95890e0 # v4.0.0
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: apps/app
+          command: versions upload
+
+      - name: Comment preview URL
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: thollander/actions-comment-pull-request@24bffb9b452ba05a4f3f77933840a6a841d1b32b # v3.0.1
+        with:
+          message: |
+            ## 📱 App Web Preview
+            🔗 ${{ steps.deploy.outputs.deployment-url }}
+
+            🔑 Commit: `${{ github.event.pull_request.head.sha }}`
+          comment-tag: deploy-conference-app-web
