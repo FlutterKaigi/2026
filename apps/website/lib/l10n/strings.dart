@@ -99,9 +99,9 @@ class Strings {
     AppLocale.en => 'Get Tickets',
   };
 
-  String get eventInfoSubmitSessionCta => switch (locale) {
-    AppLocale.ja => 'セッションを応募',
-    AppLocale.en => 'Submit Your Session',
+  String get eventInfoSessionClosed => switch (locale) {
+    AppLocale.ja => 'セッション募集は終了しました',
+    AppLocale.en => 'Session Submissions Closed',
   };
 
   String get eventInfoComingSoon => switch (locale) {
@@ -136,15 +136,15 @@ class Strings {
   };
 
   String get latestUpdatesCta => switch (locale) {
-    AppLocale.ja => 'セッション応募受付中!',
-    AppLocale.en => 'Session Submissions Now Open!',
+    AppLocale.ja => 'FlutterKaigi 2026 スポンサー募集について',
+    AppLocale.en => 'FlutterKaigi 2026 Sponsorship Opportunities',
   };
 
   String get latestUpdatesCtaUrl => switch (locale) {
     AppLocale.ja =>
-      'https://medium.com/flutterkaigi/flutterkaigi-2026-%E3%83%97%E3%83%AD%E3%83%9D%E3%83%BC%E3%82%B6%E3%83%AB%E5%BF%9C%E5%8B%9F%E3%81%AE%E3%82%B9%E3%82%B9%E3%83%A1-ea8978e0fd89',
+      'https://medium.com/flutterkaigi/flutterkaigi-2026-opportunities-guide-ja-0e8cdb0a4acb',
     AppLocale.en =>
-      'https://medium.com/flutterkaigi/a-guide-to-submitting-a-proposal-for-flutterkaigi-2026-3fda9a01121d',
+      'https://medium.com/flutterkaigi/flutterkaigi-2026-opportunities-guide-en-1e5bd6c14461',
   };
 
   // ── Sponsors ────────────────────────────────────────────────────────

@@ -77,15 +77,15 @@ class EventInfoCard extends StatelessComponent {
             disabled: true,
             attributes: {'aria-label': strings.eventInfoTicketsAriaLabel},
           ),
-          a(
+          button(
             [
               span(classes: 'event-info-card__cta-label', [
-                .text(strings.eventInfoSubmitSessionCta),
+                .text(strings.eventInfoSessionClosed),
               ]),
             ],
-            href: 'https://sessionize.com/flutterkaigi-2026/',
-            target: Target.blank,
-            classes: 'event-info-card__cta event-info-card__cta--active',
+            classes: 'event-info-card__cta',
+            type: ButtonType.button,
+            disabled: true,
           ),
         ]),
       ]),

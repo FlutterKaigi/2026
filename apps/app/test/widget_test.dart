@@ -1,52 +1,43 @@
-import 'package:app/core/provider/environment.dart';
-import 'package:app/feature/news/provider/news_provider.dart';
-import 'package:app/main.dart';
+import 'package:app/core/i18n/strings.g.dart';
+import 'package:app/feature/news/data/provider/news_list_repository.dart';
+import 'package:app/feature/news/ui/page/news_list_page.dart';
 import 'package:data/data.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 void main() {
-  testWidgets('shows news fetched from repository', (tester) async {
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          environmentProvider.overrideWithValue(
-            const Environment(
-              appIdSuffix: '.dev',
-              appName: '[DEV] FlutterKaigi 2026',
-              flavor: Flavor.develop,
-              firebaseProjectId: 'dev-flutterkaigi-2026',
-              firestoreEmulatorHost: 'localhost:8080',
-              androidFirestoreEmulatorHost: '10.0.2.2:8080',
-            ),
-          ),
-          newsRepositoryProvider.overrideWithValue(
-            _FakeNewsRepository([
-              News(
-                id: 'sample',
-                title: const LocaleMap(
-                  ja: 'FlutterKaigi 2026 スポンサー募集について',
-                  en: 'About FlutterKaigi 2026 Sponsorship',
-                ),
-                publishedAt: DateTime.parse('2026-05-01T09:00:00+09:00'),
-                createdAt: DateTime.parse('2026-06-02T00:00:00+09:00'),
-                updatedAt: DateTime.parse('2026-06-02T00:00:00+09:00'),
-                url: const LocaleMap(
-                  ja: 'https://medium.com/flutterkaigi/flutterkaigi-2026-opportunities-guide-ja-0e8cdb0a4acb',
-                  en: 'https://medium.com/flutterkaigi/flutterkaigi-2026-opportunities-guide-en-0e8cdb0a4acb',
-                ),
-              ),
-            ]),
-          ),
-        ],
-        child: const NewsSampleApp(),
-      ),
+  testWidgets('NewsListPage renders news from the repository', (tester) async {
+    final news = News(
+      id: 'sample',
+      title: const LocaleMap(ja: 'お知らせサンプル', en: 'Sample news'),
+      url: const LocaleMap(ja: '', en: ''),
+      publishedAt: DateTime.utc(2026, 5),
+      createdAt: DateTime.utc(2026, 5),
+      updatedAt: DateTime.utc(2026, 5),
     );
 
+    await tester.pumpWidget(
+      TranslationProvider(
+        child: ProviderScope(
+          overrides: [
+            newsListRepositoryProvider.overrideWithValue(
+              _FakeNewsRepository([news]),
+            ),
+          ],
+          child: MaterialApp(
+            locale: const Locale('ja'),
+            supportedLocales: AppLocaleUtils.supportedLocales,
+            localizationsDelegates: GlobalMaterialLocalizations.delegates,
+            home: const NewsListPage(),
+          ),
+        ),
+      ),
+    );
     await tester.pumpAndSettle();
 
-    expect(find.text('FlutterKaigi 2026 スポンサー募集について'), findsOneWidget);
-    expect(find.textContaining('medium.com/flutterkaigi'), findsOneWidget);
+    expect(find.text('お知らせサンプル'), findsOneWidget);
   });
 }
 

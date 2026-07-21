@@ -158,8 +158,8 @@ class HiringSection extends StatelessComponent {
           css('img').styles(
             backgroundColor: onBrand,
             raw: const {
-              'max-width': '100%',
-              'max-height': '100%',
+              'max-width': '70%',
+              'max-height': '70%',
               'object-fit': 'contain',
             },
           ),

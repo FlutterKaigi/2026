@@ -75,7 +75,7 @@ class SponsorDetailPage extends StatelessComponent {
             // through to the anchor.
             attributes: const {
               'onclick':
-                  'if(document.referrer.indexOf("/sponsors/")<0&&window.history.length>1){window.history.back();return false;}',
+                  'if(document.referrer.startsWith(location.origin)&&document.referrer.indexOf("/sponsors/")<0&&window.history.length>1){window.history.back();return false;}',
             },
             [
               span(
@@ -210,9 +210,11 @@ class SponsorDetailPage extends StatelessComponent {
       ]),
 
       // Logo banner: the logo is the bucket image used as-is (no baked padding),
-      // centered and contained. Breathing room is provided here at render time
-      // via the banner padding (clear space around the logo) plus the logo's
-      // max-height, keeping it clear of the rounded border.
+      // centered and contained. Horizontal clear space is 15% (logo capped at
+      // 70% width, matching the sponsors-section / Job Boards convention). The
+      // height is fixed via max-height (≈80% of the banner min-height, so ~10%
+      // clear top/bottom) — a square logo stays contained instead of stretching
+      // the banner tall or filling it edge to edge.
       css('.sponsor-detail__banner', [
         css('&').styles(
           display: .flex,
@@ -226,10 +228,10 @@ class SponsorDetailPage extends StatelessComponent {
             color: const Color('#CBC3D933'),
             width: 1.px,
           ),
+          // No padding here: horizontal clear space is set on the <img> via the
+          // 70% cap so it stays 15% instead of stacking with banner padding.
           raw: const {
             'min-height': 'clamp(220px, 30vw, 360px)',
-            // Clear space around the logo (replaces the asset's old baked ~10%).
-            'padding': 'clamp(24px, 6%, 56px)',
           },
         ),
         css('.sponsor-detail__logo').styles(
@@ -238,8 +240,8 @@ class SponsorDetailPage extends StatelessComponent {
           // 置かれてもグローが見えないようにする。
           backgroundColor: onBrand,
           raw: const {
-            'max-width': '100%',
-            'max-height': 'clamp(180px, 26vw, 312px)',
+            'max-width': '70%',
+            'max-height': 'clamp(176px, 24vw, 288px)',
             'object-fit': 'contain',
           },
         ),
