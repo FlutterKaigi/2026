@@ -33,6 +33,7 @@ jobs:
     env:
       FIREBASE_PROJECT_ID: ${{ vars.STG_FIREBASE_PROJECT_ID }}
       FIREBASE_WEB_APP_ID: ${{ vars.STG_APP_FIREBASE_WEB_APP_ID }}
+      APP_CHECK_SITE_KEY: ${{ vars.STG_APP_CHECK_SITE_KEY }}
       GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER_STG }}
       GCP_SERVICE_ACCOUNT: ${{ vars.GCP_SERVICE_ACCOUNT_STG }}
     steps:
@@ -52,7 +53,8 @@ jobs:
 
       - name: Validate staging Firebase configuration
         run: |
-          for name in FIREBASE_PROJECT_ID FIREBASE_WEB_APP_ID GCP_WORKLOAD_IDENTITY_PROVIDER GCP_SERVICE_ACCOUNT; do
+          for name in FIREBASE_PROJECT_ID FIREBASE_WEB_APP_ID APP_CHECK_SITE_KEY \
+            GCP_WORKLOAD_IDENTITY_PROVIDER GCP_SERVICE_ACCOUNT; do
             if [ -z "${!name}" ]; then
               echo "::error::$name is not configured as a Repository Variable."
               exit 1
@@ -95,6 +97,7 @@ jobs:
           --release
           --dart-define-from-file=environments/.env.stg
           --dart-define=FIREBASE_PROJECT_ID=$FIREBASE_PROJECT_ID
+          --dart-define=APP_CHECK_SITE_KEY=$APP_CHECK_SITE_KEY
           --dart-define=COMMIT_INFORMATION=${{ github.event.pull_request.head.sha || github.sha }}
 
       - name: Upload Cloudflare Workers version

@@ -1,3 +1,4 @@
+import 'package:app/core/firebase/app_check_initializer.dart';
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/provider/app_locale.dart';
 import 'package:app/core/provider/environment.dart';
@@ -34,6 +35,7 @@ Future<void> main() async {
     host: hostParts.first,
     firestorePort: hostParts.length > 1 ? int.parse(hostParts[1]) : 8080,
   );
+  await ensureAppCheckInitialized(environment);
 
   runApp(
     TranslationProvider(

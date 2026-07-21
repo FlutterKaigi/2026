@@ -73,6 +73,9 @@ abstract class Environment with _$Environment {
     }
     return DefaultFirebaseOptions.currentPlatform;
   }
+
+  /// reCAPTCHA Enterprise site key used by App Check for release web builds.
+  String get appCheckSiteKey => const String.fromEnvironment('APP_CHECK_SITE_KEY');
 }
 
 /// Build flavor selected at compile time through the `FLAVOR` define.
