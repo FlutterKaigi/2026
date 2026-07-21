@@ -7,7 +7,7 @@
 | `App CI` | app関連のPR、`main` push、手動 | format/analyze/test、CSpell、dprint |
 | `Preview App Web` | app関連のPR、手動 | Cloudflare Workers Version |
 | `Deploy App Web` | app関連の`main` push、手動（現在は明示的に有効化するまでJobをskip） | Cloudflare Workers Production |
-| `Deploy App iOS` | GitHub Releaseのpublish、手動 | App Store Connect / TestFlight |
+| `Deploy App iOS` | GitHub Releaseのpublish、手動、PRへの`deploy-app-ios`ラベル付与 | App Store Connect / TestFlight |
 | `Deploy App Android` | GitHub Releaseのpublish、手動 | Google Play Internal Testing |
 
 ## GitHub側の登録場所
@@ -72,6 +72,8 @@ PreviewとProductionで同じRepository Secretを使用します。既存の`CLO
 TokenはGit、Issue、Slackへ貼り付けません。権限と対象Resourceは必要最小限にします。詳細は[CloudflareのAPI Token作成手順](https://developers.cloudflare.com/fundamentals/api/get-started/create-token/)を参照してください。
 
 ## Apple Developer / App Store Connect
+
+PRマージ前にApp Store Connectへのアップロードまで確認する場合は、同一Repository内のPRへ`deploy-app-ios`ラベルを付与します。Fork由来のPRでは実行されません。通常のPR作成やpushではiOS配布を開始しません。
 
 ### App IDとApp Store Connectアプリ
 

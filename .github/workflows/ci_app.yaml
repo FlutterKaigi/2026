@@ -11,6 +11,7 @@ on:
       - dprint.jsonc
       - pubspec.yaml
       - .github/workflows/ci_app.yaml
+      - .github/workflows/deploy_app_ios.yaml
   push:
     branches:
       - main
@@ -23,6 +24,7 @@ on:
       - dprint.jsonc
       - pubspec.yaml
       - .github/workflows/ci_app.yaml
+      - .github/workflows/deploy_app_ios.yaml
   workflow_dispatch:
 
 concurrency:
