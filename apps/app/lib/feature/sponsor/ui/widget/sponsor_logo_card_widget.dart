@@ -28,7 +28,6 @@ class SponsorLogoCardWidget extends StatelessWidget {
     final shape = sponsor.tier == SponsorTier.individual
         ? const CircleBorder()
         : RoundedRectangleBorder(borderRadius: BorderRadius.circular(16));
-
     return LayoutBuilder(
       builder: (context, constraints) {
         final effectiveSide = constraints.maxWidth.isFinite ? math.min(side, constraints.maxWidth) : side;
@@ -112,20 +111,88 @@ class _SponsorLogoImage extends StatelessWidget {
     if (url == null || url.isEmpty) {
       return _SponsorLogoFallback(size: side);
     }
-
     return Semantics(
       label: name,
       image: true,
-      child: CachedNetworkImage(
-        imageUrl: url,
-        width: logoSide,
-        height: logoSide,
-        fit: BoxFit.contain,
-        placeholder: (context, url) => SizedBox.square(
-          dimension: math.min(32, side * 0.22),
-          child: const CircularProgressIndicator.adaptive(strokeWidth: 2),
+      child: SizedBox.square(
+        dimension: side,
+        child: CachedNetworkImage(
+          imageUrl: url,
+          imageBuilder: (context, imageProvider) => Center(
+            child: Image(
+              image: imageProvider,
+              width: logoSide,
+              height: logoSide,
+              fit: BoxFit.contain,
+            ),
+          ),
+          placeholder: (context, url) => _SponsorLogoShimmer(
+            size: side,
+            isCircle: isIndividual,
+          ),
+          errorWidget: (context, url, error) => _SponsorLogoFallback(size: side),
         ),
-        errorWidget: (context, url, error) => _SponsorLogoFallback(size: side),
+      ),
+    );
+  }
+}
+
+class _SponsorLogoShimmer extends StatefulWidget {
+  const _SponsorLogoShimmer({required this.size, required this.isCircle});
+
+  final double size;
+  final bool isCircle;
+
+  @override
+  State<_SponsorLogoShimmer> createState() => _SponsorLogoShimmerState();
+}
+
+class _SponsorLogoShimmerState extends State<_SponsorLogoShimmer> with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 1200));
+    unawaited(_controller.repeat());
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final baseColor = colorScheme.surfaceContainerHighest;
+    final highlightColor = colorScheme.surface;
+    final shape = widget.isCircle
+        ? const CircleBorder()
+        : RoundedRectangleBorder(borderRadius: BorderRadius.circular(16));
+
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return ShaderMask(
+          blendMode: BlendMode.srcATop,
+          shaderCallback: (bounds) {
+            return LinearGradient(
+              begin: Alignment(-1 + _controller.value * 2, -0.7),
+              end: Alignment(_controller.value * 2, 0.7),
+              colors: [baseColor, highlightColor, baseColor],
+              stops: const [0.25, 0.5, 0.75],
+            ).createShader(bounds);
+          },
+          child: child,
+        );
+      },
+      child: SizedBox.square(
+        dimension: widget.size,
+        child: DecoratedBox(
+          decoration: ShapeDecoration(color: baseColor, shape: shape),
+        ),
       ),
     );
   }

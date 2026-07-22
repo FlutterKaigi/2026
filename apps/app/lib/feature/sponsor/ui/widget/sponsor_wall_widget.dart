@@ -26,8 +26,7 @@ class SponsorWallWidget extends StatelessWidget {
             child: Column(
               children: [
                 _SponsorHeader(
-                  title: t.sponsors.title,
-                  subtitle: t.sponsors.subtitle,
+                  label: t.sponsors.subtitle,
                 ),
                 SizedBox(height: sectionGap),
                 for (final group in data.groups) ...[
@@ -55,38 +54,23 @@ class SponsorWallWidget extends StatelessWidget {
 
 class _SponsorHeader extends StatelessWidget {
   const _SponsorHeader({
-    required this.title,
-    required this.subtitle,
+    required this.label,
   });
 
-  final String title;
-  final String subtitle;
+  final String label;
 
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Column(
-      children: [
-        Text(
-          title,
-          textAlign: TextAlign.center,
-          style: textTheme.headlineMedium?.copyWith(
-            color: colorScheme.onSurface,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        const SizedBox(height: 16),
-        Text(
-          subtitle,
-          textAlign: TextAlign.center,
-          style: textTheme.bodyLarge?.copyWith(
-            color: colorScheme.onSurfaceVariant,
-            height: 1.5,
-          ),
-        ),
-      ],
+    return Text(
+      label,
+      textAlign: TextAlign.center,
+      style: textTheme.bodyLarge?.copyWith(
+        color: colorScheme.onSurfaceVariant,
+        height: 1.5,
+      ),
     );
   }
 }
