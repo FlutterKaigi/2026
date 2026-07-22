@@ -7,6 +7,7 @@ import 'package:app/feature/news/ui/page/news_list_page.dart';
 import 'package:app/feature/session/ui/page/bookmarked_sessions_page.dart';
 import 'package:app/feature/session/ui/page/session_details_page.dart';
 import 'package:app/feature/session/ui/page/session_timetable_page.dart';
+import 'package:app/feature/sponsor/ui/page/sponsor_list_page.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';

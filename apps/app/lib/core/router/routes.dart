@@ -21,6 +21,9 @@ part of 'router.dart';
         ),
       ],
     ),
+    TypedStatefulShellBranch<SponsorBranch>(
+      routes: [TypedGoRoute<SponsorRoute>(path: '/sponsors')],
+    ),
     TypedStatefulShellBranch<EventInfoBranch>(
       routes: [TypedGoRoute<EventInfoRoute>(path: '/info')],
     ),
@@ -48,6 +51,10 @@ class AppShellRoute extends StatefulShellRouteData {
           label: t.navigation.sessions,
         ),
         RootDestination(
+          icon: Icons.business_outlined,
+          label: t.navigation.sponsors,
+        ),
+        RootDestination(
           icon: Icons.info_outline,
           label: t.navigation.info,
         ),
@@ -65,6 +72,11 @@ class NewsBranch extends StatefulShellBranchData {
 /// Branch hosting the session timetable tab.
 class SessionBranch extends StatefulShellBranchData {
   const SessionBranch();
+}
+
+/// Branch hosting the sponsors tab.
+class SponsorBranch extends StatefulShellBranchData {
+  const SponsorBranch();
 }
 
 /// Branch hosting the event info tab.
@@ -104,6 +116,14 @@ class SessionDetailsRoute extends GoRouteData with $SessionDetailsRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) => SessionDetailsPage(sessionId: sessionId);
+}
+
+/// `/sponsors` — the sponsor logo wall.
+class SponsorRoute extends GoRouteData with $SponsorRoute {
+  const SponsorRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const SponsorListPage();
 }
 
 /// `/info` — event and app information.
