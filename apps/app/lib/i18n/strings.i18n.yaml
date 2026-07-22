@@ -3,11 +3,18 @@ app:
 navigation:
   news: お知らせ
   sessions: セッション
+  sponsors: スポンサー
   info: 情報
 news:
   title: お知らせ
   empty: お知らせはまだありません
   error: お知らせを取得できませんでした
+sponsors:
+  title: スポンサー
+  subtitle: FlutterKaigi 2026 を支えてくださるスポンサーの皆様
+  empty: スポンサーはまだ公開されていません
+  error: スポンサーを取得できませんでした
+  logoSemanticLabel: $name のロゴ
 sessionTimetable:
   title: タイムテーブル
   dayButtonLabel: $day日目 ($date)

@@ -3,11 +3,18 @@ app:
 navigation:
   news: News
   sessions: Sessions
+  sponsors: Sponsors
   info: Info
 news:
   title: News
   empty: There is no news yet
   error: Failed to load news
+sponsors:
+  title: Sponsors
+  subtitle: The sponsors supporting FlutterKaigi 2026
+  empty: Sponsors have not been published yet
+  error: Failed to load sponsors
+  logoSemanticLabel: $name logo
 sessionTimetable:
   title: Timetable
   dayButtonLabel: Day $day ($date)

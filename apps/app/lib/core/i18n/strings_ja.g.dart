@@ -43,6 +43,7 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	late final Translations$app$ja app = Translations$app$ja.internal(_root);
 	late final Translations$navigation$ja navigation = Translations$navigation$ja.internal(_root);
 	late final Translations$news$ja news = Translations$news$ja.internal(_root);
+	late final Translations$sponsors$ja sponsors = Translations$sponsors$ja.internal(_root);
 	late final Translations$sessionTimetable$ja sessionTimetable = Translations$sessionTimetable$ja.internal(_root);
 	late final Translations$sessionDetails$ja sessionDetails = Translations$sessionDetails$ja.internal(_root);
 	late final Translations$sessionBookmark$ja sessionBookmark = Translations$sessionBookmark$ja.internal(_root);
@@ -78,6 +79,9 @@ class Translations$navigation$ja {
 	/// ja: 'セッション'
 	String get sessions => 'セッション';
 
+	/// ja: 'スポンサー'
+	String get sponsors => 'スポンサー';
+
 	/// ja: '情報'
 	String get info => '情報';
 }
@@ -98,6 +102,30 @@ class Translations$news$ja {
 
 	/// ja: 'お知らせを取得できませんでした'
 	String get error => 'お知らせを取得できませんでした';
+}
+
+// Path: sponsors
+class Translations$sponsors$ja {
+	Translations$sponsors$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'スポンサー'
+	String get title => 'スポンサー';
+
+	/// ja: 'FlutterKaigi 2026 を支えてくださるスポンサーの皆様'
+	String get subtitle => 'FlutterKaigi 2026 を支えてくださるスポンサーの皆様';
+
+	/// ja: 'スポンサーはまだ公開されていません'
+	String get empty => 'スポンサーはまだ公開されていません';
+
+	/// ja: 'スポンサーを取得できませんでした'
+	String get error => 'スポンサーを取得できませんでした';
+
+	/// ja: '$name のロゴ'
+	String logoSemanticLabel({required Object name}) => '${name} のロゴ';
 }
 
 // Path: sessionTimetable
@@ -371,10 +399,16 @@ extension on Translations {
 			'app.title' => 'FlutterKaigi 2026',
 			'navigation.news' => 'お知らせ',
 			'navigation.sessions' => 'セッション',
+			'navigation.sponsors' => 'スポンサー',
 			'navigation.info' => '情報',
 			'news.title' => 'お知らせ',
 			'news.empty' => 'お知らせはまだありません',
 			'news.error' => 'お知らせを取得できませんでした',
+			'sponsors.title' => 'スポンサー',
+			'sponsors.subtitle' => 'FlutterKaigi 2026 を支えてくださるスポンサーの皆様',
+			'sponsors.empty' => 'スポンサーはまだ公開されていません',
+			'sponsors.error' => 'スポンサーを取得できませんでした',
+			'sponsors.logoSemanticLabel' => ({required Object name}) => '${name} のロゴ',
 			'sessionTimetable.title' => 'タイムテーブル',
 			'sessionTimetable.dayButtonLabel' => ({required Object day, required Object date}) => '${day}日目 (${date})',
 			'sessionTimetable.empty' => 'タイムテーブルはまだ公開されていません',
