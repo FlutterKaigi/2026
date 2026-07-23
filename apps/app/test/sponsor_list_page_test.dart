@@ -79,7 +79,6 @@ void main() {
               path: ':sponsorKey',
               builder: (context, state) => SponsorDetailsPage(
                 sponsorKey: state.pathParameters['sponsorKey']!,
-                initialSponsor: state.extra as Sponsor?,
               ),
             ),
           ],

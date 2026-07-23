@@ -17,20 +17,14 @@ import 'package:url_launcher/url_launcher.dart';
 class SponsorDetailsPage extends ConsumerWidget {
   const SponsorDetailsPage({
     required this.sponsorKey,
-    this.initialSponsor,
     super.key,
   });
 
   final String sponsorKey;
-  final Sponsor? initialSponsor;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final t = Translations.of(context);
-
-    if (initialSponsor != null) {
-      return _SponsorDetailsContent(sponsor: initialSponsor!);
-    }
 
     final detail = ref.watch(sponsorDetailProvider(sponsorKey));
 

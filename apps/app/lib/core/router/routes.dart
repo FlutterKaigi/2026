@@ -135,17 +135,12 @@ class SponsorRoute extends GoRouteData with $SponsorRoute {
 class SponsorDetailsRoute extends GoRouteData with $SponsorDetailsRoute {
   const SponsorDetailsRoute({
     required this.sponsorKey,
-    this.$extra,
   });
 
   final String sponsorKey;
-  final Sponsor? $extra;
 
   @override
-  Widget build(BuildContext context, GoRouterState state) => SponsorDetailsPage(
-    sponsorKey: sponsorKey,
-    initialSponsor: $extra,
-  );
+  Widget build(BuildContext context, GoRouterState state) => SponsorDetailsPage(sponsorKey: sponsorKey);
 }
 
 /// `/info` — event and app information.
