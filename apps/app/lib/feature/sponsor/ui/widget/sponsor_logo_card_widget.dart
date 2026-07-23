@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'package:app/core/extension/locale_map_extension.dart';
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/router/router.dart';
+import 'package:app/core/ui/widget/press_scale_effect_widget.dart';
 import 'package:app/feature/sponsor/data/provider/sponsor_detail_provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:data/data.dart';
@@ -37,22 +38,21 @@ class SponsorLogoCardWidget extends StatelessWidget {
           child: Semantics(
             label: Translations.of(context).sponsors.logoSemanticLabel(name: effectiveName),
             button: true,
-            child: Material(
-              color: Colors.white,
-              elevation: 3,
-              shadowColor: Colors.black.withValues(alpha: 0.25),
-              shape: shape.copyWith(
-                side: BorderSide(
-                  color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.2),
+            child: PressScaleEffectWidget(
+              onTap: () => SponsorDetailsRoute(
+                sponsorKey: sponsorKey,
+                $extra: sponsor,
+              ).push<void>(context),
+              child: Material(
+                color: Colors.white,
+                elevation: 3,
+                shadowColor: Colors.black.withValues(alpha: 0.25),
+                shape: shape.copyWith(
+                  side: BorderSide(
+                    color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.2),
+                  ),
                 ),
-              ),
-              clipBehavior: Clip.antiAlias,
-              child: InkWell(
-                customBorder: shape,
-                onTap: () => SponsorDetailsRoute(
-                  sponsorKey: sponsorKey,
-                  $extra: sponsor,
-                ).push<void>(context),
+                clipBehavior: Clip.antiAlias,
                 child: SizedBox.square(
                   dimension: effectiveSide,
                   child: Center(
