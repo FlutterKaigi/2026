@@ -26,10 +26,11 @@ class App extends ConsumerWidget {
       localizationsDelegates: GlobalMaterialLocalizations.delegates,
       builder: (context, child) {
         final colorScheme = Theme.of(context).colorScheme;
+        final navigationBarColor = appNavigationBarColor(colorScheme);
         return AnnotatedRegion<SystemUiOverlayStyle>(
           value: SystemUiOverlayStyle(
-            systemNavigationBarColor: colorScheme.surface,
-            systemNavigationBarDividerColor: colorScheme.surface,
+            systemNavigationBarColor: navigationBarColor,
+            systemNavigationBarDividerColor: navigationBarColor,
             systemNavigationBarIconBrightness: colorScheme.brightness == Brightness.dark
                 ? Brightness.light
                 : Brightness.dark,
