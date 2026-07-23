@@ -4,7 +4,7 @@
 
 | Workflow | Trigger | Delivery target |
 | --- | --- | --- |
-| `App CI` | app関連のPR、`main` push、手動 | format/analyze/test、CSpell、dprint |
+| `App CI` | app関連のPR、`main` push、手動 | format/analyze/test、dprint |
 | `Preview App Web` | app関連のPR、手動 | Cloudflare Workers Version |
 | `Deploy App Web` | app関連の`main` push、手動（現在は明示的に有効化するまでJobをskip） | Cloudflare Workers Production |
 | `Deploy App iOS` | GitHub Releaseのpublish、手動、PRへの`deploy-app-ios`ラベル付与 | App Store Connect / TestFlight |
@@ -243,7 +243,7 @@ stg／prodのCI Service Accountへ、対象Projectで次の読み取り専用Rol
 
 生成直後にDart OptionsとNative設定ファイルのProject ID／App ID／Package Name／Bundle IDを指定値と照合し、一致しない場合はビルドを停止します。
 
-App CIは実Projectへ接続しません。`firebase_options.stub.dart`をGit管理外の`firebase_options.dart`へコピーし、`apps/app`と`packages/data`だけを対象にformat/analyze/test、CSpell、dprintを実行します。Firebase設定ファイルが未整備の`apps/dashboard`は、workflowの変更検知と各品質チェックの両方から明示的に除外しています。実行時はdev FlavorのFirebase Emulatorへ接続します。
+App CIは実Projectへ接続しません。`firebase_options.stub.dart`をGit管理外の`firebase_options.dart`へコピーし、`apps/app`と`packages/data`だけを対象にformat/analyze/test、dprintを実行します。Firebase設定ファイルが未整備の`apps/dashboard`は、workflowの変更検知と各品質チェックの両方から明示的に除外しています。実行時はdev FlavorのFirebase Emulatorへ接続します。
 
 OptionsをGit管理外にしても、それだけをデータ保護の境界にはできません。クライアント配布物からSDK設定を取得できるため、Firestore／Storage Rulesのテスト、API KeyのAPI・Application restrictions、App Check enforcementを配布前に確認します。[Firebase App Check](https://firebase.google.com/docs/app-check)はAuthenticationとSecurity Rulesを補完する仕組みです。
 
