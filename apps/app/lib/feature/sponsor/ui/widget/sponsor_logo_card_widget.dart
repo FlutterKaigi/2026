@@ -197,18 +197,20 @@ class _SponsorLogoFallback extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final fontSize = (size * 0.13).clamp(13.0, 24.0);
 
-    return Padding(
-      padding: EdgeInsets.all(size * 0.12),
-      child: Text(
-        name,
-        maxLines: 3,
-        overflow: TextOverflow.ellipsis,
-        textAlign: TextAlign.center,
-        style: textTheme.titleMedium?.copyWith(
-          color: colorScheme.onSurface,
-          fontSize: fontSize,
-          fontWeight: FontWeight.w700,
-          height: 1.2,
+    return Center(
+      child: Padding(
+        padding: EdgeInsets.all(size * 0.12),
+        child: Text(
+          name,
+          maxLines: 3,
+          overflow: TextOverflow.ellipsis,
+          textAlign: TextAlign.center,
+          style: textTheme.titleMedium?.copyWith(
+            color: colorScheme.onSurface,
+            fontSize: fontSize,
+            fontWeight: FontWeight.w700,
+            height: 1.2,
+          ),
         ),
       ),
     );
