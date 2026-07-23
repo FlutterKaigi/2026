@@ -22,7 +22,12 @@ part of 'router.dart';
       ],
     ),
     TypedStatefulShellBranch<SponsorBranch>(
-      routes: [TypedGoRoute<SponsorRoute>(path: '/sponsors')],
+      routes: [
+        TypedGoRoute<SponsorRoute>(
+          path: '/sponsors',
+          routes: [TypedGoRoute<SponsorDetailsRoute>(path: ':sponsorKey')],
+        ),
+      ],
     ),
     TypedStatefulShellBranch<EventInfoBranch>(
       routes: [TypedGoRoute<EventInfoRoute>(path: '/info')],
@@ -124,6 +129,23 @@ class SponsorRoute extends GoRouteData with $SponsorRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) => const SponsorListPage();
+}
+
+/// `/sponsors/:sponsorKey` — sponsor details.
+class SponsorDetailsRoute extends GoRouteData with $SponsorDetailsRoute {
+  const SponsorDetailsRoute({
+    required this.sponsorKey,
+    this.$extra,
+  });
+
+  final String sponsorKey;
+  final Sponsor? $extra;
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => SponsorDetailsPage(
+    sponsorKey: sponsorKey,
+    initialSponsor: $extra,
+  );
 }
 
 /// `/info` — event and app information.
