@@ -36,6 +36,20 @@ RouteBase get $appShellRoute => StatefulShellRouteData.$route(
     ),
     StatefulShellBranchData.$branch(
       routes: [
+        GoRouteData.$route(
+          path: '/sponsors',
+          factory: $SponsorRoute._fromState,
+          routes: [
+            GoRouteData.$route(
+              path: ':sponsorKey',
+              factory: $SponsorDetailsRoute._fromState,
+            ),
+          ],
+        ),
+      ],
+    ),
+    StatefulShellBranchData.$branch(
+      routes: [
         GoRouteData.$route(path: '/info', factory: $EventInfoRoute._fromState),
       ],
     ),
@@ -112,6 +126,50 @@ mixin $SessionDetailsRoute on GoRouteData {
   @override
   String get location => GoRouteData.$location(
     '/sessions/${Uri.encodeComponent(_self.sessionId)}',
+  );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) => context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $SponsorRoute on GoRouteData {
+  static SponsorRoute _fromState(GoRouterState state) => const SponsorRoute();
+
+  @override
+  String get location => GoRouteData.$location('/sponsors');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) => context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $SponsorDetailsRoute on GoRouteData {
+  static SponsorDetailsRoute _fromState(GoRouterState state) => SponsorDetailsRoute(
+    sponsorKey: state.pathParameters['sponsorKey']!,
+  );
+
+  SponsorDetailsRoute get _self => this as SponsorDetailsRoute;
+
+  @override
+  String get location => GoRouteData.$location(
+    '/sponsors/${Uri.encodeComponent(_self.sponsorKey)}',
   );
 
   @override

@@ -10,8 +10,14 @@ ThemeData darkTheme() => _themeFrom(darkColorScheme);
 /// UI font family from the design system: Noto Sans JP for all UI text.
 const _fontFamily = 'Noto Sans JP';
 
+/// Background color shared by the app bottom navigation and Android system nav.
+Color appNavigationBarColor(ColorScheme colorScheme) => colorScheme.surfaceContainer;
+
 ThemeData _themeFrom(ColorScheme colorScheme) => ThemeData(
   colorScheme: colorScheme,
   fontFamily: _fontFamily,
   appBarTheme: const AppBarTheme(centerTitle: false),
+  navigationBarTheme: NavigationBarThemeData(
+    backgroundColor: appNavigationBarColor(colorScheme),
+  ),
 );

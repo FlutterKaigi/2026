@@ -3,6 +3,7 @@ import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/provider/theme_mode.dart';
 import 'package:app/core/router/router.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -23,6 +24,20 @@ class App extends ConsumerWidget {
       locale: TranslationProvider.of(context).flutterLocale,
       supportedLocales: AppLocaleUtils.supportedLocales,
       localizationsDelegates: GlobalMaterialLocalizations.delegates,
+      builder: (context, child) {
+        final colorScheme = Theme.of(context).colorScheme;
+        final navigationBarColor = appNavigationBarColor(colorScheme);
+        return AnnotatedRegion<SystemUiOverlayStyle>(
+          value: SystemUiOverlayStyle(
+            systemNavigationBarColor: navigationBarColor,
+            systemNavigationBarDividerColor: navigationBarColor,
+            systemNavigationBarIconBrightness: colorScheme.brightness == Brightness.dark
+                ? Brightness.light
+                : Brightness.dark,
+          ),
+          child: child ?? const SizedBox.shrink(),
+        );
+      },
     );
   }
 }

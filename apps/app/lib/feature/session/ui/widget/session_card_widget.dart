@@ -1,6 +1,7 @@
 import 'package:app/core/extension/locale_map_extension.dart';
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/router/router.dart';
+import 'package:app/core/ui/widget/app_network_image.dart';
 import 'package:app/feature/session/data/provider/session_timetable_provider.dart';
 import 'package:app/feature/session/ui/widget/session_bookmark_button.dart';
 import 'package:app/feature/session/util/event_time.dart';
@@ -100,10 +101,7 @@ class SessionCardWidget extends StatelessWidget {
 }
 
 class _SessionCardSurfaceWidget extends StatelessWidget {
-  const _SessionCardSurfaceWidget({
-    required this.child,
-    this.onTap,
-  });
+  const _SessionCardSurfaceWidget({required this.child, this.onTap});
 
   final Widget child;
   final VoidCallback? onTap;
@@ -121,20 +119,14 @@ class _SessionCardSurfaceWidget extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: child,
-        ),
+        child: Padding(padding: const EdgeInsets.all(16), child: child),
       ),
     );
   }
 }
 
 class _InfoChipWidget extends StatelessWidget {
-  const _InfoChipWidget({
-    required this.icon,
-    required this.label,
-  });
+  const _InfoChipWidget({required this.icon, required this.label});
 
   final IconData icon;
   final String label;
@@ -162,9 +154,9 @@ class _SpeakerChipWidget extends StatelessWidget {
     final avatarUrl = speaker.avatarUrl;
 
     return Chip(
-      avatar: CircleAvatar(
-        backgroundImage: avatarUrl == null || avatarUrl.isEmpty ? null : NetworkImage(avatarUrl),
-        child: avatarUrl == null || avatarUrl.isEmpty ? const Icon(Icons.person_outline, size: 16) : null,
+      avatar: AppNetworkAvatar(
+        imageUrl: avatarUrl,
+        fallback: const Icon(Icons.person_outline, size: 16),
       ),
       label: Text(speaker.name),
       visualDensity: VisualDensity.compact,
