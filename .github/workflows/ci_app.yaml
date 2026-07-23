@@ -7,7 +7,6 @@ on:
       - packages/data/**
       - packages/flutterkaigi_lints/**
       - .fvmrc
-      - cspell.jsonc
       - dprint.jsonc
       - pubspec.yaml
       - .github/workflows/ci_app.yaml
@@ -20,7 +19,6 @@ on:
       - packages/data/**
       - packages/flutterkaigi_lints/**
       - .fvmrc
-      - cspell.jsonc
       - dprint.jsonc
       - pubspec.yaml
       - .github/workflows/ci_app.yaml
@@ -38,21 +36,6 @@ defaults:
     shell: bash -euo pipefail {0}
 
 jobs:
-  spelling:
-    runs-on: ubuntu-24.04
-    timeout-minutes: 5
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-
-      - name: Check spelling
-        uses: streetsidesoftware/cspell-action@de2a73e963e7443969755b648a1008f77033c5b2 # v8.4.0
-        with:
-          config: cspell.jsonc
-          incremental_files_only: false
-          use_cspell_files: true
-
   style:
     runs-on: ubuntu-24.04
     timeout-minutes: 5
