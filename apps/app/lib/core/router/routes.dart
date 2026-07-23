@@ -21,6 +21,9 @@ part of 'router.dart';
         ),
       ],
     ),
+    TypedStatefulShellBranch<VenueMapBranch>(
+      routes: [TypedGoRoute<VenueMapRoute>(path: '/venue-map')],
+    ),
     TypedStatefulShellBranch<EventInfoBranch>(
       routes: [TypedGoRoute<EventInfoRoute>(path: '/info')],
     ),
@@ -35,7 +38,7 @@ class AppShellRoute extends StatefulShellRouteData {
     GoRouterState state,
     StatefulNavigationShell navigationShell,
   ) {
-    final t = Translations.of(context);
+    final t = context.t;
     return RootScaffold(
       navigationShell: navigationShell,
       destinations: [
@@ -46,6 +49,10 @@ class AppShellRoute extends StatefulShellRouteData {
         RootDestination(
           icon: Icons.calendar_today_outlined,
           label: t.navigation.sessions,
+        ),
+        RootDestination(
+          icon: Icons.map_outlined,
+          label: t.navigation.venueMap,
         ),
         RootDestination(
           icon: Icons.info_outline,
@@ -65,6 +72,11 @@ class NewsBranch extends StatefulShellBranchData {
 /// Branch hosting the session timetable tab.
 class SessionBranch extends StatefulShellBranchData {
   const SessionBranch();
+}
+
+/// Branch hosting the venue map tab.
+class VenueMapBranch extends StatefulShellBranchData {
+  const VenueMapBranch();
 }
 
 /// Branch hosting the event info tab.
@@ -104,6 +116,14 @@ class SessionDetailsRoute extends GoRouteData with $SessionDetailsRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) => SessionDetailsPage(sessionId: sessionId);
+}
+
+/// `/venue-map` — the venue map.
+class VenueMapRoute extends GoRouteData with $VenueMapRoute {
+  const VenueMapRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const VenueMapPage();
 }
 
 /// `/info` — event and app information.

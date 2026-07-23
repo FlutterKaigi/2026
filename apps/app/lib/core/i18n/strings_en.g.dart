@@ -46,6 +46,7 @@ class TranslationsEn extends Translations with BaseTranslations<AppLocale, Trans
 	@override late final _Translations$sessionDetails$en sessionDetails = _Translations$sessionDetails$en._(_root);
 	@override late final _Translations$sessionBookmark$en sessionBookmark = _Translations$sessionBookmark$en._(_root);
 	@override late final _Translations$bookmarkedSessions$en bookmarkedSessions = _Translations$bookmarkedSessions$en._(_root);
+	@override late final _Translations$venueMap$en venueMap = _Translations$venueMap$en._(_root);
 	@override late final _Translations$eventInfo$en eventInfo = _Translations$eventInfo$en._(_root);
 	@override late final _Translations$notFound$en notFound = _Translations$notFound$en._(_root);
 	@override late final _Translations$common$en common = _Translations$common$en._(_root);
@@ -71,6 +72,7 @@ class _Translations$navigation$en extends Translations$navigation$ja {
 	@override String get news => 'News';
 	@override String get sessions => 'Sessions';
 	@override String get info => 'Info';
+	@override String get venueMap => 'Venue Map';
 }
 
 // Path: news
@@ -146,6 +148,19 @@ class _Translations$bookmarkedSessions$en extends Translations$bookmarkedSession
 	@override String get emptyBody => 'Bookmark sessions to find them here.';
 	@override String get openSessions => 'Open sessions';
 	@override String get error => 'Failed to load bookmarked sessions';
+}
+
+// Path: venueMap
+class _Translations$venueMap$en extends Translations$venueMap$ja {
+	_Translations$venueMap$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Venue Map';
+	@override String get loadError => 'Could not load the venue map';
+	@override String get loadErrorDescription => 'Please try again. If the map still does not appear, restart the app.';
+	@override late final _Translations$venueMap$controls$en controls = _Translations$venueMap$controls$en._(_root);
 }
 
 // Path: eventInfo
@@ -228,6 +243,18 @@ class _Translations$sessionTimetable$type$en extends Translations$sessionTimetab
 	@override String get event => 'Event';
 }
 
+// Path: venueMap.controls
+class _Translations$venueMap$controls$en extends Translations$venueMap$controls$ja {
+	_Translations$venueMap$controls$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override late final _Translations$venueMap$controls$view$en view = _Translations$venueMap$controls$view$en._(_root);
+	@override late final _Translations$venueMap$controls$labels$en labels = _Translations$venueMap$controls$labels$en._(_root);
+	@override late final _Translations$venueMap$controls$highlight$en highlight = _Translations$venueMap$controls$highlight$en._(_root);
+}
+
 // Path: eventInfo.themeMode
 class _Translations$eventInfo$themeMode$en extends Translations$eventInfo$themeMode$ja {
 	_Translations$eventInfo$themeMode$en._(TranslationsEn root) : this._root = root, super.internal(root);
@@ -253,6 +280,48 @@ class _Translations$eventInfo$language$en extends Translations$eventInfo$languag
 	@override String get english => 'English';
 }
 
+// Path: venueMap.controls.view
+class _Translations$venueMap$controls$view$en extends Translations$venueMap$controls$view$ja {
+	_Translations$venueMap$controls$view$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'View';
+	@override String get threeD => '3D View';
+	@override String get top => 'Top View';
+}
+
+// Path: venueMap.controls.labels
+class _Translations$venueMap$controls$labels$en extends Translations$venueMap$controls$labels$ja {
+	_Translations$venueMap$controls$labels$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Labels';
+	@override String get hide => 'Hide Labels';
+	@override String get show => 'Show Labels';
+	@override String get decreaseSize => 'Smaller';
+	@override String get increaseSize => 'Larger';
+}
+
+// Path: venueMap.controls.highlight
+class _Translations$venueMap$controls$highlight$en extends Translations$venueMap$controls$highlight$ja {
+	_Translations$venueMap$controls$highlight$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Highlight';
+	@override String get mainHalls => 'Main Halls';
+	@override String get exhibitionHalls => 'Exhibition Halls';
+	@override String get grandHalls => 'Grand Halls';
+	@override String get toilets => 'Toilets';
+	@override String get elevators => 'Elevators';
+	@override String get entrance => 'Entrance';
+}
+
 /// The flat map containing all translations for locale <en>.
 /// Only for edge cases! For simple maps, use the map function of this library.
 ///
@@ -265,6 +334,7 @@ extension on TranslationsEn {
 			'navigation.news' => 'News',
 			'navigation.sessions' => 'Sessions',
 			'navigation.info' => 'Info',
+			'navigation.venueMap' => 'Venue Map',
 			'news.title' => 'News',
 			'news.empty' => 'There is no news yet',
 			'news.error' => 'Failed to load news',
@@ -301,6 +371,24 @@ extension on TranslationsEn {
 			'bookmarkedSessions.emptyBody' => 'Bookmark sessions to find them here.',
 			'bookmarkedSessions.openSessions' => 'Open sessions',
 			'bookmarkedSessions.error' => 'Failed to load bookmarked sessions',
+			'venueMap.title' => 'Venue Map',
+			'venueMap.loadError' => 'Could not load the venue map',
+			'venueMap.loadErrorDescription' => 'Please try again. If the map still does not appear, restart the app.',
+			'venueMap.controls.view.title' => 'View',
+			'venueMap.controls.view.threeD' => '3D View',
+			'venueMap.controls.view.top' => 'Top View',
+			'venueMap.controls.labels.title' => 'Labels',
+			'venueMap.controls.labels.hide' => 'Hide Labels',
+			'venueMap.controls.labels.show' => 'Show Labels',
+			'venueMap.controls.labels.decreaseSize' => 'Smaller',
+			'venueMap.controls.labels.increaseSize' => 'Larger',
+			'venueMap.controls.highlight.title' => 'Highlight',
+			'venueMap.controls.highlight.mainHalls' => 'Main Halls',
+			'venueMap.controls.highlight.exhibitionHalls' => 'Exhibition Halls',
+			'venueMap.controls.highlight.grandHalls' => 'Grand Halls',
+			'venueMap.controls.highlight.toilets' => 'Toilets',
+			'venueMap.controls.highlight.elevators' => 'Elevators',
+			'venueMap.controls.highlight.entrance' => 'Entrance',
 			'eventInfo.title' => 'Info',
 			'eventInfo.version' => 'Version',
 			'eventInfo.themeMode.title' => 'Theme',

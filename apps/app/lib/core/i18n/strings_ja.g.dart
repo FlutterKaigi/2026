@@ -47,6 +47,7 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	late final Translations$sessionDetails$ja sessionDetails = Translations$sessionDetails$ja.internal(_root);
 	late final Translations$sessionBookmark$ja sessionBookmark = Translations$sessionBookmark$ja.internal(_root);
 	late final Translations$bookmarkedSessions$ja bookmarkedSessions = Translations$bookmarkedSessions$ja.internal(_root);
+	late final Translations$venueMap$ja venueMap = Translations$venueMap$ja.internal(_root);
 	late final Translations$eventInfo$ja eventInfo = Translations$eventInfo$ja.internal(_root);
 	late final Translations$notFound$ja notFound = Translations$notFound$ja.internal(_root);
 	late final Translations$common$ja common = Translations$common$ja.internal(_root);
@@ -80,6 +81,9 @@ class Translations$navigation$ja {
 
 	/// ja: '情報'
 	String get info => '情報';
+
+	/// ja: '会場マップ'
+	String get venueMap => '会場マップ';
 }
 
 // Path: news
@@ -210,6 +214,26 @@ class Translations$bookmarkedSessions$ja {
 	String get error => 'ブックマークしたセッションを取得できませんでした';
 }
 
+// Path: venueMap
+class Translations$venueMap$ja {
+	Translations$venueMap$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: '会場マップ'
+	String get title => '会場マップ';
+
+	/// ja: '会場マップを読み込めませんでした'
+	String get loadError => '会場マップを読み込めませんでした';
+
+	/// ja: '再試行してください。表示されない場合は、アプリを再起動してください。'
+	String get loadErrorDescription => '再試行してください。表示されない場合は、アプリを再起動してください。';
+
+	late final Translations$venueMap$controls$ja controls = Translations$venueMap$controls$ja.internal(_root);
+}
+
 // Path: eventInfo
 class Translations$eventInfo$ja {
 	Translations$eventInfo$ja.internal(this._root);
@@ -321,6 +345,18 @@ class Translations$sessionTimetable$type$ja {
 	String get event => 'イベント';
 }
 
+// Path: venueMap.controls
+class Translations$venueMap$controls$ja {
+	Translations$venueMap$controls$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+	late final Translations$venueMap$controls$view$ja view = Translations$venueMap$controls$view$ja.internal(_root);
+	late final Translations$venueMap$controls$labels$ja labels = Translations$venueMap$controls$labels$ja.internal(_root);
+	late final Translations$venueMap$controls$highlight$ja highlight = Translations$venueMap$controls$highlight$ja.internal(_root);
+}
+
 // Path: eventInfo.themeMode
 class Translations$eventInfo$themeMode$ja {
 	Translations$eventInfo$themeMode$ja.internal(this._root);
@@ -360,6 +396,78 @@ class Translations$eventInfo$language$ja {
 	String get english => 'English';
 }
 
+// Path: venueMap.controls.view
+class Translations$venueMap$controls$view$ja {
+	Translations$venueMap$controls$view$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: '表示'
+	String get title => '表示';
+
+	/// ja: '3D表示'
+	String get threeD => '3D表示';
+
+	/// ja: '上面表示'
+	String get top => '上面表示';
+}
+
+// Path: venueMap.controls.labels
+class Translations$venueMap$controls$labels$ja {
+	Translations$venueMap$controls$labels$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'ラベル'
+	String get title => 'ラベル';
+
+	/// ja: 'ラベル非表示'
+	String get hide => 'ラベル非表示';
+
+	/// ja: 'ラベル表示'
+	String get show => 'ラベル表示';
+
+	/// ja: '縮小'
+	String get decreaseSize => '縮小';
+
+	/// ja: '拡大'
+	String get increaseSize => '拡大';
+}
+
+// Path: venueMap.controls.highlight
+class Translations$venueMap$controls$highlight$ja {
+	Translations$venueMap$controls$highlight$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'ハイライト'
+	String get title => 'ハイライト';
+
+	/// ja: 'メインホール'
+	String get mainHalls => 'メインホール';
+
+	/// ja: '展示ホール'
+	String get exhibitionHalls => '展示ホール';
+
+	/// ja: 'グランドホール'
+	String get grandHalls => 'グランドホール';
+
+	/// ja: 'トイレ'
+	String get toilets => 'トイレ';
+
+	/// ja: 'エレベーター'
+	String get elevators => 'エレベーター';
+
+	/// ja: '入口'
+	String get entrance => '入口';
+}
+
 /// The flat map containing all translations for locale <ja>.
 /// Only for edge cases! For simple maps, use the map function of this library.
 ///
@@ -372,6 +480,7 @@ extension on Translations {
 			'navigation.news' => 'お知らせ',
 			'navigation.sessions' => 'セッション',
 			'navigation.info' => '情報',
+			'navigation.venueMap' => '会場マップ',
 			'news.title' => 'お知らせ',
 			'news.empty' => 'お知らせはまだありません',
 			'news.error' => 'お知らせを取得できませんでした',
@@ -408,6 +517,24 @@ extension on Translations {
 			'bookmarkedSessions.emptyBody' => '気になるセッションをブックマークすると、ここからすぐに見つけられます',
 			'bookmarkedSessions.openSessions' => 'タイムテーブルを開く',
 			'bookmarkedSessions.error' => 'ブックマークしたセッションを取得できませんでした',
+			'venueMap.title' => '会場マップ',
+			'venueMap.loadError' => '会場マップを読み込めませんでした',
+			'venueMap.loadErrorDescription' => '再試行してください。表示されない場合は、アプリを再起動してください。',
+			'venueMap.controls.view.title' => '表示',
+			'venueMap.controls.view.threeD' => '3D表示',
+			'venueMap.controls.view.top' => '上面表示',
+			'venueMap.controls.labels.title' => 'ラベル',
+			'venueMap.controls.labels.hide' => 'ラベル非表示',
+			'venueMap.controls.labels.show' => 'ラベル表示',
+			'venueMap.controls.labels.decreaseSize' => '縮小',
+			'venueMap.controls.labels.increaseSize' => '拡大',
+			'venueMap.controls.highlight.title' => 'ハイライト',
+			'venueMap.controls.highlight.mainHalls' => 'メインホール',
+			'venueMap.controls.highlight.exhibitionHalls' => '展示ホール',
+			'venueMap.controls.highlight.grandHalls' => 'グランドホール',
+			'venueMap.controls.highlight.toilets' => 'トイレ',
+			'venueMap.controls.highlight.elevators' => 'エレベーター',
+			'venueMap.controls.highlight.entrance' => '入口',
 			'eventInfo.title' => '情報',
 			'eventInfo.version' => 'バージョン',
 			'eventInfo.themeMode.title' => 'テーマ',

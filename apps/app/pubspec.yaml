@@ -30,6 +30,7 @@ dependencies:
   intl: ^0.20.2
   flutter_localizations:
     sdk: flutter
+  webview_flutter: ^4.14.1
 
 dev_dependencies:
   flutter_test:
@@ -45,6 +46,7 @@ flutter:
   uses-material-design: true
 
   assets:
+    - assets/html/venue_floor_plan_webview.html
     - res/assets/fonts/NotoSansJP/OFL.txt
 
   fonts:

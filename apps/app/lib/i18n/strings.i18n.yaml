@@ -4,6 +4,7 @@ navigation:
   news: お知らせ
   sessions: セッション
   info: 情報
+  venueMap: 会場マップ
 news:
   title: お知らせ
   empty: お知らせはまだありません
@@ -49,6 +50,29 @@ bookmarkedSessions:
   emptyBody: 気になるセッションをブックマークすると、ここからすぐに見つけられます
   openSessions: タイムテーブルを開く
   error: ブックマークしたセッションを取得できませんでした
+venueMap:
+  title: 会場マップ
+  loadError: 会場マップを読み込めませんでした
+  loadErrorDescription: 再試行してください。表示されない場合は、アプリを再起動してください。
+  controls:
+    view:
+      title: 表示
+      threeD: 3D表示
+      top: 上面表示
+    labels:
+      title: ラベル
+      hide: ラベル非表示
+      show: ラベル表示
+      decreaseSize: 縮小
+      increaseSize: 拡大
+    highlight:
+      title: ハイライト
+      mainHalls: メインホール
+      exhibitionHalls: 展示ホール
+      grandHalls: グランドホール
+      toilets: トイレ
+      elevators: エレベーター
+      entrance: 入口
 eventInfo:
   title: 情報
   version: バージョン
