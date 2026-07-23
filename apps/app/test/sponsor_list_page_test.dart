@@ -48,8 +48,8 @@ void main() {
     expect(find.text('スポンサー'), findsWidgets);
     expect(find.text('Platinum'), findsOneWidget);
     expect(find.text('Gold'), findsOneWidget);
-    expect(find.byTooltip('Flutter'), findsOneWidget);
-    expect(find.byTooltip('Gold Sponsor'), findsOneWidget);
+    expect(find.text('Flutter'), findsOneWidget);
+    expect(find.text('Gold Sponsor'), findsOneWidget);
   });
 
   testWidgets('opens sponsor details from a sponsor card', (tester) async {
@@ -105,7 +105,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byTooltip('株式会社サイバーエージェント'));
+    await tester.tap(find.text('株式会社サイバーエージェント'));
     await tester.pumpAndSettle();
 
     expect(find.text('Gold スポンサー'), findsOneWidget);

@@ -33,38 +33,35 @@ class SponsorLogoCardWidget extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final effectiveSide = constraints.maxWidth.isFinite ? math.min(side, constraints.maxWidth) : side;
-        return Tooltip(
-          message: effectiveName,
-          child: Semantics(
-            label: Translations.of(
-              context,
-            ).sponsors.logoSemanticLabel(name: effectiveName),
-            button: true,
-            child: PressScaleEffectWidget(
-              onTap: () => SponsorDetailsRoute(
-                sponsorKey: sponsorKey,
-                $extra: sponsor,
-              ).push<void>(context),
-              child: Material(
-                color: Colors.white,
-                elevation: 3,
-                shadowColor: Colors.black.withValues(alpha: 0.25),
-                shape: shape.copyWith(
-                  side: BorderSide(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.outlineVariant.withValues(alpha: 0.2),
-                  ),
+        return Semantics(
+          label: Translations.of(
+            context,
+          ).sponsors.logoSemanticLabel(name: effectiveName),
+          button: true,
+          child: PressScaleEffectWidget(
+            onTap: () => SponsorDetailsRoute(
+              sponsorKey: sponsorKey,
+              $extra: sponsor,
+            ).push<void>(context),
+            child: Material(
+              color: Colors.white,
+              elevation: 3,
+              shadowColor: Colors.black.withValues(alpha: 0.25),
+              shape: shape.copyWith(
+                side: BorderSide(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.outlineVariant.withValues(alpha: 0.2),
                 ),
-                clipBehavior: Clip.antiAlias,
-                child: SizedBox.square(
-                  dimension: effectiveSide,
-                  child: Center(
-                    child: _SponsorLogoImage(
-                      sponsor: sponsor,
-                      name: effectiveName,
-                      side: effectiveSide,
-                    ),
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: SizedBox.square(
+                dimension: effectiveSide,
+                child: Center(
+                  child: _SponsorLogoImage(
+                    sponsor: sponsor,
+                    name: effectiveName,
+                    side: effectiveSide,
                   ),
                 ),
               ),
