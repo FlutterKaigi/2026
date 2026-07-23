@@ -20,10 +20,7 @@ class SponsorListPage extends ConsumerWidget {
           icon: Icons.business_outlined,
           title: t.sponsors.empty,
         ),
-        AsyncData(:final value) => RefreshIndicator(
-          onRefresh: () async => ref.invalidate(sponsorListProvider),
-          child: SponsorWallWidget(data: value),
-        ),
+        AsyncData(:final value) => SponsorWallWidget(data: value),
         AsyncError() => SponsorMessageStateWidget(
           icon: Icons.error_outline,
           title: t.sponsors.error,

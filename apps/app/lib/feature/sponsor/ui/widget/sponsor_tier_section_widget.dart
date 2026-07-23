@@ -1,6 +1,6 @@
 import 'package:app/feature/sponsor/data/provider/sponsor_list_provider.dart';
+import 'package:app/feature/sponsor/ui/sponsor_tier_presentation.dart';
 import 'package:app/feature/sponsor/ui/widget/sponsor_logo_card_widget.dart';
-import 'package:data/data.dart';
 import 'package:flutter/material.dart';
 
 /// Sponsor logos for one sponsorship tier.
@@ -44,25 +44,4 @@ class SponsorTierSectionWidget extends StatelessWidget {
       ],
     );
   }
-}
-
-extension SponsorTierPresentation on SponsorTier {
-  /// Brand-facing tier label kept in English, matching the website design.
-  String get label => switch (this) {
-    SponsorTier.platinum => 'Platinum',
-    SponsorTier.gold => 'Gold',
-    SponsorTier.silver => 'Silver',
-    SponsorTier.bronze => 'Bronze',
-    SponsorTier.tool => 'Tool',
-    SponsorTier.community => 'Community',
-    SponsorTier.individual => 'Individual',
-  };
-
-  /// Logo tile side length from the website sponsor wall.
-  double get logoSide => switch (this) {
-    SponsorTier.platinum => 256,
-    SponsorTier.gold => 192,
-    SponsorTier.individual => 96,
-    _ => 144,
-  };
 }

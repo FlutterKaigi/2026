@@ -3,10 +3,11 @@ import 'dart:math' as math;
 
 import 'package:app/core/extension/locale_map_extension.dart';
 import 'package:app/core/i18n/strings.g.dart';
+import 'package:app/core/router/router.dart';
+import 'package:app/feature/sponsor/data/provider/sponsor_detail_provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:data/data.dart';
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 /// Square sponsor logo tile.
 class SponsorLogoCardWidget extends StatelessWidget {
@@ -24,7 +25,7 @@ class SponsorLogoCardWidget extends StatelessWidget {
     final locale = Localizations.localeOf(context);
     final name = sponsor.name.resolve(locale).trim();
     final effectiveName = name.isEmpty ? sponsor.id : name;
-    final url = _primaryUrl(sponsor);
+    final sponsorKey = sponsorRouteKey(sponsor);
     final shape = sponsor.tier == SponsorTier.individual
         ? const CircleBorder()
         : RoundedRectangleBorder(borderRadius: BorderRadius.circular(16));
@@ -35,7 +36,7 @@ class SponsorLogoCardWidget extends StatelessWidget {
           message: effectiveName,
           child: Semantics(
             label: Translations.of(context).sponsors.logoSemanticLabel(name: effectiveName),
-            button: url != null,
+            button: true,
             child: Material(
               color: Colors.white,
               elevation: 3,
@@ -48,11 +49,10 @@ class SponsorLogoCardWidget extends StatelessWidget {
               clipBehavior: Clip.antiAlias,
               child: InkWell(
                 customBorder: shape,
-                onTap: url == null
-                    ? null
-                    : () => unawaited(
-                        launchUrl(url, mode: LaunchMode.externalApplication),
-                      ),
+                onTap: () => SponsorDetailsRoute(
+                  sponsorKey: sponsorKey,
+                  $extra: sponsor,
+                ).push<void>(context),
                 child: SizedBox.square(
                   dimension: effectiveSide,
                   child: Center(
@@ -69,25 +69,6 @@ class SponsorLogoCardWidget extends StatelessWidget {
         );
       },
     );
-  }
-
-  Uri? _primaryUrl(Sponsor sponsor) {
-    return _parseUri(sponsor.websiteUrl) ??
-        _parseUri(sponsor.recruitUrl) ??
-        _parseUri(sponsor.jobBoardUrl) ??
-        _parseUri(sponsor.xUrl);
-  }
-
-  Uri? _parseUri(String? raw) {
-    final value = raw?.trim();
-    if (value == null || value.isEmpty) {
-      return null;
-    }
-    final uri = Uri.tryParse(value);
-    if (uri == null || !uri.hasScheme) {
-      return null;
-    }
-    return uri;
   }
 }
 
@@ -109,7 +90,7 @@ class _SponsorLogoImage extends StatelessWidget {
     final logoSide = side * (isIndividual ? 1 : 0.7);
 
     if (url == null || url.isEmpty) {
-      return _SponsorLogoFallback(size: side);
+      return _SponsorLogoFallback(name: name, size: side);
     }
     return Semantics(
       label: name,
@@ -130,7 +111,10 @@ class _SponsorLogoImage extends StatelessWidget {
             size: side,
             isCircle: isIndividual,
           ),
-          errorWidget: (context, url, error) => _SponsorLogoFallback(size: side),
+          errorWidget: (context, url, error) => _SponsorLogoFallback(
+            name: name,
+            size: side,
+          ),
         ),
       ),
     );
@@ -199,16 +183,34 @@ class _SponsorLogoShimmerState extends State<_SponsorLogoShimmer> with SingleTic
 }
 
 class _SponsorLogoFallback extends StatelessWidget {
-  const _SponsorLogoFallback({required this.size});
+  const _SponsorLogoFallback({
+    required this.name,
+    required this.size,
+  });
 
+  final String name;
   final double size;
 
   @override
   Widget build(BuildContext context) {
-    return Icon(
-      Icons.business_center_outlined,
-      size: size * 0.28,
-      color: Theme.of(context).colorScheme.outline,
+    final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
+    final fontSize = (size * 0.13).clamp(13.0, 24.0);
+
+    return Padding(
+      padding: EdgeInsets.all(size * 0.12),
+      child: Text(
+        name,
+        maxLines: 3,
+        overflow: TextOverflow.ellipsis,
+        textAlign: TextAlign.center,
+        style: textTheme.titleMedium?.copyWith(
+          color: colorScheme.onSurface,
+          fontSize: fontSize,
+          fontWeight: FontWeight.w700,
+          height: 1.2,
+        ),
+      ),
     );
   }
 }

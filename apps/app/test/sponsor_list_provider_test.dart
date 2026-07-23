@@ -1,3 +1,4 @@
+import 'package:app/feature/sponsor/data/provider/sponsor_detail_provider.dart';
 import 'package:app/feature/sponsor/data/provider/sponsor_list_provider.dart';
 import 'package:data/data.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -23,6 +24,17 @@ void main() {
       'D2026-010',
       'D2026-030',
     ]);
+  });
+
+  test('findSponsorByRouteKey resolves sponsors by slug and ID', () {
+    final sponsors = [
+      _sponsor(id: 'D2026-020', name: 'CyberAgent', slug: 'cyberagent'),
+      _sponsor(id: 'D2026-021', name: 'No Slug'),
+    ];
+
+    expect(findSponsorByRouteKey(sponsors, 'cyberagent')?.id, 'D2026-020');
+    expect(findSponsorByRouteKey(sponsors, 'D2026-021')?.id, 'D2026-021');
+    expect(findSponsorByRouteKey(sponsors, 'missing'), isNull);
   });
 }
 
