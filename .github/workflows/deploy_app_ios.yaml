@@ -1,0 +1,190 @@
+name: Deploy App iOS
+
+on:
+  release:
+    types: [published]
+  pull_request:
+    types: [labeled]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-app-ios-production
+  cancel-in-progress: false
+
+permissions: {}
+
+defaults:
+  run:
+    shell: bash -euo pipefail {0}
+
+jobs:
+  deploy:
+    if: >-
+      ${{ github.event_name != 'pull_request' ||
+          (github.event.label.name == 'deploy-app-ios' &&
+           github.event.pull_request.head.repo.full_name == github.repository) }}
+    runs-on: macos-26
+    timeout-minutes: 45
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      XCODE_VERSION: "26.4.1"
+      FIREBASE_PROJECT_ID: ${{ vars.PROD_FIREBASE_PROJECT_ID }}
+      APPLE_TEAM_ID: ${{ vars.APPLE_TEAM_ID }}
+      IOS_BUNDLE_ID: ${{ vars.IOS_BUNDLE_ID }}
+      APP_STORE_CONNECT_API_KEY_ID: ${{ vars.APP_STORE_CONNECT_API_KEY_ID }}
+      APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ vars.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
+      APP_STORE_CONNECT_API_KEY_BASE64: ${{ secrets.APP_STORE_CONNECT_API_KEY_BASE64 }}
+      GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER_PROD }}
+      GCP_SERVICE_ACCOUNT: ${{ vars.GCP_SERVICE_ACCOUNT_PROD }}
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - uses: maxim-lobanov/setup-xcode@60606e260d2fc5762a71e64e74b2174e8ea3c8bd # v1.6.0
+        with:
+          xcode-version: ${{ env.XCODE_VERSION }}
+
+      - name: Validate Xcode and iPhoneOS SDK
+        run: |
+          xcodebuild -version
+          xcrun --sdk iphoneos --show-sdk-version
+
+      - id: flutter-version
+        run: echo "version=$(jq -r .flutter .fvmrc)" >> "$GITHUB_OUTPUT"
+
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version: ${{ steps.flutter-version.outputs.version }}
+          channel: stable
+          cache: true
+
+      - name: Enable Swift Package Manager
+        run: flutter config --enable-swift-package-manager
+
+      - name: Resolve dependencies
+        run: flutter pub get
+
+      - name: Validate delivery configuration
+        run: |
+          for name in FIREBASE_PROJECT_ID APPLE_TEAM_ID IOS_BUNDLE_ID APP_STORE_CONNECT_API_KEY_ID \
+            APP_STORE_CONNECT_API_KEY_ISSUER_ID APP_STORE_CONNECT_API_KEY_BASE64 \
+            GCP_WORKLOAD_IDENTITY_PROVIDER GCP_SERVICE_ACCOUNT; do
+            if [ -z "${!name}" ]; then
+              echo "::error::$name is not configured as a Repository Variable or Secret."
+              exit 1
+            fi
+          done
+          if [ "$IOS_BUNDLE_ID" != "jp.flutterkaigi.conf2026" ]; then
+            echo "::error::IOS_BUNDLE_ID must match jp.flutterkaigi.conf2026."
+            exit 1
+          fi
+
+      - name: Authenticate to Firebase with Workload Identity Federation
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3
+        with:
+          project_id: ${{ vars.PROD_FIREBASE_PROJECT_ID }}
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER_PROD }}
+          service_account: ${{ vars.GCP_SERVICE_ACCOUNT_PROD }}
+
+      - name: Install pinned Firebase configuration tools
+        run: |
+          npm install --global firebase-tools@13.35.1
+          dart pub global activate flutterfire_cli 1.4.0
+          echo "$HOME/.pub-cache/bin" >> "$GITHUB_PATH"
+
+      - name: Generate production Firebase options
+        working-directory: apps/app
+        run: >-
+          flutterfire configure
+          --yes
+          --project="$FIREBASE_PROJECT_ID"
+          --platforms=ios
+          --ios-bundle-id="$IOS_BUNDLE_ID"
+          --ios-build-config=Release
+          --ios-out=ios/Runner/GoogleService-Info.plist
+          --out=lib/firebase_options.dart
+
+      - name: Validate generated production Firebase options
+        working-directory: apps/app
+        run: |
+          test "$(/usr/libexec/PlistBuddy -c 'Print :PROJECT_ID' ios/Runner/GoogleService-Info.plist)" = "$FIREBASE_PROJECT_ID"
+          test "$(/usr/libexec/PlistBuddy -c 'Print :BUNDLE_ID' ios/Runner/GoogleService-Info.plist)" = "$IOS_BUNDLE_ID"
+          grep -Fq "projectId: '$FIREBASE_PROJECT_ID'" lib/firebase_options.dart
+
+      - name: Set build number
+        run: echo "BUILD_NUMBER=$((GITHUB_RUN_NUMBER * 100 + GITHUB_RUN_ATTEMPT))" >> "$GITHUB_ENV"
+
+      - name: Configure Xcode environment
+        run: cp apps/app/environments/.env.prod apps/app/ios/Flutter/Environment.xcconfig
+
+      - name: Configure iOS release
+        working-directory: apps/app
+        run: >-
+          flutter build ios
+          --config-only
+          --no-codesign
+          --no-pub
+          --build-number="$BUILD_NUMBER"
+          --dart-define-from-file=environments/.env.prod
+          --dart-define=FIREBASE_PROJECT_ID=$FIREBASE_PROJECT_ID
+          --dart-define=COMMIT_INFORMATION=${{ github.ref_name }}-${{ github.sha }}
+
+      - name: Prepare App Store Connect key and export options
+        run: |
+          mkdir -p "$HOME/.private_keys" "$RUNNER_TEMP/app-store-export"
+          printf '%s' "$APP_STORE_CONNECT_API_KEY_BASE64" | base64 -d \
+            > "$HOME/.private_keys/AuthKey_$APP_STORE_CONNECT_API_KEY_ID.p8"
+          cp apps/app/ios/ExportOptions.plist "$RUNNER_TEMP/ExportOptions.plist"
+          /usr/libexec/PlistBuddy -c "Set :teamID $APPLE_TEAM_ID" "$RUNNER_TEMP/ExportOptions.plist"
+
+      - name: Archive iOS app
+        working-directory: apps/app
+        run: |
+          xcodebuild archive \
+            -workspace ios/Runner.xcworkspace \
+            -scheme Runner \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -archivePath build/ios/Runner.xcarchive \
+            DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
+            CODE_SIGN_STYLE=Automatic \
+            -allowProvisioningUpdates \
+            -authenticationKeyIssuerID "$APP_STORE_CONNECT_API_KEY_ISSUER_ID" \
+            -authenticationKeyID "$APP_STORE_CONNECT_API_KEY_ID" \
+            -authenticationKeyPath "$HOME/.private_keys/AuthKey_$APP_STORE_CONNECT_API_KEY_ID.p8"
+
+      - name: Export signed IPA
+        working-directory: apps/app
+        run: |
+          xcodebuild -exportArchive \
+            -archivePath build/ios/Runner.xcarchive \
+            -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" \
+            -exportPath build/ios/export \
+            -allowProvisioningUpdates \
+            -authenticationKeyIssuerID "$APP_STORE_CONNECT_API_KEY_ISSUER_ID" \
+            -authenticationKeyID "$APP_STORE_CONNECT_API_KEY_ID" \
+            -authenticationKeyPath "$HOME/.private_keys/AuthKey_$APP_STORE_CONNECT_API_KEY_ID.p8"
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: FlutterKaigi-2026-ios-${{ github.run_number }}
+          path: apps/app/build/ios/export/*.ipa
+          if-no-files-found: error
+
+      - name: Upload IPA to App Store Connect
+        working-directory: apps/app
+        run: |
+          ipa_path="$(find build/ios/export -maxdepth 1 -name '*.ipa' -print -quit)"
+          if [ -z "$ipa_path" ]; then
+            echo "::error::Exported IPA was not found."
+            exit 1
+          fi
+          xcrun altool \
+            --upload-app \
+            --file "$ipa_path" \
+            --type ios \
+            --apiIssuer "$APP_STORE_CONNECT_API_KEY_ISSUER_ID" \
+            --apiKey "$APP_STORE_CONNECT_API_KEY_ID"

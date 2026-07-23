@@ -1,5 +1,7 @@
 // ignore_for_file: do_not_use_environment
 
+import 'package:app/firebase_options.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -59,6 +61,21 @@ abstract class Environment with _$Environment {
     }
     return firestoreEmulatorHost;
   }
+
+  /// Firebase options for the selected real project.
+  ///
+  /// CI generates the real-project values with FlutterFire CLI into the
+  /// ignored `lib/firebase_options.dart`. Local development returns `null` so
+  /// the data package connects to the Firebase Emulator Suite instead.
+  FirebaseOptions? get firebaseOptions {
+    if (flavor == Flavor.develop) {
+      return null;
+    }
+    return DefaultFirebaseOptions.currentPlatform;
+  }
+
+  /// reCAPTCHA Enterprise site key used by App Check for release web builds.
+  String get appCheckSiteKey => const String.fromEnvironment('APP_CHECK_SITE_KEY');
 }
 
 /// Build flavor selected at compile time through the `FLAVOR` define.

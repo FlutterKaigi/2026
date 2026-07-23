@@ -1,6 +1,6 @@
 name: app
 description: "FlutterKaigi 2026 official application."
-publish_to: 'none'
+publish_to: "none"
 version: 1.0.0+1
 resolution: workspace
 
@@ -11,6 +11,8 @@ environment:
 dependencies:
   data:
     path: ../../packages/data
+  firebase_app_check: ^0.4.5
+  firebase_core: ^4.10.0
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.8

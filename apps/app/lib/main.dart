@@ -1,3 +1,4 @@
+import 'package:app/core/firebase/app_check_initializer.dart';
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/provider/app_locale.dart';
 import 'package:app/core/provider/environment.dart';
@@ -25,15 +26,16 @@ Future<void> main() async {
   final sharedPreferences = await SharedPreferences.getInstance();
   await initializeAppLocale(sharedPreferences);
 
-  // dev (emulator): options stays null so FirebaseInitializer wires the local
-  // emulator suite. For stg/prod, generate firebase_options.dart via
-  // `flutterfire configure` and pass `DefaultFirebaseOptions.currentPlatform`.
+  // dev uses the local Emulator Suite. CI generates stg/prod SDK settings with
+  // FlutterFire CLI into the ignored lib/firebase_options.dart before building.
   final hostParts = environment.firestoreHost.split(':');
   await FirebaseInitializer.ensureInitialized(
+    options: environment.firebaseOptions,
     projectId: environment.firebaseProjectId,
     host: hostParts.first,
     firestorePort: hostParts.length > 1 ? int.parse(hostParts[1]) : 8080,
   );
+  await ensureAppCheckInitialized(environment);
 
   runApp(
     TranslationProvider(
