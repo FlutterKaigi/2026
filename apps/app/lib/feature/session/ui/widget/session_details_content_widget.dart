@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:app/core/extension/locale_map_extension.dart';
 import 'package:app/core/i18n/strings.g.dart';
+import 'package:app/core/ui/widget/app_network_image.dart';
 import 'package:app/feature/session/data/provider/session_detail_provider.dart';
 import 'package:app/feature/session/data/provider/session_time_format.dart';
 import 'package:app/feature/session/ui/widget/session_bookmark_button.dart';
@@ -15,10 +16,7 @@ import 'package:url_launcher/url_launcher.dart';
 const _sessionOrigin = 'https://2026.flutterkaigi.jp';
 
 class SessionDetailsContentWidget extends ConsumerWidget {
-  const SessionDetailsContentWidget({
-    required this.data,
-    super.key,
-  });
+  const SessionDetailsContentWidget({required this.data, super.key});
 
   final SessionDetailData data;
 
@@ -60,7 +58,9 @@ class SessionDetailsContentWidget extends ConsumerWidget {
                     ),
                     _InfoChip(
                       icon: Icons.calendar_today_outlined,
-                      label: DateFormat('yyyy/MM/dd').format(toEventTime(session.startsAt)),
+                      label: DateFormat(
+                        'yyyy/MM/dd',
+                      ).format(toEventTime(session.startsAt)),
                     ),
                     _InfoChip(
                       icon: Icons.schedule,
@@ -95,7 +95,9 @@ class SessionDetailsContentWidget extends ConsumerWidget {
               _SectionHeader(title: t.sessionDetails.schedule),
               _DetailListTile(
                 icon: Icons.event_outlined,
-                title: DateFormat('yyyy/MM/dd').format(toEventTime(session.startsAt)),
+                title: DateFormat(
+                  'yyyy/MM/dd',
+                ).format(toEventTime(session.startsAt)),
               ),
               _DetailListTile(
                 icon: Icons.schedule,
@@ -117,7 +119,10 @@ class SessionDetailsContentWidget extends ConsumerWidget {
                   title: t.sessionDetails.sessionize,
                   subtitle: sessionizeUri.toString(),
                   onTap: () => unawaited(
-                    launchUrl(sessionizeUri, mode: LaunchMode.externalApplication),
+                    launchUrl(
+                      sessionizeUri,
+                      mode: LaunchMode.externalApplication,
+                    ),
                   ),
                 ),
               ],
@@ -141,9 +146,9 @@ class _SectionHeader extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
       child: Text(
         title,
-        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-          fontWeight: FontWeight.w700,
-        ),
+        style: Theme.of(
+          context,
+        ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
       ),
     );
   }
@@ -160,10 +165,10 @@ class _SpeakerTile extends StatelessWidget {
 
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      leading: CircleAvatar(
+      leading: AppNetworkAvatar(
         radius: 28,
-        backgroundImage: avatarUrl == null || avatarUrl.isEmpty ? null : NetworkImage(avatarUrl),
-        child: avatarUrl == null || avatarUrl.isEmpty ? const Icon(Icons.person_outline) : null,
+        imageUrl: avatarUrl,
+        fallback: const Icon(Icons.person_outline),
       ),
       title: Text(speaker.name),
       subtitle: speaker.bio == null || speaker.bio!.trim().isEmpty ? null : Text(speaker.bio!.trim()),
@@ -197,10 +202,7 @@ class _DetailListTile extends StatelessWidget {
 }
 
 class _InfoChip extends StatelessWidget {
-  const _InfoChip({
-    required this.icon,
-    required this.label,
-  });
+  const _InfoChip({required this.icon, required this.label});
 
   final IconData icon;
   final String label;

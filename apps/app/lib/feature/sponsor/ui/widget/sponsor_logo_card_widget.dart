@@ -4,9 +4,9 @@ import 'dart:math' as math;
 import 'package:app/core/extension/locale_map_extension.dart';
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/router/router.dart';
+import 'package:app/core/ui/widget/app_network_image.dart';
 import 'package:app/core/ui/widget/press_scale_effect_widget.dart';
 import 'package:app/feature/sponsor/data/provider/sponsor_detail_provider.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:data/data.dart';
 import 'package:flutter/material.dart';
 
@@ -36,7 +36,9 @@ class SponsorLogoCardWidget extends StatelessWidget {
         return Tooltip(
           message: effectiveName,
           child: Semantics(
-            label: Translations.of(context).sponsors.logoSemanticLabel(name: effectiveName),
+            label: Translations.of(
+              context,
+            ).sponsors.logoSemanticLabel(name: effectiveName),
             button: true,
             child: PressScaleEffectWidget(
               onTap: () => SponsorDetailsRoute(
@@ -49,7 +51,9 @@ class SponsorLogoCardWidget extends StatelessWidget {
                 shadowColor: Colors.black.withValues(alpha: 0.25),
                 shape: shape.copyWith(
                   side: BorderSide(
-                    color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.2),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.outlineVariant.withValues(alpha: 0.2),
                   ),
                 ),
                 clipBehavior: Clip.antiAlias,
@@ -97,23 +101,14 @@ class _SponsorLogoImage extends StatelessWidget {
       image: true,
       child: SizedBox.square(
         dimension: side,
-        child: CachedNetworkImage(
-          imageUrl: url,
-          imageBuilder: (context, imageProvider) => Center(
-            child: Image(
-              image: imageProvider,
-              width: logoSide,
-              height: logoSide,
-              fit: BoxFit.contain,
-            ),
-          ),
-          placeholder: (context, url) => _SponsorLogoShimmer(
-            size: side,
-            isCircle: isIndividual,
-          ),
-          errorWidget: (context, url, error) => _SponsorLogoFallback(
-            name: name,
-            size: side,
+        child: Center(
+          child: AppNetworkImage(
+            imageUrl: url,
+            width: logoSide,
+            height: logoSide,
+            fit: BoxFit.contain,
+            placeholderBuilder: (context) => _SponsorLogoShimmer(size: side, isCircle: isIndividual),
+            errorBuilder: (context, error, stackTrace) => _SponsorLogoFallback(name: name, size: side),
           ),
         ),
       ),
@@ -137,7 +132,10 @@ class _SponsorLogoShimmerState extends State<_SponsorLogoShimmer> with SingleTic
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 1200));
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    );
     unawaited(_controller.repeat());
   }
 
@@ -183,10 +181,7 @@ class _SponsorLogoShimmerState extends State<_SponsorLogoShimmer> with SingleTic
 }
 
 class _SponsorLogoFallback extends StatelessWidget {
-  const _SponsorLogoFallback({
-    required this.name,
-    required this.size,
-  });
+  const _SponsorLogoFallback({required this.name, required this.size});
 
   final String name;
   final double size;

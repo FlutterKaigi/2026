@@ -3,11 +3,11 @@ import 'dart:math' as math;
 
 import 'package:app/core/extension/locale_map_extension.dart';
 import 'package:app/core/i18n/strings.g.dart';
+import 'package:app/core/ui/widget/app_network_image.dart';
 import 'package:app/feature/sponsor/data/provider/sponsor_detail_provider.dart';
 import 'package:app/feature/sponsor/data/provider/sponsor_list_provider.dart';
 import 'package:app/feature/sponsor/ui/sponsor_tier_presentation.dart';
 import 'package:app/feature/sponsor/ui/widget/sponsor_message_state_widget.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:data/data.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -112,9 +112,9 @@ class _SponsorDetailsContent extends StatelessWidget {
                         const SizedBox(height: 32),
                         Text(
                           description,
-                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            height: 1.65,
-                          ),
+                          style: Theme.of(
+                            context,
+                          ).textTheme.bodyLarge?.copyWith(height: 1.65),
                         ),
                       ],
                     ],
@@ -130,10 +130,7 @@ class _SponsorDetailsContent extends StatelessWidget {
 }
 
 class _SponsorLogoBanner extends StatelessWidget {
-  const _SponsorLogoBanner({
-    required this.sponsor,
-    required this.name,
-  });
+  const _SponsorLogoBanner({required this.sponsor, required this.name});
 
   final Sponsor sponsor;
   final String name;
@@ -169,19 +166,16 @@ class _SponsorLogoBanner extends StatelessWidget {
                   : Semantics(
                       label: name,
                       image: true,
-                      child: CachedNetworkImage(
+                      child: AppNetworkImage(
                         imageUrl: logoUrl,
-                        imageBuilder: (context, imageProvider) => Image(
-                          image: imageProvider,
-                          width: width * 0.7,
-                          height: height * 0.62,
-                          fit: BoxFit.contain,
-                        ),
-                        placeholder: (context, url) => const SizedBox.square(
+                        width: width * 0.7,
+                        height: height * 0.62,
+                        fit: BoxFit.contain,
+                        placeholderBuilder: (context) => const SizedBox.square(
                           dimension: 32,
                           child: CircularProgressIndicator.adaptive(),
                         ),
-                        errorWidget: (context, url, error) => _SponsorLogoNameFallback(
+                        errorBuilder: (context, error, stackTrace) => _SponsorLogoNameFallback(
                           name: name,
                           width: width,
                           height: height,
@@ -274,10 +268,7 @@ class _TierBadge extends StatelessWidget {
 }
 
 class _LinkSection extends StatelessWidget {
-  const _LinkSection({
-    required this.title,
-    required this.links,
-  });
+  const _LinkSection({required this.title, required this.links});
 
   final String title;
   final List<_SponsorLinkData> links;
@@ -300,9 +291,9 @@ class _LinkSection extends StatelessWidget {
           children: [
             Text(
               title,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: 12),
             for (final link in links) _SponsorLinkTile(link: link),
@@ -323,18 +314,13 @@ class _SponsorLinkTile extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     return InkWell(
-      onTap: () => unawaited(
-        launchUrl(link.uri, mode: LaunchMode.externalApplication),
-      ),
+      onTap: () => unawaited(launchUrl(link.uri, mode: LaunchMode.externalApplication)),
       borderRadius: BorderRadius.circular(8),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 10),
         child: Row(
           children: [
-            SizedBox.square(
-              dimension: 24,
-              child: Center(child: link.icon),
-            ),
+            SizedBox.square(dimension: 24, child: Center(child: link.icon)),
             const SizedBox(width: 14),
             Expanded(
               child: Text(
