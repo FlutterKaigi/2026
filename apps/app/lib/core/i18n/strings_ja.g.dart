@@ -115,6 +115,9 @@ class Translations$sponsors$ja {
 	/// ja: 'スポンサー'
 	String get title => 'スポンサー';
 
+	/// ja: 'スポンサー詳細'
+	String get detailTitle => 'スポンサー詳細';
+
 	/// ja: 'FlutterKaigi 2026 を支えてくださるスポンサーの皆様'
 	String get subtitle => 'FlutterKaigi 2026 を支えてくださるスポンサーの皆様';
 
@@ -124,8 +127,26 @@ class Translations$sponsors$ja {
 	/// ja: 'スポンサーを取得できませんでした'
 	String get error => 'スポンサーを取得できませんでした';
 
+	/// ja: 'スポンサーが見つかりませんでした'
+	String get notFound => 'スポンサーが見つかりませんでした';
+
 	/// ja: '$name のロゴ'
 	String logoSemanticLabel({required Object name}) => '${name} のロゴ';
+
+	/// ja: '$tier スポンサー'
+	String tierBadge({required Object tier}) => '${tier} スポンサー';
+
+	/// ja: 'Job Boards'
+	String get jobBoards => 'Job Boards';
+
+	/// ja: '採用情報'
+	String get jobBoardCta => '採用情報';
+
+	/// ja: '採用サイト'
+	String get recruitCta => '採用サイト';
+
+	/// ja: 'Connect'
+	String get connect => 'Connect';
 }
 
 // Path: sessionTimetable
@@ -405,10 +426,17 @@ extension on Translations {
 			'news.empty' => 'お知らせはまだありません',
 			'news.error' => 'お知らせを取得できませんでした',
 			'sponsors.title' => 'スポンサー',
+			'sponsors.detailTitle' => 'スポンサー詳細',
 			'sponsors.subtitle' => 'FlutterKaigi 2026 を支えてくださるスポンサーの皆様',
 			'sponsors.empty' => 'スポンサーはまだ公開されていません',
 			'sponsors.error' => 'スポンサーを取得できませんでした',
+			'sponsors.notFound' => 'スポンサーが見つかりませんでした',
 			'sponsors.logoSemanticLabel' => ({required Object name}) => '${name} のロゴ',
+			'sponsors.tierBadge' => ({required Object tier}) => '${tier} スポンサー',
+			'sponsors.jobBoards' => 'Job Boards',
+			'sponsors.jobBoardCta' => '採用情報',
+			'sponsors.recruitCta' => '採用サイト',
+			'sponsors.connect' => 'Connect',
 			'sessionTimetable.title' => 'タイムテーブル',
 			'sessionTimetable.dayButtonLabel' => ({required Object day, required Object date}) => '${day}日目 (${date})',
 			'sessionTimetable.empty' => 'タイムテーブルはまだ公開されていません',

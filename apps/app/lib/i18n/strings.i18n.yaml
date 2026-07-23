@@ -11,10 +11,17 @@ news:
   error: お知らせを取得できませんでした
 sponsors:
   title: スポンサー
+  detailTitle: スポンサー詳細
   subtitle: FlutterKaigi 2026 を支えてくださるスポンサーの皆様
   empty: スポンサーはまだ公開されていません
   error: スポンサーを取得できませんでした
+  notFound: スポンサーが見つかりませんでした
   logoSemanticLabel: $name のロゴ
+  tierBadge: $tier スポンサー
+  jobBoards: Job Boards
+  jobBoardCta: 採用情報
+  recruitCta: 採用サイト
+  connect: Connect
 sessionTimetable:
   title: タイムテーブル
   dayButtonLabel: $day日目 ($date)

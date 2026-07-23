@@ -95,10 +95,17 @@ class _Translations$sponsors$en extends Translations$sponsors$ja {
 
 	// Translations
 	@override String get title => 'Sponsors';
+	@override String get detailTitle => 'Sponsor Details';
 	@override String get subtitle => 'The sponsors supporting FlutterKaigi 2026';
 	@override String get empty => 'Sponsors have not been published yet';
 	@override String get error => 'Failed to load sponsors';
+	@override String get notFound => 'Sponsor not found';
 	@override String logoSemanticLabel({required Object name}) => '${name} logo';
+	@override String tierBadge({required Object tier}) => '${tier} Sponsor';
+	@override String get jobBoards => 'Job Boards';
+	@override String get jobBoardCta => 'Hiring information';
+	@override String get recruitCta => 'Careers';
+	@override String get connect => 'Connect';
 }
 
 // Path: sessionTimetable
@@ -286,10 +293,17 @@ extension on TranslationsEn {
 			'news.empty' => 'There is no news yet',
 			'news.error' => 'Failed to load news',
 			'sponsors.title' => 'Sponsors',
+			'sponsors.detailTitle' => 'Sponsor Details',
 			'sponsors.subtitle' => 'The sponsors supporting FlutterKaigi 2026',
 			'sponsors.empty' => 'Sponsors have not been published yet',
 			'sponsors.error' => 'Failed to load sponsors',
+			'sponsors.notFound' => 'Sponsor not found',
 			'sponsors.logoSemanticLabel' => ({required Object name}) => '${name} logo',
+			'sponsors.tierBadge' => ({required Object tier}) => '${tier} Sponsor',
+			'sponsors.jobBoards' => 'Job Boards',
+			'sponsors.jobBoardCta' => 'Hiring information',
+			'sponsors.recruitCta' => 'Careers',
+			'sponsors.connect' => 'Connect',
 			'sessionTimetable.title' => 'Timetable',
 			'sessionTimetable.dayButtonLabel' => ({required Object day, required Object date}) => 'Day ${day} (${date})',
 			'sessionTimetable.empty' => 'The timetable has not been published yet',

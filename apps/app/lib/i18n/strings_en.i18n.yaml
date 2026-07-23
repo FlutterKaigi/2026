@@ -11,10 +11,17 @@ news:
   error: Failed to load news
 sponsors:
   title: Sponsors
+  detailTitle: Sponsor Details
   subtitle: The sponsors supporting FlutterKaigi 2026
   empty: Sponsors have not been published yet
   error: Failed to load sponsors
+  notFound: Sponsor not found
   logoSemanticLabel: $name logo
+  tierBadge: $tier Sponsor
+  jobBoards: Job Boards
+  jobBoardCta: Hiring information
+  recruitCta: Careers
+  connect: Connect
 sessionTimetable:
   title: Timetable
   dayButtonLabel: Day $day ($date)
