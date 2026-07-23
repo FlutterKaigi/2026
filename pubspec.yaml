@@ -83,12 +83,12 @@ melos:
       description: Run all tests (website + app + dashboard + shared packages)
 
     website:serve:
-      run: fvm dart run melos run sponsors:generate && fvm dart run melos exec --scope=website -- fvm dart run jaspr_cli:jaspr serve
-      description: Serve the jaspr website in dev mode (regenerates sponsor data first)
+      run: fvm dart run melos run sponsors:generate && fvm dart run melos run staff:generate && fvm dart run melos exec --scope=website -- fvm dart run jaspr_cli:jaspr serve
+      description: Serve the jaspr website in dev mode (regenerates sponsor + staff data first)
 
     website:build:
-      run: fvm dart run melos run sponsors:generate && fvm dart run melos exec --scope=website -- make build
-      description: Build the jaspr website for production (regenerates sponsor data first)
+      run: fvm dart run melos run sponsors:generate && fvm dart run melos run staff:generate && fvm dart run melos exec --scope=website -- make build
+      description: Build the jaspr website for production (regenerates sponsor + staff data first)
 
     website:start:
       run: |
@@ -179,3 +179,7 @@ melos:
     sponsors:generate:
       run: fvm dart run tool/generate_sponsors.dart
       description: Regenerate apps/website/lib/constants/generated_sponsors.dart (+ web/images/sponsors/) from the Firestore emulator (or a configured STG/prod project). Git-ignored output.
+
+    staff:generate:
+      run: fvm dart run tool/generate_staff.dart
+      description: Regenerate apps/website/lib/constants/generated_staff.dart from the Firestore emulator (or a configured STG/prod project). Git-ignored output.

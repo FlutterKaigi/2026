@@ -33,3 +33,7 @@ ui-debug.log
 # Real sponsor info is fetched at build time and must never be committed.
 apps/website/lib/constants/generated_sponsors.dart
 apps/website/web/images/logos/
+
+# Generated staff data.
+# Real staff info is fetched at build time and must never be committed.
+apps/website/lib/constants/generated_staff.dart

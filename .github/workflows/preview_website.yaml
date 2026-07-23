@@ -61,6 +61,15 @@ jobs:
           FIRESTORE_HOST: firestore.googleapis.com
           FIRESTORE_ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
 
+      # Generate the (git-ignored) staff data from the STG Firestore project
+      # (`staffMembers` collection) — same fallback behaviour as the sponsors.
+      - name: Generate staff data
+        run: dart run tool/generate_staff.dart
+        env:
+          FIREBASE_PROJECT_ID: ${{ vars.STG_FIREBASE_PROJECT_ID }}
+          FIRESTORE_HOST: firestore.googleapis.com
+          FIRESTORE_ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
+
       # Empty SITE_ORIGIN → OGP `og:image`/`og:url` are emitted host-relative so
       # they resolve against the per-version preview origin (`*.workers.dev`)
       # rather than the production domain (where this branch's per-sponsor images
