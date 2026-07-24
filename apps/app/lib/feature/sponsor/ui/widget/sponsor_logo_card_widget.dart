@@ -39,7 +39,7 @@ class SponsorLogoCardWidget extends StatelessWidget {
           ).sponsors.logoSemanticLabel(name: effectiveName),
           button: true,
           child: PressScaleEffectWidget(
-            onTap: () => SponsorDetailsRoute(sponsorKey: sponsorKey).push<void>(context),
+            onTap: () => SponsorDetailsRoute(sponsorKey: sponsorKey).go(context),
             child: Material(
               color: Colors.white,
               elevation: 3,
