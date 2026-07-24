@@ -2367,6 +2367,581 @@
       }
     },
     {
+      "path": "sponsors/flutter",
+      "schema": "sponsor",
+      "data": {
+        "name": {
+          "ja": "Flutter(Google Inc.)",
+          "en": "Flutter(Google Inc.)"
+        },
+        "nameKana": null,
+        "description": {
+          "ja": "",
+          "en": ""
+        },
+        "primaryLogoUrl": "https://2026-bucket.flutterkaigi.jp/logos/11419a2c-b550-4f3b-8735-91ef5ebd4e5b.webp",
+        "secondaryLogoUrl": null,
+        "tier": "platinum",
+        "slug": "flutter",
+        "xUrl": null,
+        "websiteUrl": null,
+        "recruitUrl": null,
+        "jobBoardUrl": null,
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sponsors/japan-toreca",
+      "schema": "sponsor",
+      "data": {
+        "name": {
+          "ja": "日本トレカセンター",
+          "en": "JAPAN TRADING CARD CENTER"
+        },
+        "nameKana": null,
+        "description": {
+          "ja": "ポケモンカード・遊戯王・ワンピースカードなど、さまざまなジャンルの限定オリパが引ける「満足度No.1」のオンラインオリパサービス「日本トレカセンター」を開発・運営しています。Flutterを主軸としたモバイルアプリ開発を推進し、スピード感ある事業成長を支えるプロダクトづくりに挑戦しています。エンジニアが大きな裁量を持ち、技術選定や改善をリードできる環境です。",
+          "en": "We develop and operate an online \"oripa\" (original card pack) service offering limited-edition packs. We are driving mobile app development centered on Flutter and are dedicated to building products that support rapid business growth. Our environment empowers engineers with significant autonomy, allowing them to take the lead in technology selection and continuous improvement."
+        },
+        "primaryLogoUrl": "https://2026-bucket.flutterkaigi.jp/logos/6366e2fc-05dc-4c5c-8b40-83ba8accbb26.webp",
+        "secondaryLogoUrl": null,
+        "tier": "platinum",
+        "slug": "japan-toreca",
+        "xUrl": "https://twitter.com/jpn_tcg_center",
+        "websiteUrl": "https://jtc.center/",
+        "recruitUrl": null,
+        "jobBoardUrl": null,
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sponsors/up-sider",
+      "schema": "sponsor",
+      "data": {
+        "name": {
+          "ja": "株式会社UPSIDER",
+          "en": "UPSIDER, Inc."
+        },
+        "nameKana": null,
+        "description": {
+          "ja": "株式会社UPSIDERは「挑戦者を支える世界的な金融プラットフォームを創る」をミッションに、AIとテクノロジーで信用のアップデートを実現する金融・経営インフラを提供しています。支出管理・支払い・経理・資金供給を一気通貫で支援し、企業の意思決定とスピードを加速。法人カードの基盤を外部企業へも提供することで、金融機能を誰もが利用・提供できる総合金融プラットフォームへと進化を進めています。",
+          "en": "UPSIDER builds financial infrastructure that redefines creditworthiness through AI and technology. Supporting expense management, payments, accounting, and funding end-to-end, UPSIDER accelerates business decisions. By offering its corporate card infrastructure to partners, UPSIDER is evolving into a platform where anyone can access and deliver financial services."
+        },
+        "primaryLogoUrl": "https://2026-bucket.flutterkaigi.jp/logos/1521722c-4fc9-4ebb-a760-3a1c68971bbd.webp",
+        "secondaryLogoUrl": null,
+        "tier": "platinum",
+        "slug": "up-sider",
+        "xUrl": "https://x.com/upsider_inc",
+        "websiteUrl": "https://corp.up-sider.com/",
+        "recruitUrl": null,
+        "jobBoardUrl": "https://corp.up-sider.com/",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sponsors/hacomono",
+      "schema": "sponsor",
+      "data": {
+        "name": {
+          "ja": "株式会社hacomono",
+          "en": "hacomono.inc"
+        },
+        "nameKana": null,
+        "description": {
+          "ja": "hacomonoは、ウェルネス産業向けに入会・予約・決済・会員管理をデジタル化するVertical SaaS企業です。ジュニアスクールから公共施設まで幅広い業態を支援し、全国11,000店舗以上に導入される産業インフラへ成長しています。2026年3月には、基盤を活かしたtoC向け新サービス「FitFits」をリリースしました。",
+          "en": "hacomono is a Vertical SaaS company digitizing registration, booking, payments, and member management for the wellness industry. Supporting a wide range of facilities from junior sports schools to public spaces, it has grown into an industrial infrastructure adopted by over 11,000 stores nationwide. In March 2026, leveraging this foundation, it launched \"FitFits,\" a new B2C service."
+        },
+        "primaryLogoUrl": "https://2026-bucket.flutterkaigi.jp/logos/8ba411fb-be4c-420b-ad43-1052fda2eac9.webp",
+        "secondaryLogoUrl": null,
+        "tier": "platinum",
+        "slug": "hacomono",
+        "xUrl": "https://x.com/hacomono_Dev",
+        "websiteUrl": "https://www.hacomono.co.jp/",
+        "recruitUrl": null,
+        "jobBoardUrl": "https://www.hacomono.co.jp/recruit/engineer/",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sponsors/assign-inc",
+      "schema": "sponsor",
+      "data": {
+        "name": {
+          "ja": "株式会社アサイン",
+          "en": "ASSIGN Inc"
+        },
+        "nameKana": null,
+        "description": {
+          "ja": "アサインは、「人」と「技術」の力で、若手ハイエンド向けのキャリア支援サービスを提供しています。若手ハイエンド向けキャリアプラットフォーム『ASSIGN』では、ユーザー一人ひとりの価値観に向き合い、長期のキャリア形成を支える体験づくりに取り組んでいます。モバイル開発ではFlutterを軸に、iOS/Androidへ一貫した質の高い体験を素早く届けています。",
+          "en": "ASSIGN provides career support for high-potential young professionals by combining people and technology. Through our career platform ASSIGN, we create experiences rooted in each user's values and support long-term career growth. Our mobile app uses Flutter to rapidly deliver a consistent, high-quality experience across iOS and Android."
+        },
+        "primaryLogoUrl": "https://2026-bucket.flutterkaigi.jp/logos/1bafa9d2-3666-472c-9ca7-e246cbec0002.webp",
+        "secondaryLogoUrl": null,
+        "tier": "platinum",
+        "slug": "assign-inc",
+        "xUrl": "https://x.com/ASSIGN_dev",
+        "websiteUrl": "https://assign-inc.com/",
+        "recruitUrl": null,
+        "jobBoardUrl": "https://job.persona-ats.com/ja/assign/jobs",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sponsors/accenturesong",
+      "schema": "sponsor",
+      "data": {
+        "name": {
+          "ja": "ゆめみ（アクセンチュア）",
+          "en": "YUMEMI（Accenture)"
+        },
+        "nameKana": null,
+        "description": {
+          "ja": "ゆめみは、誰かの心を動かす体験をテクノロジーとデザインで形にするエンジニアリング＆クリエイティブブランドです。構想から設計、開発、運用・改善までを一貫して担い、「つくる」と「育てる」を分断しないプロダクトづくりを強みとしています。2025年にゆめみはアクセンチュアの一員となり、グローバルの知見と接続することで、より大きな価値創出に挑戦しています。",
+          "en": "YUMEMI is an engineering and creative brand that brings inspiring experiences to life through technology and design. We provide end-to-end product development—from concept and design to development, operation, and continuous improvement—bridging creation and growth. Since joining Accenture in 2025, YUMEMI has been leveraging global expertise to create greater value and impact."
+        },
+        "primaryLogoUrl": "https://2026-bucket.flutterkaigi.jp/logos/533a1681-7167-4583-ae16-b3b1a6668c6a.webp",
+        "secondaryLogoUrl": null,
+        "tier": "platinum",
+        "slug": "accenturesong",
+        "xUrl": "https://x.com/yumemiinc",
+        "websiteUrl": "https://www.yumemi.co.jp/",
+        "recruitUrl": null,
+        "jobBoardUrl": "https://www.yumemi.co.jp/",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sponsors/coderabbit",
+      "schema": "sponsor",
+      "data": {
+        "name": {
+          "ja": "CodeRabbit",
+          "en": "CodeRabbit"
+        },
+        "nameKana": null,
+        "description": {
+          "ja": "CodeRabbit（コードラビット）はGitHubやGitLab、BitBucketなどと連携し、コードレビューの時間とバグを減らすAIコードレビューサービスです。PRの自動レビューに加えて、VS Code機能拡張や各種AIコーディングエージェントと連携できるCLIを提供しています。",
+          "en": "CodeRabbit is an AI-powered code review service that integrates with GitHub, GitLab, BitBucket, and other git platforms to cut the time spent on code reviews and minimize bugs. In addition to automated PR reviews, it offers a CLI that integrates with VS Code extensions and various AI coding agents."
+        },
+        "primaryLogoUrl": "https://2026-bucket.flutterkaigi.jp/logos/f5976ae3-65bd-41ad-a8fe-a1a326937a9d.webp",
+        "secondaryLogoUrl": null,
+        "tier": "gold",
+        "slug": "coderabbit",
+        "xUrl": "https://x.com/coderabbitaija",
+        "websiteUrl": "https://www.coderabbit.ai/ja",
+        "recruitUrl": null,
+        "jobBoardUrl": "https://jobs.ashbyhq.com/coderabbit?locationId=b93060e6-9530-4f58-84b7-97761855d09c",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sponsors/cyberagent",
+      "schema": "sponsor",
+      "data": {
+        "name": {
+          "ja": "株式会社サイバーエージェント",
+          "en": "CyberAgent, Inc."
+        },
+        "nameKana": null,
+        "description": {
+          "ja": "サイバーエージェントはインターネットを軸に、メディア&IP事業、インターネット広告事業、ゲーム事業と主に3つの事業を展開しています。その他にもIP・コンテンツ、AI、DXを強化分野として事業創出に取り組んでおり、様々な事業でFlutterの活用事例があります。社内発の社外向けの勉強会である「CA.flutter」も定期的に開催しています。",
+          "en": "CyberAgent operates three main internet businesses: Media & IP, Internet Advertising, and Games. It also creates new businesses focusing on IP/Content, AI, and DX, utilizing Flutter across various projects. Additionally, it regularly hosts \"CA.flutter,\" a public study group."
+        },
+        "primaryLogoUrl": "https://2026-bucket.flutterkaigi.jp/logos/735d471e-0c92-40d7-884c-38c2ff7c68c5.webp",
+        "secondaryLogoUrl": null,
+        "tier": "gold",
+        "slug": "cyberagent",
+        "xUrl": "https://x.com/ca_developers",
+        "websiteUrl": "https://www.cyberagent.co.jp/",
+        "recruitUrl": null,
+        "jobBoardUrl": "https://hrmos.co/pages/cyberagent-group",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sponsors/revcomm",
+      "schema": "sponsor",
+      "data": {
+        "name": {
+          "ja": "RevComm",
+          "en": "RevComm Inc."
+        },
+        "nameKana": null,
+        "description": {
+          "ja": "RevCommは「コミュニケーションを再発明し、人が人を想う社会を創る」という理念のもと、音声AIで対人コミュニケーションの課題を解決する企業です。顧客との会話という価値ある一次情報を、音声認識・自然言語処理・生成AIを組み合わせた自社プロダクトで分析し、ビジネスの現場に活用しています。モバイルアプリ開発にはFlutterを採用しています。ぜひRevCommのブースにお立ち寄りください！",
+          "en": "Under our mission of \"Reinventing Communication to create a society where people think of others,\" RevComm solves the challenges of human communication through voice AI. We turn customer conversations into business insights with our products built on speech recognition, NLP, and generative AI. We use Flutter for our mobile apps. We're hiring engineers, so please stop by our booth and say hello!"
+        },
+        "primaryLogoUrl": "https://2026-bucket.flutterkaigi.jp/logos/f093b8b6-a766-4791-83da-da1a14e5f544.webp",
+        "secondaryLogoUrl": null,
+        "tier": "gold",
+        "slug": "revcomm",
+        "xUrl": "https://x.com/RevComm_inc",
+        "websiteUrl": "https://www.revcomm.com/",
+        "recruitUrl": null,
+        "jobBoardUrl": null,
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sponsors/suke-dachi",
+      "schema": "sponsor",
+      "data": {
+        "name": {
+          "ja": "株式会社助太刀",
+          "en": "sukedachi"
+        },
+        "nameKana": null,
+        "description": {
+          "ja": "「建設現場を魅力ある職場に。」というミッションに挑むスタートアップです。高齢化や若手減少が進む業界で、職人さんが直感的に使える簡単・便利なITサービスを展開しています。現場で働く誰もが誇りを持てる社会の実現を目指し、社会的意義の大きいこのプロダクトを一緒にスケールさせる仲間を募集中です！会場で皆様とお話しできるのを楽しみにしています。",
+          "en": "We are a startup on a mission to make construction rewarding. We provide easy, intuitive IT services for on-site workers facing an aging industry. Partner with us to transform the industry. Let's talk at our booth."
+        },
+        "primaryLogoUrl": "https://2026-bucket.flutterkaigi.jp/logos/76e4f420-2833-45f9-8cb8-ac277343b501.webp",
+        "secondaryLogoUrl": null,
+        "tier": "gold",
+        "slug": "suke-dachi",
+        "xUrl": "https://x.com/sukedachi__?lang=ja",
+        "websiteUrl": "https://company.suke-dachi.jp/",
+        "recruitUrl": null,
+        "jobBoardUrl": "https://suke-dachi.jp/company/recruit.html",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sponsors/soda-inc",
+      "schema": "sponsor",
+      "data": {
+        "name": {
+          "ja": "株式会社SODA",
+          "en": "SODA inc."
+        },
+        "nameKana": null,
+        "description": {
+          "ja": "「SNKRDUNK（スニーカーダンク）」は、スニーカーやアパレルを中心とするファッション領域やトレーディングカード・フィギュアなどを中心に、個人間での売買を簡単に行える国内最大級のファッション・コレクティブルマーケットプレイスです。",
+          "en": "\"SNKRDUNK (Sneaker Dunk)\" is one of Japan's largest fashion and collectible marketplaces, where individuals can easily buy and sell items, primarily in the fashion category featuring sneakers and apparel, as well as trading cards and toy figures."
+        },
+        "primaryLogoUrl": "https://2026-bucket.flutterkaigi.jp/logos/12e9c1d3-f2ff-454c-9daa-d6dd6439f06b.webp",
+        "secondaryLogoUrl": null,
+        "tier": "silver",
+        "slug": "soda-inc",
+        "xUrl": "https://x.com/soda_engineers/",
+        "websiteUrl": "https://soda-inc.jp/",
+        "recruitUrl": null,
+        "jobBoardUrl": "https://soda-inc.jp/",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sponsors/andpad",
+      "schema": "sponsor",
+      "data": {
+        "name": {
+          "ja": "株式会社アンドパッド",
+          "en": "ANDPAD Inc."
+        },
+        "nameKana": null,
+        "description": {
+          "ja": "アンドパッドは建築建設業界でトップシェアの69万人以上が使うプラットフォームです。現在、新規アプリ開発の主軸としてFlutterを積極採用し、クロスプラットフォームの強みを活かした圧倒的なスピードで開発・改善を回し、現場を支える価値ある機能を最速で届けています。当日はブースで開発模様や複雑なドメインの面白さをぜひお話しましょう！",
+          "en": "ANDPAD is Japan's leading construction SaaS, trusted by 690,000+ professionals. We actively adopt Flutter for our greenfield mobile apps to move fast, iterate rapidly, and deliver high-value features at maximum speed. Come connect with our team at FlutterKaigi 2026 to talk about our cross-platform journey!"
+        },
+        "primaryLogoUrl": "https://2026-bucket.flutterkaigi.jp/logos/b7fc944f-229d-43b3-95ef-660e9fed4031.webp",
+        "secondaryLogoUrl": null,
+        "tier": "silver",
+        "slug": "andpad",
+        "xUrl": "https://x.com/andpad_dev",
+        "websiteUrl": "https://andpad.co.jp/",
+        "recruitUrl": null,
+        "jobBoardUrl": "https://engineer.andpad.co.jp/",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sponsors/classmethod",
+      "schema": "sponsor",
+      "data": {
+        "name": {
+          "ja": "クラスメソッド株式会社",
+          "en": "Classmethod, Inc."
+        },
+        "nameKana": null,
+        "description": {
+          "ja": "クラスメソッドは、「オープンな発想と高い技術力」を掲げる技術者集団です。AWS・生成AI・アプリ開発を中心に5,600社以上を支援し、技術ブログ「DevelopersIO」でエンジニアコミュニティへ貢献しています。アプリ開発ではFlutterをメインに採用しており、仲間を募集中です！",
+          "en": "Classmethod is a team of engineers driven by open thinking and technical excellence. We support over 5,600 clients across AWS, generative AI, and app development, and share knowledge through DevelopersIO, one of Japan's largest tech blogs. We work with Flutter in app development and are always looking for passionate engineers to join our team. Proud to support FlutterKaigi 2026."
+        },
+        "primaryLogoUrl": "https://2026-bucket.flutterkaigi.jp/logos/4b00303e-0553-4252-a622-3d622919f580.webp",
+        "secondaryLogoUrl": null,
+        "tier": "silver",
+        "slug": "classmethod",
+        "xUrl": "https://x.com/classmethod",
+        "websiteUrl": "https://classmethod.jp/",
+        "recruitUrl": null,
+        "jobBoardUrl": "https://careers.classmethod.jp/requirements/retail-app-flutter-engineer/",
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sponsors/studyplus",
+      "schema": "sponsor",
+      "data": {
+        "name": {
+          "ja": "スタディプラス株式会社",
+          "en": "Studyplus Inc."
+        },
+        "nameKana": null,
+        "description": {
+          "ja": "スタディプラス株式会社は「学ぶ喜びをすべての人へ」をミッションに、学習の記録・可視化・共有をサポートするStudyplusを提供しています。私たちと一緒に、楽しく学びを広げるプラットフォームを作りませんか？あなたのアイデアが、みんなの学びをもっと豊かにする力になります。ぜひ、私たちと一緒に新しい学びの形を生み出しましょう！",
+          "en": "At Studyplus Inc., our mission is to deliver the joy of learning to everyone. Our platform helps users record, visualize, and share their progress. We’re looking for innovators to join us in making learning more engaging. Your ideas can enrich the experience of millions. Let’s collaborate to shape the future of education and create new ways to learn together!"
+        },
+        "primaryLogoUrl": "https://2026-bucket.flutterkaigi.jp/logos/30e6d121-81d2-47f2-912c-9b5bf8f4d03e.webp",
+        "secondaryLogoUrl": null,
+        "tier": "bronze",
+        "slug": "studyplus",
+        "xUrl": "https://x.com/studyplus_dev",
+        "websiteUrl": "https://info.studyplus.co.jp/",
+        "recruitUrl": null,
+        "jobBoardUrl": null,
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sponsors/geekneer",
+      "schema": "sponsor",
+      "data": {
+        "name": {
+          "ja": "株式会社ギークニア",
+          "en": "Geekneer, Inc."
+        },
+        "nameKana": null,
+        "description": {
+          "ja": "全ての転職相談を元エンジニアが対応しているギークニア。エンジニアのみなさんの転職のシーンにおいて、近い目線からお力添えをさせていただきます。プログラマーに限らず、AIエンジニア、PM、EMなど、ポジションは幅広くサポートしておりますのでお気軽にご相談くださいませ。本イベントが、盛会となることを祈っております！",
+          "en": "At Geeknia, all career consultations are handled by former engineers. We are here to support you throughout your career transition from a shared perspective. Our support spans a wide range of roles—not just programmers, but also AI engineers, PMs, EMs, and more—so please feel free to reach out. We wish this event great success!"
+        },
+        "primaryLogoUrl": "https://2026-bucket.flutterkaigi.jp/logos/6e293ec8-27c2-4d4d-8b1c-cb2a6477d049.webp",
+        "secondaryLogoUrl": null,
+        "tier": "bronze",
+        "slug": "geekneer",
+        "xUrl": "https://x.com/geekneerjp",
+        "websiteUrl": "https://geekneer.com/",
+        "recruitUrl": null,
+        "jobBoardUrl": null,
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sponsors/pscsrv",
+      "schema": "sponsor",
+      "data": {
+        "name": {
+          "ja": "ピープルソフトウェア株式会社",
+          "en": "PEOPLE SOFTWARE CORPORATION"
+        },
+        "nameKana": null,
+        "description": {
+          "ja": "岡山に仕事がない時代から、Flutterを追いかけ続けてはや7年……。私たちは「エンジニアリングの力で、未来に彩りを。」を掲げる倉敷発の独立系ソフトウェアベンダーです。思考の速度でアプリが形になる圧倒的な開発体験に魅せられたメンバーが集結！受託開発を主軸にお客様へ感動を届けながら、地元のFlutterコミュニティを盛り上げるため、全力で応援しています！",
+          "en": "岡山に仕事がない時代から、Flutterを追いかけ続けてはや7年……。私たちは「エンジニアリングの力で、未来に彩りを。」を掲げる倉敷発の独立系ソフトウェアベンダーです。思考の速度でアプリが形になる圧倒的な開発体験に魅せられたメンバーが集結！受託開発を主軸にお客様へ感動を届けながら、地元のFlutterコミュニティを盛り上げるため、全力で応援しています！"
+        },
+        "primaryLogoUrl": "https://2026-bucket.flutterkaigi.jp/logos/5ebe38b4-1055-47a4-b2e0-0d416214dc1f.webp",
+        "secondaryLogoUrl": null,
+        "tier": "bronze",
+        "slug": "pscsrv",
+        "xUrl": "https://x.com/_pscsrv",
+        "websiteUrl": "https://pscsrv.co.jp/",
+        "recruitUrl": null,
+        "jobBoardUrl": null,
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sponsors/team-lab",
+      "schema": "sponsor",
+      "data": {
+        "name": {
+          "ja": "チームラボ",
+          "en": "teamLab"
+        },
+        "nameKana": null,
+        "description": {
+          "ja": "チームラボがこれまでに手掛けたWebサービスでは月間アクティブユーザーは3000万人、リリース済みのスマホアプリでは累計1.9億DL以上（アプリ平均評価4.53）に達しており、社会の様々な場面で生活者の体験を向上し続けています。",
+          "en": "teamLab has developed web services that now reach 30 million monthly active users and smartphone apps with over 190 million total downloads, maintaining an average app rating of 4.53. Through these achievements, we continue to enhance user experiences across various aspects of daily life."
+        },
+        "primaryLogoUrl": "https://2026-bucket.flutterkaigi.jp/logos/dd627288-5b2a-4aea-a854-23bbcb33c5c6.webp",
+        "secondaryLogoUrl": null,
+        "tier": "bronze",
+        "slug": "team-lab",
+        "xUrl": "https://x.com/teamlab_recruit",
+        "websiteUrl": "https://www.team-lab.com/",
+        "recruitUrl": null,
+        "jobBoardUrl": null,
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sponsors/mixi",
+      "schema": "sponsor",
+      "data": {
+        "name": {
+          "ja": "株式会社MIXI",
+          "en": "MIXI, Inc."
+        },
+        "nameKana": null,
+        "description": {
+          "ja": "MIXIは、「豊かなコミュニケーションを広げ、世界を幸せな驚きで包む。」というパーパスのもと、「mixi」や「モンスターストライク」など、友人や家族間で一緒に楽しむコミュニケーションサービスを提供しています。",
+          "en": "Under our Purpose of enriching communication and inspiring moments of joy, MIXI aims to offer enjoyable communication services for friends and family, such as mixi and MONSTER STRIKE."
+        },
+        "primaryLogoUrl": "https://2026-bucket.flutterkaigi.jp/logos/87a78bb3-bfc2-4626-abab-388aa8fd933c.webp",
+        "secondaryLogoUrl": null,
+        "tier": "bronze",
+        "slug": "mixi",
+        "xUrl": "https://x.com/mixi_engineers",
+        "websiteUrl": "https://mixi.co.jp/",
+        "recruitUrl": null,
+        "jobBoardUrl": null,
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sponsors/ibj",
+      "schema": "sponsor",
+      "data": {
+        "name": {
+          "ja": "株式会社IBJ",
+          "en": "IBJ Inc."
+        },
+        "nameKana": null,
+        "description": {
+          "ja": "婚活サービスやライフデザインサービスを幅広く展開し、日本で最も多くの結婚カップルを創出している会社です。「IT×ヒト」を強みとした事業運営を行っており、接客やコンサルティングを担うサービス部門に加え、アプリやシステムの開発・改善を行うクリエイターやエンジニアも活躍しています。",
+          "en": "The company offers a wide range of matchmaking and life design services and has facilitated more marriages than any other company in Japan. By combining technology and human expertise, it delivers its services through both its service division and the creators and engineers who develop and improve its applications and systems."
+        },
+        "primaryLogoUrl": "https://2026-bucket.flutterkaigi.jp/logos/a39acedb-c2a4-4314-99a3-c87d0a06dddc.webp",
+        "secondaryLogoUrl": null,
+        "tier": "bronze",
+        "slug": "ibj",
+        "xUrl": "https://x.com/IBJ_renmei",
+        "websiteUrl": "https://www.ibjapan.jp/",
+        "recruitUrl": null,
+        "jobBoardUrl": null,
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sponsors/ibis",
+      "schema": "sponsor",
+      "data": {
+        "name": {
+          "ja": "株式会社アイビス",
+          "en": "Ibis Co., Ltd."
+        },
+        "nameKana": null,
+        "description": {
+          "ja": "アイビスはFlutterでの開発支援を通じて、関わるすべての人と企業が成長できる持続可能な関係づくりを目指しています。共にアイビスを創る仲間も募集しています。",
+          "en": "Through Flutter development support, Ibis aims to build sustainable relationships in which everyone involved—both individuals and companies—can grow together. We are also looking for new team members to help shape and grow Ibis with us."
+        },
+        "primaryLogoUrl": "https://2026-bucket.flutterkaigi.jp/logos/6f159b8e-c1bb-4e0e-a9e0-174c38bbab85.webp",
+        "secondaryLogoUrl": null,
+        "tier": "bronze",
+        "slug": "ibis",
+        "xUrl": "https://x.com/ibis_official",
+        "websiteUrl": "https://i-bis.jp/",
+        "recruitUrl": null,
+        "jobBoardUrl": null,
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sponsors/tokyu",
+      "schema": "sponsor",
+      "data": {
+        "name": {
+          "ja": "東急株式会社",
+          "en": "TOKYU CORPORATION"
+        },
+        "nameKana": null,
+        "description": {
+          "ja": "東急(株)URBAN HACKSは「街づくりのDX」を実現するための内製開発チームです。東急グループの次の100年を変革する大プロジェクト。あなたの技術や知識を活かし、一緒に世界一の街づくりを目指してみませんか？",
+          "en": "URBAN HACKS, Tokyu Corporation's in-house product development team, is driving the digital transformation of urban development. We're building the technology and services that will shape the next 100 years of the Tokyu Group. If you're passionate about using your skills and expertise to create better urban experiences, join us in building the world's most inspiring urban future."
+        },
+        "primaryLogoUrl": "https://2026-bucket.flutterkaigi.jp/logos/3d8568ca-5bcb-434e-bd51-7dfbeb25cdec.webp",
+        "secondaryLogoUrl": null,
+        "tier": "bronze",
+        "slug": "tokyu",
+        "xUrl": "https://x.com/urban_89s",
+        "websiteUrl": "https://10q89s.jp/",
+        "recruitUrl": null,
+        "jobBoardUrl": null,
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sponsors/medley",
+      "schema": "sponsor",
+      "data": {
+        "name": {
+          "ja": "株式会社メドレー",
+          "en": "株式会社メドレー"
+        },
+        "nameKana": null,
+        "description": {
+          "ja": "",
+          "en": ""
+        },
+        "primaryLogoUrl": "https://2026-bucket.flutterkaigi.jp/logos/5be1da70-d42a-4758-a446-e85f9133f5aa.webp",
+        "secondaryLogoUrl": null,
+        "tier": "bronze",
+        "slug": "medley",
+        "xUrl": null,
+        "websiteUrl": null,
+        "recruitUrl": null,
+        "jobBoardUrl": null,
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sponsors/layerx",
+      "schema": "sponsor",
+      "data": {
+        "name": {
+          "ja": "株式会社LayerX",
+          "en": "株式会社LayerX"
+        },
+        "nameKana": null,
+        "description": {
+          "ja": "",
+          "en": ""
+        },
+        "primaryLogoUrl": "https://2026-bucket.flutterkaigi.jp/logos/51e854c3-3e92-4c54-b209-da2540457f4b.webp",
+        "secondaryLogoUrl": null,
+        "tier": "tool",
+        "slug": "layerx",
+        "xUrl": null,
+        "websiteUrl": null,
+        "recruitUrl": null,
+        "jobBoardUrl": null,
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
       "path": "staffMembers/staff-001",
       "schema": "staff_member",
       "data": {
