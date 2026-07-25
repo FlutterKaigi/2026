@@ -6,6 +6,7 @@ import 'package:app/feature/event/ui/page/event_info_page.dart';
 import 'package:app/feature/news/ui/page/news_list_page.dart';
 import 'package:app/feature/session/ui/page/bookmarked_sessions_page.dart';
 import 'package:app/feature/session/ui/page/session_details_page.dart';
+import 'package:app/feature/session/ui/page/session_search_page.dart';
 import 'package:app/feature/session/ui/page/session_timetable_page.dart';
 import 'package:app/feature/sponsor/ui/page/sponsor_details_page.dart';
 import 'package:app/feature/sponsor/ui/page/sponsor_list_page.dart';
@@ -23,6 +24,15 @@ part 'routes.dart';
 /// add new destinations there and regenerate with `melos gen`.
 final routerProvider = Provider<GoRouter>((ref) {
   final talker = ref.watch(talkerProvider);
+
+  // Session details and bookmarks are opened with `push` so native back
+  // navigation returns to the exact previous screen. go_router ignores
+  // imperative matches in the browser URL by default, even when the target is
+  // a declared deep link. All imperative destinations in this app are declared
+  // routes, so reflecting the top-most match keeps web URLs shareable without
+  // sacrificing the navigation stack.
+  GoRouter.optionURLReflectsImperativeAPIs = true;
+
   return GoRouter(
     initialLocation: const NewsRoute().location,
     routes: $appRoutes,

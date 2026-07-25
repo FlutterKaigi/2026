@@ -15,6 +15,7 @@ part of 'router.dart';
         TypedGoRoute<SessionTimetableRoute>(
           path: '/sessions',
           routes: [
+            TypedGoRoute<SessionSearchRoute>(path: 'search'),
             TypedGoRoute<BookmarkedSessionsRoute>(path: 'bookmarked'),
             TypedGoRoute<SessionDetailsRoute>(path: ':sessionId'),
           ],
@@ -103,6 +104,14 @@ class SessionTimetableRoute extends GoRouteData with $SessionTimetableRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) => const SessionTimetablePage();
+}
+
+/// `/sessions/search` — local search across published sessions.
+class SessionSearchRoute extends GoRouteData with $SessionSearchRoute {
+  const SessionSearchRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const SessionSearchPage();
 }
 
 /// `/sessions/bookmarked` — locally bookmarked sessions.

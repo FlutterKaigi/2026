@@ -44,6 +44,7 @@ class TranslationsEn extends Translations with BaseTranslations<AppLocale, Trans
 	@override late final _Translations$news$en news = _Translations$news$en._(_root);
 	@override late final _Translations$sponsors$en sponsors = _Translations$sponsors$en._(_root);
 	@override late final _Translations$sessionTimetable$en sessionTimetable = _Translations$sessionTimetable$en._(_root);
+	@override late final _Translations$sessionSearch$en sessionSearch = _Translations$sessionSearch$en._(_root);
 	@override late final _Translations$sessionDetails$en sessionDetails = _Translations$sessionDetails$en._(_root);
 	@override late final _Translations$sessionBookmark$en sessionBookmark = _Translations$sessionBookmark$en._(_root);
 	@override late final _Translations$bookmarkedSessions$en bookmarkedSessions = _Translations$bookmarkedSessions$en._(_root);
@@ -117,13 +118,43 @@ class _Translations$sessionTimetable$en extends Translations$sessionTimetable$ja
 	// Translations
 	@override String get title => 'Timetable';
 	@override String dayButtonLabel({required Object day, required Object date}) => 'Day ${day} (${date})';
+	@override late final _Translations$sessionTimetable$view$en view = _Translations$sessionTimetable$view$en._(_root);
 	@override String get empty => 'The timetable has not been published yet';
-	@override String get emptyFiltered => 'There are no items for the selected venue';
+	@override String get emptyFiltered => 'There are no items for this day';
 	@override String get error => 'Failed to load timetable';
-	@override late final _Translations$sessionTimetable$timeFormat$en timeFormat = _Translations$sessionTimetable$timeFormat$en._(_root);
 	@override late final _Translations$sessionTimetable$venue$en venue = _Translations$sessionTimetable$venue$en._(_root);
 	@override late final _Translations$sessionTimetable$speaker$en speaker = _Translations$sessionTimetable$speaker$en._(_root);
 	@override late final _Translations$sessionTimetable$type$en type = _Translations$sessionTimetable$type$en._(_root);
+}
+
+// Path: sessionSearch
+class _Translations$sessionSearch$en extends Translations$sessionSearch$ja {
+	_Translations$sessionSearch$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Search sessions';
+	@override String get hint => 'Search titles, descriptions, and speakers';
+	@override String get clear => 'Clear search';
+	@override String get allDates => 'All days';
+	@override String get allTypes => 'All types';
+	@override String get allLanguages => 'All languages';
+	@override String get dateFilter => 'Filter by day';
+	@override String get typeFilter => 'Filter by type';
+	@override String get languageFilter => 'Filter by language';
+	@override String get dateChip => 'Day';
+	@override String get typeChip => 'Type';
+	@override String get languageChip => 'Language';
+	@override String get promptTitle => 'Find a session';
+	@override String get promptBody => 'Enter a keyword or select a day, session type, or language';
+	@override String get emptyTitle => 'No sessions found';
+	@override String get emptyBody => 'Try changing the keyword or filters';
+	@override String resultCount({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n,
+		one: '${n} session',
+		other: '${n} sessions',
+	);
+	@override String get error => 'Failed to search sessions';
 }
 
 // Path: sessionDetails
@@ -205,15 +236,16 @@ class _Translations$common$en extends Translations$common$ja {
 	@override String get retry => 'Retry';
 }
 
-// Path: sessionTimetable.timeFormat
-class _Translations$sessionTimetable$timeFormat$en extends Translations$sessionTimetable$timeFormat$ja {
-	_Translations$sessionTimetable$timeFormat$en._(TranslationsEn root) : this._root = root, super.internal(root);
+// Path: sessionTimetable.view
+class _Translations$sessionTimetable$view$en extends Translations$sessionTimetable$view$ja {
+	_Translations$sessionTimetable$view$en._(TranslationsEn root) : this._root = root, super.internal(root);
 
 	final TranslationsEn _root; // ignore: unused_field
 
 	// Translations
-	@override String get twentyFourHour => '24 Hour';
-	@override String get amPm => 'AM/PM';
+	@override String get openRooms => 'Switch to room timeline';
+	@override String get openList => 'Switch to list view';
+	@override String get shared => 'Shared';
 }
 
 // Path: sessionTimetable.venue
@@ -223,7 +255,6 @@ class _Translations$sessionTimetable$venue$en extends Translations$sessionTimeta
 	final TranslationsEn _root; // ignore: unused_field
 
 	// Translations
-	@override String get all => 'All';
 	@override String get unknown => 'Venue TBA';
 }
 
@@ -306,12 +337,12 @@ extension on TranslationsEn {
 			'sponsors.connect' => 'Connect',
 			'sessionTimetable.title' => 'Timetable',
 			'sessionTimetable.dayButtonLabel' => ({required Object day, required Object date}) => 'Day ${day} (${date})',
+			'sessionTimetable.view.openRooms' => 'Switch to room timeline',
+			'sessionTimetable.view.openList' => 'Switch to list view',
+			'sessionTimetable.view.shared' => 'Shared',
 			'sessionTimetable.empty' => 'The timetable has not been published yet',
-			'sessionTimetable.emptyFiltered' => 'There are no items for the selected venue',
+			'sessionTimetable.emptyFiltered' => 'There are no items for this day',
 			'sessionTimetable.error' => 'Failed to load timetable',
-			'sessionTimetable.timeFormat.twentyFourHour' => '24 Hour',
-			'sessionTimetable.timeFormat.amPm' => 'AM/PM',
-			'sessionTimetable.venue.all' => 'All',
 			'sessionTimetable.venue.unknown' => 'Venue TBA',
 			'sessionTimetable.speaker.none' => 'Speaker TBA',
 			'sessionTimetable.type.regular' => 'Regular Talk',
@@ -319,6 +350,24 @@ extension on TranslationsEn {
 			'sessionTimetable.type.beginnersLightningTalk' => 'Beginners LT',
 			'sessionTimetable.type.handsOn' => 'Hands-on',
 			'sessionTimetable.type.event' => 'Event',
+			'sessionSearch.title' => 'Search sessions',
+			'sessionSearch.hint' => 'Search titles, descriptions, and speakers',
+			'sessionSearch.clear' => 'Clear search',
+			'sessionSearch.allDates' => 'All days',
+			'sessionSearch.allTypes' => 'All types',
+			'sessionSearch.allLanguages' => 'All languages',
+			'sessionSearch.dateFilter' => 'Filter by day',
+			'sessionSearch.typeFilter' => 'Filter by type',
+			'sessionSearch.languageFilter' => 'Filter by language',
+			'sessionSearch.dateChip' => 'Day',
+			'sessionSearch.typeChip' => 'Type',
+			'sessionSearch.languageChip' => 'Language',
+			'sessionSearch.promptTitle' => 'Find a session',
+			'sessionSearch.promptBody' => 'Enter a keyword or select a day, session type, or language',
+			'sessionSearch.emptyTitle' => 'No sessions found',
+			'sessionSearch.emptyBody' => 'Try changing the keyword or filters',
+			'sessionSearch.resultCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} session', other: '${n} sessions', ),
+			'sessionSearch.error' => 'Failed to search sessions',
 			'sessionDetails.title' => 'Session Details',
 			'sessionDetails.description' => 'Description',
 			'sessionDetails.schedule' => 'Schedule and Venue',

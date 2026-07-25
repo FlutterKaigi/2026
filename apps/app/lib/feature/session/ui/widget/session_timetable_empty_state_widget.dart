@@ -1,39 +1,21 @@
 import 'package:app/core/i18n/strings.g.dart';
-import 'package:app/feature/session/data/provider/session_timetable_provider.dart';
-import 'package:app/feature/session/ui/widget/session_timetable_filter_bar_widget.dart';
 import 'package:flutter/material.dart';
 
 class SessionTimetableEmptyStateWidget extends StatelessWidget {
   const SessionTimetableEmptyStateWidget({
-    required this.data,
     required this.scrollController,
     super.key,
   });
 
-  final SessionTimetableData data;
   final ScrollController scrollController;
 
   @override
   Widget build(BuildContext context) {
     final t = Translations.of(context);
-    final message = data.hasAnyEntries && data.selectedVenueId != null
-        ? t.sessionTimetable.emptyFiltered
-        : t.sessionTimetable.empty;
 
     return ListView(
       controller: scrollController,
       children: [
-        if (data.availableDates.isNotEmpty)
-          SessionTimetableDaySelectorBarWidget(
-            dates: data.availableDates,
-            selectedDate: data.selectedDate,
-          ),
-        if (data.venues.isNotEmpty)
-          SessionTimetableVenueFilterBarWidget(
-            venues: data.venues,
-            selectedVenueId: data.selectedVenueId,
-          ),
-        const SessionTimetableTimeFormatSelectorWidget(),
         Padding(
           padding: const EdgeInsets.all(24),
           child: Column(
@@ -47,7 +29,7 @@ class SessionTimetableEmptyStateWidget extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               Text(
-                message,
+                t.sessionTimetable.empty,
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodyLarge,
               ),

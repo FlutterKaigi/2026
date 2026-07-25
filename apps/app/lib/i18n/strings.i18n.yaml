@@ -25,14 +25,14 @@ sponsors:
 sessionTimetable:
   title: タイムテーブル
   dayButtonLabel: $day日目 ($date)
+  view:
+    openRooms: 会場別タイムラインに切り替え
+    openList: リスト表示に切り替え
+    shared: 共通
   empty: タイムテーブルはまだ公開されていません
-  emptyFiltered: 選択した会場の予定はありません
+  emptyFiltered: この日の予定はありません
   error: タイムテーブルを取得できませんでした
-  timeFormat:
-    twentyFourHour: 24時間
-    amPm: 午前/午後
   venue:
-    all: すべて
     unknown: 会場未定
   speaker:
     none: 登壇者未定
@@ -42,6 +42,27 @@ sessionTimetable:
     beginnersLightningTalk: 初心者向けLT
     handsOn: ハンズオン
     event: イベント
+sessionSearch:
+  title: セッションを検索
+  hint: タイトル・概要・登壇者を検索
+  clear: 検索条件をクリア
+  allDates: すべての日程
+  allTypes: すべての種類
+  allLanguages: すべての言語
+  dateFilter: 日程で絞り込み
+  typeFilter: 種類で絞り込み
+  languageFilter: 言語で絞り込み
+  dateChip: 日程
+  typeChip: 種類
+  languageChip: 言語
+  promptTitle: セッションを探す
+  promptBody: キーワードを入力するか、日程・種類・言語を選択してください
+  emptyTitle: セッションが見つかりません
+  emptyBody: キーワードや絞り込み条件を変更してみてください
+  resultCount:
+    one: $n件のセッション
+    other: $n件のセッション
+  error: セッションを検索できませんでした
 sessionDetails:
   title: セッション詳細
   description: 概要

@@ -1,7 +1,6 @@
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/router/router.dart';
 import 'package:app/feature/session/data/provider/bookmarked_sessions_provider.dart';
-import 'package:app/feature/session/data/provider/session_time_format.dart';
 import 'package:app/feature/session/data/provider/session_timetable_provider.dart';
 import 'package:app/feature/session/ui/widget/session_card_widget.dart';
 import 'package:app/feature/session/ui/widget/session_details_message_state_widget.dart';
@@ -16,7 +15,6 @@ class BookmarkedSessionsPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final t = Translations.of(context);
     final bookmarkedSessions = ref.watch(bookmarkedSessionsProvider);
-    final timeFormat = ref.watch(sessionTimeFormatProvider);
 
     return Scaffold(
       body: CustomScrollView(
@@ -31,10 +29,7 @@ class BookmarkedSessionsPage extends ConsumerWidget {
                 onOpenSessions: () => const SessionTimetableRoute().go(context),
               ),
             ),
-            AsyncData(:final value) => _BookmarkedSessionsListWidget(
-              data: value,
-              timeFormat: timeFormat,
-            ),
+            AsyncData(:final value) => _BookmarkedSessionsListWidget(data: value),
             AsyncError() => SliverFillRemaining(
               hasScrollBody: false,
               child: SessionDetailsMessageStateWidget(
@@ -68,11 +63,9 @@ class BookmarkedSessionsPage extends ConsumerWidget {
 class _BookmarkedSessionsListWidget extends StatelessWidget {
   const _BookmarkedSessionsListWidget({
     required this.data,
-    required this.timeFormat,
   });
 
   final BookmarkedSessionsData data;
-  final EventTimeFormat timeFormat;
 
   @override
   Widget build(BuildContext context) {
@@ -88,7 +81,7 @@ class _BookmarkedSessionsListWidget extends StatelessWidget {
           final entry = data.entries[index ~/ 2];
           return SessionCardWidget(
             entry: entry,
-            timeFormat: timeFormat,
+            timeFormat: EventTimeFormat.twentyFourHour,
             onTap: () => SessionDetailsRoute(sessionId: entry.id).push<void>(context),
           );
         },
