@@ -22,6 +22,11 @@ sponsors:
   jobBoardCta: Hiring information
   recruitCta: Careers
   connect: Connect
+# NOTE: Keep these notices in sync with footerTrademark in apps/website/lib/l10n/strings.dart
+trademarks:
+  flutterAffiliation: Flutter and the related logo are trademarks of Google LLC. FlutterKaigi is not affiliated with or otherwise sponsored by Google LLC.
+  flutterNameAndLogo: The Flutter name and the Flutter logo are trademarks of Google LLC.
+  revComm: RevComm is a registered trademark or trademark of RevComm Inc.
 sessionTimetable:
   title: Timetable
   dayButtonLabel: Day $day ($date)

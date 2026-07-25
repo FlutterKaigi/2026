@@ -44,6 +44,7 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	late final Translations$navigation$ja navigation = Translations$navigation$ja.internal(_root);
 	late final Translations$news$ja news = Translations$news$ja.internal(_root);
 	late final Translations$sponsors$ja sponsors = Translations$sponsors$ja.internal(_root);
+	late final Translations$trademarks$ja trademarks = Translations$trademarks$ja.internal(_root);
 	late final Translations$sessionTimetable$ja sessionTimetable = Translations$sessionTimetable$ja.internal(_root);
 	late final Translations$sessionSearch$ja sessionSearch = Translations$sessionSearch$ja.internal(_root);
 	late final Translations$sessionDetails$ja sessionDetails = Translations$sessionDetails$ja.internal(_root);
@@ -148,6 +149,24 @@ class Translations$sponsors$ja {
 
 	/// ja: 'Connect'
 	String get connect => 'Connect';
+}
+
+// Path: trademarks
+class Translations$trademarks$ja {
+	Translations$trademarks$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'Flutter および関連するロゴは Google LLC の商標です。FlutterKaigi は Google LLC の承認または提携を受けておりません。'
+	String get flutterAffiliation => 'Flutter および関連するロゴは Google LLC の商標です。FlutterKaigi は Google LLC の承認または提携を受けておりません。';
+
+	/// ja: 'Flutter の名称およびロゴは Google LLC の商標です。'
+	String get flutterNameAndLogo => 'Flutter の名称およびロゴは Google LLC の商標です。';
+
+	/// ja: 'RevCommは、株式会社 RevComm の登録商標または商標です。'
+	String get revComm => 'RevCommは、株式会社 RevComm の登録商標または商標です。';
 }
 
 // Path: sessionTimetable
@@ -505,6 +524,9 @@ extension on Translations {
 			'sponsors.jobBoardCta' => '採用情報',
 			'sponsors.recruitCta' => '採用サイト',
 			'sponsors.connect' => 'Connect',
+			'trademarks.flutterAffiliation' => 'Flutter および関連するロゴは Google LLC の商標です。FlutterKaigi は Google LLC の承認または提携を受けておりません。',
+			'trademarks.flutterNameAndLogo' => 'Flutter の名称およびロゴは Google LLC の商標です。',
+			'trademarks.revComm' => 'RevCommは、株式会社 RevComm の登録商標または商標です。',
 			'sessionTimetable.title' => 'タイムテーブル',
 			'sessionTimetable.dayButtonLabel' => ({required Object day, required Object date}) => '${day}日目 (${date})',
 			'sessionTimetable.view.openRooms' => '会場別タイムラインに切り替え',

@@ -43,6 +43,7 @@ class TranslationsEn extends Translations with BaseTranslations<AppLocale, Trans
 	@override late final _Translations$navigation$en navigation = _Translations$navigation$en._(_root);
 	@override late final _Translations$news$en news = _Translations$news$en._(_root);
 	@override late final _Translations$sponsors$en sponsors = _Translations$sponsors$en._(_root);
+	@override late final _Translations$trademarks$en trademarks = _Translations$trademarks$en._(_root);
 	@override late final _Translations$sessionTimetable$en sessionTimetable = _Translations$sessionTimetable$en._(_root);
 	@override late final _Translations$sessionSearch$en sessionSearch = _Translations$sessionSearch$en._(_root);
 	@override late final _Translations$sessionDetails$en sessionDetails = _Translations$sessionDetails$en._(_root);
@@ -107,6 +108,18 @@ class _Translations$sponsors$en extends Translations$sponsors$ja {
 	@override String get jobBoardCta => 'Hiring information';
 	@override String get recruitCta => 'Careers';
 	@override String get connect => 'Connect';
+}
+
+// Path: trademarks
+class _Translations$trademarks$en extends Translations$trademarks$ja {
+	_Translations$trademarks$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get flutterAffiliation => 'Flutter and the related logo are trademarks of Google LLC. FlutterKaigi is not affiliated with or otherwise sponsored by Google LLC.';
+	@override String get flutterNameAndLogo => 'The Flutter name and the Flutter logo are trademarks of Google LLC.';
+	@override String get revComm => 'RevComm is a registered trademark or trademark of RevComm Inc.';
 }
 
 // Path: sessionTimetable
@@ -335,6 +348,9 @@ extension on TranslationsEn {
 			'sponsors.jobBoardCta' => 'Hiring information',
 			'sponsors.recruitCta' => 'Careers',
 			'sponsors.connect' => 'Connect',
+			'trademarks.flutterAffiliation' => 'Flutter and the related logo are trademarks of Google LLC. FlutterKaigi is not affiliated with or otherwise sponsored by Google LLC.',
+			'trademarks.flutterNameAndLogo' => 'The Flutter name and the Flutter logo are trademarks of Google LLC.',
+			'trademarks.revComm' => 'RevComm is a registered trademark or trademark of RevComm Inc.',
 			'sessionTimetable.title' => 'Timetable',
 			'sessionTimetable.dayButtonLabel' => ({required Object day, required Object date}) => 'Day ${day} (${date})',
 			'sessionTimetable.view.openRooms' => 'Switch to room timeline',

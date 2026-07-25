@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'package:app/core/extension/locale_map_extension.dart';
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/ui/widget/app_network_image.dart';
+import 'package:app/core/ui/widget/trademark_footer_widget.dart';
 import 'package:app/feature/sponsor/data/provider/sponsor_detail_provider.dart';
 import 'package:app/feature/sponsor/data/provider/sponsor_list_provider.dart';
 import 'package:app/feature/sponsor/ui/sponsor_tier_presentation.dart';
@@ -111,6 +112,8 @@ class _SponsorDetailsContent extends StatelessWidget {
                           ).textTheme.bodyLarge?.copyWith(height: 1.65),
                         ),
                       ],
+                      const SizedBox(height: 48),
+                      const TrademarkFooterWidget(),
                     ],
                   ),
                 ),
