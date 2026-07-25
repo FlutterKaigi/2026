@@ -48,24 +48,112 @@ void main() {
 
     expect(find.text('スポンサー'), findsWidgets);
     expect(find.text('Platinum'), findsOneWidget);
-    expect(find.text('Gold'), findsOneWidget);
     expect(find.text('Flutter'), findsOneWidget);
+
+    await tester.scrollUntilVisible(find.text('Gold Sponsor'), 300);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Gold'), findsOneWidget);
     expect(find.text('Gold Sponsor'), findsOneWidget);
     final footer = find.byType(TrademarkFooterWidget);
-    expect(footer, findsOneWidget);
-    expect(
-      find.ancestor(of: footer, matching: find.byType(ListView)),
-      findsOneWidget,
-    );
 
     await tester.scrollUntilVisible(footer, 300);
     await tester.pumpAndSettle();
 
+    expect(footer, findsOneWidget);
+    expect(
+      find.ancestor(of: footer, matching: find.byType(CustomScrollView)),
+      findsOneWidget,
+    );
     expect(
       find.textContaining(
         'Flutter および関連するロゴは Google LLC の商標です。',
       ),
       findsOneWidget,
+    );
+  });
+
+  testWidgets('SponsorListPage releases offscreen sponsor cards', (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      TranslationProvider(
+        child: ProviderScope(
+          overrides: [
+            sponsorRepositoryProvider.overrideWithValue(
+              _FakeSponsorRepository([
+                for (var index = 1; index <= 50; index++)
+                  _sponsor(
+                    id: 'D2026-$index',
+                    name: 'Platinum Sponsor $index',
+                  ),
+              ]),
+            ),
+          ],
+          child: MaterialApp(
+            locale: const Locale('en'),
+            supportedLocales: AppLocaleUtils.supportedLocales,
+            localizationsDelegates: GlobalMaterialLocalizations.delegates,
+            home: const SponsorListPage(),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text('Platinum Sponsor 50', skipOffstage: false),
+      findsNothing,
+    );
+
+    await tester.scrollUntilVisible(find.text('Platinum Sponsor 50'), 500);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Platinum Sponsor 50'), findsOneWidget);
+    expect(
+      find.text('Platinum Sponsor 1', skipOffstage: false),
+      findsNothing,
+    );
+  });
+
+  testWidgets('SponsorListPage centers an incomplete sponsor row', (tester) async {
+    tester.view.physicalSize = const Size(800, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      TranslationProvider(
+        child: ProviderScope(
+          overrides: [
+            sponsorRepositoryProvider.overrideWithValue(
+              _FakeSponsorRepository([
+                _sponsor(id: 'D2026-001', name: 'Platinum Sponsor 1'),
+                _sponsor(id: 'D2026-002', name: 'Platinum Sponsor 2'),
+                _sponsor(id: 'D2026-003', name: 'Platinum Sponsor 3'),
+              ]),
+            ),
+          ],
+          child: MaterialApp(
+            locale: const Locale('en'),
+            supportedLocales: AppLocaleUtils.supportedLocales,
+            localizationsDelegates: GlobalMaterialLocalizations.delegates,
+            home: const SponsorListPage(),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.scrollUntilVisible(find.text('Platinum Sponsor 3'), 300);
+    await tester.pumpAndSettle();
+
+    expect(
+      tester.getCenter(find.text('Platinum Sponsor 3')).dx,
+      closeTo(400, 0.1),
     );
   });
 
