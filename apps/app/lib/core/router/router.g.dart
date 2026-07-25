@@ -23,6 +23,10 @@ RouteBase get $appShellRoute => StatefulShellRouteData.$route(
           factory: $SessionTimetableRoute._fromState,
           routes: [
             GoRouteData.$route(
+              path: 'search',
+              factory: $SessionSearchRoute._fromState,
+            ),
+            GoRouteData.$route(
               path: 'bookmarked',
               factory: $BookmarkedSessionsRoute._fromState,
             ),
@@ -84,6 +88,25 @@ mixin $SessionTimetableRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/sessions');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) => context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $SessionSearchRoute on GoRouteData {
+  static SessionSearchRoute _fromState(GoRouterState state) => const SessionSearchRoute();
+
+  @override
+  String get location => GoRouteData.$location('/sessions/search');
 
   @override
   void go(BuildContext context) => context.go(location);

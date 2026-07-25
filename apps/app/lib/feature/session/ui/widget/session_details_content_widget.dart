@@ -4,50 +4,67 @@ import 'package:app/core/extension/locale_map_extension.dart';
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/ui/widget/app_network_image.dart';
 import 'package:app/feature/session/data/provider/session_detail_provider.dart';
-import 'package:app/feature/session/data/provider/session_time_format.dart';
 import 'package:app/feature/session/ui/widget/session_bookmark_button.dart';
 import 'package:app/feature/session/util/event_time.dart';
+import 'package:app/feature/session/util/session_language.dart';
 import 'package:data/data.dart';
 import 'package:flutter/material.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 const _sessionOrigin = 'https://2026.flutterkaigi.jp';
+const _largeAppBarCollapsedHeight = 64.0;
+const _largeAppBarTitleBottomPadding = 28.0;
+const _largeAppBarMaxTitleScaleFactor = 1.34;
+const _largeAppBarTitleHorizontalPadding = 32.0;
 
-class SessionDetailsContentWidget extends ConsumerWidget {
-  const SessionDetailsContentWidget({required this.data, super.key});
+class SessionDetailsContentWidget extends StatelessWidget {
+  const SessionDetailsContentWidget({
+    required this.data,
+    super.key,
+  });
 
   final SessionDetailData data;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final t = Translations.of(context);
     final locale = Localizations.localeOf(context);
     final session = data.session;
     final title = session.title.resolve(locale);
     final description = session.description.resolve(locale).trim();
-    final timeFormat = ref.watch(sessionTimeFormatProvider);
+    final languageLabel = sessionLanguageLabel(session.primaryLocale);
+    const timeFormat = EventTimeFormat.twentyFourHour;
     final sessionizeUri = _externalUri(session.sessionizeUrl);
 
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          SliverAppBar.large(
-            title: Text(title),
-            actions: [
-              SessionBookmarkButton(sessionId: session.id),
-              IconButton(
-                tooltip: t.sessionDetails.share,
-                onPressed: () => unawaited(_shareSession(data, locale)),
-                icon: const Icon(Icons.share_outlined),
+          SliverLayoutBuilder(
+            builder: (context, constraints) => SliverAppBar.large(
+              expandedHeight: _sessionTitleExpandedHeight(
+                context: context,
+                title: title,
+                maxWidth: constraints.crossAxisExtent,
               ),
-            ],
+              title: Text(
+                title,
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              actions: [
+                SessionBookmarkButton(sessionId: session.id),
+                IconButton(
+                  tooltip: t.sessionDetails.share,
+                  onPressed: () => unawaited(_shareSession(data, locale)),
+                  icon: const Icon(Icons.share_outlined),
+                ),
+              ],
+            ),
           ),
           SliverList.list(
             children: [
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                 child: Wrap(
                   spacing: 8,
                   runSpacing: 8,
@@ -56,6 +73,11 @@ class SessionDetailsContentWidget extends ConsumerWidget {
                       icon: Icons.sell_outlined,
                       label: _sessionTypeLabel(t, session),
                     ),
+                    if (languageLabel != null)
+                      _InfoChip(
+                        icon: Icons.language,
+                        label: languageLabel,
+                      ),
                     _InfoChip(
                       icon: Icons.calendar_today_outlined,
                       label: DateFormat(
@@ -135,6 +157,28 @@ class SessionDetailsContentWidget extends ConsumerWidget {
   }
 }
 
+double _sessionTitleExpandedHeight({
+  required BuildContext context,
+  required String title,
+  required double maxWidth,
+}) {
+  final textPainter =
+      TextPainter(
+        text: TextSpan(
+          text: title,
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
+        textDirection: Directionality.of(context),
+        textScaler: MediaQuery.textScalerOf(
+          context,
+        ).clamp(maxScaleFactor: _largeAppBarMaxTitleScaleFactor),
+      )..layout(
+        maxWidth: maxWidth - _largeAppBarTitleHorizontalPadding,
+      );
+
+  return _largeAppBarCollapsedHeight + _largeAppBarTitleBottomPadding + textPainter.height;
+}
+
 class _SectionHeader extends StatelessWidget {
   const _SectionHeader({required this.title});
 
@@ -161,13 +205,11 @@ class _SpeakerTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final avatarUrl = speaker.avatarUrl;
-
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       leading: AppNetworkAvatar(
         radius: 28,
-        imageUrl: avatarUrl,
+        imageUrl: speaker.avatarUrl,
         fallback: const Icon(Icons.person_outline),
       ),
       title: Text(speaker.name),

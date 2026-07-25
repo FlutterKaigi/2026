@@ -24,20 +24,6 @@ final sessionSpeakerListProvider = StreamProvider<List<Speaker>>(
   (ref) => ref.watch(sessionTimetableSpeakerRepositoryProvider).watchAll(),
 );
 
-/// Holds the selected venue filter. `null` means all venues.
-class SessionTimetableVenueFilterNotifier extends Notifier<String?> {
-  @override
-  String? build() => null;
-
-  /// Selects a venue or clears the filter with `null`.
-  void select(String? venueId) => state = venueId;
-}
-
-/// Exposes the selected venue filter for the timetable.
-final sessionTimetableVenueFilterProvider = NotifierProvider<SessionTimetableVenueFilterNotifier, String?>(
-  SessionTimetableVenueFilterNotifier.new,
-);
-
 /// Holds the selected event date. `null` means the first available event day.
 class SessionTimetableDayFilterNotifier extends Notifier<DateTime?> {
   @override
@@ -77,7 +63,6 @@ final sessionTimetableProvider = Provider<AsyncValue<SessionTimetableData>>(
             timelineEvents: timelineEventList,
             venues: venueList,
             speakers: speakerList,
-            selectedVenueId: ref.watch(sessionTimetableVenueFilterProvider),
             selectedDate: ref.watch(sessionTimetableDayFilterProvider),
           ),
         ),
@@ -92,13 +77,10 @@ SessionTimetableData buildSessionTimetableData({
   required List<TimelineEvent> timelineEvents,
   required List<Venue> venues,
   required List<Speaker> speakers,
-  required String? selectedVenueId,
   DateTime? selectedDate,
 }) {
   final venueById = {for (final venue in venues) venue.id: venue};
   final speakerById = {for (final speaker in speakers) speaker.id: speaker};
-  final sortedVenues = [...venues]..sort(_compareVenues);
-  final effectiveSelectedVenueId = venueById.containsKey(selectedVenueId) ? selectedVenueId : null;
 
   final entries = [
     for (final timelineEvent in timelineEvents)
@@ -122,37 +104,29 @@ SessionTimetableData buildSessionTimetableData({
     selectedDate,
     availableDates,
   );
-  final filteredEntries = [
-    for (final entry in entries)
-      if (effectiveSelectedVenueId == null || entry.venueId == null || entry.venueId == effectiveSelectedVenueId) entry,
+  final days = [
+    for (final date in availableDates)
+      SessionTimetableDay(
+        date: date,
+        entries: [
+          for (final entry in entries)
+            if (_isSameDate(eventDateOnly(entry.startsAt), date)) entry,
+        ],
+      ),
   ];
   final selectedDay = effectiveSelectedDate == null
       ? null
-      : SessionTimetableDay(
-          date: effectiveSelectedDate,
-          entries: [
-            for (final entry in filteredEntries)
-              if (_isSameDate(eventDateOnly(entry.startsAt), effectiveSelectedDate)) entry,
-          ],
+      : days.firstWhere(
+          (day) => _isSameDate(day.date, effectiveSelectedDate),
         );
 
   return SessionTimetableData(
-    days: selectedDay == null ? const [] : [selectedDay],
+    days: days,
     availableDates: availableDates,
     selectedDate: effectiveSelectedDate,
     selectedDay: selectedDay,
-    venues: sortedVenues,
-    selectedVenueId: effectiveSelectedVenueId,
     hasAnyEntries: entries.isNotEmpty,
   );
-}
-
-int _compareVenues(Venue a, Venue b) {
-  final orderCompare = (a.order ?? 1 << 30).compareTo(b.order ?? 1 << 30);
-  if (orderCompare != 0) {
-    return orderCompare;
-  }
-  return a.id.compareTo(b.id);
 }
 
 int compareSessionTimetableEntries(
@@ -218,8 +192,6 @@ final class SessionTimetableData {
     required this.availableDates,
     required this.selectedDate,
     required this.selectedDay,
-    required this.venues,
-    required this.selectedVenueId,
     required this.hasAnyEntries,
   });
 
@@ -227,11 +199,7 @@ final class SessionTimetableData {
   final List<DateTime> availableDates;
   final DateTime? selectedDate;
   final SessionTimetableDay? selectedDay;
-  final List<Venue> venues;
-  final String? selectedVenueId;
   final bool hasAnyEntries;
-
-  bool get isEmpty => selectedDay == null || selectedDay!.entries.isEmpty;
 }
 
 /// Timetable entries grouped by event-local calendar day.

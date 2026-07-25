@@ -25,14 +25,14 @@ sponsors:
 sessionTimetable:
   title: Timetable
   dayButtonLabel: Day $day ($date)
+  view:
+    openRooms: Switch to room timeline
+    openList: Switch to list view
+    shared: Shared
   empty: The timetable has not been published yet
-  emptyFiltered: There are no items for the selected venue
+  emptyFiltered: There are no items for this day
   error: Failed to load timetable
-  timeFormat:
-    twentyFourHour: 24 Hour
-    amPm: AM/PM
   venue:
-    all: All
     unknown: Venue TBA
   speaker:
     none: Speaker TBA
@@ -42,6 +42,27 @@ sessionTimetable:
     beginnersLightningTalk: Beginners LT
     handsOn: Hands-on
     event: Event
+sessionSearch:
+  title: Search sessions
+  hint: Search titles, descriptions, and speakers
+  clear: Clear search
+  allDates: All days
+  allTypes: All types
+  allLanguages: All languages
+  dateFilter: Filter by day
+  typeFilter: Filter by type
+  languageFilter: Filter by language
+  dateChip: Day
+  typeChip: Type
+  languageChip: Language
+  promptTitle: Find a session
+  promptBody: Enter a keyword or select a day, session type, or language
+  emptyTitle: No sessions found
+  emptyBody: Try changing the keyword or filters
+  resultCount:
+    one: $n session
+    other: $n sessions
+  error: Failed to search sessions
 sessionDetails:
   title: Session Details
   description: Description

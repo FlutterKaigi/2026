@@ -5,6 +5,7 @@ import 'package:app/core/ui/widget/app_network_image.dart';
 import 'package:app/feature/session/data/provider/session_timetable_provider.dart';
 import 'package:app/feature/session/ui/widget/session_bookmark_button.dart';
 import 'package:app/feature/session/util/event_time.dart';
+import 'package:app/feature/session/util/session_language.dart';
 import 'package:data/data.dart';
 import 'package:flutter/material.dart';
 
@@ -12,12 +13,14 @@ class SessionCardWidget extends StatelessWidget {
   const SessionCardWidget({
     required this.entry,
     required this.timeFormat,
+    this.compact = false,
     this.onTap,
     super.key,
   });
 
   final SessionTimetableEntry entry;
   final EventTimeFormat timeFormat;
+  final bool compact;
   final VoidCallback? onTap;
 
   @override
@@ -27,6 +30,7 @@ class SessionCardWidget extends StatelessWidget {
     final session = entry.session!;
     final title = session.title.resolve(locale);
     final description = session.description.resolve(locale).trim();
+    final languageLabel = sessionLanguageLabel(session.primaryLocale);
 
     return _SessionCardSurfaceWidget(
       onTap: onTap ?? () => SessionDetailsRoute(sessionId: session.id).push<void>(context),
@@ -37,20 +41,50 @@ class SessionCardWidget extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
-                child: Text(
-                  title,
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
+                child: Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: [
+                    if (!compact)
+                      _MetadataTagWidget(
+                        icon: Icons.sell_outlined,
+                        label: _sessionTypeLabel(t, session),
+                      ),
+                    _MetadataTagWidget(
+                      icon: Icons.meeting_room_outlined,
+                      label: entry.venue?.name.resolve(locale) ?? t.sessionTimetable.venue.unknown,
+                    ),
+                    if (languageLabel != null)
+                      _MetadataTagWidget(
+                        label: languageLabel,
+                      ),
+                    if (!compact)
+                      _MetadataTagWidget(
+                        icon: Icons.schedule,
+                        label: formatEventTimeRange(
+                          entry.startsAt,
+                          entry.endsAt,
+                          timeFormat,
+                          locale: locale.toLanguageTag(),
+                        ),
+                      ),
+                  ],
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 4),
               SessionBookmarkButton(sessionId: session.id),
             ],
           ),
-          if (description.isNotEmpty) ...[
+          const SizedBox(height: 10),
+          Text(
+            title,
+            maxLines: 3,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          if (!compact && description.isNotEmpty) ...[
             const SizedBox(height: 8),
             Text(
               description,
@@ -59,34 +93,8 @@ class SessionCardWidget extends StatelessWidget {
               style: Theme.of(context).textTheme.bodyMedium,
             ),
           ],
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              _InfoChipWidget(
-                icon: Icons.sell_outlined,
-                label: _sessionTypeLabel(t, session),
-              ),
-              _InfoChipWidget(
-                icon: Icons.meeting_room_outlined,
-                label: entry.venue?.name.resolve(locale) ?? t.sessionTimetable.venue.unknown,
-              ),
-              _InfoChipWidget(
-                icon: Icons.schedule,
-                label: formatEventTimeRange(
-                  entry.startsAt,
-                  entry.endsAt,
-                  timeFormat,
-                  locale: locale.toLanguageTag(),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          if (entry.speakers.isEmpty)
-            _SpeakerPlaceholderWidget(label: t.sessionTimetable.speaker.none)
-          else
+          if (entry.speakers.isNotEmpty) ...[
+            const SizedBox(height: 10),
             Wrap(
               spacing: 8,
               runSpacing: 8,
@@ -94,7 +102,59 @@ class SessionCardWidget extends StatelessWidget {
                 for (final speaker in entry.speakers) _SpeakerChipWidget(speaker: speaker),
               ],
             ),
+          ] else if (!compact) ...[
+            const SizedBox(height: 10),
+            _SpeakerPlaceholderWidget(label: t.sessionTimetable.speaker.none),
+          ],
         ],
+      ),
+    );
+  }
+}
+
+class _MetadataTagWidget extends StatelessWidget {
+  const _MetadataTagWidget({
+    required this.label,
+    this.icon,
+  });
+
+  final IconData? icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        border: Border.all(color: theme.colorScheme.outline),
+        borderRadius: BorderRadius.circular(7),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (icon != null) ...[
+              Icon(
+                icon,
+                size: 14,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+              const SizedBox(width: 5),
+            ],
+            Flexible(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.labelMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -125,25 +185,6 @@ class _SessionCardSurfaceWidget extends StatelessWidget {
   }
 }
 
-class _InfoChipWidget extends StatelessWidget {
-  const _InfoChipWidget({required this.icon, required this.label});
-
-  final IconData icon;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return Chip(
-      avatar: Icon(icon, size: 16),
-      label: Text(label),
-      side: BorderSide(color: colorScheme.outlineVariant),
-      visualDensity: VisualDensity.compact,
-    );
-  }
-}
-
 class _SpeakerChipWidget extends StatelessWidget {
   const _SpeakerChipWidget({required this.speaker});
 
@@ -151,11 +192,9 @@ class _SpeakerChipWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final avatarUrl = speaker.avatarUrl;
-
     return Chip(
       avatar: AppNetworkAvatar(
-        imageUrl: avatarUrl,
+        imageUrl: speaker.avatarUrl,
         fallback: const Icon(Icons.person_outline, size: 16),
       ),
       label: Text(speaker.name),

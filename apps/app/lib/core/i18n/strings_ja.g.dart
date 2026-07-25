@@ -45,6 +45,7 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	late final Translations$news$ja news = Translations$news$ja.internal(_root);
 	late final Translations$sponsors$ja sponsors = Translations$sponsors$ja.internal(_root);
 	late final Translations$sessionTimetable$ja sessionTimetable = Translations$sessionTimetable$ja.internal(_root);
+	late final Translations$sessionSearch$ja sessionSearch = Translations$sessionSearch$ja.internal(_root);
 	late final Translations$sessionDetails$ja sessionDetails = Translations$sessionDetails$ja.internal(_root);
 	late final Translations$sessionBookmark$ja sessionBookmark = Translations$sessionBookmark$ja.internal(_root);
 	late final Translations$bookmarkedSessions$ja bookmarkedSessions = Translations$bookmarkedSessions$ja.internal(_root);
@@ -163,19 +164,86 @@ class Translations$sessionTimetable$ja {
 	/// ja: '$day日目 ($date)'
 	String dayButtonLabel({required Object day, required Object date}) => '${day}日目 (${date})';
 
+	late final Translations$sessionTimetable$view$ja view = Translations$sessionTimetable$view$ja.internal(_root);
+
 	/// ja: 'タイムテーブルはまだ公開されていません'
 	String get empty => 'タイムテーブルはまだ公開されていません';
 
-	/// ja: '選択した会場の予定はありません'
-	String get emptyFiltered => '選択した会場の予定はありません';
+	/// ja: 'この日の予定はありません'
+	String get emptyFiltered => 'この日の予定はありません';
 
 	/// ja: 'タイムテーブルを取得できませんでした'
 	String get error => 'タイムテーブルを取得できませんでした';
 
-	late final Translations$sessionTimetable$timeFormat$ja timeFormat = Translations$sessionTimetable$timeFormat$ja.internal(_root);
 	late final Translations$sessionTimetable$venue$ja venue = Translations$sessionTimetable$venue$ja.internal(_root);
 	late final Translations$sessionTimetable$speaker$ja speaker = Translations$sessionTimetable$speaker$ja.internal(_root);
 	late final Translations$sessionTimetable$type$ja type = Translations$sessionTimetable$type$ja.internal(_root);
+}
+
+// Path: sessionSearch
+class Translations$sessionSearch$ja {
+	Translations$sessionSearch$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'セッションを検索'
+	String get title => 'セッションを検索';
+
+	/// ja: 'タイトル・概要・登壇者を検索'
+	String get hint => 'タイトル・概要・登壇者を検索';
+
+	/// ja: '検索条件をクリア'
+	String get clear => '検索条件をクリア';
+
+	/// ja: 'すべての日程'
+	String get allDates => 'すべての日程';
+
+	/// ja: 'すべての種類'
+	String get allTypes => 'すべての種類';
+
+	/// ja: 'すべての言語'
+	String get allLanguages => 'すべての言語';
+
+	/// ja: '日程で絞り込み'
+	String get dateFilter => '日程で絞り込み';
+
+	/// ja: '種類で絞り込み'
+	String get typeFilter => '種類で絞り込み';
+
+	/// ja: '言語で絞り込み'
+	String get languageFilter => '言語で絞り込み';
+
+	/// ja: '日程'
+	String get dateChip => '日程';
+
+	/// ja: '種類'
+	String get typeChip => '種類';
+
+	/// ja: '言語'
+	String get languageChip => '言語';
+
+	/// ja: 'セッションを探す'
+	String get promptTitle => 'セッションを探す';
+
+	/// ja: 'キーワードを入力するか、日程・種類・言語を選択してください'
+	String get promptBody => 'キーワードを入力するか、日程・種類・言語を選択してください';
+
+	/// ja: 'セッションが見つかりません'
+	String get emptyTitle => 'セッションが見つかりません';
+
+	/// ja: 'キーワードや絞り込み条件を変更してみてください'
+	String get emptyBody => 'キーワードや絞り込み条件を変更してみてください';
+
+	/// ja: '(one) {$n件のセッション} (other) {$n件のセッション}'
+	String resultCount({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(n,
+		one: '${n}件のセッション',
+		other: '${n}件のセッション',
+	);
+
+	/// ja: 'セッションを検索できませんでした'
+	String get error => 'セッションを検索できませんでした';
 }
 
 // Path: sessionDetails
@@ -304,19 +372,22 @@ class Translations$common$ja {
 	String get retry => '再試行';
 }
 
-// Path: sessionTimetable.timeFormat
-class Translations$sessionTimetable$timeFormat$ja {
-	Translations$sessionTimetable$timeFormat$ja.internal(this._root);
+// Path: sessionTimetable.view
+class Translations$sessionTimetable$view$ja {
+	Translations$sessionTimetable$view$ja.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
 	// Translations
 
-	/// ja: '24時間'
-	String get twentyFourHour => '24時間';
+	/// ja: '会場別タイムラインに切り替え'
+	String get openRooms => '会場別タイムラインに切り替え';
 
-	/// ja: '午前/午後'
-	String get amPm => '午前/午後';
+	/// ja: 'リスト表示に切り替え'
+	String get openList => 'リスト表示に切り替え';
+
+	/// ja: '共通'
+	String get shared => '共通';
 }
 
 // Path: sessionTimetable.venue
@@ -326,9 +397,6 @@ class Translations$sessionTimetable$venue$ja {
 	final Translations _root; // ignore: unused_field
 
 	// Translations
-
-	/// ja: 'すべて'
-	String get all => 'すべて';
 
 	/// ja: '会場未定'
 	String get unknown => '会場未定';
@@ -439,12 +507,12 @@ extension on Translations {
 			'sponsors.connect' => 'Connect',
 			'sessionTimetable.title' => 'タイムテーブル',
 			'sessionTimetable.dayButtonLabel' => ({required Object day, required Object date}) => '${day}日目 (${date})',
+			'sessionTimetable.view.openRooms' => '会場別タイムラインに切り替え',
+			'sessionTimetable.view.openList' => 'リスト表示に切り替え',
+			'sessionTimetable.view.shared' => '共通',
 			'sessionTimetable.empty' => 'タイムテーブルはまだ公開されていません',
-			'sessionTimetable.emptyFiltered' => '選択した会場の予定はありません',
+			'sessionTimetable.emptyFiltered' => 'この日の予定はありません',
 			'sessionTimetable.error' => 'タイムテーブルを取得できませんでした',
-			'sessionTimetable.timeFormat.twentyFourHour' => '24時間',
-			'sessionTimetable.timeFormat.amPm' => '午前/午後',
-			'sessionTimetable.venue.all' => 'すべて',
 			'sessionTimetable.venue.unknown' => '会場未定',
 			'sessionTimetable.speaker.none' => '登壇者未定',
 			'sessionTimetable.type.regular' => '通常セッション',
@@ -452,6 +520,24 @@ extension on Translations {
 			'sessionTimetable.type.beginnersLightningTalk' => '初心者向けLT',
 			'sessionTimetable.type.handsOn' => 'ハンズオン',
 			'sessionTimetable.type.event' => 'イベント',
+			'sessionSearch.title' => 'セッションを検索',
+			'sessionSearch.hint' => 'タイトル・概要・登壇者を検索',
+			'sessionSearch.clear' => '検索条件をクリア',
+			'sessionSearch.allDates' => 'すべての日程',
+			'sessionSearch.allTypes' => 'すべての種類',
+			'sessionSearch.allLanguages' => 'すべての言語',
+			'sessionSearch.dateFilter' => '日程で絞り込み',
+			'sessionSearch.typeFilter' => '種類で絞り込み',
+			'sessionSearch.languageFilter' => '言語で絞り込み',
+			'sessionSearch.dateChip' => '日程',
+			'sessionSearch.typeChip' => '種類',
+			'sessionSearch.languageChip' => '言語',
+			'sessionSearch.promptTitle' => 'セッションを探す',
+			'sessionSearch.promptBody' => 'キーワードを入力するか、日程・種類・言語を選択してください',
+			'sessionSearch.emptyTitle' => 'セッションが見つかりません',
+			'sessionSearch.emptyBody' => 'キーワードや絞り込み条件を変更してみてください',
+			'sessionSearch.resultCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(n, one: '${n}件のセッション', other: '${n}件のセッション', ),
+			'sessionSearch.error' => 'セッションを検索できませんでした',
 			'sessionDetails.title' => 'セッション詳細',
 			'sessionDetails.description' => '概要',
 			'sessionDetails.schedule' => '日時・会場',

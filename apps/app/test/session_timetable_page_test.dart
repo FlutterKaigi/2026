@@ -8,27 +8,180 @@ import 'package:app/feature/session/data/provider/session_timetable_repository.d
 import 'package:app/feature/session/ui/page/session_timetable_page.dart';
 import 'package:data/data.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
-  testWidgets('keeps Japanese AM/PM time labels on one line at compact width', (tester) async {
+  testWidgets('uses a compact DroidKaigi-style day switcher at mobile width', (tester) async {
+    await _pumpTimetableState(
+      tester,
+      AsyncData(_loadedTimetable),
+    );
+
+    expect(find.byType(SegmentedButton<int>), findsOneWidget);
+    expect(find.text('1日目 (10/31)'), findsOneWidget);
+    expect(find.text('会場'), findsNothing);
+    expect(find.text('時刻表示'), findsNothing);
+    expect(find.text('2026/10/31'), findsNothing);
+    expect(find.text('JA'), findsOneWidget);
+    expect(find.text('Description'), findsNothing);
+
+    expect(find.byIcon(Icons.tune), findsNothing);
+    expect(find.text('時刻表示'), findsNothing);
+  });
+
+  testWidgets('switches between list and room timeline views', (tester) async {
+    await _pumpTimetableState(
+      tester,
+      AsyncData(_loadedTimetable),
+    );
+
+    expect(find.byTooltip('会場別タイムラインに切り替え'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('会場別タイムラインに切り替え'));
+    await tester.pumpAndSettle();
+
+    expect(find.byTooltip('リスト表示に切り替え'), findsOneWidget);
+    expect(find.text('10:00'), findsOneWidget);
+    expect(find.text('10:15-11:00'), findsOneWidget);
+    expect(find.text('Room A'), findsOneWidget);
+    expect(find.text('JA'), findsOneWidget);
+  });
+
+  testWidgets('orders room columns by venue order instead of the earliest session', (tester) async {
+    await _pumpTimetableState(
+      tester,
+      AsyncData(_venueOrderTimetable),
+    );
+
+    await tester.tap(find.byTooltip('会場別タイムラインに切り替え'));
+    await tester.pumpAndSettle();
+
+    final roomAHeader = tester.getCenter(find.text('Room A'));
+    final roomBHeader = tester.getCenter(find.text('Room B'));
+    final sharedHeader = tester.getCenter(find.text('共通'));
+
+    expect(sharedHeader.dx, lessThan(roomAHeader.dx));
+    expect(roomAHeader.dx, lessThan(roomBHeader.dx));
+  });
+
+  testWidgets('uses the venue id as a stable tie-breaker for room columns', (tester) async {
+    await _pumpTimetableState(
+      tester,
+      AsyncData(_equalVenueOrderTimetable),
+    );
+
+    await tester.tap(find.byTooltip('会場別タイムラインに切り替え'));
+    await tester.pumpAndSettle();
+
+    final roomAHeader = tester.getCenter(find.text('Room A'));
+    final roomBHeader = tester.getCenter(find.text('Room B'));
+
+    expect(roomAHeader.dx, lessThan(roomBHeader.dx));
+  });
+
+  testWidgets('places overlapping room entries in separate horizontal lanes', (tester) async {
+    await _pumpTimetableState(
+      tester,
+      AsyncData(_overlappingTimetable),
+    );
+
+    await tester.tap(find.byTooltip('会場別タイムラインに切り替え'));
+    await tester.pumpAndSettle();
+
+    final sessionRect = tester.getRect(find.text('Compact Session'));
+    final eventRect = tester.getRect(find.text('Overlap Event'));
+
+    expect(sessionRect.overlaps(eventRect), isFalse);
+    expect(sessionRect.top, lessThan(eventRect.bottom));
+    expect(eventRect.top, lessThan(sessionRect.bottom));
+  });
+
+  testWidgets('stacks simultaneous list entries vertically', (tester) async {
+    await _pumpTimetableState(
+      tester,
+      AsyncData(_parallelTimetable),
+    );
+
+    final firstRect = tester.getRect(find.text('Compact Session'));
+    final secondRect = tester.getRect(find.text('Parallel Session'));
+
+    expect(firstRect.left, secondRect.left);
+    expect(firstRect.bottom, lessThan(secondRect.top));
+    expect(find.byType(Scrollbar), findsNothing);
+  });
+
+  testWidgets('keeps day tabs fixed and changes days by swiping or tapping', (tester) async {
+    await _pumpTimetableState(
+      tester,
+      AsyncData(_twoDayTimetable),
+    );
+
+    expect(
+      find.ancestor(
+        of: find.byType(SegmentedButton<int>),
+        matching: find.byType(PageView),
+      ),
+      findsNothing,
+    );
+    expect(find.text('Compact Session'), findsOneWidget);
+
+    await tester.drag(find.byType(PageView), const Offset(-300, 0));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Day Two Session'), findsOneWidget);
+    expect(
+      tester.widget<SegmentedButton<int>>(find.byType(SegmentedButton<int>)).selected,
+      {1},
+    );
+
+    await tester.tap(find.text('1日目 (10/31)'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Compact Session'), findsOneWidget);
+  });
+
+  testWidgets('keeps a valid day selected when the available day count shrinks', (tester) async {
+    final sessionRepository = _MutableSessionRepository([
+      _session,
+      _dayTwoSession,
+    ]);
+    addTearDown(sessionRepository.dispose);
+    await _pumpTimetableRepositories(
+      tester,
+      sessionRepository: sessionRepository,
+      timelineEventRepository: _CountingTimelineEventRepository(),
+      venueRepository: _CountingVenueRepository(),
+      speakerRepository: _CountingSpeakerRepository(),
+    );
+
+    await tester.drag(find.byType(PageView), const Offset(-300, 0));
+    await tester.pumpAndSettle();
+    expect(find.text('Day Two Session'), findsOneWidget);
+
+    sessionRepository.emit([_session]);
+    await _pumpProviderFrames(tester);
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(find.text('Compact Session'), findsOneWidget);
+    expect(
+      tester.widget<SegmentedButton<int>>(find.byType(SegmentedButton<int>)).selected,
+      {0},
+    );
+  });
+
+  testWidgets('always uses 24-hour time labels at compact width', (tester) async {
     await _pumpTimetableState(
       tester,
       AsyncData(_loadedTimetable),
       preferences: const {'session_time_format': 'amPm'},
     );
 
-    const label = '午前10:15';
-    final paragraph = tester.renderObject<RenderParagraph>(find.text(label));
-    final boxes = paragraph.getBoxesForSelection(
-      const TextSelection(baseOffset: 0, extentOffset: label.length),
-    );
-
-    expect(boxes.map((box) => box.top).toSet(), hasLength(1));
+    expect(find.text('10:15'), findsOneWidget);
+    expect(find.textContaining('午前'), findsNothing);
     expect(find.byType(RefreshIndicator), findsNothing);
   });
 
@@ -40,6 +193,7 @@ void main() {
 
     expect(find.byType(RefreshIndicator), findsNothing);
     expect(find.text('タイムテーブルはまだ公開されていません'), findsOneWidget);
+    expect(find.text('時刻表示'), findsNothing);
   });
 
   testWidgets('retry reloads every timetable repository after an error', (tester) async {
@@ -164,8 +318,6 @@ const _emptyTimetable = SessionTimetableData(
   availableDates: [],
   selectedDate: null,
   selectedDay: null,
-  venues: [],
-  selectedVenueId: null,
   hasAnyEntries: false,
 );
 
@@ -184,6 +336,15 @@ final _session = Session(
 final _venue = Venue(
   id: 'room-a',
   name: const LocaleMap(ja: 'Room A', en: 'Room A'),
+  order: 1,
+  createdAt: DateTime.utc(2026),
+  updatedAt: DateTime.utc(2026),
+);
+
+final _venueB = Venue(
+  id: 'room-b',
+  name: const LocaleMap(ja: 'Room B', en: 'Room B'),
+  order: 2,
   createdAt: DateTime.utc(2026),
   updatedAt: DateTime.utc(2026),
 );
@@ -192,6 +353,108 @@ final _entry = SessionTimetableEntry.session(
   session: _session,
   venue: _venue,
   speakers: const [],
+);
+
+final _parallelSession = Session(
+  id: 'parallel-session',
+  title: const LocaleMap(ja: 'Parallel Session', en: 'Parallel Session'),
+  description: const LocaleMap(ja: 'Description', en: 'Description'),
+  primaryLocale: 'en',
+  startsAt: _session.startsAt,
+  endsAt: _session.endsAt,
+  venueId: 'room-b',
+  createdAt: DateTime.utc(2026),
+  updatedAt: DateTime.utc(2026),
+);
+
+final _parallelEntry = SessionTimetableEntry.session(
+  session: _parallelSession,
+  venue: _venueB,
+  speakers: const [],
+);
+
+final _earlyRoomBSession = Session(
+  id: 'early-room-b-session',
+  title: const LocaleMap(
+    ja: 'Early Room B Session',
+    en: 'Early Room B Session',
+  ),
+  description: const LocaleMap(ja: 'Description', en: 'Description'),
+  primaryLocale: 'en',
+  startsAt: DateTime.utc(2026, 10, 31),
+  endsAt: DateTime.utc(2026, 10, 31, 0, 30),
+  venueId: 'room-b',
+  createdAt: DateTime.utc(2026),
+  updatedAt: DateTime.utc(2026),
+);
+
+final _earlyRoomBEntry = SessionTimetableEntry.session(
+  session: _earlyRoomBSession,
+  venue: _venueB,
+  speakers: const [],
+);
+
+final _sharedEvent = TimelineEvent(
+  id: 'shared-event',
+  title: const LocaleMap(ja: 'Shared Event', en: 'Shared Event'),
+  startsAt: DateTime.utc(2026, 10, 31, 3),
+  endsAt: DateTime.utc(2026, 10, 31, 3, 30),
+  createdAt: DateTime.utc(2026),
+  updatedAt: DateTime.utc(2026),
+);
+
+final _sharedEntry = SessionTimetableEntry.timelineEvent(
+  timelineEvent: _sharedEvent,
+  venue: null,
+);
+
+final _equalOrderVenueA = Venue(
+  id: 'room-a',
+  name: const LocaleMap(ja: 'Room A', en: 'Room A'),
+  order: 1,
+  createdAt: DateTime.utc(2026),
+  updatedAt: DateTime.utc(2026),
+);
+
+final _equalOrderVenueB = Venue(
+  id: 'room-b',
+  name: const LocaleMap(ja: 'Room B', en: 'Room B'),
+  order: 1,
+  createdAt: DateTime.utc(2026),
+  updatedAt: DateTime.utc(2026),
+);
+
+final _dayTwoSession = Session(
+  id: 'day-two-session',
+  title: const LocaleMap(ja: 'Day Two Session', en: 'Day Two Session'),
+  description: const LocaleMap(ja: 'Description', en: 'Description'),
+  primaryLocale: 'en',
+  startsAt: DateTime.utc(2026, 11, 1, 1, 15),
+  endsAt: DateTime.utc(2026, 11, 1, 2),
+  venueId: 'room-a',
+  createdAt: DateTime.utc(2026),
+  updatedAt: DateTime.utc(2026),
+);
+
+final _dayTwoEntry = SessionTimetableEntry.session(
+  session: _dayTwoSession,
+  venue: _venue,
+  speakers: const [],
+);
+
+final _overlapEvent = TimelineEvent(
+  id: 'overlap-event',
+  title: const LocaleMap(ja: 'Overlap Event', en: 'Overlap Event'),
+  startsAt: DateTime.utc(2026, 10, 31, 1, 30),
+  endsAt: DateTime.utc(2026, 10, 31, 1, 50),
+  venueId: 'room-a',
+  createdAt: DateTime.utc(2026),
+  updatedAt: DateTime.utc(2026),
+);
+
+final _overlapEntry = SessionTimetableEntry.timelineEvent(
+  timelineEvent: _overlapEvent,
+  venue: _venue,
 );
 
 final _day = SessionTimetableDay(
@@ -204,8 +467,85 @@ final _loadedTimetable = SessionTimetableData(
   availableDates: [_day.date],
   selectedDate: _day.date,
   selectedDay: _day,
-  venues: [_venue],
-  selectedVenueId: null,
+  hasAnyEntries: true,
+);
+
+final _parallelDay = SessionTimetableDay(
+  date: _day.date,
+  entries: [_entry, _parallelEntry],
+);
+
+final _parallelTimetable = SessionTimetableData(
+  days: [_parallelDay],
+  availableDates: [_parallelDay.date],
+  selectedDate: _parallelDay.date,
+  selectedDay: _parallelDay,
+  hasAnyEntries: true,
+);
+
+final _venueOrderDay = SessionTimetableDay(
+  date: _day.date,
+  entries: [_earlyRoomBEntry, _entry, _sharedEntry],
+);
+
+final _venueOrderTimetable = SessionTimetableData(
+  days: [_venueOrderDay],
+  availableDates: [_venueOrderDay.date],
+  selectedDate: _venueOrderDay.date,
+  selectedDay: _venueOrderDay,
+  hasAnyEntries: true,
+);
+
+final _equalVenueOrderDay = SessionTimetableDay(
+  date: _day.date,
+  entries: [
+    SessionTimetableEntry.session(
+      session: _earlyRoomBSession,
+      venue: _equalOrderVenueB,
+      speakers: const [],
+    ),
+    SessionTimetableEntry.session(
+      session: _session,
+      venue: _equalOrderVenueA,
+      speakers: const [],
+    ),
+  ],
+);
+
+final _equalVenueOrderTimetable = SessionTimetableData(
+  days: [_equalVenueOrderDay],
+  availableDates: [_equalVenueOrderDay.date],
+  selectedDate: _equalVenueOrderDay.date,
+  selectedDay: _equalVenueOrderDay,
+  hasAnyEntries: true,
+);
+
+final _secondDay = SessionTimetableDay(
+  date: DateTime(2026, 11),
+  entries: [_dayTwoEntry],
+);
+
+final _twoDayTimetable = SessionTimetableData(
+  days: [_day, _secondDay],
+  availableDates: [_day.date, _secondDay.date],
+  selectedDate: _day.date,
+  selectedDay: _day,
+  hasAnyEntries: true,
+);
+
+final _overlappingTimetable = SessionTimetableData(
+  days: [
+    SessionTimetableDay(
+      date: _day.date,
+      entries: [_entry, _overlapEntry],
+    ),
+  ],
+  availableDates: [_day.date],
+  selectedDate: _day.date,
+  selectedDay: SessionTimetableDay(
+    date: _day.date,
+    entries: [_entry, _overlapEntry],
+  ),
   hasAnyEntries: true,
 );
 
@@ -224,6 +564,32 @@ final class _RetrySessionRepository implements SessionRepository {
   }
 
   Future<void> dispose() => _firstWatchController.close();
+
+  @override
+  Future<void> save(Session session) async {}
+
+  @override
+  Future<void> delete(String id) async {}
+}
+
+final class _MutableSessionRepository implements SessionRepository {
+  _MutableSessionRepository(this._sessions);
+
+  List<Session> _sessions;
+  final _controller = StreamController<List<Session>>.broadcast(sync: true);
+
+  @override
+  Stream<List<Session>> watchAll() async* {
+    yield _sessions;
+    yield* _controller.stream;
+  }
+
+  void emit(List<Session> sessions) {
+    _sessions = sessions;
+    _controller.add(sessions);
+  }
+
+  Future<void> dispose() => _controller.close();
 
   @override
   Future<void> save(Session session) async {}
