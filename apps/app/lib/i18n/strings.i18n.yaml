@@ -22,6 +22,11 @@ sponsors:
   jobBoardCta: 採用情報
   recruitCta: 採用サイト
   connect: Connect
+# NOTE: apps/website/lib/l10n/strings.dart の footerTrademark と同一文言を維持すること
+trademarks:
+  flutterAffiliation: Flutter および関連するロゴは Google LLC の商標です。FlutterKaigi は Google LLC の承認または提携を受けておりません。
+  flutterNameAndLogo: Flutter の名称およびロゴは Google LLC の商標です。
+  revComm: RevCommは、株式会社 RevComm の登録商標または商標です。
 sessionTimetable:
   title: タイムテーブル
   dayButtonLabel: $day日目 ($date)

@@ -1,5 +1,6 @@
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/router/router.dart';
+import 'package:app/core/ui/widget/trademark_footer_widget.dart';
 import 'package:app/feature/sponsor/data/provider/sponsor_repository.dart';
 import 'package:app/feature/sponsor/ui/page/sponsor_details_page.dart';
 import 'package:app/feature/sponsor/ui/page/sponsor_list_page.dart';
@@ -50,6 +51,22 @@ void main() {
     expect(find.text('Gold'), findsOneWidget);
     expect(find.text('Flutter'), findsOneWidget);
     expect(find.text('Gold Sponsor'), findsOneWidget);
+    final footer = find.byType(TrademarkFooterWidget);
+    expect(footer, findsOneWidget);
+    expect(
+      find.ancestor(of: footer, matching: find.byType(ListView)),
+      findsOneWidget,
+    );
+
+    await tester.scrollUntilVisible(footer, 300);
+    await tester.pumpAndSettle();
+
+    expect(
+      find.textContaining(
+        'Flutter および関連するロゴは Google LLC の商標です。',
+      ),
+      findsOneWidget,
+    );
   });
 
   testWidgets('opens sponsor details from a sponsor card', (tester) async {
@@ -115,6 +132,20 @@ void main() {
     expect(find.text('https://www.cyberagent.co.jp/'), findsOneWidget);
     expect(find.text('https://x.com/ca_developers'), findsOneWidget);
     expect(find.text('サイバーエージェントはFlutterを活用しています。'), findsOneWidget);
+    final footer = find.byType(TrademarkFooterWidget);
+    expect(footer, findsOneWidget);
+    expect(
+      find.ancestor(of: footer, matching: find.byType(CustomScrollView)),
+      findsOneWidget,
+    );
+
+    await tester.scrollUntilVisible(footer, 300);
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text('RevCommは、株式会社 RevComm の登録商標または商標です。'),
+      findsOneWidget,
+    );
   });
 }
 

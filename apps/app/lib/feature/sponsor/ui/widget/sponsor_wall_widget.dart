@@ -1,4 +1,5 @@
 import 'package:app/core/i18n/strings.g.dart';
+import 'package:app/core/ui/widget/trademark_footer_widget.dart';
 import 'package:app/feature/sponsor/data/provider/sponsor_list_provider.dart';
 import 'package:app/feature/sponsor/ui/widget/sponsor_tier_section_widget.dart';
 import 'package:flutter/material.dart';
@@ -33,6 +34,8 @@ class SponsorWallWidget extends StatelessWidget {
                   SponsorTierSectionWidget(group: group),
                   if (group != data.groups.last) SizedBox(height: sectionGap),
                 ],
+                SizedBox(height: sectionGap),
+                const TrademarkFooterWidget(),
               ],
             ),
           ),
