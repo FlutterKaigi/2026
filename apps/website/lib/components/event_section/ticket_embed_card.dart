@@ -3,6 +3,7 @@ import 'package:jaspr/jaspr.dart';
 
 import '../../constants/theme.dart';
 import '../../constants/ticket_sales.dart';
+import '../../l10n/strings.dart';
 
 /// Exploratory preview of Luma's embedded checkout (`<iframe>`), placed
 /// alongside the checkout-button CTAs (Hero / EventInfoCard) so the two
@@ -14,14 +15,15 @@ class TicketEmbedCard extends StatelessComponent {
 
   @override
   Component build(BuildContext context) {
+    final locale = LocaleScope.of(context);
+    final strings = Strings(locale);
+
     return article(classes: 'ticket-embed-card', [
       h2(classes: 'ticket-embed-card__title', [
-        .text('Embedded checkout (preview)'),
+        .text(strings.ticketEmbedTitle),
       ]),
       p(classes: 'ticket-embed-card__note', [
-        .text(
-          'Exploring an embedded alternative to the checkout-button CTAs above — not a final placement.',
-        ),
+        .text(strings.ticketEmbedNote),
       ]),
       iframe(
         const [],
