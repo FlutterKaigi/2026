@@ -2,15 +2,13 @@
 /// Firestore collection managed by `packages/data` (the same data the admin
 /// dashboard writes), or a local sample fixture as a fallback.
 ///
-/// Fetching and decoding reuses `packages/data`'s `News` / `LocaleMap`
-/// domain model directly (`News.fromJson`, imported via the Flutter-free
-/// `package:data/news_model.dart`), the same model class the app and
-/// dashboard use — this script does not maintain its own shadow copy of the
-/// `news` document shape. It does *not* use `FirestoreNewsRepository`
+/// Both the fetch (Firestore REST call + document decode) and the domain
+/// model (`News`/`LocaleMap`) are reused from `packages/data` via the
+/// Flutter-free `package:data/news_model.dart` — this script does not
+/// maintain its own copy of either. It does *not* use `FirestoreNewsRepository`
 /// (`package:data/news.dart`), which needs `cloud_firestore`'s platform
 /// channels and a running Firebase app — both unavailable, and uncompilable,
-/// in a bare `dart run` script; Firestore access still goes through the REST
-/// API below.
+/// in a bare `dart run` script.
 ///
 /// Unlike `tool/generate_sponsors.dart`, the output here is **not**
 /// git-ignored: news items are not sensitive, so the generated file is
@@ -42,14 +40,15 @@
 ///   - `FIRESTORE_API_KEY`       — optional `?key=` for a real project.
 ///   - If Firestore is unreachable, fall back to `tool/news/sample_news.json`
 ///     so offline/preview builds still render something. A *reachable but
-///     empty* collection yields an empty News card (no fake data).
+///     empty* collection yields an empty News card (no fake data). A single
+///     malformed document is skipped (with a warning) rather than discarding
+///     the whole list — see `fetchNewsViaFirestoreRest`.
 library;
 
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:data/news_model.dart';
-import 'package:http/http.dart' as http;
 
 const _outFile = 'apps/website/lib/constants/generated_news.dart';
 const _sampleFile = 'tool/news/sample_news.json';
@@ -74,7 +73,11 @@ Future<void> main(List<String> args) async {
 
 Future<List<News>> _loadNews() async {
   try {
-    final news = await _fetchFirestoreNews();
+    final config = _resolveFirestoreConfig();
+    final news = await fetchNewsViaFirestoreRest(
+      config,
+      onWarning: (message) => stderr.writeln('warning: $message'),
+    );
     stdout.writeln('Loaded ${news.length} news item(s) from Firestore.');
     // A reachable but empty collection is a valid state — emit an empty list
     // rather than masking it with fake placeholders.
@@ -88,61 +91,29 @@ Future<List<News>> _loadNews() async {
   }
 }
 
-/// Fetches every document in the `news` collection via the Firestore REST
-/// API and decodes each into `packages/data`'s [News] model.
-///
-/// Talks to the local emulator by default; set the `FIRESTORE_*` /
-/// `FIREBASE_PROJECT_ID` env vars (see the library doc) to target STG/prod.
-Future<List<News>> _fetchFirestoreNews() async {
+/// Resolves the [FirestoreRestConfig] from the `FIRESTORE_*` /
+/// `FIREBASE_PROJECT_ID` env vars (see the library doc); defaults to the
+/// local emulator.
+FirestoreRestConfig _resolveFirestoreConfig() {
   final projectId = Platform.environment['FIREBASE_PROJECT_ID'] ?? _defaultProjectId;
   final emulatorHost = Platform.environment['FIRESTORE_EMULATOR_HOST'];
   final host = _normalizeHost(
     Platform.environment['FIRESTORE_HOST'] ?? emulatorHost ?? _defaultFirestoreHost,
   );
   final isEmulator = emulatorHost != null || host.startsWith('localhost') || host.startsWith('127.0.0.1');
-  final scheme = isEmulator ? 'http' : 'https';
-  final token = Platform.environment['FIRESTORE_ACCESS_TOKEN'];
-  final apiKey = Platform.environment['FIRESTORE_API_KEY'];
 
   stdout.writeln(
     'Fetching news from Firestore '
-    '($scheme://$host, project $projectId${isEmulator ? ', emulator' : ''}).',
+    '(${isEmulator ? 'http' : 'https'}://$host, project $projectId${isEmulator ? ', emulator' : ''}).',
   );
 
-  final headers = <String, String>{
-    'Accept': 'application/json',
-    if (isEmulator)
-      'Authorization': 'Bearer owner'
-    else if (token != null && token.isNotEmpty)
-      'Authorization': 'Bearer $token',
-  };
-
-  final base =
-      '$scheme://$host/v1/projects/${Uri.encodeComponent(projectId)}'
-      '/databases/(default)/documents/news';
-
-  final news = <News>[];
-  String? pageToken;
-  do {
-    final query = <String>[
-      'pageSize=300',
-      if (pageToken != null && pageToken.isNotEmpty) 'pageToken=${Uri.encodeComponent(pageToken)}',
-      if (apiKey != null && apiKey.isNotEmpty) 'key=${Uri.encodeComponent(apiKey)}',
-    ];
-    final uri = Uri.parse('$base?${query.join('&')}');
-    final resp = await http.get(uri, headers: headers).timeout(const Duration(seconds: 30));
-    if (resp.statusCode != 200) {
-      throw HttpException('Firestore returned ${resp.statusCode}: ${resp.body}');
-    }
-    final decoded = jsonDecode(utf8.decode(resp.bodyBytes)) as Map<String, dynamic>;
-    final docs = (decoded['documents'] as List?) ?? const [];
-    for (final doc in docs.whereType<Map<String, dynamic>>()) {
-      news.add(News.fromJson(_decodeFirestoreDoc(doc)));
-    }
-    pageToken = decoded['nextPageToken'] as String?;
-  } while (pageToken != null && pageToken.isNotEmpty);
-
-  return news;
+  return FirestoreRestConfig(
+    projectId: projectId,
+    host: host,
+    isEmulator: isEmulator,
+    accessToken: Platform.environment['FIRESTORE_ACCESS_TOKEN'],
+    apiKey: Platform.environment['FIRESTORE_API_KEY'],
+  );
 }
 
 List<News> _loadSampleNews() {
@@ -172,46 +143,6 @@ String _normalizeHost(String host) {
     value = value.substring(0, value.length - 1);
   }
   return value;
-}
-
-// ── Firestore REST decoding (inverse of tool/firebase_seed.dart) ────────────
-
-/// Decodes a Firestore REST document (`{name, fields, ...}`) into a plain map
-/// of the `packages/data` `News` model, injecting the doc id.
-Map<String, dynamic> _decodeFirestoreDoc(Map<String, dynamic> doc) {
-  final name = (doc['name'] ?? '').toString();
-  final id = name.contains('/') ? name.split('/').last : name;
-  final fields = (doc['fields'] as Map?)?.cast<String, dynamic>() ?? const {};
-  return {
-    for (final e in fields.entries) e.key: _decodeFirestoreValue(e.value),
-    'id': id,
-  };
-}
-
-/// Inverse of `_encodeFirestoreValue` in `tool/firebase_seed.dart`.
-Object? _decodeFirestoreValue(Object? value) {
-  final m = (value as Map?)?.cast<String, dynamic>();
-  if (m == null) return null;
-  if (m.containsKey('nullValue')) return null;
-  if (m.containsKey('booleanValue')) return m['booleanValue'];
-  if (m.containsKey('integerValue')) {
-    return int.tryParse(m['integerValue'].toString());
-  }
-  if (m.containsKey('doubleValue')) return m['doubleValue'];
-  if (m.containsKey('timestampValue')) return m['timestampValue'];
-  if (m.containsKey('stringValue')) return m['stringValue'];
-  if (m.containsKey('referenceValue')) return m['referenceValue'];
-  if (m.containsKey('mapValue')) {
-    final fields = ((m['mapValue'] as Map?)?['fields'] as Map?)?.cast<String, dynamic>() ?? const {};
-    return {
-      for (final e in fields.entries) e.key: _decodeFirestoreValue(e.value),
-    };
-  }
-  if (m.containsKey('arrayValue')) {
-    final values = ((m['arrayValue'] as Map?)?['values'] as List?) ?? const [];
-    return values.map(_decodeFirestoreValue).toList();
-  }
-  return null;
 }
 
 // ── Dart emission ───────────────────────────────────────────────────────────
