@@ -181,7 +181,7 @@ class EventInfoCard extends StatelessComponent {
         alignItems: .center,
         raw: const {'margin-top': '4px', 'gap': '16px 24px'},
       ),
-      // Disabled CTA：時計アイコン+ラベル+販売開始日のmeta行。
+      // Disabled CTA：ラベルのみ。
       // `<button disabled>` 標準 disabled でブラウザのキーボード操作・aria 伝達を任せる。
       // デスクトップは inline-flex で内容幅、タブレット以下はカード幅いっぱい。
       css('.event-info-card__cta', [
@@ -235,24 +235,8 @@ class EventInfoCard extends StatelessComponent {
                 '$onPrimaryHoverHex, $onPrimaryHoverHex)',
           },
         ),
-        css('.event-info-card__cta-icon').styles(
-          width: 16.px,
-          height: 16.px,
-          raw: const {'flex-shrink': '0', 'opacity': '0.9'},
-        ),
         css('.event-info-card__cta-label').styles(
           raw: const {'white-space': 'nowrap'},
-        ),
-        css('.event-info-card__cta-meta').styles(
-          fontWeight: .w400,
-          raw: const {
-            'font-size': '12px',
-            'line-height': '16px',
-            'opacity': '0.85',
-            'padding-left': '6px',
-            'border-left': '1px solid rgba(255, 255, 255, 0.4)',
-            'margin-left': '2px',
-          },
         ),
       ]),
     ]),
@@ -277,16 +261,6 @@ class EventInfoCard extends StatelessComponent {
           raw: const {
             'grid-template-columns': 'minmax(0, 1fr)',
             'gap': '20px',
-          },
-        ),
-        // 狭い画面では meta の縦区切り線をやめて自然に折り返す。
-        css('.event-info-card__cta .event-info-card__cta-meta').styles(
-          raw: const {
-            'border-left': 'none',
-            'padding-left': '0',
-            'margin-left': '0',
-            'flex-basis': '100%',
-            'text-align': 'center',
           },
         ),
       ]),
