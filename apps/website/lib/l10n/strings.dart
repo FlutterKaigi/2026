@@ -116,17 +116,6 @@ class Strings {
     AppLocale.en => 'View All News',
   };
 
-  /// [TicketEmbedCard] — exploratory embedded-checkout preview, not a final feature.
-  String get ticketEmbedTitle => switch (locale) {
-    AppLocale.ja => '埋め込みチェックアウト（検討中）',
-    AppLocale.en => 'Embedded checkout (preview)',
-  };
-
-  String get ticketEmbedNote => switch (locale) {
-    AppLocale.ja => '上部のチェックアウトボタンとの比較検討用です。最終的な配置ではありません。',
-    AppLocale.en => 'Exploring an embedded alternative to the checkout-button CTAs above — not a final placement.',
-  };
-
   // ── Sponsors ────────────────────────────────────────────────────────
 
   String get sponsorsNav => 'Sponsors';

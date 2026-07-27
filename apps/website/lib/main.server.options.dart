@@ -12,8 +12,6 @@ import 'package:website/components/event_section/roadmap_card.dart'
     as _roadmap_card;
 import 'package:website/components/event_section/social_link_card.dart'
     as _social_link_card;
-import 'package:website/components/event_section/ticket_embed_card.dart'
-    as _ticket_embed_card;
 import 'package:website/components/event_section.dart' as _event_section;
 import 'package:website/components/footer.dart' as _footer;
 import 'package:website/components/header.dart' as _header;
@@ -47,7 +45,6 @@ ServerOptions get defaultServerOptions => ServerOptions(
     ..._news_card.NewsCard.styles,
     ..._roadmap_card.RoadmapCard.styles,
     ..._social_link_card.SocialLinkCard.styles,
-    ..._ticket_embed_card.TicketEmbedCard.styles,
     ..._event_section.EventSection.styles,
     ..._footer.Footer.styles,
     ..._header.Header.styles,

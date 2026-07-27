@@ -6,14 +6,12 @@ import 'event_section/event_info_card.dart';
 import 'event_section/news_card.dart';
 import 'event_section/roadmap_card.dart';
 import 'event_section/social_link_card.dart';
-import 'event_section/ticket_embed_card.dart';
 
 /// トップページ Hero 直下に置くイベント情報セクション。Bento Grid (12 cols)。
 ///
 /// - Row 1: News (12 cols)
 /// - Row 2: Event Information (8 cols) + Roadmap (4 cols)
-/// - Row 3: Embedded-checkout preview (12 cols) — temporary, see [TicketEmbedCard]
-/// - Row 4: Medium (6 cols) + X (6 cols)
+/// - Row 3: Medium (6 cols) + X (6 cols)
 ///
 /// タブレット以下 (≤960px) では全カード横幅いっぱい縦並びに崩れる。
 class EventSection extends StatelessComponent {
@@ -29,7 +27,6 @@ class EventSection extends StatelessComponent {
           div(classes: 'event-section__news', [const NewsCard()]),
           div(classes: 'event-section__info', [const EventInfoCard()]),
           div(classes: 'event-section__roadmap', [const RoadmapCard()]),
-          div(classes: 'event-section__ticket-embed', [const TicketEmbedCard()]),
           for (var i = 0; i < eventSocialCards.length; i++)
             div(
               classes: i == 0 ? 'event-section__social event-section__social--first' : 'event-section__social',
@@ -71,10 +68,6 @@ class EventSection extends StatelessComponent {
         display: .flex,
         raw: const {'grid-column': '9 / span 4', 'min-width': '0'},
       ),
-      css('.event-section__ticket-embed').styles(
-        display: .flex,
-        raw: const {'grid-column': '1 / span 12', 'min-width': '0'},
-      ),
       css('.event-section__social').styles(
         display: .flex,
         raw: const {'grid-column': 'span 6', 'min-width': '0'},
@@ -86,7 +79,6 @@ class EventSection extends StatelessComponent {
       css('.event-section__news > *').styles(width: 100.percent),
       css('.event-section__info > *').styles(width: 100.percent),
       css('.event-section__roadmap > *').styles(width: 100.percent),
-      css('.event-section__ticket-embed > *').styles(width: 100.percent),
       css('.event-section__social > *').styles(width: 100.percent),
     ]),
 
@@ -109,9 +101,6 @@ class EventSection extends StatelessComponent {
           raw: const {'grid-column': '1'},
         ),
         css('.event-section__roadmap').styles(
-          raw: const {'grid-column': '1'},
-        ),
-        css('.event-section__ticket-embed').styles(
           raw: const {'grid-column': '1'},
         ),
         css('.event-section__social').styles(
