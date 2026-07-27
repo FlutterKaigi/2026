@@ -3,7 +3,6 @@ import 'package:jaspr/jaspr.dart';
 
 import '../constants/build_config.dart';
 import '../constants/site.dart';
-import '../constants/ticket_sales.dart';
 import '../l10n/strings.dart';
 
 /// A single Open Graph `<meta property=... content=...>` element.
@@ -38,12 +37,6 @@ class SiteHead extends StatelessComponent {
         ogMeta('og:image', '$siteOrigin${baseHref}images/ogp.png'),
         ogMeta('og:type', 'website'),
         ogMeta('og:url', '$siteOrigin${locale.linkHref}'),
-        // Turns the EventInformation ticket link (`data-luma-action=
-        // "checkout"`) into an in-page checkout modal. `defer` so it runs
-        // after that element exists in the DOM; home-only (this component
-        // isn't mounted on sponsor detail pages) since that's the only place
-        // the button lives.
-        script(src: lumaCheckoutButtonScriptUrl, defer: true, id: 'luma-checkout'),
       ],
     );
   }

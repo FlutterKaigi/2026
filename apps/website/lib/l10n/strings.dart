@@ -64,11 +64,13 @@ class Strings {
 
   /// Hero CTA label — links out to the ticket-sales announcement on Medium.
   String get heroTicketsCta => switch (locale) {
-    AppLocale.ja => 'FlutterKaigi 2026のチケットを販売開始しました',
-    AppLocale.en => 'Ticket Sales for FlutterKaigi 2026 Are Now Open!',
+    AppLocale.ja => 'チケットの販売を開始しました',
+    AppLocale.en => 'Tickets Now on Sale!',
   };
 
-  String get heroTicketsCtaUrl => switch (locale) {
+  /// Ticket-sales announcement on Medium — shared by the Hero CTA and the
+  /// EventInformation ticket button.
+  String get ticketsCtaUrl => switch (locale) {
     AppLocale.ja => 'https://medium.com/flutterkaigi/flutterkaigi-2026のチケットを販売開始しました-99035b658a7b',
     AppLocale.en => 'https://medium.com/flutterkaigi/ticket-sales-for-flutterkaigi-2026-are-now-open-1d7c809a3c72',
   };

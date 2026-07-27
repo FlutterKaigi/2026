@@ -60,7 +60,7 @@ class Home extends StatelessComponent {
             ),
           ]),
           a(
-            href: strings.heroTicketsCtaUrl,
+            href: strings.ticketsCtaUrl,
             target: Target.blank,
             classes: 'hero__cta',
             [

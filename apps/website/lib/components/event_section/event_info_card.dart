@@ -3,7 +3,6 @@ import 'package:jaspr/jaspr.dart';
 
 import '../../constants/event_info.dart';
 import '../../constants/theme.dart';
-import '../../constants/ticket_sales.dart';
 import '../../l10n/strings.dart';
 
 class EventInfoCard extends StatelessComponent {
@@ -52,13 +51,9 @@ class EventInfoCard extends StatelessComponent {
         ]),
         div(classes: 'event-info-card__cta-row', [
           a(
-            href: lumaEventUrl,
+            href: strings.ticketsCtaUrl,
             target: Target.blank,
-            classes: 'event-info-card__cta event-info-card__cta--active luma-checkout--button',
-            attributes: const {
-              'data-luma-action': 'checkout',
-              'data-luma-event-id': lumaEventId,
-            },
+            classes: 'event-info-card__cta event-info-card__cta--active',
             [
               span(classes: 'event-info-card__cta-label', [
                 .text(strings.eventInfoGetTicketsCta),
