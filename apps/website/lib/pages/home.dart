@@ -6,6 +6,7 @@ import '../components/hiring_section.dart';
 import '../components/sponsors_section.dart';
 import '../constants/generated_tokens.dart';
 import '../constants/theme.dart';
+import '../constants/ticket_sales.dart';
 import '../l10n/strings.dart';
 
 class Home extends StatelessComponent {
@@ -60,11 +61,18 @@ class Home extends StatelessComponent {
             ),
           ]),
           a(
-            href: strings.latestUpdatesCtaUrl,
+            // href is the real Luma event page: if the checkout script below
+            // fails to load, this still navigates the visitor to a working
+            // ticket page instead of a dead link.
+            href: lumaEventUrl,
             target: Target.blank,
-            classes: 'hero__cta',
+            classes: 'hero__cta luma-checkout--button',
+            attributes: const {
+              'data-luma-action': 'checkout',
+              'data-luma-event-id': lumaEventId,
+            },
             [
-              span([.text(strings.latestUpdatesCta)]),
+              span([.text(strings.eventInfoGetTicketsCta)]),
               span(
                 classes: 'hero__cta-arrow',
                 attributes: const {'aria-hidden': 'true'},

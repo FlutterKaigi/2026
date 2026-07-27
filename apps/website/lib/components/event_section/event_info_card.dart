@@ -2,8 +2,8 @@ import 'package:jaspr/dom.dart';
 import 'package:jaspr/jaspr.dart';
 
 import '../../constants/event_info.dart';
-import '../../constants/roadmap_milestones.dart';
 import '../../constants/theme.dart';
+import '../../constants/ticket_sales.dart';
 import '../../l10n/strings.dart';
 
 class EventInfoCard extends StatelessComponent {
@@ -13,7 +13,6 @@ class EventInfoCard extends StatelessComponent {
   Component build(BuildContext context) {
     final locale = LocaleScope.of(context);
     final strings = Strings(locale);
-    final ticketsOpen = milestoneByGate(MilestoneGate.tickets);
 
     return article(classes: 'event-info-card', [
       div(classes: 'event-info-card__head', [
@@ -52,30 +51,19 @@ class EventInfoCard extends StatelessComponent {
           .text(strings.eventInfoTicketsLabel),
         ]),
         div(classes: 'event-info-card__cta-row', [
-          button(
+          a(
+            href: lumaEventUrl,
+            target: Target.blank,
+            classes: 'event-info-card__cta event-info-card__cta--active luma-checkout--button',
+            attributes: const {
+              'data-luma-action': 'checkout',
+              'data-luma-event-id': lumaEventId,
+            },
             [
-              img(
-                classes: 'event-info-card__cta-icon',
-                src: 'images/icons/hourglass.svg',
-                alt: '',
-                attributes: const {'aria-hidden': 'true'},
-              ),
               span(classes: 'event-info-card__cta-label', [
-                .text(strings.eventInfoComingSoon),
+                .text(strings.eventInfoGetTicketsCta),
               ]),
-              if (ticketsOpen != null)
-                span(classes: 'event-info-card__cta-meta', [
-                  .text(
-                    strings.eventInfoTicketsOpensAt(
-                      ticketsOpen.dateFor(locale),
-                    ),
-                  ),
-                ]),
             ],
-            classes: 'event-info-card__cta',
-            type: ButtonType.button,
-            disabled: true,
-            attributes: {'aria-label': strings.eventInfoTicketsAriaLabel},
           ),
           button(
             [

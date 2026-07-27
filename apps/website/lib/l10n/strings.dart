@@ -101,22 +101,6 @@ class Strings {
     AppLocale.en => 'Session Submissions Closed',
   };
 
-  String get eventInfoComingSoon => switch (locale) {
-    AppLocale.ja => 'Coming soon...',
-    AppLocale.en => 'Coming soon...',
-  };
-
-  /// `date` 部分はマイルストーン側のロケール対応済み文字列を埋め込む。
-  String eventInfoTicketsOpensAt(String date) => switch (locale) {
-    AppLocale.ja => '$date 販売開始',
-    AppLocale.en => 'Opens $date',
-  };
-
-  String get eventInfoTicketsAriaLabel => switch (locale) {
-    AppLocale.ja => 'チケット販売は準備中です',
-    AppLocale.en => 'Tickets are not on sale yet',
-  };
-
   String get roadmapCardTitle => switch (locale) {
     AppLocale.ja => 'Roadmap',
     AppLocale.en => 'Roadmap',
@@ -130,18 +114,6 @@ class Strings {
   String get newsViewAllCta => switch (locale) {
     AppLocale.ja => 'すべてのニュースを見る',
     AppLocale.en => 'View All News',
-  };
-
-  String get latestUpdatesCta => switch (locale) {
-    AppLocale.ja => 'FlutterKaigi 2026 スポンサー募集について',
-    AppLocale.en => 'FlutterKaigi 2026 Sponsorship Opportunities',
-  };
-
-  String get latestUpdatesCtaUrl => switch (locale) {
-    AppLocale.ja =>
-      'https://medium.com/flutterkaigi/flutterkaigi-2026-opportunities-guide-ja-0e8cdb0a4acb',
-    AppLocale.en =>
-      'https://medium.com/flutterkaigi/flutterkaigi-2026-opportunities-guide-en-1e5bd6c14461',
   };
 
   // ── Sponsors ────────────────────────────────────────────────────────
