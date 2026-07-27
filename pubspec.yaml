@@ -12,6 +12,12 @@ workspace:
   - packages/data
   - packages/flutterkaigi_lints
 
+dependencies:
+  # Shares the `News` domain model + Firestore document shape with the app and
+  # dashboard (see tool/generate_news.dart) instead of re-declaring it here.
+  data:
+    path: packages/data
+
 dev_dependencies:
   melos: ^7.0.0
   http: ^1.2.0

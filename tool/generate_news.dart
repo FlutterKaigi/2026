@@ -2,6 +2,16 @@
 /// Firestore collection managed by `packages/data` (the same data the admin
 /// dashboard writes), or a local sample fixture as a fallback.
 ///
+/// Fetching and decoding reuses `packages/data`'s `News` / `LocaleMap`
+/// domain model directly (`News.fromJson`, imported via the Flutter-free
+/// `package:data/news_model.dart`), the same model class the app and
+/// dashboard use — this script does not maintain its own shadow copy of the
+/// `news` document shape. It does *not* use `FirestoreNewsRepository`
+/// (`package:data/news.dart`), which needs `cloud_firestore`'s platform
+/// channels and a running Firebase app — both unavailable, and uncompilable,
+/// in a bare `dart run` script; Firestore access still goes through the REST
+/// API below.
+///
 /// Unlike `tool/generate_sponsors.dart`, the output here is **not**
 /// git-ignored: news items are not sensitive, so the generated file is
 /// checked into git like any other source file. Re-run this script whenever
@@ -38,6 +48,7 @@ library;
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:data/news_model.dart';
 import 'package:http/http.dart' as http;
 
 const _outFile = 'apps/website/lib/constants/generated_news.dart';
@@ -61,7 +72,7 @@ Future<void> main(List<String> args) async {
 
 // ── Data loading ──────────────────────────────────────────────────────────
 
-Future<List<_News>> _loadNews() async {
+Future<List<News>> _loadNews() async {
   try {
     final news = await _fetchFirestoreNews();
     stdout.writeln('Loaded ${news.length} news item(s) from Firestore.');
@@ -78,11 +89,11 @@ Future<List<_News>> _loadNews() async {
 }
 
 /// Fetches every document in the `news` collection via the Firestore REST
-/// API and maps each to the website [_News] model.
+/// API and decodes each into `packages/data`'s [News] model.
 ///
 /// Talks to the local emulator by default; set the `FIRESTORE_*` /
 /// `FIREBASE_PROJECT_ID` env vars (see the library doc) to target STG/prod.
-Future<List<_News>> _fetchFirestoreNews() async {
+Future<List<News>> _fetchFirestoreNews() async {
   final projectId = Platform.environment['FIREBASE_PROJECT_ID'] ?? _defaultProjectId;
   final emulatorHost = Platform.environment['FIRESTORE_EMULATOR_HOST'];
   final host = _normalizeHost(
@@ -110,7 +121,7 @@ Future<List<_News>> _fetchFirestoreNews() async {
       '$scheme://$host/v1/projects/${Uri.encodeComponent(projectId)}'
       '/databases/(default)/documents/news';
 
-  final news = <_News>[];
+  final news = <News>[];
   String? pageToken;
   do {
     final query = <String>[
@@ -126,7 +137,7 @@ Future<List<_News>> _fetchFirestoreNews() async {
     final decoded = jsonDecode(utf8.decode(resp.bodyBytes)) as Map<String, dynamic>;
     final docs = (decoded['documents'] as List?) ?? const [];
     for (final doc in docs.whereType<Map<String, dynamic>>()) {
-      news.add(_News.fromModel(_decodeFirestoreDoc(doc)));
+      news.add(News.fromJson(_decodeFirestoreDoc(doc)));
     }
     pageToken = decoded['nextPageToken'] as String?;
   } while (pageToken != null && pageToken.isNotEmpty);
@@ -134,9 +145,9 @@ Future<List<_News>> _fetchFirestoreNews() async {
   return news;
 }
 
-List<_News> _loadSampleNews() {
+List<News> _loadSampleNews() {
   final decoded = jsonDecode(File(_sampleFile).readAsStringSync());
-  return _extractList(decoded).map(_News.fromModel).toList();
+  return _extractList(decoded).map(News.fromJson).toList();
 }
 
 /// Accepts a bare array or a `{news|data|items: [...]}` envelope.
@@ -151,7 +162,7 @@ List<Map<String, dynamic>> _extractList(Object? decoded) {
   return list.whereType<Map<String, dynamic>>().toList();
 }
 
-List<_News> _sortByPublishedAtDesc(List<_News> news) => [...news]..sort(
+List<News> _sortByPublishedAtDesc(List<News> news) => [...news]..sort(
   (a, b) => b.publishedAt.compareTo(a.publishedAt),
 );
 
@@ -205,7 +216,7 @@ Object? _decodeFirestoreValue(Object? value) {
 
 // ── Dart emission ───────────────────────────────────────────────────────────
 
-void _writeDart(List<_News> news) {
+void _writeDart(List<News> news) {
   final out = StringBuffer()
     ..writeln('// GENERATED FILE — do not edit by hand.')
     ..writeln('// Source of truth: the `news` Firestore collection (packages/data),')
@@ -220,13 +231,20 @@ void _writeDart(List<_News> news) {
     ..writeln('final List<NewsEntry> generatedNews = [');
 
   for (final n in news) {
+    // Fall back across locales so a news item with only one language still
+    // renders something on both site locales (LocaleMap itself doesn't do
+    // this — both fields are just required strings).
+    final titleJa = _firstNonEmpty([n.title.ja, n.title.en]);
+    final titleEn = _firstNonEmpty([n.title.en, n.title.ja]);
+    final urlJa = _firstNonEmpty([n.url.ja, n.url.en]);
+    final urlEn = _firstNonEmpty([n.url.en, n.url.ja]);
     out
       ..writeln('  NewsEntry(')
       ..writeln('    id: ${_str(n.id)},')
-      ..writeln('    titleJa: ${_str(n.titleJa)},')
-      ..writeln('    titleEn: ${_str(n.titleEn)},')
-      ..writeln('    urlJa: ${_str(n.urlJa)},')
-      ..writeln('    urlEn: ${_str(n.urlEn)},')
+      ..writeln('    titleJa: ${_str(titleJa)},')
+      ..writeln('    titleEn: ${_str(titleEn)},')
+      ..writeln('    urlJa: ${_str(urlJa)},')
+      ..writeln('    urlEn: ${_str(urlEn)},')
       ..writeln('    publishedAt: ${_dateTime(n.publishedAt)},')
       ..writeln('  ),');
   }
@@ -287,57 +305,5 @@ String _dateTime(DateTime dt) {
   return 'DateTime.utc(${u.year}, ${u.month}, ${u.day}, ${u.hour}, ${u.minute}, ${u.second})';
 }
 
-// ── Internal model ──────────────────────────────────────────────────────────
-
-class _News {
-  _News({
-    required this.id,
-    required this.titleJa,
-    required this.titleEn,
-    required this.urlJa,
-    required this.urlEn,
-    required this.publishedAt,
-  });
-
-  /// Maps a decoded `packages/data` `News` document to the generator model.
-  factory _News.fromModel(Map<String, dynamic> m) {
-    final title = _localeMap(m['title']);
-    final url = _localeMap(m['url']);
-    return _News(
-      id: (m['id'] ?? '').toString(),
-      titleJa: _firstNonEmpty([title['ja'], title['en']]),
-      titleEn: _firstNonEmpty([title['en'], title['ja']]),
-      urlJa: _firstNonEmpty([url['ja'], url['en']]),
-      urlEn: _firstNonEmpty([url['en'], url['ja']]),
-      publishedAt: _dateTimeOf(m['publishedAt']),
-    );
-  }
-
-  final String id;
-  final String titleJa;
-  final String titleEn;
-  final String urlJa;
-  final String urlEn;
-  final DateTime publishedAt;
-}
-
-/// Coerces a value into a `{ja, en}` string map (Firestore `LocaleMap`).
-Map<String, String> _localeMap(Object? value) {
-  final m = (value as Map?) ?? const {};
-  return {
-    for (final e in m.entries) e.key.toString(): (e.value ?? '').toString(),
-  };
-}
-
 String _firstNonEmpty(List<String?> candidates) =>
     candidates.firstWhere((c) => c != null && c.trim().isNotEmpty, orElse: () => '')!.trim();
-
-/// Parses an ISO-8601 `publishedAt` timestamp; defaults to the Unix epoch so
-/// entries with a malformed date sort last rather than crashing the build.
-DateTime _dateTimeOf(Object? publishedAt) {
-  if (publishedAt is String) {
-    final dt = DateTime.tryParse(publishedAt);
-    if (dt != null) return dt.toUtc();
-  }
-  return DateTime.utc(1970);
-}
