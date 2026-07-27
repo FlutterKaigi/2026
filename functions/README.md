@@ -1,12 +1,13 @@
 # Cloud Functions
 
-FlutterKaigi 2026 の Cloud Functions。現在は STG → 本番のスポンサーデータ反映
-（`syncSponsorsToProd`）のみを提供する。
+FlutterKaigi 2026 の Cloud Functions。現在は STG → 本番のデータ反映用に
+`syncSponsorsToProd` と `syncNewsToProd` を提供する。
 
-## syncSponsorsToProd
+## syncSponsorsToProd / syncNewsToProd
 
 STG プロジェクトにデプロイする callable function。管理ダッシュボード（STG）からの
-呼び出しで、STG の `sponsors` コレクションを本番プロジェクトへ**完全ミラー**する。
+呼び出しで、STG の `sponsors` / `news` コレクションをそれぞれ本番プロジェクトへ
+**完全ミラー**する（両関数ともロジックは同一で、対象コレクションが異なるだけ）。
 
 - STG に存在するドキュメントは同じ ID で本番へ作成・上書き（完全置換）
 - STG に存在しない本番側のドキュメントは**削除**

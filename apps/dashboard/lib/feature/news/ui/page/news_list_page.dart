@@ -3,6 +3,7 @@ import 'package:dashboard/core/ui/confirm_delete_dialog.dart' show ConfirmDelete
 import 'package:dashboard/feature/news/data/provider/news_list_repository.dart';
 import 'package:dashboard/feature/news/data/provider/news_list_state.dart';
 import 'package:dashboard/feature/news/model/news_column.dart';
+import 'package:dashboard/feature/news/ui/widget/news_sync_button.dart';
 import 'package:dashboard/feature/news/ui/widget/news_table.dart';
 import 'package:data/data.dart';
 import 'package:flutter/material.dart';
@@ -314,6 +315,7 @@ class NewsListPage extends HookConsumerWidget {
                     : const Icon(Icons.save),
                 label: Text('保存 ($dirtyCount件)'),
               ),
+              const NewsSyncButton(),
             ],
           ),
         ),

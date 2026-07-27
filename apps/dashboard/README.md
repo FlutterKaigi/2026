@@ -47,13 +47,13 @@ Firebase Hosting へのデプロイは `dashboard:deploy:stg` / `dashboard:deplo
 firebase login
 ```
 
-## スポンサーデータの本番反映
+## スポンサー・ニュースデータの本番反映
 
-スポンサー一覧画面の「本番環境へ反映」ボタンで、STG の `sponsors` コレクションを
-本番環境へワンクリックで完全ミラーできる（作成・上書きに加えて、STG に存在しない
-本番側ドキュメントの**削除**も行う）。
+スポンサー一覧・ニュース一覧それぞれの画面にある「本番環境へ反映」ボタンで、STG の
+`sponsors` / `news` コレクションを本番環境へワンクリックで完全ミラーできる
+（作成・上書きに加えて、STG に存在しない本番側ドキュメントの**削除**も行う）。
 
-- 実体は STG プロジェクトの Cloud Functions `syncSponsorsToProd`（[functions/README.md](../../functions/README.md) 参照）
+- 実体は STG プロジェクトの Cloud Functions `syncSponsorsToProd` / `syncNewsToProd`（[functions/README.md](../../functions/README.md) 参照）
 - 実行前に dry run の結果（作成/更新/削除の件数）が確認ダイアログに表示される
 - ボタンは stg / dev フレーバーでのみ表示（prod では非表示）
 - dev フレーバーでは `localhost:5001` の Functions エミュレータに接続する
