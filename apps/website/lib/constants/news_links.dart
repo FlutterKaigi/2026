@@ -42,8 +42,12 @@ class NewsEntry {
 
   /// 表示用の日付文字列（例: "2026年6月17日" / "JUN 17, 2026"）。
   /// uppercase 等の見た目はここで確定させ、ビュー側では変換しない。
+  ///
+  /// `publishedAt` は常にUTCなので、JST（会場・想定読者のタイムゾーン）の
+  /// 日付に変換してから年月日を取り出す。そのまま UTC の年月日を使うと、
+  /// JST 0:00〜8:59 に公開設定されたニュースが前日の日付で表示されてしまう。
   String dateFor(AppLocale locale) {
-    final d = publishedAt;
+    final d = publishedAt.toUtc().add(const Duration(hours: 9));
     return switch (locale) {
       AppLocale.ja => '${d.year}年${d.month}月${d.day}日',
       AppLocale.en => '${_monthAbbrEn[d.month]} ${d.day}, ${d.year}',

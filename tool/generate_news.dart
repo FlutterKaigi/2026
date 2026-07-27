@@ -38,11 +38,15 @@
 ///   - `FIRESTORE_HOST`          — explicit host for a real project (HTTPS).
 ///   - `FIRESTORE_ACCESS_TOKEN`  — OAuth bearer token for a real project.
 ///   - `FIRESTORE_API_KEY`       — optional `?key=` for a real project.
-///   - If Firestore is unreachable, fall back to `tool/news/sample_news.json`
-///     so offline/preview builds still render something. A *reachable but
-///     empty* collection yields an empty News card (no fake data). A single
-///     malformed document is skipped (with a warning) rather than discarding
-///     the whole list — see `fetchNewsViaFirestoreRest`.
+///   - If Firestore is unreachable: when a committed `generated_news.dart`
+///     already exists, it is left untouched (this is the "committed copy as
+///     fallback" case above — an outage must not regress the live site to
+///     placeholder data). Only when no output file exists yet (e.g. a fresh
+///     checkout before this script has ever run) does it fall back to
+///     `tool/news/sample_news.json` so the build still renders something. A
+///     *reachable but empty* collection yields an empty News card (no fake
+///     data). A single malformed document is skipped (with a warning) rather
+///     than discarding the whole list — see `fetchNewsViaFirestoreRest`.
 library;
 
 import 'dart:convert';
@@ -59,6 +63,13 @@ const _defaultFirestoreHost = 'localhost:8080';
 
 Future<void> main(List<String> args) async {
   final entries = await _loadNews();
+  if (entries == null) {
+    stdout.writeln(
+      'Keeping existing $_outFile as-is (Firestore unreachable and a '
+      'committed copy already exists).',
+    );
+    return;
+  }
   if (entries.isEmpty) {
     stderr.writeln('warning: no news found in the data source.');
   }
@@ -71,7 +82,10 @@ Future<void> main(List<String> args) async {
 
 // ── Data loading ──────────────────────────────────────────────────────────
 
-Future<List<News>> _loadNews() async {
+/// Returns `null` when Firestore is unreachable and `$_outFile` is already
+/// committed — [main] then leaves it untouched instead of regressing a
+/// possibly larger/newer news list down to the hand-maintained sample.
+Future<List<News>?> _loadNews() async {
   try {
     final config = _resolveFirestoreConfig();
     final news = await fetchNewsViaFirestoreRest(
@@ -83,10 +97,12 @@ Future<List<News>> _loadNews() async {
     // rather than masking it with fake placeholders.
     return _sortByPublishedAtDesc(news);
   } catch (e) {
-    stderr.writeln(
-      'warning: could not load news from Firestore ($e).\n'
-      'Falling back to $_sampleFile.',
-    );
+    stderr.writeln('warning: could not load news from Firestore ($e).');
+    if (File(_outFile).existsSync()) {
+      stderr.writeln('Keeping the existing committed $_outFile as-is.');
+      return null;
+    }
+    stderr.writeln('No existing $_outFile found; falling back to $_sampleFile.');
     return _sortByPublishedAtDesc(_loadSampleNews());
   }
 }
