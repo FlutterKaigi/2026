@@ -38,11 +38,11 @@ class SiteHead extends StatelessComponent {
         ogMeta('og:image', '$siteOrigin${baseHref}images/ogp.png'),
         ogMeta('og:type', 'website'),
         ogMeta('og:url', '$siteOrigin${locale.linkHref}'),
-        // Turns the Hero / EventInformation ticket links (`data-luma-action=
+        // Turns the EventInformation ticket link (`data-luma-action=
         // "checkout"`) into an in-page checkout modal. `defer` so it runs
-        // after those elements exist in the DOM; home-only (this component
+        // after that element exists in the DOM; home-only (this component
         // isn't mounted on sponsor detail pages) since that's the only place
-        // the buttons live.
+        // the button lives.
         script(src: lumaCheckoutButtonScriptUrl, defer: true, id: 'luma-checkout'),
       ],
     );

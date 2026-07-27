@@ -1,5 +1,5 @@
-/// Luma ticket-sales page for the event. Used by the Hero CTA and the
-/// EventInformation ticket button (checkout-button embed).
+/// Luma ticket-sales page for the event. Used by the EventInformation ticket
+/// button (checkout-button embed).
 library;
 
 const lumaEventId = 'evt-qUO00SlCqL95v5b';
