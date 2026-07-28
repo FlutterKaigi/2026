@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../model/timeline_event.dart';
+import 'firestore_watch.dart';
 
 abstract interface class TimelineEventRepository {
   Stream<List<TimelineEvent>> watchAll();
@@ -18,14 +19,15 @@ final class FirestoreTimelineEventRepository implements TimelineEventRepository 
 
   @override
   Stream<List<TimelineEvent>> watchAll() {
-    return _collection
-        .orderBy('startsAt')
-        .snapshots()
-        .map(
-          (snapshot) => [
-            for (final doc in snapshot.docs) TimelineEvent.fromJson(<String, dynamic>{...doc.data(), 'id': doc.id}),
-          ],
-        );
+    final query = _collection.orderBy('startsAt');
+    return watchFirestoreQuery(
+      query,
+      fallbackToEmptyCacheOnTimeout: true,
+    ).map(
+      (snapshot) => [
+        for (final doc in snapshot.docs) TimelineEvent.fromJson(<String, dynamic>{...doc.data(), 'id': doc.id}),
+      ],
+    );
   }
 
   @override

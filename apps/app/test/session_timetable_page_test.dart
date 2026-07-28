@@ -216,7 +216,7 @@ void main() {
     expect(timelineEventRepository.watchCount, 1);
     expect(venueRepository.watchCount, 1);
     expect(speakerRepository.watchCount, 1);
-    expect(find.text('タイムテーブルを取得できませんでした'), findsOneWidget);
+    expect(find.text('データを読み込めませんでした'), findsOneWidget);
     expect(find.text('再試行'), findsOneWidget);
 
     await tester.tap(find.text('再試行'));

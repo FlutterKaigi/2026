@@ -1,9 +1,9 @@
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/router/router.dart';
+import 'package:app/core/ui/widget/app_error_view.dart';
 import 'package:app/feature/session/data/provider/bookmarked_sessions_provider.dart';
 import 'package:app/feature/session/data/provider/session_timetable_provider.dart';
 import 'package:app/feature/session/ui/widget/session_card_widget.dart';
-import 'package:app/feature/session/ui/widget/session_details_message_state_widget.dart';
 import 'package:app/feature/session/util/event_time.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -30,16 +30,11 @@ class BookmarkedSessionsPage extends ConsumerWidget {
               ),
             ),
             AsyncData(:final value) => _BookmarkedSessionsListWidget(data: value),
-            AsyncError() => SliverFillRemaining(
+            AsyncError(:final error) => SliverFillRemaining(
               hasScrollBody: false,
-              child: SessionDetailsMessageStateWidget(
-                icon: Icons.error_outline,
-                message: t.bookmarkedSessions.error,
-                action: FilledButton.icon(
-                  onPressed: () => _refresh(ref),
-                  icon: const Icon(Icons.refresh),
-                  label: Text(t.common.retry),
-                ),
+              child: AppErrorView(
+                error: error,
+                onRetry: () => _refresh(ref),
               ),
             ),
             AsyncLoading() => const SliverFillRemaining(

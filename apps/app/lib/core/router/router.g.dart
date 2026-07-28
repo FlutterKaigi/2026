@@ -6,14 +6,46 @@ part of 'router.dart';
 // GoRouterGenerator
 // **************************************************************************
 
-List<RouteBase> get $appRoutes => [$appShellRoute];
+List<RouteBase> get $appRoutes => [$settingsRoute, $appShellRoute];
+
+RouteBase get $settingsRoute => GoRouteData.$route(path: '/settings', factory: $SettingsRoute._fromState);
+
+mixin $SettingsRoute on GoRouteData {
+  static SettingsRoute _fromState(GoRouterState state) => const SettingsRoute();
+
+  @override
+  String get location => GoRouteData.$location('/settings');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) => context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
 
 RouteBase get $appShellRoute => StatefulShellRouteData.$route(
   factory: $AppShellRouteExtension._fromState,
   branches: [
     StatefulShellBranchData.$branch(
       routes: [
+        GoRouteData.$route(path: '/info', factory: $EventInfoRoute._fromState),
         GoRouteData.$route(path: '/news', factory: $NewsRoute._fromState),
+        GoRouteData.$route(
+          path: '/licenses',
+          factory: $LicenseRoute._fromState,
+          routes: [
+            GoRouteData.$route(
+              path: ':packageName',
+              factory: $LicenseDetailRoute._fromState,
+            ),
+          ],
+        ),
       ],
     ),
     StatefulShellBranchData.$branch(
@@ -52,11 +84,6 @@ RouteBase get $appShellRoute => StatefulShellRouteData.$route(
         ),
       ],
     ),
-    StatefulShellBranchData.$branch(
-      routes: [
-        GoRouteData.$route(path: '/info', factory: $EventInfoRoute._fromState),
-      ],
-    ),
   ],
 );
 
@@ -64,11 +91,73 @@ extension $AppShellRouteExtension on AppShellRoute {
   static AppShellRoute _fromState(GoRouterState state) => const AppShellRoute();
 }
 
+mixin $EventInfoRoute on GoRouteData {
+  static EventInfoRoute _fromState(GoRouterState state) => const EventInfoRoute();
+
+  @override
+  String get location => GoRouteData.$location('/info');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) => context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
 mixin $NewsRoute on GoRouteData {
   static NewsRoute _fromState(GoRouterState state) => const NewsRoute();
 
   @override
   String get location => GoRouteData.$location('/news');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) => context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $LicenseRoute on GoRouteData {
+  static LicenseRoute _fromState(GoRouterState state) => const LicenseRoute();
+
+  @override
+  String get location => GoRouteData.$location('/licenses');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) => context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $LicenseDetailRoute on GoRouteData {
+  static LicenseDetailRoute _fromState(GoRouterState state) =>
+      LicenseDetailRoute(packageName: state.pathParameters['packageName']!);
+
+  LicenseDetailRoute get _self => this as LicenseDetailRoute;
+
+  @override
+  String get location => GoRouteData.$location(
+    '/licenses/${Uri.encodeComponent(_self.packageName)}',
+  );
 
   @override
   void go(BuildContext context) => context.go(location);
@@ -184,9 +273,8 @@ mixin $SponsorRoute on GoRouteData {
 }
 
 mixin $SponsorDetailsRoute on GoRouteData {
-  static SponsorDetailsRoute _fromState(GoRouterState state) => SponsorDetailsRoute(
-    sponsorKey: state.pathParameters['sponsorKey']!,
-  );
+  static SponsorDetailsRoute _fromState(GoRouterState state) =>
+      SponsorDetailsRoute(sponsorKey: state.pathParameters['sponsorKey']!);
 
   SponsorDetailsRoute get _self => this as SponsorDetailsRoute;
 
@@ -194,25 +282,6 @@ mixin $SponsorDetailsRoute on GoRouteData {
   String get location => GoRouteData.$location(
     '/sponsors/${Uri.encodeComponent(_self.sponsorKey)}',
   );
-
-  @override
-  void go(BuildContext context) => context.go(location);
-
-  @override
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
-
-  @override
-  void pushReplacement(BuildContext context) => context.pushReplacement(location);
-
-  @override
-  void replace(BuildContext context) => context.replace(location);
-}
-
-mixin $EventInfoRoute on GoRouteData {
-  static EventInfoRoute _fromState(GoRouterState state) => const EventInfoRoute();
-
-  @override
-  String get location => GoRouteData.$location('/info');
 
   @override
   void go(BuildContext context) => context.go(location);

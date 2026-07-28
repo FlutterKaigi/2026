@@ -3,6 +3,8 @@ import 'dart:math' as math;
 
 import 'package:app/core/extension/locale_map_extension.dart';
 import 'package:app/core/i18n/strings.g.dart';
+import 'package:app/core/ui/launch_external_url.dart';
+import 'package:app/core/ui/widget/app_error_view.dart';
 import 'package:app/core/ui/widget/app_network_image.dart';
 import 'package:app/core/ui/widget/trademark_footer_widget.dart';
 import 'package:app/feature/sponsor/data/provider/sponsor_detail_provider.dart';
@@ -12,7 +14,6 @@ import 'package:app/feature/sponsor/ui/widget/sponsor_message_state_widget.dart'
 import 'package:data/data.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 /// Shows details for one sponsor from the sponsor wall data.
 class SponsorDetailsPage extends ConsumerWidget {
@@ -40,13 +41,11 @@ class SponsorDetailsPage extends ConsumerWidget {
                 ),
               )
             : _SponsorDetailsContent(sponsor: value),
-      AsyncError() => Scaffold(
+      AsyncError(:final error) => Scaffold(
         appBar: AppBar(title: Text(t.sponsors.detailTitle)),
-        body: SponsorMessageStateWidget(
-          icon: Icons.error_outline,
-          title: t.sponsors.error,
-          actionLabel: t.common.retry,
-          onActionPressed: () => ref.invalidate(sponsorListProvider),
+        body: AppErrorView(
+          error: error,
+          onRetry: () => ref.invalidate(sponsorListProvider),
         ),
       ),
       AsyncLoading() => Scaffold(
@@ -309,9 +308,16 @@ class _SponsorLinkTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final t = Translations.of(context);
 
     return InkWell(
-      onTap: () => unawaited(launchUrl(link.uri, mode: LaunchMode.externalApplication)),
+      onTap: () => unawaited(
+        launchExternalUrl(
+          context,
+          uri: link.uri,
+          failureMessage: t.links.openError,
+        ),
+      ),
       borderRadius: BorderRadius.circular(8),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 10),

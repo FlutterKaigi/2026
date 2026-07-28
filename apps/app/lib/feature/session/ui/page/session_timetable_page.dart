@@ -1,5 +1,6 @@
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/router/router.dart';
+import 'package:app/core/ui/widget/settings_icon_button.dart';
 import 'package:app/core/util/window_size.dart';
 import 'package:app/feature/session/data/provider/session_timetable_provider.dart';
 import 'package:app/feature/session/ui/widget/session_timetable_empty_state_widget.dart';
@@ -91,6 +92,7 @@ class SessionTimetablePage extends HookConsumerWidget {
               ),
             ),
           ],
+          const SettingsIconButton(),
         ],
       ),
       body: switch (timetable) {
@@ -101,7 +103,8 @@ class SessionTimetablePage extends HookConsumerWidget {
           data: value,
           viewMode: viewMode.value,
         ),
-        AsyncError() => SessionTimetableErrorStateWidget(
+        AsyncError(:final error) => SessionTimetableErrorStateWidget(
+          error: error,
           onRetry: () => _retry(ref),
         ),
         AsyncLoading() => const Center(

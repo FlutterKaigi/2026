@@ -1,20 +1,19 @@
 app:
   title: FlutterKaigi 2026
+links:
+  openError: リンクを開けませんでした
 navigation:
-  news: お知らせ
   sessions: セッション
   sponsors: スポンサー
-  info: 情報
+  info: イベント
 news:
   title: お知らせ
   empty: お知らせはまだありません
-  error: お知らせを取得できませんでした
 sponsors:
   title: スポンサー
   detailTitle: スポンサー詳細
   subtitle: FlutterKaigi 2026 を支えてくださるスポンサーの皆様
   empty: スポンサーはまだ公開されていません
-  error: スポンサーを取得できませんでした
   notFound: スポンサーが見つかりませんでした
   logoSemanticLabel: $name のロゴ
   tierBadge: $tier スポンサー
@@ -36,7 +35,6 @@ sessionTimetable:
     shared: 共通
   empty: タイムテーブルはまだ公開されていません
   emptyFiltered: この日の予定はありません
-  error: タイムテーブルを取得できませんでした
   venue:
     unknown: 会場未定
   speaker:
@@ -67,7 +65,6 @@ sessionSearch:
   resultCount:
     one: $n件のセッション
     other: $n件のセッション
-  error: セッションを検索できませんでした
 sessionDetails:
   title: セッション詳細
   description: 概要
@@ -77,7 +74,6 @@ sessionDetails:
   sessionize: Sessionize
   share: 共有
   notFound: セッションが見つかりませんでした
-  error: セッションを取得できませんでした
 sessionBookmark:
   openBookmarked: ブックマークしたセッション
   add: ブックマークに追加
@@ -88,10 +84,33 @@ bookmarkedSessions:
   emptyTitle: ブックマークしたセッションはありません
   emptyBody: 気になるセッションをブックマークすると、ここからすぐに見つけられます
   openSessions: タイムテーブルを開く
-  error: ブックマークしたセッションを取得できませんでした
 eventInfo:
-  title: 情報
+  title: イベント概要
+  newsTitle: 最新のお知らせ
+  newsSubtitle: FlutterKaigi 2026 の最新情報を確認
+  logoSemanticLabel: FlutterKaigi 2026 ロゴ
+  tagline: 会って、話して、熱くなる。
+  themeName: 〜Assemble〜
+  description: 2026年、日本国内で Flutter をメインに扱う技術カンファレンス。Flutter や Dart の知見を共有し、参加者同士がつながる2日間です。
+  dateLabel: 日程
+  date: 2026年10月29日(木) – 30日(金)
+  venueLabel: 会場
+  venue: 浜松町コンベンションホール
+  viewMap: 地図を見る
+  other: その他
+  officialWebsite: 公式Webサイト
+  codeOfConduct: 行動規範
+  privacyPolicy: プライバシーポリシー
+  exclusionPolicy: 反社会的勢力排除に関する基本方針
+  contact: お問い合わせ
+  sourceCode: ソースコードを見る
+  ossLicenses: OSSライセンス
+settings:
+  title: 設定
+  appearance: 表示設定
+  appInfo: アプリ情報
   version: バージョン
+  saveError: 設定を保存できませんでした
   themeMode:
     title: テーマ
     system: システムに合わせる
@@ -101,8 +120,22 @@ eventInfo:
     title: 表示言語
     japanese: 日本語
     english: English
+licenses:
+  title: ライセンス
+  searchHint: パッケージを検索
+  clearSearch: 検索をクリア
+  licenseCount:
+    one: "ライセンス: $n件"
+    other: "ライセンス: $n件"
+  notFound: ライセンスが見つかりませんでした
+error:
+  title: データを読み込めませんでした
+  message: 通信状況を確認して、もう一度お試しください。
+  permissionDenied: この情報を表示する権限がありません。FlutterKaigi スタッフへお問い合わせください。
+  unavailable: 通信状況を確認して、しばらくしてからもう一度お試しください。
+  timeout: 読み込みに時間がかかっています。もう一度お試しください。
+  retry: 再試行
+  imageSemanticLabel: 困った表情のダシュマル
 notFound:
   title: ページが見つかりません
   description: お探しのページは存在しないか、移動した可能性があります。
-common:
-  retry: 再試行

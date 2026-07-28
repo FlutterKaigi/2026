@@ -40,6 +40,7 @@ class TranslationsEn extends Translations with BaseTranslations<AppLocale, Trans
 
 	// Translations
 	@override late final _Translations$app$en app = _Translations$app$en._(_root);
+	@override late final _Translations$links$en links = _Translations$links$en._(_root);
 	@override late final _Translations$navigation$en navigation = _Translations$navigation$en._(_root);
 	@override late final _Translations$news$en news = _Translations$news$en._(_root);
 	@override late final _Translations$sponsors$en sponsors = _Translations$sponsors$en._(_root);
@@ -50,8 +51,10 @@ class TranslationsEn extends Translations with BaseTranslations<AppLocale, Trans
 	@override late final _Translations$sessionBookmark$en sessionBookmark = _Translations$sessionBookmark$en._(_root);
 	@override late final _Translations$bookmarkedSessions$en bookmarkedSessions = _Translations$bookmarkedSessions$en._(_root);
 	@override late final _Translations$eventInfo$en eventInfo = _Translations$eventInfo$en._(_root);
+	@override late final _Translations$settings$en settings = _Translations$settings$en._(_root);
+	@override late final _Translations$licenses$en licenses = _Translations$licenses$en._(_root);
+	@override late final _Translations$error$en error = _Translations$error$en._(_root);
 	@override late final _Translations$notFound$en notFound = _Translations$notFound$en._(_root);
-	@override late final _Translations$common$en common = _Translations$common$en._(_root);
 }
 
 // Path: app
@@ -64,6 +67,16 @@ class _Translations$app$en extends Translations$app$ja {
 	@override String get title => 'FlutterKaigi 2026';
 }
 
+// Path: links
+class _Translations$links$en extends Translations$links$ja {
+	_Translations$links$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get openError => 'Could not open the link';
+}
+
 // Path: navigation
 class _Translations$navigation$en extends Translations$navigation$ja {
 	_Translations$navigation$en._(TranslationsEn root) : this._root = root, super.internal(root);
@@ -71,10 +84,9 @@ class _Translations$navigation$en extends Translations$navigation$ja {
 	final TranslationsEn _root; // ignore: unused_field
 
 	// Translations
-	@override String get news => 'News';
 	@override String get sessions => 'Sessions';
 	@override String get sponsors => 'Sponsors';
-	@override String get info => 'Info';
+	@override String get info => 'Event';
 }
 
 // Path: news
@@ -86,7 +98,6 @@ class _Translations$news$en extends Translations$news$ja {
 	// Translations
 	@override String get title => 'News';
 	@override String get empty => 'There is no news yet';
-	@override String get error => 'Failed to load news';
 }
 
 // Path: sponsors
@@ -100,7 +111,6 @@ class _Translations$sponsors$en extends Translations$sponsors$ja {
 	@override String get detailTitle => 'Sponsor Details';
 	@override String get subtitle => 'The sponsors supporting FlutterKaigi 2026';
 	@override String get empty => 'Sponsors have not been published yet';
-	@override String get error => 'Failed to load sponsors';
 	@override String get notFound => 'Sponsor not found';
 	@override String logoSemanticLabel({required Object name}) => '${name} logo';
 	@override String tierBadge({required Object tier}) => '${tier} Sponsor';
@@ -134,7 +144,6 @@ class _Translations$sessionTimetable$en extends Translations$sessionTimetable$ja
 	@override late final _Translations$sessionTimetable$view$en view = _Translations$sessionTimetable$view$en._(_root);
 	@override String get empty => 'The timetable has not been published yet';
 	@override String get emptyFiltered => 'There are no items for this day';
-	@override String get error => 'Failed to load timetable';
 	@override late final _Translations$sessionTimetable$venue$en venue = _Translations$sessionTimetable$venue$en._(_root);
 	@override late final _Translations$sessionTimetable$speaker$en speaker = _Translations$sessionTimetable$speaker$en._(_root);
 	@override late final _Translations$sessionTimetable$type$en type = _Translations$sessionTimetable$type$en._(_root);
@@ -167,7 +176,6 @@ class _Translations$sessionSearch$en extends Translations$sessionSearch$ja {
 		one: '${n} session',
 		other: '${n} sessions',
 	);
-	@override String get error => 'Failed to search sessions';
 }
 
 // Path: sessionDetails
@@ -185,7 +193,6 @@ class _Translations$sessionDetails$en extends Translations$sessionDetails$ja {
 	@override String get sessionize => 'Sessionize';
 	@override String get share => 'Share';
 	@override String get notFound => 'Session not found';
-	@override String get error => 'Failed to load session';
 }
 
 // Path: sessionBookmark
@@ -212,7 +219,6 @@ class _Translations$bookmarkedSessions$en extends Translations$bookmarkedSession
 	@override String get emptyTitle => 'No bookmarked sessions';
 	@override String get emptyBody => 'Bookmark sessions to find them here.';
 	@override String get openSessions => 'Open sessions';
-	@override String get error => 'Failed to load bookmarked sessions';
 }
 
 // Path: eventInfo
@@ -222,10 +228,75 @@ class _Translations$eventInfo$en extends Translations$eventInfo$ja {
 	final TranslationsEn _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'Info';
+	@override String get title => 'Event Overview';
+	@override String get newsTitle => 'Latest News';
+	@override String get newsSubtitle => 'See the latest FlutterKaigi 2026 updates';
+	@override String get logoSemanticLabel => 'FlutterKaigi 2026 logo';
+	@override String get tagline => 'Connect, Converse, Ignite.';
+	@override String get themeName => '〜Assemble〜';
+	@override String get description => 'Japan\'s Flutter tech conference in 2026. Two days for sharing Flutter and Dart expertise and connecting with the community.';
+	@override String get dateLabel => 'Date';
+	@override String get date => 'October 29–30, 2026';
+	@override String get venueLabel => 'Venue';
+	@override String get venue => 'Hamamatsucho Convention Hall';
+	@override String get viewMap => 'View Map';
+	@override String get other => 'Other';
+	@override String get officialWebsite => 'Official Website';
+	@override String get codeOfConduct => 'Code of Conduct';
+	@override String get privacyPolicy => 'Privacy Policy';
+	@override String get exclusionPolicy => 'Exclusion of Anti-Social Forces';
+	@override String get contact => 'Contact';
+	@override String get sourceCode => 'View Source Code';
+	@override String get ossLicenses => 'OSS Licenses';
+}
+
+// Path: settings
+class _Translations$settings$en extends Translations$settings$ja {
+	_Translations$settings$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Settings';
+	@override String get appearance => 'Appearance';
+	@override String get appInfo => 'App Information';
 	@override String get version => 'Version';
-	@override late final _Translations$eventInfo$themeMode$en themeMode = _Translations$eventInfo$themeMode$en._(_root);
-	@override late final _Translations$eventInfo$language$en language = _Translations$eventInfo$language$en._(_root);
+	@override String get saveError => 'Could not save the setting';
+	@override late final _Translations$settings$themeMode$en themeMode = _Translations$settings$themeMode$en._(_root);
+	@override late final _Translations$settings$language$en language = _Translations$settings$language$en._(_root);
+}
+
+// Path: licenses
+class _Translations$licenses$en extends Translations$licenses$ja {
+	_Translations$licenses$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Licenses';
+	@override String get searchHint => 'Search packages';
+	@override String get clearSearch => 'Clear search';
+	@override String licenseCount({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n,
+		one: '${n} license',
+		other: '${n} licenses',
+	);
+	@override String get notFound => 'License not found';
+}
+
+// Path: error
+class _Translations$error$en extends Translations$error$ja {
+	_Translations$error$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Could not load data';
+	@override String get message => 'Check your connection and try again.';
+	@override String get permissionDenied => 'You do not have permission to view this information. Please contact FlutterKaigi staff.';
+	@override String get unavailable => 'Check your connection and try again in a moment.';
+	@override String get timeout => 'Loading is taking longer than expected. Please try again.';
+	@override String get retry => 'Retry';
+	@override String get imageSemanticLabel => 'Dashumaru looking troubled';
 }
 
 // Path: notFound
@@ -237,16 +308,6 @@ class _Translations$notFound$en extends Translations$notFound$ja {
 	// Translations
 	@override String get title => 'Page not found';
 	@override String get description => 'The page you are looking for does not exist or may have moved.';
-}
-
-// Path: common
-class _Translations$common$en extends Translations$common$ja {
-	_Translations$common$en._(TranslationsEn root) : this._root = root, super.internal(root);
-
-	final TranslationsEn _root; // ignore: unused_field
-
-	// Translations
-	@override String get retry => 'Retry';
 }
 
 // Path: sessionTimetable.view
@@ -295,9 +356,9 @@ class _Translations$sessionTimetable$type$en extends Translations$sessionTimetab
 	@override String get event => 'Event';
 }
 
-// Path: eventInfo.themeMode
-class _Translations$eventInfo$themeMode$en extends Translations$eventInfo$themeMode$ja {
-	_Translations$eventInfo$themeMode$en._(TranslationsEn root) : this._root = root, super.internal(root);
+// Path: settings.themeMode
+class _Translations$settings$themeMode$en extends Translations$settings$themeMode$ja {
+	_Translations$settings$themeMode$en._(TranslationsEn root) : this._root = root, super.internal(root);
 
 	final TranslationsEn _root; // ignore: unused_field
 
@@ -308,9 +369,9 @@ class _Translations$eventInfo$themeMode$en extends Translations$eventInfo$themeM
 	@override String get dark => 'Dark';
 }
 
-// Path: eventInfo.language
-class _Translations$eventInfo$language$en extends Translations$eventInfo$language$ja {
-	_Translations$eventInfo$language$en._(TranslationsEn root) : this._root = root, super.internal(root);
+// Path: settings.language
+class _Translations$settings$language$en extends Translations$settings$language$ja {
+	_Translations$settings$language$en._(TranslationsEn root) : this._root = root, super.internal(root);
 
 	final TranslationsEn _root; // ignore: unused_field
 
@@ -329,18 +390,16 @@ extension on TranslationsEn {
 	dynamic _flatMapFunction(String path) {
 		return switch (path) {
 			'app.title' => 'FlutterKaigi 2026',
-			'navigation.news' => 'News',
+			'links.openError' => 'Could not open the link',
 			'navigation.sessions' => 'Sessions',
 			'navigation.sponsors' => 'Sponsors',
-			'navigation.info' => 'Info',
+			'navigation.info' => 'Event',
 			'news.title' => 'News',
 			'news.empty' => 'There is no news yet',
-			'news.error' => 'Failed to load news',
 			'sponsors.title' => 'Sponsors',
 			'sponsors.detailTitle' => 'Sponsor Details',
 			'sponsors.subtitle' => 'The sponsors supporting FlutterKaigi 2026',
 			'sponsors.empty' => 'Sponsors have not been published yet',
-			'sponsors.error' => 'Failed to load sponsors',
 			'sponsors.notFound' => 'Sponsor not found',
 			'sponsors.logoSemanticLabel' => ({required Object name}) => '${name} logo',
 			'sponsors.tierBadge' => ({required Object tier}) => '${tier} Sponsor',
@@ -358,7 +417,6 @@ extension on TranslationsEn {
 			'sessionTimetable.view.shared' => 'Shared',
 			'sessionTimetable.empty' => 'The timetable has not been published yet',
 			'sessionTimetable.emptyFiltered' => 'There are no items for this day',
-			'sessionTimetable.error' => 'Failed to load timetable',
 			'sessionTimetable.venue.unknown' => 'Venue TBA',
 			'sessionTimetable.speaker.none' => 'Speaker TBA',
 			'sessionTimetable.type.regular' => 'Regular Talk',
@@ -383,7 +441,6 @@ extension on TranslationsEn {
 			'sessionSearch.emptyTitle' => 'No sessions found',
 			'sessionSearch.emptyBody' => 'Try changing the keyword or filters',
 			'sessionSearch.resultCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} session', other: '${n} sessions', ),
-			'sessionSearch.error' => 'Failed to search sessions',
 			'sessionDetails.title' => 'Session Details',
 			'sessionDetails.description' => 'Description',
 			'sessionDetails.schedule' => 'Schedule and Venue',
@@ -392,7 +449,6 @@ extension on TranslationsEn {
 			'sessionDetails.sessionize' => 'Sessionize',
 			'sessionDetails.share' => 'Share',
 			'sessionDetails.notFound' => 'Session not found',
-			'sessionDetails.error' => 'Failed to load session',
 			'sessionBookmark.openBookmarked' => 'Bookmarked sessions',
 			'sessionBookmark.add' => 'Add bookmark',
 			'sessionBookmark.remove' => 'Remove bookmark',
@@ -401,19 +457,52 @@ extension on TranslationsEn {
 			'bookmarkedSessions.emptyTitle' => 'No bookmarked sessions',
 			'bookmarkedSessions.emptyBody' => 'Bookmark sessions to find them here.',
 			'bookmarkedSessions.openSessions' => 'Open sessions',
-			'bookmarkedSessions.error' => 'Failed to load bookmarked sessions',
-			'eventInfo.title' => 'Info',
-			'eventInfo.version' => 'Version',
-			'eventInfo.themeMode.title' => 'Theme',
-			'eventInfo.themeMode.system' => 'System',
-			'eventInfo.themeMode.light' => 'Light',
-			'eventInfo.themeMode.dark' => 'Dark',
-			'eventInfo.language.title' => 'Language',
-			'eventInfo.language.japanese' => '日本語',
-			'eventInfo.language.english' => 'English',
+			'eventInfo.title' => 'Event Overview',
+			'eventInfo.newsTitle' => 'Latest News',
+			'eventInfo.newsSubtitle' => 'See the latest FlutterKaigi 2026 updates',
+			'eventInfo.logoSemanticLabel' => 'FlutterKaigi 2026 logo',
+			'eventInfo.tagline' => 'Connect, Converse, Ignite.',
+			'eventInfo.themeName' => '〜Assemble〜',
+			'eventInfo.description' => 'Japan\'s Flutter tech conference in 2026. Two days for sharing Flutter and Dart expertise and connecting with the community.',
+			'eventInfo.dateLabel' => 'Date',
+			'eventInfo.date' => 'October 29–30, 2026',
+			'eventInfo.venueLabel' => 'Venue',
+			'eventInfo.venue' => 'Hamamatsucho Convention Hall',
+			'eventInfo.viewMap' => 'View Map',
+			'eventInfo.other' => 'Other',
+			'eventInfo.officialWebsite' => 'Official Website',
+			'eventInfo.codeOfConduct' => 'Code of Conduct',
+			'eventInfo.privacyPolicy' => 'Privacy Policy',
+			'eventInfo.exclusionPolicy' => 'Exclusion of Anti-Social Forces',
+			'eventInfo.contact' => 'Contact',
+			'eventInfo.sourceCode' => 'View Source Code',
+			'eventInfo.ossLicenses' => 'OSS Licenses',
+			'settings.title' => 'Settings',
+			'settings.appearance' => 'Appearance',
+			'settings.appInfo' => 'App Information',
+			'settings.version' => 'Version',
+			'settings.saveError' => 'Could not save the setting',
+			'settings.themeMode.title' => 'Theme',
+			'settings.themeMode.system' => 'System',
+			'settings.themeMode.light' => 'Light',
+			'settings.themeMode.dark' => 'Dark',
+			'settings.language.title' => 'Language',
+			'settings.language.japanese' => '日本語',
+			'settings.language.english' => 'English',
+			'licenses.title' => 'Licenses',
+			'licenses.searchHint' => 'Search packages',
+			'licenses.clearSearch' => 'Clear search',
+			'licenses.licenseCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} license', other: '${n} licenses', ),
+			'licenses.notFound' => 'License not found',
+			'error.title' => 'Could not load data',
+			'error.message' => 'Check your connection and try again.',
+			'error.permissionDenied' => 'You do not have permission to view this information. Please contact FlutterKaigi staff.',
+			'error.unavailable' => 'Check your connection and try again in a moment.',
+			'error.timeout' => 'Loading is taking longer than expected. Please try again.',
+			'error.retry' => 'Retry',
+			'error.imageSemanticLabel' => 'Dashumaru looking troubled',
 			'notFound.title' => 'Page not found',
 			'notFound.description' => 'The page you are looking for does not exist or may have moved.',
-			'common.retry' => 'Retry',
 			_ => null,
 		};
 	}

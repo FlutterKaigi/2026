@@ -1,5 +1,14 @@
 part of 'router.dart';
 
+/// `/settings` — appearance, language, and app information.
+@TypedGoRoute<SettingsRoute>(path: '/settings')
+class SettingsRoute extends GoRouteData with $SettingsRoute {
+  const SettingsRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const SettingsPage();
+}
+
 /// Shell hosting the main bottom/rail navigation destinations.
 ///
 /// Uses [StatefulShellRoute.indexedStack] so switching tabs swaps branches
@@ -7,8 +16,17 @@ part of 'router.dart';
 /// navigation and scroll state.
 @TypedStatefulShellRoute<AppShellRoute>(
   branches: [
-    TypedStatefulShellBranch<NewsBranch>(
-      routes: [TypedGoRoute<NewsRoute>(path: '/news')],
+    TypedStatefulShellBranch<EventInfoBranch>(
+      routes: [
+        TypedGoRoute<EventInfoRoute>(path: '/info'),
+        TypedGoRoute<NewsRoute>(path: '/news'),
+        TypedGoRoute<LicenseRoute>(
+          path: '/licenses',
+          routes: [
+            TypedGoRoute<LicenseDetailRoute>(path: ':packageName'),
+          ],
+        ),
+      ],
     ),
     TypedStatefulShellBranch<SessionBranch>(
       routes: [
@@ -30,9 +48,6 @@ part of 'router.dart';
         ),
       ],
     ),
-    TypedStatefulShellBranch<EventInfoBranch>(
-      routes: [TypedGoRoute<EventInfoRoute>(path: '/info')],
-    ),
   ],
 )
 class AppShellRoute extends StatefulShellRouteData {
@@ -49,8 +64,8 @@ class AppShellRoute extends StatefulShellRouteData {
       navigationShell: navigationShell,
       destinations: [
         RootDestination(
-          icon: Icons.campaign_outlined,
-          label: t.navigation.news,
+          icon: Icons.event_outlined,
+          label: t.navigation.info,
         ),
         RootDestination(
           icon: Icons.calendar_today_outlined,
@@ -60,19 +75,16 @@ class AppShellRoute extends StatefulShellRouteData {
           icon: Icons.business_outlined,
           label: t.navigation.sponsors,
         ),
-        RootDestination(
-          icon: Icons.info_outline,
-          label: t.navigation.info,
-        ),
       ],
     );
   }
 }
 
-/// Branch hosting the news tab. Branch order must match the order of
+/// Branch hosting the event overview and its news destination. Branch order
+/// must match the order of
 /// [RootScaffold.destinations] built in [AppShellRoute.builder].
-class NewsBranch extends StatefulShellBranchData {
-  const NewsBranch();
+class EventInfoBranch extends StatefulShellBranchData {
+  const EventInfoBranch();
 }
 
 /// Branch hosting the session timetable tab.
@@ -85,17 +97,32 @@ class SponsorBranch extends StatefulShellBranchData {
   const SponsorBranch();
 }
 
-/// Branch hosting the event info tab.
-class EventInfoBranch extends StatefulShellBranchData {
-  const EventInfoBranch();
-}
-
-/// `/news` — the news list.
+/// `/news` — the news list opened from the event overview.
 class NewsRoute extends GoRouteData with $NewsRoute {
   const NewsRoute();
 
   @override
   Widget build(BuildContext context, GoRouterState state) => const NewsListPage();
+}
+
+/// `/licenses` — bundled OSS packages and their license counts.
+class LicenseRoute extends GoRouteData with $LicenseRoute {
+  const LicenseRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const OssLicensePage();
+}
+
+/// `/licenses/:packageName` — license text for one bundled package.
+class LicenseDetailRoute extends GoRouteData with $LicenseDetailRoute {
+  const LicenseDetailRoute({required this.packageName});
+
+  final String packageName;
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => LicenseDetailPage(
+    packageName: packageName,
+  );
 }
 
 /// `/sessions` — the session timetable.

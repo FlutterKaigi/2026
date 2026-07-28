@@ -4,13 +4,11 @@ class SessionDetailsMessageStateWidget extends StatelessWidget {
   const SessionDetailsMessageStateWidget({
     required this.icon,
     required this.message,
-    this.action,
     super.key,
   });
 
   final IconData icon;
   final String message;
-  final Widget? action;
 
   @override
   Widget build(BuildContext context) {
@@ -31,10 +29,6 @@ class SessionDetailsMessageStateWidget extends StatelessWidget {
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyLarge,
             ),
-            if (action != null) ...[
-              const SizedBox(height: 16),
-              action!,
-            ],
           ],
         ),
       ),

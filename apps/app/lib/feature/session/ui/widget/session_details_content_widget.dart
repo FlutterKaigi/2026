@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:app/core/extension/locale_map_extension.dart';
 import 'package:app/core/i18n/strings.g.dart';
+import 'package:app/core/ui/launch_external_url.dart';
 import 'package:app/core/ui/widget/app_network_image.dart';
 import 'package:app/feature/session/data/provider/session_detail_provider.dart';
 import 'package:app/feature/session/ui/widget/session_bookmark_button.dart';
@@ -10,7 +11,6 @@ import 'package:app/feature/session/util/session_language.dart';
 import 'package:data/data.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 const _sessionOrigin = 'https://2026.flutterkaigi.jp';
 const _largeAppBarCollapsedHeight = 64.0;
@@ -55,7 +55,14 @@ class SessionDetailsContentWidget extends StatelessWidget {
                 SessionBookmarkButton(sessionId: session.id),
                 IconButton(
                   tooltip: t.sessionDetails.share,
-                  onPressed: () => unawaited(_shareSession(data, locale)),
+                  onPressed: () => unawaited(
+                    _shareSession(
+                      context,
+                      data,
+                      locale,
+                      t.links.openError,
+                    ),
+                  ),
                   icon: const Icon(Icons.share_outlined),
                 ),
               ],
@@ -141,9 +148,10 @@ class SessionDetailsContentWidget extends StatelessWidget {
                   title: t.sessionDetails.sessionize,
                   subtitle: sessionizeUri.toString(),
                   onTap: () => unawaited(
-                    launchUrl(
-                      sessionizeUri,
-                      mode: LaunchMode.externalApplication,
+                    launchExternalUrl(
+                      context,
+                      uri: sessionizeUri,
+                      failureMessage: t.links.openError,
                     ),
                   ),
                 ),
@@ -260,7 +268,12 @@ class _InfoChip extends StatelessWidget {
   }
 }
 
-Future<void> _shareSession(SessionDetailData data, Locale locale) async {
+Future<void> _shareSession(
+  BuildContext context,
+  SessionDetailData data,
+  Locale locale,
+  String failureMessage,
+) async {
   final session = data.session;
   final sessionUrl = Uri.parse('$_sessionOrigin/sessions/${session.id}');
   final speakerNames = data.speakers.map((speaker) => speaker.name).join(', ');
@@ -274,7 +287,11 @@ Future<void> _shareSession(SessionDetailData data, Locale locale) async {
     'hashtags': 'FlutterKaigi2026',
   });
 
-  await launchUrl(intentUri, mode: LaunchMode.externalApplication);
+  await launchExternalUrl(
+    context,
+    uri: intentUri,
+    failureMessage: failureMessage,
+  );
 }
 
 Uri? _externalUri(String? rawUrl) {

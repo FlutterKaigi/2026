@@ -1,9 +1,9 @@
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/router/router.dart';
+import 'package:app/core/ui/widget/app_error_view.dart';
 import 'package:app/feature/session/data/provider/session_search_provider.dart';
 import 'package:app/feature/session/data/provider/session_timetable_provider.dart';
 import 'package:app/feature/session/ui/widget/session_card_widget.dart';
-import 'package:app/feature/session/ui/widget/session_details_message_state_widget.dart';
 import 'package:app/feature/session/util/event_time.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -69,14 +69,9 @@ class SessionSearchPage extends HookConsumerWidget {
           onLanguageChanged: (value) => selectedLanguage.value = value,
           onClear: clearSearch,
         ),
-        AsyncError() => SessionDetailsMessageStateWidget(
-          icon: Icons.error_outline,
-          message: t.sessionSearch.error,
-          action: FilledButton.icon(
-            onPressed: () => _retry(ref),
-            icon: const Icon(Icons.refresh),
-            label: Text(t.common.retry),
-          ),
+        AsyncError(:final error) => AppErrorView(
+          error: error,
+          onRetry: () => _retry(ref),
         ),
         AsyncLoading() => const Center(
           child: CircularProgressIndicator.adaptive(),
