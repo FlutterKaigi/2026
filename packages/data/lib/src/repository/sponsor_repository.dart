@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../model/sponsor.dart';
+import 'firestore_watch.dart';
 
 abstract interface class SponsorRepository {
   Stream<List<Sponsor>> watchAll();
@@ -17,14 +18,12 @@ final class FirestoreSponsorRepository implements SponsorRepository {
 
   @override
   Stream<List<Sponsor>> watchAll() {
-    return _collection
-        .orderBy('createdAt', descending: true)
-        .snapshots()
-        .map(
-          (snapshot) => [
-            for (final doc in snapshot.docs) Sponsor.fromJson(<String, dynamic>{...doc.data(), 'id': doc.id}),
-          ],
-        );
+    final query = _collection.orderBy('createdAt', descending: true);
+    return watchFirestoreQuery(query).map(
+      (snapshot) => [
+        for (final doc in snapshot.docs) Sponsor.fromJson(<String, dynamic>{...doc.data(), 'id': doc.id}),
+      ],
+    );
   }
 
   @override

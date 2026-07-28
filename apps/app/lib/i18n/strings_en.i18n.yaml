@@ -1,20 +1,19 @@
 app:
   title: FlutterKaigi 2026
+links:
+  openError: Could not open the link
 navigation:
-  news: News
   sessions: Sessions
   sponsors: Sponsors
-  info: Info
+  info: Event
 news:
   title: News
   empty: There is no news yet
-  error: Failed to load news
 sponsors:
   title: Sponsors
   detailTitle: Sponsor Details
   subtitle: The sponsors supporting FlutterKaigi 2026
   empty: Sponsors have not been published yet
-  error: Failed to load sponsors
   notFound: Sponsor not found
   logoSemanticLabel: $name logo
   tierBadge: $tier Sponsor
@@ -36,7 +35,6 @@ sessionTimetable:
     shared: Shared
   empty: The timetable has not been published yet
   emptyFiltered: There are no items for this day
-  error: Failed to load timetable
   venue:
     unknown: Venue TBA
   speaker:
@@ -67,7 +65,6 @@ sessionSearch:
   resultCount:
     one: $n session
     other: $n sessions
-  error: Failed to search sessions
 sessionDetails:
   title: Session Details
   description: Description
@@ -77,7 +74,6 @@ sessionDetails:
   sessionize: Sessionize
   share: Share
   notFound: Session not found
-  error: Failed to load session
 sessionBookmark:
   openBookmarked: Bookmarked sessions
   add: Add bookmark
@@ -88,10 +84,33 @@ bookmarkedSessions:
   emptyTitle: No bookmarked sessions
   emptyBody: Bookmark sessions to find them here.
   openSessions: Open sessions
-  error: Failed to load bookmarked sessions
 eventInfo:
-  title: Info
+  title: Event Overview
+  newsTitle: Latest News
+  newsSubtitle: See the latest FlutterKaigi 2026 updates
+  logoSemanticLabel: FlutterKaigi 2026 logo
+  tagline: Connect, Converse, Ignite.
+  themeName: 〜Assemble〜
+  description: Japan's Flutter tech conference in 2026. Two days for sharing Flutter and Dart expertise and connecting with the community.
+  dateLabel: Date
+  date: October 29–30, 2026
+  venueLabel: Venue
+  venue: Hamamatsucho Convention Hall
+  viewMap: View Map
+  other: Other
+  officialWebsite: Official Website
+  codeOfConduct: Code of Conduct
+  privacyPolicy: Privacy Policy
+  exclusionPolicy: Exclusion of Anti-Social Forces
+  contact: Contact
+  sourceCode: View Source Code
+  ossLicenses: OSS Licenses
+settings:
+  title: Settings
+  appearance: Appearance
+  appInfo: App Information
   version: Version
+  saveError: Could not save the setting
   themeMode:
     title: Theme
     system: System
@@ -101,8 +120,22 @@ eventInfo:
     title: Language
     japanese: 日本語
     english: English
+licenses:
+  title: Licenses
+  searchHint: Search packages
+  clearSearch: Clear search
+  licenseCount:
+    one: "$n license"
+    other: "$n licenses"
+  notFound: License not found
+error:
+  title: Could not load data
+  message: Check your connection and try again.
+  permissionDenied: You do not have permission to view this information. Please contact FlutterKaigi staff.
+  unavailable: Check your connection and try again in a moment.
+  timeout: Loading is taking longer than expected. Please try again.
+  retry: Retry
+  imageSemanticLabel: Dashumaru looking troubled
 notFound:
   title: Page not found
   description: The page you are looking for does not exist or may have moved.
-common:
-  retry: Retry

@@ -137,7 +137,7 @@ void main() {
     );
     await _pumpProviderFrames(tester);
 
-    expect(find.text('セッションを取得できませんでした'), findsOneWidget);
+    expect(find.text('データを読み込めませんでした'), findsOneWidget);
     expect(find.text('再試行'), findsOneWidget);
   });
 

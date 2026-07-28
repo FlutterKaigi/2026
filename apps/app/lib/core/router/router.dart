@@ -3,11 +3,14 @@ import 'package:app/core/log/talker.dart';
 import 'package:app/core/ui/not_found_page.dart';
 import 'package:app/core/ui/root_scaffold.dart';
 import 'package:app/feature/event/ui/page/event_info_page.dart';
+import 'package:app/feature/license/ui/page/license_detail_page.dart';
+import 'package:app/feature/license/ui/page/license_page.dart';
 import 'package:app/feature/news/ui/page/news_list_page.dart';
 import 'package:app/feature/session/ui/page/bookmarked_sessions_page.dart';
 import 'package:app/feature/session/ui/page/session_details_page.dart';
 import 'package:app/feature/session/ui/page/session_search_page.dart';
 import 'package:app/feature/session/ui/page/session_timetable_page.dart';
+import 'package:app/feature/settings/ui/page/settings_page.dart';
 import 'package:app/feature/sponsor/ui/page/sponsor_details_page.dart';
 import 'package:app/feature/sponsor/ui/page/sponsor_list_page.dart';
 import 'package:flutter/material.dart';
@@ -34,7 +37,7 @@ final routerProvider = Provider<GoRouter>((ref) {
   GoRouter.optionURLReflectsImperativeAPIs = true;
 
   return GoRouter(
-    initialLocation: const NewsRoute().location,
+    initialLocation: const EventInfoRoute().location,
     routes: $appRoutes,
     observers: [TalkerRouteObserver(talker)],
     errorBuilder: (context, state) => const NotFoundPage(),

@@ -188,7 +188,7 @@ void main() {
       sessionListValue: AsyncError(Exception('sessions'), StackTrace.current),
     );
 
-    expect(find.text('ブックマークしたセッションを取得できませんでした'), findsOneWidget);
+    expect(find.text('データを読み込めませんでした'), findsOneWidget);
     expect(find.text('再試行'), findsOneWidget);
   });
 
@@ -198,7 +198,7 @@ void main() {
       AsyncError(Exception('bookmarks'), StackTrace.current),
     );
 
-    expect(find.text('ブックマークしたセッションを取得できませんでした'), findsOneWidget);
+    expect(find.text('データを読み込めませんでした'), findsOneWidget);
   });
 
   testWidgets('retry action is available from the bookmarked screen error state', (tester) async {
@@ -207,7 +207,7 @@ void main() {
       AsyncError(Exception('bookmarks'), StackTrace.current),
     );
 
-    expect(find.text('ブックマークしたセッションを取得できませんでした'), findsOneWidget);
+    expect(find.text('データを読み込めませんでした'), findsOneWidget);
     await tester.tap(find.text('再試行'));
     await tester.pump();
 

@@ -16,5 +16,11 @@ void main() {
     addTearDown(router.dispose);
 
     expect(GoRouter.optionURLReflectsImperativeAPIs, isTrue);
+    expect(router.routeInformationProvider.value.uri.path, '/info');
+    expect(const LicenseRoute().location, '/licenses');
+    expect(
+      const LicenseDetailRoute(packageName: 'foo bar').location,
+      '/licenses/foo%20bar',
+    );
   });
 }

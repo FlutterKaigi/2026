@@ -41,6 +41,7 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 
 	// Translations
 	late final Translations$app$ja app = Translations$app$ja.internal(_root);
+	late final Translations$links$ja links = Translations$links$ja.internal(_root);
 	late final Translations$navigation$ja navigation = Translations$navigation$ja.internal(_root);
 	late final Translations$news$ja news = Translations$news$ja.internal(_root);
 	late final Translations$sponsors$ja sponsors = Translations$sponsors$ja.internal(_root);
@@ -51,8 +52,10 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	late final Translations$sessionBookmark$ja sessionBookmark = Translations$sessionBookmark$ja.internal(_root);
 	late final Translations$bookmarkedSessions$ja bookmarkedSessions = Translations$bookmarkedSessions$ja.internal(_root);
 	late final Translations$eventInfo$ja eventInfo = Translations$eventInfo$ja.internal(_root);
+	late final Translations$settings$ja settings = Translations$settings$ja.internal(_root);
+	late final Translations$licenses$ja licenses = Translations$licenses$ja.internal(_root);
+	late final Translations$error$ja error = Translations$error$ja.internal(_root);
 	late final Translations$notFound$ja notFound = Translations$notFound$ja.internal(_root);
-	late final Translations$common$ja common = Translations$common$ja.internal(_root);
 }
 
 // Path: app
@@ -67,6 +70,18 @@ class Translations$app$ja {
 	String get title => 'FlutterKaigi 2026';
 }
 
+// Path: links
+class Translations$links$ja {
+	Translations$links$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'リンクを開けませんでした'
+	String get openError => 'リンクを開けませんでした';
+}
+
 // Path: navigation
 class Translations$navigation$ja {
 	Translations$navigation$ja.internal(this._root);
@@ -75,17 +90,14 @@ class Translations$navigation$ja {
 
 	// Translations
 
-	/// ja: 'お知らせ'
-	String get news => 'お知らせ';
-
 	/// ja: 'セッション'
 	String get sessions => 'セッション';
 
 	/// ja: 'スポンサー'
 	String get sponsors => 'スポンサー';
 
-	/// ja: '情報'
-	String get info => '情報';
+	/// ja: 'イベント'
+	String get info => 'イベント';
 }
 
 // Path: news
@@ -101,9 +113,6 @@ class Translations$news$ja {
 
 	/// ja: 'お知らせはまだありません'
 	String get empty => 'お知らせはまだありません';
-
-	/// ja: 'お知らせを取得できませんでした'
-	String get error => 'お知らせを取得できませんでした';
 }
 
 // Path: sponsors
@@ -125,9 +134,6 @@ class Translations$sponsors$ja {
 
 	/// ja: 'スポンサーはまだ公開されていません'
 	String get empty => 'スポンサーはまだ公開されていません';
-
-	/// ja: 'スポンサーを取得できませんでした'
-	String get error => 'スポンサーを取得できませんでした';
 
 	/// ja: 'スポンサーが見つかりませんでした'
 	String get notFound => 'スポンサーが見つかりませんでした';
@@ -190,9 +196,6 @@ class Translations$sessionTimetable$ja {
 
 	/// ja: 'この日の予定はありません'
 	String get emptyFiltered => 'この日の予定はありません';
-
-	/// ja: 'タイムテーブルを取得できませんでした'
-	String get error => 'タイムテーブルを取得できませんでした';
 
 	late final Translations$sessionTimetable$venue$ja venue = Translations$sessionTimetable$venue$ja.internal(_root);
 	late final Translations$sessionTimetable$speaker$ja speaker = Translations$sessionTimetable$speaker$ja.internal(_root);
@@ -260,9 +263,6 @@ class Translations$sessionSearch$ja {
 		one: '${n}件のセッション',
 		other: '${n}件のセッション',
 	);
-
-	/// ja: 'セッションを検索できませんでした'
-	String get error => 'セッションを検索できませんでした';
 }
 
 // Path: sessionDetails
@@ -296,9 +296,6 @@ class Translations$sessionDetails$ja {
 
 	/// ja: 'セッションが見つかりませんでした'
 	String get notFound => 'セッションが見つかりませんでした';
-
-	/// ja: 'セッションを取得できませんでした'
-	String get error => 'セッションを取得できませんでした';
 }
 
 // Path: sessionBookmark
@@ -341,9 +338,6 @@ class Translations$bookmarkedSessions$ja {
 
 	/// ja: 'タイムテーブルを開く'
 	String get openSessions => 'タイムテーブルを開く';
-
-	/// ja: 'ブックマークしたセッションを取得できませんでした'
-	String get error => 'ブックマークしたセッションを取得できませんでした';
 }
 
 // Path: eventInfo
@@ -354,14 +348,149 @@ class Translations$eventInfo$ja {
 
 	// Translations
 
-	/// ja: '情報'
-	String get title => '情報';
+	/// ja: 'イベント概要'
+	String get title => 'イベント概要';
+
+	/// ja: '最新のお知らせ'
+	String get newsTitle => '最新のお知らせ';
+
+	/// ja: 'FlutterKaigi 2026 の最新情報を確認'
+	String get newsSubtitle => 'FlutterKaigi 2026 の最新情報を確認';
+
+	/// ja: 'FlutterKaigi 2026 ロゴ'
+	String get logoSemanticLabel => 'FlutterKaigi 2026 ロゴ';
+
+	/// ja: '会って、話して、熱くなる。'
+	String get tagline => '会って、話して、熱くなる。';
+
+	/// ja: '〜Assemble〜'
+	String get themeName => '〜Assemble〜';
+
+	/// ja: '2026年、日本国内で Flutter をメインに扱う技術カンファレンス。Flutter や Dart の知見を共有し、参加者同士がつながる2日間です。'
+	String get description => '2026年、日本国内で Flutter をメインに扱う技術カンファレンス。Flutter や Dart の知見を共有し、参加者同士がつながる2日間です。';
+
+	/// ja: '日程'
+	String get dateLabel => '日程';
+
+	/// ja: '2026年10月29日(木) – 30日(金)'
+	String get date => '2026年10月29日(木) – 30日(金)';
+
+	/// ja: '会場'
+	String get venueLabel => '会場';
+
+	/// ja: '浜松町コンベンションホール'
+	String get venue => '浜松町コンベンションホール';
+
+	/// ja: '地図を見る'
+	String get viewMap => '地図を見る';
+
+	/// ja: 'その他'
+	String get other => 'その他';
+
+	/// ja: '公式Webサイト'
+	String get officialWebsite => '公式Webサイト';
+
+	/// ja: '行動規範'
+	String get codeOfConduct => '行動規範';
+
+	/// ja: 'プライバシーポリシー'
+	String get privacyPolicy => 'プライバシーポリシー';
+
+	/// ja: '反社会的勢力排除に関する基本方針'
+	String get exclusionPolicy => '反社会的勢力排除に関する基本方針';
+
+	/// ja: 'お問い合わせ'
+	String get contact => 'お問い合わせ';
+
+	/// ja: 'ソースコードを見る'
+	String get sourceCode => 'ソースコードを見る';
+
+	/// ja: 'OSSライセンス'
+	String get ossLicenses => 'OSSライセンス';
+}
+
+// Path: settings
+class Translations$settings$ja {
+	Translations$settings$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: '設定'
+	String get title => '設定';
+
+	/// ja: '表示設定'
+	String get appearance => '表示設定';
+
+	/// ja: 'アプリ情報'
+	String get appInfo => 'アプリ情報';
 
 	/// ja: 'バージョン'
 	String get version => 'バージョン';
 
-	late final Translations$eventInfo$themeMode$ja themeMode = Translations$eventInfo$themeMode$ja.internal(_root);
-	late final Translations$eventInfo$language$ja language = Translations$eventInfo$language$ja.internal(_root);
+	/// ja: '設定を保存できませんでした'
+	String get saveError => '設定を保存できませんでした';
+
+	late final Translations$settings$themeMode$ja themeMode = Translations$settings$themeMode$ja.internal(_root);
+	late final Translations$settings$language$ja language = Translations$settings$language$ja.internal(_root);
+}
+
+// Path: licenses
+class Translations$licenses$ja {
+	Translations$licenses$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'ライセンス'
+	String get title => 'ライセンス';
+
+	/// ja: 'パッケージを検索'
+	String get searchHint => 'パッケージを検索';
+
+	/// ja: '検索をクリア'
+	String get clearSearch => '検索をクリア';
+
+	/// ja: '(one) {ライセンス: $n件} (other) {ライセンス: $n件}'
+	String licenseCount({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(n,
+		one: 'ライセンス: ${n}件',
+		other: 'ライセンス: ${n}件',
+	);
+
+	/// ja: 'ライセンスが見つかりませんでした'
+	String get notFound => 'ライセンスが見つかりませんでした';
+}
+
+// Path: error
+class Translations$error$ja {
+	Translations$error$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'データを読み込めませんでした'
+	String get title => 'データを読み込めませんでした';
+
+	/// ja: '通信状況を確認して、もう一度お試しください。'
+	String get message => '通信状況を確認して、もう一度お試しください。';
+
+	/// ja: 'この情報を表示する権限がありません。FlutterKaigi スタッフへお問い合わせください。'
+	String get permissionDenied => 'この情報を表示する権限がありません。FlutterKaigi スタッフへお問い合わせください。';
+
+	/// ja: '通信状況を確認して、しばらくしてからもう一度お試しください。'
+	String get unavailable => '通信状況を確認して、しばらくしてからもう一度お試しください。';
+
+	/// ja: '読み込みに時間がかかっています。もう一度お試しください。'
+	String get timeout => '読み込みに時間がかかっています。もう一度お試しください。';
+
+	/// ja: '再試行'
+	String get retry => '再試行';
+
+	/// ja: '困った表情のダシュマル'
+	String get imageSemanticLabel => '困った表情のダシュマル';
 }
 
 // Path: notFound
@@ -377,18 +506,6 @@ class Translations$notFound$ja {
 
 	/// ja: 'お探しのページは存在しないか、移動した可能性があります。'
 	String get description => 'お探しのページは存在しないか、移動した可能性があります。';
-}
-
-// Path: common
-class Translations$common$ja {
-	Translations$common$ja.internal(this._root);
-
-	final Translations _root; // ignore: unused_field
-
-	// Translations
-
-	/// ja: '再試行'
-	String get retry => '再試行';
 }
 
 // Path: sessionTimetable.view
@@ -457,9 +574,9 @@ class Translations$sessionTimetable$type$ja {
 	String get event => 'イベント';
 }
 
-// Path: eventInfo.themeMode
-class Translations$eventInfo$themeMode$ja {
-	Translations$eventInfo$themeMode$ja.internal(this._root);
+// Path: settings.themeMode
+class Translations$settings$themeMode$ja {
+	Translations$settings$themeMode$ja.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -478,9 +595,9 @@ class Translations$eventInfo$themeMode$ja {
 	String get dark => 'ダーク';
 }
 
-// Path: eventInfo.language
-class Translations$eventInfo$language$ja {
-	Translations$eventInfo$language$ja.internal(this._root);
+// Path: settings.language
+class Translations$settings$language$ja {
+	Translations$settings$language$ja.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -505,18 +622,16 @@ extension on Translations {
 	dynamic _flatMapFunction(String path) {
 		return switch (path) {
 			'app.title' => 'FlutterKaigi 2026',
-			'navigation.news' => 'お知らせ',
+			'links.openError' => 'リンクを開けませんでした',
 			'navigation.sessions' => 'セッション',
 			'navigation.sponsors' => 'スポンサー',
-			'navigation.info' => '情報',
+			'navigation.info' => 'イベント',
 			'news.title' => 'お知らせ',
 			'news.empty' => 'お知らせはまだありません',
-			'news.error' => 'お知らせを取得できませんでした',
 			'sponsors.title' => 'スポンサー',
 			'sponsors.detailTitle' => 'スポンサー詳細',
 			'sponsors.subtitle' => 'FlutterKaigi 2026 を支えてくださるスポンサーの皆様',
 			'sponsors.empty' => 'スポンサーはまだ公開されていません',
-			'sponsors.error' => 'スポンサーを取得できませんでした',
 			'sponsors.notFound' => 'スポンサーが見つかりませんでした',
 			'sponsors.logoSemanticLabel' => ({required Object name}) => '${name} のロゴ',
 			'sponsors.tierBadge' => ({required Object tier}) => '${tier} スポンサー',
@@ -534,7 +649,6 @@ extension on Translations {
 			'sessionTimetable.view.shared' => '共通',
 			'sessionTimetable.empty' => 'タイムテーブルはまだ公開されていません',
 			'sessionTimetable.emptyFiltered' => 'この日の予定はありません',
-			'sessionTimetable.error' => 'タイムテーブルを取得できませんでした',
 			'sessionTimetable.venue.unknown' => '会場未定',
 			'sessionTimetable.speaker.none' => '登壇者未定',
 			'sessionTimetable.type.regular' => '通常セッション',
@@ -559,7 +673,6 @@ extension on Translations {
 			'sessionSearch.emptyTitle' => 'セッションが見つかりません',
 			'sessionSearch.emptyBody' => 'キーワードや絞り込み条件を変更してみてください',
 			'sessionSearch.resultCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(n, one: '${n}件のセッション', other: '${n}件のセッション', ),
-			'sessionSearch.error' => 'セッションを検索できませんでした',
 			'sessionDetails.title' => 'セッション詳細',
 			'sessionDetails.description' => '概要',
 			'sessionDetails.schedule' => '日時・会場',
@@ -568,7 +681,6 @@ extension on Translations {
 			'sessionDetails.sessionize' => 'Sessionize',
 			'sessionDetails.share' => '共有',
 			'sessionDetails.notFound' => 'セッションが見つかりませんでした',
-			'sessionDetails.error' => 'セッションを取得できませんでした',
 			'sessionBookmark.openBookmarked' => 'ブックマークしたセッション',
 			'sessionBookmark.add' => 'ブックマークに追加',
 			'sessionBookmark.remove' => 'ブックマークから削除',
@@ -577,19 +689,52 @@ extension on Translations {
 			'bookmarkedSessions.emptyTitle' => 'ブックマークしたセッションはありません',
 			'bookmarkedSessions.emptyBody' => '気になるセッションをブックマークすると、ここからすぐに見つけられます',
 			'bookmarkedSessions.openSessions' => 'タイムテーブルを開く',
-			'bookmarkedSessions.error' => 'ブックマークしたセッションを取得できませんでした',
-			'eventInfo.title' => '情報',
-			'eventInfo.version' => 'バージョン',
-			'eventInfo.themeMode.title' => 'テーマ',
-			'eventInfo.themeMode.system' => 'システムに合わせる',
-			'eventInfo.themeMode.light' => 'ライト',
-			'eventInfo.themeMode.dark' => 'ダーク',
-			'eventInfo.language.title' => '表示言語',
-			'eventInfo.language.japanese' => '日本語',
-			'eventInfo.language.english' => 'English',
+			'eventInfo.title' => 'イベント概要',
+			'eventInfo.newsTitle' => '最新のお知らせ',
+			'eventInfo.newsSubtitle' => 'FlutterKaigi 2026 の最新情報を確認',
+			'eventInfo.logoSemanticLabel' => 'FlutterKaigi 2026 ロゴ',
+			'eventInfo.tagline' => '会って、話して、熱くなる。',
+			'eventInfo.themeName' => '〜Assemble〜',
+			'eventInfo.description' => '2026年、日本国内で Flutter をメインに扱う技術カンファレンス。Flutter や Dart の知見を共有し、参加者同士がつながる2日間です。',
+			'eventInfo.dateLabel' => '日程',
+			'eventInfo.date' => '2026年10月29日(木) – 30日(金)',
+			'eventInfo.venueLabel' => '会場',
+			'eventInfo.venue' => '浜松町コンベンションホール',
+			'eventInfo.viewMap' => '地図を見る',
+			'eventInfo.other' => 'その他',
+			'eventInfo.officialWebsite' => '公式Webサイト',
+			'eventInfo.codeOfConduct' => '行動規範',
+			'eventInfo.privacyPolicy' => 'プライバシーポリシー',
+			'eventInfo.exclusionPolicy' => '反社会的勢力排除に関する基本方針',
+			'eventInfo.contact' => 'お問い合わせ',
+			'eventInfo.sourceCode' => 'ソースコードを見る',
+			'eventInfo.ossLicenses' => 'OSSライセンス',
+			'settings.title' => '設定',
+			'settings.appearance' => '表示設定',
+			'settings.appInfo' => 'アプリ情報',
+			'settings.version' => 'バージョン',
+			'settings.saveError' => '設定を保存できませんでした',
+			'settings.themeMode.title' => 'テーマ',
+			'settings.themeMode.system' => 'システムに合わせる',
+			'settings.themeMode.light' => 'ライト',
+			'settings.themeMode.dark' => 'ダーク',
+			'settings.language.title' => '表示言語',
+			'settings.language.japanese' => '日本語',
+			'settings.language.english' => 'English',
+			'licenses.title' => 'ライセンス',
+			'licenses.searchHint' => 'パッケージを検索',
+			'licenses.clearSearch' => '検索をクリア',
+			'licenses.licenseCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(n, one: 'ライセンス: ${n}件', other: 'ライセンス: ${n}件', ),
+			'licenses.notFound' => 'ライセンスが見つかりませんでした',
+			'error.title' => 'データを読み込めませんでした',
+			'error.message' => '通信状況を確認して、もう一度お試しください。',
+			'error.permissionDenied' => 'この情報を表示する権限がありません。FlutterKaigi スタッフへお問い合わせください。',
+			'error.unavailable' => '通信状況を確認して、しばらくしてからもう一度お試しください。',
+			'error.timeout' => '読み込みに時間がかかっています。もう一度お試しください。',
+			'error.retry' => '再試行',
+			'error.imageSemanticLabel' => '困った表情のダシュマル',
 			'notFound.title' => 'ページが見つかりません',
 			'notFound.description' => 'お探しのページは存在しないか、移動した可能性があります。',
-			'common.retry' => '再試行',
 			_ => null,
 		};
 	}
