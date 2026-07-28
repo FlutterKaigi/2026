@@ -7,7 +7,6 @@ import 'package:app/core/provider/app_locale.dart';
 import 'package:app/core/router/router.dart';
 import 'package:app/core/ui/launch_external_url.dart';
 import 'package:app/core/ui/widget/settings_icon_button.dart';
-import 'package:app/core/ui/widget/trademark_footer_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -151,8 +150,6 @@ class EventInfoPage extends ConsumerWidget {
                           ],
                         ),
                       ),
-                      const SizedBox(height: 24),
-                      const TrademarkFooterWidget(),
                     ],
                   ),
                 ),

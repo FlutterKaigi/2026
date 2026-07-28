@@ -2,6 +2,7 @@ import 'package:app/core/constants/app_links.dart';
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/provider/package_info.dart';
 import 'package:app/core/provider/shared_preferences.dart';
+import 'package:app/core/ui/widget/trademark_footer_widget.dart';
 import 'package:app/feature/event/ui/page/event_info_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -62,6 +63,7 @@ void main() {
     );
     expect(find.byIcon(Icons.settings_outlined), findsOneWidget);
     expect(find.text('アプリ設定'), findsNothing);
+    expect(find.byType(TrademarkFooterWidget), findsNothing);
   }, variant: TargetPlatformVariant.only(TargetPlatform.macOS));
 
   testWidgets('opens news from the event overview banner', (tester) async {
