@@ -14,12 +14,15 @@ import 'package:website/components/event_section/social_link_card.dart'
     as _social_link_card;
 import 'package:website/components/staff_section/staff_card.dart'
     as _staff_card;
+import 'package:website/components/app_dialog.dart' as _app_dialog;
 import 'package:website/components/event_section.dart' as _event_section;
 import 'package:website/components/footer.dart' as _footer;
 import 'package:website/components/header.dart' as _header;
 import 'package:website/components/hiring_section.dart' as _hiring_section;
 import 'package:website/components/sponsors_section.dart' as _sponsors_section;
 import 'package:website/components/staff_section.dart' as _staff_section;
+import 'package:website/components/timetable_section.dart'
+    as _timetable_section;
 import 'package:website/pages/home.dart' as _home;
 import 'package:website/pages/sponsor_detail.dart' as _sponsor_detail;
 import 'package:website/app.dart' as _app;
@@ -49,12 +52,14 @@ ServerOptions get defaultServerOptions => ServerOptions(
     ..._roadmap_card.RoadmapCard.styles,
     ..._social_link_card.SocialLinkCard.styles,
     ..._staff_card.StaffCard.styles,
+    ..._app_dialog.AppDialog.styles,
     ..._event_section.EventSection.styles,
     ..._footer.Footer.styles,
     ..._header.Header.styles,
     ..._hiring_section.HiringSection.styles,
     ..._sponsors_section.SponsorsSection.styles,
     ..._staff_section.StaffSection.styles,
+    ..._timetable_section.TimetableSection.styles,
     ..._home.Home.styles,
     ..._sponsor_detail.SponsorDetailPage.styles,
     ..._app.App.styles,
