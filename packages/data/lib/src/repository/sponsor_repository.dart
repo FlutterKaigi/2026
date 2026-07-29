@@ -4,7 +4,7 @@ import '../model/sponsor.dart';
 import 'firestore_watch.dart';
 
 abstract interface class SponsorRepository {
-  Stream<List<Sponsor>> watchAll({bool skipMalformedDocuments = false});
+  Stream<List<Sponsor>> watchAll({bool excludeUnsupportedTiers = false});
   Future<void> save(Sponsor sponsor);
   Future<void> delete(String id);
 }
@@ -17,7 +17,7 @@ final class FirestoreSponsorRepository implements SponsorRepository {
   CollectionReference<Map<String, dynamic>> get _collection => _firestore.collection('sponsors');
 
   @override
-  Stream<List<Sponsor>> watchAll({bool skipMalformedDocuments = false}) {
+  Stream<List<Sponsor>> watchAll({bool excludeUnsupportedTiers = false}) {
     final query = _collection.orderBy('createdAt', descending: true);
     return watchFirestoreQuery(query).map(
       (snapshot) => snapshot.docs
@@ -25,7 +25,7 @@ final class FirestoreSponsorRepository implements SponsorRepository {
             (doc) => parseSponsorDocument(
               id: doc.id,
               data: doc.data(),
-              skipMalformedDocument: skipMalformedDocuments,
+              excludeUnsupportedTier: excludeUnsupportedTiers,
             ),
           )
           .nonNulls
@@ -55,20 +55,17 @@ final class FirestoreSponsorRepository implements SponsorRepository {
 
 /// Parses one sponsor document without treating a missing logo as invalid.
 ///
-/// Public clients can skip an incomplete document so one dashboard draft does
-/// not break the whole sponsor list. Other consumers keep strict conversion by
-/// default. This is not an access-control boundary.
+/// Public clients can exclude tiers they do not support yet. Other malformed
+/// fields keep surfacing as conversion errors, and other consumers keep strict
+/// tier conversion by default. This is not an access-control boundary.
 Sponsor? parseSponsorDocument({
   required String id,
   required Map<String, dynamic> data,
-  required bool skipMalformedDocument,
+  required bool excludeUnsupportedTier,
 }) {
-  try {
-    return Sponsor.fromJson(<String, dynamic>{...data, 'id': id});
-  } on Object {
-    if (!skipMalformedDocument) {
-      rethrow;
-    }
+  final tier = data['tier'];
+  if (excludeUnsupportedTier && (tier is! String || !SponsorTier.values.any((value) => value.name == tier))) {
     return null;
   }
+  return Sponsor.fromJson(<String, dynamic>{...data, 'id': id});
 }

@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 void main() {
-  test('sponsorListProvider keeps logo-less sponsors and isolates malformed documents', () async {
+  test('sponsorListProvider keeps logo-less sponsors and excludes unsupported tiers', () async {
     final repository = _FakeSponsorRepository([
       _sponsor(id: 'with-logo', name: 'With Logo'),
       _sponsor(id: 'without-logo', name: 'Without Logo', primaryLogoUrl: null),
@@ -23,7 +23,7 @@ void main() {
     final sponsors = await container.read(sponsorListProvider.future);
 
     expect(sponsors.map((sponsor) => sponsor.id), ['with-logo', 'without-logo']);
-    expect(repository.skipMalformedDocuments, isTrue);
+    expect(repository.excludeUnsupportedTiers, isTrue);
   });
 
   test('buildSponsorWallData groups sponsors by tier and pins Flutter first', () {
@@ -64,11 +64,11 @@ final class _FakeSponsorRepository implements SponsorRepository {
   _FakeSponsorRepository(this.sponsors);
 
   final List<Sponsor> sponsors;
-  bool? skipMalformedDocuments;
+  bool? excludeUnsupportedTiers;
 
   @override
-  Stream<List<Sponsor>> watchAll({bool skipMalformedDocuments = false}) {
-    this.skipMalformedDocuments = skipMalformedDocuments;
+  Stream<List<Sponsor>> watchAll({bool excludeUnsupportedTiers = false}) {
+    this.excludeUnsupportedTiers = excludeUnsupportedTiers;
     return Stream.value(sponsors);
   }
 

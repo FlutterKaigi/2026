@@ -10,33 +10,37 @@ void main() {
           ..._sponsorData(),
           'primaryLogoUrl': null,
         },
-        skipMalformedDocument: true,
+        excludeUnsupportedTier: true,
       );
 
       expect(sponsor?.id, 'logo-less-001');
       expect(sponsor?.primaryLogoUrl, isNull);
     });
 
-    test('skips an incomplete draft when requested', () {
+    test('skips an unsupported tier when requested', () {
       final sponsor = parseSponsorDocument(
-        id: 'draft-001',
+        id: 'unsupported-001',
         data: <String, dynamic>{
-          'name': {'ja': '入力中'},
+          ..._sponsorData(),
+          'tier': 'GENDAスペシャル',
         },
-        skipMalformedDocument: true,
+        excludeUnsupportedTier: true,
       );
 
       expect(sponsor, isNull);
     });
 
-    test('keeps strict conversion for other consumers', () {
+    test('keeps strict tier conversion for other consumers', () {
       expect(
         () => parseSponsorDocument(
-          id: 'malformed-001',
-          data: <String, dynamic>{},
-          skipMalformedDocument: false,
+          id: 'unsupported-001',
+          data: <String, dynamic>{
+            ..._sponsorData(),
+            'tier': 'GENDAスペシャル',
+          },
+          excludeUnsupportedTier: false,
         ),
-        throwsA(isA<TypeError>()),
+        throwsArgumentError,
       );
     });
 
@@ -44,7 +48,7 @@ void main() {
       final sponsor = parseSponsorDocument(
         id: 'dashboard-001',
         data: _sponsorData(),
-        skipMalformedDocument: false,
+        excludeUnsupportedTier: false,
       );
 
       expect(sponsor?.id, 'dashboard-001');
