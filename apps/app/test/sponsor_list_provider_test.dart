@@ -9,6 +9,7 @@ void main() {
   test('sponsorListProvider requests only publishable sponsors', () async {
     final repository = _FakeSponsorRepository([
       _sponsor(id: 'published', name: 'Published'),
+      _sponsor(id: 'draft', name: 'Draft', primaryLogoUrl: ''),
     ]);
     final container = ProviderContainer(
       overrides: [
@@ -68,7 +69,10 @@ final class _FakeSponsorRepository implements SponsorRepository {
   @override
   Stream<List<Sponsor>> watchAll({bool requirePrimaryLogo = false}) {
     this.requirePrimaryLogo = requirePrimaryLogo;
-    return Stream.value(sponsors);
+    return Stream.value([
+      for (final sponsor in sponsors)
+        if (!requirePrimaryLogo || sponsor.primaryLogoUrl?.trim().isNotEmpty == true) sponsor,
+    ]);
   }
 
   @override
@@ -83,6 +87,7 @@ Sponsor _sponsor({
   required String name,
   SponsorTier tier = SponsorTier.platinum,
   String? slug,
+  String primaryLogoUrl = 'https://example.com/logo.png',
 }) {
   return Sponsor(
     id: id,
@@ -90,6 +95,7 @@ Sponsor _sponsor({
     description: const LocaleMap(ja: '', en: ''),
     tier: tier,
     slug: slug,
+    primaryLogoUrl: primaryLogoUrl,
     createdAt: DateTime.utc(2026),
     updatedAt: DateTime.utc(2026),
   );

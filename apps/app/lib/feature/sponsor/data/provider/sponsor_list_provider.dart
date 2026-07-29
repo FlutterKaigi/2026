@@ -4,8 +4,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 /// Streams sponsors from Firestore.
 final sponsorListProvider = StreamProvider<List<Sponsor>>(
-  // Matches the website generator's temporary publication gate. Applying it
-  // at the repository boundary also prevents unpublished detail routes.
+  // Match the website's current logo-based display condition. This only hides
+  // incomplete entries from the app UI; Firestore rules control data access.
   (ref) => ref.watch(sponsorRepositoryProvider).watchAll(requirePrimaryLogo: true),
 );
 

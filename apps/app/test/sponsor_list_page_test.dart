@@ -3,6 +3,7 @@ import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/router/router.dart';
 import 'package:app/core/ui/widget/trademark_footer_widget.dart';
 import 'package:app/feature/sponsor/data/provider/sponsor_list_provider.dart';
+import 'package:app/feature/sponsor/data/provider/sponsor_repository.dart';
 import 'package:app/feature/sponsor/ui/page/sponsor_details_page.dart';
 import 'package:app/feature/sponsor/ui/page/sponsor_list_page.dart';
 import 'package:data/data.dart';
@@ -21,19 +22,20 @@ void main() {
   });
 
   testWidgets('SponsorListPage renders sponsors from the repository', (tester) async {
+    final repository = _FakeSponsorRepository([
+      _sponsor(id: 'D2026-015', name: 'Flutter', slug: 'flutter'),
+      _sponsor(
+        id: 'D2026-020',
+        name: 'Gold Sponsor',
+        tier: SponsorTier.gold,
+      ),
+    ]);
     await tester.pumpWidget(
       TranslationProvider(
         child: ProviderScope(
           overrides: [
-            sponsorListProvider.overrideWithValue(
-              AsyncData([
-                _sponsor(id: 'D2026-015', name: 'Flutter', slug: 'flutter'),
-                _sponsor(
-                  id: 'D2026-020',
-                  name: 'Gold Sponsor',
-                  tier: SponsorTier.gold,
-                ),
-              ]),
+            sponsorRepositoryProvider.overrideWithValue(
+              repository,
             ),
           ],
           child: MaterialApp(
@@ -51,6 +53,7 @@ void main() {
     expect(find.text('スポンサー'), findsWidgets);
     expect(find.text('Platinum'), findsOneWidget);
     expect(find.text('Flutter'), findsOneWidget);
+    expect(repository.requirePrimaryLogo, isTrue);
     final appBar = tester.widget<AppBar>(find.byType(AppBar));
     final appBarTitle = appBar.title! as Text;
     expect(appBar.toolbarHeight, 52);
@@ -242,6 +245,25 @@ void main() {
       findsOneWidget,
     );
   });
+}
+
+final class _FakeSponsorRepository implements SponsorRepository {
+  _FakeSponsorRepository(this.sponsors);
+
+  final List<Sponsor> sponsors;
+  bool? requirePrimaryLogo;
+
+  @override
+  Stream<List<Sponsor>> watchAll({bool requirePrimaryLogo = false}) {
+    this.requirePrimaryLogo = requirePrimaryLogo;
+    return Stream.value(sponsors);
+  }
+
+  @override
+  Future<void> save(Sponsor sponsor) async {}
+
+  @override
+  Future<void> delete(String id) async {}
 }
 
 Sponsor _sponsor({

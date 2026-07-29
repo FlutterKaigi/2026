@@ -53,10 +53,12 @@ final class FirestoreSponsorRepository implements SponsorRepository {
   Future<void> delete(String id) => _collection.doc(id).delete();
 }
 
-/// Parses one sponsor document after applying the requested publication gate.
+/// Parses one sponsor document after applying the requested display filter.
 ///
 /// The logo check intentionally runs before strict model conversion so a draft
 /// that is still being completed in the dashboard cannot break public clients.
+/// This filter does not enforce access control; Firestore rules determine which
+/// documents clients can read.
 Sponsor? parseSponsorDocument({
   required String id,
   required Map<String, dynamic> data,
