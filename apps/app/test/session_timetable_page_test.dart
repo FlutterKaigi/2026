@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:app/core/designsystem/theme/app_theme.dart';
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/provider/shared_preferences.dart';
 import 'package:app/feature/session/data/provider/session_repository.dart';
@@ -27,9 +28,35 @@ void main() {
     expect(find.text('2026/10/31'), findsNothing);
     expect(find.text('JA'), findsOneWidget);
     expect(find.text('Description'), findsNothing);
+    final appBar = tester.widget<AppBar>(find.byType(AppBar));
+    final appBarTitle = appBar.title! as Text;
+    expect(appBar.toolbarHeight, 52);
+    expect(appBarTitle.style?.fontSize, 16);
+    expect(appBarTitle.style?.fontWeight, FontWeight.w700);
 
     expect(find.byIcon(Icons.tune), findsNothing);
     expect(find.text('時刻表示'), findsNothing);
+  });
+
+  testWidgets('uses an icon-only bookmarked action at every width', (tester) async {
+    await _pumpTimetableState(
+      tester,
+      AsyncData(_loadedTimetable),
+    );
+
+    expect(find.byTooltip('ブックマークしたセッション'), findsOneWidget);
+    expect(find.byIcon(Icons.bookmarks_outlined), findsOneWidget);
+    expect(find.text('ブックマークしたセッション'), findsNothing);
+
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(1200, 900);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.view.resetPhysicalSize);
+    await tester.pump();
+
+    expect(find.byTooltip('ブックマークしたセッション'), findsOneWidget);
+    expect(find.byIcon(Icons.bookmarks_outlined), findsOneWidget);
+    expect(find.text('ブックマークしたセッション'), findsNothing);
   });
 
   testWidgets('switches between list and room timeline views', (tester) async {
@@ -287,6 +314,7 @@ Future<void> _pumpTimetableRepositories(
 
 Widget _testApp() {
   return MaterialApp(
+    theme: lightTheme(),
     locale: const Locale('ja'),
     supportedLocales: AppLocaleUtils.supportedLocales,
     localizationsDelegates: GlobalMaterialLocalizations.delegates,

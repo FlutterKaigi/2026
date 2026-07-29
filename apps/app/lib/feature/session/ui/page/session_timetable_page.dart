@@ -1,7 +1,6 @@
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/router/router.dart';
 import 'package:app/core/ui/widget/settings_icon_button.dart';
-import 'package:app/core/util/window_size.dart';
 import 'package:app/feature/session/data/provider/session_timetable_provider.dart';
 import 'package:app/feature/session/ui/widget/session_timetable_empty_state_widget.dart';
 import 'package:app/feature/session/ui/widget/session_timetable_error_state_widget.dart';
@@ -20,7 +19,6 @@ class SessionTimetablePage extends HookConsumerWidget {
     final timetable = ref.watch(sessionTimetableProvider);
     final scrollController = useScrollController();
     final viewMode = useState(SessionTimetableViewMode.list);
-    final windowSize = WindowSize.fromWidth(MediaQuery.sizeOf(context).width);
     final timetableData = switch (timetable) {
       AsyncData(:final value) => value,
       _ => null,
@@ -47,51 +45,31 @@ class SessionTimetablePage extends HookConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(t.sessionTimetable.title),
+        toolbarHeight: 52,
+        title: Text(
+          t.sessionTimetable.title,
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w700,
+          ),
+        ),
         actions: [
-          if (windowSize == WindowSize.compact) ...[
-            if (timetableData?.hasAnyEntries ?? false)
-              IconButton(
-                tooltip: t.sessionSearch.title,
-                onPressed: openSearch,
-                icon: const Icon(Icons.search),
-              ),
-            if (timetableData?.hasAnyEntries ?? false)
-              IconButton(
-                tooltip: viewModeTooltip,
-                onPressed: toggleViewMode,
-                icon: Icon(viewModeIcon),
-              ),
+          if (timetableData?.hasAnyEntries ?? false)
             IconButton(
-              tooltip: t.sessionBookmark.openBookmarked,
-              onPressed: openBookmarked,
-              icon: const Icon(Icons.bookmarks_outlined),
+              tooltip: t.sessionSearch.title,
+              onPressed: openSearch,
+              icon: const Icon(Icons.search),
             ),
-          ] else ...[
-            if (timetableData?.hasAnyEntries ?? false)
-              IconButton(
-                tooltip: t.sessionSearch.title,
-                onPressed: openSearch,
-                icon: const Icon(Icons.search),
-              ),
-            if (timetableData?.hasAnyEntries ?? false)
-              IconButton(
-                tooltip: viewModeTooltip,
-                onPressed: toggleViewMode,
-                icon: Icon(viewModeIcon),
-              ),
-            Padding(
-              padding: const EdgeInsetsDirectional.only(end: 16),
-              child: Tooltip(
-                message: t.sessionBookmark.openBookmarked,
-                child: FilledButton.tonalIcon(
-                  onPressed: openBookmarked,
-                  icon: const Icon(Icons.bookmarks_outlined),
-                  label: Text(t.sessionBookmark.openBookmarked),
-                ),
-              ),
+          if (timetableData?.hasAnyEntries ?? false)
+            IconButton(
+              tooltip: viewModeTooltip,
+              onPressed: toggleViewMode,
+              icon: Icon(viewModeIcon),
             ),
-          ],
+          IconButton(
+            tooltip: t.sessionBookmark.openBookmarked,
+            onPressed: openBookmarked,
+            icon: const Icon(Icons.bookmarks_outlined),
+          ),
           const SettingsIconButton(),
         ],
       ),

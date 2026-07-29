@@ -4,7 +4,9 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 /// Streams sponsors from Firestore.
 final sponsorListProvider = StreamProvider<List<Sponsor>>(
-  (ref) => ref.watch(sponsorRepositoryProvider).watchAll(),
+  // Keep valid sponsors without a logo so the UI can render its name fallback.
+  // Hide tiers the app does not support while their presentation is undecided.
+  (ref) => ref.watch(sponsorRepositoryProvider).watchAll(excludeUnsupportedTiers: true),
 );
 
 /// Groups sponsors for the logo wall UI.

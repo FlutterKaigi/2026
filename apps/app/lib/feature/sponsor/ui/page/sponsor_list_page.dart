@@ -17,7 +17,13 @@ class SponsorListPage extends ConsumerWidget {
     final sponsorWall = ref.watch(sponsorWallProvider);
     return Scaffold(
       appBar: AppBar(
-        title: Text(t.sponsors.title),
+        toolbarHeight: 52,
+        title: Text(
+          t.sponsors.title,
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w700,
+          ),
+        ),
         actions: const [SettingsIconButton()],
       ),
       body: switch (sponsorWall) {

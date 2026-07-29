@@ -1,6 +1,8 @@
+import 'package:app/core/designsystem/theme/app_theme.dart';
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/router/router.dart';
 import 'package:app/core/ui/widget/trademark_footer_widget.dart';
+import 'package:app/feature/sponsor/data/provider/sponsor_list_provider.dart';
 import 'package:app/feature/sponsor/data/provider/sponsor_repository.dart';
 import 'package:app/feature/sponsor/ui/page/sponsor_details_page.dart';
 import 'package:app/feature/sponsor/ui/page/sponsor_list_page.dart';
@@ -20,22 +22,24 @@ void main() {
   });
 
   testWidgets('SponsorListPage renders sponsors from the repository', (tester) async {
+    final repository = _FakeSponsorRepository([
+      _sponsor(id: 'D2026-015', name: 'Flutter', slug: 'flutter'),
+      _sponsor(
+        id: 'D2026-020',
+        name: 'Gold Sponsor',
+        tier: SponsorTier.gold,
+      ),
+    ]);
     await tester.pumpWidget(
       TranslationProvider(
         child: ProviderScope(
           overrides: [
             sponsorRepositoryProvider.overrideWithValue(
-              _FakeSponsorRepository([
-                _sponsor(id: 'D2026-015', name: 'Flutter', slug: 'flutter'),
-                _sponsor(
-                  id: 'D2026-020',
-                  name: 'Gold Sponsor',
-                  tier: SponsorTier.gold,
-                ),
-              ]),
+              repository,
             ),
           ],
           child: MaterialApp(
+            theme: lightTheme(),
             locale: const Locale('en'),
             supportedLocales: AppLocaleUtils.supportedLocales,
             localizationsDelegates: GlobalMaterialLocalizations.delegates,
@@ -49,6 +53,12 @@ void main() {
     expect(find.text('スポンサー'), findsWidgets);
     expect(find.text('Platinum'), findsOneWidget);
     expect(find.text('Flutter'), findsOneWidget);
+    expect(repository.excludeUnsupportedTiers, isTrue);
+    final appBar = tester.widget<AppBar>(find.byType(AppBar));
+    final appBarTitle = appBar.title! as Text;
+    expect(appBar.toolbarHeight, 52);
+    expect(appBarTitle.style?.fontSize, 16);
+    expect(appBarTitle.style?.fontWeight, FontWeight.w700);
 
     await tester.scrollUntilVisible(find.text('Gold Sponsor'), 300);
     await tester.pumpAndSettle();
@@ -83,8 +93,8 @@ void main() {
       TranslationProvider(
         child: ProviderScope(
           overrides: [
-            sponsorRepositoryProvider.overrideWithValue(
-              _FakeSponsorRepository([
+            sponsorListProvider.overrideWithValue(
+              AsyncData([
                 for (var index = 1; index <= 50; index++)
                   _sponsor(
                     id: 'D2026-$index',
@@ -129,8 +139,8 @@ void main() {
       TranslationProvider(
         child: ProviderScope(
           overrides: [
-            sponsorRepositoryProvider.overrideWithValue(
-              _FakeSponsorRepository([
+            sponsorListProvider.overrideWithValue(
+              AsyncData([
                 _sponsor(id: 'D2026-001', name: 'Platinum Sponsor 1'),
                 _sponsor(id: 'D2026-002', name: 'Platinum Sponsor 2'),
                 _sponsor(id: 'D2026-003', name: 'Platinum Sponsor 3'),
@@ -195,8 +205,8 @@ void main() {
       TranslationProvider(
         child: ProviderScope(
           overrides: [
-            sponsorRepositoryProvider.overrideWithValue(
-              _FakeSponsorRepository([sponsor]),
+            sponsorListProvider.overrideWithValue(
+              AsyncData([sponsor]),
             ),
           ],
           child: MaterialApp.router(
@@ -238,12 +248,16 @@ void main() {
 }
 
 final class _FakeSponsorRepository implements SponsorRepository {
-  const _FakeSponsorRepository(this._sponsors);
+  _FakeSponsorRepository(this.sponsors);
 
-  final List<Sponsor> _sponsors;
+  final List<Sponsor> sponsors;
+  bool? excludeUnsupportedTiers;
 
   @override
-  Stream<List<Sponsor>> watchAll() => Stream.value(_sponsors);
+  Stream<List<Sponsor>> watchAll({bool excludeUnsupportedTiers = false}) {
+    this.excludeUnsupportedTiers = excludeUnsupportedTiers;
+    return Stream.value(sponsors);
+  }
 
   @override
   Future<void> save(Sponsor sponsor) async {}
