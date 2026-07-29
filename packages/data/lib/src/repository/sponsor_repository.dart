@@ -56,9 +56,10 @@ final class FirestoreSponsorRepository implements SponsorRepository {
 /// Parses one sponsor document after applying the requested display filter.
 ///
 /// The logo check intentionally runs before strict model conversion so a draft
-/// that is still being completed in the dashboard cannot break public clients.
-/// This filter does not enforce access control; Firestore rules determine which
-/// documents clients can read.
+/// without a usable primary logo cannot break public clients. Documents that
+/// pass the logo check are still parsed strictly and can surface data errors.
+/// This filter does not enforce access control; Firestore currently permits
+/// public reads.
 Sponsor? parseSponsorDocument({
   required String id,
   required Map<String, dynamic> data,
