@@ -25,7 +25,7 @@ final class FirestoreSponsorRepository implements SponsorRepository {
             (doc) => parseSponsorDocument(
               id: doc.id,
               data: doc.data(),
-              excludeUnsupportedTier: excludeUnsupportedTiers,
+              excludeUnsupportedTiers: excludeUnsupportedTiers,
             ),
           )
           .nonNulls
@@ -61,10 +61,10 @@ final class FirestoreSponsorRepository implements SponsorRepository {
 Sponsor? parseSponsorDocument({
   required String id,
   required Map<String, dynamic> data,
-  required bool excludeUnsupportedTier,
+  required bool excludeUnsupportedTiers,
 }) {
   final tier = data['tier'];
-  if (excludeUnsupportedTier && (tier is! String || !SponsorTier.values.any((value) => value.name == tier))) {
+  if (excludeUnsupportedTiers && tier is String && !SponsorTier.values.any((value) => value.name == tier)) {
     return null;
   }
   return Sponsor.fromJson(<String, dynamic>{...data, 'id': id});

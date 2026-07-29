@@ -10,7 +10,7 @@ void main() {
           ..._sponsorData(),
           'primaryLogoUrl': null,
         },
-        excludeUnsupportedTier: true,
+        excludeUnsupportedTiers: true,
       );
 
       expect(sponsor?.id, 'logo-less-001');
@@ -24,7 +24,7 @@ void main() {
           ..._sponsorData(),
           'tier': 'GENDAスペシャル',
         },
-        excludeUnsupportedTier: true,
+        excludeUnsupportedTiers: true,
       );
 
       expect(sponsor, isNull);
@@ -38,7 +38,7 @@ void main() {
             ..._sponsorData(),
             'tier': 'GENDAスペシャル',
           },
-          excludeUnsupportedTier: false,
+          excludeUnsupportedTiers: false,
         ),
         throwsArgumentError,
       );
@@ -48,11 +48,36 @@ void main() {
       final sponsor = parseSponsorDocument(
         id: 'dashboard-001',
         data: _sponsorData(),
-        excludeUnsupportedTier: false,
+        excludeUnsupportedTiers: false,
       );
 
       expect(sponsor?.id, 'dashboard-001');
       expect(sponsor?.primaryLogoUrl, isNotNull);
+    });
+
+    test('keeps a missing tier as a conversion error', () {
+      expect(
+        () => parseSponsorDocument(
+          id: 'missing-tier-001',
+          data: <String, dynamic>{..._sponsorData()}..remove('tier'),
+          excludeUnsupportedTiers: true,
+        ),
+        throwsArgumentError,
+      );
+    });
+
+    test('keeps a non-string tier as a conversion error', () {
+      expect(
+        () => parseSponsorDocument(
+          id: 'invalid-tier-001',
+          data: <String, dynamic>{
+            ..._sponsorData(),
+            'tier': 1,
+          },
+          excludeUnsupportedTiers: true,
+        ),
+        throwsArgumentError,
+      );
     });
   });
 }

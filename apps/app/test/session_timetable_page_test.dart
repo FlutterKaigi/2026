@@ -48,7 +48,10 @@ void main() {
     expect(find.byIcon(Icons.bookmarks_outlined), findsOneWidget);
     expect(find.text('ブックマークしたセッション'), findsNothing);
 
+    tester.view.devicePixelRatio = 1;
     tester.view.physicalSize = const Size(1200, 900);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.view.resetPhysicalSize);
     await tester.pump();
 
     expect(find.byTooltip('ブックマークしたセッション'), findsOneWidget);
