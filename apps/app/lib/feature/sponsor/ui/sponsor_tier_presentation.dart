@@ -11,6 +11,7 @@ extension SponsorTierPresentation on SponsorTier {
     SponsorTier.tool => 'Tool',
     SponsorTier.community => 'Community',
     SponsorTier.individual => 'Individual',
+    SponsorTier.entertainment => 'Entertainment',
   };
 
   /// Logo tile side length from the website sponsor wall.
@@ -33,6 +34,7 @@ extension SponsorTierPresentation on SponsorTier {
     SponsorTier.tool => const [Color(0xFF7E57C2), Color(0xFF65558F)],
     SponsorTier.community => const [Color(0xFF1E88E5), Color(0xFF1565C0)],
     SponsorTier.individual => const [Color(0xFF7E57C2), Color(0xFF65558F)],
+    SponsorTier.entertainment => const [Color(0xFFD81B60), Color(0xFFAD1457)],
   };
 
   Color get badgeForegroundColor => switch (this) {

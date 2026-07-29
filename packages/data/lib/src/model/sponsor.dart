@@ -7,7 +7,7 @@ part 'sponsor.freezed.dart';
 part 'sponsor.g.dart';
 
 @JsonEnum()
-enum SponsorTier { platinum, gold, silver, bronze, tool, community, individual }
+enum SponsorTier { platinum, gold, silver, bronze, tool, community, individual, entertainment }
 
 @freezed
 abstract class Sponsor with _$Sponsor {
