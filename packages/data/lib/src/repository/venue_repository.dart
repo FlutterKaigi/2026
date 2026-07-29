@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../model/venue.dart';
-import 'firestore_watch.dart';
 
 abstract interface class VenueRepository {
   Stream<List<Venue>> watchAll();
@@ -19,7 +18,7 @@ final class FirestoreVenueRepository implements VenueRepository {
   @override
   Stream<List<Venue>> watchAll() {
     final query = _collection.orderBy('createdAt', descending: true);
-    return watchFirestoreQuery(query).map(
+    return query.snapshots().map(
       (snapshot) => [
         for (final doc in snapshot.docs) Venue.fromJson(<String, dynamic>{...doc.data(), 'id': doc.id}),
       ],

@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../model/session.dart';
-import 'firestore_watch.dart';
 
 abstract interface class SessionRepository {
   Stream<List<Session>> watchAll();
@@ -19,7 +18,7 @@ final class FirestoreSessionRepository implements SessionRepository {
   @override
   Stream<List<Session>> watchAll() {
     final query = _collection.orderBy('startsAt');
-    return watchFirestoreQuery(query).map(
+    return query.snapshots().map(
       (snapshot) => [
         for (final doc in snapshot.docs) Session.fromJson(<String, dynamic>{...doc.data(), 'id': doc.id}),
       ],

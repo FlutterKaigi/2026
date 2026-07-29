@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../model/staff_member.dart';
-import 'firestore_watch.dart';
 
 abstract interface class StaffMemberRepository {
   Stream<List<StaffMember>> watchAll();
@@ -19,7 +18,7 @@ final class FirestoreStaffMemberRepository implements StaffMemberRepository {
   @override
   Stream<List<StaffMember>> watchAll() {
     final query = _collection.orderBy('order');
-    return watchFirestoreQuery(query).map(
+    return query.snapshots().map(
       (snapshot) => [
         for (final doc in snapshot.docs) StaffMember.fromJson(<String, dynamic>{...doc.data(), 'id': doc.id}),
       ],
