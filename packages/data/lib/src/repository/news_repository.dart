@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../model/news.dart';
+import 'firestore_watch.dart';
 
 abstract interface class NewsRepository {
   Future<List<News>> fetchNews();
@@ -27,7 +28,7 @@ final class FirestoreNewsRepository implements NewsRepository {
   @override
   Stream<List<News>> watchAll() {
     final query = _collection.orderBy('publishedAt', descending: true);
-    return query.snapshots().map(
+    return watchFirestoreQuery(query).map(
       (snapshot) => [
         for (final doc in snapshot.docs) News.fromJson(<String, dynamic>{...doc.data(), 'id': doc.id}),
       ],
