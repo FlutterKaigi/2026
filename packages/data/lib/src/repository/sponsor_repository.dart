@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../model/sponsor.dart';
 
 abstract interface class SponsorRepository {
-  Stream<List<Sponsor>> watchAll();
+  Stream<List<Sponsor>> watchAll({bool requirePrimaryLogo = false});
   Future<void> save(Sponsor sponsor);
   Future<void> delete(String id);
 }
@@ -16,12 +16,19 @@ final class FirestoreSponsorRepository implements SponsorRepository {
   CollectionReference<Map<String, dynamic>> get _collection => _firestore.collection('sponsors');
 
   @override
-  Stream<List<Sponsor>> watchAll() {
+  Stream<List<Sponsor>> watchAll({bool requirePrimaryLogo = false}) {
     final query = _collection.orderBy('createdAt', descending: true);
     return query.snapshots().map(
-      (snapshot) => [
-        for (final doc in snapshot.docs) Sponsor.fromJson(<String, dynamic>{...doc.data(), 'id': doc.id}),
-      ],
+      (snapshot) => snapshot.docs
+          .map(
+            (doc) => parseSponsorDocument(
+              id: doc.id,
+              data: doc.data(),
+              requirePrimaryLogo: requirePrimaryLogo,
+            ),
+          )
+          .nonNulls
+          .toList(),
     );
   }
 
@@ -43,4 +50,20 @@ final class FirestoreSponsorRepository implements SponsorRepository {
 
   @override
   Future<void> delete(String id) => _collection.doc(id).delete();
+}
+
+/// Parses one sponsor document after applying the requested publication gate.
+///
+/// The logo check intentionally runs before strict model conversion so a draft
+/// that is still being completed in the dashboard cannot break public clients.
+Sponsor? parseSponsorDocument({
+  required String id,
+  required Map<String, dynamic> data,
+  required bool requirePrimaryLogo,
+}) {
+  final primaryLogoUrl = data['primaryLogoUrl'];
+  if (requirePrimaryLogo && (primaryLogoUrl is! String || primaryLogoUrl.trim().isEmpty)) {
+    return null;
+  }
+  return Sponsor.fromJson(<String, dynamic>{...data, 'id': id});
 }

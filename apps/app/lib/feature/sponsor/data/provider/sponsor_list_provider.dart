@@ -4,17 +4,10 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 /// Streams sponsors from Firestore.
 final sponsorListProvider = StreamProvider<List<Sponsor>>(
-  (ref) => ref.watch(sponsorRepositoryProvider).watchAll().map(publishedSponsors),
+  // Matches the website generator's temporary publication gate. Applying it
+  // at the repository boundary also prevents unpublished detail routes.
+  (ref) => ref.watch(sponsorRepositoryProvider).watchAll(requirePrimaryLogo: true),
 );
-
-/// Keeps only sponsors ready to be shown in the conference app.
-///
-/// Sponsors without a primary logo remain available to the dashboard so that
-/// their information can be completed there.
-List<Sponsor> publishedSponsors(List<Sponsor> sponsors) => [
-  for (final sponsor in sponsors)
-    if (sponsor.primaryLogoUrl?.trim().isNotEmpty ?? false) sponsor,
-];
 
 /// Groups sponsors for the logo wall UI.
 final sponsorWallProvider = Provider<AsyncValue<SponsorWallData>>(

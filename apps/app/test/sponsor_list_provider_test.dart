@@ -1,21 +1,28 @@
 import 'package:app/feature/sponsor/data/provider/sponsor_detail_provider.dart';
 import 'package:app/feature/sponsor/data/provider/sponsor_list_provider.dart';
+import 'package:app/feature/sponsor/data/provider/sponsor_repository.dart';
 import 'package:data/data.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 void main() {
-  test('publishedSponsors keeps only sponsors with a primary logo', () {
-    final sponsors = publishedSponsors([
-      _sponsor(
-        id: 'published',
-        name: 'Published',
-        primaryLogoUrl: 'https://example.com/logo.png',
-      ),
-      _sponsor(id: 'empty-logo', name: 'Empty logo', primaryLogoUrl: ''),
-      _sponsor(id: 'no-logo', name: 'No logo'),
+  test('sponsorListProvider requests only publishable sponsors', () async {
+    final repository = _FakeSponsorRepository([
+      _sponsor(id: 'published', name: 'Published'),
     ]);
+    final container = ProviderContainer(
+      overrides: [
+        sponsorRepositoryProvider.overrideWithValue(repository),
+      ],
+    );
+    addTearDown(container.dispose);
+    final subscription = container.listen(sponsorListProvider, (_, _) {});
+    addTearDown(subscription.close);
+
+    final sponsors = await container.read(sponsorListProvider.future);
 
     expect(sponsors.map((sponsor) => sponsor.id), ['published']);
+    expect(repository.requirePrimaryLogo, isTrue);
   });
 
   test('buildSponsorWallData groups sponsors by tier and pins Flutter first', () {
@@ -52,12 +59,30 @@ void main() {
   });
 }
 
+final class _FakeSponsorRepository implements SponsorRepository {
+  _FakeSponsorRepository(this.sponsors);
+
+  final List<Sponsor> sponsors;
+  bool? requirePrimaryLogo;
+
+  @override
+  Stream<List<Sponsor>> watchAll({bool requirePrimaryLogo = false}) {
+    this.requirePrimaryLogo = requirePrimaryLogo;
+    return Stream.value(sponsors);
+  }
+
+  @override
+  Future<void> save(Sponsor sponsor) async {}
+
+  @override
+  Future<void> delete(String id) async {}
+}
+
 Sponsor _sponsor({
   required String id,
   required String name,
   SponsorTier tier = SponsorTier.platinum,
   String? slug,
-  String? primaryLogoUrl,
 }) {
   return Sponsor(
     id: id,
@@ -65,7 +90,6 @@ Sponsor _sponsor({
     description: const LocaleMap(ja: '', en: ''),
     tier: tier,
     slug: slug,
-    primaryLogoUrl: primaryLogoUrl,
     createdAt: DateTime.utc(2026),
     updatedAt: DateTime.utc(2026),
   );

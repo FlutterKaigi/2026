@@ -38,11 +38,16 @@ void main() {
     expect(find.text('時刻表示'), findsNothing);
   });
 
-  testWidgets('uses an icon-only bookmarked action at wide widths', (tester) async {
+  testWidgets('uses an icon-only bookmarked action at every width', (tester) async {
     await _pumpTimetableState(
       tester,
       AsyncData(_loadedTimetable),
     );
+
+    expect(find.byTooltip('ブックマークしたセッション'), findsOneWidget);
+    expect(find.byIcon(Icons.bookmarks_outlined), findsOneWidget);
+    expect(find.text('ブックマークしたセッション'), findsNothing);
+
     tester.view.physicalSize = const Size(1200, 900);
     await tester.pump();
 
