@@ -65,23 +65,10 @@ Sponsor? parseSponsorDocument({
 }) {
   try {
     return Sponsor.fromJson(<String, dynamic>{...data, 'id': id});
-  } on Object catch (error) {
+  } on Object {
     if (!skipMalformedDocument) {
       rethrow;
     }
-    final name = data['name'];
-    final description = data['description'];
-    // Temporary release-build diagnostics. Remove after inspecting the Preview.
-    // ignore: avoid_print
-    print(
-      '[SponsorParseError] id=$id error=$error '
-      'keys=${data.keys.toList()} '
-      'nameKeys=${name is Map ? name.keys.toList() : name.runtimeType} '
-      'descriptionKeys=${description is Map ? description.keys.toList() : description.runtimeType} '
-      'tier=${data['tier']} '
-      'createdAtType=${data['createdAt'].runtimeType} '
-      'updatedAtType=${data['updatedAt'].runtimeType}',
-    );
     return null;
   }
 }
