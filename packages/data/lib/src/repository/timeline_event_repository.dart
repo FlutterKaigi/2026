@@ -20,10 +20,7 @@ final class FirestoreTimelineEventRepository implements TimelineEventRepository 
   @override
   Stream<List<TimelineEvent>> watchAll() {
     final query = _collection.orderBy('startsAt');
-    return watchFirestoreQuery(
-      query,
-      fallbackToEmptyCacheOnTimeout: true,
-    ).map(
+    return watchFirestoreQuery(query).map(
       (snapshot) => [
         for (final doc in snapshot.docs) TimelineEvent.fromJson(<String, dynamic>{...doc.data(), 'id': doc.id}),
       ],

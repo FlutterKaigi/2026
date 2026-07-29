@@ -1,3 +1,4 @@
+import 'package:app/core/designsystem/theme/app_theme.dart';
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/router/router.dart';
 import 'package:app/core/ui/widget/trademark_footer_widget.dart';
@@ -36,6 +37,7 @@ void main() {
             ),
           ],
           child: MaterialApp(
+            theme: lightTheme(),
             locale: const Locale('en'),
             supportedLocales: AppLocaleUtils.supportedLocales,
             localizationsDelegates: GlobalMaterialLocalizations.delegates,
@@ -49,6 +51,11 @@ void main() {
     expect(find.text('スポンサー'), findsWidgets);
     expect(find.text('Platinum'), findsOneWidget);
     expect(find.text('Flutter'), findsOneWidget);
+    final appBar = tester.widget<AppBar>(find.byType(AppBar));
+    final appBarTitle = appBar.title! as Text;
+    expect(appBar.toolbarHeight, 52);
+    expect(appBarTitle.style?.fontSize, 16);
+    expect(appBarTitle.style?.fontWeight, FontWeight.w700);
 
     await tester.scrollUntilVisible(find.text('Gold Sponsor'), 300);
     await tester.pumpAndSettle();

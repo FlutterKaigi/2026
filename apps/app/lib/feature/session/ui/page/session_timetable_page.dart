@@ -47,7 +47,13 @@ class SessionTimetablePage extends HookConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(t.sessionTimetable.title),
+        toolbarHeight: 52,
+        title: Text(
+          t.sessionTimetable.title,
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w700,
+          ),
+        ),
         actions: [
           if (windowSize == WindowSize.compact) ...[
             if (timetableData?.hasAnyEntries ?? false)
