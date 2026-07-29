@@ -4,10 +4,9 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 /// Streams sponsors from Firestore.
 final sponsorListProvider = StreamProvider<List<Sponsor>>(
-  // Match the website's current logo-based display condition. This only hides
-  // entries without a usable primary logo from the UI; Firestore currently
-  // permits public reads, so this is not an access-control boundary.
-  (ref) => ref.watch(sponsorRepositoryProvider).watchAll(requirePrimaryLogo: true),
+  // Keep valid sponsors without a logo so the UI can render its name fallback.
+  // Isolate malformed dashboard drafts instead of failing the whole list.
+  (ref) => ref.watch(sponsorRepositoryProvider).watchAll(skipMalformedDocuments: true),
 );
 
 /// Groups sponsors for the logo wall UI.

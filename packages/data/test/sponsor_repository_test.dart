@@ -3,54 +3,52 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('parseSponsorDocument', () {
-    test('parses a complete sponsor when a primary logo is required', () {
+    test('parses a complete sponsor without a primary logo', () {
       final sponsor = parseSponsorDocument(
-        id: 'published-001',
-        data: _sponsorData(),
-        requirePrimaryLogo: true,
+        id: 'logo-less-001',
+        data: <String, dynamic>{
+          ..._sponsorData(),
+          'primaryLogoUrl': null,
+        },
+        skipMalformedDocument: true,
       );
 
-      expect(sponsor?.id, 'published-001');
+      expect(sponsor?.id, 'logo-less-001');
+      expect(sponsor?.primaryLogoUrl, isNull);
     });
 
-    test('skips an incomplete draft before strict conversion', () {
+    test('skips an incomplete draft when requested', () {
       final sponsor = parseSponsorDocument(
         id: 'draft-001',
         data: <String, dynamic>{
           'name': {'ja': '入力中'},
-          'primaryLogoUrl': '',
         },
-        requirePrimaryLogo: true,
+        skipMalformedDocument: true,
       );
 
       expect(sponsor, isNull);
     });
 
-    test('does not hide a malformed published sponsor', () {
+    test('keeps strict conversion for other consumers', () {
       expect(
         () => parseSponsorDocument(
           id: 'malformed-001',
-          data: <String, dynamic>{
-            'primaryLogoUrl': 'https://example.com/logo.png',
-          },
-          requirePrimaryLogo: true,
+          data: <String, dynamic>{},
+          skipMalformedDocument: false,
         ),
         throwsA(isA<TypeError>()),
       );
     });
 
-    test('keeps a sponsor without a logo when publication is not required', () {
+    test('parses a complete sponsor in strict mode', () {
       final sponsor = parseSponsorDocument(
         id: 'dashboard-001',
-        data: <String, dynamic>{
-          ..._sponsorData(),
-          'primaryLogoUrl': null,
-        },
-        requirePrimaryLogo: false,
+        data: _sponsorData(),
+        skipMalformedDocument: false,
       );
 
       expect(sponsor?.id, 'dashboard-001');
-      expect(sponsor?.primaryLogoUrl, isNull);
+      expect(sponsor?.primaryLogoUrl, isNotNull);
     });
   });
 }

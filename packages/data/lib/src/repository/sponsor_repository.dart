@@ -1,10 +1,12 @@
+import 'dart:developer' as developer;
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../model/sponsor.dart';
 import 'firestore_watch.dart';
 
 abstract interface class SponsorRepository {
-  Stream<List<Sponsor>> watchAll({bool requirePrimaryLogo = false});
+  Stream<List<Sponsor>> watchAll({bool skipMalformedDocuments = false});
   Future<void> save(Sponsor sponsor);
   Future<void> delete(String id);
 }
@@ -17,7 +19,7 @@ final class FirestoreSponsorRepository implements SponsorRepository {
   CollectionReference<Map<String, dynamic>> get _collection => _firestore.collection('sponsors');
 
   @override
-  Stream<List<Sponsor>> watchAll({bool requirePrimaryLogo = false}) {
+  Stream<List<Sponsor>> watchAll({bool skipMalformedDocuments = false}) {
     final query = _collection.orderBy('createdAt', descending: true);
     return watchFirestoreQuery(query).map(
       (snapshot) => snapshot.docs
@@ -25,7 +27,7 @@ final class FirestoreSponsorRepository implements SponsorRepository {
             (doc) => parseSponsorDocument(
               id: doc.id,
               data: doc.data(),
-              requirePrimaryLogo: requirePrimaryLogo,
+              skipMalformedDocument: skipMalformedDocuments,
             ),
           )
           .nonNulls
@@ -53,21 +55,28 @@ final class FirestoreSponsorRepository implements SponsorRepository {
   Future<void> delete(String id) => _collection.doc(id).delete();
 }
 
-/// Parses one sponsor document after applying the requested display filter.
+/// Parses one sponsor document without treating a missing logo as invalid.
 ///
-/// The logo check intentionally runs before strict model conversion so a draft
-/// without a usable primary logo cannot break public clients. Documents that
-/// pass the logo check are still parsed strictly and can surface data errors.
-/// This filter does not enforce access control; Firestore currently permits
-/// public reads.
+/// Public clients can skip an incomplete document so one dashboard draft does
+/// not break the whole sponsor list. Other consumers keep strict conversion by
+/// default. This is not an access-control boundary.
 Sponsor? parseSponsorDocument({
   required String id,
   required Map<String, dynamic> data,
-  required bool requirePrimaryLogo,
+  required bool skipMalformedDocument,
 }) {
-  final primaryLogoUrl = data['primaryLogoUrl'];
-  if (requirePrimaryLogo && (primaryLogoUrl is! String || primaryLogoUrl.trim().isEmpty)) {
+  try {
+    return Sponsor.fromJson(<String, dynamic>{...data, 'id': id});
+  } on Object catch (error, stackTrace) {
+    if (!skipMalformedDocument) {
+      rethrow;
+    }
+    developer.log(
+      'Skipping malformed sponsor document: $id',
+      name: 'FirestoreSponsorRepository',
+      error: error,
+      stackTrace: stackTrace,
+    );
     return null;
   }
-  return Sponsor.fromJson(<String, dynamic>{...data, 'id': id});
 }

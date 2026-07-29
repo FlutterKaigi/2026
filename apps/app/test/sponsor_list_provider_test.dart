@@ -6,10 +6,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 void main() {
-  test('sponsorListProvider requests only publishable sponsors', () async {
+  test('sponsorListProvider keeps logo-less sponsors and isolates malformed documents', () async {
     final repository = _FakeSponsorRepository([
-      _sponsor(id: 'published', name: 'Published'),
-      _sponsor(id: 'draft', name: 'Draft', primaryLogoUrl: ''),
+      _sponsor(id: 'with-logo', name: 'With Logo'),
+      _sponsor(id: 'without-logo', name: 'Without Logo', primaryLogoUrl: null),
     ]);
     final container = ProviderContainer(
       overrides: [
@@ -22,8 +22,8 @@ void main() {
 
     final sponsors = await container.read(sponsorListProvider.future);
 
-    expect(sponsors.map((sponsor) => sponsor.id), ['published']);
-    expect(repository.requirePrimaryLogo, isTrue);
+    expect(sponsors.map((sponsor) => sponsor.id), ['with-logo', 'without-logo']);
+    expect(repository.skipMalformedDocuments, isTrue);
   });
 
   test('buildSponsorWallData groups sponsors by tier and pins Flutter first', () {
@@ -64,15 +64,12 @@ final class _FakeSponsorRepository implements SponsorRepository {
   _FakeSponsorRepository(this.sponsors);
 
   final List<Sponsor> sponsors;
-  bool? requirePrimaryLogo;
+  bool? skipMalformedDocuments;
 
   @override
-  Stream<List<Sponsor>> watchAll({bool requirePrimaryLogo = false}) {
-    this.requirePrimaryLogo = requirePrimaryLogo;
-    return Stream.value([
-      for (final sponsor in sponsors)
-        if (!requirePrimaryLogo || sponsor.primaryLogoUrl?.trim().isNotEmpty == true) sponsor,
-    ]);
+  Stream<List<Sponsor>> watchAll({bool skipMalformedDocuments = false}) {
+    this.skipMalformedDocuments = skipMalformedDocuments;
+    return Stream.value(sponsors);
   }
 
   @override
@@ -87,7 +84,7 @@ Sponsor _sponsor({
   required String name,
   SponsorTier tier = SponsorTier.platinum,
   String? slug,
-  String primaryLogoUrl = 'https://example.com/logo.png',
+  String? primaryLogoUrl = 'https://example.com/logo.png',
 }) {
   return Sponsor(
     id: id,

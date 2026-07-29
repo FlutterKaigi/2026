@@ -53,7 +53,7 @@ void main() {
     expect(find.text('スポンサー'), findsWidgets);
     expect(find.text('Platinum'), findsOneWidget);
     expect(find.text('Flutter'), findsOneWidget);
-    expect(repository.requirePrimaryLogo, isTrue);
+    expect(repository.skipMalformedDocuments, isTrue);
     final appBar = tester.widget<AppBar>(find.byType(AppBar));
     final appBarTitle = appBar.title! as Text;
     expect(appBar.toolbarHeight, 52);
@@ -251,11 +251,11 @@ final class _FakeSponsorRepository implements SponsorRepository {
   _FakeSponsorRepository(this.sponsors);
 
   final List<Sponsor> sponsors;
-  bool? requirePrimaryLogo;
+  bool? skipMalformedDocuments;
 
   @override
-  Stream<List<Sponsor>> watchAll({bool requirePrimaryLogo = false}) {
-    this.requirePrimaryLogo = requirePrimaryLogo;
+  Stream<List<Sponsor>> watchAll({bool skipMalformedDocuments = false}) {
+    this.skipMalformedDocuments = skipMalformedDocuments;
     return Stream.value(sponsors);
   }
 
