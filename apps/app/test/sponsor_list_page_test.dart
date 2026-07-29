@@ -2,7 +2,7 @@ import 'package:app/core/designsystem/theme/app_theme.dart';
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/router/router.dart';
 import 'package:app/core/ui/widget/trademark_footer_widget.dart';
-import 'package:app/feature/sponsor/data/provider/sponsor_repository.dart';
+import 'package:app/feature/sponsor/data/provider/sponsor_list_provider.dart';
 import 'package:app/feature/sponsor/ui/page/sponsor_details_page.dart';
 import 'package:app/feature/sponsor/ui/page/sponsor_list_page.dart';
 import 'package:data/data.dart';
@@ -25,8 +25,8 @@ void main() {
       TranslationProvider(
         child: ProviderScope(
           overrides: [
-            sponsorRepositoryProvider.overrideWithValue(
-              _FakeSponsorRepository([
+            sponsorListProvider.overrideWithValue(
+              AsyncData([
                 _sponsor(id: 'D2026-015', name: 'Flutter', slug: 'flutter'),
                 _sponsor(
                   id: 'D2026-020',
@@ -90,8 +90,8 @@ void main() {
       TranslationProvider(
         child: ProviderScope(
           overrides: [
-            sponsorRepositoryProvider.overrideWithValue(
-              _FakeSponsorRepository([
+            sponsorListProvider.overrideWithValue(
+              AsyncData([
                 for (var index = 1; index <= 50; index++)
                   _sponsor(
                     id: 'D2026-$index',
@@ -136,8 +136,8 @@ void main() {
       TranslationProvider(
         child: ProviderScope(
           overrides: [
-            sponsorRepositoryProvider.overrideWithValue(
-              _FakeSponsorRepository([
+            sponsorListProvider.overrideWithValue(
+              AsyncData([
                 _sponsor(id: 'D2026-001', name: 'Platinum Sponsor 1'),
                 _sponsor(id: 'D2026-002', name: 'Platinum Sponsor 2'),
                 _sponsor(id: 'D2026-003', name: 'Platinum Sponsor 3'),
@@ -202,8 +202,8 @@ void main() {
       TranslationProvider(
         child: ProviderScope(
           overrides: [
-            sponsorRepositoryProvider.overrideWithValue(
-              _FakeSponsorRepository([sponsor]),
+            sponsorListProvider.overrideWithValue(
+              AsyncData([sponsor]),
             ),
           ],
           child: MaterialApp.router(
@@ -242,21 +242,6 @@ void main() {
       findsOneWidget,
     );
   });
-}
-
-final class _FakeSponsorRepository implements SponsorRepository {
-  const _FakeSponsorRepository(this._sponsors);
-
-  final List<Sponsor> _sponsors;
-
-  @override
-  Stream<List<Sponsor>> watchAll() => Stream.value(_sponsors);
-
-  @override
-  Future<void> save(Sponsor sponsor) async {}
-
-  @override
-  Future<void> delete(String id) async {}
 }
 
 Sponsor _sponsor({

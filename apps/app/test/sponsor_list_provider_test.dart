@@ -4,6 +4,20 @@ import 'package:data/data.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('publishedSponsors keeps only sponsors with a primary logo', () {
+    final sponsors = publishedSponsors([
+      _sponsor(
+        id: 'published',
+        name: 'Published',
+        primaryLogoUrl: 'https://example.com/logo.png',
+      ),
+      _sponsor(id: 'empty-logo', name: 'Empty logo', primaryLogoUrl: ''),
+      _sponsor(id: 'no-logo', name: 'No logo'),
+    ]);
+
+    expect(sponsors.map((sponsor) => sponsor.id), ['published']);
+  });
+
   test('buildSponsorWallData groups sponsors by tier and pins Flutter first', () {
     final data = buildSponsorWallData([
       _sponsor(id: 'D2026-030', name: 'Gold B', tier: SponsorTier.gold),
@@ -43,6 +57,7 @@ Sponsor _sponsor({
   required String name,
   SponsorTier tier = SponsorTier.platinum,
   String? slug,
+  String? primaryLogoUrl,
 }) {
   return Sponsor(
     id: id,
@@ -50,6 +65,7 @@ Sponsor _sponsor({
     description: const LocaleMap(ja: '', en: ''),
     tier: tier,
     slug: slug,
+    primaryLogoUrl: primaryLogoUrl,
     createdAt: DateTime.utc(2026),
     updatedAt: DateTime.utc(2026),
   );
