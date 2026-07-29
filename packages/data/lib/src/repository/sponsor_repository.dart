@@ -1,5 +1,3 @@
-import 'dart:developer' as developer;
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../model/sponsor.dart';
@@ -67,15 +65,22 @@ Sponsor? parseSponsorDocument({
 }) {
   try {
     return Sponsor.fromJson(<String, dynamic>{...data, 'id': id});
-  } on Object catch (error, stackTrace) {
+  } on Object catch (error) {
     if (!skipMalformedDocument) {
       rethrow;
     }
-    developer.log(
-      'Skipping malformed sponsor document: $id',
-      name: 'FirestoreSponsorRepository',
-      error: error,
-      stackTrace: stackTrace,
+    final name = data['name'];
+    final description = data['description'];
+    // Temporary release-build diagnostics. Remove after inspecting the Preview.
+    // ignore: avoid_print
+    print(
+      '[SponsorParseError] id=$id error=$error '
+      'keys=${data.keys.toList()} '
+      'nameKeys=${name is Map ? name.keys.toList() : name.runtimeType} '
+      'descriptionKeys=${description is Map ? description.keys.toList() : description.runtimeType} '
+      'tier=${data['tier']} '
+      'createdAtType=${data['createdAt'].runtimeType} '
+      'updatedAtType=${data['updatedAt'].runtimeType}',
     );
     return null;
   }
