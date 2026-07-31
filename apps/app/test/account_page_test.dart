@@ -1,4 +1,5 @@
 import 'package:app/core/i18n/strings.g.dart';
+import 'package:app/core/provider/environment.dart';
 import 'package:app/feature/auth/data/provider/auth_repository.dart';
 import 'package:app/feature/auth/ui/page/account_page.dart';
 import 'package:app/feature/auth/ui/widget/apple_sign_in_button.dart';
@@ -12,9 +13,28 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'fake_auth_repository.dart';
 
 void main() {
-  Widget buildSubject(FakeAuthRepository repository) => TranslationProvider(
+  Widget buildSubject(
+    FakeAuthRepository repository, {
+    Flavor flavor = Flavor.production,
+    bool showsAppleSignIn = false,
+  }) => TranslationProvider(
     child: ProviderScope(
-      overrides: [authRepositoryProvider.overrideWithValue(repository)],
+      overrides: [
+        authRepositoryProvider.overrideWithValue(repository),
+        appleSignInAvailabilityProvider.overrideWithValue(
+          showsAppleSignIn,
+        ),
+        environmentProvider.overrideWithValue(
+          Environment(
+            appIdSuffix: '',
+            appName: 'FlutterKaigi 2026',
+            flavor: flavor,
+            firebaseProjectId: 'test-project',
+            firestoreEmulatorHost: 'localhost:8080',
+            androidFirestoreEmulatorHost: '10.0.2.2:8080',
+          ),
+        ),
+      ],
       child: MaterialApp(
         locale: const Locale('ja'),
         supportedLocales: AppLocaleUtils.supportedLocales,
@@ -26,6 +46,33 @@ void main() {
 
   setUp(() => LocaleSettings.setLocaleSync(AppLocale.ja));
 
+  test('allows Apple sign-in only on production iOS', () {
+    expect(
+      isAppleSignInAvailable(
+        flavor: Flavor.production,
+        isWeb: false,
+        platform: TargetPlatform.iOS,
+      ),
+      isTrue,
+    );
+    for (final condition in [
+      (flavor: Flavor.staging, isWeb: false, platform: TargetPlatform.iOS),
+      (flavor: Flavor.develop, isWeb: false, platform: TargetPlatform.iOS),
+      (flavor: Flavor.production, isWeb: true, platform: TargetPlatform.iOS),
+      (flavor: Flavor.production, isWeb: false, platform: TargetPlatform.android),
+      (flavor: Flavor.production, isWeb: false, platform: TargetPlatform.macOS),
+    ]) {
+      expect(
+        isAppleSignInAvailable(
+          flavor: condition.flavor,
+          isWeb: condition.isWeb,
+          platform: condition.platform,
+        ),
+        isFalse,
+      );
+    }
+  });
+
   testWidgets('signs in with Google from the signed-out view', (tester) async {
     final repository = FakeAuthRepository();
     addTearDown(repository.dispose);
@@ -34,7 +81,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.bySemanticsLabel('Google でサインイン'), findsOneWidget);
-    expect(find.text('Appleでサインイン'), findsOneWidget);
+    expect(find.text('Appleでサインイン'), findsNothing);
     expect(find.text('メールアドレスでサインイン'), findsOneWidget);
 
     await tester.tap(find.bySemanticsLabel('Google でサインイン'));
@@ -47,11 +94,43 @@ void main() {
     expect(find.text('サインアウト'), findsOneWidget);
   });
 
+  testWidgets('shows Apple sign-in on production iOS', (tester) async {
+    final repository = FakeAuthRepository();
+    addTearDown(repository.dispose);
+
+    await tester.pumpWidget(
+      buildSubject(repository, showsAppleSignIn: true),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Appleでサインイン'), findsOneWidget);
+
+    await tester.tap(find.text('Appleでサインイン'));
+    await tester.pumpAndSettle();
+
+    expect(repository.calledMethods, ['signInWithApple']);
+    expect(find.text('Apple User'), findsOneWidget);
+  });
+
+  testWidgets('hides Apple sign-in on staging iOS', (tester) async {
+    final repository = FakeAuthRepository();
+    addTearDown(repository.dispose);
+
+    await tester.pumpWidget(
+      buildSubject(repository, flavor: Flavor.staging),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Appleでサインイン'), findsNothing);
+  });
+
   testWidgets('keeps all sign-in method buttons at the same size', (tester) async {
     final repository = FakeAuthRepository();
     addTearDown(repository.dispose);
 
-    await tester.pumpWidget(buildSubject(repository));
+    await tester.pumpWidget(
+      buildSubject(repository, showsAppleSignIn: true),
+    );
     await tester.pumpAndSettle();
 
     final googleSize = tester.getSize(find.byType(GoogleSignInButton));
@@ -69,7 +148,9 @@ void main() {
     final repository = FakeAuthRepository();
     addTearDown(repository.dispose);
 
-    await tester.pumpWidget(buildSubject(repository));
+    await tester.pumpWidget(
+      buildSubject(repository, showsAppleSignIn: true),
+    );
     await tester.pumpAndSettle();
 
     TextStyle effectiveStyle(String label) {
@@ -94,7 +175,9 @@ void main() {
     final repository = FakeAuthRepository()..nextError = FirebaseAuthException(code: 'network-request-failed');
     addTearDown(repository.dispose);
 
-    await tester.pumpWidget(buildSubject(repository));
+    await tester.pumpWidget(
+      buildSubject(repository, showsAppleSignIn: true),
+    );
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('Appleでサインイン'));

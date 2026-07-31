@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:cloud_functions/cloud_functions.dart';
 import 'package:data/src/firebase/firebase_initializer.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
@@ -22,11 +21,8 @@ abstract interface class AuthRepository {
 }
 
 final class FirebaseAuthRepository implements AuthRepository {
-  FirebaseAuthRepository({FirebaseAuth? auth, FirebaseFunctions? functions, this.hostedDomain})
-    : _auth = auth ?? FirebaseAuth.instance,
-      _functions = functions ?? FirebaseFunctions.instanceFor(region: FirebaseInitializer.functionsRegion);
+  FirebaseAuthRepository({FirebaseAuth? auth, this.hostedDomain}) : _auth = auth ?? FirebaseAuth.instance;
   final FirebaseAuth _auth;
-  final FirebaseFunctions _functions;
 
   /// 指定すると Google サインインの `hd` パラメータに渡し、アカウント選択を
   /// 当該ドメインへ誘導する（UI ヒントであり強制力はない。実際の認可は
@@ -46,7 +42,10 @@ final class FirebaseAuthRepository implements AuthRepository {
 
   @override
   Future<void> signInWithApple() {
-    return _signInWithOAuth(_appleProvider());
+    if (kIsWeb || !Platform.isIOS) {
+      throw UnsupportedError('AppleサインインはiOSでのみ利用できます');
+    }
+    return _auth.signInWithProvider(_appleProvider());
   }
 
   GoogleAuthProvider _googleProvider() {
@@ -61,12 +60,11 @@ final class FirebaseAuthRepository implements AuthRepository {
     ..addScope('email')
     ..addScope('name');
 
-  /// Web はポップアップ、モバイルは signInWithProvider でサインインする。
+  /// GoogleはWebではポップアップ、モバイルではsignInWithProviderで
+  /// サインインする。
   ///
-  /// Auth Emulator 接続時、Google は全プラットフォームで Emulator の擬似 IdP
-  /// 画面が開く。Apple も Android / Web では擬似 IdP 画面だが、iOS では
-  /// FlutterFire がネイティブの Sign in with Apple を呼び出すため、
-  /// Sign in with Apple Capability と実際の Apple ID が必要になる。
+  /// Auth Emulator接続時は全プラットフォームでEmulatorの擬似IdP画面が
+  /// 開く。
   Future<void> _signInWithOAuth(AuthProvider provider) {
     if (kIsWeb) {
       return _auth.signInWithPopup(provider);
@@ -102,6 +100,15 @@ final class FirebaseAuthRepository implements AuthRepository {
     // Apple はトークン失効(App Store Review Guideline 5.1.1(v))に必要な
     // authorizationCode も再認証で取得する。
     final providerIds = user.providerData.map((info) => info.providerId).toSet();
+    final usesApple = providerIds.contains(AppleAuthProvider.PROVIDER_ID);
+    if (usesApple && (kIsWeb || !Platform.isIOS)) {
+      // Web / Android のApple OAuthを開始するとServices IDが必要になる。
+      // Apple連携済みアカウントの削除とトークン失効はiOSからだけ行う。
+      throw FirebaseAuthException(
+        code: 'apple-token-revocation-failed',
+        message: 'Apple連携済みアカウントはiOSアプリから削除してください',
+      );
+    }
     UserCredential? appleCredential;
     if (providerIds.contains(EmailAuthProvider.PROVIDER_ID)) {
       final email = user.email;
@@ -120,7 +127,7 @@ final class FirebaseAuthRepository implements AuthRepository {
     // Apple が他のプロバイダーとリンクされている場合も必ず失効する。
     // 上の再認証で Apple を使っていなければ、失効用トークンを得るために
     // Apple でもう一度再認証する。
-    if (providerIds.contains(AppleAuthProvider.PROVIDER_ID)) {
+    if (usesApple) {
       appleCredential ??= await _reauthenticateWithOAuth(user, _appleProvider());
       await _revokeAppleToken(appleCredential);
     }
@@ -144,56 +151,21 @@ final class FirebaseAuthRepository implements AuthRepository {
   /// 場合は例外を伝播させて削除自体を中断する。
   /// https://developer.apple.com/support/offering-account-deletion-in-your-app/
   Future<void> _revokeAppleToken(UserCredential credential) async {
-    // Auth Emulator は失効エンドポイントを提供しないため、Emulator 接続時のみ
+    // Auth Emulator は失効エンドポイントを提供しないため、Emulator接続時のみ
     // 明示的にスキップする。
     if (FirebaseInitializer.emulatorConfigured) {
       return;
     }
-    if (kIsWeb) {
-      // Web の SDK には失効 API がないため
-      // (revokeTokenWithAuthorizationCode は Apple プラットフォーム専用、
-      // revokeAccessToken は Android 専用)、client secret を保持できる
-      // Cloud Functions(revokeAppleToken)経由で Apple の REST API から
-      // 失効させる。
-      final oauthCredential = credential.credential;
-      final accessToken = oauthCredential is OAuthCredential ? oauthCredential.accessToken : null;
-      if (accessToken == null) {
-        throw FirebaseAuthException(
-          code: 'apple-token-revocation-failed',
-          message: '再認証結果に accessToken が含まれていないためトークンを失効できません',
-        );
-      }
-      try {
-        await _functions.httpsCallable('revokeAppleToken').call<dynamic>({'token': accessToken});
-      } on FirebaseFunctionsException catch (exception) {
-        throw FirebaseAuthException(
-          code: 'apple-token-revocation-failed',
-          message: exception.message,
-        );
-      }
-      return;
+    if (kIsWeb || !Platform.isIOS) {
+      throw UnsupportedError('Appleアカウントの削除はiOSでのみ利用できます');
     }
-    if (Platform.isIOS) {
-      final authorizationCode = credential.additionalUserInfo?.authorizationCode;
-      if (authorizationCode == null) {
-        throw FirebaseAuthException(
-          code: 'apple-token-revocation-failed',
-          message: '再認証結果に authorizationCode が含まれていないためトークンを失効できません',
-        );
-      }
-      await _auth.revokeTokenWithAuthorizationCode(authorizationCode);
-      return;
+    final authorizationCode = credential.additionalUserInfo?.authorizationCode;
+    if (authorizationCode == null) {
+      throw FirebaseAuthException(
+        code: 'apple-token-revocation-failed',
+        message: '再認証結果に authorizationCode が含まれていないためトークンを失効できません',
+      );
     }
-    if (Platform.isAndroid) {
-      final oauthCredential = credential.credential;
-      final accessToken = oauthCredential is OAuthCredential ? oauthCredential.accessToken : null;
-      if (accessToken == null) {
-        throw FirebaseAuthException(
-          code: 'apple-token-revocation-failed',
-          message: '再認証結果に accessToken が含まれていないためトークンを失効できません',
-        );
-      }
-      await _auth.revokeAccessToken(accessToken);
-    }
+    await _auth.revokeTokenWithAuthorizationCode(authorizationCode);
   }
 }

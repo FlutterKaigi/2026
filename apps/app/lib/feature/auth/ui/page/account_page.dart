@@ -1,5 +1,6 @@
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/log/talker.dart';
+import 'package:app/core/provider/environment.dart';
 import 'package:app/core/router/router.dart';
 import 'package:app/core/ui/widget/app_error_view.dart';
 import 'package:app/core/ui/widget/settings_icon_button.dart';
@@ -11,9 +12,26 @@ import 'package:app/feature/auth/ui/widget/google_sign_in_button.dart';
 import 'package:app/feature/auth/ui/widget/sign_in_method_button_style.dart';
 import 'package:data/data.dart';
 import 'package:data/user.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+
+/// Whether the current build may expose native Sign in with Apple.
+bool isAppleSignInAvailable({
+  required Flavor flavor,
+  required bool isWeb,
+  required TargetPlatform platform,
+}) => flavor == Flavor.production && !isWeb && platform == TargetPlatform.iOS;
+
+final appleSignInAvailabilityProvider = Provider<bool>((ref) {
+  final environment = ref.watch(environmentProvider);
+  return isAppleSignInAvailable(
+    flavor: environment.flavor,
+    isWeb: kIsWeb,
+    platform: defaultTargetPlatform,
+  );
+});
 
 /// The account tab: sign-in options while signed out, account info while
 /// signed in.
@@ -25,6 +43,7 @@ class AccountPage extends HookConsumerWidget {
     final t = Translations.of(context);
     final authState = ref.watch(authStateChangesProvider);
     final isProcessing = useState(false);
+    final showsAppleSignIn = ref.watch(appleSignInAvailabilityProvider);
 
     void showMessage(String message) {
       ScaffoldMessenger.of(context)
@@ -118,12 +137,12 @@ class AccountPage extends HookConsumerWidget {
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(24),
             child: ConstrainedBox(
-              // Apple の Web 向けボタン仕様の上限に合わせ、認証操作を
-              // すべて同じ最大幅に揃える。
+              // 認証方法が変わっても操作領域が揃うよう、共通の最大幅にする。
               constraints: const BoxConstraints(maxWidth: signInMethodButtonMaxWidth),
               child: value == null
                   ? _SignedOutView(
                       isProcessing: isProcessing.value,
+                      showsAppleSignIn: showsAppleSignIn,
                       onSignIn: runAuthAction,
                     )
                   : _SignedInView(
@@ -151,10 +170,12 @@ class AccountPage extends HookConsumerWidget {
 class _SignedOutView extends StatelessWidget {
   const _SignedOutView({
     required this.isProcessing,
+    required this.showsAppleSignIn,
     required this.onSignIn,
   });
 
   final bool isProcessing;
+  final bool showsAppleSignIn;
   final Future<void> Function(Future<void> Function(AuthRepository repository) action) onSignIn;
 
   @override
@@ -181,10 +202,12 @@ class _SignedOutView extends StatelessWidget {
           onPressed: isProcessing ? null : () async => onSignIn((repository) => repository.signInWithGoogle()),
         ),
         const SizedBox(height: 12),
-        AppleSignInButton(
-          onPressed: isProcessing ? null : () async => onSignIn((repository) => repository.signInWithApple()),
-        ),
-        const SizedBox(height: 12),
+        if (showsAppleSignIn) ...[
+          AppleSignInButton(
+            onPressed: isProcessing ? null : () async => onSignIn((repository) => repository.signInWithApple()),
+          ),
+          const SizedBox(height: 12),
+        ],
         OutlinedButton(
           onPressed: isProcessing ? null : () async => const EmailSignInRoute().push<void>(context),
           style: OutlinedButton.styleFrom(

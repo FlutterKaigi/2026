@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
@@ -17,23 +16,20 @@ final class FirebaseInitializer {
 
   static bool _emulatorConfigured = false;
 
-  /// Whether [ensureInitialized] wired Firestore, Auth, and Functions to the
-  /// local Emulator Suite.
+  /// Whether [ensureInitialized] wired Firestore and Auth to the local
+  /// Emulator Suite.
   static bool get emulatorConfigured => _emulatorConfigured;
 
   /// Initializes the default [FirebaseApp], and optionally wires Firestore and
   /// Auth to the local emulator suite.
   ///
-  /// By default, `options == null` wires Firestore, Auth, and Functions to the
+  /// By default, `options == null` wires Firestore and Auth to the
   /// local emulator suite. Set [useEmulators] explicitly when Web OAuth needs
   /// valid FlutterFire-generated [options] for the SDK helper page while all
   /// data and authentication requests must still remain local.
   ///
   /// Safe to call more than once: Firebase is only initialized when no app
   /// exists yet, and the emulator wiring is applied a single time.
-  /// The region every Cloud Functions callable in this project deploys to.
-  static const functionsRegion = 'asia-northeast1';
-
   static Future<void> ensureInitialized({
     FirebaseOptions? options,
     bool? useEmulators,
@@ -41,7 +37,6 @@ final class FirebaseInitializer {
     String host = 'localhost',
     int firestorePort = 8080,
     int authPort = 9099,
-    int functionsPort = 5001,
   }) async {
     if (Firebase.apps.isEmpty) {
       await Firebase.initializeApp(
@@ -60,7 +55,6 @@ final class FirebaseInitializer {
 
     FirebaseFirestore.instance.useFirestoreEmulator(host, firestorePort);
     await FirebaseAuth.instance.useAuthEmulator(host, authPort);
-    FirebaseFunctions.instanceFor(region: functionsRegion).useFunctionsEmulator(host, functionsPort);
   }
 
   /// Dummy [FirebaseOptions] that are sufficient for the emulator suite.

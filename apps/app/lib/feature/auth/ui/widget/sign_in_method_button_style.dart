@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 /// branding does not make one option look more prominent than another.
 const signInMethodButtonHeight = 48.0;
 
-/// Maximum width supported by the Sign in with Apple web button.
+/// Maximum width shared by the sign-in method buttons.
 const signInMethodButtonMaxWidth = 375.0;
 
 const signInMethodButtonIconInset = 12.0;

@@ -1,45 +1,7 @@
 # Cloud Functions
 
-FlutterKaigi 2026 の Cloud Functions。STG → 本番のデータ反映用の
-`syncSponsorsToProd` / `syncNewsToProd` と、公式アプリ（Web）のアカウント削除に
-使う `revokeAppleToken` を提供する。
-
-## revokeAppleToken
-
-公式アプリの Web 版がアカウント削除の直前に呼び出す callable function。
-Apple はアカウント削除時の Sign in with Apple トークン失効を要求しているが、
-Web クライアントの SDK には失効 API がなく client secret も置けないため、
-この function が Apple の REST API（`/auth/revoke`）でアクセストークンを
-失効させる（iOS / Android は Firebase SDK で直接失効するため使わない）。
-
-呼び出しにはサインイン済みの Firebase Auth と有効な App Check トークンが必要。
-
-### 設定
-
-プロジェクトごとの`.env.<project-id>`に以下を設定する（値はApple Developer / Firebase Consoleを参照）。
-テンプレートは`.env.example`に含まれている。
-
-- `APPLE_TEAM_ID`: Apple Developer の Team ID
-- `APPLE_KEY_ID`: Sign in with Apple 用秘密鍵（.p8）の Key ID
-- `APPLE_SIGN_IN_CLIENT_ID`: Firebase Console の Apple プロバイダーに設定した
-  Web 用 Services ID
-
-秘密鍵本体は Secret Manager に登録する:
-
-```bash
-firebase functions:secrets:set APPLE_SIGN_IN_PRIVATE_KEY --project <プロジェクトID>
-# プロンプトに .p8 ファイルの PEM 全文を貼り付ける
-```
-
-設定後、失効Functionだけを各アプリ環境へデプロイする:
-
-```bash
-fvm dart run melos functions:deploy:auth:stg
-fvm dart run melos functions:deploy:auth:prod
-```
-
-STG/本番の両方へデプロイしないと、それぞれのWebアプリからのAppleアカウント
-削除が`not-found`で失敗する。
+FlutterKaigi 2026 の Cloud Functions。現在は STG → 本番のデータ反映用に
+`syncSponsorsToProd` と `syncNewsToProd` を提供する。
 
 ## syncSponsorsToProd / syncNewsToProd
 
