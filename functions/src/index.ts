@@ -1,14 +1,25 @@
+import { createPrivateKey, sign } from "node:crypto";
 import { App, getApps, initializeApp } from "firebase-admin/app";
 import { Firestore, getFirestore } from "firebase-admin/firestore";
 import { setGlobalOptions } from "firebase-functions/v2";
 import { HttpsError, onCall } from "firebase-functions/v2/https";
-import { defineString } from "firebase-functions/params";
+import { defineSecret, defineString } from "firebase-functions/params";
 import * as logger from "firebase-functions/logger";
 
 // デプロイ先（= 同期元）と同期先のリージョン・プロジェクト設定。
 // SYNC_TARGET_PROJECT_ID は functions/.env（Git 管理外）で指定する。
 // 例: SYNC_TARGET_PROJECT_ID=flutterkaigi-2026-283db
 const syncTargetProjectId = defineString("SYNC_TARGET_PROJECT_ID");
+
+// Sign in with Apple のトークン失効（revokeAppleToken）に使う設定。
+// APPLE_TEAM_ID / APPLE_KEY_ID / APPLE_SIGN_IN_CLIENT_ID は functions/.env、
+// 秘密鍵は `firebase functions:secrets:set APPLE_SIGN_IN_PRIVATE_KEY`
+// （.p8 の PEM 全文）で設定する。
+const appleTeamId = defineString("APPLE_TEAM_ID");
+const appleKeyId = defineString("APPLE_KEY_ID");
+// Firebase Console の Apple プロバイダーで Web 用に設定した Services ID。
+const appleSignInClientId = defineString("APPLE_SIGN_IN_CLIENT_ID");
+const appleSignInPrivateKey = defineSecret("APPLE_SIGN_IN_PRIVATE_KEY");
 
 setGlobalOptions({ region: "asia-northeast1" });
 
@@ -76,6 +87,100 @@ async function assertAdmin(auth: {
     throw new HttpsError("permission-denied", "管理者権限がありません。");
   }
 }
+
+/** JWT 用の Base64URL エンコード。 */
+function base64url(input: Buffer | string): string {
+  return Buffer.from(input).toString("base64url");
+}
+
+/**
+ * Apple の REST API 認証に使う client secret（ES256 署名付き JWT）を生成する。
+ * https://developer.apple.com/documentation/accountorganizationaldatasharing/creating-a-client-secret
+ */
+function createAppleClientSecret(): string {
+  const teamId = appleTeamId.value();
+  const keyId = appleKeyId.value();
+  const clientId = appleSignInClientId.value();
+  const privateKeyPem = appleSignInPrivateKey.value();
+  if (!teamId || !keyId || !clientId || !privateKeyPem) {
+    throw new HttpsError(
+      "failed-precondition",
+      "Apple トークン失効の設定（APPLE_TEAM_ID / APPLE_KEY_ID / " +
+        "APPLE_SIGN_IN_CLIENT_ID / APPLE_SIGN_IN_PRIVATE_KEY）が不足しています。",
+    );
+  }
+
+  const nowSeconds = Math.floor(Date.now() / 1000);
+  const header = base64url(JSON.stringify({ alg: "ES256", kid: keyId }));
+  const payload = base64url(
+    JSON.stringify({
+      iss: teamId,
+      iat: nowSeconds,
+      exp: nowSeconds + 300,
+      aud: "https://appleid.apple.com",
+      sub: clientId,
+    }),
+  );
+  const signingInput = `${header}.${payload}`;
+  // JOSE (ES256) は DER ではなく r||s 連結（ieee-p1363）形式の署名を要求する。
+  const signature = sign("sha256", Buffer.from(signingInput), {
+    key: createPrivateKey(privateKeyPem),
+    dsaEncoding: "ieee-p1363",
+  });
+  return `${signingInput}.${signature.toString("base64url")}`;
+}
+
+/**
+ * Sign in with Apple のアクセストークンを失効させる。
+ *
+ * Web クライアントには失効 SDK がないため、アカウント削除の直前にアプリから
+ * 呼び出される（iOS / Android は Firebase SDK が直接失効できるため使わない）。
+ * Apple はアカウント削除時のトークン失効を要求している。
+ * https://developer.apple.com/support/offering-account-deletion-in-your-app/
+ */
+export const revokeAppleToken = onCall(
+  {
+    // アプリ（Web）は App Check を有効化済み。エミュレータでは App Check
+    // トークンを発行できないため無効にする。
+    enforceAppCheck: !isEmulator,
+    secrets: [appleSignInPrivateKey],
+    memory: "256MiB",
+    timeoutSeconds: 30,
+  },
+  async (request): Promise<void> => {
+    if (request.auth == null) {
+      throw new HttpsError("unauthenticated", "サインインが必要です。");
+    }
+    const token = request.data?.token;
+    if (typeof token !== "string" || token.length === 0) {
+      throw new HttpsError("invalid-argument", "token が指定されていません。");
+    }
+
+    const clientSecret = createAppleClientSecret();
+    const response = await fetch("https://appleid.apple.com/auth/revoke", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        client_id: appleSignInClientId.value(),
+        client_secret: clientSecret,
+        token,
+        token_type_hint: "access_token",
+      }),
+    });
+    if (!response.ok) {
+      logger.error("revokeAppleToken failed", {
+        status: response.status,
+        uid: request.auth.uid,
+      });
+      throw new HttpsError(
+        "internal",
+        `Apple トークンの失効に失敗しました（HTTP ${response.status}）。`,
+      );
+    }
+
+    logger.info("revokeAppleToken succeeded", { uid: request.auth.uid });
+  },
+);
 
 export interface SyncSponsorsResult {
   dryRun: boolean;

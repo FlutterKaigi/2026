@@ -164,6 +164,14 @@ melos:
       run: npx -y firebase-tools@13.35.1 deploy --only functions --project flutterkaigi-2026-stg
       description: Deploy Cloud Functions to the STG project (requires functions/.env, see functions/README.md)
 
+    functions:deploy:auth:stg:
+      run: npx -y firebase-tools@13.35.1 deploy --only functions:revokeAppleToken --project flutterkaigi-2026-stg
+      description: Deploy the Apple token revocation function to STG
+
+    functions:deploy:auth:prod:
+      run: npx -y firebase-tools@13.35.1 deploy --only functions:revokeAppleToken --project flutterkaigi-2026-283db
+      description: Deploy the Apple token revocation function to production
+
     firebase:schema:validate:
       run: fvm dart run tool/firebase_seed.dart --validate-only packages/data/firebase/seed/firestore/default.json
       description: Validate Firebase seed data against the sample Firestore JSON Schema

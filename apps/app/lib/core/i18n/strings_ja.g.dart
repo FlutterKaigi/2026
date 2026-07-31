@@ -52,6 +52,7 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	late final Translations$sessionBookmark$ja sessionBookmark = Translations$sessionBookmark$ja.internal(_root);
 	late final Translations$bookmarkedSessions$ja bookmarkedSessions = Translations$bookmarkedSessions$ja.internal(_root);
 	late final Translations$eventInfo$ja eventInfo = Translations$eventInfo$ja.internal(_root);
+	late final Translations$auth$ja auth = Translations$auth$ja.internal(_root);
 	late final Translations$settings$ja settings = Translations$settings$ja.internal(_root);
 	late final Translations$licenses$ja licenses = Translations$licenses$ja.internal(_root);
 	late final Translations$error$ja error = Translations$error$ja.internal(_root);
@@ -98,6 +99,9 @@ class Translations$navigation$ja {
 
 	/// ja: 'イベント'
 	String get info => 'イベント';
+
+	/// ja: 'アカウント'
+	String get account => 'アカウント';
 }
 
 // Path: news
@@ -409,6 +413,19 @@ class Translations$eventInfo$ja {
 	String get ossLicenses => 'OSSライセンス';
 }
 
+// Path: auth
+class Translations$auth$ja {
+	Translations$auth$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+	late final Translations$auth$signIn$ja signIn = Translations$auth$signIn$ja.internal(_root);
+	late final Translations$auth$email$ja email = Translations$auth$email$ja.internal(_root);
+	late final Translations$auth$account$ja account = Translations$auth$account$ja.internal(_root);
+	late final Translations$auth$error$ja error = Translations$auth$error$ja.internal(_root);
+}
+
 // Path: settings
 class Translations$settings$ja {
 	Translations$settings$ja.internal(this._root);
@@ -574,6 +591,165 @@ class Translations$sessionTimetable$type$ja {
 	String get event => 'イベント';
 }
 
+// Path: auth.signIn
+class Translations$auth$signIn$ja {
+	Translations$auth$signIn$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'FlutterKaigi 2026 アプリで利用するサインイン方法を選択してください'
+	String get description => 'FlutterKaigi 2026 アプリで利用するサインイン方法を選択してください';
+
+	/// ja: 'Google でサインイン'
+	String get withGoogle => 'Google でサインイン';
+
+	/// ja: 'Appleでサインイン'
+	String get withApple => 'Appleでサインイン';
+
+	/// ja: 'メールアドレスでサインイン'
+	String get withEmail => 'メールアドレスでサインイン';
+}
+
+// Path: auth.email
+class Translations$auth$email$ja {
+	Translations$auth$email$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'メールアドレスでサインイン'
+	String get title => 'メールアドレスでサインイン';
+
+	/// ja: 'メールアドレス'
+	String get emailLabel => 'メールアドレス';
+
+	/// ja: 'パスワード'
+	String get passwordLabel => 'パスワード';
+
+	/// ja: 'メールアドレスを入力してください'
+	String get emailRequired => 'メールアドレスを入力してください';
+
+	/// ja: 'パスワードを入力してください'
+	String get passwordRequired => 'パスワードを入力してください';
+
+	/// ja: 'パスワードを表示'
+	String get showPassword => 'パスワードを表示';
+
+	/// ja: 'パスワードを隠す'
+	String get hidePassword => 'パスワードを隠す';
+
+	/// ja: 'サインイン'
+	String get signInButton => 'サインイン';
+
+	/// ja: 'アカウントを作成'
+	String get createAccountButton => 'アカウントを作成';
+
+	/// ja: 'アカウントを新規作成する'
+	String get switchToCreateAccount => 'アカウントを新規作成する';
+
+	/// ja: '既存のアカウントでサインインする'
+	String get switchToSignIn => '既存のアカウントでサインインする';
+
+	/// ja: 'パスワードを再設定する'
+	String get forgotPassword => 'パスワードを再設定する';
+
+	/// ja: 'パスワード再設定メールを送信しました'
+	String get resetEmailSent => 'パスワード再設定メールを送信しました';
+}
+
+// Path: auth.account
+class Translations$auth$account$ja {
+	Translations$auth$account$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'アカウント'
+	String get title => 'アカウント';
+
+	/// ja: 'サインイン中'
+	String get signedIn => 'サインイン中';
+
+	/// ja: 'サインアウト'
+	String get signOut => 'サインアウト';
+
+	/// ja: 'サインアウトできませんでした'
+	String get signOutError => 'サインアウトできませんでした';
+
+	/// ja: 'メールアドレス未設定'
+	String get noEmail => 'メールアドレス未設定';
+
+	/// ja: 'アカウントを削除'
+	String get delete => 'アカウントを削除';
+
+	/// ja: 'アカウントを削除しますか?'
+	String get deleteConfirmTitle => 'アカウントを削除しますか?';
+
+	/// ja: 'アカウントは完全に削除され、元に戻すことはできません。削除の前に再認証が必要です。'
+	String get deleteConfirmBody => 'アカウントは完全に削除され、元に戻すことはできません。削除の前に再認証が必要です。';
+
+	/// ja: '削除する'
+	String get deleteConfirmAction => '削除する';
+
+	/// ja: 'パスワードの確認'
+	String get deletePasswordTitle => 'パスワードの確認';
+
+	/// ja: 'アカウントを削除するには、現在のパスワードを入力してください。'
+	String get deletePasswordBody => 'アカウントを削除するには、現在のパスワードを入力してください。';
+
+	/// ja: 'アカウントを削除しました'
+	String get deleted => 'アカウントを削除しました';
+
+	/// ja: 'キャンセル'
+	String get cancel => 'キャンセル';
+}
+
+// Path: auth.error
+class Translations$auth$error$ja {
+	Translations$auth$error$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'メールアドレスの形式が正しくありません'
+	String get invalidEmail => 'メールアドレスの形式が正しくありません';
+
+	/// ja: 'このアカウントは利用できません'
+	String get userDisabled => 'このアカウントは利用できません';
+
+	/// ja: 'メールアドレスまたはパスワードが正しくありません'
+	String get invalidCredential => 'メールアドレスまたはパスワードが正しくありません';
+
+	/// ja: 'このメールアドレスは既に登録されています'
+	String get emailAlreadyInUse => 'このメールアドレスは既に登録されています';
+
+	/// ja: 'パスワードが簡単すぎます。より複雑なパスワードを設定してください'
+	String get weakPassword => 'パスワードが簡単すぎます。より複雑なパスワードを設定してください';
+
+	/// ja: '試行回数の上限に達しました。しばらくしてからもう一度お試しください'
+	String get tooManyRequests => '試行回数の上限に達しました。しばらくしてからもう一度お試しください';
+
+	/// ja: '通信に失敗しました。通信状況を確認してもう一度お試しください'
+	String get network => '通信に失敗しました。通信状況を確認してもう一度お試しください';
+
+	/// ja: '確認のため再認証が必要です。もう一度お試しください'
+	String get requiresRecentLogin => '確認のため再認証が必要です。もう一度お試しください';
+
+	/// ja: '再認証したアカウントがサインイン中のアカウントと一致しません'
+	String get userMismatch => '再認証したアカウントがサインイン中のアカウントと一致しません';
+
+	/// ja: 'Appleのトークン失効に失敗したため、アカウントを削除できませんでした。もう一度お試しください'
+	String get appleTokenRevocationFailed => 'Appleのトークン失効に失敗したため、アカウントを削除できませんでした。もう一度お試しください';
+
+	/// ja: '認証に失敗しました。もう一度お試しください'
+	String get unknown => '認証に失敗しました。もう一度お試しください';
+}
+
 // Path: settings.themeMode
 class Translations$settings$themeMode$ja {
 	Translations$settings$themeMode$ja.internal(this._root);
@@ -626,6 +802,7 @@ extension on Translations {
 			'navigation.sessions' => 'セッション',
 			'navigation.sponsors' => 'スポンサー',
 			'navigation.info' => 'イベント',
+			'navigation.account' => 'アカウント',
 			'news.title' => 'お知らせ',
 			'news.empty' => 'お知らせはまだありません',
 			'sponsors.title' => 'スポンサー',
@@ -709,6 +886,47 @@ extension on Translations {
 			'eventInfo.contact' => 'お問い合わせ',
 			'eventInfo.sourceCode' => 'ソースコードを見る',
 			'eventInfo.ossLicenses' => 'OSSライセンス',
+			'auth.signIn.description' => 'FlutterKaigi 2026 アプリで利用するサインイン方法を選択してください',
+			'auth.signIn.withGoogle' => 'Google でサインイン',
+			'auth.signIn.withApple' => 'Appleでサインイン',
+			'auth.signIn.withEmail' => 'メールアドレスでサインイン',
+			'auth.email.title' => 'メールアドレスでサインイン',
+			'auth.email.emailLabel' => 'メールアドレス',
+			'auth.email.passwordLabel' => 'パスワード',
+			'auth.email.emailRequired' => 'メールアドレスを入力してください',
+			'auth.email.passwordRequired' => 'パスワードを入力してください',
+			'auth.email.showPassword' => 'パスワードを表示',
+			'auth.email.hidePassword' => 'パスワードを隠す',
+			'auth.email.signInButton' => 'サインイン',
+			'auth.email.createAccountButton' => 'アカウントを作成',
+			'auth.email.switchToCreateAccount' => 'アカウントを新規作成する',
+			'auth.email.switchToSignIn' => '既存のアカウントでサインインする',
+			'auth.email.forgotPassword' => 'パスワードを再設定する',
+			'auth.email.resetEmailSent' => 'パスワード再設定メールを送信しました',
+			'auth.account.title' => 'アカウント',
+			'auth.account.signedIn' => 'サインイン中',
+			'auth.account.signOut' => 'サインアウト',
+			'auth.account.signOutError' => 'サインアウトできませんでした',
+			'auth.account.noEmail' => 'メールアドレス未設定',
+			'auth.account.delete' => 'アカウントを削除',
+			'auth.account.deleteConfirmTitle' => 'アカウントを削除しますか?',
+			'auth.account.deleteConfirmBody' => 'アカウントは完全に削除され、元に戻すことはできません。削除の前に再認証が必要です。',
+			'auth.account.deleteConfirmAction' => '削除する',
+			'auth.account.deletePasswordTitle' => 'パスワードの確認',
+			'auth.account.deletePasswordBody' => 'アカウントを削除するには、現在のパスワードを入力してください。',
+			'auth.account.deleted' => 'アカウントを削除しました',
+			'auth.account.cancel' => 'キャンセル',
+			'auth.error.invalidEmail' => 'メールアドレスの形式が正しくありません',
+			'auth.error.userDisabled' => 'このアカウントは利用できません',
+			'auth.error.invalidCredential' => 'メールアドレスまたはパスワードが正しくありません',
+			'auth.error.emailAlreadyInUse' => 'このメールアドレスは既に登録されています',
+			'auth.error.weakPassword' => 'パスワードが簡単すぎます。より複雑なパスワードを設定してください',
+			'auth.error.tooManyRequests' => '試行回数の上限に達しました。しばらくしてからもう一度お試しください',
+			'auth.error.network' => '通信に失敗しました。通信状況を確認してもう一度お試しください',
+			'auth.error.requiresRecentLogin' => '確認のため再認証が必要です。もう一度お試しください',
+			'auth.error.userMismatch' => '再認証したアカウントがサインイン中のアカウントと一致しません',
+			'auth.error.appleTokenRevocationFailed' => 'Appleのトークン失効に失敗したため、アカウントを削除できませんでした。もう一度お試しください',
+			'auth.error.unknown' => '認証に失敗しました。もう一度お試しください',
 			'settings.title' => '設定',
 			'settings.appearance' => '表示設定',
 			'settings.appInfo' => 'アプリ情報',

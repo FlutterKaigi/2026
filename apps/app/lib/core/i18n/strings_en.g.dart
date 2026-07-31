@@ -35,7 +35,7 @@ class TranslationsEn extends Translations with BaseTranslations<AppLocale, Trans
 
 	late final TranslationsEn _root = this; // ignore: unused_field
 
-	@override 
+	@override
 	TranslationsEn $copyWith({TranslationMetadata<AppLocale, Translations>? meta}) => TranslationsEn(meta: meta ?? this.$meta);
 
 	// Translations
@@ -51,6 +51,7 @@ class TranslationsEn extends Translations with BaseTranslations<AppLocale, Trans
 	@override late final _Translations$sessionBookmark$en sessionBookmark = _Translations$sessionBookmark$en._(_root);
 	@override late final _Translations$bookmarkedSessions$en bookmarkedSessions = _Translations$bookmarkedSessions$en._(_root);
 	@override late final _Translations$eventInfo$en eventInfo = _Translations$eventInfo$en._(_root);
+	@override late final _Translations$auth$en auth = _Translations$auth$en._(_root);
 	@override late final _Translations$settings$en settings = _Translations$settings$en._(_root);
 	@override late final _Translations$licenses$en licenses = _Translations$licenses$en._(_root);
 	@override late final _Translations$error$en error = _Translations$error$en._(_root);
@@ -87,6 +88,7 @@ class _Translations$navigation$en extends Translations$navigation$ja {
 	@override String get sessions => 'Sessions';
 	@override String get sponsors => 'Sponsors';
 	@override String get info => 'Event';
+	@override String get account => 'Account';
 }
 
 // Path: news
@@ -250,6 +252,19 @@ class _Translations$eventInfo$en extends Translations$eventInfo$ja {
 	@override String get ossLicenses => 'OSS Licenses';
 }
 
+// Path: auth
+class _Translations$auth$en extends Translations$auth$ja {
+	_Translations$auth$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override late final _Translations$auth$signIn$en signIn = _Translations$auth$signIn$en._(_root);
+	@override late final _Translations$auth$email$en email = _Translations$auth$email$en._(_root);
+	@override late final _Translations$auth$account$en account = _Translations$auth$account$en._(_root);
+	@override late final _Translations$auth$error$en error = _Translations$auth$error$en._(_root);
+}
+
 // Path: settings
 class _Translations$settings$en extends Translations$settings$ja {
 	_Translations$settings$en._(TranslationsEn root) : this._root = root, super.internal(root);
@@ -356,6 +371,83 @@ class _Translations$sessionTimetable$type$en extends Translations$sessionTimetab
 	@override String get event => 'Event';
 }
 
+// Path: auth.signIn
+class _Translations$auth$signIn$en extends Translations$auth$signIn$ja {
+	_Translations$auth$signIn$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get description => 'Choose how you want to sign in to the FlutterKaigi 2026 app';
+	@override String get withGoogle => 'Sign in with Google';
+	@override String get withApple => 'Sign in with Apple';
+	@override String get withEmail => 'Sign in with email';
+}
+
+// Path: auth.email
+class _Translations$auth$email$en extends Translations$auth$email$ja {
+	_Translations$auth$email$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Sign in with email';
+	@override String get emailLabel => 'Email address';
+	@override String get passwordLabel => 'Password';
+	@override String get emailRequired => 'Enter your email address';
+	@override String get passwordRequired => 'Enter your password';
+	@override String get showPassword => 'Show password';
+	@override String get hidePassword => 'Hide password';
+	@override String get signInButton => 'Sign in';
+	@override String get createAccountButton => 'Create account';
+	@override String get switchToCreateAccount => 'Create a new account';
+	@override String get switchToSignIn => 'Sign in with an existing account';
+	@override String get forgotPassword => 'Reset your password';
+	@override String get resetEmailSent => 'Password reset email sent';
+}
+
+// Path: auth.account
+class _Translations$auth$account$en extends Translations$auth$account$ja {
+	_Translations$auth$account$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Account';
+	@override String get signedIn => 'Signed in';
+	@override String get signOut => 'Sign out';
+	@override String get signOutError => 'Could not sign out';
+	@override String get noEmail => 'No email address';
+	@override String get delete => 'Delete account';
+	@override String get deleteConfirmTitle => 'Delete your account?';
+	@override String get deleteConfirmBody => 'Your account will be permanently deleted and cannot be restored. Re-authentication is required before deletion.';
+	@override String get deleteConfirmAction => 'Delete';
+	@override String get deletePasswordTitle => 'Confirm your password';
+	@override String get deletePasswordBody => 'Enter your current password to delete your account.';
+	@override String get deleted => 'Your account has been deleted';
+	@override String get cancel => 'Cancel';
+}
+
+// Path: auth.error
+class _Translations$auth$error$en extends Translations$auth$error$ja {
+	_Translations$auth$error$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get invalidEmail => 'The email address is badly formatted';
+	@override String get userDisabled => 'This account has been disabled';
+	@override String get invalidCredential => 'Incorrect email address or password';
+	@override String get emailAlreadyInUse => 'This email address is already in use';
+	@override String get weakPassword => 'The password is too weak. Choose a stronger password';
+	@override String get tooManyRequests => 'Too many attempts. Please try again later';
+	@override String get network => 'A network error occurred. Check your connection and try again';
+	@override String get requiresRecentLogin => 'Recent authentication is required. Please try again';
+	@override String get userMismatch => 'The re-authenticated account does not match the signed-in account';
+	@override String get appleTokenRevocationFailed => 'Could not delete the account because revoking the Apple token failed. Please try again';
+	@override String get unknown => 'Authentication failed. Please try again';
+}
+
 // Path: settings.themeMode
 class _Translations$settings$themeMode$en extends Translations$settings$themeMode$ja {
 	_Translations$settings$themeMode$en._(TranslationsEn root) : this._root = root, super.internal(root);
@@ -394,6 +486,7 @@ extension on TranslationsEn {
 			'navigation.sessions' => 'Sessions',
 			'navigation.sponsors' => 'Sponsors',
 			'navigation.info' => 'Event',
+			'navigation.account' => 'Account',
 			'news.title' => 'News',
 			'news.empty' => 'There is no news yet',
 			'sponsors.title' => 'Sponsors',
@@ -477,6 +570,47 @@ extension on TranslationsEn {
 			'eventInfo.contact' => 'Contact',
 			'eventInfo.sourceCode' => 'View Source Code',
 			'eventInfo.ossLicenses' => 'OSS Licenses',
+			'auth.signIn.description' => 'Choose how you want to sign in to the FlutterKaigi 2026 app',
+			'auth.signIn.withGoogle' => 'Sign in with Google',
+			'auth.signIn.withApple' => 'Sign in with Apple',
+			'auth.signIn.withEmail' => 'Sign in with email',
+			'auth.email.title' => 'Sign in with email',
+			'auth.email.emailLabel' => 'Email address',
+			'auth.email.passwordLabel' => 'Password',
+			'auth.email.emailRequired' => 'Enter your email address',
+			'auth.email.passwordRequired' => 'Enter your password',
+			'auth.email.showPassword' => 'Show password',
+			'auth.email.hidePassword' => 'Hide password',
+			'auth.email.signInButton' => 'Sign in',
+			'auth.email.createAccountButton' => 'Create account',
+			'auth.email.switchToCreateAccount' => 'Create a new account',
+			'auth.email.switchToSignIn' => 'Sign in with an existing account',
+			'auth.email.forgotPassword' => 'Reset your password',
+			'auth.email.resetEmailSent' => 'Password reset email sent',
+			'auth.account.title' => 'Account',
+			'auth.account.signedIn' => 'Signed in',
+			'auth.account.signOut' => 'Sign out',
+			'auth.account.signOutError' => 'Could not sign out',
+			'auth.account.noEmail' => 'No email address',
+			'auth.account.delete' => 'Delete account',
+			'auth.account.deleteConfirmTitle' => 'Delete your account?',
+			'auth.account.deleteConfirmBody' => 'Your account will be permanently deleted and cannot be restored. Re-authentication is required before deletion.',
+			'auth.account.deleteConfirmAction' => 'Delete',
+			'auth.account.deletePasswordTitle' => 'Confirm your password',
+			'auth.account.deletePasswordBody' => 'Enter your current password to delete your account.',
+			'auth.account.deleted' => 'Your account has been deleted',
+			'auth.account.cancel' => 'Cancel',
+			'auth.error.invalidEmail' => 'The email address is badly formatted',
+			'auth.error.userDisabled' => 'This account has been disabled',
+			'auth.error.invalidCredential' => 'Incorrect email address or password',
+			'auth.error.emailAlreadyInUse' => 'This email address is already in use',
+			'auth.error.weakPassword' => 'The password is too weak. Choose a stronger password',
+			'auth.error.tooManyRequests' => 'Too many attempts. Please try again later',
+			'auth.error.network' => 'A network error occurred. Check your connection and try again',
+			'auth.error.requiresRecentLogin' => 'Recent authentication is required. Please try again',
+			'auth.error.userMismatch' => 'The re-authenticated account does not match the signed-in account',
+			'auth.error.appleTokenRevocationFailed' => 'Could not delete the account because revoking the Apple token failed. Please try again',
+			'auth.error.unknown' => 'Authentication failed. Please try again',
 			'settings.title' => 'Settings',
 			'settings.appearance' => 'Appearance',
 			'settings.appInfo' => 'App Information',

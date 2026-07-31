@@ -89,6 +89,7 @@ jobs:
         run: |
           grep -Fq "projectId: '$FIREBASE_PROJECT_ID'" lib/firebase_options.dart
           grep -Fq "appId: '$FIREBASE_WEB_APP_ID'" lib/firebase_options.dart
+          grep -Fq "authDomain:" lib/firebase_options.dart
 
       - name: Build staging web app
         working-directory: apps/app

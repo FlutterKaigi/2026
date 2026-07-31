@@ -112,6 +112,27 @@ jobs:
           test "$(/usr/libexec/PlistBuddy -c 'Print :BUNDLE_ID' ios/Runner/GoogleService-Info.plist)" = "$IOS_BUNDLE_ID"
           grep -Fq "projectId: '$FIREBASE_PROJECT_ID'" lib/firebase_options.dart
 
+      # Google サインイン(signInWithProvider)のブラウザフローがアプリへ戻る
+      # には REVERSED_CLIENT_ID の URL スキーム登録が必要。Info.plist には
+      # dev(Emulator)用スキームしかコミットされていないため、FlutterFire CLI が
+      # 生成した本番値をアーカイブ前に挿入して検証する。
+      - name: Register Google sign-in callback URL scheme
+        working-directory: apps/app
+        run: |
+          reversed_client_id="$(/usr/libexec/PlistBuddy -c 'Print :REVERSED_CLIENT_ID' ios/Runner/GoogleService-Info.plist)"
+          if [ -z "$reversed_client_id" ]; then
+            echo "::error::REVERSED_CLIENT_ID was not found in GoogleService-Info.plist."
+            exit 1
+          fi
+          /usr/libexec/PlistBuddy \
+            -c 'Add :CFBundleURLTypes:1 dict' \
+            -c 'Add :CFBundleURLTypes:1:CFBundleTypeRole string Editor' \
+            -c 'Add :CFBundleURLTypes:1:CFBundleURLSchemes array' \
+            -c "Add :CFBundleURLTypes:1:CFBundleURLSchemes:0 string $reversed_client_id" \
+            ios/Runner/Info.plist
+          /usr/libexec/PlistBuddy -c 'Print :CFBundleURLTypes:1:CFBundleURLSchemes:0' ios/Runner/Info.plist \
+            | grep -Fx "$reversed_client_id"
+
       - name: Set build number
         run: echo "BUILD_NUMBER=$((GITHUB_RUN_NUMBER * 100 + GITHUB_RUN_ATTEMPT))" >> "$GITHUB_ENV"
 
