@@ -13,8 +13,6 @@ class Header extends StatelessComponent {
   /// pages where there's no per-locale counterpart).
   final String? altLocaleHref;
 
-  // TODO: Timeline を追加する場合はここに追記する。
-
   @override
   Component build(BuildContext context) {
     final strings = LocaleScope.stringsOf(context);
@@ -22,6 +20,7 @@ class Header extends StatelessComponent {
     // ナビリンク定義（desktop nav と mobile panel で共用）。
     final navLinks = [
       (label: 'Event Info', href: locale.eventInfoAnchorHref),
+      (label: 'Timetable', href: locale.timetableAnchorHref),
       (label: 'Sponsors', href: locale.sponsorsAnchorHref),
       (label: 'Job Boards', href: locale.jobBoardsAnchorHref),
     ];
@@ -32,8 +31,7 @@ class Header extends StatelessComponent {
         classes: 'nav',
         attributes: const {'aria-label': 'Primary'},
         [
-          for (final item in navLinks)
-            a(href: item.href, classes: 'nav__link', [.text(item.label)]),
+          for (final item in navLinks) a(href: item.href, classes: 'nav__link', [.text(item.label)]),
         ],
       ),
       div(classes: 'actions', [
@@ -76,8 +74,7 @@ class Header extends StatelessComponent {
           classes: 'mob-nav__panel',
           attributes: const {'aria-label': 'Primary'},
           [
-            for (final item in navLinks)
-              a(href: item.href, classes: 'mob-nav__link', [.text(item.label)]),
+            for (final item in navLinks) a(href: item.href, classes: 'mob-nav__link', [.text(item.label)]),
           ],
         ),
       ]),

@@ -4,6 +4,7 @@ import 'package:jaspr/jaspr.dart';
 import '../components/event_section.dart';
 import '../components/hiring_section.dart';
 import '../components/sponsors_section.dart';
+import '../components/timetable_section.dart';
 import '../constants/generated_tokens.dart';
 import '../constants/theme.dart';
 import '../l10n/strings.dart';
@@ -79,6 +80,7 @@ class Home extends StatelessComponent {
         ]),
       ]),
       const EventSection(),
+      const TimetableSection(),
       const SponsorsSection(),
       const HiringSection(),
     ]);
