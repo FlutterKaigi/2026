@@ -158,6 +158,12 @@ class Strings {
     AppLocale.en => 'Session timeline for the two days of FlutterKaigi 2026',
   };
 
+  /// タイムテーブル未確定（生成データが空）のときに表示する。
+  String get timetableComingSoon => switch (locale) {
+    AppLocale.ja => 'タイムテーブルは準備中です。確定次第このページで公開します。',
+    AppLocale.en => 'The timetable is being finalised. It will be published on this page once it is ready.',
+  };
+
   // ── Sponsors ────────────────────────────────────────────────────────
 
   String get sponsorsNav => 'Sponsors';
