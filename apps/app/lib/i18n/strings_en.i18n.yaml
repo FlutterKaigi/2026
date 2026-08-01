@@ -6,6 +6,7 @@ navigation:
   sessions: Sessions
   sponsors: Sponsors
   info: Event
+  account: Account
 news:
   title: News
   empty: There is no news yet
@@ -105,6 +106,52 @@ eventInfo:
   contact: Contact
   sourceCode: View Source Code
   ossLicenses: OSS Licenses
+auth:
+  signIn:
+    description: Choose how you want to sign in to the FlutterKaigi 2026 app
+    withGoogle: Sign in with Google
+    withApple: Sign in with Apple
+    withEmail: Sign in with email
+  email:
+    title: Sign in with email
+    emailLabel: Email address
+    passwordLabel: Password
+    emailRequired: Enter your email address
+    passwordRequired: Enter your password
+    showPassword: Show password
+    hidePassword: Hide password
+    signInButton: Sign in
+    createAccountButton: Create account
+    switchToCreateAccount: Create a new account
+    switchToSignIn: Sign in with an existing account
+    forgotPassword: Reset your password
+    resetEmailSent: Password reset email sent
+  account:
+    title: Account
+    signedIn: Signed in
+    signOut: Sign out
+    signOutError: Could not sign out
+    noEmail: No email address
+    delete: Delete account
+    deleteConfirmTitle: Delete your account?
+    deleteConfirmBody: Your account will be permanently deleted and cannot be restored. Re-authentication is required before deletion.
+    deleteConfirmAction: Delete
+    deletePasswordTitle: Confirm your password
+    deletePasswordBody: Enter your current password to delete your account.
+    deleted: Your account has been deleted
+    cancel: Cancel
+  error:
+    invalidEmail: The email address is badly formatted
+    userDisabled: This account has been disabled
+    invalidCredential: Incorrect email address or password
+    emailAlreadyInUse: This email address is already in use
+    weakPassword: The password is too weak. Choose a stronger password
+    tooManyRequests: Too many attempts. Please try again later
+    network: A network error occurred. Check your connection and try again
+    requiresRecentLogin: Recent authentication is required. Please try again
+    userMismatch: The re-authenticated account does not match the signed-in account
+    appleTokenRevocationFailed: Could not delete the account because revoking the Apple token failed. Please try again
+    unknown: Authentication failed. Please try again
 settings:
   title: Settings
   appearance: Appearance

@@ -31,6 +31,7 @@ Future<void> main() async {
   final hostParts = environment.firestoreHost.split(':');
   await FirebaseInitializer.ensureInitialized(
     options: environment.firebaseOptions,
+    useEmulators: environment.flavor == Flavor.develop,
     projectId: environment.firebaseProjectId,
     host: hostParts.first,
     firestorePort: hostParts.length > 1 ? int.parse(hostParts[1]) : 8080,

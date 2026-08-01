@@ -22,5 +22,7 @@ void main() {
       const LicenseDetailRoute(packageName: 'foo bar').location,
       '/licenses/foo%20bar',
     );
+    expect(const AccountRoute().location, '/account');
+    expect(const EmailSignInRoute().location, '/account/email');
   });
 }

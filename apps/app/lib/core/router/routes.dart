@@ -48,6 +48,14 @@ class SettingsRoute extends GoRouteData with $SettingsRoute {
         ),
       ],
     ),
+    TypedStatefulShellBranch<AccountBranch>(
+      routes: [
+        TypedGoRoute<AccountRoute>(
+          path: '/account',
+          routes: [TypedGoRoute<EmailSignInRoute>(path: 'email')],
+        ),
+      ],
+    ),
   ],
 )
 class AppShellRoute extends StatefulShellRouteData {
@@ -75,6 +83,10 @@ class AppShellRoute extends StatefulShellRouteData {
           icon: Icons.business_outlined,
           label: t.navigation.sponsors,
         ),
+        RootDestination(
+          icon: Icons.person_outline,
+          label: t.navigation.account,
+        ),
       ],
     );
   }
@@ -95,6 +107,28 @@ class SessionBranch extends StatefulShellBranchData {
 /// Branch hosting the sponsors tab.
 class SponsorBranch extends StatefulShellBranchData {
   const SponsorBranch();
+}
+
+/// Branch hosting the account tab.
+class AccountBranch extends StatefulShellBranchData {
+  const AccountBranch();
+}
+
+/// `/account` — sign-in options while signed out, account info while signed
+/// in.
+class AccountRoute extends GoRouteData with $AccountRoute {
+  const AccountRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const AccountPage();
+}
+
+/// `/account/email` — email/password sign-in and account creation.
+class EmailSignInRoute extends GoRouteData with $EmailSignInRoute {
+  const EmailSignInRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const EmailSignInPage();
 }
 
 /// `/news` — the news list opened from the event overview.

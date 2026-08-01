@@ -84,6 +84,20 @@ RouteBase get $appShellRoute => StatefulShellRouteData.$route(
         ),
       ],
     ),
+    StatefulShellBranchData.$branch(
+      routes: [
+        GoRouteData.$route(
+          path: '/account',
+          factory: $AccountRoute._fromState,
+          routes: [
+            GoRouteData.$route(
+              path: 'email',
+              factory: $EmailSignInRoute._fromState,
+            ),
+          ],
+        ),
+      ],
+    ),
   ],
 );
 
@@ -282,6 +296,44 @@ mixin $SponsorDetailsRoute on GoRouteData {
   String get location => GoRouteData.$location(
     '/sponsors/${Uri.encodeComponent(_self.sponsorKey)}',
   );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) => context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $AccountRoute on GoRouteData {
+  static AccountRoute _fromState(GoRouterState state) => const AccountRoute();
+
+  @override
+  String get location => GoRouteData.$location('/account');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) => context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $EmailSignInRoute on GoRouteData {
+  static EmailSignInRoute _fromState(GoRouterState state) => const EmailSignInRoute();
+
+  @override
+  String get location => GoRouteData.$location('/account/email');
 
   @override
   void go(BuildContext context) => context.go(location);

@@ -62,17 +62,14 @@ abstract class Environment with _$Environment {
     return firestoreEmulatorHost;
   }
 
-  /// Firebase options for the selected real project.
+  /// Firebase options generated for the selected project.
   ///
   /// CI generates the real-project values with FlutterFire CLI into the
-  /// ignored `lib/firebase_options.dart`. Local development returns `null` so
-  /// the data package connects to the Firebase Emulator Suite instead.
-  FirebaseOptions? get firebaseOptions {
-    if (flavor == Flavor.develop) {
-      return null;
-    }
-    return DefaultFirebaseOptions.currentPlatform;
-  }
+  /// ignored `lib/firebase_options.dart`. Development still initializes with
+  /// those Web SDK values because popup/redirect OAuth requires a valid
+  /// `apiKey` and `authDomain`; `main` separately routes all services to the
+  /// Emulator Suite.
+  FirebaseOptions get firebaseOptions => DefaultFirebaseOptions.currentPlatform;
 
   /// reCAPTCHA Enterprise site key used by App Check for release web builds.
   String get appCheckSiteKey => const String.fromEnvironment('APP_CHECK_SITE_KEY');

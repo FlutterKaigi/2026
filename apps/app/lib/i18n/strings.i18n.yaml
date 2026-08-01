@@ -6,6 +6,7 @@ navigation:
   sessions: セッション
   sponsors: スポンサー
   info: イベント
+  account: アカウント
 news:
   title: お知らせ
   empty: お知らせはまだありません
@@ -105,6 +106,53 @@ eventInfo:
   contact: お問い合わせ
   sourceCode: ソースコードを見る
   ossLicenses: OSSライセンス
+auth:
+  signIn:
+    description: FlutterKaigi 2026 アプリで利用するサインイン方法を選択してください
+    withGoogle: Google でサインイン
+    # NOTE: Apple 公式の日本語ボタン表記(スペースなし)に合わせる
+    withApple: Appleでサインイン
+    withEmail: メールアドレスでサインイン
+  email:
+    title: メールアドレスでサインイン
+    emailLabel: メールアドレス
+    passwordLabel: パスワード
+    emailRequired: メールアドレスを入力してください
+    passwordRequired: パスワードを入力してください
+    showPassword: パスワードを表示
+    hidePassword: パスワードを隠す
+    signInButton: サインイン
+    createAccountButton: アカウントを作成
+    switchToCreateAccount: アカウントを新規作成する
+    switchToSignIn: 既存のアカウントでサインインする
+    forgotPassword: パスワードを再設定する
+    resetEmailSent: パスワード再設定メールを送信しました
+  account:
+    title: アカウント
+    signedIn: サインイン中
+    signOut: サインアウト
+    signOutError: サインアウトできませんでした
+    noEmail: メールアドレス未設定
+    delete: アカウントを削除
+    deleteConfirmTitle: アカウントを削除しますか?
+    deleteConfirmBody: アカウントは完全に削除され、元に戻すことはできません。削除の前に再認証が必要です。
+    deleteConfirmAction: 削除する
+    deletePasswordTitle: パスワードの確認
+    deletePasswordBody: アカウントを削除するには、現在のパスワードを入力してください。
+    deleted: アカウントを削除しました
+    cancel: キャンセル
+  error:
+    invalidEmail: メールアドレスの形式が正しくありません
+    userDisabled: このアカウントは利用できません
+    invalidCredential: メールアドレスまたはパスワードが正しくありません
+    emailAlreadyInUse: このメールアドレスは既に登録されています
+    weakPassword: パスワードが簡単すぎます。より複雑なパスワードを設定してください
+    tooManyRequests: 試行回数の上限に達しました。しばらくしてからもう一度お試しください
+    network: 通信に失敗しました。通信状況を確認してもう一度お試しください
+    requiresRecentLogin: 確認のため再認証が必要です。もう一度お試しください
+    userMismatch: 再認証したアカウントがサインイン中のアカウントと一致しません
+    appleTokenRevocationFailed: Appleのトークン失効に失敗したため、アカウントを削除できませんでした。もう一度お試しください
+    unknown: 認証に失敗しました。もう一度お試しください
 settings:
   title: 設定
   appearance: 表示設定
