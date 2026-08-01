@@ -189,3 +189,7 @@ melos:
     news:generate:
       run: fvm dart run tool/generate_news.dart
       description: Regenerate apps/website/lib/constants/generated_news.dart from the Firestore emulator (or a configured STG/prod project). Output is committed to git (news is not sensitive).
+
+    sessions:import:
+      run: fvm dart run tool/import_sessions.dart
+      description: Import scheduled sessions and their speakers from the Sessionize API into the Firestore emulator (or a configured STG/prod project). Requires SESSIONIZE_ENDPOINT_ID; pass --dry-run to preview.
