@@ -1,6 +1,7 @@
 import 'package:jaspr/dom.dart';
 import 'package:jaspr/jaspr.dart';
 
+import '../constants/generated_sessions.dart';
 import '../constants/generated_tokens.dart';
 import '../constants/theme.dart';
 import '../constants/timetable.dart';
@@ -16,58 +17,80 @@ import 'app_dialog.dart';
 /// hidden な radio input と `:checked ~` セレクタの組み合わせで表示日を
 /// 切り替える（SSG のまま動く）。
 ///
-/// 現状はデザイン確認用の仮データ（`constants/timetable.dart`）を表示。
+/// データはビルド時生成の `constants/generated_sessions.dart`（Firestore
+/// 由来、git 管理外）。タイムテーブル確定前は空になるため、その場合は
+/// タブとグリッドを出さず準備中メッセージのみを表示する。
 class TimetableSection extends StatelessComponent {
   const TimetableSection({super.key});
 
   @override
   Component build(BuildContext context) {
     final strings = LocaleScope.stringsOf(context);
+    // 会場が 1 つも無い＝タイムテーブル未確定。セッションが無ければ
+    // タイムラインイベントだけ出しても意味がないので同じ扱いにする。
+    final hasProgramme =
+        generatedTimetableRooms.isNotEmpty && generatedTimetableByDay.values.any((slots) => slots.isNotEmpty);
     return section(id: 'timetable', classes: 'timetable-section', [
       div(classes: 'timetable-section__inner', [
         div(classes: 'timetable-section__header', [
           h2(classes: 'timetable-section__title', [.text(strings.timetableTitle)]),
           p(classes: 'timetable-section__subtitle', [.text(strings.timetableSubtitle)]),
         ]),
-        // タブ切替用の radio（sr-only で視覚のみ非表示）。tabs / day グリッド
-        // の兄弟要素であることが `:checked ~` セレクタの前提。キーボードでは
-        // Tab でグループに入り、矢印キーで Day を切り替えられる。
-        for (final day in TimetableDay.values)
-          input(
-            type: InputType.radio,
-            id: 'timetable-${day.name}',
-            name: 'timetable-day',
-            classes: 'timetable-day-input',
-            checked: day == TimetableDay.day1,
-          ),
-        div(classes: 'timetable-tabs', [
+        if (!hasProgramme)
+          p(classes: 'timetable-empty', [.text(strings.timetableComingSoon)])
+        else ...[
+          // タブ切替用の radio（sr-only で視覚のみ非表示）。tabs / day グリッド
+          // の兄弟要素であることが `:checked ~` セレクタの前提。キーボードでは
+          // Tab でグループに入り、矢印キーで Day を切り替えられる。
           for (final day in TimetableDay.values)
-            label(
-              classes: 'timetable-tab timetable-tab--${day.name}',
-              htmlFor: 'timetable-${day.name}',
+            input(
+              type: InputType.radio,
+              id: 'timetable-${day.name}',
+              name: 'timetable-day',
+              classes: 'timetable-day-input',
+              checked: day == TimetableDay.day1,
+            ),
+          div(classes: 'timetable-tabs', [
+            for (final day in TimetableDay.values)
+              label(
+                classes: 'timetable-tab timetable-tab--${day.name}',
+                htmlFor: 'timetable-${day.name}',
+                [
+                  span(classes: 'timetable-tab__day', [.text(day.label)]),
+                  span(classes: 'timetable-tab__date', [.text('${day.date} ${day.weekday}')]),
+                ],
+              ),
+          ]),
+          for (final day in TimetableDay.values)
+            div(
+              classes: 'timetable-day timetable-day--${day.name}',
+              // 列数は会場データ由来。CSS 側は var() 経由で受けるので、
+              // 縦積みに切り替えるメディアクエリを inline style が上書きしない。
+              styles: Styles(
+                raw: {'--tt-cols': '4.5rem repeat(${generatedTimetableRooms.length}, minmax(0, 1fr))'},
+              ),
               [
-                span(classes: 'timetable-tab__day', [.text(day.label)]),
-                span(classes: 'timetable-tab__date', [.text('${day.date} ${day.weekday}')]),
+                div(classes: 'timetable-rowhead', [
+                  div([]),
+                  for (final room in generatedTimetableRooms)
+                    div(
+                      classes: 'timetable-roomhead',
+                      styles: Styles(raw: {'--tt-room-color': room.colorHex}),
+                      [
+                        span(classes: 'timetable-roomhead__dot', []),
+                        .text(room.name),
+                      ],
+                    ),
+                ]),
+                // 片方の日だけ未確定というケースもある。
+                if (generatedTimetableByDay[day]!.isEmpty)
+                  p(classes: 'timetable-empty', [.text(strings.timetableComingSoon)])
+                else
+                  for (final (slotIndex, slot) in generatedTimetableByDay[day]!.indexed)
+                    _SlotRow(slot: slot, day: day, slotIndex: slotIndex, strings: strings),
               ],
             ),
-        ]),
-        for (final day in TimetableDay.values)
-          div(classes: 'timetable-day timetable-day--${day.name}', [
-            div(classes: 'timetable-rowhead', [
-              div([]),
-              for (final room in timetableRooms)
-                div(
-                  classes: 'timetable-roomhead',
-                  styles: Styles(raw: {'--tt-room-color': room.colorHex}),
-                  [
-                    span(classes: 'timetable-roomhead__dot', []),
-                    .text(room.name),
-                  ],
-                ),
-            ]),
-            for (final (slotIndex, slot) in timetableByDay[day]!.indexed)
-              _SlotRow(slot: slot, day: day, slotIndex: slotIndex, strings: strings),
-          ]),
+        ],
       ]),
     ]);
   }
@@ -119,6 +142,16 @@ class TimetableSection extends StatelessComponent {
           },
         ),
       ]),
+
+      // タイムテーブル未確定時のプレースホルダー。空のグリッドを見せるより、
+      // 準備中であることを明示する。
+      css('.timetable-empty').styles(
+        color: const Color('#494456'),
+        fontFamily: uiFontFamily,
+        fontWeight: .w400,
+        textAlign: .center,
+        raw: const {'font-size': '0.95rem', 'line-height': '1.7'},
+      ),
 
       // ── Day tabs（radio + label による JS なし切替） ─────────────────
       // アクティブは M3 primary 塗り（サイト全体のフォーカスリング等と同系色。
@@ -206,12 +239,13 @@ class TimetableSection extends StatelessComponent {
         '& #timetable-day2:checked ~ .timetable-day--day2',
       ).styles(raw: const {'display': 'flex'}),
 
-      // 時刻列 + 会場カラムのグリッド。会場数は現状 4 固定
-      // （実データ連携時に会場データから列数を導出する）。
+      // 時刻列 + 会場カラムのグリッド。列数は `.timetable-day` に inline で
+      // 載せた `--tt-cols`（会場データ由来）から受け取る。フォールバックは
+      // 従来どおり 4 会場。
       css('& .timetable-rowhead, & .timetable-row').styles(
         display: .grid,
         gap: Gap.column(12.px),
-        raw: const {'grid-template-columns': '4.5rem repeat(4, minmax(0, 1fr))'},
+        raw: const {'grid-template-columns': 'var(--tt-cols, 4.5rem repeat(4, minmax(0, 1fr)))'},
       ),
       css('.timetable-rowhead').styles(
         raw: const {'margin-bottom': '8px'},
@@ -507,7 +541,7 @@ class _SlotRow extends StatelessComponent {
           else ...[
             _SessionCard(
               session: session,
-              room: timetableRooms[i],
+              room: generatedTimetableRooms[i],
               dialogId: _dialogId(i),
               strings: strings,
             ),
@@ -516,7 +550,7 @@ class _SlotRow extends StatelessComponent {
             _SessionDialog(
               id: _dialogId(i),
               session: session,
-              room: timetableRooms[i],
+              room: generatedTimetableRooms[i],
               day: day,
               slot: slot,
               strings: strings,
