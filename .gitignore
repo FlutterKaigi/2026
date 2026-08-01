@@ -33,3 +33,8 @@ ui-debug.log
 # Real sponsor info is fetched at build time and must never be committed.
 apps/website/lib/constants/generated_sponsors.dart
 apps/website/web/images/logos/
+
+# Generated session/timetable data.
+# The programme is fetched at build time; it must not enter this public repo's
+# git history before it is announced.
+apps/website/lib/constants/generated_sessions.dart
