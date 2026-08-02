@@ -189,3 +189,7 @@ melos:
     news:generate:
       run: fvm dart run tool/generate_news.dart
       description: Regenerate apps/website/lib/constants/generated_news.dart from the Firestore emulator (or a configured STG/prod project). Output is committed to git (news is not sensitive).
+
+    contributors:refresh:
+      run: fvm dart run tool/refresh_contributors.dart
+      description: Refresh the Firestore contributors collection from the GitHub API (emulator by default; set FIRESTORE_HOST/FIRESTORE_ACCESS_TOKEN for STG/prod)

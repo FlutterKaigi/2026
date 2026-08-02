@@ -2975,6 +2975,39 @@
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
       }
+    },
+    {
+      "path": "contributors/example-contributor-001",
+      "schema": "contributor",
+      "data": {
+        "login": "example-contributor-001",
+        "avatarUrl": "https://example.com/contributors/example-contributor-001.png",
+        "htmlUrl": "https://github.com/example-contributor-001",
+        "contributions": 115,
+        "updatedAt": "2026-08-03T00:00:00Z"
+      }
+    },
+    {
+      "path": "contributors/example-contributor-002",
+      "schema": "contributor",
+      "data": {
+        "login": "example-contributor-002",
+        "avatarUrl": "https://example.com/contributors/example-contributor-002.png",
+        "htmlUrl": "https://github.com/example-contributor-002",
+        "contributions": 12,
+        "updatedAt": "2026-08-03T00:00:00Z"
+      }
+    },
+    {
+      "path": "contributors/example-contributor-003",
+      "schema": "contributor",
+      "data": {
+        "login": "example-contributor-003",
+        "avatarUrl": "https://example.com/contributors/example-contributor-003.png",
+        "htmlUrl": "https://github.com/example-contributor-003",
+        "contributions": 1,
+        "updatedAt": "2026-08-03T00:00:00Z"
+      }
     }
   ]
 }
