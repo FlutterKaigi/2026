@@ -27,15 +27,25 @@ void main() {
     );
 
     expect(find.text('コントリビューター'), findsOneWidget);
-    expect(
-      find.text('FlutterKaigi 2026 の開発にコントリビュートしてくださった皆様'),
-      findsOneWidget,
-    );
+    expect(find.text('FlutterKaigi/2026'), findsOneWidget);
+    expect(find.byIcon(Icons.open_in_new), findsOneWidget);
     expect(find.text('alice'), findsOneWidget);
     expect(find.text('115 contributions'), findsOneWidget);
     expect(find.text('bob'), findsOneWidget);
     expect(find.text('1 contributions'), findsOneWidget);
+    expect(find.byType(ListTile), findsNWidgets(2));
     expect(find.byIcon(Icons.person_outline), findsNWidgets(2));
+    expect(
+      tester
+          .getSize(
+            find.ancestor(
+              of: find.text('alice'),
+              matching: find.byType(ListTile),
+            ),
+          )
+          .height,
+      greaterThanOrEqualTo(48),
+    );
   });
 
   testWidgets('shows the empty message when there are no contributors', (

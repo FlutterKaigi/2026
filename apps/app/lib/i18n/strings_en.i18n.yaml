@@ -110,7 +110,7 @@ eventInfo:
   ossLicenses: OSS Licenses
 contributors:
   title: Contributors
-  description: Everyone who has contributed to the development of FlutterKaigi 2026
+  openRepository: Open the FlutterKaigi/2026 repository
   empty: No contributors found
   contributionsCount:
     one: $n contribution

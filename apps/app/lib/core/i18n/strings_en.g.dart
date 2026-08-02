@@ -263,7 +263,7 @@ class _Translations$contributors$en extends Translations$contributors$ja {
 
 	// Translations
 	@override String get title => 'Contributors';
-	@override String get description => 'Everyone who has contributed to the development of FlutterKaigi 2026';
+	@override String get openRepository => 'Open the FlutterKaigi/2026 repository';
 	@override String get empty => 'No contributors found';
 	@override String contributionsCount({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n,
 		one: '${n} contribution',
@@ -592,7 +592,7 @@ extension on TranslationsEn {
 			'eventInfo.sourceCode' => 'View Source Code',
 			'eventInfo.ossLicenses' => 'OSS Licenses',
 			'contributors.title' => 'Contributors',
-			'contributors.description' => 'Everyone who has contributed to the development of FlutterKaigi 2026',
+			'contributors.openRepository' => 'Open the FlutterKaigi/2026 repository',
 			'contributors.empty' => 'No contributors found',
 			'contributors.contributionsCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} contribution', other: '${n} contributions', ), 
 			'auth.signIn.description' => 'Choose how you want to sign in to the FlutterKaigi 2026 app',

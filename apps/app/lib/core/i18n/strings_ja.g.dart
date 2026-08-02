@@ -431,8 +431,8 @@ class Translations$contributors$ja {
 	/// ja: 'コントリビューター'
 	String get title => 'コントリビューター';
 
-	/// ja: 'FlutterKaigi 2026 の開発にコントリビュートしてくださった皆様'
-	String get description => 'FlutterKaigi 2026 の開発にコントリビュートしてくださった皆様';
+	/// ja: 'FlutterKaigi/2026 のリポジトリを開く'
+	String get openRepository => 'FlutterKaigi/2026 のリポジトリを開く';
 
 	/// ja: 'コントリビューターが見つかりませんでした'
 	String get empty => 'コントリビューターが見つかりませんでした';
@@ -920,7 +920,7 @@ extension on Translations {
 			'eventInfo.sourceCode' => 'ソースコードを見る',
 			'eventInfo.ossLicenses' => 'OSSライセンス',
 			'contributors.title' => 'コントリビューター',
-			'contributors.description' => 'FlutterKaigi 2026 の開発にコントリビュートしてくださった皆様',
+			'contributors.openRepository' => 'FlutterKaigi/2026 のリポジトリを開く',
 			'contributors.empty' => 'コントリビューターが見つかりませんでした',
 			'contributors.contributionsCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(n, one: '${n} contributions', other: '${n} contributions', ), 
 			'auth.signIn.description' => 'FlutterKaigi 2026 アプリで利用するサインイン方法を選択してください',

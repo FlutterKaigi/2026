@@ -110,7 +110,7 @@ eventInfo:
   ossLicenses: OSSライセンス
 contributors:
   title: コントリビューター
-  description: FlutterKaigi 2026 の開発にコントリビュートしてくださった皆様
+  openRepository: FlutterKaigi/2026 のリポジトリを開く
   empty: コントリビューターが見つかりませんでした
   contributionsCount:
     one: $n contributions
