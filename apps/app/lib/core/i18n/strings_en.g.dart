@@ -35,7 +35,7 @@ class TranslationsEn extends Translations with BaseTranslations<AppLocale, Trans
 
 	late final TranslationsEn _root = this; // ignore: unused_field
 
-	@override
+	@override 
 	TranslationsEn $copyWith({TranslationMetadata<AppLocale, Translations>? meta}) => TranslationsEn(meta: meta ?? this.$meta);
 
 	// Translations
@@ -51,6 +51,7 @@ class TranslationsEn extends Translations with BaseTranslations<AppLocale, Trans
 	@override late final _Translations$sessionBookmark$en sessionBookmark = _Translations$sessionBookmark$en._(_root);
 	@override late final _Translations$bookmarkedSessions$en bookmarkedSessions = _Translations$bookmarkedSessions$en._(_root);
 	@override late final _Translations$eventInfo$en eventInfo = _Translations$eventInfo$en._(_root);
+	@override late final _Translations$contributors$en contributors = _Translations$contributors$en._(_root);
 	@override late final _Translations$auth$en auth = _Translations$auth$en._(_root);
 	@override late final _Translations$settings$en settings = _Translations$settings$en._(_root);
 	@override late final _Translations$licenses$en licenses = _Translations$licenses$en._(_root);
@@ -242,6 +243,8 @@ class _Translations$eventInfo$en extends Translations$eventInfo$ja {
 	@override String get venueLabel => 'Venue';
 	@override String get venue => 'Hamamatsucho Convention Hall';
 	@override String get viewMap => 'View Map';
+	@override String get credits => 'Credits';
+	@override String get contributors => 'Contributors';
 	@override String get other => 'Other';
 	@override String get officialWebsite => 'Official Website';
 	@override String get codeOfConduct => 'Code of Conduct';
@@ -250,6 +253,22 @@ class _Translations$eventInfo$en extends Translations$eventInfo$ja {
 	@override String get contact => 'Contact';
 	@override String get sourceCode => 'View Source Code';
 	@override String get ossLicenses => 'OSS Licenses';
+}
+
+// Path: contributors
+class _Translations$contributors$en extends Translations$contributors$ja {
+	_Translations$contributors$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Contributors';
+	@override String get description => 'Everyone who has contributed to the development of FlutterKaigi 2026';
+	@override String get empty => 'No contributors found';
+	@override String contributionsCount({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n,
+		one: '${n} contribution',
+		other: '${n} contributions',
+	);
 }
 
 // Path: auth
@@ -533,7 +552,7 @@ extension on TranslationsEn {
 			'sessionSearch.promptBody' => 'Enter a keyword or select a day, session type, or language',
 			'sessionSearch.emptyTitle' => 'No sessions found',
 			'sessionSearch.emptyBody' => 'Try changing the keyword or filters',
-			'sessionSearch.resultCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} session', other: '${n} sessions', ),
+			'sessionSearch.resultCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} session', other: '${n} sessions', ), 
 			'sessionDetails.title' => 'Session Details',
 			'sessionDetails.description' => 'Description',
 			'sessionDetails.schedule' => 'Schedule and Venue',
@@ -562,6 +581,8 @@ extension on TranslationsEn {
 			'eventInfo.venueLabel' => 'Venue',
 			'eventInfo.venue' => 'Hamamatsucho Convention Hall',
 			'eventInfo.viewMap' => 'View Map',
+			'eventInfo.credits' => 'Credits',
+			'eventInfo.contributors' => 'Contributors',
 			'eventInfo.other' => 'Other',
 			'eventInfo.officialWebsite' => 'Official Website',
 			'eventInfo.codeOfConduct' => 'Code of Conduct',
@@ -570,6 +591,10 @@ extension on TranslationsEn {
 			'eventInfo.contact' => 'Contact',
 			'eventInfo.sourceCode' => 'View Source Code',
 			'eventInfo.ossLicenses' => 'OSS Licenses',
+			'contributors.title' => 'Contributors',
+			'contributors.description' => 'Everyone who has contributed to the development of FlutterKaigi 2026',
+			'contributors.empty' => 'No contributors found',
+			'contributors.contributionsCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} contribution', other: '${n} contributions', ), 
 			'auth.signIn.description' => 'Choose how you want to sign in to the FlutterKaigi 2026 app',
 			'auth.signIn.withGoogle' => 'Sign in with Google',
 			'auth.signIn.withApple' => 'Sign in with Apple',
@@ -626,7 +651,7 @@ extension on TranslationsEn {
 			'licenses.title' => 'Licenses',
 			'licenses.searchHint' => 'Search packages',
 			'licenses.clearSearch' => 'Clear search',
-			'licenses.licenseCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} license', other: '${n} licenses', ),
+			'licenses.licenseCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} license', other: '${n} licenses', ), 
 			'licenses.notFound' => 'License not found',
 			'error.title' => 'Could not load data',
 			'error.message' => 'Check your connection and try again.',
