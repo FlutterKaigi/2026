@@ -52,6 +52,7 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	late final Translations$sessionBookmark$ja sessionBookmark = Translations$sessionBookmark$ja.internal(_root);
 	late final Translations$bookmarkedSessions$ja bookmarkedSessions = Translations$bookmarkedSessions$ja.internal(_root);
 	late final Translations$eventInfo$ja eventInfo = Translations$eventInfo$ja.internal(_root);
+	late final Translations$contributors$ja contributors = Translations$contributors$ja.internal(_root);
 	late final Translations$auth$ja auth = Translations$auth$ja.internal(_root);
 	late final Translations$settings$ja settings = Translations$settings$ja.internal(_root);
 	late final Translations$licenses$ja licenses = Translations$licenses$ja.internal(_root);
@@ -388,6 +389,12 @@ class Translations$eventInfo$ja {
 	/// ja: '地図を見る'
 	String get viewMap => '地図を見る';
 
+	/// ja: 'クレジット'
+	String get credits => 'クレジット';
+
+	/// ja: 'コントリビューター'
+	String get contributors => 'コントリビューター';
+
 	/// ja: 'その他'
 	String get other => 'その他';
 
@@ -411,6 +418,30 @@ class Translations$eventInfo$ja {
 
 	/// ja: 'OSSライセンス'
 	String get ossLicenses => 'OSSライセンス';
+}
+
+// Path: contributors
+class Translations$contributors$ja {
+	Translations$contributors$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'コントリビューター'
+	String get title => 'コントリビューター';
+
+	/// ja: 'FlutterKaigi/2026 のリポジトリを開く'
+	String get openRepository => 'FlutterKaigi/2026 のリポジトリを開く';
+
+	/// ja: 'コントリビューターが見つかりませんでした'
+	String get empty => 'コントリビューターが見つかりませんでした';
+
+	/// ja: '(one) {$n contributions} (other) {$n contributions}'
+	String contributionsCount({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(n,
+		one: '${n} contributions',
+		other: '${n} contributions',
+	);
 }
 
 // Path: auth
@@ -849,7 +880,7 @@ extension on Translations {
 			'sessionSearch.promptBody' => 'キーワードを入力するか、日程・種類・言語を選択してください',
 			'sessionSearch.emptyTitle' => 'セッションが見つかりません',
 			'sessionSearch.emptyBody' => 'キーワードや絞り込み条件を変更してみてください',
-			'sessionSearch.resultCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(n, one: '${n}件のセッション', other: '${n}件のセッション', ),
+			'sessionSearch.resultCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(n, one: '${n}件のセッション', other: '${n}件のセッション', ), 
 			'sessionDetails.title' => 'セッション詳細',
 			'sessionDetails.description' => '概要',
 			'sessionDetails.schedule' => '日時・会場',
@@ -878,6 +909,8 @@ extension on Translations {
 			'eventInfo.venueLabel' => '会場',
 			'eventInfo.venue' => '浜松町コンベンションホール',
 			'eventInfo.viewMap' => '地図を見る',
+			'eventInfo.credits' => 'クレジット',
+			'eventInfo.contributors' => 'コントリビューター',
 			'eventInfo.other' => 'その他',
 			'eventInfo.officialWebsite' => '公式Webサイト',
 			'eventInfo.codeOfConduct' => '行動規範',
@@ -886,6 +919,10 @@ extension on Translations {
 			'eventInfo.contact' => 'お問い合わせ',
 			'eventInfo.sourceCode' => 'ソースコードを見る',
 			'eventInfo.ossLicenses' => 'OSSライセンス',
+			'contributors.title' => 'コントリビューター',
+			'contributors.openRepository' => 'FlutterKaigi/2026 のリポジトリを開く',
+			'contributors.empty' => 'コントリビューターが見つかりませんでした',
+			'contributors.contributionsCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(n, one: '${n} contributions', other: '${n} contributions', ), 
 			'auth.signIn.description' => 'FlutterKaigi 2026 アプリで利用するサインイン方法を選択してください',
 			'auth.signIn.withGoogle' => 'Google でサインイン',
 			'auth.signIn.withApple' => 'Appleでサインイン',
@@ -942,7 +979,7 @@ extension on Translations {
 			'licenses.title' => 'ライセンス',
 			'licenses.searchHint' => 'パッケージを検索',
 			'licenses.clearSearch' => '検索をクリア',
-			'licenses.licenseCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(n, one: 'ライセンス: ${n}件', other: 'ライセンス: ${n}件', ),
+			'licenses.licenseCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(n, one: 'ライセンス: ${n}件', other: 'ライセンス: ${n}件', ), 
 			'licenses.notFound' => 'ライセンスが見つかりませんでした',
 			'error.title' => 'データを読み込めませんでした',
 			'error.message' => '通信状況を確認して、もう一度お試しください。',

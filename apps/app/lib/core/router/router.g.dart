@@ -46,6 +46,10 @@ RouteBase get $appShellRoute => StatefulShellRouteData.$route(
             ),
           ],
         ),
+        GoRouteData.$route(
+          path: '/contributors',
+          factory: $ContributorsRoute._fromState,
+        ),
       ],
     ),
     StatefulShellBranchData.$branch(
@@ -172,6 +176,25 @@ mixin $LicenseDetailRoute on GoRouteData {
   String get location => GoRouteData.$location(
     '/licenses/${Uri.encodeComponent(_self.packageName)}',
   );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) => context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $ContributorsRoute on GoRouteData {
+  static ContributorsRoute _fromState(GoRouterState state) => const ContributorsRoute();
+
+  @override
+  String get location => GoRouteData.$location('/contributors');
 
   @override
   void go(BuildContext context) => context.go(location);

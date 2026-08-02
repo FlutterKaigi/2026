@@ -49,6 +49,8 @@ void main() {
     await tester.scrollUntilVisible(find.text('その他'), 500);
     await tester.pumpAndSettle();
 
+    expect(find.text('クレジット'), findsOneWidget);
+    expect(find.text('コントリビューター'), findsOneWidget);
     expect(find.text('その他'), findsOneWidget);
     expect(
       tester
@@ -92,6 +94,39 @@ void main() {
 
     expect(router.routeInformationProvider.value.uri.path, '/news');
     expect(find.text('news destination'), findsOneWidget);
+  });
+
+  testWidgets('opens the contributor list from the event overview', (
+    tester,
+  ) async {
+    GoRouter.optionURLReflectsImperativeAPIs = true;
+    addTearDown(() => GoRouter.optionURLReflectsImperativeAPIs = false);
+    final router = GoRouter(
+      initialLocation: '/info',
+      routes: [
+        GoRoute(
+          path: '/info',
+          builder: (context, state) => const EventInfoPage(),
+        ),
+        GoRoute(
+          path: '/contributors',
+          builder: (context, state) => const Scaffold(
+            body: Text('contributor destination'),
+          ),
+        ),
+      ],
+    );
+    addTearDown(router.dispose);
+
+    await _pumpEventInfoPage(tester, router: router);
+    await tester.scrollUntilVisible(find.text('コントリビューター'), 200);
+    await tester.ensureVisible(find.text('コントリビューター'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('コントリビューター'));
+    await tester.pumpAndSettle();
+
+    expect(router.routeInformationProvider.value.uri.path, '/contributors');
+    expect(find.text('contributor destination'), findsOneWidget);
   });
 
   testWidgets('opens the OSS license list from the event overview', (
