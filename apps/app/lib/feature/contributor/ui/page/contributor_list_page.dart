@@ -7,8 +7,8 @@ import 'package:app/core/ui/launch_external_url.dart';
 import 'package:app/core/ui/widget/app_error_view.dart';
 import 'package:app/core/ui/widget/app_network_image.dart';
 import 'package:app/core/ui/widget/settings_icon_button.dart';
-import 'package:app/feature/contributor/data/contributor_provider.dart';
-import 'package:app/feature/contributor/data/model/contributor.dart';
+import 'package:app/feature/contributor/data/provider/contributor_list_provider.dart';
+import 'package:data/data.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -22,7 +22,7 @@ class ContributorListPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final t = Translations.of(context);
     final theme = Theme.of(context);
-    final contributors = ref.watch(contributorsProvider);
+    final contributors = ref.watch(contributorListProvider);
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 52,
@@ -94,7 +94,7 @@ class ContributorListPage extends ConsumerWidget {
               child: Text(t.contributors.empty),
             ),
             AsyncData(:final value) => RefreshIndicator(
-              onRefresh: () async => ref.invalidate(contributorsProvider),
+              onRefresh: () async => ref.invalidate(contributorListProvider),
               child: ListView.builder(
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 itemCount: value.length,
@@ -105,7 +105,7 @@ class ContributorListPage extends ConsumerWidget {
             ),
             AsyncError(:final error) => AppErrorView(
               error: error,
-              onRetry: () => ref.invalidate(contributorsProvider),
+              onRetry: () => ref.invalidate(contributorListProvider),
             ),
             AsyncLoading() => const Center(
               child: CircularProgressIndicator.adaptive(),

@@ -1,10 +1,9 @@
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/router/router.dart';
 import 'package:app/core/ui/widget/app_error_view.dart';
-import 'package:app/feature/contributor/data/contributor_provider.dart';
-import 'package:app/feature/contributor/data/contributor_repository.dart';
-import 'package:app/feature/contributor/data/model/contributor.dart';
+import 'package:app/feature/contributor/data/provider/contributor_repository.dart';
 import 'package:app/feature/contributor/ui/page/contributor_list_page.dart';
+import 'package:data/data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -15,7 +14,7 @@ void main() {
     expect(const ContributorsRoute().location, '/contributors');
   });
 
-  testWidgets('renders contributors returned by the repository', (
+  testWidgets('renders contributors streamed from the repository', (
     tester,
   ) async {
     await _pumpContributorListPage(
@@ -59,7 +58,7 @@ void main() {
     expect(find.text('コントリビューターが見つかりませんでした'), findsOneWidget);
   });
 
-  testWidgets('shows the error view when fetching contributors fails', (
+  testWidgets('shows the error view when the contributor stream fails', (
     tester,
   ) async {
     await _pumpContributorListPage(
@@ -82,10 +81,9 @@ Contributor _contributor({
   avatarUrl: '',
   htmlUrl: 'https://github.com/$login',
   contributions: contributions,
-  type: 'User',
 );
 
-class _FakeContributorRepository extends ContributorRepository {
+class _FakeContributorRepository implements ContributorRepository {
   const _FakeContributorRepository(this._contributors) : _fails = false;
 
   const _FakeContributorRepository.failing() : _contributors = const [], _fails = true;
@@ -94,12 +92,8 @@ class _FakeContributorRepository extends ContributorRepository {
   final bool _fails;
 
   @override
-  Future<List<Contributor>> fetchContributors() async {
-    if (_fails) {
-      throw Exception('network error');
-    }
-    return _contributors;
-  }
+  Stream<List<Contributor>> watchAll() =>
+      _fails ? Stream.error(Exception('network error')) : Stream.value(_contributors);
 }
 
 Future<void> _pumpContributorListPage(
