@@ -23,6 +23,7 @@ class Header extends StatelessComponent {
     final navLinks = [
       (label: 'Event Info', href: locale.eventInfoAnchorHref),
       (label: 'Sponsors', href: locale.sponsorsAnchorHref),
+      (label: 'Staff', href: locale.staffAnchorHref),
       (label: 'Job Boards', href: locale.jobBoardsAnchorHref),
     ];
     return header([
@@ -32,8 +33,7 @@ class Header extends StatelessComponent {
         classes: 'nav',
         attributes: const {'aria-label': 'Primary'},
         [
-          for (final item in navLinks)
-            a(href: item.href, classes: 'nav__link', [.text(item.label)]),
+          for (final item in navLinks) a(href: item.href, classes: 'nav__link', [.text(item.label)]),
         ],
       ),
       div(classes: 'actions', [
@@ -76,8 +76,7 @@ class Header extends StatelessComponent {
           classes: 'mob-nav__panel',
           attributes: const {'aria-label': 'Primary'},
           [
-            for (final item in navLinks)
-              a(href: item.href, classes: 'mob-nav__link', [.text(item.label)]),
+            for (final item in navLinks) a(href: item.href, classes: 'mob-nav__link', [.text(item.label)]),
           ],
         ),
       ]),

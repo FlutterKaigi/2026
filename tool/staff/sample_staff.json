@@ -1,0 +1,41 @@
+{
+  "_comment": "Fake sample data for offline/preview builds, shaped like the packages/data `StaffMember` Firestore model (see packages/data/firebase/seed/firestore/default.json). Used only when the Firestore emulator/project is unreachable. iconUrl is left empty so the site renders its avatar placeholder. Never real staff data.",
+  "staff": [
+    {
+      "id": "sample-staff-001",
+      "name": "Sample Taro",
+      "iconUrl": "",
+      "greeting": "Yeah!!!!!!!!!!!!!!!!",
+      "snsLinks": [
+        { "type": "x", "value": "https://x.com/example_staff_001" },
+        { "type": "github", "value": "https://github.com/example-staff-001" },
+        { "type": "note", "value": "https://note.com/example_staff_001" }
+      ],
+      "order": 1,
+      "createdAt": "2026-06-02T00:00:00Z",
+      "updatedAt": "2026-06-02T00:00:00Z"
+    },
+    {
+      "id": "sample-staff-002",
+      "name": "Sample Hanako",
+      "iconUrl": "",
+      "greeting": null,
+      "snsLinks": [
+        { "type": "zenn", "value": "https://zenn.dev/example_staff_002" }
+      ],
+      "order": 2,
+      "createdAt": "2026-06-02T00:00:00Z",
+      "updatedAt": "2026-06-02T00:00:00Z"
+    },
+    {
+      "id": "sample-staff-003",
+      "name": "Sample Jiro",
+      "iconUrl": "",
+      "greeting": "Flutter 大好き!",
+      "snsLinks": [],
+      "order": 3,
+      "createdAt": "2026-06-02T00:00:00Z",
+      "updatedAt": "2026-06-02T00:00:00Z"
+    }
+  ]
+}
