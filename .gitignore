@@ -6,6 +6,7 @@ docs/superpowers/
 # Dart / Flutter build output and caches
 .dart_tool/
 .packages
+.flutter-plugins-dependencies
 pubspec.lock
 build/
 

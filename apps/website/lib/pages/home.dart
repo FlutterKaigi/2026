@@ -61,11 +61,11 @@ class Home extends StatelessComponent {
             ),
           ]),
           a(
-            href: strings.latestUpdatesCtaUrl,
+            href: strings.ticketsCtaUrl,
             target: Target.blank,
             classes: 'hero__cta',
             [
-              span([.text(strings.latestUpdatesCta)]),
+              span([.text(strings.heroTicketsCta)]),
               span(
                 classes: 'hero__cta-arrow',
                 attributes: const {'aria-hidden': 'true'},

@@ -16,6 +16,10 @@ void main() {
       en.sessionTimetable.dayButtonLabel(day: 1, date: '10/31'),
       'Day 1 (10/31)',
     );
+    expect(ja.sessionTimetable.view.openRooms, '会場別タイムラインに切り替え');
+    expect(en.sessionTimetable.view.openRooms, 'Switch to room timeline');
+    expect(en.sessionSearch.resultCount(n: 1), '1 session');
+    expect(en.sessionSearch.resultCount(n: 2), '2 sessions');
   });
 
   group('resolvePreferredAppLocale', () {

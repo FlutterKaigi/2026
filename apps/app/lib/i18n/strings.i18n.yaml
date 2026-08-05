@@ -1,24 +1,42 @@
 app:
   title: FlutterKaigi 2026
+links:
+  openError: リンクを開けませんでした
 navigation:
-  news: お知らせ
   sessions: セッション
-  info: 情報
+  sponsors: スポンサー
+  info: イベント
+  account: アカウント
 news:
   title: お知らせ
   empty: お知らせはまだありません
-  error: お知らせを取得できませんでした
+sponsors:
+  title: スポンサー
+  detailTitle: スポンサー詳細
+  subtitle: FlutterKaigi 2026 を支えてくださるスポンサーの皆様
+  empty: スポンサーはまだ公開されていません
+  notFound: スポンサーが見つかりませんでした
+  logoSemanticLabel: $name のロゴ
+  tierBadge: $tier スポンサー
+  jobBoards: Job Boards
+  jobBoardCta: 採用情報
+  recruitCta: 採用サイト
+  connect: Connect
+# NOTE: apps/website/lib/l10n/strings.dart の footerTrademark と同一文言を維持すること
+trademarks:
+  flutterAffiliation: Flutter および関連するロゴは Google LLC の商標です。FlutterKaigi は Google LLC の承認または提携を受けておりません。
+  flutterNameAndLogo: Flutter の名称およびロゴは Google LLC の商標です。
+  revComm: RevCommは、株式会社 RevComm の登録商標または商標です。
 sessionTimetable:
   title: タイムテーブル
   dayButtonLabel: $day日目 ($date)
+  view:
+    openRooms: 会場別タイムラインに切り替え
+    openList: リスト表示に切り替え
+    shared: 共通
   empty: タイムテーブルはまだ公開されていません
-  emptyFiltered: 選択した会場の予定はありません
-  error: タイムテーブルを取得できませんでした
-  timeFormat:
-    twentyFourHour: 24時間
-    amPm: 午前/午後
+  emptyFiltered: この日の予定はありません
   venue:
-    all: すべて
     unknown: 会場未定
   speaker:
     none: 登壇者未定
@@ -28,6 +46,26 @@ sessionTimetable:
     beginnersLightningTalk: 初心者向けLT
     handsOn: ハンズオン
     event: イベント
+sessionSearch:
+  title: セッションを検索
+  hint: タイトル・概要・登壇者を検索
+  clear: 検索条件をクリア
+  allDates: すべての日程
+  allTypes: すべての種類
+  allLanguages: すべての言語
+  dateFilter: 日程で絞り込み
+  typeFilter: 種類で絞り込み
+  languageFilter: 言語で絞り込み
+  dateChip: 日程
+  typeChip: 種類
+  languageChip: 言語
+  promptTitle: セッションを探す
+  promptBody: キーワードを入力するか、日程・種類・言語を選択してください
+  emptyTitle: セッションが見つかりません
+  emptyBody: キーワードや絞り込み条件を変更してみてください
+  resultCount:
+    one: $n件のセッション
+    other: $n件のセッション
 sessionDetails:
   title: セッション詳細
   description: 概要
@@ -37,7 +75,6 @@ sessionDetails:
   sessionize: Sessionize
   share: 共有
   notFound: セッションが見つかりませんでした
-  error: セッションを取得できませんでした
 sessionBookmark:
   openBookmarked: ブックマークしたセッション
   add: ブックマークに追加
@@ -48,10 +85,80 @@ bookmarkedSessions:
   emptyTitle: ブックマークしたセッションはありません
   emptyBody: 気になるセッションをブックマークすると、ここからすぐに見つけられます
   openSessions: タイムテーブルを開く
-  error: ブックマークしたセッションを取得できませんでした
 eventInfo:
-  title: 情報
+  title: イベント概要
+  newsTitle: 最新のお知らせ
+  newsSubtitle: FlutterKaigi 2026 の最新情報を確認
+  logoSemanticLabel: FlutterKaigi 2026 ロゴ
+  tagline: 会って、話して、熱くなる。
+  themeName: 〜Assemble〜
+  description: 2026年、日本国内で Flutter をメインに扱う技術カンファレンス。Flutter や Dart の知見を共有し、参加者同士がつながる2日間です。
+  dateLabel: 日程
+  date: 2026年10月29日(木) – 30日(金)
+  venueLabel: 会場
+  venue: 浜松町コンベンションホール
+  viewMap: 地図を見る
+  other: その他
+  officialWebsite: 公式Webサイト
+  codeOfConduct: 行動規範
+  privacyPolicy: プライバシーポリシー
+  exclusionPolicy: 反社会的勢力排除に関する基本方針
+  contact: お問い合わせ
+  sourceCode: ソースコードを見る
+  ossLicenses: OSSライセンス
+auth:
+  signIn:
+    description: FlutterKaigi 2026 アプリで利用するサインイン方法を選択してください
+    withGoogle: Google でサインイン
+    # NOTE: Apple 公式の日本語ボタン表記(スペースなし)に合わせる
+    withApple: Appleでサインイン
+    withEmail: メールアドレスでサインイン
+  email:
+    title: メールアドレスでサインイン
+    emailLabel: メールアドレス
+    passwordLabel: パスワード
+    emailRequired: メールアドレスを入力してください
+    passwordRequired: パスワードを入力してください
+    showPassword: パスワードを表示
+    hidePassword: パスワードを隠す
+    signInButton: サインイン
+    createAccountButton: アカウントを作成
+    switchToCreateAccount: アカウントを新規作成する
+    switchToSignIn: 既存のアカウントでサインインする
+    forgotPassword: パスワードを再設定する
+    resetEmailSent: パスワード再設定メールを送信しました
+  account:
+    title: アカウント
+    signedIn: サインイン中
+    signOut: サインアウト
+    signOutError: サインアウトできませんでした
+    noEmail: メールアドレス未設定
+    delete: アカウントを削除
+    deleteConfirmTitle: アカウントを削除しますか?
+    deleteConfirmBody: アカウントは完全に削除され、元に戻すことはできません。削除の前に再認証が必要です。
+    deleteConfirmAction: 削除する
+    deletePasswordTitle: パスワードの確認
+    deletePasswordBody: アカウントを削除するには、現在のパスワードを入力してください。
+    deleted: アカウントを削除しました
+    cancel: キャンセル
+  error:
+    invalidEmail: メールアドレスの形式が正しくありません
+    userDisabled: このアカウントは利用できません
+    invalidCredential: メールアドレスまたはパスワードが正しくありません
+    emailAlreadyInUse: このメールアドレスは既に登録されています
+    weakPassword: パスワードが簡単すぎます。より複雑なパスワードを設定してください
+    tooManyRequests: 試行回数の上限に達しました。しばらくしてからもう一度お試しください
+    network: 通信に失敗しました。通信状況を確認してもう一度お試しください
+    requiresRecentLogin: 確認のため再認証が必要です。もう一度お試しください
+    userMismatch: 再認証したアカウントがサインイン中のアカウントと一致しません
+    appleTokenRevocationFailed: Appleのトークン失効に失敗したため、アカウントを削除できませんでした。もう一度お試しください
+    unknown: 認証に失敗しました。もう一度お試しください
+settings:
+  title: 設定
+  appearance: 表示設定
+  appInfo: アプリ情報
   version: バージョン
+  saveError: 設定を保存できませんでした
   themeMode:
     title: テーマ
     system: システムに合わせる
@@ -61,8 +168,22 @@ eventInfo:
     title: 表示言語
     japanese: 日本語
     english: English
+licenses:
+  title: ライセンス
+  searchHint: パッケージを検索
+  clearSearch: 検索をクリア
+  licenseCount:
+    one: "ライセンス: $n件"
+    other: "ライセンス: $n件"
+  notFound: ライセンスが見つかりませんでした
+error:
+  title: データを読み込めませんでした
+  message: 通信状況を確認して、もう一度お試しください。
+  permissionDenied: この情報を表示する権限がありません。FlutterKaigi スタッフへお問い合わせください。
+  unavailable: 通信状況を確認して、しばらくしてからもう一度お試しください。
+  timeout: 読み込みに時間がかかっています。もう一度お試しください。
+  retry: 再試行
+  imageSemanticLabel: 困った表情のダシュマル
 notFound:
   title: ページが見つかりません
   description: お探しのページは存在しないか、移動した可能性があります。
-common:
-  retry: 再試行

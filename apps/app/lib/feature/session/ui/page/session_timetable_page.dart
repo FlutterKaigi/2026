@@ -1,5 +1,6 @@
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/router/router.dart';
+import 'package:app/core/ui/widget/settings_icon_button.dart';
 import 'package:app/feature/session/data/provider/session_timetable_provider.dart';
 import 'package:app/feature/session/ui/widget/session_timetable_empty_state_widget.dart';
 import 'package:app/feature/session/ui/widget/session_timetable_error_state_widget.dart';
@@ -17,28 +18,71 @@ class SessionTimetablePage extends HookConsumerWidget {
     final t = Translations.of(context);
     final timetable = ref.watch(sessionTimetableProvider);
     final scrollController = useScrollController();
+    final viewMode = useState(SessionTimetableViewMode.list);
+    final timetableData = switch (timetable) {
+      AsyncData(:final value) => value,
+      _ => null,
+    };
+
+    Future<void> openBookmarked() => const BookmarkedSessionsRoute().push<void>(context);
+    Future<void> openSearch() => const SessionSearchRoute().push<void>(context);
+
+    void toggleViewMode() {
+      viewMode.value = switch (viewMode.value) {
+        SessionTimetableViewMode.list => SessionTimetableViewMode.rooms,
+        SessionTimetableViewMode.rooms => SessionTimetableViewMode.list,
+      };
+    }
+
+    final viewModeTooltip = switch (viewMode.value) {
+      SessionTimetableViewMode.list => t.sessionTimetable.view.openRooms,
+      SessionTimetableViewMode.rooms => t.sessionTimetable.view.openList,
+    };
+    final viewModeIcon = switch (viewMode.value) {
+      SessionTimetableViewMode.list => Icons.grid_view_outlined,
+      SessionTimetableViewMode.rooms => Icons.view_agenda_outlined,
+    };
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(t.sessionTimetable.title),
+        toolbarHeight: 52,
+        title: Text(
+          t.sessionTimetable.title,
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w700,
+          ),
+        ),
         actions: [
+          if (timetableData?.hasAnyEntries ?? false)
+            IconButton(
+              tooltip: t.sessionSearch.title,
+              onPressed: openSearch,
+              icon: const Icon(Icons.search),
+            ),
+          if (timetableData?.hasAnyEntries ?? false)
+            IconButton(
+              tooltip: viewModeTooltip,
+              onPressed: toggleViewMode,
+              icon: Icon(viewModeIcon),
+            ),
           IconButton(
             tooltip: t.sessionBookmark.openBookmarked,
-            onPressed: () => const BookmarkedSessionsRoute().push<void>(context),
+            onPressed: openBookmarked,
             icon: const Icon(Icons.bookmarks_outlined),
           ),
+          const SettingsIconButton(),
         ],
       ),
       body: switch (timetable) {
-        AsyncData(:final value) when value.isEmpty => SessionTimetableEmptyStateWidget(
-          data: value,
+        AsyncData(:final value) when !value.hasAnyEntries => SessionTimetableEmptyStateWidget(
           scrollController: scrollController,
         ),
         AsyncData(:final value) => SessionTimetableListWidget(
           data: value,
-          scrollController: scrollController,
+          viewMode: viewMode.value,
         ),
-        AsyncError() => SessionTimetableErrorStateWidget(
+        AsyncError(:final error) => SessionTimetableErrorStateWidget(
+          error: error,
           onRetry: () => _retry(ref),
         ),
         AsyncLoading() => const Center(

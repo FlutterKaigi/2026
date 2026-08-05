@@ -1,10 +1,9 @@
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/router/router.dart';
+import 'package:app/core/ui/widget/app_error_view.dart';
 import 'package:app/feature/session/data/provider/bookmarked_sessions_provider.dart';
-import 'package:app/feature/session/data/provider/session_time_format.dart';
 import 'package:app/feature/session/data/provider/session_timetable_provider.dart';
 import 'package:app/feature/session/ui/widget/session_card_widget.dart';
-import 'package:app/feature/session/ui/widget/session_details_message_state_widget.dart';
 import 'package:app/feature/session/util/event_time.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -16,7 +15,6 @@ class BookmarkedSessionsPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final t = Translations.of(context);
     final bookmarkedSessions = ref.watch(bookmarkedSessionsProvider);
-    final timeFormat = ref.watch(sessionTimeFormatProvider);
 
     return Scaffold(
       body: CustomScrollView(
@@ -31,20 +29,12 @@ class BookmarkedSessionsPage extends ConsumerWidget {
                 onOpenSessions: () => const SessionTimetableRoute().go(context),
               ),
             ),
-            AsyncData(:final value) => _BookmarkedSessionsListWidget(
-              data: value,
-              timeFormat: timeFormat,
-            ),
-            AsyncError() => SliverFillRemaining(
+            AsyncData(:final value) => _BookmarkedSessionsListWidget(data: value),
+            AsyncError(:final error) => SliverFillRemaining(
               hasScrollBody: false,
-              child: SessionDetailsMessageStateWidget(
-                icon: Icons.error_outline,
-                message: t.bookmarkedSessions.error,
-                action: FilledButton.icon(
-                  onPressed: () => _refresh(ref),
-                  icon: const Icon(Icons.refresh),
-                  label: Text(t.common.retry),
-                ),
+              child: AppErrorView(
+                error: error,
+                onRetry: () => _refresh(ref),
               ),
             ),
             AsyncLoading() => const SliverFillRemaining(
@@ -68,11 +58,9 @@ class BookmarkedSessionsPage extends ConsumerWidget {
 class _BookmarkedSessionsListWidget extends StatelessWidget {
   const _BookmarkedSessionsListWidget({
     required this.data,
-    required this.timeFormat,
   });
 
   final BookmarkedSessionsData data;
-  final EventTimeFormat timeFormat;
 
   @override
   Widget build(BuildContext context) {
@@ -88,7 +76,7 @@ class _BookmarkedSessionsListWidget extends StatelessWidget {
           final entry = data.entries[index ~/ 2];
           return SessionCardWidget(
             entry: entry,
-            timeFormat: timeFormat,
+            timeFormat: EventTimeFormat.twentyFourHour,
             onTap: () => SessionDetailsRoute(sessionId: entry.id).push<void>(context),
           );
         },

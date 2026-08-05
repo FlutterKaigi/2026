@@ -16,18 +16,23 @@ final class FirebaseInitializer {
 
   static bool _emulatorConfigured = false;
 
+  /// Whether [ensureInitialized] wired Firestore and Auth to the local
+  /// Emulator Suite.
+  static bool get emulatorConfigured => _emulatorConfigured;
+
   /// Initializes the default [FirebaseApp], and optionally wires Firestore and
   /// Auth to the local emulator suite.
   ///
-  /// When [options] is `null`, Firestore and Auth are wired to the local
-  /// emulator suite. Pass `DefaultFirebaseOptions.currentPlatform` from a
-  /// `flutterfire configure`-generated `firebase_options.dart` to use a real
-  /// Firebase project instead.
+  /// By default, `options == null` wires Firestore and Auth to the
+  /// local emulator suite. Set [useEmulators] explicitly when Web OAuth needs
+  /// valid FlutterFire-generated [options] for the SDK helper page while all
+  /// data and authentication requests must still remain local.
   ///
   /// Safe to call more than once: Firebase is only initialized when no app
   /// exists yet, and the emulator wiring is applied a single time.
   static Future<void> ensureInitialized({
     FirebaseOptions? options,
+    bool? useEmulators,
     String projectId = 'dev-flutterkaigi-2026',
     String host = 'localhost',
     int firestorePort = 8080,
@@ -39,7 +44,11 @@ final class FirebaseInitializer {
       );
     }
 
-    if (options != null || _emulatorConfigured) {
+    // Preserve the package's existing `options == null` development behavior,
+    // while allowing Web apps to initialize with valid OAuth helper settings
+    // and still route every Firebase service to the local emulators.
+    final shouldUseEmulators = useEmulators ?? options == null;
+    if (!shouldUseEmulators || _emulatorConfigured) {
       return;
     }
     _emulatorConfigured = true;
@@ -60,6 +69,9 @@ final class FirebaseInitializer {
     appId: '1:000000000000:${_appIdPlatform()}:0000000000000000000000',
     messagingSenderId: '000000000000',
     projectId: projectId,
+    // The Web Auth SDK requires authDomain before it can start popup/redirect
+    // OAuth flows, even when the request itself is routed to Auth Emulator.
+    authDomain: '$projectId.firebaseapp.com',
   );
 
   /// The platform segment of `appId` (`1:<sender>:<platform>:<hash>`).

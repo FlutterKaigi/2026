@@ -31,6 +31,7 @@ void main() {
     expect(find.text('2026/10/29'), findsWidgets);
     expect(find.text('10:00-10:45'), findsWidgets);
     expect(find.text('Hall A'), findsWidgets);
+    expect(find.text('EN'), findsOneWidget);
     expect(find.text('Speaker A'), findsOneWidget);
     expect(find.text('Bio A'), findsOneWidget);
     expect(find.text('Sessionize'), findsOneWidget);
@@ -46,6 +47,52 @@ void main() {
     expect(find.text('概要'), findsNothing);
     expect(find.text('リンク'), findsNothing);
     expect(find.text('Sessionize'), findsNothing);
+  });
+
+  testWidgets('shows long session titles without truncation', (tester) async {
+    const title = 'A very long session title that must remain fully readable on a narrow mobile screen';
+    final session = _sessions.first.copyWith(
+      id: 'long-title-session',
+      title: const LocaleMap(ja: title, en: title),
+    );
+
+    await _pumpSessionDetailsPage(
+      tester,
+      sessionId: session.id,
+      sessionRepository: _FakeSessionRepository([session]),
+      contentWidth: 320,
+    );
+    await _pumpProviderFrames(tester);
+
+    final titleTexts = tester.widgetList<Text>(find.text(title));
+    expect(titleTexts, isNotEmpty);
+    for (final titleText in titleTexts) {
+      expect(titleText.maxLines, isNull);
+      expect(titleText.overflow, isNot(TextOverflow.ellipsis));
+    }
+    final appBar = tester.widget<SliverAppBar>(find.byType(SliverAppBar));
+    final context = tester.element(find.byType(SliverAppBar));
+    final contentWidth = tester.getSize(find.byType(CustomScrollView)).width;
+    expect(MediaQuery.sizeOf(context).width, greaterThan(contentWidth));
+    final titlePainter =
+        TextPainter(
+          text: TextSpan(
+            text: title,
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+          textDirection: Directionality.of(context),
+          textScaler: MediaQuery.textScalerOf(
+            context,
+          ).clamp(maxScaleFactor: 1.34),
+        )..layout(
+          maxWidth: contentWidth - 32,
+        );
+    final expectedExpandedHeight = 64 + 28 + titlePainter.height;
+
+    expect(
+      appBar.expandedHeight,
+      closeTo(expectedExpandedHeight, 0.01),
+    );
   });
 
   testWidgets('hides the Sessionize link when the URL is not a hosted HTTPS URL', (tester) async {
@@ -90,11 +137,13 @@ void main() {
     );
     await _pumpProviderFrames(tester);
 
-    expect(find.text('セッションを取得できませんでした'), findsOneWidget);
+    expect(find.text('データを読み込めませんでした'), findsOneWidget);
     expect(find.text('再試行'), findsOneWidget);
   });
 
   testWidgets('opens session details from a timetable session card', (tester) async {
+    GoRouter.optionURLReflectsImperativeAPIs = true;
+    addTearDown(() => GoRouter.optionURLReflectsImperativeAPIs = false);
     final router = GoRouter(
       initialLocation: '/sessions',
       routes: [
@@ -133,6 +182,10 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Sessionize'), findsOneWidget);
+    expect(
+      router.routeInformationProvider.value.uri.path,
+      '/sessions/session-a',
+    );
   });
 }
 
@@ -147,14 +200,24 @@ Future<void> _pumpSessionDetailsPage(
   required String sessionId,
   SessionRepository? sessionRepository,
   VenueRepository? venueRepository,
+  double? contentWidth,
 }) async {
+  final page = SessionDetailsPage(sessionId: sessionId);
   await _pumpWithProviders(
     tester,
     MaterialApp(
       locale: const Locale('en'),
       supportedLocales: AppLocaleUtils.supportedLocales,
       localizationsDelegates: GlobalMaterialLocalizations.delegates,
-      home: SessionDetailsPage(sessionId: sessionId),
+      home: contentWidth == null
+          ? page
+          : Align(
+              alignment: Alignment.topLeft,
+              child: SizedBox(
+                width: contentWidth,
+                child: page,
+              ),
+            ),
     ),
     sessionRepository: sessionRepository,
     venueRepository: venueRepository,

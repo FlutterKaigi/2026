@@ -70,6 +70,18 @@ jobs:
           FIRESTORE_HOST: firestore.googleapis.com
           FIRESTORE_ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
 
+      # Generate news data (packages/data `news` collection) from the STG
+      # Firestore project. Unlike sponsor data this output is also committed
+      # to git (news is not sensitive); regenerating here just keeps the
+      # preview fresh, falling back to the committed/sample copy if Firestore
+      # is unreachable.
+      - name: Generate news data
+        run: dart run tool/generate_news.dart
+        env:
+          FIREBASE_PROJECT_ID: ${{ vars.STG_FIREBASE_PROJECT_ID }}
+          FIRESTORE_HOST: firestore.googleapis.com
+          FIRESTORE_ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
+
       # Empty SITE_ORIGIN → OGP `og:image`/`og:url` are emitted host-relative so
       # they resolve against the per-version preview origin (`*.workers.dev`)
       # rather than the production domain (where this branch's per-sponsor images

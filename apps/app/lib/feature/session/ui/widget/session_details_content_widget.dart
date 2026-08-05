@@ -2,19 +2,23 @@ import 'dart:async';
 
 import 'package:app/core/extension/locale_map_extension.dart';
 import 'package:app/core/i18n/strings.g.dart';
+import 'package:app/core/ui/launch_external_url.dart';
+import 'package:app/core/ui/widget/app_network_image.dart';
 import 'package:app/feature/session/data/provider/session_detail_provider.dart';
-import 'package:app/feature/session/data/provider/session_time_format.dart';
 import 'package:app/feature/session/ui/widget/session_bookmark_button.dart';
 import 'package:app/feature/session/util/event_time.dart';
+import 'package:app/feature/session/util/session_language.dart';
 import 'package:data/data.dart';
 import 'package:flutter/material.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 const _sessionOrigin = 'https://2026.flutterkaigi.jp';
+const _largeAppBarCollapsedHeight = 64.0;
+const _largeAppBarTitleBottomPadding = 28.0;
+const _largeAppBarMaxTitleScaleFactor = 1.34;
+const _largeAppBarTitleHorizontalPadding = 32.0;
 
-class SessionDetailsContentWidget extends ConsumerWidget {
+class SessionDetailsContentWidget extends StatelessWidget {
   const SessionDetailsContentWidget({
     required this.data,
     super.key,
@@ -23,33 +27,51 @@ class SessionDetailsContentWidget extends ConsumerWidget {
   final SessionDetailData data;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final t = Translations.of(context);
     final locale = Localizations.localeOf(context);
     final session = data.session;
     final title = session.title.resolve(locale);
     final description = session.description.resolve(locale).trim();
-    final timeFormat = ref.watch(sessionTimeFormatProvider);
+    final languageLabel = sessionLanguageLabel(session.primaryLocale);
+    const timeFormat = EventTimeFormat.twentyFourHour;
     final sessionizeUri = _externalUri(session.sessionizeUrl);
 
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          SliverAppBar.large(
-            title: Text(title),
-            actions: [
-              SessionBookmarkButton(sessionId: session.id),
-              IconButton(
-                tooltip: t.sessionDetails.share,
-                onPressed: () => unawaited(_shareSession(data, locale)),
-                icon: const Icon(Icons.share_outlined),
+          SliverLayoutBuilder(
+            builder: (context, constraints) => SliverAppBar.large(
+              expandedHeight: _sessionTitleExpandedHeight(
+                context: context,
+                title: title,
+                maxWidth: constraints.crossAxisExtent,
               ),
-            ],
+              title: Text(
+                title,
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              actions: [
+                SessionBookmarkButton(sessionId: session.id),
+                IconButton(
+                  tooltip: t.sessionDetails.share,
+                  onPressed: () => unawaited(
+                    _shareSession(
+                      context,
+                      data,
+                      locale,
+                      t.links.openError,
+                    ),
+                  ),
+                  icon: const Icon(Icons.share_outlined),
+                ),
+              ],
+            ),
           ),
           SliverList.list(
             children: [
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                 child: Wrap(
                   spacing: 8,
                   runSpacing: 8,
@@ -58,9 +80,16 @@ class SessionDetailsContentWidget extends ConsumerWidget {
                       icon: Icons.sell_outlined,
                       label: _sessionTypeLabel(t, session),
                     ),
+                    if (languageLabel != null)
+                      _InfoChip(
+                        icon: Icons.language,
+                        label: languageLabel,
+                      ),
                     _InfoChip(
                       icon: Icons.calendar_today_outlined,
-                      label: DateFormat('yyyy/MM/dd').format(toEventTime(session.startsAt)),
+                      label: DateFormat(
+                        'yyyy/MM/dd',
+                      ).format(toEventTime(session.startsAt)),
                     ),
                     _InfoChip(
                       icon: Icons.schedule,
@@ -95,7 +124,9 @@ class SessionDetailsContentWidget extends ConsumerWidget {
               _SectionHeader(title: t.sessionDetails.schedule),
               _DetailListTile(
                 icon: Icons.event_outlined,
-                title: DateFormat('yyyy/MM/dd').format(toEventTime(session.startsAt)),
+                title: DateFormat(
+                  'yyyy/MM/dd',
+                ).format(toEventTime(session.startsAt)),
               ),
               _DetailListTile(
                 icon: Icons.schedule,
@@ -117,7 +148,11 @@ class SessionDetailsContentWidget extends ConsumerWidget {
                   title: t.sessionDetails.sessionize,
                   subtitle: sessionizeUri.toString(),
                   onTap: () => unawaited(
-                    launchUrl(sessionizeUri, mode: LaunchMode.externalApplication),
+                    launchExternalUrl(
+                      context,
+                      uri: sessionizeUri,
+                      failureMessage: t.links.openError,
+                    ),
                   ),
                 ),
               ],
@@ -128,6 +163,28 @@ class SessionDetailsContentWidget extends ConsumerWidget {
       ),
     );
   }
+}
+
+double _sessionTitleExpandedHeight({
+  required BuildContext context,
+  required String title,
+  required double maxWidth,
+}) {
+  final textPainter =
+      TextPainter(
+        text: TextSpan(
+          text: title,
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
+        textDirection: Directionality.of(context),
+        textScaler: MediaQuery.textScalerOf(
+          context,
+        ).clamp(maxScaleFactor: _largeAppBarMaxTitleScaleFactor),
+      )..layout(
+        maxWidth: maxWidth - _largeAppBarTitleHorizontalPadding,
+      );
+
+  return _largeAppBarCollapsedHeight + _largeAppBarTitleBottomPadding + textPainter.height;
 }
 
 class _SectionHeader extends StatelessWidget {
@@ -141,9 +198,9 @@ class _SectionHeader extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
       child: Text(
         title,
-        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-          fontWeight: FontWeight.w700,
-        ),
+        style: Theme.of(
+          context,
+        ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
       ),
     );
   }
@@ -156,14 +213,12 @@ class _SpeakerTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final avatarUrl = speaker.avatarUrl;
-
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      leading: CircleAvatar(
+      leading: AppNetworkAvatar(
         radius: 28,
-        backgroundImage: avatarUrl == null || avatarUrl.isEmpty ? null : NetworkImage(avatarUrl),
-        child: avatarUrl == null || avatarUrl.isEmpty ? const Icon(Icons.person_outline) : null,
+        imageUrl: speaker.avatarUrl,
+        fallback: const Icon(Icons.person_outline),
       ),
       title: Text(speaker.name),
       subtitle: speaker.bio == null || speaker.bio!.trim().isEmpty ? null : Text(speaker.bio!.trim()),
@@ -197,10 +252,7 @@ class _DetailListTile extends StatelessWidget {
 }
 
 class _InfoChip extends StatelessWidget {
-  const _InfoChip({
-    required this.icon,
-    required this.label,
-  });
+  const _InfoChip({required this.icon, required this.label});
 
   final IconData icon;
   final String label;
@@ -216,7 +268,12 @@ class _InfoChip extends StatelessWidget {
   }
 }
 
-Future<void> _shareSession(SessionDetailData data, Locale locale) async {
+Future<void> _shareSession(
+  BuildContext context,
+  SessionDetailData data,
+  Locale locale,
+  String failureMessage,
+) async {
   final session = data.session;
   final sessionUrl = Uri.parse('$_sessionOrigin/sessions/${session.id}');
   final speakerNames = data.speakers.map((speaker) => speaker.name).join(', ');
@@ -230,7 +287,11 @@ Future<void> _shareSession(SessionDetailData data, Locale locale) async {
     'hashtags': 'FlutterKaigi2026',
   });
 
-  await launchUrl(intentUri, mode: LaunchMode.externalApplication);
+  await launchExternalUrl(
+    context,
+    uri: intentUri,
+    failureMessage: failureMessage,
+  );
 }
 
 Uri? _externalUri(String? rawUrl) {

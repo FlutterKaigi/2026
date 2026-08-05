@@ -1,0 +1,47 @@
+{
+  "_comment": "Fallback sample data for offline/preview builds, shaped like the packages/data `News` Firestore model. Used only when the Firestore emulator/project is unreachable. Unlike tool/sponsors/sample_sponsors.json, news is not sensitive, so these are the real current announcements (kept in sync by hand when they change) rather than synthetic placeholders.",
+  "news": [
+    {
+      "id": "proposal-guide",
+      "title": {
+        "ja": "FlutterKaigi 2026 プロポーザル応募のススメ",
+        "en": "A Guide to Submitting a Proposal for FlutterKaigi 2026"
+      },
+      "url": {
+        "ja": "https://medium.com/flutterkaigi/flutterkaigi-2026-%E3%83%97%E3%83%AD%E3%83%9D%E3%83%BC%E3%82%B6%E3%83%AB%E5%BF%9C%E5%8B%9F%E3%81%AE%E3%82%B9%E3%82%B9%E3%83%A1-ea8978e0fd89",
+        "en": "https://medium.com/flutterkaigi/a-guide-to-submitting-a-proposal-for-flutterkaigi-2026-3fda9a01121d"
+      },
+      "publishedAt": "2026-06-17T00:00:00Z",
+      "createdAt": "2026-06-17T00:00:00Z",
+      "updatedAt": "2026-06-17T00:00:00Z"
+    },
+    {
+      "id": "sponsorship-guide",
+      "title": {
+        "ja": "FlutterKaigi 2026 スポンサー募集について",
+        "en": "FlutterKaigi 2026 Sponsorship Opportunities"
+      },
+      "url": {
+        "ja": "https://medium.com/flutterkaigi/flutterkaigi-2026-opportunities-guide-ja-0e8cdb0a4acb",
+        "en": "https://medium.com/flutterkaigi/flutterkaigi-2026-opportunities-guide-en-1e5bd6c14461"
+      },
+      "publishedAt": "2026-05-11T00:00:00Z",
+      "createdAt": "2026-05-11T00:00:00Z",
+      "updatedAt": "2026-05-11T00:00:00Z"
+    },
+    {
+      "id": "kickoff-announcement",
+      "title": {
+        "ja": "FlutterKaigi 2026 開催のお知らせ",
+        "en": "Announcement: FlutterKaigi 2026"
+      },
+      "url": {
+        "ja": "https://medium.com/flutterkaigi/flutterkaigi-2026-開催のお知らせ-f78a1421fe08",
+        "en": "https://medium.com/flutterkaigi/flutterkaigi-2026-開催のお知らせ-f78a1421fe08"
+      },
+      "publishedAt": "2026-03-09T00:00:00Z",
+      "createdAt": "2026-03-09T00:00:00Z",
+      "updatedAt": "2026-03-09T00:00:00Z"
+    }
+  ]
+}
