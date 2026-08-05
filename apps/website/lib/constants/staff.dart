@@ -42,6 +42,9 @@ class StaffSnsLink {
     'github' => 'images/icons/link_github.svg',
     'note' => 'images/icons/link_note.svg',
     'medium' => 'images/icons/medium.svg',
+    'bluesky' => 'images/icons/link_bluesky.svg',
+    'qiita' => 'images/icons/link_qiita.svg',
+    'zenn' => 'images/icons/link_zenn.svg',
     _ => 'images/icons/link_globe.svg',
   };
 }
