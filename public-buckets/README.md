@@ -10,14 +10,21 @@ R2 公開バケット `2026-public-production` への公開ファイル（スポ
 ```
 public-buckets/
 ├── README.md                      # このファイル（概要・rclone セットアップ）
-└── sponsor-logos/                 # スポンサーロゴ アップロードツール
-    ├── logos/                     # ロゴ画像を置く（画像本体は Git 管理外）
-    ├── upload-sponsor-logos.sh    # アップロードスクリプト
-    └── README.md                  # ★ ロゴの置き方・形式・使い方
+├── sponsor-logos/                 # 企業スポンサーロゴ アップロードツール（→ logos/ プレフィックス）
+│   ├── logos/                     # ロゴ画像を置く（画像本体は Git 管理外）
+│   ├── upload-sponsor-logos.sh    # アップロードスクリプト
+│   └── README.md                  # ★ ロゴの置き方・形式・使い方
+└── individual-photos/             # 個人スポンサー写真 アップロードツール（→ individual/ プレフィックス）
+    ├── photos/                    # 写真を置く（画像本体は Git 管理外）
+    ├── upload-individual-photos.sh # アップロードスクリプト
+    └── README.md                  # ★ 写真の置き方・形式・使い方
 ```
 
-ロゴ画像の**置き方・形式・公開URL・アップロード手順**は、ツール直下の
-[`sponsor-logos/README.md`](sponsor-logos/README.md) にまとめています。
+企業スポンサーと個人スポンサーは同じバケットを使いますが、R2 上のプレフィックスを
+`logos/` と `individual/` に分けて独立して管理しています。
+置き方・形式・公開URL・アップロード手順は、ツール直下の
+[`sponsor-logos/README.md`](sponsor-logos/README.md) / [`individual-photos/README.md`](individual-photos/README.md)
+にまとめています。
 
 ## rclone のセットアップ
 
@@ -61,8 +68,11 @@ rclone ls r2:2026-public-production
 
 ```bash
 # プロジェクトルートから
-./public-buckets/sponsor-logos/upload-sponsor-logos.sh
+./public-buckets/sponsor-logos/upload-sponsor-logos.sh        # 企業スポンサー → logos/
+./public-buckets/individual-photos/upload-individual-photos.sh # 個人スポンサー → individual/
 ```
 
-`logos/` 配下の画像が `r2:2026-public-production/logos/` にアップロードされます。
-アップロード後、数分で `https://2026-bucket.flutterkaigi.jp/logos/<ファイル名>` から取得可能です。
+- `sponsor-logos/logos/` 配下の画像が `r2:2026-public-production/logos/` にアップロードされます。
+  数分で `https://2026-bucket.flutterkaigi.jp/logos/<ファイル名>` から取得可能です。
+- `individual-photos/photos/` 配下の画像が `r2:2026-public-production/individual/` にアップロードされます。
+  数分で `https://2026-bucket.flutterkaigi.jp/individual/<ファイル名>` から取得可能です。
