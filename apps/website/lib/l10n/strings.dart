@@ -147,10 +147,10 @@ class Strings {
   };
 
   /// Accessible label for an individual sponsor's card, which links directly
-  /// to their GitHub profile rather than a detail page.
+  /// to their GitHub profile rather than a detail page (in a new tab).
   String sponsorGithubCardAriaLabel(String name) => switch (locale) {
-    AppLocale.ja => '$name の GitHub を見る',
-    AppLocale.en => "View $name's GitHub profile",
+    AppLocale.ja => '$name の GitHub を見る（新しいタブで開く）',
+    AppLocale.en => "View $name's GitHub profile (opens in a new tab)",
   };
 
   String get sponsorBackToList => switch (locale) {
