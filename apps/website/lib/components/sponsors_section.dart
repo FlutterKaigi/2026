@@ -264,6 +264,15 @@ class SponsorsSection extends StatelessComponent {
             'overflow-wrap': 'anywhere',
           },
         ),
+        // Signals "this navigates away" at rest, not just on hover — mirrors
+        // `.connect-link__ext` on the sponsor detail page and
+        // `.social-link-card__arrow` on the event Follow-on-X / Medium cards,
+        // both of which keep this marker even though they too link to a
+        // single, expected destination.
+        css('.individual-card__arrow').styles(
+          color: onSurfaceVariant,
+          raw: const {'font-size': '14px'},
+        ),
       ]),
     ]),
 
@@ -351,7 +360,19 @@ class _IndividualSponsorCard extends StatelessComponent {
           alt: '',
           attributes: const {'aria-hidden': 'true'},
         ),
-      span(classes: 'individual-card__name', [.text(name)]),
+      span(classes: 'individual-card__name', [
+        .text(name),
+        // Trails the name text itself (not a separate flex sibling) so it
+        // wraps onto the same line as the last word rather than sitting
+        // pinned to the row's top-right corner when the name spans two
+        // lines — mirrors `connect-link__ext` on the sponsor detail page.
+        if (githubUrl != null)
+          span(
+            classes: 'individual-card__arrow',
+            attributes: const {'aria-hidden': 'true'},
+            [.text(' ↗')],
+          ),
+      ]),
     ]);
 
     // No GitHub URL on record (e.g. only an X/Twitter link was provided):
