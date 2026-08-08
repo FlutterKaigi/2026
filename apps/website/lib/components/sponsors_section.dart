@@ -9,8 +9,10 @@ import '../l10n/strings.dart';
 /// Home-page Sponsors section: a centered "logo wall" grouped by tier.
 ///
 /// Tiers and logo-cell sizes follow the Figma layout (node 656:2718):
-/// Platinum 256 / Gold 192 / Silver·Bronze·Tool·Student·Community 144 /
-/// Individual 96. Each logo links to `sponsors/{slug}`.
+/// Platinum 256 / Gold 192 / Silver·Bronze·Tool·Student·Community 144.
+/// Each of those logos links to `sponsors/{slug}`. Individual sponsors (96px
+/// avatar) are the exception — see [_IndividualSponsorCard] — and link out to
+/// GitHub instead.
 /// Firestore document id of Flutter (Google) — pinned to the front of the
 /// sponsor wall regardless of the default id-ascending order.
 const String _pinnedFirstId = 'D2026-015';
@@ -118,6 +120,7 @@ class SponsorsSection extends StatelessComponent {
         css('.sponsors-tier__grid').styles(
           display: .flex,
           justifyContent: .center,
+          alignItems: .start,
           width: 100.percent,
           raw: const {'flex-wrap': 'wrap', 'gap': '24px'},
         ),
@@ -182,21 +185,80 @@ class SponsorsSection extends StatelessComponent {
         css('&.sponsor-card--md').styles(
           raw: const {'width': '144px'},
         ),
-        css('&.sponsor-card--sm').styles(
-          raw: const {'width': '96px'},
+      ]),
+
+      // ── Individual sponsor card ────────────────────────────────────
+      // Unlike other tiers, this isn't a `.sponsor-card`: the avatar is a
+      // fixed 96px circular tile (same square-logo asset and full-bleed
+      // crop the old `sponsor-card--circle` used), with the GitHub icon +
+      // display name stacked below it. The whole card links out to GitHub
+      // rather than the site's own detail page.
+      css('.individual-card', [
+        css('&').styles(
+          display: .flex,
+          flexDirection: .column,
+          alignItems: .center,
+          gap: Gap.row(8.px),
+          maxWidth: 140.px,
+          textDecoration: const TextDecoration(line: TextDecorationLine.none),
+          raw: const {'flex-shrink': '0', 'transition': 'transform 150ms ease'},
         ),
-        // Individual sponsors are shown as circular tiles: the logo fills the
-        // tile (no breathing room — overridden below) and the card clips it to a
-        // circle via border-radius + the card's `overflow: hidden`. Clipping
-        // happens on the card container (not the replaced <img> itself), so it
-        // yields a true circle rather than the octagon a border-radius on the
-        // <img> produced.
-        css('&.sponsor-card--circle').styles(
-          raw: const {'border-radius': '50%'},
+        css('&:hover .individual-card__avatar').styles(
+          raw: const {
+            'transform': 'translateY(-3px)',
+            'box-shadow': '6px 8px 8px rgba(0, 0, 0, 0.22)',
+          },
         ),
-        css('&.sponsor-card--circle img').styles(
+        css('&:focus-visible').styles(
+          raw: const {'outline': '3px solid #65558F', 'outline-offset': '2px'},
+        ),
+        css('.individual-card__avatar', [
+          css('&').styles(
+            width: 96.px,
+            height: 96.px,
+            backgroundColor: onBrand,
+            radius: .circular(999.px),
+            border: Border.all(
+              style: BorderStyle.solid,
+              color: const Color('#CBC3D933'),
+              width: 1.px,
+            ),
+            raw: const {
+              'flex-shrink': '0',
+              'overflow': 'hidden',
+              'box-shadow': '4px 4px 2px rgba(0, 0, 0, 0.25)',
+              'transition': 'transform 150ms ease, box-shadow 150ms ease',
+            },
+          ),
+          css('img').styles(
+            width: 100.percent,
+            height: 100.percent,
+            raw: const {'object-fit': 'contain'},
+          ),
+        ]),
+        css('.individual-card__meta').styles(
+          display: .flex,
+          alignItems: .center,
+          justifyContent: .center,
+          gap: Gap.column(4.px),
           width: 100.percent,
-          height: 100.percent,
+        ),
+        css('.individual-card__github-icon').styles(
+          width: 14.px,
+          height: 14.px,
+          raw: const {'flex-shrink': '0'},
+        ),
+        css('.individual-card__name').styles(
+          color: const Color('#1D1A25'),
+          fontFamily: uiFontFamily,
+          fontWeight: .w500,
+          textAlign: .center,
+          raw: const {
+            'font-size': '14px',
+            'line-height': '20px',
+            'word-break': 'auto-phrase',
+            'overflow-wrap': 'anywhere',
+          },
         ),
       ]),
     ]),
@@ -226,22 +288,84 @@ class _SponsorLogoCard extends StatelessComponent {
   static String _sizeClass(SponsorTier tier) => switch (tier) {
     SponsorTier.platinum => 'sponsor-card--xl',
     SponsorTier.gold => 'sponsor-card--lg',
-    SponsorTier.individual => 'sponsor-card--sm',
     _ => 'sponsor-card--md',
   };
 
   @override
   Component build(BuildContext context) {
     final name = sponsor.name.resolve(strings.locale);
+    if (sponsor.tier == SponsorTier.individual) {
+      return _IndividualSponsorCard(sponsor: sponsor, strings: strings, name: name);
+    }
     return a(
       href: strings.locale.sponsorHref(sponsor.slug),
-      classes:
-          'sponsor-card ${_sizeClass(sponsor.tier)}'
-          '${sponsor.tier == SponsorTier.individual ? ' sponsor-card--circle' : ''}',
+      classes: 'sponsor-card ${_sizeClass(sponsor.tier)}',
       attributes: {'aria-label': strings.sponsorCardAriaLabel(name)},
       [
         img(src: sponsor.squareLogo, alt: name, attributes: const {'loading': 'lazy'}),
       ],
+    );
+  }
+}
+
+/// Individual sponsors don't have a company site, so the generic "Web" link
+/// (from Firestore's `websiteUrl`) is repurposed to carry their GitHub
+/// profile URL instead.
+String? _individualGithubUrl(Sponsor sponsor) {
+  for (final link in sponsor.links) {
+    if (link.type == SponsorLinkType.other) return link.url;
+  }
+  return null;
+}
+
+/// Individual-sponsor card: a circular avatar (same square logo asset and
+/// crop as other tiers) with the GitHub icon + display name below it. The
+/// whole card links out to the sponsor's GitHub profile rather than the
+/// site's own detail page — unlike every other tier.
+class _IndividualSponsorCard extends StatelessComponent {
+  const _IndividualSponsorCard({
+    required this.sponsor,
+    required this.strings,
+    required this.name,
+  });
+
+  final Sponsor sponsor;
+  final Strings strings;
+  final String name;
+
+  @override
+  Component build(BuildContext context) {
+    final githubUrl = _individualGithubUrl(sponsor);
+    final children = [
+      div(classes: 'individual-card__avatar', [
+        img(src: sponsor.squareLogo, alt: '', attributes: const {'loading': 'lazy', 'aria-hidden': 'true'}),
+      ]),
+      div(classes: 'individual-card__meta', [
+        img(
+          classes: 'individual-card__github-icon',
+          src: 'images/icons/link_github.svg',
+          alt: '',
+          attributes: const {'aria-hidden': 'true'},
+        ),
+        span(classes: 'individual-card__name', [.text(name)]),
+      ]),
+    ];
+
+    // No GitHub URL on record (e.g. only an X/Twitter link was provided):
+    // show the avatar and name without a click target rather than guessing
+    // a fallback destination.
+    if (githubUrl == null) {
+      return div(classes: 'individual-card', children);
+    }
+    return a(
+      href: githubUrl,
+      target: Target.blank,
+      classes: 'individual-card',
+      attributes: {
+        'aria-label': strings.sponsorGithubCardAriaLabel(name),
+        'rel': 'noopener noreferrer',
+      },
+      children,
     );
   }
 }
