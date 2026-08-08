@@ -189,27 +189,31 @@ class SponsorsSection extends StatelessComponent {
 
       // ── Individual sponsor card ────────────────────────────────────
       // Unlike other tiers, this isn't a `.sponsor-card`: the avatar is a
-      // fixed 96px circular tile (same square-logo asset and full-bleed
-      // crop the old `sponsor-card--circle` used), with the GitHub icon +
-      // display name stacked below it. The whole card links out to GitHub
-      // rather than the site's own detail page.
+      // fixed 96px circular tile (same square-logo asset as other tiers,
+      // but cropped to fill — a profile photo, unlike a company logo, isn't
+      // guaranteed square and shouldn't be letterboxed), with the GitHub
+      // icon + display name stacked below it. The whole card links out to
+      // GitHub rather than the site's own detail page — but only when a
+      // GitHub URL is on record; otherwise it renders as a plain, inert
+      // `<div>` with no `--linked` modifier (see `_IndividualSponsorCard`),
+      // so it never picks up the hover/focus affordance below.
       css('.individual-card', [
         css('&').styles(
           display: .flex,
           flexDirection: .column,
           alignItems: .center,
           gap: Gap.row(8.px),
-          maxWidth: 140.px,
+          width: 140.px,
           textDecoration: const TextDecoration(line: TextDecorationLine.none),
-          raw: const {'flex-shrink': '0', 'transition': 'transform 150ms ease'},
+          raw: const {'flex-shrink': '0'},
         ),
-        css('&:hover .individual-card__avatar').styles(
+        css('&.individual-card--linked:hover .individual-card__avatar').styles(
           raw: const {
             'transform': 'translateY(-3px)',
             'box-shadow': '6px 8px 8px rgba(0, 0, 0, 0.22)',
           },
         ),
-        css('&:focus-visible').styles(
+        css('&.individual-card--linked:focus-visible').styles(
           raw: const {'outline': '3px solid #65558F', 'outline-offset': '2px'},
         ),
         css('.individual-card__avatar', [
@@ -220,7 +224,7 @@ class SponsorsSection extends StatelessComponent {
             radius: .circular(999.px),
             border: Border.all(
               style: BorderStyle.solid,
-              color: const Color('#CBC3D933'),
+              color: eventCardBorderSocial,
               width: 1.px,
             ),
             raw: const {
@@ -233,12 +237,12 @@ class SponsorsSection extends StatelessComponent {
           css('img').styles(
             width: 100.percent,
             height: 100.percent,
-            raw: const {'object-fit': 'contain'},
+            raw: const {'object-fit': 'cover'},
           ),
         ]),
         css('.individual-card__meta').styles(
           display: .flex,
-          alignItems: .center,
+          alignItems: .start,
           justifyContent: .center,
           gap: Gap.column(4.px),
           width: 100.percent,
@@ -318,10 +322,10 @@ String? _individualGithubUrl(Sponsor sponsor) {
   return null;
 }
 
-/// Individual-sponsor card: a circular avatar (same square logo asset and
-/// crop as other tiers) with the GitHub icon + display name below it. The
-/// whole card links out to the sponsor's GitHub profile rather than the
-/// site's own detail page — unlike every other tier.
+/// Individual-sponsor card: a circular avatar (same square logo asset as
+/// other tiers, cropped to fill) with the GitHub icon + display name below
+/// it. The whole card links out to the sponsor's GitHub profile rather than
+/// the site's own detail page — unlike every other tier.
 class _IndividualSponsorCard extends StatelessComponent {
   const _IndividualSponsorCard({
     required this.sponsor,
@@ -336,36 +340,36 @@ class _IndividualSponsorCard extends StatelessComponent {
   @override
   Component build(BuildContext context) {
     final githubUrl = _individualGithubUrl(sponsor);
-    final children = [
-      div(classes: 'individual-card__avatar', [
-        img(src: sponsor.squareLogo, alt: '', attributes: const {'loading': 'lazy', 'aria-hidden': 'true'}),
-      ]),
-      div(classes: 'individual-card__meta', [
+    final avatar = div(classes: 'individual-card__avatar', [
+      img(src: sponsor.squareLogo, alt: '', attributes: const {'loading': 'lazy', 'aria-hidden': 'true'}),
+    ]);
+    final meta = div(classes: 'individual-card__meta', [
+      if (githubUrl != null)
         img(
           classes: 'individual-card__github-icon',
           src: 'images/icons/link_github.svg',
           alt: '',
           attributes: const {'aria-hidden': 'true'},
         ),
-        span(classes: 'individual-card__name', [.text(name)]),
-      ]),
-    ];
+      span(classes: 'individual-card__name', [.text(name)]),
+    ]);
 
     // No GitHub URL on record (e.g. only an X/Twitter link was provided):
     // show the avatar and name without a click target rather than guessing
-    // a fallback destination.
+    // a fallback destination. No `--linked` modifier, so it doesn't pick up
+    // the hover/focus affordance either.
     if (githubUrl == null) {
-      return div(classes: 'individual-card', children);
+      return div(classes: 'individual-card', [avatar, meta]);
     }
     return a(
       href: githubUrl,
       target: Target.blank,
-      classes: 'individual-card',
+      classes: 'individual-card individual-card--linked',
       attributes: {
         'aria-label': strings.sponsorGithubCardAriaLabel(name),
         'rel': 'noopener noreferrer',
       },
-      children,
+      [avatar, meta],
     );
   }
 }
