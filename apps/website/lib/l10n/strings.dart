@@ -4,7 +4,8 @@ import '../constants/build_config.dart';
 
 enum AppLocale {
   ja(code: 'ja', homePath: '/', relativeHref: ''),
-  en(code: 'en', homePath: '/en', relativeHref: 'en/');
+  en(code: 'en', homePath: '/en', relativeHref: 'en/')
+  ;
 
   const AppLocale({
     required this.code,
@@ -26,8 +27,7 @@ enum AppLocale {
 
   /// Jaspr Router route path (absolute, **no** baseHref) for a sponsor detail
   /// page — this drives the SSG output directory.
-  String sponsorRoutePath(String slug) =>
-      '${homePath == '/' ? '' : homePath}/sponsors/$slug';
+  String sponsorRoutePath(String slug) => '${homePath == '/' ? '' : homePath}/sponsors/$slug';
 
   /// Navigation href (baseHref-prefixed) for a sponsor detail page.
   String sponsorHref(String slug) => '${linkHref}sponsors/$slug';
@@ -71,10 +71,8 @@ class Strings {
   /// Ticket-sales announcement on Medium — shared by the Hero CTA and the
   /// EventInformation ticket button.
   String get ticketsCtaUrl => switch (locale) {
-    AppLocale.ja =>
-      'https://medium.com/flutterkaigi/flutterkaigi-2026のチケットを販売開始しました-99035b658a7b',
-    AppLocale.en =>
-      'https://medium.com/flutterkaigi/ticket-sales-for-flutterkaigi-2026-are-now-open-1d7c809a3c72',
+    AppLocale.ja => 'https://medium.com/flutterkaigi/flutterkaigi-2026のチケットを販売開始しました-99035b658a7b',
+    AppLocale.en => 'https://medium.com/flutterkaigi/ticket-sales-for-flutterkaigi-2026-are-now-open-1d7c809a3c72',
   };
 
   // ── Header ──────────────────────────────────────────────────────────
@@ -191,8 +189,7 @@ class Strings {
   /// Section subtitle on the home Job Boards section.
   String get jobBoardsSubtitle => switch (locale) {
     AppLocale.ja => 'Flutter エンジニアを募集しているスポンサー企業の求人情報をチェックしよう。',
-    AppLocale.en =>
-      'Explore open roles at the sponsor companies hiring Flutter engineers.',
+    AppLocale.en => 'Explore open roles at the sponsor companies hiring Flutter engineers.',
   };
 
   /// CTA label on Job Board cards and the detail page block.
@@ -233,10 +230,8 @@ class Strings {
   };
 
   String get footerExclusionUrl => switch (locale) {
-    AppLocale.ja =>
-      'https://docs.flutterkaigi.jp/Exclusion-of-Anti-Social-Forces.ja',
-    AppLocale.en =>
-      'https://docs.flutterkaigi.jp/Exclusion-of-Anti-Social-Forces',
+    AppLocale.ja => 'https://docs.flutterkaigi.jp/Exclusion-of-Anti-Social-Forces.ja',
+    AppLocale.en => 'https://docs.flutterkaigi.jp/Exclusion-of-Anti-Social-Forces',
   };
 
   String get footerContact => switch (locale) {
@@ -258,7 +253,11 @@ class Strings {
 }
 
 class LocaleScope extends InheritedComponent {
-  const LocaleScope({required this.locale, required super.child, super.key});
+  const LocaleScope({
+    required this.locale,
+    required super.child,
+    super.key,
+  });
 
   final AppLocale locale;
 
@@ -271,6 +270,5 @@ class LocaleScope extends InheritedComponent {
   static Strings stringsOf(BuildContext context) => Strings(of(context));
 
   @override
-  bool updateShouldNotify(covariant LocaleScope oldComponent) =>
-      locale != oldComponent.locale;
+  bool updateShouldNotify(covariant LocaleScope oldComponent) => locale != oldComponent.locale;
 }
