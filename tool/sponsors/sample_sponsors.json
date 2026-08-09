@@ -102,12 +102,43 @@
         "ja": "個人スポンサーとして FlutterKaigi 2026 を応援しています。",
         "en": "Supporting FlutterKaigi 2026 as an individual sponsor."
       },
-      "primaryLogoUrl": "",
+      "primaryLogoUrl": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAABwklEQVR4nO3bwU0DMRBAUR9SCA1AZVANndEAdALiMNJqFQmJrOfP2P/fk43mra0oWd+eXz+/h2Hd6A+wewLACQAnAJwAcALACQAnAJwAcALACQAnAJwAcALACQAnAJwAcALACQAnAJwAcALAtQD4eH/692tf3r4u/SxXVxrgkcGf36MqRDmAK4b+1/tWwigFMGv4965TBaEEQNbg712ThsABiOGfr08ioAD08CMSAQOoMvyIQkAAqg0/IhDSAaoOP8pGSAWoPvwoEwH/FrR7aQBd7v4oaxWkAHQbfpSB4BYEJwDcdICu2080extyBcBNBeh+90czV4ErAE4AOAHgBIATAE4AOAHgBIATAE4AOAHgBIATAE4AuKkAvz/hrvCTtH/ILNx0gO6rwKciFk8AuBSArtvQMk/GjYYIPpy7SakAXVbBsucDRgOE5U/IjMII25wRGwURtjslOQohbHtOeBRA2P6k/DgMIROCHnxUAiDKWg1Vhj+qAYzTcK7EqDT0Y+UAjl2xNVUdfFQaIKo+xEdqAbByAsAJACcAnABwAsAJACcAnABwAsAJACcAnABwAsAJACcAnABwAsAJACcAnABwP2JIhnOLnEX5AAAAAElFTkSuQmCC",
       "tier": "individual",
       "slug": "sora",
+      "websiteUrl": "https://github.com/example4",
       "xUrl": "https://x.com/example4",
       "createdAt": "2026-03-20T00:00:00Z",
       "updatedAt": "2026-03-20T00:00:00Z"
+    },
+    {
+      "id": "sample-umi",
+      "name": { "ja": "うみ", "en": "Umi" },
+      "nameKana": "ウミ",
+      "description": {
+        "ja": "個人スポンサーとして FlutterKaigi 2026 を応援しています。",
+        "en": "Supporting FlutterKaigi 2026 as an individual sponsor."
+      },
+      "primaryLogoUrl": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAABwklEQVR4nO3bwU0DMRBAUR9SCA1AZVANndEAdALiMNJqFQmJrOfP2P/fk43mra0oWd+eXz+/h2Hd6A+wewLACQAnAJwAcALACQAnAJwAcALACQAnAJwAcALACQAnAJwAcALACQAnAJwAcALAtQD4eH/692tf3r4u/SxXVxrgkcGf36MqRDmAK4b+1/tWwigFMGv4965TBaEEQNbg712ThsABiOGfr08ioAD08CMSAQOoMvyIQkAAqg0/IhDSAaoOP8pGSAWoPvwoEwH/FrR7aQBd7v4oaxWkAHQbfpSB4BYEJwDcdICu2080extyBcBNBeh+90czV4ErAE4AOAHgBIATAE4AOAHgBIATAE4AOAHgBIATAE4AuKkAvz/hrvCTtH/ILNx0gO6rwKciFk8AuBSArtvQMk/GjYYIPpy7SakAXVbBsucDRgOE5U/IjMII25wRGwURtjslOQohbHtOeBRA2P6k/DgMIROCHnxUAiDKWg1Vhj+qAYzTcK7EqDT0Y+UAjl2xNVUdfFQaIKo+xEdqAbByAsAJACcAnABwAsAJACcAnABwAsAJACcAnABwAsAJACcAnABwAsAJACcAnABwP2JIhnOLnEX5AAAAAElFTkSuQmCC",
+      "tier": "individual",
+      "slug": "umi",
+      "xUrl": "https://x.com/example6",
+      "createdAt": "2026-03-22T00:00:00Z",
+      "updatedAt": "2026-03-22T00:00:00Z"
+    },
+    {
+      "id": "sample-tsukikage",
+      "name": { "ja": "月影ゆうすけ・フラッター太郎", "en": "Yusuke Tsukikage-Flutter Taro" },
+      "nameKana": "ツキカゲユウスケ・フラッタータロウ",
+      "description": {
+        "ja": "個人スポンサーとして FlutterKaigi 2026 を応援しています。",
+        "en": "Supporting FlutterKaigi 2026 as an individual sponsor."
+      },
+      "primaryLogoUrl": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAABwklEQVR4nO3bQU7DMBBAUS96HjgQbLgYbLgQJwKxGCmKKiHReP6M/f++TTUvtqo2vj29v3wPw7rRH2D3BIATAE4AOAHgBIATAE4AOAHgBIATAE4AOAHgBIATAE4AOAHgBIATAE4AOAHgBIBrAfD19vnv1z5/vF76Wa6uNMAjgz+/R1WIcgBXDP2v962EUQpg1vDvXacKQgmArMHfuyYNgQMQwz9fn0RAAejhRyQCBlBl+BGFgABUG35EIKQDVB1+lI2QClB9+FEmAv4taPfSALrc/VHWKkgB6Db8KAPBLQhOALjpAF23n2j2NuQKgJsK0P3uj2auAlcAnABwAsAJACcAnABwAsAJACcAnABwAsAJACcAnABwUwF+f8Jd4Sdp/5BZuOkA3VeBT0UsngBwKQBdt6FlnowbDRF8OHeTUgG6rIJlzweMBgjLn5AZhRG2OSM2CiJsd0pyFELY9pzwKICw/Un5cRhCJgQ9+KgEQJS1GqoMf1QDGKfhXIlRaejHygEcu2Jrqjr4qDRAVH2Ij9QCYOUEgBMATgA4AeAEgBMATgA4AeAEgBMATgA4AeAEgBMATgA4AeAEgBMATgA4AeB+AFA0hdF2gxWLAAAAAElFTkSuQmCC",
+      "tier": "individual",
+      "slug": "tsukikage",
+      "websiteUrl": "https://github.com/example5",
+      "createdAt": "2026-03-21T00:00:00Z",
+      "updatedAt": "2026-03-21T00:00:00Z"
     }
   ]
 }
