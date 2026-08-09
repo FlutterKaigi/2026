@@ -12,13 +12,16 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 /// Shows the FlutterKaigi 2026 overview, related links, and app settings.
 class EventInfoPage extends ConsumerWidget {
-  const EventInfoPage({super.key});
+  const EventInfoPage({super.key, this.externalUrlLauncher});
+
+  /// Optional launcher used by tests to observe the destination URI.
+  final ExternalUrlLauncher? externalUrlLauncher;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final t = Translations.of(context);
     final appLocale = ref.watch(appLocaleProvider);
-    final isJapanese = appLocale == AppLocale.ja;
+    final localizedLinks = _LocalizedEventLinks.fromLocale(appLocale);
 
     return Scaffold(
       appBar: AppBar(
@@ -87,7 +90,7 @@ class EventInfoPage extends ConsumerWidget {
                               onTap: () => unawaited(
                                 _openExternalUrl(
                                   context,
-                                  url: isJapanese ? AppLinks.codeOfConductJa : AppLinks.codeOfConductEn,
+                                  url: localizedLinks.codeOfConduct,
                                   failureMessage: t.links.openError,
                                 ),
                               ),
@@ -99,7 +102,7 @@ class EventInfoPage extends ConsumerWidget {
                               onTap: () => unawaited(
                                 _openExternalUrl(
                                   context,
-                                  url: isJapanese ? AppLinks.privacyPolicyJa : AppLinks.privacyPolicyEn,
+                                  url: localizedLinks.privacyPolicy,
                                   failureMessage: t.links.openError,
                                 ),
                               ),
@@ -111,7 +114,7 @@ class EventInfoPage extends ConsumerWidget {
                               onTap: () => unawaited(
                                 _openExternalUrl(
                                   context,
-                                  url: isJapanese ? AppLinks.exclusionPolicyJa : AppLinks.exclusionPolicyEn,
+                                  url: localizedLinks.exclusionPolicy,
                                   failureMessage: t.links.openError,
                                 ),
                               ),
@@ -169,7 +172,34 @@ class EventInfoPage extends ConsumerWidget {
     context,
     uri: Uri.parse(url),
     failureMessage: failureMessage,
+    launcher: externalUrlLauncher,
   );
+}
+
+/// External documents that have separate Japanese and English pages.
+class _LocalizedEventLinks {
+  const _LocalizedEventLinks({
+    required this.codeOfConduct,
+    required this.privacyPolicy,
+    required this.exclusionPolicy,
+  });
+
+  factory _LocalizedEventLinks.fromLocale(AppLocale locale) => switch (locale) {
+    AppLocale.ja => const _LocalizedEventLinks(
+      codeOfConduct: AppLinks.codeOfConductJa,
+      privacyPolicy: AppLinks.privacyPolicyJa,
+      exclusionPolicy: AppLinks.exclusionPolicyJa,
+    ),
+    AppLocale.en => const _LocalizedEventLinks(
+      codeOfConduct: AppLinks.codeOfConductEn,
+      privacyPolicy: AppLinks.privacyPolicyEn,
+      exclusionPolicy: AppLinks.exclusionPolicyEn,
+    ),
+  };
+
+  final String codeOfConduct;
+  final String privacyPolicy;
+  final String exclusionPolicy;
 }
 
 class _EventOverviewCard extends StatelessWidget {

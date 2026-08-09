@@ -51,10 +51,11 @@ class SponsorTierRowsSliverWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     const spacing = 24.0;
     final contentWidth = math.min<double>(1232, availableWidth);
-    final logoSide = math.min(group.tier.logoSide, contentWidth);
+    final itemWidth = math.min(group.tier.wallItemWidth, contentWidth);
+    final itemHeight = group.tier.wallItemHeight;
     final columnCount = math.max(
       1,
-      ((contentWidth + spacing) / (logoSide + spacing)).floor(),
+      ((contentWidth + spacing) / (itemWidth + spacing)).floor(),
     );
     final rowCount = (group.sponsors.length / columnCount).ceil();
 
@@ -76,8 +77,9 @@ class SponsorTierRowsSliverWidget extends StatelessWidget {
                 for (var sponsorIndex = firstSponsorIndex; sponsorIndex < lastSponsorIndex; sponsorIndex++) ...[
                   IndexedSemantics(
                     index: semanticIndexOffset + sponsorIndex,
-                    child: SizedBox.square(
-                      dimension: logoSide,
+                    child: SizedBox(
+                      width: itemWidth,
+                      height: itemHeight,
                       child: SponsorLogoCardWidget(
                         sponsor: group.sponsors[sponsorIndex],
                         side: group.tier.logoSide,
