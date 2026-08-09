@@ -145,6 +145,15 @@ class Translations$sponsors$ja {
 	/// ja: '$name のロゴ'
 	String logoSemanticLabel({required Object name}) => '${name} のロゴ';
 
+	/// ja: '$name の GitHub を見る'
+	String githubCardSemanticLabel({required Object name}) => '${name} の GitHub を見る';
+
+	/// ja: '$name の X を見る'
+	String xCardSemanticLabel({required Object name}) => '${name} の X を見る';
+
+	/// ja: '$name のリンクを開く'
+	String externalCardSemanticLabel({required Object name}) => '${name} のリンクを開く';
+
 	/// ja: '$tier スポンサー'
 	String tierBadge({required Object tier}) => '${tier} スポンサー';
 
@@ -811,6 +820,9 @@ extension on Translations {
 			'sponsors.empty' => 'スポンサーはまだ公開されていません',
 			'sponsors.notFound' => 'スポンサーが見つかりませんでした',
 			'sponsors.logoSemanticLabel' => ({required Object name}) => '${name} のロゴ',
+			'sponsors.githubCardSemanticLabel' => ({required Object name}) => '${name} の GitHub を見る',
+			'sponsors.xCardSemanticLabel' => ({required Object name}) => '${name} の X を見る',
+			'sponsors.externalCardSemanticLabel' => ({required Object name}) => '${name} のリンクを開く',
 			'sponsors.tierBadge' => ({required Object tier}) => '${tier} スポンサー',
 			'sponsors.jobBoards' => 'Job Boards',
 			'sponsors.jobBoardCta' => '採用情報',

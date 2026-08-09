@@ -17,6 +17,9 @@ sponsors:
   empty: スポンサーはまだ公開されていません
   notFound: スポンサーが見つかりませんでした
   logoSemanticLabel: $name のロゴ
+  githubCardSemanticLabel: $name の GitHub を見る
+  xCardSemanticLabel: $name の X を見る
+  externalCardSemanticLabel: $name のリンクを開く
   tierBadge: $tier スポンサー
   jobBoards: Job Boards
   jobBoardCta: 採用情報
