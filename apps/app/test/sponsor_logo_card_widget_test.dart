@@ -3,6 +3,7 @@ import 'package:app/feature/sponsor/ui/widget/sponsor_logo_card_widget.dart';
 import 'package:data/data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -33,6 +34,7 @@ void main() {
 
     final name = find.text('個人スポンサー').last;
     expect(name, findsOneWidget);
+    expect(_assetName(tester), 'res/assets/icons/link_github.svg');
     await tester.tap(name);
     await tester.pumpAndSettle();
 
@@ -66,7 +68,7 @@ void main() {
 
     final name = find.text('個人スポンサー').last;
     expect(name, findsOneWidget);
-    expect(find.text('X'), findsOneWidget);
+    expect(_assetName(tester), 'res/assets/icons/link_x.svg');
     await tester.tap(name);
     await tester.pumpAndSettle();
 
@@ -100,7 +102,7 @@ void main() {
 
     final name = find.text('個人スポンサー').last;
     expect(name, findsOneWidget);
-    expect(find.byIcon(Icons.public), findsOneWidget);
+    expect(_assetName(tester), 'res/assets/icons/link_globe.svg');
     await tester.tap(name);
     await tester.pumpAndSettle();
 
@@ -134,13 +136,19 @@ void main() {
 
     final name = find.text('個人スポンサー').last;
     expect(name, findsOneWidget);
-    expect(find.byIcon(Icons.public), findsNothing);
-    expect(find.text('X'), findsNothing);
+    expect(find.byType(SvgPicture), findsNothing);
     await tester.tap(name);
     await tester.pumpAndSettle();
 
     expect(openedUri, isNull);
   });
+}
+
+String _assetName(WidgetTester tester) {
+  final icon = tester.widget<SvgPicture>(find.byType(SvgPicture));
+  final loader = icon.bytesLoader;
+  expect(loader, isA<SvgAssetLoader>());
+  return (loader as SvgAssetLoader).assetName;
 }
 
 Sponsor _sponsor({String? websiteUrl, String? xUrl}) {

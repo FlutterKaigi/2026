@@ -10,6 +10,7 @@ import 'package:app/core/ui/widget/press_scale_effect_widget.dart';
 import 'package:app/feature/sponsor/data/provider/sponsor_detail_provider.dart';
 import 'package:data/data.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 /// Square sponsor logo tile.
 class SponsorLogoCardWidget extends StatelessWidget {
@@ -247,16 +248,20 @@ class _IndividualLinkIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return switch (type) {
-      _IndividualLinkType.github => const Icon(Icons.code, size: 14),
-      _IndividualLinkType.x => const Text(
-        'X',
-        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-      ),
-      _IndividualLinkType.other => const Icon(Icons.public, size: 14),
-    };
+    return SvgPicture.asset(
+      _individualLinkIconAsset(type),
+      width: 14,
+      height: 14,
+      excludeFromSemantics: true,
+    );
   }
 }
+
+String _individualLinkIconAsset(_IndividualLinkType type) => switch (type) {
+  _IndividualLinkType.github => 'res/assets/icons/link_github.svg',
+  _IndividualLinkType.x => 'res/assets/icons/link_x.svg',
+  _IndividualLinkType.other => 'res/assets/icons/link_globe.svg',
+};
 
 _IndividualLink? _individualLink(Sponsor sponsor) {
   for (final rawUrl in [sponsor.websiteUrl, sponsor.xUrl]) {
