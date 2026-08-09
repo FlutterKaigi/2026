@@ -124,9 +124,14 @@ class Strings {
     AppLocale.en => 'News',
   };
 
-  String get newsViewAllCta => switch (locale) {
-    AppLocale.ja => 'すべてのニュースを見る',
-    AppLocale.en => 'View All News',
+  String get newsShowAllCta => switch (locale) {
+    AppLocale.ja => 'すべてのニュースを表示',
+    AppLocale.en => 'Show All News',
+  };
+
+  String get newsShowLessCta => switch (locale) {
+    AppLocale.ja => '閉じる',
+    AppLocale.en => 'Show Less',
   };
 
   // ── Sponsors ────────────────────────────────────────────────────────
