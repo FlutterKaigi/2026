@@ -153,6 +153,16 @@ class Strings {
     AppLocale.en => "View $name's GitHub profile (opens in a new tab)",
   };
 
+  String sponsorXCardAriaLabel(String name) => switch (locale) {
+    AppLocale.ja => '$name の X を見る（新しいタブで開く）',
+    AppLocale.en => "View $name's X profile (opens in a new tab)",
+  };
+
+  String sponsorExternalCardAriaLabel(String name) => switch (locale) {
+    AppLocale.ja => '$name のリンクを開く（新しいタブで開く）',
+    AppLocale.en => "Open $name's link (opens in a new tab)",
+  };
+
   String get sponsorBackToList => switch (locale) {
     AppLocale.ja => 'スポンサー一覧に戻る',
     AppLocale.en => 'Back to Sponsors',

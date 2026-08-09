@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'package:app/core/extension/locale_map_extension.dart';
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/router/router.dart';
+import 'package:app/core/ui/launch_external_url.dart';
 import 'package:app/core/ui/widget/app_network_image.dart';
 import 'package:app/core/ui/widget/press_scale_effect_widget.dart';
 import 'package:app/feature/sponsor/data/provider/sponsor_detail_provider.dart';
@@ -15,21 +16,29 @@ class SponsorLogoCardWidget extends StatelessWidget {
   const SponsorLogoCardWidget({
     required this.sponsor,
     required this.side,
+    this.externalUrlLauncher,
     super.key,
   });
 
   final Sponsor sponsor;
   final double side;
+  final ExternalUrlLauncher? externalUrlLauncher;
 
   @override
   Widget build(BuildContext context) {
+    if (sponsor.tier == SponsorTier.individual) {
+      return _IndividualSponsorCard(
+        sponsor: sponsor,
+        side: side,
+        externalUrlLauncher: externalUrlLauncher,
+      );
+    }
+
     final locale = Localizations.localeOf(context);
     final name = sponsor.name.resolve(locale).trim();
     final effectiveName = name.isEmpty ? sponsor.id : name;
     final sponsorKey = sponsorRouteKey(sponsor);
-    final shape = sponsor.tier == SponsorTier.individual
-        ? const CircleBorder()
-        : RoundedRectangleBorder(borderRadius: BorderRadius.circular(16));
+    final shape = RoundedRectangleBorder(borderRadius: BorderRadius.circular(16));
     return LayoutBuilder(
       builder: (context, constraints) {
         final effectiveSide = constraints.maxWidth.isFinite ? math.min(side, constraints.maxWidth) : side;
@@ -68,6 +77,217 @@ class SponsorLogoCardWidget extends StatelessWidget {
       },
     );
   }
+}
+
+/// Individual sponsors use their `websiteUrl` first and fall back to `xUrl`
+/// for an external profile or website URL, matching the website's card
+/// behavior. The URL host determines the marker shown below the avatar
+/// (GitHub, X, or a generic link). Missing or invalid URLs leave the card inert
+/// instead of navigating to the sponsor details page.
+class _IndividualSponsorCard extends StatelessWidget {
+  const _IndividualSponsorCard({
+    required this.sponsor,
+    required this.side,
+    this.externalUrlLauncher,
+  });
+
+  final Sponsor sponsor;
+  final double side;
+  final ExternalUrlLauncher? externalUrlLauncher;
+
+  @override
+  Widget build(BuildContext context) {
+    final locale = Localizations.localeOf(context);
+    final name = sponsor.name.resolve(locale).trim();
+    final effectiveName = name.isEmpty ? sponsor.id : name;
+    final individualLink = _individualLink(sponsor);
+    final t = Translations.of(context);
+
+    void openExternalLink() {
+      if (individualLink == null) {
+        return;
+      }
+      unawaited(
+        launchExternalUrl(
+          context,
+          uri: individualLink.uri,
+          failureMessage: t.links.openError,
+          launcher: externalUrlLauncher,
+        ),
+      );
+    }
+
+    return Semantics(
+      label: switch (individualLink?.type) {
+        null => t.sponsors.logoSemanticLabel(name: effectiveName),
+        _IndividualLinkType.github => t.sponsors.githubCardSemanticLabel(name: effectiveName),
+        _IndividualLinkType.x => t.sponsors.xCardSemanticLabel(name: effectiveName),
+        _IndividualLinkType.other => t.sponsors.externalCardSemanticLabel(name: effectiveName),
+      },
+      button: individualLink != null,
+      child: PressScaleEffectWidget(
+        onTap: individualLink == null ? null : openExternalLink,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final width = constraints.maxWidth.isFinite ? constraints.maxWidth : 140.0;
+            final avatarSide = math.min(side, width);
+            return SizedBox(
+              width: width,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _IndividualAvatar(
+                    sponsor: sponsor,
+                    name: effectiveName,
+                    side: avatarSide,
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      if (individualLink != null) ...[
+                        ExcludeSemantics(
+                          child: _IndividualLinkIcon(type: individualLink.type),
+                        ),
+                        const SizedBox(width: 4),
+                      ],
+                      Flexible(
+                        child: Text.rich(
+                          TextSpan(
+                            text: effectiveName,
+                            children: [
+                              if (individualLink != null) const TextSpan(text: ' ↗'),
+                            ],
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurface,
+                            fontWeight: FontWeight.w500,
+                            height: 1.4,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class _IndividualAvatar extends StatelessWidget {
+  const _IndividualAvatar({
+    required this.sponsor,
+    required this.name,
+    required this.side,
+  });
+
+  final Sponsor sponsor;
+  final String name;
+  final double side;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final url = sponsor.primaryLogoUrl?.trim();
+
+    return Material(
+      color: Colors.white,
+      elevation: 3,
+      shadowColor: Colors.black.withValues(alpha: 0.25),
+      shape: CircleBorder(
+        side: BorderSide(
+          color: colorScheme.outlineVariant.withValues(alpha: 0.45),
+        ),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: SizedBox.square(
+        dimension: side,
+        child: url == null || url.isEmpty
+            ? _SponsorLogoFallback(name: name, size: side)
+            : AppNetworkImage(
+                imageUrl: url,
+                width: side,
+                height: side,
+                fit: BoxFit.cover,
+                placeholderBuilder: (context) => _SponsorLogoShimmer(
+                  size: side,
+                  isCircle: true,
+                ),
+                errorBuilder: (context, error, stackTrace) => _SponsorLogoFallback(
+                  name: name,
+                  size: side,
+                ),
+              ),
+      ),
+    );
+  }
+}
+
+enum _IndividualLinkType { github, x, other }
+
+class _IndividualLink {
+  const _IndividualLink({required this.uri, required this.type});
+
+  final Uri uri;
+  final _IndividualLinkType type;
+}
+
+class _IndividualLinkIcon extends StatelessWidget {
+  const _IndividualLinkIcon({required this.type});
+
+  final _IndividualLinkType type;
+
+  @override
+  Widget build(BuildContext context) {
+    return switch (type) {
+      _IndividualLinkType.github => const Icon(Icons.code, size: 14),
+      _IndividualLinkType.x => const Text(
+        'X',
+        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+      ),
+      _IndividualLinkType.other => const Icon(Icons.public, size: 14),
+    };
+  }
+}
+
+_IndividualLink? _individualLink(Sponsor sponsor) {
+  for (final rawUrl in [sponsor.websiteUrl, sponsor.xUrl]) {
+    final link = _parseIndividualLink(rawUrl);
+    if (link != null) {
+      return link;
+    }
+  }
+  return null;
+}
+
+_IndividualLink? _parseIndividualLink(String? rawUrl) {
+  final trimmedUrl = rawUrl?.trim();
+  if (trimmedUrl == null || trimmedUrl.isEmpty) {
+    return null;
+  }
+
+  final uri = Uri.tryParse(trimmedUrl);
+  if (uri == null || uri.host.isEmpty) {
+    return null;
+  }
+  if (uri.scheme != 'https' && uri.scheme != 'http') {
+    return null;
+  }
+  final host = uri.host.toLowerCase();
+  final type = switch (host) {
+    'github.com' || 'www.github.com' => _IndividualLinkType.github,
+    'x.com' || 'www.x.com' || 'twitter.com' || 'www.twitter.com' => _IndividualLinkType.x,
+    _ => _IndividualLinkType.other,
+  };
+  return _IndividualLink(uri: uri, type: type);
 }
 
 class _SponsorLogoImage extends StatelessWidget {

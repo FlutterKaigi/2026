@@ -191,12 +191,11 @@ class SponsorsSection extends StatelessComponent {
       // Unlike other tiers, this isn't a `.sponsor-card`: the avatar is a
       // fixed 96px circular tile (same square-logo asset as other tiers,
       // but cropped to fill — a profile photo, unlike a company logo, isn't
-      // guaranteed square and shouldn't be letterboxed), with the GitHub
-      // icon + display name stacked below it. The whole card links out to
-      // GitHub rather than the site's own detail page — but only when a
-      // GitHub URL is on record; otherwise it renders as a plain, inert
-      // `<div>` with no `--linked` modifier (see `_IndividualSponsorCard`),
-      // so it never picks up the hover/focus affordance below.
+      // guaranteed square and shouldn't be letterboxed), with a domain-aware
+      // link icon + display name stacked below it. The whole card links out
+      // to the recorded external URL rather than the site's own detail page;
+      // without a valid URL it renders as a plain, inert `<div>` with no
+      // `--linked` modifier (see `_IndividualSponsorCard`).
       css('.individual-card', [
         css('&').styles(
           display: .flex,
@@ -247,7 +246,7 @@ class SponsorsSection extends StatelessComponent {
           gap: Gap.column(4.px),
           width: 100.percent,
         ),
-        css('.individual-card__github-icon').styles(
+        css('.individual-card__link-icon').styles(
           width: 14.px,
           height: 14.px,
           raw: const {'flex-shrink': '0'},
@@ -321,20 +320,46 @@ class _SponsorLogoCard extends StatelessComponent {
   }
 }
 
-/// Individual sponsors don't have a company site, so the generic "Web" link
-/// (from Firestore's `websiteUrl`) is repurposed to carry their GitHub
-/// profile URL instead.
-String? _individualGithubUrl(Sponsor sponsor) {
+/// Individual sponsors use Firestore's generic "Web" link first and fall back
+/// to the X link for their external profile or website URL. The host selects
+/// the marker shown on the card.
+enum _IndividualLinkType { github, x, other }
+
+class _IndividualLink {
+  const _IndividualLink({required this.url, required this.type});
+
+  final String url;
+  final _IndividualLinkType type;
+}
+
+_IndividualLink? _individualLink(Sponsor sponsor) {
   for (final link in sponsor.links) {
-    if (link.type == SponsorLinkType.other) return link.url;
+    if (link.type != SponsorLinkType.other && link.type != SponsorLinkType.x) continue;
+    final uri = Uri.tryParse(link.url.trim());
+    if (uri == null || uri.host.isEmpty || (uri.scheme != 'http' && uri.scheme != 'https')) {
+      continue;
+    }
+    final host = uri.host.toLowerCase();
+    final type = switch (host) {
+      'github.com' || 'www.github.com' => _IndividualLinkType.github,
+      'x.com' || 'www.x.com' || 'twitter.com' || 'www.twitter.com' => _IndividualLinkType.x,
+      _ => _IndividualLinkType.other,
+    };
+    return _IndividualLink(url: uri.toString(), type: type);
   }
   return null;
 }
 
+String _individualLinkIconAsset(_IndividualLinkType type) => switch (type) {
+  _IndividualLinkType.github => 'images/icons/link_github.svg',
+  _IndividualLinkType.x => 'images/icons/link_x.svg',
+  _IndividualLinkType.other => 'images/icons/link_globe.svg',
+};
+
 /// Individual-sponsor card: a circular avatar (same square logo asset as
-/// other tiers, cropped to fill) with the GitHub icon + display name below
-/// it. The whole card links out to the sponsor's GitHub profile rather than
-/// the site's own detail page — unlike every other tier.
+/// other tiers, cropped to fill) with a domain-aware link icon + display name
+/// below it. The whole card links out to the recorded external URL rather
+/// than the site's own detail page — unlike every other tier.
 class _IndividualSponsorCard extends StatelessComponent {
   const _IndividualSponsorCard({
     required this.sponsor,
@@ -348,15 +373,15 @@ class _IndividualSponsorCard extends StatelessComponent {
 
   @override
   Component build(BuildContext context) {
-    final githubUrl = _individualGithubUrl(sponsor);
+    final individualLink = _individualLink(sponsor);
     final avatar = div(classes: 'individual-card__avatar', [
       img(src: sponsor.squareLogo, alt: '', attributes: const {'loading': 'lazy', 'aria-hidden': 'true'}),
     ]);
     final meta = div(classes: 'individual-card__meta', [
-      if (githubUrl != null)
+      if (individualLink != null)
         img(
-          classes: 'individual-card__github-icon',
-          src: 'images/icons/link_github.svg',
+          classes: 'individual-card__link-icon',
+          src: _individualLinkIconAsset(individualLink.type),
           alt: '',
           attributes: const {'aria-hidden': 'true'},
         ),
@@ -366,7 +391,7 @@ class _IndividualSponsorCard extends StatelessComponent {
         // wraps onto the same line as the last word rather than sitting
         // pinned to the row's top-right corner when the name spans two
         // lines — mirrors `connect-link__ext` on the sponsor detail page.
-        if (githubUrl != null)
+        if (individualLink != null)
           span(
             classes: 'individual-card__arrow',
             attributes: const {'aria-hidden': 'true'},
@@ -375,19 +400,22 @@ class _IndividualSponsorCard extends StatelessComponent {
       ]),
     ]);
 
-    // No GitHub URL on record (e.g. only an X/Twitter link was provided):
-    // show the avatar and name without a click target rather than guessing
-    // a fallback destination. No `--linked` modifier, so it doesn't pick up
-    // the hover/focus affordance either.
-    if (githubUrl == null) {
+    // No valid external URL on record: show the avatar and name without a
+    // click target rather than guessing a fallback destination. No `--linked`
+    // modifier, so it doesn't pick up the hover/focus affordance either.
+    if (individualLink == null) {
       return div(classes: 'individual-card', [avatar, meta]);
     }
     return a(
-      href: githubUrl,
+      href: individualLink.url,
       target: Target.blank,
       classes: 'individual-card individual-card--linked',
       attributes: {
-        'aria-label': strings.sponsorGithubCardAriaLabel(name),
+        'aria-label': switch (individualLink.type) {
+          _IndividualLinkType.github => strings.sponsorGithubCardAriaLabel(name),
+          _IndividualLinkType.x => strings.sponsorXCardAriaLabel(name),
+          _IndividualLinkType.other => strings.sponsorExternalCardAriaLabel(name),
+        },
         'rel': 'noopener noreferrer',
       },
       [avatar, meta],

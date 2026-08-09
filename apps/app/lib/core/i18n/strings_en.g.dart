@@ -115,6 +115,9 @@ class _Translations$sponsors$en extends Translations$sponsors$ja {
 	@override String get empty => 'Sponsors have not been published yet';
 	@override String get notFound => 'Sponsor not found';
 	@override String logoSemanticLabel({required Object name}) => '${name} logo';
+	@override String githubCardSemanticLabel({required Object name}) => 'View ${name}\'s GitHub profile';
+	@override String xCardSemanticLabel({required Object name}) => 'View ${name}\'s X profile';
+	@override String externalCardSemanticLabel({required Object name}) => 'Open ${name}\'s link';
 	@override String tierBadge({required Object tier}) => '${tier} Sponsor';
 	@override String get jobBoards => 'Job Boards';
 	@override String get jobBoardCta => 'Hiring information';
@@ -495,6 +498,9 @@ extension on TranslationsEn {
 			'sponsors.empty' => 'Sponsors have not been published yet',
 			'sponsors.notFound' => 'Sponsor not found',
 			'sponsors.logoSemanticLabel' => ({required Object name}) => '${name} logo',
+			'sponsors.githubCardSemanticLabel' => ({required Object name}) => 'View ${name}\'s GitHub profile',
+			'sponsors.xCardSemanticLabel' => ({required Object name}) => 'View ${name}\'s X profile',
+			'sponsors.externalCardSemanticLabel' => ({required Object name}) => 'Open ${name}\'s link',
 			'sponsors.tierBadge' => ({required Object tier}) => '${tier} Sponsor',
 			'sponsors.jobBoards' => 'Job Boards',
 			'sponsors.jobBoardCta' => 'Hiring information',
