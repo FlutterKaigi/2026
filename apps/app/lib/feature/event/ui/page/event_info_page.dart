@@ -62,6 +62,23 @@ class EventInfoPage extends ConsumerWidget {
                         ),
                       ),
                       const SizedBox(height: 24),
+                      _SectionHeading(title: t.eventInfo.credits),
+                      const SizedBox(height: 8),
+                      Card.outlined(
+                        margin: EdgeInsets.zero,
+                        clipBehavior: Clip.antiAlias,
+                        child: Column(
+                          children: [
+                            _ExternalLinkTile(
+                              icon: Icons.people_outline,
+                              title: t.eventInfo.contributors,
+                              external: false,
+                              onTap: () => const ContributorsRoute().push<void>(context),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 24),
                       _SectionHeading(title: t.eventInfo.other),
                       const SizedBox(height: 8),
                       Card.outlined(

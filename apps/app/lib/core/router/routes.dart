@@ -26,6 +26,7 @@ class SettingsRoute extends GoRouteData with $SettingsRoute {
             TypedGoRoute<LicenseDetailRoute>(path: ':packageName'),
           ],
         ),
+        TypedGoRoute<ContributorsRoute>(path: '/contributors'),
       ],
     ),
     TypedStatefulShellBranch<SessionBranch>(
@@ -157,6 +158,14 @@ class LicenseDetailRoute extends GoRouteData with $LicenseDetailRoute {
   Widget build(BuildContext context, GoRouterState state) => LicenseDetailPage(
     packageName: packageName,
   );
+}
+
+/// `/contributors` — GitHub contributors to the FlutterKaigi 2026 repository.
+class ContributorsRoute extends GoRouteData with $ContributorsRoute {
+  const ContributorsRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const ContributorListPage();
 }
 
 /// `/sessions` — the session timetable.

@@ -4,6 +4,7 @@ import 'package:app/core/ui/not_found_page.dart';
 import 'package:app/core/ui/root_scaffold.dart';
 import 'package:app/feature/auth/ui/page/account_page.dart';
 import 'package:app/feature/auth/ui/page/email_sign_in_page.dart';
+import 'package:app/feature/contributor/ui/page/contributor_list_page.dart';
 import 'package:app/feature/event/ui/page/event_info_page.dart';
 import 'package:app/feature/license/ui/page/license_detail_page.dart';
 import 'package:app/feature/license/ui/page/license_page.dart';
