@@ -54,7 +54,7 @@ class NewsCard extends StatelessComponent {
               span(
                 classes: 'news-card__toggle-arrow',
                 attributes: const {'aria-hidden': 'true'},
-                [.text('→')],
+                [.text('↓')],
               ),
             ]),
           ]),
@@ -239,7 +239,9 @@ class NewsCard extends StatelessComponent {
       css('.news-card__toggle:hover .news-card__toggle-chip').styles(
         backgroundColor: onSecondaryContainerHover,
       ),
-      // 開いているときは「閉じる」ラベルを出し、矢印を下向きに回転させる。
+      // 開いているときは「閉じる」ラベルを出し、矢印を上向き（180deg）に
+      // 回転させる。一般的な「もっと見る」系アコーディオンの慣習
+      // （閉:下向きシェブロン→開:上向き）に合わせている。
       css('.news-card__toggle-text--open').styles(
         raw: const {'display': 'none'},
       ),
@@ -250,7 +252,7 @@ class NewsCard extends StatelessComponent {
         raw: const {'display': 'none'},
       ),
       css('.news-card__more[open] .news-card__toggle-arrow').styles(
-        raw: const {'transform': 'rotate(90deg)'},
+        raw: const {'transform': 'rotate(180deg)'},
       ),
     ]),
 
