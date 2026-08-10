@@ -1,5 +1,6 @@
 import 'package:app/core/constants/app_links.dart';
 import 'package:app/core/i18n/strings.g.dart';
+import 'package:app/core/i18n/strings_en.g.dart';
 import 'package:app/core/provider/package_info.dart';
 import 'package:app/core/provider/shared_preferences.dart';
 import 'package:app/core/ui/launch_external_url.dart';
@@ -189,7 +190,12 @@ Future<void> _pumpEventInfoPage(
   AppLocale locale = AppLocale.ja,
   ExternalUrlLauncher? externalUrlLauncher,
 }) async {
-  await LocaleSettings.setLocale(locale);
+  if (locale == AppLocale.en) {
+    // The English strings are deferred in production, but Flutter's test VM
+    // cannot complete that load. Register them directly for widget tests.
+    LocaleSettings.instance.translationMap[locale] ??= TranslationsEn();
+  }
+  LocaleSettings.setLocaleSync(locale);
   addTearDown(() => LocaleSettings.setLocaleSync(AppLocale.ja));
   SharedPreferences.setMockInitialValues({'app_locale': locale.languageCode});
   final preferences = await SharedPreferences.getInstance();
@@ -252,7 +258,9 @@ Future<void> _tapDocsLinks(
       matching: find.byType(ListTile),
     );
     await tester.scrollUntilVisible(tile, 500);
+    await tester.pumpAndSettle();
     await tester.ensureVisible(tile);
+    await tester.pumpAndSettle();
     await tester.tap(tile);
     await tester.pump();
   }
