@@ -29,9 +29,14 @@
 ///     the original-language half is rewritten — the translation is left for
 ///     the translation pass / dashboard to refresh.
 ///
-///   - **Service sessions become timeline events.** Breaks, lunch and the like
-///     are modelled as the `timelineEvents` collection on the Firestore side,
-///     matching how `apps/app` merges the two into one timetable.
+///   - **Plenary sessions become timeline events.** Sessionize marks breaks,
+///     lunch and the like as *service* sessions, but so are the sponsor slots
+///     and other room-bound programme items — the two are indistinguishable in
+///     the API. What does separate them is `isPlenumSession`: only the
+///     event-wide slots carry it. Those become the `timelineEvents` collection
+///     (matching how `apps/app` merges the two into one timetable); every other
+///     service session is imported as a normal session so it keeps its room,
+///     description and speakers.
 ///
 /// Run via:
 ///
@@ -375,6 +380,10 @@ _Plan _buildPlan({
 
     final status = (session['status'] ?? '').toString();
     final isService = session['isServiceSession'] == true;
+    // Only the event-wide slots (opening, lunch, the closing party) become
+    // timeline events. Room-bound service sessions — sponsor slots, the LT
+    // block, the quiz — are part of the programme and stay sessions.
+    final isPlenary = session['isPlenumSession'] == true;
     // Service sessions carry no acceptance status; everything else must be
     // accepted. A non-accepted session means the endpoint is not restricted
     // to the programme — refuse it rather than leaking it into Firestore.
@@ -396,7 +405,7 @@ _Plan _buildPlan({
       continue;
     }
 
-    if (isService) {
+    if (isPlenary) {
       // Timeline events allow a null venue (a break is not tied to a room).
       final roomId = _asInt(session['roomId']);
       final write = _planTimelineEvent(
