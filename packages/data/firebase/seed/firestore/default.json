@@ -23,8 +23,8 @@
       "schema": "venue",
       "data": {
         "name": {
-          "ja": "ホール A",
-          "en": "Hall A"
+          "ja": "メインA",
+          "en": "メインA"
         },
         "order": 1,
         "createdAt": "2026-06-02T00:00:00Z",
@@ -36,8 +36,8 @@
       "schema": "venue",
       "data": {
         "name": {
-          "ja": "ホール B",
-          "en": "Hall B"
+          "ja": "メインB",
+          "en": "メインB"
         },
         "order": 2,
         "createdAt": "2026-06-02T00:00:00Z",
@@ -49,8 +49,8 @@
       "schema": "venue",
       "data": {
         "name": {
-          "ja": "ホール C",
-          "en": "Hall C"
+          "ja": "大B",
+          "en": "大B"
         },
         "order": 3,
         "createdAt": "2026-06-02T00:00:00Z",
@@ -62,8 +62,8 @@
       "schema": "venue",
       "data": {
         "name": {
-          "ja": "ホール D",
-          "en": "Hall D"
+          "ja": "大A",
+          "en": "大A"
         },
         "order": 4,
         "createdAt": "2026-06-02T00:00:00Z",
