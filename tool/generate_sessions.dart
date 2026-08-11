@@ -231,7 +231,7 @@ String _normalizeHost(String host) {
 typedef _Text = ({String ja, String en});
 
 /// One column of the timetable grid.
-typedef _Room = ({String venueId, String name, String colorRef});
+typedef _Room = ({String venueId, _Text name, String colorRef});
 
 /// One session cell.
 typedef _Cell = ({
@@ -269,10 +269,7 @@ List<_Room> _buildRooms(List<Venue> venues) {
     for (final (i, v) in sorted.indexed)
       (
         venueId: v.id,
-        // `TimetableRoom.name` is a plain String, not LocalizedText, so the
-        // column header cannot switch language. English is preferred as the
-        // shorter, locale-neutral label ("Hall A" over "ホール A").
-        name: _firstNonEmpty([v.name.en, v.name.ja]),
+        name: _text(v.name),
         colorRef: _kRoomColorRefs[i % _kRoomColorRefs.length],
       ),
   ];
@@ -445,7 +442,7 @@ void _writeDart({required List<_Room> rooms, required Map<String, _Day> days}) {
 
   out.writeln('const List<TimetableRoom> generatedTimetableRooms = [');
   for (final room in rooms) {
-    out.writeln('  TimetableRoom(name: ${_str(room.name)}, colorHex: ${room.colorRef}),');
+    out.writeln('  TimetableRoom(name: ${_localizedText(room.name)}, colorHex: ${room.colorRef}),');
   }
   out
     ..writeln('];')

@@ -29,7 +29,7 @@ enum TimetableDay {
 class TimetableRoom {
   const TimetableRoom({required this.name, required this.colorHex});
 
-  final String name;
+  final LocalizedText name;
 
   /// 会場識別色。デザイントークン由来の色のみを使う。
   final String colorHex;

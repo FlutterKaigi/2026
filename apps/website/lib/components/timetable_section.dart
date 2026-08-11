@@ -79,7 +79,7 @@ class TimetableSection extends StatelessComponent {
                       styles: Styles(raw: {'--tt-room-color': room.colorHex}),
                       [
                         span(classes: 'timetable-roomhead__dot', []),
-                        .text(room.name),
+                        .text(room.name.resolve(strings.locale)),
                       ],
                     ),
                 ]),
@@ -644,7 +644,7 @@ class _SessionCard extends StatelessComponent {
         span(classes: 'timetable-card__meta', [
           // 時刻列が消える縦積み時のための時刻。desktop では非表示。
           span(classes: 'timetable-chip timetable-chip--time', [.text('$start – $end')]),
-          span(classes: 'timetable-chip timetable-chip--room', [.text(room.name)]),
+          span(classes: 'timetable-chip timetable-chip--room', [.text(room.name.resolve(locale))]),
           for (final tag in session.tags) span(classes: 'timetable-chip', [.text(tag.resolve(locale))]),
         ]),
         span(classes: 'timetable-card__title', [.text(session.title.resolve(locale))]),
@@ -687,7 +687,7 @@ class _SessionDialog extends StatelessComponent {
           styles: Styles(raw: {'--tt-room-color': room.colorHex}),
           [
             div(classes: 'timetable-card__meta', [
-              span(classes: 'timetable-chip timetable-chip--room', [.text(room.name)]),
+              span(classes: 'timetable-chip timetable-chip--room', [.text(room.name.resolve(locale))]),
               for (final tag in session.tags) span(classes: 'timetable-chip', [.text(tag.resolve(locale))]),
             ]),
             h3(id: '$id-title', classes: 'timetable-dialog__title', [.text(session.title.resolve(locale))]),
