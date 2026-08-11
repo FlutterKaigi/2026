@@ -52,8 +52,12 @@
 ///     matches no enum entry is dropped with a warning, as there is no tab to
 ///     show it under. Every enum day is emitted, empty if it has no sessions,
 ///     so the website's `timetableByDay[day]!` lookup never misses.
-///   - `timelineEvents` become full-width `TimetableSlot.event` rows; sessions
-///     sharing a start/end become one `TimetableSlot.sessions` row.
+///   - Each day becomes a `TimetableProgramme`: every start/end time in it is
+///     collected into `ticks` (the grid's row boundaries) and each session /
+///     timeline event is emitted as a `TimetableEntry` spanning the boundaries
+///     it covers. Sessions therefore keep a shared time axis without having to
+///     share a row, so a 10-minute LT no longer stretches the 30-minute talk
+///     running next to it.
 library;
 
 import 'dart:io';
@@ -110,9 +114,9 @@ Future<void> main(List<String> args) async {
   _writeDart(rooms: rooms, days: days);
   _format(_outFile);
 
-  final slotCount = days.values.fold<int>(0, (sum, slots) => sum + slots.length);
+  final entryCount = days.values.fold<int>(0, (sum, day) => sum + day.entries.length);
   stdout.writeln(
-    'Wrote $_outFile with ${rooms.length} room(s) and $slotCount slot(s) '
+    'Wrote $_outFile with ${rooms.length} room(s) and $entryCount entr(ies) '
     'across ${days.length} day(s).',
   );
 }
@@ -238,18 +242,17 @@ typedef _Cell = ({
   List<String> tagRefs,
 });
 
-/// One row of the timetable grid: either parallel sessions ([byRoom], aligned
-/// to the room columns) or a full-width timeline event ([eventLabel]).
-class _Slot {
-  _Slot.sessions(this.start, this.end, int roomCount)
-    : byRoom = List<_Cell?>.filled(roomCount, null),
-      eventLabel = null;
+/// One placed item of the timetable grid: either a session in a room column
+/// ([column] / [cell]) or a full-width timeline event ([eventLabel]).
+class _Entry {
+  _Entry.session(this.start, this.end, int this.column, _Cell this.cell) : eventLabel = null;
 
-  _Slot.event(this.start, this.end, this.eventLabel) : byRoom = const [];
+  _Entry.event(this.start, this.end, this.eventLabel) : column = null, cell = null;
 
   final DateTime start;
   final DateTime end;
-  final List<_Cell?> byRoom;
+  final int? column;
+  final _Cell? cell;
   final _Text? eventLabel;
 }
 
@@ -275,15 +278,17 @@ List<_Room> _buildRooms(List<Venue> venues) {
   ];
 }
 
-/// Groups sessions and timeline events into per-day, time-ordered rows, keyed
-/// by the `TimetableDay` enum reference the generated file emits.
-Map<String, List<_Slot>> _buildDays(_Data data, List<_Room> rooms) {
+/// One day of the timetable: the grid's row boundaries and everything placed
+/// on it.
+typedef _Day = ({List<DateTime> ticks, List<_Entry> entries});
+
+/// Groups sessions and timeline events per day, keyed by the `TimetableDay`
+/// enum reference the generated file emits.
+Map<String, _Day> _buildDays(_Data data, List<_Room> rooms) {
   final roomIndex = {for (final (i, r) in rooms.indexed) r.venueId: i};
   // Every enum day is present, even when empty — the website indexes this map
   // with `!` and would throw on a missing key.
-  final byDay = {for (final ref in _kDayRefByDate.values) ref: <_Slot>[]};
-  // Sessions sharing a start/end share a row; events always get their own.
-  final sessionSlots = <String, _Slot>{};
+  final byDay = {for (final ref in _kDayRefByDate.values) ref: <_Entry>[]};
 
   for (final s in [...data.sessions]..sort((a, b) => a.id.compareTo(b.id))) {
     final dayRef = _dayRefFor(s.startsAt);
@@ -300,20 +305,19 @@ Map<String, List<_Slot>> _buildDays(_Data data, List<_Room> rooms) {
       continue;
     }
 
-    final key = '$dayRef|${s.startsAt.toUtc().toIso8601String()}|${s.endsAt.toUtc().toIso8601String()}';
-    final slot = sessionSlots.putIfAbsent(key, () {
-      final created = _Slot.sessions(s.startsAt, s.endsAt, rooms.length);
-      byDay[dayRef]!.add(created);
-      return created;
-    });
-    if (slot.byRoom[column] != null) {
+    // Two sessions overlapping in one room would be placed on top of each
+    // other in the same grid cell.
+    final clash = byDay[dayRef]!.any(
+      (e) => e.column == column && e.start.isBefore(s.endsAt) && s.startsAt.isBefore(e.end),
+    );
+    if (clash) {
       stderr.writeln(
-        'warning: session ${s.id} collides with another session in venue '
+        'warning: session ${s.id} overlaps another session in venue '
         "'${s.venueId}' at ${_hhmm(s.startsAt)}; keeping the first and skipping this one.",
       );
       continue;
     }
-    slot.byRoom[column] = _buildCell(s, data.speakersById);
+    byDay[dayRef]!.add(_Entry.session(s.startsAt, s.endsAt, column, _buildCell(s, data.speakersById)));
   }
 
   for (final e in [...data.events]..sort((a, b) => a.id.compareTo(b.id))) {
@@ -326,24 +330,30 @@ Map<String, List<_Slot>> _buildDays(_Data data, List<_Room> rooms) {
       continue;
     }
     if (e.endsAt == null) {
-      // The row renders "start – end"; without an end there is nothing better
-      // to show than the start time again.
+      // A zero-length event still needs a row to sit on; without an end there
+      // is nothing better to show than the start time again.
       stderr.writeln('warning: timeline event ${e.id} has no endsAt; showing its start time as the end.');
     }
-    byDay[dayRef]!.add(_Slot.event(e.startsAt, e.endsAt ?? e.startsAt, _text(e.title)));
+    byDay[dayRef]!.add(_Entry.event(e.startsAt, e.endsAt ?? e.startsAt, _text(e.title)));
   }
 
-  for (final slots in byDay.values) {
-    slots.sort((a, b) {
+  return byDay.map((dayRef, entries) {
+    entries.sort((a, b) {
       final byStart = a.start.compareTo(b.start);
       if (byStart != 0) return byStart;
-      // A break ending where a session starts belongs above it.
-      final byEnd = a.end.compareTo(b.end);
-      if (byEnd != 0) return byEnd;
-      return (a.eventLabel != null ? 0 : 1).compareTo(b.eventLabel != null ? 0 : 1);
+      // Stacked vertically (mobile) an event reads as the heading of what
+      // follows, so it comes before the sessions starting with it.
+      final byKind = (a.eventLabel != null ? 0 : 1).compareTo(b.eventLabel != null ? 0 : 1);
+      if (byKind != 0) return byKind;
+      return (a.column ?? 0).compareTo(b.column ?? 0);
     });
-  }
-  return byDay;
+    // Every start and end is a row boundary: an entry spans from its own start
+    // tick to its own end tick, so entries never have to share a row.
+    final ticks = <DateTime>{
+      for (final e in entries) ...[e.start, e.end],
+    }.toList()..sort();
+    return MapEntry(dayRef, (ticks: ticks, entries: entries));
+  });
 }
 
 _Cell _buildCell(Session s, Map<String, Speaker> speakersById) {
@@ -406,12 +416,11 @@ String _two(int n) => n.toString().padLeft(2, '0');
 
 // ── Dart emission ───────────────────────────────────────────────────────────
 
-void _writeDart({required List<_Room> rooms, required Map<String, List<_Slot>> days}) {
+void _writeDart({required List<_Room> rooms, required Map<String, _Day> days}) {
   final usedTags = <String>{
-    for (final slots in days.values)
-      for (final slot in slots)
-        for (final cell in slot.byRoom)
-          if (cell != null) ...cell.tagRefs,
+    for (final day in days.values)
+      for (final entry in day.entries)
+        if (entry.cell case final cell?) ...cell.tagRefs,
   };
 
   final out = StringBuffer()
@@ -441,43 +450,53 @@ void _writeDart({required List<_Room> rooms, required Map<String, List<_Slot>> d
   out
     ..writeln('];')
     ..writeln()
-    ..writeln('const Map<TimetableDay, List<TimetableSlot>> generatedTimetableByDay = {');
+    ..writeln('const Map<TimetableDay, TimetableProgramme> generatedTimetableByDay = {');
 
-  for (final MapEntry(key: dayRef, value: slots) in days.entries) {
-    out.writeln('  $dayRef: [');
-    for (final slot in slots) {
-      final start = _str(_hhmm(slot.start));
-      final end = _str(_hhmm(slot.end));
-      if (slot.eventLabel case final label?) {
-        out.writeln('    TimetableSlot.event($start, $end, ${_localizedText(label)}),');
+  for (final MapEntry(key: dayRef, value: day) in days.entries) {
+    final tickIndex = {for (final (i, t) in day.ticks.indexed) t: i};
+    out
+      ..writeln('  $dayRef: TimetableProgramme(')
+      ..writeln('    ticks: [${day.ticks.map((t) => _str(_hhmm(t))).join(', ')}],')
+      ..writeln('    entries: [');
+    for (final entry in day.entries) {
+      final startTick = tickIndex[entry.start]!;
+      final endTick = tickIndex[entry.end]!;
+      if (entry.eventLabel case final label?) {
+        out
+          ..writeln('      TimetableEntry.event(')
+          ..writeln('        startTick: $startTick,')
+          ..writeln('        endTick: $endTick,')
+          ..writeln('        eventLabel: ${_localizedText(label)},')
+          ..writeln('      ),');
         continue;
       }
-      out.writeln('    TimetableSlot.sessions($start, $end, [');
-      for (final cell in slot.byRoom) {
-        if (cell == null) {
-          out.writeln('      null,');
-          continue;
-        }
-        out
-          ..writeln('      TimetableSession(')
-          ..writeln('        title: ${_localizedText(cell.title)},');
-        if (cell.speakerName case final name?) {
-          out.writeln('        speakerName: ${_localizedText(name)},');
-        }
-        if (cell.avatarUrl case final url?) {
-          out.writeln('        speakerAvatarUrl: ${_str(url)},');
-        }
-        if (cell.description case final description?) {
-          out.writeln('        description: ${_localizedText(description)},');
-        }
-        if (cell.tagRefs.isNotEmpty) {
-          out.writeln('        tags: [${cell.tagRefs.join(', ')}],');
-        }
-        out.writeln('      ),');
+      final cell = entry.cell!;
+      out
+        ..writeln('      TimetableEntry.session(')
+        ..writeln('        startTick: $startTick,')
+        ..writeln('        endTick: $endTick,')
+        ..writeln('        roomIndex: ${entry.column},')
+        ..writeln('        session: TimetableSession(')
+        ..writeln('          title: ${_localizedText(cell.title)},');
+      if (cell.speakerName case final name?) {
+        out.writeln('          speakerName: ${_localizedText(name)},');
       }
-      out.writeln('    ]),');
+      if (cell.avatarUrl case final url?) {
+        out.writeln('          speakerAvatarUrl: ${_str(url)},');
+      }
+      if (cell.description case final description?) {
+        out.writeln('          description: ${_localizedText(description)},');
+      }
+      if (cell.tagRefs.isNotEmpty) {
+        out.writeln('          tags: [${cell.tagRefs.join(', ')}],');
+      }
+      out
+        ..writeln('        ),')
+        ..writeln('      ),');
     }
-    out.writeln('  ],');
+    out
+      ..writeln('    ],')
+      ..writeln('  ),');
   }
 
   out.writeln('};');

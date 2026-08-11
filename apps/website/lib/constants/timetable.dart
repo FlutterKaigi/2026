@@ -61,19 +61,45 @@ class TimetableSession {
   final List<LocalizedText> tags;
 }
 
-/// 1 つの時間帯（タイムテーブルの 1 行）。
+/// 1 日分のタイムテーブル。
 ///
-/// - [TimetableSlot.sessions] : 会場ごとの並列セッション。[byRoom] は
-///   `generatedTimetableRooms` と同じ並び。null は空き枠。セッションは必ず
-///   いずれか 1 つの会場に属する（全会場またぎのセッションは存在しない）。
-/// - [TimetableSlot.event] : 開場・休憩などのタイムラインイベント（全幅バー）。
-class TimetableSlot {
-  const TimetableSlot.sessions(this.start, this.end, this.byRoom) : eventLabel = null;
+/// [ticks] はその日に現れる開始・終了時刻をすべて集めた行の境界（`HH:mm`
+/// 昇順）で、隣り合う 2 つがグリッドの 1 行になる。各 [TimetableEntry] は
+/// 自分の開始境界から終了境界までを占めるため、開始時刻の揃わないセッション
+/// （30 分枠の裏で 10 分の LT が 3 本など）が 1 行に押し込められることなく、
+/// 時間軸を共有したまま上下にずれて並ぶ。
+class TimetableProgramme {
+  const TimetableProgramme({this.ticks = const [], this.entries = const []});
 
-  const TimetableSlot.event(this.start, this.end, LocalizedText label) : byRoom = const [], eventLabel = label;
+  final List<String> ticks;
+  final List<TimetableEntry> entries;
+}
 
-  final String start;
-  final String end;
-  final List<TimetableSession?> byRoom;
+/// タイムテーブル上の 1 枠。縦位置は [TimetableProgramme.ticks] の
+/// インデックスで表す（[startTick] 以上 [endTick] 未満の行を占める）。
+///
+/// - [TimetableEntry.session] : 会場カラムに収まるセッション。
+/// - [TimetableEntry.event] : 開場・休憩などのタイムラインイベント（全幅バー）。
+class TimetableEntry {
+  const TimetableEntry.session({
+    required this.startTick,
+    required this.endTick,
+    required int this.roomIndex,
+    required TimetableSession this.session,
+  }) : eventLabel = null;
+
+  const TimetableEntry.event({
+    required this.startTick,
+    required this.endTick,
+    required LocalizedText this.eventLabel,
+  }) : roomIndex = null,
+       session = null;
+
+  final int startTick;
+  final int endTick;
+
+  /// `generatedTimetableRooms` 上の位置。全幅イベントは null。
+  final int? roomIndex;
+  final TimetableSession? session;
   final LocalizedText? eventLabel;
 }
