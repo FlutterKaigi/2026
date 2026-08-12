@@ -18,7 +18,6 @@ const _largeAppBarCollapsedHeight = 64.0;
 const _largeAppBarTitleBottomPadding = 28.0;
 const _largeAppBarMaxTitleScaleFactor = 1.34;
 const _largeAppBarTitleHorizontalPadding = 32.0;
-const _sessionDetailsMaxWidth = 760.0;
 
 class SessionDetailsContentWidget extends StatelessWidget {
   const SessionDetailsContentWidget({
@@ -72,118 +71,111 @@ class SessionDetailsContentWidget extends StatelessWidget {
               ),
             ),
             SliverToBoxAdapter(
-              child: Center(
-                child: ConstrainedBox(
-                  key: const ValueKey('session-details-content'),
-                  constraints: const BoxConstraints(
-                    maxWidth: _sessionDetailsMaxWidth,
+              child: Column(
+                key: const ValueKey('session-details-content'),
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                    child: Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        _InfoChip(
+                          icon: Icons.sell_outlined,
+                          label: _sessionTypeLabel(t, session),
+                        ),
+                        if (languageLabel != null)
+                          _InfoChip(
+                            icon: Icons.language,
+                            label: languageLabel,
+                          ),
+                        _InfoChip(
+                          icon: Icons.calendar_today_outlined,
+                          label: DateFormat(
+                            'yyyy/MM/dd',
+                          ).format(toEventTime(session.startsAt)),
+                        ),
+                        _InfoChip(
+                          icon: Icons.schedule,
+                          label: formatEventTimeRange(
+                            session.startsAt,
+                            session.endsAt,
+                            timeFormat,
+                            locale: locale.toLanguageTag(),
+                          ),
+                        ),
+                        _InfoChip(
+                          icon: Icons.meeting_room_outlined,
+                          label: data.venue?.name.resolve(locale) ?? t.sessionTimetable.venue.unknown,
+                        ),
+                      ],
+                    ),
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                        child: Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: [
-                            _InfoChip(
-                              icon: Icons.sell_outlined,
-                              label: _sessionTypeLabel(t, session),
+                  if (data.speakers.isNotEmpty) ...[
+                    _SectionHeader(title: t.sessionDetails.speakers),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          for (var index = 0; index < data.speakers.length; index++) ...[
+                            _SpeakerDetailsWidget(
+                              speaker: data.speakers[index],
                             ),
-                            if (languageLabel != null)
-                              _InfoChip(
-                                icon: Icons.language,
-                                label: languageLabel,
-                              ),
-                            _InfoChip(
-                              icon: Icons.calendar_today_outlined,
-                              label: DateFormat(
-                                'yyyy/MM/dd',
-                              ).format(toEventTime(session.startsAt)),
-                            ),
-                            _InfoChip(
-                              icon: Icons.schedule,
-                              label: formatEventTimeRange(
-                                session.startsAt,
-                                session.endsAt,
-                                timeFormat,
-                                locale: locale.toLanguageTag(),
-                              ),
-                            ),
-                            _InfoChip(
-                              icon: Icons.meeting_room_outlined,
-                              label: data.venue?.name.resolve(locale) ?? t.sessionTimetable.venue.unknown,
-                            ),
+                            if (index < data.speakers.length - 1) const SizedBox(height: 16),
                           ],
-                        ),
+                        ],
                       ),
-                      if (data.speakers.isNotEmpty) ...[
-                        _SectionHeader(title: t.sessionDetails.speakers),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              for (var index = 0; index < data.speakers.length; index++) ...[
-                                _SpeakerDetailsWidget(
-                                  speaker: data.speakers[index],
-                                ),
-                                if (index < data.speakers.length - 1) const SizedBox(height: 16),
-                              ],
-                            ],
-                          ),
-                        ),
-                      ],
-                      if (description.isNotEmpty) ...[
-                        _SectionHeader(title: t.sessionDetails.description),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: Text(
-                            description,
-                            style: Theme.of(context).textTheme.bodyLarge,
-                          ),
-                        ),
-                      ],
-                      _SectionHeader(title: t.sessionDetails.schedule),
-                      _DetailListTile(
-                        icon: Icons.event_outlined,
-                        title: DateFormat(
-                          'yyyy/MM/dd',
-                        ).format(toEventTime(session.startsAt)),
+                    ),
+                  ],
+                  if (description.isNotEmpty) ...[
+                    _SectionHeader(title: t.sessionDetails.description),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Text(
+                        description,
+                        style: Theme.of(context).textTheme.bodyLarge,
                       ),
-                      _DetailListTile(
-                        icon: Icons.schedule,
-                        title: formatEventTimeRange(
-                          session.startsAt,
-                          session.endsAt,
-                          timeFormat,
-                          locale: locale.toLanguageTag(),
-                        ),
-                      ),
-                      _DetailListTile(
-                        icon: Icons.room_outlined,
-                        title: data.venue?.name.resolve(locale) ?? t.sessionTimetable.venue.unknown,
-                      ),
-                      if (sessionizeUri != null) ...[
-                        _SectionHeader(title: t.sessionDetails.links),
-                        _DetailListTile(
-                          icon: Icons.open_in_new,
-                          title: t.sessionDetails.sessionize,
-                          subtitle: sessionizeUri.toString(),
-                          onTap: () => unawaited(
-                            launchExternalUrl(
-                              context,
-                              uri: sessionizeUri,
-                              failureMessage: t.links.openError,
-                            ),
-                          ),
-                        ),
-                      ],
-                      const SizedBox(height: 32),
-                    ],
+                    ),
+                  ],
+                  _SectionHeader(title: t.sessionDetails.schedule),
+                  _DetailListTile(
+                    icon: Icons.event_outlined,
+                    title: DateFormat(
+                      'yyyy/MM/dd',
+                    ).format(toEventTime(session.startsAt)),
                   ),
-                ),
+                  _DetailListTile(
+                    icon: Icons.schedule,
+                    title: formatEventTimeRange(
+                      session.startsAt,
+                      session.endsAt,
+                      timeFormat,
+                      locale: locale.toLanguageTag(),
+                    ),
+                  ),
+                  _DetailListTile(
+                    icon: Icons.room_outlined,
+                    title: data.venue?.name.resolve(locale) ?? t.sessionTimetable.venue.unknown,
+                  ),
+                  if (sessionizeUri != null) ...[
+                    _SectionHeader(title: t.sessionDetails.links),
+                    _DetailListTile(
+                      icon: Icons.open_in_new,
+                      title: t.sessionDetails.sessionize,
+                      subtitle: sessionizeUri.toString(),
+                      onTap: () => unawaited(
+                        launchExternalUrl(
+                          context,
+                          uri: sessionizeUri,
+                          failureMessage: t.links.openError,
+                        ),
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 32),
+                ],
               ),
             ),
           ],

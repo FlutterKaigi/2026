@@ -135,10 +135,9 @@ void main() {
       final contentRect = tester.getRect(contentFinder);
       final scrollViewRect = tester.getRect(find.byType(CustomScrollView));
       final scrollbarRect = tester.getRect(find.byType(Scrollbar));
-      final expectedContentWidth = viewportWidth > 760 ? 760.0 : viewportWidth;
       expect(
         contentRect.width,
-        closeTo(expectedContentWidth, 0.01),
+        closeTo(viewportWidth, 0.01),
         reason: 'viewport width: $viewportWidth',
       );
       expect(
