@@ -418,6 +418,26 @@ void main() {
     expect(find.text('時刻表示'), findsNothing);
   });
 
+  testWidgets('centers the empty timetable message', (tester) async {
+    await _pumpTimetableState(
+      tester,
+      const AsyncData(_emptyTimetable),
+      viewportSize: const Size(390, 844),
+    );
+
+    final iconRect = tester.getRect(find.byIcon(Icons.event_busy_outlined));
+    final messageRect = tester.getRect(
+      find.text('タイムテーブルはまだ公開されていません'),
+    );
+    final viewportCenter = tester.view.physicalSize.width / 2;
+
+    expect(iconRect.center.dx, closeTo(viewportCenter, 1));
+    expect(messageRect.center.dx, closeTo(viewportCenter, 1));
+    expect(iconRect.center.dy, greaterThan(250));
+    expect(iconRect.center.dy, lessThan(650));
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('retry reloads every timetable repository after an error', (tester) async {
     final sessionRepository = _RetrySessionRepository();
     final timelineEventRepository = _CountingTimelineEventRepository();
