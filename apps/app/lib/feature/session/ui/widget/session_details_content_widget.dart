@@ -41,44 +41,43 @@ class SessionDetailsContentWidget extends StatelessWidget {
 
     return Scaffold(
       body: AppScrollbar(
-        child: Align(
-          alignment: AlignmentDirectional.topCenter,
-          child: ConstrainedBox(
-            key: const ValueKey('session-details-content'),
-            constraints: const BoxConstraints(
-              maxWidth: _sessionDetailsMaxWidth,
-            ),
-            child: CustomScrollView(
-              slivers: [
-                SliverLayoutBuilder(
-                  builder: (context, constraints) => SliverAppBar.large(
-                    expandedHeight: _sessionTitleExpandedHeight(
-                      context: context,
-                      title: title,
-                      maxWidth: constraints.crossAxisExtent,
-                    ),
-                    title: Text(
-                      title,
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                    actions: [
-                      SessionBookmarkButton(sessionId: session.id),
-                      IconButton(
-                        tooltip: t.sessionDetails.share,
-                        onPressed: () => unawaited(
-                          _shareSession(
-                            context,
-                            data,
-                            locale,
-                            t.links.openError,
-                          ),
-                        ),
-                        icon: const Icon(Icons.share_outlined),
-                      ),
-                    ],
-                  ),
+        child: CustomScrollView(
+          slivers: [
+            SliverLayoutBuilder(
+              builder: (context, constraints) => SliverAppBar.large(
+                expandedHeight: _sessionTitleExpandedHeight(
+                  context: context,
+                  title: title,
+                  maxWidth: constraints.crossAxisExtent,
                 ),
-                SliverToBoxAdapter(
+                title: Text(
+                  title,
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                actions: [
+                  SessionBookmarkButton(sessionId: session.id),
+                  IconButton(
+                    tooltip: t.sessionDetails.share,
+                    onPressed: () => unawaited(
+                      _shareSession(
+                        context,
+                        data,
+                        locale,
+                        t.links.openError,
+                      ),
+                    ),
+                    icon: const Icon(Icons.share_outlined),
+                  ),
+                ],
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: Center(
+                child: ConstrainedBox(
+                  key: const ValueKey('session-details-content'),
+                  constraints: const BoxConstraints(
+                    maxWidth: _sessionDetailsMaxWidth,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
@@ -185,9 +184,9 @@ class SessionDetailsContentWidget extends StatelessWidget {
                     ],
                   ),
                 ),
-              ],
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );
