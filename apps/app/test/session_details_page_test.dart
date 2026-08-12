@@ -88,7 +88,7 @@ void main() {
         TextPainter(
           text: TextSpan(
             text: title,
-            style: Theme.of(context).textTheme.titleLarge,
+            style: Theme.of(context).textTheme.headlineMedium,
           ),
           textDirection: Directionality.of(context),
           textScaler: MediaQuery.textScalerOf(
@@ -97,7 +97,7 @@ void main() {
         )..layout(
           maxWidth: contentWidth - 32,
         );
-    final expectedExpandedHeight = 64 + 28 + titlePainter.height;
+    final expectedExpandedHeight = kToolbarHeight + 32 + titlePainter.height;
 
     expect(
       appBar.expandedHeight,

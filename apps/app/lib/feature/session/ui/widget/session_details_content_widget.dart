@@ -14,8 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 const _sessionOrigin = 'https://2026.flutterkaigi.jp';
-const _largeAppBarCollapsedHeight = 64.0;
-const _largeAppBarTitleBottomPadding = 28.0;
+const _largeAppBarTitleBottomPadding = 32.0;
 const _largeAppBarMaxTitleScaleFactor = 1.34;
 const _largeAppBarTitleHorizontalPadding = 32.0;
 
@@ -194,7 +193,7 @@ double _sessionTitleExpandedHeight({
       TextPainter(
         text: TextSpan(
           text: title,
-          style: Theme.of(context).textTheme.titleLarge,
+          style: Theme.of(context).textTheme.headlineMedium,
         ),
         textDirection: Directionality.of(context),
         textScaler: MediaQuery.textScalerOf(
@@ -204,7 +203,7 @@ double _sessionTitleExpandedHeight({
         maxWidth: maxWidth - _largeAppBarTitleHorizontalPadding,
       );
 
-  return _largeAppBarCollapsedHeight + _largeAppBarTitleBottomPadding + textPainter.height;
+  return kToolbarHeight + _largeAppBarTitleBottomPadding + textPainter.height;
 }
 
 class _SectionHeader extends StatelessWidget {
