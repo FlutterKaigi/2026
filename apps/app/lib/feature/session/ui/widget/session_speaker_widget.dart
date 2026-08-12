@@ -7,9 +7,6 @@ import 'package:data/data.dart';
 import 'package:flutter/material.dart';
 
 /// Displays one session speaker as an avatar and name pair.
-///
-/// The explicit square around [AppNetworkAvatar] keeps the image circular even
-/// when this widget is used in compact desktop layouts.
 class SessionSpeakerLabelWidget extends StatelessWidget {
   const SessionSpeakerLabelWidget({
     required this.speaker,
@@ -30,47 +27,14 @@ class SessionSpeakerLabelWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final xProfileUri = speakerXProfileUri(speaker.xId);
-    final avatar = SizedBox.square(
-      key: ValueKey('session-speaker-avatar-${speaker.id}'),
-      dimension: avatarSize,
-      child: AppNetworkAvatar(
-        radius: avatarSize / 2,
-        imageUrl: speaker.avatarUrl,
-        fallback: Icon(
-          Icons.person_outline,
-          size: avatarSize * 0.6,
-        ),
-      ),
-    );
-
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (xProfileUri == null)
-          avatar
-        else
-          Tooltip(
-            message: 'X: @${_normalizeXId(speaker.xId)!}',
-            child: Semantics(
-              link: true,
-              label: '${speaker.name} X',
-              child: InkResponse(
-                key: ValueKey('session-speaker-x-link-${speaker.id}'),
-                onTap: () => unawaited(
-                  launchExternalUrl(
-                    context,
-                    uri: xProfileUri,
-                    failureMessage: Translations.of(context).links.openError,
-                    launcher: launcher,
-                  ),
-                ),
-                containedInkWell: true,
-                customBorder: const CircleBorder(),
-                child: avatar,
-              ),
-            ),
-          ),
+        SessionSpeakerAvatarWidget(
+          speaker: speaker,
+          size: avatarSize,
+          launcher: launcher,
+        ),
         SizedBox(width: gap),
         Flexible(
           child: Text(
@@ -82,6 +46,68 @@ class SessionSpeakerLabelWidget extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Displays a speaker avatar as a true circle and links it to X when possible.
+class SessionSpeakerAvatarWidget extends StatelessWidget {
+  const SessionSpeakerAvatarWidget({
+    required this.speaker,
+    this.size = 24,
+    this.launcher,
+    super.key,
+  });
+
+  final Speaker speaker;
+  final double size;
+  final ExternalUrlLauncher? launcher;
+
+  @override
+  Widget build(BuildContext context) {
+    final xProfileUri = speakerXProfileUri(speaker.xId);
+    final avatar = SizedBox.square(
+      key: ValueKey('session-speaker-avatar-${speaker.id}'),
+      dimension: size,
+      child: AppNetworkAvatar(
+        radius: size / 2,
+        imageUrl: speaker.avatarUrl,
+        // Speaker photos are repeated throughout the room table. Fetch bytes
+        // first so CORS-enabled images stay in Flutter's canvas instead of
+        // creating one HTML platform view per avatar. Keep the HTML fallback
+        // for any future image origin that does not support CORS.
+        webHtmlElementStrategy: WebHtmlElementStrategy.fallback,
+        fallback: Icon(
+          Icons.person_outline,
+          size: size * 0.6,
+        ),
+      ),
+    );
+
+    if (xProfileUri == null) {
+      return avatar;
+    }
+
+    return Tooltip(
+      message: 'X: @${_normalizeXId(speaker.xId)!}',
+      child: Semantics(
+        link: true,
+        label: '${speaker.name} X',
+        child: InkResponse(
+          key: ValueKey('session-speaker-x-link-${speaker.id}'),
+          onTap: () => unawaited(
+            launchExternalUrl(
+              context,
+              uri: xProfileUri,
+              failureMessage: Translations.of(context).links.openError,
+              launcher: launcher,
+            ),
+          ),
+          containedInkWell: true,
+          customBorder: const CircleBorder(),
+          child: avatar,
+        ),
+      ),
     );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:app/core/i18n/strings.g.dart';
+import 'package:app/core/ui/widget/app_network_image.dart';
 import 'package:app/feature/session/ui/widget/session_speaker_widget.dart';
 import 'package:data/data.dart';
 import 'package:flutter/material.dart';
@@ -105,6 +106,29 @@ void main() {
       find.byKey(const ValueKey('session-speaker-x-link-speaker-b')),
       findsNothing,
     );
+  });
+
+  testWidgets('prefers byte decoding for speaker avatars on web', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      TranslationProvider(
+        child: MaterialApp(
+          home: Scaffold(
+            body: SessionSpeakerLabelWidget(
+              speaker: _speakers.first.copyWith(
+                avatarUrl: 'https://cdn.sessionize.com/avatar.png',
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final image = tester.widget<AppNetworkImage>(
+      find.byType(AppNetworkImage),
+    );
+    expect(image.webHtmlElementStrategy, WebHtmlElementStrategy.fallback);
   });
 }
 

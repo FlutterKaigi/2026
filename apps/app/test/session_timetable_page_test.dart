@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:app/core/designsystem/theme/app_theme.dart';
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/provider/shared_preferences.dart';
+import 'package:app/core/ui/widget/app_network_image.dart';
 import 'package:app/feature/session/data/provider/session_repository.dart';
 import 'package:app/feature/session/data/provider/session_timetable_provider.dart';
 import 'package:app/feature/session/data/provider/session_timetable_repository.dart';
@@ -15,6 +16,68 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
+  for (final viewport in _responsiveRoomViewports.entries) {
+    testWidgets('keeps the full room table stable at ${viewport.key}', (tester) async {
+      await _pumpTimetableState(
+        tester,
+        AsyncData(_stressRoomTimetable),
+        viewportSize: Size(viewport.value, 1000),
+      );
+
+      await tester.tap(find.byTooltip('会場別タイムラインに切り替え'));
+      await tester.pumpAndSettle();
+
+      final roomScroll = find.byKey(
+        ValueKey(('room-schedule-scroll', _stressRoomDay.date)),
+      );
+      final scrollable = tester.state<ScrollableState>(
+        find.descendant(
+          of: roomScroll,
+          matching: find.byType(Scrollable),
+        ),
+      );
+      final lastTitle = tester.widget<Text>(
+        find.byKey(const ValueKey('room-session-title-stress-session-29')),
+      );
+
+      expect(lastTitle.maxLines, isNull);
+      expect(lastTitle.overflow, isNull);
+      expect(
+        find.byKey(const ValueKey('session-speaker-avatar-stress-speaker-29')),
+        findsOneWidget,
+      );
+      expect(find.byType(ClipOval), findsNWidgets(30));
+      expect(find.byType(AppNetworkImage), findsNWidgets(30));
+      for (final image in tester.widgetList<AppNetworkImage>(
+        find.byType(AppNetworkImage),
+      )) {
+        expect(
+          image.webHtmlElementStrategy,
+          WebHtmlElementStrategy.fallback,
+        );
+      }
+
+      if (scrollable.position.maxScrollExtent > 0) {
+        final scrollRect = tester.getRect(roomScroll);
+        await tester.dragFrom(
+          Offset(scrollRect.center.dx, scrollRect.top + 24),
+          const Offset(-200, 0),
+        );
+        await tester.pumpAndSettle();
+        expect(scrollable.position.pixels, greaterThan(0));
+        scrollable.position.jumpTo(
+          scrollable.position.maxScrollExtent,
+        );
+        await tester.pump();
+        expect(scrollable.position.pixels, greaterThan(0));
+        scrollable.position.jumpTo(0);
+        await tester.pump();
+        expect(scrollable.position.pixels, 0);
+      }
+      expect(tester.takeException(), isNull);
+    });
+  }
+
   testWidgets('uses a compact DroidKaigi-style day switcher at mobile width', (tester) async {
     await _pumpTimetableState(
       tester,
@@ -245,6 +308,60 @@ void main() {
     expect(find.text('Compact Session'), findsOneWidget);
   });
 
+  testWidgets('keeps room scrolling inside the table and changes days only from tabs', (tester) async {
+    await _pumpTimetableState(
+      tester,
+      AsyncData(_twoDayRoomTimetable),
+    );
+
+    await tester.tap(find.byTooltip('会場別タイムラインに切り替え'));
+    await tester.pumpAndSettle();
+
+    final pageView = tester.widget<PageView>(find.byType(PageView));
+    expect(pageView.physics, isA<NeverScrollableScrollPhysics>());
+
+    final roomScroll = find.byKey(
+      ValueKey(('room-schedule-scroll', _parallelDay.date)),
+    );
+    expect(roomScroll, findsOneWidget);
+    final horizontalScrollable = find.descendant(
+      of: roomScroll,
+      matching: find.byType(Scrollable),
+    );
+    final scrollable = tester.state<ScrollableState>(horizontalScrollable);
+    expect(scrollable.position.physics, isA<ClampingScrollPhysics>());
+    expect(scrollable.position.pixels, 0);
+
+    await tester.drag(roomScroll, const Offset(-240, 0));
+    await tester.pumpAndSettle();
+
+    expect(scrollable.position.pixels, greaterThan(0));
+    expect(
+      tester.widget<SegmentedButton<int>>(find.byType(SegmentedButton<int>)).selected,
+      {0},
+    );
+    expect(find.text('Day Two Session'), findsNothing);
+
+    await tester.drag(find.byType(PageView), const Offset(-300, 0));
+    await tester.pumpAndSettle();
+
+    expect(
+      tester.widget<SegmentedButton<int>>(find.byType(SegmentedButton<int>)).selected,
+      {0},
+    );
+    expect(find.text('Day Two Session'), findsNothing);
+
+    await tester.tap(find.text('2日目 (11/1)'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Day Two Session'), findsOneWidget);
+    expect(
+      tester.widget<SegmentedButton<int>>(find.byType(SegmentedButton<int>)).selected,
+      {1},
+    );
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('keeps a valid day selected when the available day count shrinks', (tester) async {
     final sessionRepository = _MutableSessionRepository([
       _session,
@@ -337,8 +454,13 @@ Future<void> _pumpTimetableState(
   WidgetTester tester,
   AsyncValue<SessionTimetableData> state, {
   Map<String, Object> preferences = const {},
+  Size viewportSize = const Size(320, 900),
 }) async {
-  final sharedPreferences = await _prepareTester(tester, preferences);
+  final sharedPreferences = await _prepareTester(
+    tester,
+    preferences,
+    viewportSize: viewportSize,
+  );
 
   await tester.pumpWidget(
     TranslationProvider(
@@ -399,9 +521,10 @@ Widget _testApp() {
 
 Future<SharedPreferences> _prepareTester(
   WidgetTester tester,
-  Map<String, Object> preferences,
-) async {
-  tester.view.physicalSize = const Size(320, 900);
+  Map<String, Object> preferences, {
+  Size viewportSize = const Size(320, 900),
+}) async {
+  tester.view.physicalSize = viewportSize;
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.resetPhysicalSize);
   addTearDown(tester.view.resetDevicePixelRatio);
@@ -735,6 +858,14 @@ final _twoDayTimetable = SessionTimetableData(
   hasAnyEntries: true,
 );
 
+final _twoDayRoomTimetable = SessionTimetableData(
+  days: [_parallelDay, _secondDay],
+  availableDates: [_parallelDay.date, _secondDay.date],
+  selectedDate: _parallelDay.date,
+  selectedDay: _parallelDay,
+  hasAnyEntries: true,
+);
+
 final _overlappingTimetable = SessionTimetableData(
   days: [
     SessionTimetableDay(
@@ -750,6 +881,84 @@ final _overlappingTimetable = SessionTimetableData(
   ),
   hasAnyEntries: true,
 );
+
+const _responsiveRoomViewports = <String, double>{
+  '320px phone': 320,
+  '390px phone': 390,
+  '600px medium layout (519px content)': 519,
+  '840px expanded rail layout (583px content)': 583,
+  '839px medium rail layout (758px content)': 758,
+  '1024px desktop layout (767px content)': 767,
+  '1440px desktop layout (1183px content)': 1183,
+};
+
+final _stressRoomVenues = List.generate(
+  4,
+  (index) => Venue(
+    id: 'stress-room-$index',
+    name: LocaleMap(
+      ja: 'Stress Room $index',
+      en: 'Stress Room $index',
+    ),
+    order: index,
+    createdAt: DateTime.utc(2026),
+    updatedAt: DateTime.utc(2026),
+  ),
+);
+
+final _stressRoomSpeakers = List.generate(
+  30,
+  (index) => Speaker(
+    id: 'stress-speaker-$index',
+    name: 'Stress Speaker $index with a name that can wrap',
+    avatarUrl: _transparentPngDataUri,
+    createdAt: DateTime.utc(2026),
+    updatedAt: DateTime.utc(2026),
+  ),
+);
+
+final _stressRoomEntries = List.generate(30, (index) {
+  final startsAt = DateTime.utc(2026, 10, 31, 1).add(
+    Duration(minutes: index * 10),
+  );
+  final session = Session(
+    id: 'stress-session-$index',
+    title: LocaleMap(
+      ja: 'Stress Session $index with a long title that remains fully visible',
+      en: 'Stress Session $index with a long title that remains fully visible',
+    ),
+    description: const LocaleMap(ja: '', en: ''),
+    primaryLocale: index.isEven ? 'ja' : 'en',
+    startsAt: startsAt,
+    endsAt: startsAt.add(const Duration(minutes: 10)),
+    venueId: _stressRoomVenues[index % _stressRoomVenues.length].id,
+    speakerIds: [_stressRoomSpeakers[index].id],
+    createdAt: DateTime.utc(2026),
+    updatedAt: DateTime.utc(2026),
+  );
+  return SessionTimetableEntry.session(
+    session: session,
+    venue: _stressRoomVenues[index % _stressRoomVenues.length],
+    speakers: [_stressRoomSpeakers[index]],
+  );
+});
+
+final _stressRoomDay = SessionTimetableDay(
+  date: DateTime(2026, 10, 31),
+  entries: _stressRoomEntries,
+);
+
+final _stressRoomTimetable = SessionTimetableData(
+  days: [_stressRoomDay],
+  availableDates: [_stressRoomDay.date],
+  selectedDate: _stressRoomDay.date,
+  selectedDay: _stressRoomDay,
+  hasAnyEntries: true,
+);
+
+const _transparentPngDataUri =
+    'data:image/png;base64,'
+    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGNgYAAAAAMAASsJTYQAAAAASUVORK5CYII=';
 
 final class _RetrySessionRepository implements SessionRepository {
   final _firstWatchController = StreamController<List<Session>>(sync: true);

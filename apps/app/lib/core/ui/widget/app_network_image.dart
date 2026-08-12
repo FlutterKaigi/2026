@@ -67,6 +67,7 @@ class AppNetworkAvatar extends StatelessWidget {
     this.radius,
     this.fallback,
     this.backgroundColor,
+    this.webHtmlElementStrategy = WebHtmlElementStrategy.prefer,
     super.key,
   });
 
@@ -74,6 +75,7 @@ class AppNetworkAvatar extends StatelessWidget {
   final double? radius;
   final Widget? fallback;
   final Color? backgroundColor;
+  final WebHtmlElementStrategy webHtmlElementStrategy;
 
   @override
   Widget build(BuildContext context) {
@@ -99,6 +101,7 @@ class AppNetworkAvatar extends StatelessWidget {
                       width: diameter,
                       height: diameter,
                       fit: BoxFit.cover,
+                      webHtmlElementStrategy: webHtmlElementStrategy,
                       errorBuilder: (context, error, stackTrace) => Center(
                         child: fallback ?? const SizedBox.shrink(),
                       ),

@@ -52,7 +52,9 @@ class SessionTimetableRoomTimelineWidget extends StatelessWidget {
           final tableWidth = _timeColumnWidth + roomColumnWidth * columns.length;
 
           return SingleChildScrollView(
+            key: ValueKey(('room-schedule-scroll', day.date)),
             scrollDirection: Axis.horizontal,
+            physics: const ClampingScrollPhysics(),
             child: SizedBox(
               width: tableWidth,
               child: Table(

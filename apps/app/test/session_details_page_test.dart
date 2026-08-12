@@ -105,6 +105,135 @@ void main() {
     );
   });
 
+  testWidgets('keeps all speaker details readable across viewport widths', (tester) async {
+    final session = _sessions.first.copyWith(
+      id: 'responsive-speakers-session',
+      speakerIds: _responsiveSpeakers.map((speaker) => speaker.id).toList(),
+    );
+
+    for (final viewportWidth in [
+      320.0,
+      390.0,
+      600.0,
+      839.0,
+      840.0,
+      1024.0,
+      1440.0,
+    ]) {
+      await _pumpSessionDetailsPage(
+        tester,
+        sessionId: session.id,
+        sessionRepository: _FakeSessionRepository([session]),
+        speakerRepository: _FakeSpeakerRepository(_responsiveSpeakers),
+        viewportSize: Size(viewportWidth, 1600),
+      );
+      await _pumpProviderFrames(tester);
+
+      final contentFinder = find.byKey(
+        const ValueKey('session-details-content'),
+      );
+      final contentRect = tester.getRect(contentFinder);
+      final expectedContentWidth = viewportWidth > 760 ? 760.0 : viewportWidth;
+      expect(
+        contentRect.width,
+        closeTo(expectedContentWidth, 0.01),
+        reason: 'viewport width: $viewportWidth',
+      );
+      expect(
+        contentRect.center.dx,
+        closeTo(viewportWidth / 2, 0.01),
+        reason: 'viewport width: $viewportWidth',
+      );
+
+      Rect? previousSpeakerRect;
+      for (final speaker in _responsiveSpeakers) {
+        final detailsFinder = find.byKey(
+          ValueKey('session-speaker-details-${speaker.id}'),
+        );
+        final avatarFinder = find.byKey(
+          ValueKey('session-speaker-avatar-${speaker.id}'),
+        );
+        final nameFinder = find.byKey(
+          ValueKey('session-speaker-name-${speaker.id}'),
+        );
+        final bioFinder = find.text(speaker.bio!);
+
+        expect(detailsFinder, findsOneWidget);
+        expect(avatarFinder, findsOneWidget);
+        expect(nameFinder, findsOneWidget);
+        expect(bioFinder, findsOneWidget);
+
+        final detailsRect = tester.getRect(detailsFinder);
+        final avatarRect = tester.getRect(avatarFinder);
+        final nameRect = tester.getRect(nameFinder);
+        final bioRect = tester.getRect(bioFinder);
+        final avatarClipFinder = find.descendant(
+          of: avatarFinder,
+          matching: find.byType(ClipOval),
+        );
+
+        expect(
+          avatarRect.size,
+          const Size.square(56),
+          reason: 'viewport width: $viewportWidth, speaker: ${speaker.id}',
+        );
+        expect(avatarClipFinder, findsOneWidget);
+        expect(
+          tester.getSize(avatarClipFinder),
+          const Size.square(56),
+          reason: 'viewport width: $viewportWidth, speaker: ${speaker.id}',
+        );
+        expect(
+          nameRect.left,
+          closeTo(avatarRect.right + 12, 0.01),
+          reason: 'viewport width: $viewportWidth, speaker: ${speaker.id}',
+        );
+        expect(
+          bioRect.left,
+          closeTo(nameRect.left, 0.01),
+          reason: 'viewport width: $viewportWidth, speaker: ${speaker.id}',
+        );
+        expect(
+          detailsRect.right,
+          lessThanOrEqualTo(contentRect.right - 16 + 0.01),
+          reason: 'viewport width: $viewportWidth, speaker: ${speaker.id}',
+        );
+        expect(
+          nameRect.right,
+          lessThanOrEqualTo(detailsRect.right + 0.01),
+          reason: 'viewport width: $viewportWidth, speaker: ${speaker.id}',
+        );
+        expect(
+          bioRect.right,
+          lessThanOrEqualTo(detailsRect.right + 0.01),
+          reason: 'viewport width: $viewportWidth, speaker: ${speaker.id}',
+        );
+
+        final nameText = tester.widget<Text>(nameFinder);
+        final bioText = tester.widget<Text>(bioFinder);
+        expect(nameText.maxLines, isNull);
+        expect(nameText.overflow, isNot(TextOverflow.ellipsis));
+        expect(bioText.maxLines, isNull);
+        expect(bioText.overflow, isNot(TextOverflow.ellipsis));
+
+        if (previousSpeakerRect != null) {
+          expect(
+            detailsRect.top,
+            greaterThanOrEqualTo(previousSpeakerRect.bottom + 16 - 0.01),
+            reason: 'viewport width: $viewportWidth',
+          );
+        }
+        previousSpeakerRect = detailsRect;
+      }
+
+      expect(
+        tester.takeException(),
+        isNull,
+        reason: 'viewport width: $viewportWidth',
+      );
+    }
+  });
+
   testWidgets('hides the Sessionize link when the URL is not a hosted HTTPS URL', (tester) async {
     for (final session in [
       _sessionWithSessionizeUrl(id: 'tel-url', sessionizeUrl: 'tel:+1234567890'),
@@ -210,7 +339,9 @@ Future<void> _pumpSessionDetailsPage(
   required String sessionId,
   SessionRepository? sessionRepository,
   VenueRepository? venueRepository,
+  SpeakerRepository? speakerRepository,
   double? contentWidth,
+  Size viewportSize = const Size(1200, 2400),
 }) async {
   final page = SessionDetailsPage(sessionId: sessionId);
   await _pumpWithProviders(
@@ -231,6 +362,8 @@ Future<void> _pumpSessionDetailsPage(
     ),
     sessionRepository: sessionRepository,
     venueRepository: venueRepository,
+    speakerRepository: speakerRepository,
+    viewportSize: viewportSize,
   );
 }
 
@@ -239,8 +372,13 @@ Future<void> _pumpWithProviders(
   Widget child, {
   SessionRepository? sessionRepository,
   VenueRepository? venueRepository,
+  SpeakerRepository? speakerRepository,
+  Size viewportSize = const Size(1200, 2400),
 }) async {
-  final preferences = await _prepareTester(tester);
+  final preferences = await _prepareTester(
+    tester,
+    viewportSize: viewportSize,
+  );
 
   await tester.pumpWidget(
     TranslationProvider(
@@ -257,7 +395,7 @@ Future<void> _pumpWithProviders(
             venueRepository ?? _FakeVenueRepository(_venues),
           ),
           sessionTimetableSpeakerRepositoryProvider.overrideWithValue(
-            _FakeSpeakerRepository(_speakers),
+            speakerRepository ?? _FakeSpeakerRepository(_speakers),
           ),
         ],
         child: child,
@@ -266,8 +404,11 @@ Future<void> _pumpWithProviders(
   );
 }
 
-Future<SharedPreferences> _prepareTester(WidgetTester tester) async {
-  tester.view.physicalSize = const Size(1200, 2400);
+Future<SharedPreferences> _prepareTester(
+  WidgetTester tester, {
+  Size viewportSize = const Size(1200, 2400),
+}) async {
+  tester.view.physicalSize = viewportSize;
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.resetPhysicalSize);
   addTearDown(tester.view.resetDevicePixelRatio);
@@ -342,6 +483,26 @@ final _speakers = [
     id: 'speaker-b',
     name: 'Speaker B',
     bio: 'Bio B',
+    createdAt: DateTime.utc(2026),
+    updatedAt: DateTime.utc(2026),
+  ),
+];
+
+final _responsiveSpeakers = [
+  Speaker(
+    id: 'responsive-speaker-a',
+    name: 'A speaker with a deliberately long name that must wrap without truncation',
+    bio:
+        'This deliberately long biography verifies that the first speaker uses the remaining width, wraps naturally, and stays readable without overlapping the avatar or another speaker.',
+    xId: 'responsive_speaker_a',
+    createdAt: DateTime.utc(2026),
+    updatedAt: DateTime.utc(2026),
+  ),
+  Speaker(
+    id: 'responsive-speaker-b',
+    name: 'Second speaker whose complete name must also remain visible on narrow screens',
+    bio:
+        'A second long biography verifies that every speaker is listed vertically and that adjacent speaker rows never overlap at any supported viewport width.',
     createdAt: DateTime.utc(2026),
     updatedAt: DateTime.utc(2026),
   ),
