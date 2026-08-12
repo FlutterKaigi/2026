@@ -1,5 +1,6 @@
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/router/router.dart';
+import 'package:app/core/ui/widget/app_scrollbar.dart';
 import 'package:app/feature/auth/data/provider/auth_repository.dart';
 import 'package:app/feature/auth/ui/auth_error_message.dart';
 import 'package:data/user.dart';
@@ -109,85 +110,88 @@ class EmailSignInPage extends HookConsumerWidget {
           ),
         ),
       ),
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 400),
-            child: Form(
-              key: formKey,
-              child: AutofillGroup(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    TextFormField(
-                      controller: emailController,
-                      enabled: !isProcessing.value,
-                      keyboardType: TextInputType.emailAddress,
-                      textInputAction: TextInputAction.next,
-                      autofillHints: const [AutofillHints.email],
-                      decoration: InputDecoration(
-                        labelText: t.auth.email.emailLabel,
-                        border: const OutlineInputBorder(),
-                        prefixIcon: const Icon(Icons.mail_outline),
+      body: AppScrollbar(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 400),
+              child: Form(
+                key: formKey,
+                child: AutofillGroup(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      TextFormField(
+                        controller: emailController,
+                        enabled: !isProcessing.value,
+                        keyboardType: TextInputType.emailAddress,
+                        textInputAction: TextInputAction.next,
+                        autofillHints: const [AutofillHints.email],
+                        decoration: InputDecoration(
+                          labelText: t.auth.email.emailLabel,
+                          border: const OutlineInputBorder(),
+                          prefixIcon: const Icon(Icons.mail_outline),
+                        ),
+                        validator: (value) =>
+                            (value == null || value.trim().isEmpty) ? t.auth.email.emailRequired : null,
                       ),
-                      validator: (value) => (value == null || value.trim().isEmpty) ? t.auth.email.emailRequired : null,
-                    ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: passwordController,
-                      enabled: !isProcessing.value,
-                      obscureText: obscurePassword.value,
-                      textInputAction: TextInputAction.done,
-                      autofillHints: const [AutofillHints.password],
-                      onFieldSubmitted: (_) async => submit(),
-                      decoration: InputDecoration(
-                        labelText: t.auth.email.passwordLabel,
-                        border: const OutlineInputBorder(),
-                        prefixIcon: const Icon(Icons.lock_outline),
-                        suffixIcon: IconButton(
-                          tooltip: obscurePassword.value ? t.auth.email.showPassword : t.auth.email.hidePassword,
-                          onPressed: () => obscurePassword.value = !obscurePassword.value,
-                          icon: Icon(
-                            obscurePassword.value ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: passwordController,
+                        enabled: !isProcessing.value,
+                        obscureText: obscurePassword.value,
+                        textInputAction: TextInputAction.done,
+                        autofillHints: const [AutofillHints.password],
+                        onFieldSubmitted: (_) async => submit(),
+                        decoration: InputDecoration(
+                          labelText: t.auth.email.passwordLabel,
+                          border: const OutlineInputBorder(),
+                          prefixIcon: const Icon(Icons.lock_outline),
+                          suffixIcon: IconButton(
+                            tooltip: obscurePassword.value ? t.auth.email.showPassword : t.auth.email.hidePassword,
+                            onPressed: () => obscurePassword.value = !obscurePassword.value,
+                            icon: Icon(
+                              obscurePassword.value ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                            ),
                           ),
                         ),
+                        validator: (value) => (value == null || value.isEmpty) ? t.auth.email.passwordRequired : null,
                       ),
-                      validator: (value) => (value == null || value.isEmpty) ? t.auth.email.passwordRequired : null,
-                    ),
-                    const SizedBox(height: 24),
-                    FilledButton(
-                      onPressed: isProcessing.value ? null : () async => submit(),
-                      style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(48)),
-                      child: isProcessing.value
-                          ? const SizedBox.square(
-                              dimension: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : Text(submitLabel),
-                    ),
-                    const SizedBox(height: 8),
-                    TextButton(
-                      onPressed: isProcessing.value
-                          ? null
-                          : () => mode.value = switch (mode.value) {
-                              _EmailAuthMode.signIn => _EmailAuthMode.createAccount,
-                              _EmailAuthMode.createAccount => _EmailAuthMode.signIn,
-                            },
-                      child: Text(
-                        switch (mode.value) {
-                          _EmailAuthMode.signIn => t.auth.email.switchToCreateAccount,
-                          _EmailAuthMode.createAccount => t.auth.email.switchToSignIn,
-                        },
+                      const SizedBox(height: 24),
+                      FilledButton(
+                        onPressed: isProcessing.value ? null : () async => submit(),
+                        style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(48)),
+                        child: isProcessing.value
+                            ? const SizedBox.square(
+                                dimension: 20,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : Text(submitLabel),
                       ),
-                    ),
-                    if (mode.value == _EmailAuthMode.signIn)
+                      const SizedBox(height: 8),
                       TextButton(
-                        onPressed: isProcessing.value ? null : () async => resetPassword(),
-                        child: Text(t.auth.email.forgotPassword),
+                        onPressed: isProcessing.value
+                            ? null
+                            : () => mode.value = switch (mode.value) {
+                                _EmailAuthMode.signIn => _EmailAuthMode.createAccount,
+                                _EmailAuthMode.createAccount => _EmailAuthMode.signIn,
+                              },
+                        child: Text(
+                          switch (mode.value) {
+                            _EmailAuthMode.signIn => t.auth.email.switchToCreateAccount,
+                            _EmailAuthMode.createAccount => t.auth.email.switchToSignIn,
+                          },
+                        ),
                       ),
-                  ],
+                      if (mode.value == _EmailAuthMode.signIn)
+                        TextButton(
+                          onPressed: isProcessing.value ? null : () async => resetPassword(),
+                          child: Text(t.auth.email.forgotPassword),
+                        ),
+                    ],
+                  ),
                 ),
               ),
             ),

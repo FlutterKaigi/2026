@@ -91,6 +91,7 @@ void main() {
     expect(find.text('2026/10/31'), findsNothing);
     expect(find.text('JA'), findsOneWidget);
     expect(find.text('Description'), findsNothing);
+    expect(find.text('セッション'), findsOneWidget);
     expect(find.text('Speaker A'), findsOneWidget);
     expect(find.text('Speaker B'), findsOneWidget);
     expect(
@@ -163,6 +164,8 @@ void main() {
     );
     expect(listTitle.maxLines, isNull);
     expect(listTitle.overflow, isNull);
+    expect(find.text('LT'), findsOneWidget);
+    expect(find.text('初心者向けLT'), findsOneWidget);
 
     await tester.tap(find.byTooltip('会場別タイムラインに切り替え'));
     await tester.pumpAndSettle();
@@ -741,6 +744,7 @@ final _shortLtB = Session(
   endsAt: DateTime.utc(2026, 10, 31, 8, 40),
   venueId: 'room-a',
   isLightningTalk: true,
+  isBeginnersLightningTalk: true,
   createdAt: DateTime.utc(2026),
   updatedAt: DateTime.utc(2026),
 );

@@ -45,11 +45,10 @@ class SessionCardWidget extends StatelessWidget {
                   spacing: 6,
                   runSpacing: 6,
                   children: [
-                    if (!compact)
-                      _MetadataTagWidget(
-                        icon: Icons.sell_outlined,
-                        label: _sessionTypeLabel(t, session),
-                      ),
+                    _MetadataTagWidget(
+                      icon: Icons.sell_outlined,
+                      label: _sessionTypeLabel(t, session),
+                    ),
                     _MetadataTagWidget(
                       icon: Icons.meeting_room_outlined,
                       label: entry.venue?.name.resolve(locale) ?? t.sessionTimetable.venue.unknown,

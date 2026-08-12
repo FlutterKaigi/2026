@@ -3,6 +3,7 @@ import 'package:app/core/log/talker.dart';
 import 'package:app/core/provider/environment.dart';
 import 'package:app/core/router/router.dart';
 import 'package:app/core/ui/widget/app_error_view.dart';
+import 'package:app/core/ui/widget/app_scrollbar.dart';
 import 'package:app/core/ui/widget/settings_icon_button.dart';
 import 'package:app/feature/auth/data/provider/auth_repository.dart';
 import 'package:app/feature/auth/data/provider/auth_state.dart';
@@ -133,24 +134,26 @@ class AccountPage extends HookConsumerWidget {
         actions: const [SettingsIconButton()],
       ),
       body: switch (authState) {
-        AsyncData(:final value) => Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: ConstrainedBox(
-              // 認証方法が変わっても操作領域が揃うよう、共通の最大幅にする。
-              constraints: const BoxConstraints(maxWidth: signInMethodButtonMaxWidth),
-              child: value == null
-                  ? _SignedOutView(
-                      isProcessing: isProcessing.value,
-                      showsAppleSignIn: showsAppleSignIn,
-                      onSignIn: runAuthAction,
-                    )
-                  : _SignedInView(
-                      user: value,
-                      isProcessing: isProcessing.value,
-                      onSignOut: () => runAuthAction((repository) => repository.signOut()),
-                      onDeleteAccount: () => deleteAccount(value),
-                    ),
+        AsyncData(:final value) => AppScrollbar(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: ConstrainedBox(
+                // 認証方法が変わっても操作領域が揃うよう、共通の最大幅にする。
+                constraints: const BoxConstraints(maxWidth: signInMethodButtonMaxWidth),
+                child: value == null
+                    ? _SignedOutView(
+                        isProcessing: isProcessing.value,
+                        showsAppleSignIn: showsAppleSignIn,
+                        onSignIn: runAuthAction,
+                      )
+                    : _SignedInView(
+                        user: value,
+                        isProcessing: isProcessing.value,
+                        onSignOut: () => runAuthAction((repository) => repository.signOut()),
+                        onDeleteAccount: () => deleteAccount(value),
+                      ),
+              ),
             ),
           ),
         ),

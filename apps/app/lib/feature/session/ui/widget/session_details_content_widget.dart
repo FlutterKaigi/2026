@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:app/core/extension/locale_map_extension.dart';
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/ui/launch_external_url.dart';
+import 'package:app/core/ui/widget/app_scrollbar.dart';
 import 'package:app/feature/session/data/provider/session_detail_provider.dart';
 import 'package:app/feature/session/ui/widget/session_bookmark_button.dart';
 import 'package:app/feature/session/ui/widget/session_speaker_widget.dart';
@@ -39,151 +40,153 @@ class SessionDetailsContentWidget extends StatelessWidget {
     final sessionizeUri = _externalUri(session.sessionizeUrl);
 
     return Scaffold(
-      body: Align(
-        alignment: AlignmentDirectional.topCenter,
-        child: ConstrainedBox(
-          key: const ValueKey('session-details-content'),
-          constraints: const BoxConstraints(
-            maxWidth: _sessionDetailsMaxWidth,
-          ),
-          child: CustomScrollView(
-            slivers: [
-              SliverLayoutBuilder(
-                builder: (context, constraints) => SliverAppBar.large(
-                  expandedHeight: _sessionTitleExpandedHeight(
-                    context: context,
-                    title: title,
-                    maxWidth: constraints.crossAxisExtent,
-                  ),
-                  title: Text(
-                    title,
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  actions: [
-                    SessionBookmarkButton(sessionId: session.id),
-                    IconButton(
-                      tooltip: t.sessionDetails.share,
-                      onPressed: () => unawaited(
-                        _shareSession(
-                          context,
-                          data,
-                          locale,
-                          t.links.openError,
+      body: AppScrollbar(
+        child: Align(
+          alignment: AlignmentDirectional.topCenter,
+          child: ConstrainedBox(
+            key: const ValueKey('session-details-content'),
+            constraints: const BoxConstraints(
+              maxWidth: _sessionDetailsMaxWidth,
+            ),
+            child: CustomScrollView(
+              slivers: [
+                SliverLayoutBuilder(
+                  builder: (context, constraints) => SliverAppBar.large(
+                    expandedHeight: _sessionTitleExpandedHeight(
+                      context: context,
+                      title: title,
+                      maxWidth: constraints.crossAxisExtent,
+                    ),
+                    title: Text(
+                      title,
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    actions: [
+                      SessionBookmarkButton(sessionId: session.id),
+                      IconButton(
+                        tooltip: t.sessionDetails.share,
+                        onPressed: () => unawaited(
+                          _shareSession(
+                            context,
+                            data,
+                            locale,
+                            t.links.openError,
+                          ),
                         ),
+                        icon: const Icon(Icons.share_outlined),
                       ),
-                      icon: const Icon(Icons.share_outlined),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              SliverToBoxAdapter(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                      child: Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: [
-                          _InfoChip(
-                            icon: Icons.sell_outlined,
-                            label: _sessionTypeLabel(t, session),
-                          ),
-                          if (languageLabel != null)
-                            _InfoChip(
-                              icon: Icons.language,
-                              label: languageLabel,
-                            ),
-                          _InfoChip(
-                            icon: Icons.calendar_today_outlined,
-                            label: DateFormat(
-                              'yyyy/MM/dd',
-                            ).format(toEventTime(session.startsAt)),
-                          ),
-                          _InfoChip(
-                            icon: Icons.schedule,
-                            label: formatEventTimeRange(
-                              session.startsAt,
-                              session.endsAt,
-                              timeFormat,
-                              locale: locale.toLanguageTag(),
-                            ),
-                          ),
-                          _InfoChip(
-                            icon: Icons.meeting_room_outlined,
-                            label: data.venue?.name.resolve(locale) ?? t.sessionTimetable.venue.unknown,
-                          ),
-                        ],
-                      ),
-                    ),
-                    if (data.speakers.isNotEmpty) ...[
-                      _SectionHeader(title: t.sessionDetails.speakers),
+                SliverToBoxAdapter(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                        child: Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
                           children: [
-                            for (var index = 0; index < data.speakers.length; index++) ...[
-                              _SpeakerDetailsWidget(
-                                speaker: data.speakers[index],
+                            _InfoChip(
+                              icon: Icons.sell_outlined,
+                              label: _sessionTypeLabel(t, session),
+                            ),
+                            if (languageLabel != null)
+                              _InfoChip(
+                                icon: Icons.language,
+                                label: languageLabel,
                               ),
-                              if (index < data.speakers.length - 1) const SizedBox(height: 16),
-                            ],
+                            _InfoChip(
+                              icon: Icons.calendar_today_outlined,
+                              label: DateFormat(
+                                'yyyy/MM/dd',
+                              ).format(toEventTime(session.startsAt)),
+                            ),
+                            _InfoChip(
+                              icon: Icons.schedule,
+                              label: formatEventTimeRange(
+                                session.startsAt,
+                                session.endsAt,
+                                timeFormat,
+                                locale: locale.toLanguageTag(),
+                              ),
+                            ),
+                            _InfoChip(
+                              icon: Icons.meeting_room_outlined,
+                              label: data.venue?.name.resolve(locale) ?? t.sessionTimetable.venue.unknown,
+                            ),
                           ],
                         ),
                       ),
-                    ],
-                    if (description.isNotEmpty) ...[
-                      _SectionHeader(title: t.sessionDetails.description),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Text(
-                          description,
-                          style: Theme.of(context).textTheme.bodyLarge,
-                        ),
-                      ),
-                    ],
-                    _SectionHeader(title: t.sessionDetails.schedule),
-                    _DetailListTile(
-                      icon: Icons.event_outlined,
-                      title: DateFormat(
-                        'yyyy/MM/dd',
-                      ).format(toEventTime(session.startsAt)),
-                    ),
-                    _DetailListTile(
-                      icon: Icons.schedule,
-                      title: formatEventTimeRange(
-                        session.startsAt,
-                        session.endsAt,
-                        timeFormat,
-                        locale: locale.toLanguageTag(),
-                      ),
-                    ),
-                    _DetailListTile(
-                      icon: Icons.room_outlined,
-                      title: data.venue?.name.resolve(locale) ?? t.sessionTimetable.venue.unknown,
-                    ),
-                    if (sessionizeUri != null) ...[
-                      _SectionHeader(title: t.sessionDetails.links),
-                      _DetailListTile(
-                        icon: Icons.open_in_new,
-                        title: t.sessionDetails.sessionize,
-                        subtitle: sessionizeUri.toString(),
-                        onTap: () => unawaited(
-                          launchExternalUrl(
-                            context,
-                            uri: sessionizeUri,
-                            failureMessage: t.links.openError,
+                      if (data.speakers.isNotEmpty) ...[
+                        _SectionHeader(title: t.sessionDetails.speakers),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              for (var index = 0; index < data.speakers.length; index++) ...[
+                                _SpeakerDetailsWidget(
+                                  speaker: data.speakers[index],
+                                ),
+                                if (index < data.speakers.length - 1) const SizedBox(height: 16),
+                              ],
+                            ],
                           ),
                         ),
+                      ],
+                      if (description.isNotEmpty) ...[
+                        _SectionHeader(title: t.sessionDetails.description),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Text(
+                            description,
+                            style: Theme.of(context).textTheme.bodyLarge,
+                          ),
+                        ),
+                      ],
+                      _SectionHeader(title: t.sessionDetails.schedule),
+                      _DetailListTile(
+                        icon: Icons.event_outlined,
+                        title: DateFormat(
+                          'yyyy/MM/dd',
+                        ).format(toEventTime(session.startsAt)),
                       ),
+                      _DetailListTile(
+                        icon: Icons.schedule,
+                        title: formatEventTimeRange(
+                          session.startsAt,
+                          session.endsAt,
+                          timeFormat,
+                          locale: locale.toLanguageTag(),
+                        ),
+                      ),
+                      _DetailListTile(
+                        icon: Icons.room_outlined,
+                        title: data.venue?.name.resolve(locale) ?? t.sessionTimetable.venue.unknown,
+                      ),
+                      if (sessionizeUri != null) ...[
+                        _SectionHeader(title: t.sessionDetails.links),
+                        _DetailListTile(
+                          icon: Icons.open_in_new,
+                          title: t.sessionDetails.sessionize,
+                          subtitle: sessionizeUri.toString(),
+                          onTap: () => unawaited(
+                            launchExternalUrl(
+                              context,
+                              uri: sessionizeUri,
+                              failureMessage: t.links.openError,
+                            ),
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: 32),
                     ],
-                    const SizedBox(height: 32),
-                  ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

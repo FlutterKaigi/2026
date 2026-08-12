@@ -584,8 +584,8 @@ class Translations$sessionTimetable$type$ja {
 
 	// Translations
 
-	/// ja: '通常セッション'
-	String get regular => '通常セッション';
+	/// ja: 'セッション'
+	String get regular => 'セッション';
 
 	/// ja: 'LT'
 	String get lightningTalk => 'LT';
@@ -837,7 +837,7 @@ extension on Translations {
 			'sessionTimetable.emptyFiltered' => 'この日の予定はありません',
 			'sessionTimetable.venue.unknown' => '会場未定',
 			'sessionTimetable.speaker.none' => '登壇者未定',
-			'sessionTimetable.type.regular' => '通常セッション',
+			'sessionTimetable.type.regular' => 'セッション',
 			'sessionTimetable.type.lightningTalk' => 'LT',
 			'sessionTimetable.type.beginnersLightningTalk' => '初心者向けLT',
 			'sessionTimetable.type.event' => 'イベント',
