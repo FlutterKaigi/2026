@@ -1,9 +1,9 @@
 import 'package:app/core/extension/locale_map_extension.dart';
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/router/router.dart';
-import 'package:app/core/ui/widget/app_network_image.dart';
 import 'package:app/feature/session/data/provider/session_timetable_provider.dart';
 import 'package:app/feature/session/ui/widget/session_bookmark_button.dart';
+import 'package:app/feature/session/ui/widget/session_speaker_widget.dart';
 import 'package:app/feature/session/util/event_time.dart';
 import 'package:app/feature/session/util/session_language.dart';
 import 'package:data/data.dart';
@@ -77,9 +77,8 @@ class SessionCardWidget extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           Text(
+            key: ValueKey('session-title-${session.id}'),
             title,
-            maxLines: 3,
-            overflow: TextOverflow.ellipsis,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w700,
             ),
@@ -99,7 +98,7 @@ class SessionCardWidget extends StatelessWidget {
               spacing: 8,
               runSpacing: 8,
               children: [
-                for (final speaker in entry.speakers) _SpeakerChipWidget(speaker: speaker),
+                for (final speaker in entry.speakers) SessionSpeakerChipWidget(speaker: speaker),
               ],
             ),
           ] else if (!compact) ...[
@@ -185,24 +184,6 @@ class _SessionCardSurfaceWidget extends StatelessWidget {
   }
 }
 
-class _SpeakerChipWidget extends StatelessWidget {
-  const _SpeakerChipWidget({required this.speaker});
-
-  final Speaker speaker;
-
-  @override
-  Widget build(BuildContext context) {
-    return Chip(
-      avatar: AppNetworkAvatar(
-        imageUrl: speaker.avatarUrl,
-        fallback: const Icon(Icons.person_outline, size: 16),
-      ),
-      label: Text(speaker.name),
-      visualDensity: VisualDensity.compact,
-    );
-  }
-}
-
 class _SpeakerPlaceholderWidget extends StatelessWidget {
   const _SpeakerPlaceholderWidget({required this.label});
 
@@ -222,9 +203,6 @@ class _SpeakerPlaceholderWidget extends StatelessWidget {
 }
 
 String _sessionTypeLabel(Translations t, Session session) {
-  if (session.isHandsOn) {
-    return t.sessionTimetable.type.handsOn;
-  }
   if (session.isBeginnersLightningTalk) {
     return t.sessionTimetable.type.beginnersLightningTalk;
   }

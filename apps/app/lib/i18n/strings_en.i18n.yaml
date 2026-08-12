@@ -47,7 +47,6 @@ sessionTimetable:
     regular: Regular Talk
     lightningTalk: Lightning Talk
     beginnersLightningTalk: Beginners LT
-    handsOn: Hands-on
     event: Event
 sessionSearch:
   title: Search sessions

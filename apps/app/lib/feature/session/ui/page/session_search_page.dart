@@ -421,7 +421,6 @@ String _typeLabel(Translations t, SessionSearchTypeFilter type) {
     SessionSearchTypeFilter.regular => t.sessionTimetable.type.regular,
     SessionSearchTypeFilter.lightningTalk => t.sessionTimetable.type.lightningTalk,
     SessionSearchTypeFilter.beginnersLightningTalk => t.sessionTimetable.type.beginnersLightningTalk,
-    SessionSearchTypeFilter.handsOn => t.sessionTimetable.type.handsOn,
   };
 }
 

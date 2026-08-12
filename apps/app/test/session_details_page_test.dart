@@ -33,7 +33,17 @@ void main() {
     expect(find.text('Hall A'), findsWidgets);
     expect(find.text('EN'), findsOneWidget);
     expect(find.text('Speaker A'), findsOneWidget);
+    expect(find.text('Speaker B'), findsOneWidget);
     expect(find.text('Bio A'), findsOneWidget);
+    expect(find.text('Bio B'), findsOneWidget);
+    expect(
+      tester.getSize(find.byKey(const ValueKey('session-speaker-avatar-speaker-a'))),
+      const Size.square(56),
+    );
+    expect(
+      tester.getSize(find.byKey(const ValueKey('session-speaker-avatar-speaker-b'))),
+      const Size.square(56),
+    );
     expect(find.text('Sessionize'), findsOneWidget);
     expect(find.text('https://sessionize.com/flutterkaigi-2026/session-a'), findsOneWidget);
   });
@@ -274,7 +284,7 @@ final _sessions = [
     startsAt: DateTime.utc(2026, 10, 29, 1),
     endsAt: DateTime.utc(2026, 10, 29, 1, 45),
     venueId: 'hall-a',
-    speakerIds: const ['speaker-a'],
+    speakerIds: const ['speaker-a', 'speaker-b'],
     sessionizeUrl: 'https://sessionize.com/flutterkaigi-2026/session-a',
     createdAt: DateTime.utc(2026),
     updatedAt: DateTime.utc(2026),
@@ -325,6 +335,13 @@ final _speakers = [
     id: 'speaker-a',
     name: 'Speaker A',
     bio: 'Bio A',
+    createdAt: DateTime.utc(2026),
+    updatedAt: DateTime.utc(2026),
+  ),
+  Speaker(
+    id: 'speaker-b',
+    name: 'Speaker B',
+    bio: 'Bio B',
     createdAt: DateTime.utc(2026),
     updatedAt: DateTime.utc(2026),
   ),

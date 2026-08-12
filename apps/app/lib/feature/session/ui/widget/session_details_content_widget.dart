@@ -3,9 +3,9 @@ import 'dart:async';
 import 'package:app/core/extension/locale_map_extension.dart';
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/ui/launch_external_url.dart';
-import 'package:app/core/ui/widget/app_network_image.dart';
 import 'package:app/feature/session/data/provider/session_detail_provider.dart';
 import 'package:app/feature/session/ui/widget/session_bookmark_button.dart';
+import 'package:app/feature/session/ui/widget/session_speaker_widget.dart';
 import 'package:app/feature/session/util/event_time.dart';
 import 'package:app/feature/session/util/session_language.dart';
 import 'package:data/data.dart';
@@ -109,7 +109,20 @@ class SessionDetailsContentWidget extends StatelessWidget {
               ),
               if (data.speakers.isNotEmpty) ...[
                 _SectionHeader(title: t.sessionDetails.speakers),
-                for (final speaker in data.speakers) _SpeakerTile(speaker: speaker),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Wrap(
+                    spacing: 24,
+                    runSpacing: 12,
+                    children: [
+                      for (final speaker in data.speakers)
+                        ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 420),
+                          child: _SpeakerDetailsWidget(speaker: speaker),
+                        ),
+                    ],
+                  ),
+                ),
               ],
               if (description.isNotEmpty) ...[
                 _SectionHeader(title: t.sessionDetails.description),
@@ -206,22 +219,34 @@ class _SectionHeader extends StatelessWidget {
   }
 }
 
-class _SpeakerTile extends StatelessWidget {
-  const _SpeakerTile({required this.speaker});
+class _SpeakerDetailsWidget extends StatelessWidget {
+  const _SpeakerDetailsWidget({required this.speaker});
 
   final Speaker speaker;
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      leading: AppNetworkAvatar(
-        radius: 28,
-        imageUrl: speaker.avatarUrl,
-        fallback: const Icon(Icons.person_outline),
-      ),
-      title: Text(speaker.name),
-      subtitle: speaker.bio == null || speaker.bio!.trim().isEmpty ? null : Text(speaker.bio!.trim()),
+    final bio = speaker.bio?.trim();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SessionSpeakerLabelWidget(
+          speaker: speaker,
+          avatarSize: 56,
+          gap: 12,
+          textStyle: Theme.of(context).textTheme.titleMedium,
+        ),
+        if (bio != null && bio.isNotEmpty) ...[
+          const SizedBox(height: 4),
+          Padding(
+            padding: const EdgeInsets.only(left: 68),
+            child: Text(
+              bio,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          ),
+        ],
+      ],
     );
   }
 }
@@ -308,9 +333,6 @@ Uri? _externalUri(String? rawUrl) {
 }
 
 String _sessionTypeLabel(Translations t, Session session) {
-  if (session.isHandsOn) {
-    return t.sessionTimetable.type.handsOn;
-  }
   if (session.isBeginnersLightningTalk) {
     return t.sessionTimetable.type.beginnersLightningTalk;
   }

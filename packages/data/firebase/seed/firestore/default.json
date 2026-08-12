@@ -259,7 +259,6 @@
         ],
         "isLightningTalk": false,
         "isBeginnersLightningTalk": false,
-        "isHandsOn": false,
         "sessionizeUrl": null,
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -286,7 +285,6 @@
         ],
         "isLightningTalk": false,
         "isBeginnersLightningTalk": false,
-        "isHandsOn": false,
         "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day1-state-management-at-scale",
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -313,7 +311,6 @@
         ],
         "isLightningTalk": false,
         "isBeginnersLightningTalk": false,
-        "isHandsOn": false,
         "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day1-rendering-pipeline-deep-dive",
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -340,7 +337,6 @@
         ],
         "isLightningTalk": false,
         "isBeginnersLightningTalk": false,
-        "isHandsOn": false,
         "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day1-flutter-web-production",
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -367,7 +363,6 @@
         ],
         "isLightningTalk": false,
         "isBeginnersLightningTalk": false,
-        "isHandsOn": false,
         "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day1-inclusive-design-checklist",
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -394,7 +389,6 @@
         ],
         "isLightningTalk": false,
         "isBeginnersLightningTalk": false,
-        "isHandsOn": false,
         "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day1-offline-first-data-sync",
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -421,7 +415,6 @@
         ],
         "isLightningTalk": false,
         "isBeginnersLightningTalk": false,
-        "isHandsOn": false,
         "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day1-impeller-performance-debug",
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -448,7 +441,6 @@
         ],
         "isLightningTalk": false,
         "isBeginnersLightningTalk": false,
-        "isHandsOn": false,
         "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day1-desktop-app-packaging",
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -475,7 +467,6 @@
         ],
         "isLightningTalk": false,
         "isBeginnersLightningTalk": false,
-        "isHandsOn": false,
         "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day1-firebase-app-distribution",
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -503,7 +494,6 @@
         ],
         "isLightningTalk": false,
         "isBeginnersLightningTalk": false,
-        "isHandsOn": false,
         "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day1-architecture-for-large-teams",
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -530,7 +520,6 @@
         ],
         "isLightningTalk": false,
         "isBeginnersLightningTalk": false,
-        "isHandsOn": false,
         "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day1-design-system-with-tokens",
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -557,7 +546,6 @@
         ],
         "isLightningTalk": false,
         "isBeginnersLightningTalk": false,
-        "isHandsOn": false,
         "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day1-animations-that-feel-right",
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -584,7 +572,6 @@
         ],
         "isLightningTalk": false,
         "isBeginnersLightningTalk": false,
-        "isHandsOn": false,
         "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day1-widget-composition-patterns",
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -611,7 +598,6 @@
         ],
         "isLightningTalk": false,
         "isBeginnersLightningTalk": false,
-        "isHandsOn": false,
         "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day1-native-bridge-patterns",
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -638,7 +624,6 @@
         ],
         "isLightningTalk": false,
         "isBeginnersLightningTalk": false,
-        "isHandsOn": false,
         "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day1-riverpod-async-pitfalls",
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -665,7 +650,6 @@
         ],
         "isLightningTalk": false,
         "isBeginnersLightningTalk": false,
-        "isHandsOn": false,
         "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day1-testing-strategy-2026",
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -692,7 +676,6 @@
         ],
         "isLightningTalk": false,
         "isBeginnersLightningTalk": false,
-        "isHandsOn": false,
         "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day1-accessibility-live-audit",
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -719,7 +702,6 @@
         ],
         "isLightningTalk": false,
         "isBeginnersLightningTalk": false,
-        "isHandsOn": false,
         "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day1-observability-for-flutter",
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -746,7 +728,6 @@
         ],
         "isLightningTalk": false,
         "isBeginnersLightningTalk": false,
-        "isHandsOn": false,
         "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day1-go-router-stateful-shell",
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -773,7 +754,6 @@
         ],
         "isLightningTalk": false,
         "isBeginnersLightningTalk": false,
-        "isHandsOn": false,
         "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day1-shader-and-custompaint",
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -800,7 +780,6 @@
         ],
         "isLightningTalk": false,
         "isBeginnersLightningTalk": false,
-        "isHandsOn": false,
         "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day1-multi-platform-release-ops",
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -827,7 +806,6 @@
         ],
         "isLightningTalk": false,
         "isBeginnersLightningTalk": false,
-        "isHandsOn": false,
         "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day1-dart-language-updates",
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -854,7 +832,6 @@
         ],
         "isLightningTalk": false,
         "isBeginnersLightningTalk": false,
-        "isHandsOn": false,
         "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day1-firebase-security-rules",
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -881,7 +858,6 @@
         ],
         "isLightningTalk": false,
         "isBeginnersLightningTalk": false,
-        "isHandsOn": false,
         "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day1-performance-budgeting",
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -908,7 +884,6 @@
         ],
         "isLightningTalk": false,
         "isBeginnersLightningTalk": false,
-        "isHandsOn": false,
         "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day1-localization-workflows",
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -935,7 +910,6 @@
         ],
         "isLightningTalk": false,
         "isBeginnersLightningTalk": false,
-        "isHandsOn": false,
         "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day1-app-security-and-attestation",
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -962,7 +936,6 @@
         ],
         "isLightningTalk": false,
         "isBeginnersLightningTalk": false,
-        "isHandsOn": false,
         "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day1-ai-assisted-development",
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -989,7 +962,6 @@
         ],
         "isLightningTalk": false,
         "isBeginnersLightningTalk": false,
-        "isHandsOn": false,
         "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day1-package-maintenance",
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -1016,7 +988,6 @@
         ],
         "isLightningTalk": false,
         "isBeginnersLightningTalk": false,
-        "isHandsOn": false,
         "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day1-community-growth",
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -1043,7 +1014,6 @@
         ],
         "isLightningTalk": true,
         "isBeginnersLightningTalk": false,
-        "isHandsOn": false,
         "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day1-lt-golden-tests",
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -1070,7 +1040,6 @@
         ],
         "isLightningTalk": true,
         "isBeginnersLightningTalk": false,
-        "isHandsOn": false,
         "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day1-lt-devtools-tips",
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -1097,7 +1066,6 @@
         ],
         "isLightningTalk": true,
         "isBeginnersLightningTalk": false,
-        "isHandsOn": false,
         "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day1-lt-offline-search",
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -1124,7 +1092,6 @@
         ],
         "isLightningTalk": true,
         "isBeginnersLightningTalk": false,
-        "isHandsOn": false,
         "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day1-lt-design-tokens",
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -1151,7 +1118,6 @@
         ],
         "isLightningTalk": true,
         "isBeginnersLightningTalk": false,
-        "isHandsOn": false,
         "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day1-lt-release-notes",
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -1178,7 +1144,6 @@
         ],
         "isLightningTalk": false,
         "isBeginnersLightningTalk": false,
-        "isHandsOn": false,
         "sessionizeUrl": null,
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -1205,7 +1170,6 @@
         ],
         "isLightningTalk": false,
         "isBeginnersLightningTalk": false,
-        "isHandsOn": false,
         "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day2-state-management-at-scale",
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -1232,7 +1196,6 @@
         ],
         "isLightningTalk": false,
         "isBeginnersLightningTalk": false,
-        "isHandsOn": false,
         "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day2-rendering-pipeline-deep-dive",
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -1259,7 +1222,6 @@
         ],
         "isLightningTalk": false,
         "isBeginnersLightningTalk": false,
-        "isHandsOn": false,
         "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day2-flutter-web-production",
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -1286,7 +1248,6 @@
         ],
         "isLightningTalk": false,
         "isBeginnersLightningTalk": false,
-        "isHandsOn": false,
         "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day2-inclusive-design-checklist",
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -1313,7 +1274,6 @@
         ],
         "isLightningTalk": false,
         "isBeginnersLightningTalk": false,
-        "isHandsOn": false,
         "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day2-offline-first-data-sync",
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -1340,7 +1300,6 @@
         ],
         "isLightningTalk": false,
         "isBeginnersLightningTalk": false,
-        "isHandsOn": false,
         "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day2-impeller-performance-debug",
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -1367,7 +1326,6 @@
         ],
         "isLightningTalk": false,
         "isBeginnersLightningTalk": false,
-        "isHandsOn": false,
         "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day2-desktop-app-packaging",
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -1394,7 +1352,6 @@
         ],
         "isLightningTalk": false,
         "isBeginnersLightningTalk": false,
-        "isHandsOn": false,
         "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day2-firebase-app-distribution",
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -1422,7 +1379,6 @@
         ],
         "isLightningTalk": false,
         "isBeginnersLightningTalk": false,
-        "isHandsOn": false,
         "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day2-architecture-for-large-teams",
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -1449,7 +1405,6 @@
         ],
         "isLightningTalk": false,
         "isBeginnersLightningTalk": false,
-        "isHandsOn": false,
         "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day2-design-system-with-tokens",
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -1476,7 +1431,6 @@
         ],
         "isLightningTalk": false,
         "isBeginnersLightningTalk": false,
-        "isHandsOn": false,
         "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day2-animations-that-feel-right",
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -1503,7 +1457,6 @@
         ],
         "isLightningTalk": false,
         "isBeginnersLightningTalk": false,
-        "isHandsOn": false,
         "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day2-widget-composition-patterns",
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -1530,7 +1483,6 @@
         ],
         "isLightningTalk": false,
         "isBeginnersLightningTalk": false,
-        "isHandsOn": false,
         "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day2-native-bridge-patterns",
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -1557,7 +1509,6 @@
         ],
         "isLightningTalk": false,
         "isBeginnersLightningTalk": false,
-        "isHandsOn": false,
         "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day2-riverpod-async-pitfalls",
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -1584,7 +1535,6 @@
         ],
         "isLightningTalk": false,
         "isBeginnersLightningTalk": false,
-        "isHandsOn": false,
         "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day2-testing-strategy-2026",
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -1611,7 +1561,6 @@
         ],
         "isLightningTalk": false,
         "isBeginnersLightningTalk": false,
-        "isHandsOn": false,
         "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day2-accessibility-live-audit",
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -1638,7 +1587,6 @@
         ],
         "isLightningTalk": false,
         "isBeginnersLightningTalk": false,
-        "isHandsOn": false,
         "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day2-observability-for-flutter",
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -1665,7 +1613,6 @@
         ],
         "isLightningTalk": false,
         "isBeginnersLightningTalk": false,
-        "isHandsOn": false,
         "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day2-go-router-stateful-shell",
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -1692,7 +1639,6 @@
         ],
         "isLightningTalk": false,
         "isBeginnersLightningTalk": false,
-        "isHandsOn": false,
         "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day2-shader-and-custompaint",
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -1719,7 +1665,6 @@
         ],
         "isLightningTalk": false,
         "isBeginnersLightningTalk": false,
-        "isHandsOn": false,
         "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day2-multi-platform-release-ops",
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -1746,7 +1691,6 @@
         ],
         "isLightningTalk": false,
         "isBeginnersLightningTalk": false,
-        "isHandsOn": false,
         "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day2-dart-language-updates",
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -1773,7 +1717,6 @@
         ],
         "isLightningTalk": false,
         "isBeginnersLightningTalk": false,
-        "isHandsOn": false,
         "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day2-firebase-security-rules",
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -1800,7 +1743,6 @@
         ],
         "isLightningTalk": false,
         "isBeginnersLightningTalk": false,
-        "isHandsOn": false,
         "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day2-performance-budgeting",
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -1827,7 +1769,6 @@
         ],
         "isLightningTalk": false,
         "isBeginnersLightningTalk": false,
-        "isHandsOn": false,
         "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day2-localization-workflows",
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -1854,7 +1795,6 @@
         ],
         "isLightningTalk": false,
         "isBeginnersLightningTalk": false,
-        "isHandsOn": false,
         "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day2-app-security-and-attestation",
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -1881,7 +1821,6 @@
         ],
         "isLightningTalk": false,
         "isBeginnersLightningTalk": false,
-        "isHandsOn": false,
         "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day2-ai-assisted-development",
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -1908,7 +1847,6 @@
         ],
         "isLightningTalk": false,
         "isBeginnersLightningTalk": false,
-        "isHandsOn": false,
         "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day2-package-maintenance",
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -1935,7 +1873,6 @@
         ],
         "isLightningTalk": false,
         "isBeginnersLightningTalk": false,
-        "isHandsOn": false,
         "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day2-community-growth",
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -1962,7 +1899,6 @@
         ],
         "isLightningTalk": true,
         "isBeginnersLightningTalk": false,
-        "isHandsOn": false,
         "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day2-lt-golden-tests",
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -1989,7 +1925,6 @@
         ],
         "isLightningTalk": true,
         "isBeginnersLightningTalk": false,
-        "isHandsOn": false,
         "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day2-lt-devtools-tips",
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -2016,7 +1951,6 @@
         ],
         "isLightningTalk": true,
         "isBeginnersLightningTalk": false,
-        "isHandsOn": false,
         "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day2-lt-offline-search",
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -2043,7 +1977,6 @@
         ],
         "isLightningTalk": true,
         "isBeginnersLightningTalk": false,
-        "isHandsOn": false,
         "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day2-lt-design-tokens",
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -2070,7 +2003,6 @@
         ],
         "isLightningTalk": true,
         "isBeginnersLightningTalk": false,
-        "isHandsOn": false,
         "sessionizeUrl": "https://sessionize.com/flutterkaigi-2026/day2-lt-release-notes",
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"

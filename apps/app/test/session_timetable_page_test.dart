@@ -28,6 +28,16 @@ void main() {
     expect(find.text('2026/10/31'), findsNothing);
     expect(find.text('JA'), findsOneWidget);
     expect(find.text('Description'), findsNothing);
+    expect(find.text('Speaker A'), findsOneWidget);
+    expect(find.text('Speaker B'), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('session-speaker-avatar-speaker-a')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey('session-speaker-avatar-speaker-b')),
+      findsOneWidget,
+    );
     final appBar = tester.widget<AppBar>(find.byType(AppBar));
     final appBarTitle = appBar.title! as Text;
     expect(appBar.toolbarHeight, 52);
@@ -71,10 +81,51 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byTooltip('リスト表示に切り替え'), findsOneWidget);
-    expect(find.text('10:00'), findsOneWidget);
+    expect(find.text('10:15'), findsOneWidget);
     expect(find.text('10:15-11:00'), findsOneWidget);
     expect(find.text('Room A'), findsOneWidget);
     expect(find.text('JA'), findsOneWidget);
+    expect(find.text('Speaker A'), findsOneWidget);
+    expect(find.text('Speaker B'), findsOneWidget);
+  });
+
+  testWidgets('shows every speaker and full titles without overlapping consecutive LTs', (tester) async {
+    await _pumpTimetableState(
+      tester,
+      AsyncData(_shortLtTimetable),
+    );
+
+    final listTitle = tester.widget<Text>(
+      find.byKey(const ValueKey('session-title-short-lt-a')),
+    );
+    expect(listTitle.maxLines, isNull);
+    expect(listTitle.overflow, isNull);
+
+    await tester.tap(find.byTooltip('会場別タイムラインに切り替え'));
+    await tester.pumpAndSettle();
+
+    final firstTitle = tester.widget<Text>(
+      find.byKey(const ValueKey('room-session-title-short-lt-a')),
+    );
+    final secondTitle = tester.widget<Text>(
+      find.byKey(const ValueKey('room-session-title-short-lt-b')),
+    );
+    expect(firstTitle.maxLines, isNull);
+    expect(firstTitle.overflow, isNull);
+    expect(secondTitle.maxLines, isNull);
+    expect(secondTitle.overflow, isNull);
+    expect(find.text('Speaker A'), findsOneWidget);
+    expect(find.text('Speaker B'), findsOneWidget);
+
+    final firstCard = tester.getRect(
+      find.byKey(const ValueKey('room-timeline-entry-short-lt-a')),
+    );
+    final secondCard = tester.getRect(
+      find.byKey(const ValueKey('room-timeline-entry-short-lt-b')),
+    );
+    expect(firstCard.overlaps(secondCard), isFalse);
+    expect(firstCard.bottom, lessThan(secondCard.top));
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('orders room columns by venue order instead of the earliest session', (tester) async {
@@ -109,7 +160,7 @@ void main() {
     expect(roomAHeader.dx, lessThan(roomBHeader.dx));
   });
 
-  testWidgets('places overlapping room entries in separate horizontal lanes', (tester) async {
+  testWidgets('lists overlapping room entries in separate non-overlapping rows', (tester) async {
     await _pumpTimetableState(
       tester,
       AsyncData(_overlappingTimetable),
@@ -118,12 +169,36 @@ void main() {
     await tester.tap(find.byTooltip('会場別タイムラインに切り替え'));
     await tester.pumpAndSettle();
 
-    final sessionRect = tester.getRect(find.text('Compact Session'));
-    final eventRect = tester.getRect(find.text('Overlap Event'));
+    final sessionRect = tester.getRect(
+      find.byKey(const ValueKey('room-timeline-entry-compact-session')),
+    );
+    final eventRect = tester.getRect(
+      find.byKey(const ValueKey('room-timeline-entry-overlap-event')),
+    );
 
     expect(sessionRect.overlaps(eventRect), isFalse);
-    expect(sessionRect.top, lessThan(eventRect.bottom));
-    expect(eventRect.top, lessThan(sessionRect.bottom));
+    expect(sessionRect.bottom, lessThan(eventRect.top));
+  });
+
+  testWidgets('stacks entries with the same start time and room inside one cell', (tester) async {
+    await _pumpTimetableState(
+      tester,
+      AsyncData(_sameRoomAndTimeTimetable),
+    );
+
+    await tester.tap(find.byTooltip('会場別タイムラインに切り替え'));
+    await tester.pumpAndSettle();
+
+    final firstRect = tester.getRect(
+      find.byKey(const ValueKey('room-timeline-entry-compact-session')),
+    );
+    final secondRect = tester.getRect(
+      find.byKey(const ValueKey('room-timeline-entry-same-time-event')),
+    );
+
+    expect(firstRect.overlaps(secondRect), isFalse);
+    expect(firstRect.bottom, lessThan(secondRect.top));
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('stacks simultaneous list entries vertically', (tester) async {
@@ -380,7 +455,21 @@ final _venueB = Venue(
 final _entry = SessionTimetableEntry.session(
   session: _session,
   venue: _venue,
-  speakers: const [],
+  speakers: [_speakerA, _speakerB],
+);
+
+final _speakerA = Speaker(
+  id: 'speaker-a',
+  name: 'Speaker A',
+  createdAt: DateTime.utc(2026),
+  updatedAt: DateTime.utc(2026),
+);
+
+final _speakerB = Speaker(
+  id: 'speaker-b',
+  name: 'Speaker B',
+  createdAt: DateTime.utc(2026),
+  updatedAt: DateTime.utc(2026),
 );
 
 final _parallelSession = Session(
@@ -485,6 +574,78 @@ final _overlapEntry = SessionTimetableEntry.timelineEvent(
   venue: _venue,
 );
 
+final _sameTimeEvent = TimelineEvent(
+  id: 'same-time-event',
+  title: const LocaleMap(ja: 'Same Time Event', en: 'Same Time Event'),
+  startsAt: _session.startsAt,
+  endsAt: _session.endsAt,
+  venueId: 'room-a',
+  createdAt: DateTime.utc(2026),
+  updatedAt: DateTime.utc(2026),
+);
+
+final _sameTimeEntry = SessionTimetableEntry.timelineEvent(
+  timelineEvent: _sameTimeEvent,
+  venue: _venue,
+);
+
+final _shortLtA = Session(
+  id: 'short-lt-a',
+  title: const LocaleMap(
+    ja: 'とても短いLTでもセッション名を省略せず最後まで表示するための長いタイトル',
+    en: 'A long lightning talk title that must remain fully visible',
+  ),
+  description: const LocaleMap(ja: '', en: ''),
+  primaryLocale: 'ja',
+  startsAt: DateTime.utc(2026, 10, 31, 8, 30),
+  endsAt: DateTime.utc(2026, 10, 31, 8, 35),
+  venueId: 'room-a',
+  speakerIds: const ['speaker-a', 'speaker-b'],
+  isLightningTalk: true,
+  createdAt: DateTime.utc(2026),
+  updatedAt: DateTime.utc(2026),
+);
+
+final _shortLtB = Session(
+  id: 'short-lt-b',
+  title: const LocaleMap(
+    ja: '直後に続くLTの名前も前のカードと重ならず全文を表示する長いタイトル',
+    en: 'The following lightning talk title must not overlap the previous card',
+  ),
+  description: const LocaleMap(ja: '', en: ''),
+  primaryLocale: 'ja',
+  startsAt: DateTime.utc(2026, 10, 31, 8, 35),
+  endsAt: DateTime.utc(2026, 10, 31, 8, 40),
+  venueId: 'room-a',
+  isLightningTalk: true,
+  createdAt: DateTime.utc(2026),
+  updatedAt: DateTime.utc(2026),
+);
+
+final _shortLtDay = SessionTimetableDay(
+  date: DateTime(2026, 10, 31),
+  entries: [
+    SessionTimetableEntry.session(
+      session: _shortLtA,
+      venue: _venue,
+      speakers: [_speakerA, _speakerB],
+    ),
+    SessionTimetableEntry.session(
+      session: _shortLtB,
+      venue: _venue,
+      speakers: const [],
+    ),
+  ],
+);
+
+final _shortLtTimetable = SessionTimetableData(
+  days: [_shortLtDay],
+  availableDates: [_shortLtDay.date],
+  selectedDate: _shortLtDay.date,
+  selectedDay: _shortLtDay,
+  hasAnyEntries: true,
+);
+
 final _day = SessionTimetableDay(
   date: DateTime(2026, 10, 31),
   entries: [_entry],
@@ -508,6 +669,19 @@ final _parallelTimetable = SessionTimetableData(
   availableDates: [_parallelDay.date],
   selectedDate: _parallelDay.date,
   selectedDay: _parallelDay,
+  hasAnyEntries: true,
+);
+
+final _sameRoomAndTimeDay = SessionTimetableDay(
+  date: _day.date,
+  entries: [_entry, _sameTimeEntry],
+);
+
+final _sameRoomAndTimeTimetable = SessionTimetableData(
+  days: [_sameRoomAndTimeDay],
+  availableDates: [_sameRoomAndTimeDay.date],
+  selectedDate: _sameRoomAndTimeDay.date,
+  selectedDay: _sameRoomAndTimeDay,
   hasAnyEntries: true,
 );
 

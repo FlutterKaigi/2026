@@ -5,19 +5,20 @@ import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/router/router.dart';
 import 'package:app/feature/session/data/provider/bookmarked_sessions_provider.dart';
 import 'package:app/feature/session/data/provider/session_timetable_provider.dart';
+import 'package:app/feature/session/ui/widget/session_speaker_widget.dart';
 import 'package:app/feature/session/util/event_time.dart';
 import 'package:app/feature/session/util/session_language.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-const _timeRailWidth = 58.0;
-const _roomHeaderHeight = 48.0;
-const _roomColumnWidth = 216.0;
-const _roomLaneWidth = 184.0;
-const _minuteHeight = 2.0;
-const _minimumEntryHeight = 28.0;
-const _entryGap = 4.0;
+const _timeColumnWidth = 64.0;
+const _minimumRoomColumnWidth = 216.0;
 
+/// A room-oriented schedule table.
+///
+/// Rows are grouped by start time and size themselves to their content. Unlike
+/// a pixel-per-minute timeline, this keeps every title and speaker readable
+/// without letting short or overlapping sessions paint over each other.
 class SessionTimetableRoomTimelineWidget extends StatelessWidget {
   const SessionTimetableRoomTimelineWidget({
     required this.day,
@@ -32,80 +33,66 @@ class SessionTimetableRoomTimelineWidget extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    final locale = Localizations.localeOf(context);
-    final columns = _buildColumns(context, day.entries);
-    final range = _TimelineRange.fromEntries(day.entries);
-    final gridHeight = range.durationMinutes * _minuteHeight;
-    final hourMarkers = range.hourMarkers;
+    final columns = _buildRoomColumns(context, day.entries);
+    final rows = _buildScheduleRows(day.entries);
+    final colorScheme = Theme.of(context).colorScheme;
+    final borderSide = BorderSide(color: colorScheme.outlineVariant);
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(8, 0, 0, 24),
+      padding: const EdgeInsets.fromLTRB(8, 0, 8, 24),
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final availableColumnWidth = math.max<double>(
-            0,
-            constraints.maxWidth - _timeRailWidth,
+          final availableRoomWidth = constraints.maxWidth.isFinite
+              ? math.max<double>(0, constraints.maxWidth - _timeColumnWidth)
+              : _minimumRoomColumnWidth * columns.length;
+          final roomColumnWidth = math.max<double>(
+            _minimumRoomColumnWidth,
+            availableRoomWidth / columns.length,
           );
-          return Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(
-                width: _timeRailWidth,
-                child: Column(
-                  children: [
-                    const SizedBox(height: _roomHeaderHeight),
-                    SizedBox(
-                      height: gridHeight,
-                      child: Stack(
-                        clipBehavior: Clip.none,
-                        children: [
-                          for (final marker in hourMarkers)
-                            Positioned(
-                              top: range.offsetFor(marker) - 9,
-                              right: 8,
-                              child: Text(
-                                _formatWallClock(marker),
-                                style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                  fontFeatures: const [FontFeature.tabularFigures()],
-                                ),
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                  ],
+          final tableWidth = _timeColumnWidth + roomColumnWidth * columns.length;
+
+          return SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: SizedBox(
+              width: tableWidth,
+              child: Table(
+                columnWidths: {
+                  0: const FixedColumnWidth(_timeColumnWidth),
+                  for (var index = 0; index < columns.length; index++) index + 1: FixedColumnWidth(roomColumnWidth),
+                },
+                border: TableBorder(
+                  top: borderSide,
+                  bottom: borderSide,
+                  left: borderSide,
+                  right: borderSide,
+                  horizontalInside: borderSide,
+                  verticalInside: borderSide,
                 ),
-              ),
-              Expanded(
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TableRow(
+                    decoration: BoxDecoration(color: colorScheme.surfaceContainerHigh),
                     children: [
-                      for (final column in columns)
-                        SizedBox(
-                          width: _columnWidth(
-                            column,
-                            minimumWidth: columns.length == 1 ? availableColumnWidth : _roomColumnWidth,
-                          ),
-                          child: _RoomColumnWidget(
-                            column: column,
-                            columnWidth: _columnWidth(
-                              column,
-                              minimumWidth: columns.length == 1 ? availableColumnWidth : _roomColumnWidth,
-                            ),
-                            range: range,
-                            gridHeight: gridHeight,
-                            hourMarkers: hourMarkers,
-                            locale: locale,
-                          ),
-                        ),
+                      const _TimeHeaderCellWidget(),
+                      for (final column in columns) _RoomHeaderCellWidget(label: column.label),
                     ],
                   ),
-                ),
+                  for (final row in rows)
+                    TableRow(
+                      key: ValueKey('room-schedule-row-${row.startsAt.toIso8601String()}'),
+                      children: [
+                        _TimeCellWidget(startsAt: row.startsAt),
+                        for (final column in columns)
+                          _ScheduleCellWidget(
+                            entries: [
+                              for (final entry in row.entries)
+                                if (entry.venueId == column.venueId) entry,
+                            ],
+                          ),
+                      ],
+                    ),
+                ],
               ),
-            ],
+            ),
           );
         },
       ),
@@ -113,89 +100,91 @@ class SessionTimetableRoomTimelineWidget extends StatelessWidget {
   }
 }
 
-class _RoomColumnWidget extends StatelessWidget {
-  const _RoomColumnWidget({
-    required this.column,
-    required this.columnWidth,
-    required this.range,
-    required this.gridHeight,
-    required this.hourMarkers,
-    required this.locale,
-  });
-
-  final _RoomColumn column;
-  final double columnWidth;
-  final _TimelineRange range;
-  final double gridHeight;
-  final List<DateTime> hourMarkers;
-  final Locale locale;
+class _TimeHeaderCellWidget extends StatelessWidget {
+  const _TimeHeaderCellWidget();
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return Column(
-      children: [
-        Container(
-          height: _roomHeaderHeight,
-          alignment: Alignment.center,
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          decoration: BoxDecoration(
-            color: colorScheme.surfaceContainerHigh,
-            border: Border(
-              left: BorderSide(color: colorScheme.outlineVariant),
-              bottom: BorderSide(color: colorScheme.outlineVariant),
-            ),
-          ),
-          child: Text(
-            column.label,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.labelLarge?.copyWith(
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ),
-        SizedBox(
-          height: gridHeight,
-          child: Stack(
-            children: [
-              Positioned.fill(
-                child: CustomPaint(
-                  painter: _RoomGridPainter(
-                    lineOffsets: [
-                      for (final marker in hourMarkers) range.offsetFor(marker),
-                    ],
-                    color: colorScheme.outlineVariant,
-                  ),
-                ),
-              ),
-              for (final positionedEntry in column.entries)
-                Positioned(
-                  top:
-                      range.offsetFor(
-                        toEventTime(positionedEntry.entry.startsAt),
-                      ) +
-                      (_entryGap / 2),
-                  left: _entryLeft(positionedEntry, columnWidth),
-                  right: _entryRight(positionedEntry, columnWidth),
-                  height: _entryHeight(positionedEntry.entry),
-                  child: _RoomTimelineEntryWidget(
-                    entry: positionedEntry.entry,
-                    locale: locale,
-                  ),
-                ),
-            ],
-          ),
-        ),
-      ],
+    return const Padding(
+      padding: EdgeInsets.symmetric(vertical: 14),
+      child: Icon(Icons.schedule, size: 18),
     );
   }
 }
 
-class _RoomTimelineEntryWidget extends ConsumerWidget {
-  const _RoomTimelineEntryWidget({
+class _RoomHeaderCellWidget extends StatelessWidget {
+  const _RoomHeaderCellWidget({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+      child: Text(
+        label,
+        textAlign: TextAlign.center,
+        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+  }
+}
+
+class _TimeCellWidget extends StatelessWidget {
+  const _TimeCellWidget({required this.startsAt});
+
+  final DateTime startsAt;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(4, 12, 4, 8),
+      child: Text(
+        _formatWallClock(startsAt),
+        textAlign: TextAlign.center,
+        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+          fontFeatures: const [FontFeature.tabularFigures()],
+        ),
+      ),
+    );
+  }
+}
+
+class _ScheduleCellWidget extends StatelessWidget {
+  const _ScheduleCellWidget({required this.entries});
+
+  final List<SessionTimetableEntry> entries;
+
+  @override
+  Widget build(BuildContext context) {
+    if (entries.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final locale = Localizations.localeOf(context);
+    return Padding(
+      padding: const EdgeInsets.all(6),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (var index = 0; index < entries.length; index++) ...[
+            _RoomScheduleEntryWidget(
+              entry: entries[index],
+              locale: locale,
+            ),
+            if (index < entries.length - 1) const SizedBox(height: 8),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _RoomScheduleEntryWidget extends ConsumerWidget {
+  const _RoomScheduleEntryWidget({
     required this.entry,
     required this.locale,
   });
@@ -207,7 +196,7 @@ class _RoomTimelineEntryWidget extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
     final session = entry.session;
-    final title = session?.title.resolve(locale) ?? entry.timelineEvent!.title.resolve(locale);
+    final title = _entryTitle(entry, locale);
     final languageLabel = session == null ? null : sessionLanguageLabel(session.primaryLocale);
     final bookmarked = switch (ref.watch(bookmarkedSessionIdsProvider)) {
       AsyncData(:final value) when session != null => value.contains(session.id),
@@ -215,6 +204,7 @@ class _RoomTimelineEntryWidget extends ConsumerWidget {
     };
 
     return Material(
+      key: ValueKey('room-timeline-entry-${entry.id}'),
       color: entry.isSession ? colorScheme.surfaceContainerLow : colorScheme.tertiaryContainer,
       shape: RoundedRectangleBorder(
         side: BorderSide(
@@ -226,64 +216,56 @@ class _RoomTimelineEntryWidget extends ConsumerWidget {
       child: InkWell(
         onTap: session == null ? null : () => SessionDetailsRoute(sessionId: session.id).push<void>(context),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final showMetadata = constraints.maxHeight >= 50;
-              final showSpeaker = constraints.maxHeight >= 96 && entry.speakers.isNotEmpty;
-
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+          padding: const EdgeInsets.all(8),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
                 children: [
-                  if (showMetadata)
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            formatEventTimeRange(
-                              entry.startsAt,
-                              entry.endsAt,
-                              EventTimeFormat.twentyFourHour,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context).textTheme.labelSmall,
-                          ),
-                        ),
-                        if (languageLabel != null) _TinyLanguageTagWidget(label: languageLabel),
-                        if (bookmarked) ...[
-                          const SizedBox(width: 4),
-                          Icon(
-                            Icons.bookmark,
-                            size: 14,
-                            color: colorScheme.primary,
-                          ),
-                        ],
-                      ],
-                    ),
-                  if (showMetadata) const SizedBox(height: 3),
                   Expanded(
                     child: Text(
-                      title,
-                      maxLines: showSpeaker ? 3 : 4,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        fontWeight: FontWeight.w700,
+                      formatEventTimeRange(
+                        entry.startsAt,
+                        entry.endsAt,
+                        EventTimeFormat.twentyFourHour,
                       ),
-                    ),
-                  ),
-                  if (showSpeaker)
-                    Text(
-                      entry.speakers.first.name,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                      ),
+                      style: Theme.of(context).textTheme.labelSmall,
                     ),
+                  ),
+                  if (languageLabel != null) _TinyLanguageTagWidget(label: languageLabel),
+                  if (bookmarked) ...[
+                    const SizedBox(width: 4),
+                    Icon(
+                      Icons.bookmark,
+                      size: 14,
+                      color: colorScheme.primary,
+                    ),
+                  ],
                 ],
-              );
-            },
+              ),
+              const SizedBox(height: 4),
+              Text(
+                key: ValueKey('room-session-title-${entry.id}'),
+                title,
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              if (entry.speakers.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                for (var index = 0; index < entry.speakers.length; index++) ...[
+                  SessionSpeakerLabelWidget(
+                    speaker: entry.speakers[index],
+                    textStyle: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  if (index < entry.speakers.length - 1) const SizedBox(height: 6),
+                ],
+              ],
+            ],
           ),
         ),
       ),
@@ -316,107 +298,27 @@ class _TinyLanguageTagWidget extends StatelessWidget {
   }
 }
 
-class _RoomGridPainter extends CustomPainter {
-  const _RoomGridPainter({
-    required this.lineOffsets,
-    required this.color,
-  });
-
-  final List<double> lineOffsets;
-  final Color color;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..strokeWidth = 1;
-
-    canvas.drawLine(Offset.zero, Offset(0, size.height), paint);
-    for (final offset in lineOffsets) {
-      canvas.drawLine(Offset(0, offset), Offset(size.width, offset), paint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(_RoomGridPainter oldDelegate) {
-    return color != oldDelegate.color || lineOffsets != oldDelegate.lineOffsets;
-  }
-}
-
 final class _RoomColumn {
   const _RoomColumn({
+    required this.venueId,
     required this.label,
+  });
+
+  final String? venueId;
+  final String label;
+}
+
+final class _ScheduleRow {
+  const _ScheduleRow({
+    required this.startsAt,
     required this.entries,
   });
 
-  final String label;
-  final List<_PositionedRoomEntry> entries;
-
-  int get maximumLaneCount => entries.fold(
-    1,
-    (maximum, positionedEntry) => math.max(
-      maximum,
-      positionedEntry.laneCount,
-    ),
-  );
+  final DateTime startsAt;
+  final List<SessionTimetableEntry> entries;
 }
 
-final class _PositionedRoomEntry {
-  const _PositionedRoomEntry({
-    required this.entry,
-    required this.lane,
-    required this.laneCount,
-  });
-
-  final SessionTimetableEntry entry;
-  final int lane;
-  final int laneCount;
-}
-
-final class _TimelineRange {
-  const _TimelineRange({
-    required this.start,
-    required this.end,
-  });
-
-  factory _TimelineRange.fromEntries(List<SessionTimetableEntry> entries) {
-    final localStarts = [for (final entry in entries) toEventTime(entry.startsAt)]..sort();
-    final localEnds = [
-      for (final entry in entries) toEventTime(entry.endsAt ?? entry.startsAt.add(const Duration(minutes: 30))),
-    ]..sort();
-    final earliest = localStarts.first;
-    final latest = localEnds.last;
-    final start = DateTime.utc(
-      earliest.year,
-      earliest.month,
-      earliest.day,
-      earliest.hour,
-    );
-    final end = latest.minute == 0 && latest.second == 0
-        ? latest
-        : DateTime.utc(
-            latest.year,
-            latest.month,
-            latest.day,
-            latest.hour + 1,
-          );
-
-    return _TimelineRange(start: start, end: end);
-  }
-
-  final DateTime start;
-  final DateTime end;
-
-  int get durationMinutes => math.max(60, end.difference(start).inMinutes);
-
-  List<DateTime> get hourMarkers => [
-    for (var marker = start; !marker.isAfter(end); marker = marker.add(const Duration(hours: 1))) marker,
-  ];
-
-  double offsetFor(DateTime value) => value.difference(start).inMinutes * _minuteHeight;
-}
-
-List<_RoomColumn> _buildColumns(
+List<_RoomColumn> _buildRoomColumns(
   BuildContext context,
   List<SessionTimetableEntry> entries,
 ) {
@@ -432,15 +334,12 @@ List<_RoomColumn> _buildColumns(
   return [
     for (final venueGroup in venueGroups)
       _RoomColumn(
-        label: switch ((
-          venueGroup.value.first.venueId,
-          venueGroup.value.first.venue,
-        )) {
+        venueId: venueGroup.key,
+        label: switch ((venueGroup.value.first.venueId, venueGroup.value.first.venue)) {
           (null, _) => t.sessionTimetable.view.shared,
           (_, final venue?) => venue.name.resolve(locale),
           _ => t.sessionTimetable.venue.unknown,
         },
-        entries: _positionEntries(venueGroup.value),
       ),
   ];
 }
@@ -456,111 +355,31 @@ int _compareVenueGroups(
     return 1;
   }
 
-  final aVenueOrder = a.value.first.venue?.order ?? 1 << 30;
-  final bVenueOrder = b.value.first.venue?.order ?? 1 << 30;
-  final orderCompare = aVenueOrder.compareTo(bVenueOrder);
-  if (orderCompare != 0) {
-    return orderCompare;
-  }
-
-  return a.key!.compareTo(b.key!);
+  final orderCompare = (a.value.first.venue?.order ?? 1 << 30).compareTo(
+    b.value.first.venue?.order ?? 1 << 30,
+  );
+  return orderCompare != 0 ? orderCompare : a.key!.compareTo(b.key!);
 }
 
-List<_PositionedRoomEntry> _positionEntries(
-  List<SessionTimetableEntry> entries,
-) {
-  final sortedEntries = [...entries]
-    ..sort((a, b) {
-      final startCompare = a.startsAt.compareTo(b.startsAt);
-      if (startCompare != 0) {
-        return startCompare;
-      }
-      return _entryEnd(a).compareTo(_entryEnd(b));
-    });
-  final groups = <List<SessionTimetableEntry>>[];
-  var groupEnd = DateTime.fromMillisecondsSinceEpoch(0);
-
-  for (final entry in sortedEntries) {
-    if (groups.isEmpty || !entry.startsAt.isBefore(groupEnd)) {
-      groups.add([entry]);
-      groupEnd = _entryEnd(entry);
-      continue;
-    }
-
-    groups.last.add(entry);
-    final entryEnd = _entryEnd(entry);
-    if (entryEnd.isAfter(groupEnd)) {
-      groupEnd = entryEnd;
-    }
-  }
-
-  return [
-    for (final group in groups) ..._positionGroup(group),
-  ];
-}
-
-List<_PositionedRoomEntry> _positionGroup(
-  List<SessionTimetableEntry> entries,
-) {
-  final laneEnds = <DateTime>[];
-  final assignments = <({SessionTimetableEntry entry, int lane})>[];
-
+List<_ScheduleRow> _buildScheduleRows(List<SessionTimetableEntry> entries) {
+  final entriesByStart = <DateTime, List<SessionTimetableEntry>>{};
   for (final entry in entries) {
-    final reusableLane = laneEnds.indexWhere(
-      (laneEnd) => !laneEnd.isAfter(entry.startsAt),
-    );
-    final lane = reusableLane < 0 ? laneEnds.length : reusableLane;
-    if (reusableLane < 0) {
-      laneEnds.add(_entryEnd(entry));
-    } else {
-      laneEnds[lane] = _entryEnd(entry);
-    }
-    assignments.add((entry: entry, lane: lane));
+    final startsAt = toEventTime(entry.startsAt);
+    entriesByStart.putIfAbsent(startsAt, () => []).add(entry);
   }
+  final startsAtValues = entriesByStart.keys.toList()..sort();
 
   return [
-    for (final assignment in assignments)
-      _PositionedRoomEntry(
-        entry: assignment.entry,
-        lane: assignment.lane,
-        laneCount: laneEnds.length,
+    for (final startsAt in startsAtValues)
+      _ScheduleRow(
+        startsAt: startsAt,
+        entries: entriesByStart[startsAt]!,
       ),
   ];
 }
 
-double _entryHeight(SessionTimetableEntry entry) {
-  final durationMinutes = _entryEnd(entry).difference(entry.startsAt).inMinutes;
-  return math.max(_minimumEntryHeight, durationMinutes * _minuteHeight - _entryGap);
-}
-
-DateTime _entryEnd(SessionTimetableEntry entry) {
-  return entry.endsAt ?? entry.startsAt.add(const Duration(minutes: 30));
-}
-
-double _columnWidth(
-  _RoomColumn column, {
-  required double minimumWidth,
-}) {
-  return math.max<double>(
-    minimumWidth,
-    column.maximumLaneCount * _roomLaneWidth,
-  );
-}
-
-double _entryLeft(
-  _PositionedRoomEntry entry,
-  double columnWidth,
-) {
-  final laneWidth = columnWidth / entry.laneCount;
-  return entry.lane * laneWidth + _entryGap;
-}
-
-double _entryRight(
-  _PositionedRoomEntry entry,
-  double columnWidth,
-) {
-  final laneWidth = columnWidth / entry.laneCount;
-  return columnWidth - ((entry.lane + 1) * laneWidth) + _entryGap;
+String _entryTitle(SessionTimetableEntry entry, Locale locale) {
+  return entry.session?.title.resolve(locale) ?? entry.timelineEvent!.title.resolve(locale);
 }
 
 String _formatWallClock(DateTime value) {

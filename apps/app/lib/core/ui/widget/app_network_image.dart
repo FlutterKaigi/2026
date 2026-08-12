@@ -79,21 +79,35 @@ class AppNetworkAvatar extends StatelessWidget {
   Widget build(BuildContext context) {
     final normalizedImageUrl = imageUrl?.trim();
     final hasImage = normalizedImageUrl != null && normalizedImageUrl.isNotEmpty;
+    final diameter = (radius ?? 20) * 2;
+    final effectiveBackgroundColor = backgroundColor ?? Theme.of(context).colorScheme.primaryContainer;
 
-    return CircleAvatar(
-      radius: radius,
-      backgroundColor: backgroundColor,
-      child: hasImage
-          ? ClipOval(
-              child: SizedBox.expand(
-                child: AppNetworkImage(
-                  imageUrl: normalizedImageUrl,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => fallback ?? const SizedBox.shrink(),
-                ),
-              ),
-            )
-          : fallback,
+    return SizedBox.square(
+      dimension: diameter,
+      child: Center(
+        child: AspectRatio(
+          aspectRatio: 1,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: effectiveBackgroundColor,
+              shape: BoxShape.circle,
+            ),
+            child: ClipOval(
+              child: hasImage
+                  ? AppNetworkImage(
+                      imageUrl: normalizedImageUrl,
+                      width: diameter,
+                      height: diameter,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => Center(
+                        child: fallback ?? const SizedBox.shrink(),
+                      ),
+                    )
+                  : Center(child: fallback),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

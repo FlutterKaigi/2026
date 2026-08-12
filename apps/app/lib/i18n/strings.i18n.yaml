@@ -47,7 +47,6 @@ sessionTimetable:
     regular: 通常セッション
     lightningTalk: LT
     beginnersLightningTalk: 初心者向けLT
-    handsOn: ハンズオン
     event: イベント
 sessionSearch:
   title: セッションを検索

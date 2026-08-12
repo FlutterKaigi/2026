@@ -593,9 +593,6 @@ class Translations$sessionTimetable$type$ja {
 	/// ja: '初心者向けLT'
 	String get beginnersLightningTalk => '初心者向けLT';
 
-	/// ja: 'ハンズオン'
-	String get handsOn => 'ハンズオン';
-
 	/// ja: 'イベント'
 	String get event => 'イベント';
 }
@@ -843,7 +840,6 @@ extension on Translations {
 			'sessionTimetable.type.regular' => '通常セッション',
 			'sessionTimetable.type.lightningTalk' => 'LT',
 			'sessionTimetable.type.beginnersLightningTalk' => '初心者向けLT',
-			'sessionTimetable.type.handsOn' => 'ハンズオン',
 			'sessionTimetable.type.event' => 'イベント',
 			'sessionSearch.title' => 'セッションを検索',
 			'sessionSearch.hint' => 'タイトル・概要・登壇者を検索',
