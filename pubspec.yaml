@@ -9,6 +9,9 @@ workspace:
   - apps/website
   - apps/app
   - apps/dashboard
+  - apps/venue_screen
+  - tools/caption_relay
+  - packages/caption_protocol
   - packages/data
   - packages/flutterkaigi_lints
 
@@ -40,13 +43,25 @@ melos:
       run: fvm dart run melos exec --scope=dashboard -- fvm flutter analyze .
       description: Run flutter analyze on the dashboard app
 
+    analyze:venue-screen:
+      run: fvm dart run melos exec --scope=venue_screen -- fvm flutter analyze .
+      description: Analyze the venue screen overlay
+
+    analyze:caption-protocol:
+      run: fvm dart run melos exec --scope=caption_protocol -- fvm dart analyze .
+      description: Analyze the shared caption protocol
+
+    analyze:caption-relay:
+      run: fvm dart run melos exec --scope=caption_relay -- fvm dart analyze .
+      description: Analyze the local caption relay
+
     analyze:data:
       run: fvm dart run melos exec --scope=data -- fvm flutter analyze .
       description: Run flutter analyze on the data package
 
     analyze:
-      run: fvm dart run melos run analyze:website && fvm dart run melos run analyze:app && fvm dart run melos run analyze:dashboard && fvm dart run melos run analyze:data
-      description: Analyze all packages (website + app + dashboard + shared packages)
+      run: fvm dart run melos run analyze:website && fvm dart run melos run analyze:app && fvm dart run melos run analyze:dashboard && fvm dart run melos run analyze:venue-screen && fvm dart run melos run analyze:caption-protocol && fvm dart run melos run analyze:caption-relay && fvm dart run melos run analyze:data
+      description: Analyze all packages and applications
 
     format:
       run: fvm dart run melos exec -- fvm dart format .
@@ -80,13 +95,41 @@ melos:
       run: fvm dart run melos exec --scope=dashboard --dir-exists=test -- fvm flutter test
       description: Run tests in the dashboard app (uses flutter test for widget tests)
 
+    test:venue-screen:
+      run: fvm dart run melos exec --scope=venue_screen --dir-exists=test -- fvm flutter test
+      description: Run tests for the venue screen overlay
+
+    test:caption-protocol:
+      run: fvm dart run melos exec --scope=caption_protocol --dir-exists=test -- fvm dart test
+      description: Run caption protocol contract tests
+
+    test:caption-relay:
+      run: fvm dart run melos exec --scope=caption_relay --dir-exists=test -- fvm dart test
+      description: Run local caption relay tests
+
     test:data:
       run: fvm dart run melos exec --scope=data --dir-exists=test -- fvm flutter test
       description: Run tests in the data package
 
     test:
-      run: fvm dart run melos run test:website && fvm dart run melos run test:app && fvm dart run melos run test:dashboard && fvm dart run melos run test:data
-      description: Run all tests (website + app + dashboard + shared packages)
+      run: fvm dart run melos run test:website && fvm dart run melos run test:app && fvm dart run melos run test:dashboard && fvm dart run melos run test:venue-screen && fvm dart run melos run test:caption-protocol && fvm dart run melos run test:caption-relay && fvm dart run melos run test:data
+      description: Run all tests
+
+    venue-screen:run:
+      run: fvm dart run melos exec --scope=venue_screen -- fvm flutter run -d chrome
+      description: Run the venue screen overlay directly in Chrome
+
+    venue-screen:build:
+      run: fvm dart run melos exec --scope=venue_screen -- fvm flutter build web --release --no-wasm-dry-run
+      description: Build the venue screen overlay for the local relay
+
+    caption-relay:serve:
+      run: fvm dart run melos exec --scope=caption_relay -- fvm dart run bin/caption_relay.dart --web-root ../../apps/venue_screen/build/web
+      description: Serve the built overlay and local caption WebSocket relay
+
+    caption-relay:replay:
+      run: fvm dart run melos exec --scope=caption_relay -- fvm dart run bin/replay_captions.dart --file test/fixtures/rehearsal.json
+      description: Replay an anonymous caption fixture through the local relay
 
     website:serve:
       run: fvm dart run melos run sponsors:generate && fvm dart run melos run news:generate && fvm dart run melos exec --scope=website -- fvm dart run jaspr_cli:jaspr serve

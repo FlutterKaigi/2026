@@ -1,0 +1,106 @@
+name: Venue Screen CI
+
+on:
+  pull_request:
+    paths:
+      - apps/venue_screen/**
+      - packages/caption_protocol/**
+      - packages/flutterkaigi_lints/**
+      - tools/caption_relay/**
+      - docs/venue-subtitles/**
+      - .fvmrc
+      - dprint.jsonc
+      - pubspec.yaml
+      - pubspec.lock
+      - .github/workflows/ci_venue_screen.yaml
+  push:
+    branches:
+      - main
+    paths:
+      - apps/venue_screen/**
+      - packages/caption_protocol/**
+      - packages/flutterkaigi_lints/**
+      - tools/caption_relay/**
+      - docs/venue-subtitles/**
+      - .fvmrc
+      - dprint.jsonc
+      - pubspec.yaml
+      - pubspec.lock
+      - .github/workflows/ci_venue_screen.yaml
+  workflow_dispatch:
+
+concurrency:
+  group: venue-screen-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions: {}
+
+defaults:
+  run:
+    shell: bash -euo pipefail {0}
+
+jobs:
+  style:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Check documentation and configuration formatting
+        uses: dprint/check@9cb3a2b17a8e606d37aae341e49df3654933fc23 # v2.3
+        with:
+          dprint-version: 0.55.2
+          config-path: dprint.jsonc
+
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - id: flutter-version
+        run: echo "version=$(jq -r .flutter .fvmrc)" >> "$GITHUB_OUTPUT"
+
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version: ${{ steps.flutter-version.outputs.version }}
+          channel: stable
+          cache: true
+
+      - name: Resolve dependencies
+        run: dart pub get
+
+      - name: Check Dart formatting
+        run: dart format --output=none --set-exit-if-changed apps/venue_screen packages/caption_protocol tools/caption_relay
+
+      - name: Analyze caption protocol
+        working-directory: packages/caption_protocol
+        run: dart analyze
+
+      - name: Analyze caption relay
+        working-directory: tools/caption_relay
+        run: dart analyze
+
+      - name: Analyze venue screen overlay
+        working-directory: apps/venue_screen
+        run: dart analyze
+
+      - name: Test caption protocol
+        working-directory: packages/caption_protocol
+        run: dart test
+
+      - name: Test caption relay
+        working-directory: tools/caption_relay
+        run: dart test
+
+      - name: Test venue screen overlay
+        working-directory: apps/venue_screen
+        run: flutter test
+
+      - name: Build venue screen overlay
+        working-directory: apps/venue_screen
+        run: flutter build web --release --no-wasm-dry-run

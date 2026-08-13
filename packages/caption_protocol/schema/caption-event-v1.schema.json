@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flutterkaigi.jp/schemas/caption-event-v1.schema.json",
+  "title": "FlutterKaigi caption event v1",
+  "type": "object",
+  "required": ["protocolVersion", "type", "roomId", "sessionId", "sequence", "producedAt"],
+  "properties": {
+    "protocolVersion": { "const": 1 },
+    "type": { "enum": ["caption", "clear", "heartbeat"] },
+    "roomId": { "type": "string", "pattern": "^[A-Za-z0-9._:-]+$", "maxLength": 128 },
+    "sessionId": { "type": "string", "pattern": "^[A-Za-z0-9._:-]+$", "maxLength": 128 },
+    "sequence": { "type": "integer", "minimum": 0 },
+    "utteranceId": { "type": "string", "pattern": "^[A-Za-z0-9._:-]+$", "maxLength": 128 },
+    "utteranceSequence": { "type": "integer", "minimum": 0 },
+    "revision": { "type": "integer", "minimum": 0 },
+    "sourceText": { "type": "string", "maxLength": 1000 },
+    "translatedText": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1000,
+      "pattern": "^[^\\u0000-\\u001F\\u007F\\u2028\\u2029]*$"
+    },
+    "isFinal": { "type": "boolean" },
+    "sourceStartedAt": { "type": "string", "format": "date-time", "pattern": "Z$" },
+    "producedAt": { "type": "string", "format": "date-time", "pattern": "Z$" },
+    "clearAt": { "type": "string", "format": "date-time", "pattern": "Z$" }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "type": { "const": "caption" } } },
+      "then": {
+        "required": [
+          "utteranceId",
+          "utteranceSequence",
+          "revision",
+          "translatedText",
+          "isFinal",
+          "sourceStartedAt",
+          "clearAt"
+        ]
+      }
+    },
+    {
+      "if": { "properties": { "type": { "enum": ["clear", "heartbeat"] } } },
+      "then": {
+        "not": {
+          "anyOf": [
+            { "required": ["sourceText"] },
+            { "required": ["utteranceId"] },
+            { "required": ["utteranceSequence"] },
+            { "required": ["revision"] },
+            { "required": ["translatedText"] },
+            { "required": ["isFinal"] },
+            { "required": ["sourceStartedAt"] },
+            { "required": ["clearAt"] }
+          ]
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

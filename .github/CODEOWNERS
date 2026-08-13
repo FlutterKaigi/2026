@@ -1,2 +1,6 @@
 /apps/app/ @FlutterKaigi/conference-app-2026 @FlutterKaigi/infra-2026
+/apps/venue_screen/ @FlutterKaigi/conference-app-2026 @FlutterKaigi/infra-2026
+/packages/caption_protocol/ @FlutterKaigi/conference-app-2026 @FlutterKaigi/infra-2026
+/tools/caption_relay/ @FlutterKaigi/conference-app-2026 @FlutterKaigi/infra-2026
+/docs/venue-subtitles/ @FlutterKaigi/conference-app-2026 @FlutterKaigi/infra-2026
 /apps/website/ @FlutterKaigi/conference-website-2026

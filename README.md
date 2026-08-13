@@ -1,10 +1,13 @@
 # FlutterKaigi 2026
 
-Monorepo for the FlutterKaigi 2026 website, app, and dashboard.
+Monorepo for the FlutterKaigi 2026 website, attendee app, dashboard, and venue tooling.
 
 - `apps/website/` — jaspr static site
-- `apps/app/` — Flutter app (iOS / Android)
+- `apps/app/` — Flutter app (iOS / Android / Web)
 - `apps/dashboard/` — Flutter web app (dashboard)
+- `apps/venue_screen/` — prototype transparent Flutter web caption overlay for OBS
+- `tools/caption_relay/` — prototype local-only caption ingest and WebSocket relay
+- `packages/caption_protocol/` — shared versioned caption event contract
 - `packages/` — shared Dart packages
 
 Managed with [melos](https://melos.invertase.dev/) (v7) on top of Dart pub workspaces, with Flutter pinned by [FVM](https://fvm.app/).
@@ -47,6 +50,9 @@ The pinned Flutter version is `3.41.7` (see `.fvmrc`).
 | `fvm dart run melos dashboard:build:dev` | Build the dashboard app for web (dev / emulator) |
 | `fvm dart run melos dashboard:build:stg` | Build the dashboard app for web (stg) |
 | `fvm dart run melos dashboard:build:prod` | Build the dashboard app for web (prod) |
+| `fvm dart run melos venue-screen:build` | Build the venue caption overlay |
+| `fvm dart run melos caption-relay:serve` | Serve the built overlay and local caption relay |
+| `fvm dart run melos caption-relay:replay` | Replay anonymous rehearsal captions through the relay |
 | `fvm dart run melos firebase:emulators` | Run Firebase Emulator Suite for local development |
 | `fvm dart run melos firebase:schema:validate` | Validate Firebase seed data against the sample schema |
 | `fvm dart run melos firebase:seed` | Seed the running Firestore emulator with sample data |
@@ -58,7 +64,19 @@ The pinned Flutter version is `3.41.7` (see `.fvmrc`).
 | `fvm dart run melos format` | `dart format` across all packages |
 | `fvm dart run melos test` | Run tests across all packages (website with `dart test`; app, dashboard, and `packages/data` with `flutter test`) |
 
-Per-target variants are also available: `analyze:website`, `analyze:app`, `analyze:dashboard`, `test:website`, `test:app`, `test:dashboard`.
+Per-target variants are also available for the website, attendee app, dashboard, venue screen, caption protocol, caption relay, and data package.
+
+Venue caption setup and OBS operating procedures are documented in
+[apps/venue_screen/README.md](apps/venue_screen/README.md) and
+[docs/venue-subtitles/RUNBOOK.md](docs/venue-subtitles/RUNBOOK.md).
+
+The venue-screen implementation is a technical prototype, not an approved
+production system. Production use requires the organizational, equipment,
+readability, recording, and fallback gates in
+[docs/venue-subtitles/ACCEPTANCE.md](docs/venue-subtitles/ACCEPTANCE.md). The
+attendee-app subtitle path remains mandatory parallel work owned by the app
+team; it is intentionally outside the scope of this branch and must be ready
+as an independent fallback.
 
 ## Firebase local development
 

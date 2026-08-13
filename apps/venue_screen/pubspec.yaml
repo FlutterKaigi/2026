@@ -1,0 +1,32 @@
+name: venue_screen
+description: Transparent realtime caption overlay for FlutterKaigi venue screens.
+version: 0.1.0+1
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ">=3.11.0 <4.0.0"
+  flutter: ">=3.41.0"
+
+dependencies:
+  caption_protocol:
+    path: ../../packages/caption_protocol
+  flutter:
+    sdk: flutter
+  web_socket_channel: ^3.0.3
+
+dev_dependencies:
+  fake_async: ^1.3.3
+  flutter_test:
+    sdk: flutter
+  flutterkaigi_lints:
+    path: ../../packages/flutterkaigi_lints
+
+flutter:
+  uses-material-design: true
+  assets:
+    - res/fonts/NotoSansJP/OFL.txt
+  fonts:
+    - family: Noto Sans JP
+      fonts:
+        - asset: res/fonts/NotoSansJP/NotoSansJP-VariableFont.ttf

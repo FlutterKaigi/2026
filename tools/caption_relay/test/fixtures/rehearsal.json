@@ -1,0 +1,35 @@
+[
+  {
+    "delayMs": 250,
+    "utteranceId": "rehearsal-1",
+    "utteranceSequence": 1,
+    "revision": 0,
+    "sourceAgeMs": 1400,
+    "sourceText": "FlutterKaigi 2026へようこそ。",
+    "translatedText": "Welcome to FlutterKaigi 2026.",
+    "isFinal": true,
+    "clearAfterMs": 8000
+  },
+  {
+    "delayMs": 2200,
+    "utteranceId": "rehearsal-2",
+    "utteranceSequence": 2,
+    "revision": 0,
+    "sourceAgeMs": 1700,
+    "sourceText": "この字幕は会場内のPCで処理しています。",
+    "translatedText": "These captions are processed on a computer inside the venue.",
+    "isFinal": true,
+    "clearAfterMs": 8000
+  },
+  {
+    "delayMs": 2200,
+    "utteranceId": "rehearsal-3",
+    "utteranceSequence": 3,
+    "revision": 0,
+    "sourceAgeMs": 1600,
+    "sourceText": "障害時は字幕なしの映像へ切り替えます。",
+    "translatedText": "If a failure occurs, we switch back to the clean video feed immediately.",
+    "isFinal": true,
+    "clearAfterMs": 8000
+  }
+]

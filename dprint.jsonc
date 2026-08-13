@@ -6,8 +6,13 @@
   "lineWidth": 120,
   "incremental": false,
   "includes": [
+    ".github/workflows/ci_venue_screen.yaml",
     "apps/app/**/*.{json,jsonc,md,toml,yaml,yml}",
+    "apps/venue_screen/**/*.{json,jsonc,md,toml,yaml,yml}",
+    "packages/caption_protocol/**/*.{json,jsonc,md,toml,yaml,yml}",
     "packages/data/**/*.{json,jsonc,md,toml,yaml,yml}",
+    "tools/caption_relay/**/*.{json,jsonc,md,toml,yaml,yml}",
+    "docs/venue-subtitles/**/*.{json,jsonc,md,toml,yaml,yml}",
   ],
   "excludes": [
     "apps/dashboard/**",
