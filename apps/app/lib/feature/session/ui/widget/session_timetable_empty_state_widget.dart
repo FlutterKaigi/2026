@@ -15,9 +15,7 @@ class SessionTimetableEmptyStateWidget extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final contentHeight = constraints.maxHeight > 48
-            ? constraints.maxHeight - 48
-            : 0.0;
+        final contentHeight = constraints.maxHeight > 48 ? constraints.maxHeight - 48 : 0.0;
 
         return ListView(
           controller: scrollController,
