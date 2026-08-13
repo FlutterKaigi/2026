@@ -1,5 +1,6 @@
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/ui/widget/app_error_view.dart';
+import 'package:app/core/ui/widget/app_scrollbar.dart';
 import 'package:app/feature/license/data/license_provider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -56,15 +57,17 @@ class _LicenseBody extends StatelessWidget {
       return Center(child: Text(t.licenses.notFound));
     }
 
-    return Center(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 760),
-        child: ListView.builder(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-          itemCount: groups.length,
-          itemBuilder: (context, index) => _LicenseGroup(
-            paragraphs: groups[index],
-            showDivider: index > 0,
+    return AppScrollbar(
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 760),
+          child: ListView.builder(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+            itemCount: groups.length,
+            itemBuilder: (context, index) => _LicenseGroup(
+              paragraphs: groups[index],
+              showDivider: index > 0,
+            ),
           ),
         ),
       ),

@@ -61,9 +61,6 @@
     "isBeginnersLightningTalk": {
       "type": "boolean"
     },
-    "isHandsOn": {
-      "type": "boolean"
-    },
     "sessionizeUrl": {
       "type": ["string", "null"],
       "format": "uri"

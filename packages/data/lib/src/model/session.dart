@@ -21,7 +21,6 @@ abstract class Session with _$Session {
     @Default([]) List<String> speakerIds,
     @Default(false) bool isLightningTalk,
     @Default(false) bool isBeginnersLightningTalk,
-    @Default(false) bool isHandsOn,
     String? sessionizeUrl,
     @FirestoreDateTimeConverter() required DateTime createdAt,
     @FirestoreDateTimeConverter() required DateTime updatedAt,

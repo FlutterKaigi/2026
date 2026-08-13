@@ -3,9 +3,10 @@ import 'dart:async';
 import 'package:app/core/extension/locale_map_extension.dart';
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/ui/launch_external_url.dart';
-import 'package:app/core/ui/widget/app_network_image.dart';
+import 'package:app/core/ui/widget/app_scrollbar.dart';
 import 'package:app/feature/session/data/provider/session_detail_provider.dart';
 import 'package:app/feature/session/ui/widget/session_bookmark_button.dart';
+import 'package:app/feature/session/ui/widget/session_speaker_widget.dart';
 import 'package:app/feature/session/util/event_time.dart';
 import 'package:app/feature/session/util/session_language.dart';
 import 'package:data/data.dart';
@@ -13,8 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 const _sessionOrigin = 'https://2026.flutterkaigi.jp';
-const _largeAppBarCollapsedHeight = 64.0;
-const _largeAppBarTitleBottomPadding = 28.0;
+const _largeAppBarTitleBottomPadding = 32.0;
 const _largeAppBarMaxTitleScaleFactor = 1.34;
 const _largeAppBarTitleHorizontalPadding = 32.0;
 
@@ -38,128 +38,147 @@ class SessionDetailsContentWidget extends StatelessWidget {
     final sessionizeUri = _externalUri(session.sessionizeUrl);
 
     return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          SliverLayoutBuilder(
-            builder: (context, constraints) => SliverAppBar.large(
-              expandedHeight: _sessionTitleExpandedHeight(
-                context: context,
-                title: title,
-                maxWidth: constraints.crossAxisExtent,
+      body: AppScrollbar(
+        child: CustomScrollView(
+          slivers: [
+            SliverLayoutBuilder(
+              builder: (context, constraints) => SliverAppBar.large(
+                expandedHeight: _sessionTitleExpandedHeight(
+                  context: context,
+                  title: title,
+                  maxWidth: constraints.crossAxisExtent,
+                ),
+                title: Text(
+                  title,
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                actions: [
+                  SessionBookmarkButton(sessionId: session.id),
+                  IconButton(
+                    tooltip: t.sessionDetails.share,
+                    onPressed: () => unawaited(
+                      _shareSession(
+                        context,
+                        data,
+                        locale,
+                        t.links.openError,
+                      ),
+                    ),
+                    icon: const Icon(Icons.share_outlined),
+                  ),
+                ],
               ),
-              title: Text(
-                title,
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              actions: [
-                SessionBookmarkButton(sessionId: session.id),
-                IconButton(
-                  tooltip: t.sessionDetails.share,
-                  onPressed: () => unawaited(
-                    _shareSession(
-                      context,
-                      data,
-                      locale,
-                      t.links.openError,
+            ),
+            SliverToBoxAdapter(
+              child: Column(
+                key: const ValueKey('session-details-content'),
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                    child: Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        _InfoChip(
+                          icon: Icons.sell_outlined,
+                          label: _sessionTypeLabel(t, session),
+                        ),
+                        if (languageLabel != null)
+                          _InfoChip(
+                            icon: Icons.language,
+                            label: languageLabel,
+                          ),
+                        _InfoChip(
+                          icon: Icons.calendar_today_outlined,
+                          label: DateFormat(
+                            'yyyy/MM/dd',
+                          ).format(toEventTime(session.startsAt)),
+                        ),
+                        _InfoChip(
+                          icon: Icons.schedule,
+                          label: formatEventTimeRange(
+                            session.startsAt,
+                            session.endsAt,
+                            timeFormat,
+                            locale: locale.toLanguageTag(),
+                          ),
+                        ),
+                        _InfoChip(
+                          icon: Icons.meeting_room_outlined,
+                          label: data.venue?.name.resolve(locale) ?? t.sessionTimetable.venue.unknown,
+                        ),
+                      ],
                     ),
                   ),
-                  icon: const Icon(Icons.share_outlined),
-                ),
-              ],
-            ),
-          ),
-          SliverList.list(
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                child: Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    _InfoChip(
-                      icon: Icons.sell_outlined,
-                      label: _sessionTypeLabel(t, session),
-                    ),
-                    if (languageLabel != null)
-                      _InfoChip(
-                        icon: Icons.language,
-                        label: languageLabel,
+                  if (data.speakers.isNotEmpty) ...[
+                    _SectionHeader(title: t.sessionDetails.speakers),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          for (var index = 0; index < data.speakers.length; index++) ...[
+                            _SpeakerDetailsWidget(
+                              speaker: data.speakers[index],
+                            ),
+                            if (index < data.speakers.length - 1) const SizedBox(height: 16),
+                          ],
+                        ],
                       ),
-                    _InfoChip(
-                      icon: Icons.calendar_today_outlined,
-                      label: DateFormat(
-                        'yyyy/MM/dd',
-                      ).format(toEventTime(session.startsAt)),
-                    ),
-                    _InfoChip(
-                      icon: Icons.schedule,
-                      label: formatEventTimeRange(
-                        session.startsAt,
-                        session.endsAt,
-                        timeFormat,
-                        locale: locale.toLanguageTag(),
-                      ),
-                    ),
-                    _InfoChip(
-                      icon: Icons.meeting_room_outlined,
-                      label: data.venue?.name.resolve(locale) ?? t.sessionTimetable.venue.unknown,
                     ),
                   ],
-                ),
-              ),
-              if (data.speakers.isNotEmpty) ...[
-                _SectionHeader(title: t.sessionDetails.speakers),
-                for (final speaker in data.speakers) _SpeakerTile(speaker: speaker),
-              ],
-              if (description.isNotEmpty) ...[
-                _SectionHeader(title: t.sessionDetails.description),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Text(
-                    description,
-                    style: Theme.of(context).textTheme.bodyLarge,
+                  if (description.isNotEmpty) ...[
+                    _SectionHeader(title: t.sessionDetails.description),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Text(
+                        description,
+                        style: Theme.of(context).textTheme.bodyLarge,
+                      ),
+                    ),
+                  ],
+                  _SectionHeader(title: t.sessionDetails.schedule),
+                  _DetailListTile(
+                    icon: Icons.event_outlined,
+                    title: DateFormat(
+                      'yyyy/MM/dd',
+                    ).format(toEventTime(session.startsAt)),
                   ),
-                ),
-              ],
-              _SectionHeader(title: t.sessionDetails.schedule),
-              _DetailListTile(
-                icon: Icons.event_outlined,
-                title: DateFormat(
-                  'yyyy/MM/dd',
-                ).format(toEventTime(session.startsAt)),
-              ),
-              _DetailListTile(
-                icon: Icons.schedule,
-                title: formatEventTimeRange(
-                  session.startsAt,
-                  session.endsAt,
-                  timeFormat,
-                  locale: locale.toLanguageTag(),
-                ),
-              ),
-              _DetailListTile(
-                icon: Icons.room_outlined,
-                title: data.venue?.name.resolve(locale) ?? t.sessionTimetable.venue.unknown,
-              ),
-              if (sessionizeUri != null) ...[
-                _SectionHeader(title: t.sessionDetails.links),
-                _DetailListTile(
-                  icon: Icons.open_in_new,
-                  title: t.sessionDetails.sessionize,
-                  subtitle: sessionizeUri.toString(),
-                  onTap: () => unawaited(
-                    launchExternalUrl(
-                      context,
-                      uri: sessionizeUri,
-                      failureMessage: t.links.openError,
+                  _DetailListTile(
+                    icon: Icons.schedule,
+                    title: formatEventTimeRange(
+                      session.startsAt,
+                      session.endsAt,
+                      timeFormat,
+                      locale: locale.toLanguageTag(),
                     ),
                   ),
-                ),
-              ],
-              const SizedBox(height: 32),
-            ],
-          ),
-        ],
+                  _DetailListTile(
+                    icon: Icons.room_outlined,
+                    title: data.venue?.name.resolve(locale) ?? t.sessionTimetable.venue.unknown,
+                  ),
+                  if (sessionizeUri != null) ...[
+                    _SectionHeader(title: t.sessionDetails.links),
+                    _DetailListTile(
+                      icon: Icons.open_in_new,
+                      title: t.sessionDetails.sessionize,
+                      subtitle: sessionizeUri.toString(),
+                      onTap: () => unawaited(
+                        launchExternalUrl(
+                          context,
+                          uri: sessionizeUri,
+                          failureMessage: t.links.openError,
+                        ),
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 32),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -174,7 +193,7 @@ double _sessionTitleExpandedHeight({
       TextPainter(
         text: TextSpan(
           text: title,
-          style: Theme.of(context).textTheme.titleLarge,
+          style: Theme.of(context).textTheme.headlineMedium,
         ),
         textDirection: Directionality.of(context),
         textScaler: MediaQuery.textScalerOf(
@@ -184,7 +203,7 @@ double _sessionTitleExpandedHeight({
         maxWidth: maxWidth - _largeAppBarTitleHorizontalPadding,
       );
 
-  return _largeAppBarCollapsedHeight + _largeAppBarTitleBottomPadding + textPainter.height;
+  return kToolbarHeight + _largeAppBarTitleBottomPadding + textPainter.height;
 }
 
 class _SectionHeader extends StatelessWidget {
@@ -206,22 +225,43 @@ class _SectionHeader extends StatelessWidget {
   }
 }
 
-class _SpeakerTile extends StatelessWidget {
-  const _SpeakerTile({required this.speaker});
+class _SpeakerDetailsWidget extends StatelessWidget {
+  const _SpeakerDetailsWidget({required this.speaker});
 
   final Speaker speaker;
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      leading: AppNetworkAvatar(
-        radius: 28,
-        imageUrl: speaker.avatarUrl,
-        fallback: const Icon(Icons.person_outline),
-      ),
-      title: Text(speaker.name),
-      subtitle: speaker.bio == null || speaker.bio!.trim().isEmpty ? null : Text(speaker.bio!.trim()),
+    final bio = speaker.bio?.trim();
+    return Row(
+      key: ValueKey('session-speaker-details-${speaker.id}'),
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SessionSpeakerAvatarWidget(
+          speaker: speaker,
+          size: 56,
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                key: ValueKey('session-speaker-name-${speaker.id}'),
+                speaker.name,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              if (bio != null && bio.isNotEmpty) ...[
+                const SizedBox(height: 4),
+                Text(
+                  bio,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+              ],
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
@@ -308,9 +348,6 @@ Uri? _externalUri(String? rawUrl) {
 }
 
 String _sessionTypeLabel(Translations t, Session session) {
-  if (session.isHandsOn) {
-    return t.sessionTimetable.type.handsOn;
-  }
   if (session.isBeginnersLightningTalk) {
     return t.sessionTimetable.type.beginnersLightningTalk;
   }

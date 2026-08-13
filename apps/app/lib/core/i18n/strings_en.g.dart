@@ -370,7 +370,6 @@ class _Translations$sessionTimetable$type$en extends Translations$sessionTimetab
 	@override String get regular => 'Regular Talk';
 	@override String get lightningTalk => 'Lightning Talk';
 	@override String get beginnersLightningTalk => 'Beginners LT';
-	@override String get handsOn => 'Hands-on';
 	@override String get event => 'Event';
 }
 
@@ -521,7 +520,6 @@ extension on TranslationsEn {
 			'sessionTimetable.type.regular' => 'Regular Talk',
 			'sessionTimetable.type.lightningTalk' => 'Lightning Talk',
 			'sessionTimetable.type.beginnersLightningTalk' => 'Beginners LT',
-			'sessionTimetable.type.handsOn' => 'Hands-on',
 			'sessionTimetable.type.event' => 'Event',
 			'sessionSearch.title' => 'Search sessions',
 			'sessionSearch.hint' => 'Search titles, descriptions, and speakers',
