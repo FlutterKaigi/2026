@@ -2061,8 +2061,8 @@
           "ja": "1日目: 学生支援オリエンテーション",
           "en": "Day 1: Student Support Orientation"
         },
-        "startsAt": "2026-10-29T10:45:00+09:00",
-        "endsAt": "2026-10-29T12:15:00+09:00",
+        "startsAt": "2026-10-29T10:15:00+09:00",
+        "endsAt": "2026-10-29T11:00:00+09:00",
         "venueId": "hall-d",
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -2081,6 +2081,21 @@
         "venueId": null,
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "timelineEvents/day1-lunch-stage",
+      "schema": "timeline_event",
+      "data": {
+        "title": {
+          "ja": "1日目: ランチステージ",
+          "en": "Day 1: Lunch Stage"
+        },
+        "startsAt": "2026-10-29T13:10:00+09:00",
+        "endsAt": "2026-10-29T13:25:00+09:00",
+        "venueId": "hall-a",
+        "createdAt": "2026-08-16T00:00:00Z",
+        "updatedAt": "2026-08-16T00:00:00Z"
       }
     },
     {
@@ -2181,8 +2196,8 @@
           "ja": "2日目: 学生支援オリエンテーション",
           "en": "Day 2: Student Support Orientation"
         },
-        "startsAt": "2026-10-30T10:45:00+09:00",
-        "endsAt": "2026-10-30T12:15:00+09:00",
+        "startsAt": "2026-10-30T10:15:00+09:00",
+        "endsAt": "2026-10-30T11:00:00+09:00",
         "venueId": "hall-d",
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
@@ -2201,6 +2216,21 @@
         "venueId": null,
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "timelineEvents/day2-lunch-stage",
+      "schema": "timeline_event",
+      "data": {
+        "title": {
+          "ja": "2日目: ランチステージ",
+          "en": "Day 2: Lunch Stage"
+        },
+        "startsAt": "2026-10-30T13:00:00+09:00",
+        "endsAt": "2026-10-30T13:15:00+09:00",
+        "venueId": "hall-a",
+        "createdAt": "2026-08-16T00:00:00Z",
+        "updatedAt": "2026-08-16T00:00:00Z"
       }
     },
     {
@@ -2231,6 +2261,66 @@
         "venueId": null,
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "timelineEvents/day2-hall-conversion-a",
+      "schema": "timeline_event",
+      "data": {
+        "title": {
+          "ja": "2日目: 転換開始",
+          "en": "Day 2: Start conversion"
+        },
+        "startsAt": "2026-10-30T17:30:00+09:00",
+        "endsAt": "2026-10-30T18:15:00+09:00",
+        "venueId": "hall-a",
+        "createdAt": "2026-08-16T00:00:00Z",
+        "updatedAt": "2026-08-16T00:00:00Z"
+      }
+    },
+    {
+      "path": "timelineEvents/day2-hall-conversion-b",
+      "schema": "timeline_event",
+      "data": {
+        "title": {
+          "ja": "2日目: 転換開始",
+          "en": "Day 2: Start conversion"
+        },
+        "startsAt": "2026-10-30T17:30:00+09:00",
+        "endsAt": "2026-10-30T18:15:00+09:00",
+        "venueId": "hall-b",
+        "createdAt": "2026-08-16T00:00:00Z",
+        "updatedAt": "2026-08-16T00:00:00Z"
+      }
+    },
+    {
+      "path": "timelineEvents/day2-quiz",
+      "schema": "timeline_event",
+      "data": {
+        "title": {
+          "ja": "2日目: クイズ大会",
+          "en": "Day 2: Quiz competition"
+        },
+        "startsAt": "2026-10-30T17:30:00+09:00",
+        "endsAt": "2026-10-30T18:15:00+09:00",
+        "venueId": "hall-d",
+        "createdAt": "2026-08-16T00:00:00Z",
+        "updatedAt": "2026-08-16T00:00:00Z"
+      }
+    },
+    {
+      "path": "timelineEvents/day2-panel",
+      "schema": "timeline_event",
+      "data": {
+        "title": {
+          "ja": "2日目: パネルディスカッション",
+          "en": "Day 2: Panel Discussion"
+        },
+        "startsAt": "2026-10-30T18:00:00+09:00",
+        "endsAt": "2026-10-30T18:20:00+09:00",
+        "venueId": "hall-c",
+        "createdAt": "2026-08-16T00:00:00Z",
+        "updatedAt": "2026-08-16T00:00:00Z"
       }
     },
     {
