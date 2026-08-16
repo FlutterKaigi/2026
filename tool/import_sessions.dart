@@ -29,14 +29,17 @@
 ///     the original-language half is rewritten — the translation is left for
 ///     the translation pass / dashboard to refresh.
 ///
-///   - **Plenary sessions become timeline events.** Sessionize marks breaks,
-///     lunch and the like as *service* sessions, but so are the sponsor slots
-///     and other room-bound programme items — the two are indistinguishable in
-///     the API. What does separate them is `isPlenumSession`: only the
-///     event-wide slots carry it. Those become the `timelineEvents` collection
-///     (matching how `apps/app` merges the two into one timetable); every other
-///     service session is imported as a normal session so it keeps its room,
-///     description and speakers.
+///   - **Service sessions become timeline events, unless they are talks.**
+///     Sessionize marks breaks, lunch and the like as *service* sessions, but
+///     so are the sponsor slots and other room-bound programme items. The
+///     split is:
+///       - `isPlenumSession` (event-wide slots: opening, lunch, the closing
+///         party) → full-width timeline event (`venueId` null);
+///       - other service sessions with an empty description (the cheer-LT
+///         block, the quiz, hall conversion) → venue-bound timeline event,
+///         which the website renders as a label card in that room's column;
+///       - service sessions WITH a description (sponsor talks) are part of
+///         the programme and stay normal sessions.
 ///
 /// Run via:
 ///
@@ -380,9 +383,6 @@ _Plan _buildPlan({
 
     final status = (session['status'] ?? '').toString();
     final isService = session['isServiceSession'] == true;
-    // Only the event-wide slots (opening, lunch, the closing party) become
-    // timeline events. Room-bound service sessions — sponsor slots, the LT
-    // block, the quiz — are part of the programme and stay sessions.
     final isPlenary = session['isPlenumSession'] == true;
     // Service sessions carry no acceptance status; everything else must be
     // accepted. A non-accepted session means the endpoint is not restricted
@@ -406,14 +406,16 @@ _Plan _buildPlan({
     }
 
     if (isPlenary) {
-      // Timeline events allow a null venue (a break is not tied to a room).
-      final roomId = _asInt(session['roomId']);
+      // Plenum slots are event-wide by definition, so the room Sessionize
+      // happens to attach is noise — venueId stays null, which is also what
+      // makes the website render the event as a full-width bar (a non-null
+      // venueId means a room-bound label block, e.g. the lunch stage).
       final write = _planTimelineEvent(
         id: id,
         title: title,
         startsAt: startsAt,
         endsAt: endsAt,
-        venueId: roomId == null ? null : venueIdByRoomId[roomId],
+        venueId: null,
         existing: existingEvents[id],
         now: now,
       );
@@ -433,6 +435,37 @@ _Plan _buildPlan({
     final venueId = roomId == null ? null : venueIdByRoomId[roomId];
     if (venueId == null) {
       plan.skip('no room assigned, or the room has no matching venue');
+      continue;
+    }
+
+    // Room-bound service sessions with no description are programme labels
+    // (the cheer-LT block, the quiz, hall conversion) rather than talks —
+    // they become venue-bound timeline events. Sponsor talks (service
+    // sessions with a description) stay sessions.
+    final description = (session['description'] ?? '').toString().trim();
+    if (isService && description.isEmpty) {
+      final write = _planTimelineEvent(
+        id: id,
+        title: title,
+        startsAt: startsAt,
+        endsAt: endsAt,
+        venueId: venueId,
+        existing: existingEvents[id],
+        now: now,
+      );
+      if (write == null) {
+        plan.unchanged++;
+      } else {
+        plan.writes.add(write);
+      }
+      continue;
+    }
+
+    // A session without a description means its content is not decided yet —
+    // keep it out of Firestore until it is. Organizers put the literal
+    // placeholder 未定 in undecided sponsor slots, which counts as absent.
+    if (description.isEmpty || description == '未定') {
+      plan.skip('description is empty or 未定 — content not decided yet');
       continue;
     }
 
