@@ -93,7 +93,6 @@ const _kRoomColorRefs = [
 const _kTags = {
   '_tagLt': (ja: 'LT', en: 'LT'),
   '_tagBeginnersLt': (ja: 'ビギナーズ LT', en: 'Beginners LT'),
-  '_tagHandsOn': (ja: 'ハンズオン', en: 'Hands-on'),
   '_tagJa': (ja: '日本語', en: 'JA'),
   '_tagEn': (ja: '英語', en: 'EN'),
 };
@@ -418,7 +417,6 @@ _Cell _buildCell(Session s, Map<String, Speaker> speakersById) {
     description: description.ja.isEmpty && description.en.isEmpty ? null : description,
     tagRefs: [
       if (s.isBeginnersLightningTalk) '_tagBeginnersLt' else if (s.isLightningTalk) '_tagLt',
-      if (s.isHandsOn) '_tagHandsOn',
       if (s.primaryLocale == 'en') '_tagEn' else '_tagJa',
     ],
   );
