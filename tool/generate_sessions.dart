@@ -236,7 +236,7 @@ typedef _Room = ({String venueId, _Text name, String colorRef});
 typedef _Cell = ({
   _Text title,
   _Text? speakerName,
-  String? avatarUrl,
+  List<String?> avatarUrls,
   _Text? description,
   List<String> tagRefs,
 });
@@ -400,20 +400,24 @@ _Cell _buildCell(Session s, Map<String, Speaker> speakersById) {
     }
   }
 
-  final names = [
+  final namedSpeakers = [
     for (final speaker in speakers)
-      if (speaker.name.trim().isNotEmpty) speaker.name.trim(),
+      if (speaker.name.trim().isNotEmpty) speaker,
   ];
-  final avatar = speakers
-      .map((speaker) => speaker.avatarUrl?.trim() ?? '')
-      .firstWhere((url) => url.isNotEmpty, orElse: () => '');
+  final names = [for (final speaker in namedSpeakers) speaker.name.trim()];
+  // Aligned with [names]; null keeps the placeholder for speakers without a
+  // photo, so co-presented sessions show one icon per speaker.
+  final avatarUrls = [
+    for (final speaker in namedSpeakers)
+      if (speaker.avatarUrl?.trim() case final url? when url.isNotEmpty) url else null,
+  ];
 
   final description = _text(s.description);
   return (
     title: _text(s.title),
     // Missing on LT compilations, which have no single owner.
     speakerName: names.isEmpty ? null : (ja: names.join('、'), en: names.join(', ')),
-    avatarUrl: avatar.isEmpty ? null : avatar,
+    avatarUrls: avatarUrls,
     description: description.ja.isEmpty && description.en.isEmpty ? null : description,
     tagRefs: [
       if (s.isBeginnersLightningTalk) '_tagBeginnersLt' else if (s.isLightningTalk) '_tagLt',
@@ -518,10 +522,10 @@ void _writeDart({required List<_Room> rooms, required Map<String, _Day> days}) {
         ..writeln('        session: TimetableSession(')
         ..writeln('          title: ${_localizedText(cell.title)},');
       if (cell.speakerName case final name?) {
-        out.writeln('          speakerName: ${_localizedText(name)},');
-      }
-      if (cell.avatarUrl case final url?) {
-        out.writeln('          speakerAvatarUrl: ${_str(url)},');
+        final urls = cell.avatarUrls.map((url) => url == null ? 'null' : _str(url));
+        out
+          ..writeln('          speakerName: ${_localizedText(name)},')
+          ..writeln('          speakerAvatarUrls: [${urls.join(', ')}],');
       }
       if (cell.description case final description?) {
         out.writeln('          description: ${_localizedText(description)},');

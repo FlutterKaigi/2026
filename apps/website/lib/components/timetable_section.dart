@@ -390,12 +390,24 @@ class TimetableSection extends StatelessComponent {
         raw: const {'display': 'none'},
       ),
 
-      // スピーカーアイコン（カード / ダイアログ共用）。
+      // スピーカーアイコン（カード / ダイアログ共用）。複数登壇の場合は
+      // 少し重ねて横に並べ、白フチで輪郭を分ける。
+      css('.timetable-avatars').styles(
+        display: .flex,
+        alignItems: .center,
+        raw: const {'flex-shrink': '0'},
+      ),
       css('.timetable-avatar').styles(
         width: 24.px,
         height: 24.px,
         radius: .circular(999.px),
         raw: const {'object-fit': 'cover', 'flex-shrink': '0'},
+      ),
+      css('.timetable-avatars .timetable-avatar + .timetable-avatar').styles(
+        raw: const {
+          'margin-left': '-6px',
+          'box-shadow': '0 0 0 2px #FFFFFF',
+        },
       ),
 
       // ── タイムラインイベント（開場・休憩など）の全幅バー ─────────────
@@ -512,21 +524,24 @@ class TimetableSection extends StatelessComponent {
   ];
 }
 
-/// スピーカー写真が未登録（`speakerAvatarUrl` が null）の場合の
+/// スピーカー写真が未登録（`speakerAvatarUrls` の要素が null）の場合の
 /// フォールバック画像。
 const _avatarPlaceholderSrc = 'images/icons/avatar_placeholder.svg';
 
-/// スピーカー行（アイコン + 名前）。カードとダイアログで共用。
+/// スピーカー行（登壇者ごとのアイコン + 名前）。カードとダイアログで共用。
 /// カード側は `<button>` 内に入るため phrasing content の span で構成する
 /// （表示は CSS の flex で制御）。
-Component _speakerRow(String classes, String? avatarUrl, String name) {
+Component _speakerRow(String classes, List<String?> avatarUrls, String name) {
   return span(classes: classes, [
-    img(
-      classes: 'timetable-avatar',
-      src: avatarUrl ?? _avatarPlaceholderSrc,
-      alt: '',
-      attributes: const {'aria-hidden': 'true', 'loading': 'lazy'},
-    ),
+    span(classes: 'timetable-avatars', [
+      for (final avatarUrl in avatarUrls.isEmpty ? const <String?>[null] : avatarUrls)
+        img(
+          classes: 'timetable-avatar',
+          src: avatarUrl ?? _avatarPlaceholderSrc,
+          alt: '',
+          attributes: const {'aria-hidden': 'true', 'loading': 'lazy'},
+        ),
+    ]),
     span([.text(name)]),
   ]);
 }
@@ -674,7 +689,7 @@ class _SessionCard extends StatelessComponent {
           for (final tag in session.tags) span(classes: 'timetable-chip', [.text(tag.resolve(locale))]),
         ]),
         span(classes: 'timetable-card__title', [.text(session.title.resolve(locale))]),
-        if (speaker != null) _speakerRow('timetable-card__speaker', session.speakerAvatarUrl, speaker),
+        if (speaker != null) _speakerRow('timetable-card__speaker', session.speakerAvatarUrls, speaker),
       ],
     );
   }
@@ -720,7 +735,7 @@ class _SessionDialog extends StatelessComponent {
             p(classes: 'timetable-dialog__schedule', [
               .text('${day.label} ${day.date} ${day.weekday} / $start – $end'),
             ]),
-            if (speaker != null) _speakerRow('timetable-dialog__speaker', session.speakerAvatarUrl, speaker),
+            if (speaker != null) _speakerRow('timetable-dialog__speaker', session.speakerAvatarUrls, speaker),
             if (description != null)
               div(classes: 'timetable-dialog__desc', [
                 for (final paragraph in description.split('\n')) p([.text(paragraph)]),

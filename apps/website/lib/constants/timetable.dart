@@ -39,7 +39,7 @@ class TimetableSession {
   const TimetableSession({
     required this.title,
     this.speakerName,
-    this.speakerAvatarUrl,
+    this.speakerAvatarUrls = const [],
     this.description,
     this.tags = const [],
   });
@@ -49,9 +49,10 @@ class TimetableSession {
   /// null のとき（LT 大会など）はスピーカー行を表示しない。
   final LocalizedText? speakerName;
 
-  /// スピーカーのアイコン画像 URL（実データでは Sessionize の profilePicture）。
-  /// null のとき（写真未登録のスピーカー）はプレースホルダー画像を表示する。
-  final String? speakerAvatarUrl;
+  /// 各スピーカーのアイコン画像 URL（実データでは Sessionize の
+  /// profilePicture）。[speakerName] に並べた登壇者と同順で、null の要素
+  /// （写真未登録のスピーカー）はプレースホルダー画像を表示する。
+  final List<String?> speakerAvatarUrls;
 
   /// セッション概要（詳細ダイアログに表示）。段落は `\n` 区切り。
   /// null のときは概要ブロックを表示しない。
