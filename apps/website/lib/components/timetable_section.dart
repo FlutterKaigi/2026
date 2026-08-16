@@ -383,7 +383,10 @@ class TimetableSection extends StatelessComponent {
       // 非表示。カードが縦積みになる mobile とダイアログ内では表示する。
       // 時刻チップも同様に、時刻列が消える縦積み時だけ出す（ダイアログには
       // 専用の schedule 行があるので常に非表示）。
-      css('.timetable-card .timetable-chip--room, & .timetable-chip--time').styles(
+      css(
+        '.timetable-card .timetable-chip--room, '
+        '& .timetable-chip--time',
+      ).styles(
         raw: const {'display': 'none'},
       ),
 
@@ -483,7 +486,10 @@ class TimetableSection extends StatelessComponent {
         ),
         // 目盛り列は畳んだ時点で意味を失う。時刻は各枠のチップで示す。
         css('.timetable-time').styles(raw: const {'display': 'none'}),
-        css('.timetable-card .timetable-chip--room, .timetable-card .timetable-chip--time').styles(
+        css(
+          '.timetable-card .timetable-chip--room, '
+          '.timetable-card .timetable-chip--time',
+        ).styles(
           raw: const {'display': 'flex'},
         ),
         css('.timetable-event .timetable-event__time').styles(
@@ -586,12 +592,32 @@ class _DayGrid extends StatelessComponent {
               end: ticks[entry.endTick],
               strings: strings,
             ),
+          ] else if ((entry.eventLabel, entry.roomIndex) case (final label?, final roomIndex?)) ...[
+            // roomIndex を持つイベント（応援LT・ランチステージなど）は
+            // セッションと同じカード + ダイアログで表示する。概要や
+            // スピーカーを持たないだけなので、表示モデルごと流用できる。
+            _SessionCard(
+              session: TimetableSession(title: label),
+              room: generatedTimetableRooms[roomIndex],
+              start: ticks[entry.startTick],
+              end: ticks[entry.endTick],
+              gridArea: (row: _gridRow(entry.startTick, entry.endTick), column: '${roomIndex + 2}'),
+              dialogId: _dialogId(i),
+              strings: strings,
+            ),
+            _SessionDialog(
+              id: _dialogId(i),
+              session: TimetableSession(title: label),
+              room: generatedTimetableRooms[roomIndex],
+              day: day,
+              start: ticks[entry.startTick],
+              end: ticks[entry.endTick],
+              strings: strings,
+            ),
           ] else if (entry.eventLabel case final label?)
             div(
               classes: 'timetable-event',
-              styles: Styles(
-                raw: {'grid-row': _gridRow(entry.startTick, entry.endTick)},
-              ),
+              styles: Styles(raw: {'grid-row': _gridRow(entry.startTick, entry.endTick)}),
               [
                 // 時刻列が消える縦積み時のための時刻。desktop では非表示。
                 span(classes: 'timetable-event__time', [

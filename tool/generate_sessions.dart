@@ -242,12 +242,13 @@ typedef _Cell = ({
   List<String> tagRefs,
 });
 
-/// One placed item of the timetable grid: either a session in a room column
-/// ([column] / [cell]) or a full-width timeline event ([eventLabel]).
+/// One placed item of the timetable grid: a session in a room column
+/// ([column] / [cell]), a full-width timeline event ([eventLabel] only), or a
+/// room-bound timeline event ([eventLabel] + [column] — e.g. the lunch stage).
 class _Entry {
   _Entry.session(this.start, this.end, int this.column, _Cell this.cell) : eventLabel = null;
 
-  _Entry.event(this.start, this.end, this.eventLabel) : column = null, cell = null;
+  _Entry.event(this.start, this.end, this.eventLabel, {this.column}) : cell = null;
 
   final DateTime start;
   final DateTime end;
@@ -288,6 +289,18 @@ Map<String, _Day> _buildDays(_Data data, List<_Room> rooms) {
   final byDay = {for (final ref in _kDayRefByDate.values) ref: <_Entry>[]};
 
   for (final s in [...data.sessions]..sort((a, b) => a.id.compareTo(b.id))) {
+    // A session without a description means its content is not decided yet
+    // (未定 is the placeholder organizers put in undecided sponsor slots).
+    // The importer refuses those too; this also covers documents that were
+    // written before that rule or by hand.
+    final description = _text(s.description);
+    final isUndecided = ['', '未定'].contains(description.ja) && ['', '未定'].contains(description.en);
+    if (isUndecided) {
+      stderr.writeln(
+        'warning: session ${s.id} has no description (content not decided yet); skipping.',
+      );
+      continue;
+    }
     final dayRef = _dayRefFor(s.startsAt);
     if (dayRef == null) {
       stderr.writeln(
@@ -331,16 +344,43 @@ Map<String, _Day> _buildDays(_Data data, List<_Room> rooms) {
       // is nothing better to show than the start time again.
       stderr.writeln('warning: timeline event ${e.id} has no endsAt; showing its start time as the end.');
     }
-    byDay[dayRef]!.add(_Entry.event(e.startsAt, e.endsAt ?? e.startsAt, _text(e.title)));
+    final end = e.endsAt ?? e.startsAt;
+
+    // A venue-bound event (the lunch stage, a satellite opening, …) sits in
+    // that venue's column like a session; without a venue it spans the grid.
+    int? column;
+    if (e.venueId case final venueId?) {
+      column = roomIndex[venueId];
+      if (column == null) {
+        stderr.writeln(
+          "warning: timeline event ${e.id} refers to unknown venue '$venueId'; showing it full-width.",
+        );
+      }
+    }
+    if (column != null) {
+      final clash = byDay[dayRef]!.any(
+        (x) => x.column == column && x.start.isBefore(end) && e.startsAt.isBefore(x.end),
+      );
+      if (clash) {
+        stderr.writeln(
+          'warning: timeline event ${e.id} overlaps another entry in venue '
+          "'${e.venueId}' at ${_hhmm(e.startsAt)}; keeping the first and skipping this one.",
+        );
+        continue;
+      }
+    }
+    byDay[dayRef]!.add(_Entry.event(e.startsAt, end, _text(e.title), column: column));
   }
 
   return byDay.map((dayRef, entries) {
     entries.sort((a, b) {
       final byStart = a.start.compareTo(b.start);
       if (byStart != 0) return byStart;
-      // Stacked vertically (mobile) an event reads as the heading of what
-      // follows, so it comes before the sessions starting with it.
-      final byKind = (a.eventLabel != null ? 0 : 1).compareTo(b.eventLabel != null ? 0 : 1);
+      // Stacked vertically (mobile) a full-width event reads as the heading of
+      // what follows, so it comes before the entries starting with it.
+      // Venue-bound events order by column like sessions.
+      int kind(_Entry e) => e.eventLabel != null && e.column == null ? 0 : 1;
+      final byKind = kind(a).compareTo(kind(b));
       if (byKind != 0) return byKind;
       return (a.column ?? 0).compareTo(b.column ?? 0);
     });
@@ -462,7 +502,11 @@ void _writeDart({required List<_Room> rooms, required Map<String, _Day> days}) {
         out
           ..writeln('      TimetableEntry.event(')
           ..writeln('        startTick: $startTick,')
-          ..writeln('        endTick: $endTick,')
+          ..writeln('        endTick: $endTick,');
+        if (entry.column case final column?) {
+          out.writeln('        roomIndex: $column,');
+        }
+        out
           ..writeln('        eventLabel: ${_localizedText(label)},')
           ..writeln('      ),');
         continue;

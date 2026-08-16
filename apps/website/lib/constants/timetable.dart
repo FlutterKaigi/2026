@@ -11,8 +11,7 @@ import 'sponsors.dart' show LocalizedText;
 /// 開催日。タブ切替の単位。
 enum TimetableDay {
   day1(label: 'Day 1', date: '10.29', weekday: 'THU'),
-  day2(label: 'Day 2', date: '10.30', weekday: 'FRI')
-  ;
+  day2(label: 'Day 2', date: '10.30', weekday: 'FRI');
 
   const TimetableDay({
     required this.label,
@@ -79,7 +78,9 @@ class TimetableProgramme {
 /// インデックスで表す（[startTick] 以上 [endTick] 未満の行を占める）。
 ///
 /// - [TimetableEntry.session] : 会場カラムに収まるセッション。
-/// - [TimetableEntry.event] : 開場・休憩などのタイムラインイベント（全幅バー）。
+/// - [TimetableEntry.event] : 開場・休憩などのタイムラインイベント。
+///   [roomIndex] が null なら全幅バー、あればその会場カラムに収まる
+///   ラベル枠（ランチステージなど）になる。
 class TimetableEntry {
   const TimetableEntry.session({
     required this.startTick,
@@ -91,9 +92,9 @@ class TimetableEntry {
   const TimetableEntry.event({
     required this.startTick,
     required this.endTick,
+    this.roomIndex,
     required LocalizedText this.eventLabel,
-  }) : roomIndex = null,
-       session = null;
+  }) : session = null;
 
   final int startTick;
   final int endTick;
