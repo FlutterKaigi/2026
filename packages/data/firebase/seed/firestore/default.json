@@ -2084,21 +2084,6 @@
       }
     },
     {
-      "path": "timelineEvents/day1-lunch-stage",
-      "schema": "timeline_event",
-      "data": {
-        "title": {
-          "ja": "1日目: ランチステージ",
-          "en": "Day 1: Lunch Stage"
-        },
-        "startsAt": "2026-10-29T13:10:00+09:00",
-        "endsAt": "2026-10-29T13:25:00+09:00",
-        "venueId": "hall-a",
-        "createdAt": "2026-08-16T00:00:00Z",
-        "updatedAt": "2026-08-16T00:00:00Z"
-      }
-    },
-    {
       "path": "timelineEvents/day1-afternoon-break",
       "schema": "timeline_event",
       "data": {
@@ -2219,21 +2204,6 @@
       }
     },
     {
-      "path": "timelineEvents/day2-lunch-stage",
-      "schema": "timeline_event",
-      "data": {
-        "title": {
-          "ja": "2日目: ランチステージ",
-          "en": "Day 2: Lunch Stage"
-        },
-        "startsAt": "2026-10-30T13:00:00+09:00",
-        "endsAt": "2026-10-30T13:15:00+09:00",
-        "venueId": "hall-a",
-        "createdAt": "2026-08-16T00:00:00Z",
-        "updatedAt": "2026-08-16T00:00:00Z"
-      }
-    },
-    {
       "path": "timelineEvents/day2-afternoon-break",
       "schema": "timeline_event",
       "data": {
@@ -2261,36 +2231,6 @@
         "venueId": null,
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
-      }
-    },
-    {
-      "path": "timelineEvents/day2-hall-conversion-a",
-      "schema": "timeline_event",
-      "data": {
-        "title": {
-          "ja": "2日目: 転換開始",
-          "en": "Day 2: Start conversion"
-        },
-        "startsAt": "2026-10-30T17:30:00+09:00",
-        "endsAt": "2026-10-30T18:15:00+09:00",
-        "venueId": "hall-a",
-        "createdAt": "2026-08-16T00:00:00Z",
-        "updatedAt": "2026-08-16T00:00:00Z"
-      }
-    },
-    {
-      "path": "timelineEvents/day2-hall-conversion-b",
-      "schema": "timeline_event",
-      "data": {
-        "title": {
-          "ja": "2日目: 転換開始",
-          "en": "Day 2: Start conversion"
-        },
-        "startsAt": "2026-10-30T17:30:00+09:00",
-        "endsAt": "2026-10-30T18:15:00+09:00",
-        "venueId": "hall-b",
-        "createdAt": "2026-08-16T00:00:00Z",
-        "updatedAt": "2026-08-16T00:00:00Z"
       }
     },
     {
