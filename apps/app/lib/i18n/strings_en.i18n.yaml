@@ -17,6 +17,9 @@ sponsors:
   empty: Sponsors have not been published yet
   notFound: Sponsor not found
   logoSemanticLabel: $name logo
+  githubCardSemanticLabel: View $name's GitHub profile
+  xCardSemanticLabel: View $name's X profile
+  externalCardSemanticLabel: Open $name's link
   tierBadge: $tier Sponsor
   jobBoards: Job Boards
   jobBoardCta: Hiring information
@@ -44,7 +47,6 @@ sessionTimetable:
     regular: Regular Talk
     lightningTalk: Lightning Talk
     beginnersLightningTalk: Beginners LT
-    handsOn: Hands-on
     event: Event
 sessionSearch:
   title: Search sessions

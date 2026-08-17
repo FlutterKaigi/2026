@@ -17,6 +17,9 @@ sponsors:
   empty: スポンサーはまだ公開されていません
   notFound: スポンサーが見つかりませんでした
   logoSemanticLabel: $name のロゴ
+  githubCardSemanticLabel: $name の GitHub を見る
+  xCardSemanticLabel: $name の X を見る
+  externalCardSemanticLabel: $name のリンクを開く
   tierBadge: $tier スポンサー
   jobBoards: Job Boards
   jobBoardCta: 採用情報
@@ -41,10 +44,9 @@ sessionTimetable:
   speaker:
     none: 登壇者未定
   type:
-    regular: 通常セッション
+    regular: セッション
     lightningTalk: LT
     beginnersLightningTalk: 初心者向けLT
-    handsOn: ハンズオン
     event: イベント
 sessionSearch:
   title: セッションを検索

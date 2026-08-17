@@ -145,6 +145,15 @@ class Translations$sponsors$ja {
 	/// ja: '$name のロゴ'
 	String logoSemanticLabel({required Object name}) => '${name} のロゴ';
 
+	/// ja: '$name の GitHub を見る'
+	String githubCardSemanticLabel({required Object name}) => '${name} の GitHub を見る';
+
+	/// ja: '$name の X を見る'
+	String xCardSemanticLabel({required Object name}) => '${name} の X を見る';
+
+	/// ja: '$name のリンクを開く'
+	String externalCardSemanticLabel({required Object name}) => '${name} のリンクを開く';
+
 	/// ja: '$tier スポンサー'
 	String tierBadge({required Object tier}) => '${tier} スポンサー';
 
@@ -575,17 +584,14 @@ class Translations$sessionTimetable$type$ja {
 
 	// Translations
 
-	/// ja: '通常セッション'
-	String get regular => '通常セッション';
+	/// ja: 'セッション'
+	String get regular => 'セッション';
 
 	/// ja: 'LT'
 	String get lightningTalk => 'LT';
 
 	/// ja: '初心者向けLT'
 	String get beginnersLightningTalk => '初心者向けLT';
-
-	/// ja: 'ハンズオン'
-	String get handsOn => 'ハンズオン';
 
 	/// ja: 'イベント'
 	String get event => 'イベント';
@@ -811,6 +817,9 @@ extension on Translations {
 			'sponsors.empty' => 'スポンサーはまだ公開されていません',
 			'sponsors.notFound' => 'スポンサーが見つかりませんでした',
 			'sponsors.logoSemanticLabel' => ({required Object name}) => '${name} のロゴ',
+			'sponsors.githubCardSemanticLabel' => ({required Object name}) => '${name} の GitHub を見る',
+			'sponsors.xCardSemanticLabel' => ({required Object name}) => '${name} の X を見る',
+			'sponsors.externalCardSemanticLabel' => ({required Object name}) => '${name} のリンクを開く',
 			'sponsors.tierBadge' => ({required Object tier}) => '${tier} スポンサー',
 			'sponsors.jobBoards' => 'Job Boards',
 			'sponsors.jobBoardCta' => '採用情報',
@@ -828,10 +837,9 @@ extension on Translations {
 			'sessionTimetable.emptyFiltered' => 'この日の予定はありません',
 			'sessionTimetable.venue.unknown' => '会場未定',
 			'sessionTimetable.speaker.none' => '登壇者未定',
-			'sessionTimetable.type.regular' => '通常セッション',
+			'sessionTimetable.type.regular' => 'セッション',
 			'sessionTimetable.type.lightningTalk' => 'LT',
 			'sessionTimetable.type.beginnersLightningTalk' => '初心者向けLT',
-			'sessionTimetable.type.handsOn' => 'ハンズオン',
 			'sessionTimetable.type.event' => 'イベント',
 			'sessionSearch.title' => 'セッションを検索',
 			'sessionSearch.hint' => 'タイトル・概要・登壇者を検索',

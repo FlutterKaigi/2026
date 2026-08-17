@@ -44,16 +44,16 @@ void main() {
           date: _dayTwo.date,
         ),
       ).map((entry) => entry.id),
-      ['workshop-session'],
+      ['day-two-session'],
     );
     expect(
       buildSessionSearchResults(
         data: _timetable,
         criteria: const SessionSearchCriteria(
-          type: SessionSearchTypeFilter.handsOn,
+          type: SessionSearchTypeFilter.lightningTalk,
         ),
       ).map((entry) => entry.id),
-      ['workshop-session'],
+      ['animation-session'],
     );
   });
 
@@ -74,7 +74,7 @@ void main() {
           language: SessionSearchLanguageFilter.ja,
         ),
       ).map((entry) => entry.id),
-      ['state-session', 'workshop-session'],
+      ['state-session', 'day-two-session'],
     );
   });
 
@@ -158,10 +158,10 @@ void main() {
 
     await tester.tap(find.byTooltip('種類で絞り込み'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('ハンズオン').last);
+    await tester.tap(find.text('LT').last);
     await tester.pumpAndSettle();
 
-    expect(find.text('ハンズオンワークショップ'), findsOneWidget);
+    expect(find.text('アニメーション'), findsOneWidget);
     expect(find.text('状態管理'), findsNothing);
     expect(find.text('1件のセッション'), findsOneWidget);
   });
@@ -294,25 +294,25 @@ final _animationSession = Session(
   startsAt: DateTime.utc(2026, 10, 29, 2, 15),
   endsAt: DateTime.utc(2026, 10, 29, 3),
   venueId: _roomA.id,
+  isLightningTalk: true,
   createdAt: DateTime.utc(2026),
   updatedAt: DateTime.utc(2026),
 );
 
-final _workshopSession = Session(
-  id: 'workshop-session',
+final _dayTwoSession = Session(
+  id: 'day-two-session',
   title: const LocaleMap(
-    ja: 'ハンズオンワークショップ',
-    en: 'Hands-on Workshop',
+    ja: '2日目のセッション',
+    en: 'Day Two Session',
   ),
   description: const LocaleMap(
-    ja: '実際にコードを書きます',
-    en: 'Write code together',
+    ja: '2日目に開催する通常セッション',
+    en: 'A regular session on the second day',
   ),
   primaryLocale: 'ja',
   startsAt: DateTime.utc(2026, 10, 30, 1, 15),
   endsAt: DateTime.utc(2026, 10, 30, 2, 15),
   venueId: _roomA.id,
-  isHandsOn: true,
   createdAt: DateTime.utc(2026),
   updatedAt: DateTime.utc(2026),
 );
@@ -329,8 +329,8 @@ final _animationEntry = SessionTimetableEntry.session(
   speakers: const [],
 );
 
-final _workshopEntry = SessionTimetableEntry.session(
-  session: _workshopSession,
+final _dayTwoEntry = SessionTimetableEntry.session(
+  session: _dayTwoSession,
   venue: _roomA,
   speakers: const [],
 );
@@ -342,7 +342,7 @@ final _dayOne = SessionTimetableDay(
 
 final _dayTwo = SessionTimetableDay(
   date: DateTime(2026, 10, 30),
-  entries: [_workshopEntry],
+  entries: [_dayTwoEntry],
 );
 
 final _timetable = SessionTimetableData(

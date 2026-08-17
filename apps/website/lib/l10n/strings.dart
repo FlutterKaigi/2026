@@ -127,9 +127,14 @@ class Strings {
     AppLocale.en => 'News',
   };
 
-  String get newsViewAllCta => switch (locale) {
-    AppLocale.ja => 'すべてのニュースを見る',
-    AppLocale.en => 'View All News',
+  String get newsShowAllCta => switch (locale) {
+    AppLocale.ja => 'すべてのニュースを表示',
+    AppLocale.en => 'Show All News',
+  };
+
+  String get newsShowLessCta => switch (locale) {
+    AppLocale.ja => '閉じる',
+    AppLocale.en => 'Show Less',
   };
 
   // ── Sponsors ────────────────────────────────────────────────────────
@@ -147,6 +152,13 @@ class Strings {
   String sponsorCardAriaLabel(String name) => switch (locale) {
     AppLocale.ja => '$name の詳細を見る',
     AppLocale.en => 'View details for $name',
+  };
+
+  /// Accessible label for an individual sponsor's card, which links directly
+  /// to their GitHub profile rather than a detail page (in a new tab).
+  String sponsorGithubCardAriaLabel(String name) => switch (locale) {
+    AppLocale.ja => '$name の GitHub を見る（新しいタブで開く）',
+    AppLocale.en => "View $name's GitHub profile (opens in a new tab)",
   };
 
   String get sponsorBackToList => switch (locale) {

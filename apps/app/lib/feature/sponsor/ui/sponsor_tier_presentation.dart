@@ -22,6 +22,12 @@ extension SponsorTierPresentation on SponsorTier {
     _ => 144,
   };
 
+  /// Width of one item in the sponsor wall grid.
+  double get wallItemWidth => this == SponsorTier.individual ? 140 : logoSide;
+
+  /// Height reserved for one item in the sponsor wall grid.
+  double get wallItemHeight => this == SponsorTier.individual ? 144 : logoSide;
+
   List<Color> get badgeGradientColors => switch (this) {
     SponsorTier.platinum => const [
       Color(0xFFD6DBE0),

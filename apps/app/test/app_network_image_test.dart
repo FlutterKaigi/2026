@@ -43,4 +43,26 @@ void main() {
     expect(image.imageUrl, 'https://example.com/avatar.png');
     expect(image.webHtmlElementStrategy, WebHtmlElementStrategy.prefer);
   });
+
+  testWidgets('AppNetworkAvatar keeps its visible image square under a shorter height constraint', (tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox(
+            width: 56,
+            height: 48,
+            child: AppNetworkAvatar(
+              radius: 28,
+              imageUrl: null,
+              fallback: Icon(Icons.person_outline),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final visibleAvatarSize = tester.getSize(find.byType(ClipOval));
+    expect(visibleAvatarSize.width, visibleAvatarSize.height);
+    expect(visibleAvatarSize, const Size.square(48));
+  });
 }

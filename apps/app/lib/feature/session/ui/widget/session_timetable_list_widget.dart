@@ -86,6 +86,7 @@ class SessionTimetableListWidget extends HookConsumerWidget {
         Expanded(
           child: PageView.builder(
             controller: pageController,
+            physics: viewMode == SessionTimetableViewMode.rooms ? const NeverScrollableScrollPhysics() : null,
             itemCount: data.days.length,
             onPageChanged: (index) {
               currentPageIndex.value = index;

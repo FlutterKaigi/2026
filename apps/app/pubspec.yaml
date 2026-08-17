@@ -16,6 +16,7 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.8
+  flutter_svg: ^2.3.0
   freezed_annotation: ^3.1.0
   hooks_riverpod: ^3.3.2
   flutter_hooks: ^0.21.3+1
@@ -50,6 +51,7 @@ flutter:
     - res/assets/fonts/NotoSansJP/OFL.txt
     # Google 公式の Sign in with Google ボタン素材。
     - res/assets/google_sign_in/
+    - res/assets/icons/
     - res/assets/shuriken-logo.png
 
   fonts:
