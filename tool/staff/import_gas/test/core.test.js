@@ -95,6 +95,37 @@ test('extractDriveFileId_ supports Google Forms file URLs', () => {
   );
 });
 
+test('buildDriveThumbnailUrl_ requests a 320px square webp thumbnail', () => {
+  const gas = loadGas(['DriveImage.gs']);
+
+  // lh3 形式: 末尾のオプション列を差し替える
+  assert.equal(
+    gas.buildDriveThumbnailUrl_('https://lh3.googleusercontent.com/drive-storage/AbC_1-2=s220', 320),
+    'https://lh3.googleusercontent.com/drive-storage/AbC_1-2=s320-c-rw',
+  );
+  // オプション列が無い場合は付与する
+  assert.equal(
+    gas.buildDriveThumbnailUrl_('https://lh3.googleusercontent.com/drive-storage/AbC_1-2', 320),
+    'https://lh3.googleusercontent.com/drive-storage/AbC_1-2=s320-c-rw',
+  );
+  // feeds/vt 形式: sz クエリだけを差し替え、webp は要求しない
+  assert.equal(
+    gas.buildDriveThumbnailUrl_('https://docs.google.com/feeds/vt?id=abc&sz=s220&v=1', 320),
+    'https://docs.google.com/feeds/vt?id=abc&sz=s320&v=1',
+  );
+  assert.equal(gas.buildDriveThumbnailUrl_('', 320), '');
+});
+
+test('normalizeImageContentType_ accepts only supported image types', () => {
+  const gas = loadGas(['DriveImage.gs']);
+
+  assert.equal(gas.normalizeImageContentType_('image/webp'), 'image/webp');
+  assert.equal(gas.normalizeImageContentType_('IMAGE/PNG; charset=binary'), 'image/png');
+  // サムネイル生成失敗時はエラーページが返るため、画像以外は弾く
+  assert.equal(gas.normalizeImageContentType_('text/html'), '');
+  assert.equal(gas.normalizeImageContentType_(null), '');
+});
+
 test('resolveStaff_ maps a normalized account alias to a stable staff key', () => {
   const gas = loadGas(['Transform.gs']);
   const index = gas.buildNameMapIndex_([
@@ -252,7 +283,7 @@ test('uploadStaffAvatar_ uploads existing-token metadata and image bytes in one 
   const downloadUrl = gas.uploadStaffAvatar_(
     {bucket: 'sample-project.firebasestorage.app'},
     'sample-one',
-    {mimeType: 'image/png'},
+    'image/png',
     {getBytes: () => imageBytes.slice()},
   );
 
@@ -313,7 +344,7 @@ test('uploadStaffAvatar_ generates a token and uses generation zero for a new ob
   const downloadUrl = gas.uploadStaffAvatar_(
     {bucket: 'sample-project.firebasestorage.app'},
     'sample-two',
-    {mimeType: 'image/jpeg'},
+    'image/jpeg',
     {getBytes: () => [1, 2, 3]},
   );
 
@@ -621,7 +652,7 @@ test('importPreparedRow_ skips a non-fatal image upload failure before Firestore
   };
   let firestoreWrites = 0;
 
-  gas.loadDriveImageBlob_ = () => ({});
+  gas.loadStaffAvatarBlob_ = () => ({getContentType: () => 'image/webp'});
   gas.uploadStaffAvatar_ = () => {
     throw new Error('Storage upload failed');
   };
@@ -648,7 +679,7 @@ test('importPreparedRow_ preserves and rethrows a fatal image upload failure', (
   const fatalError = new Error('Storage authorization failed');
   fatalError.fatal = true;
 
-  gas.loadDriveImageBlob_ = () => ({});
+  gas.loadStaffAvatarBlob_ = () => ({getContentType: () => 'image/webp'});
   gas.uploadStaffAvatar_ = () => {
     throw fatalError;
   };

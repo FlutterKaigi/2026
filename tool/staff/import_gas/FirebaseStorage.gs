@@ -16,13 +16,16 @@ function buildFirebaseDownloadUrl_(bucket, objectPath, token) {
 }
 
 /**
+ * オブジェクトパスは拡張子を持たないため、webp へ変換されても公開 URL は変わらない。
+ * 形式は contentType メタデータだけで表す。
+ *
  * @param {{bucket: string}} environment
  * @param {string} staffKey
- * @param {{mimeType: string}} image
+ * @param {string} contentType アップロードする blob の実際の MIME type
  * @param {GoogleAppsScript.Base.Blob} blob
  * @return {string}
  */
-function uploadStaffAvatar_(environment, staffKey, image, blob) {
+function uploadStaffAvatar_(environment, staffKey, contentType, blob) {
   var objectPath = 'public/staff/' + staffKey + '/avatar';
   var existing = getStorageObjectMetadata_(environment.bucket, objectPath);
   var existingTokens = existing && existing.metadata
@@ -35,11 +38,11 @@ function uploadStaffAvatar_(environment, staffKey, image, blob) {
     boundary,
     {
       name: objectPath,
-      contentType: image.mimeType,
+      contentType: contentType,
       cacheControl: 'public,max-age=3600',
       metadata: {firebaseStorageDownloadTokens: token},
     },
-    image.mimeType,
+    contentType,
     blob.getBytes(),
   );
 

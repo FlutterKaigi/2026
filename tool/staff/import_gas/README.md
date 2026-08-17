@@ -83,6 +83,7 @@ Apps Script の「プロジェクトの設定 → スクリプト プロパテ�
 - 未対応者はアカウント名を名前に流用せず `SKIPPED_UNMAPPED`
 - 同じ `staffKey` の複数回答は最新タイムスタンプを採用。同時刻なら下の行を採用
 - 採用行へシート順で `order: 1..N` を付与
+- 画像は Drive のサムネイル生成で長辺 320px の正方形へ縮小し、webp を優先して取得
 - 画像は `public/staff/{staffKey}/avatar` へ上書きし、既存のダウンロードトークンを再利用
 - Firestore は `staffMembers/staff-{staffKey}` へ条件付き upsert
 - 既存更新では `createdAt` を保持し、`updatedAt` をサーバー時刻で更新
@@ -113,5 +114,11 @@ node --test test/core.test.js
 Apps Script 上の「セルフテスト」も外部への書き込みを行いません。Sheets / Drive / Storage / Firestore の結合確認は STG で行います。
 
 ## 既知の制約
+
+Apps Script にはネイティブの画像リサイズと webp エンコードがありません。スポンサーロゴの `convert-sponsor-logos.sh` が使う `cwebp` / `rsvg-convert` は GAS 上で実行できないため、アバターの縮小と webp 化は Drive のサムネイル生成 (`thumbnailLink` に `=s320-c-rw` を指定) に委譲しています。
+
+`-rw` による webp 応答は Drive 側の非公開動作です。応答の Content-Type を確認し、webp 以外なら縮小済みの png / jpeg として、サムネイル生成自体が失敗した場合は原本としてアップロードします。**実際に webp が返るかは STG インポート後に Storage 上のオブジェクトの Content-Type で確認してください。**
+
+オブジェクトパス `public/staff/{staffKey}/avatar` は拡張子を持たないため、形式が変わっても公開 URL は変わりません。
 
 現行 Dashboard のスタッフ編集画面は `github` と `web` を入力項目として保持しません。GAS が登録した該当リンクを Dashboard で編集・保存すると失われる可能性があるため、対応までは該当レコードを GAS 経由で更新してください。

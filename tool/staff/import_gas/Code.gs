@@ -228,8 +228,8 @@ function prepareSelectedRows_(selectedRows) {
 function importPreparedRow_(environment, row) {
   var iconUrl;
   try {
-    var blob = loadDriveImageBlob_(row.image);
-    iconUrl = uploadStaffAvatar_(environment, row.staffKey, row.image, blob);
+    var blob = loadStaffAvatarBlob_(row.image);
+    iconUrl = uploadStaffAvatar_(environment, row.staffKey, blob.getContentType(), blob);
   } catch (error) {
     if (error.fatal) {
       setRowResult_(row, 'ERROR_IMAGE', safeErrorMessage_(error));
