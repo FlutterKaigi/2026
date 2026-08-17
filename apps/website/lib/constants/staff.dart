@@ -37,6 +37,11 @@ class StaffSnsLink {
   /// Platforms without a dedicated icon fall back to the generic globe.
   // Filenames follow the sponsor link icons (`link_*`): neutral names that ad
   // blockers don't network-block.
+  //
+  // mixi2 だけ png なのは、公式が配布するブランドアセットが png / ai のみで
+  // svg が無いため。Simple Icons にも収録されていない (simple-icons#12566 は
+  // not_planned でクローズ)。公式の単色版 (Symbol_Black) をマークに手を加えず、
+  // 透明カンバスを正方形へ整えて縮小したもの。
   String get iconAsset => switch (type.toLowerCase()) {
     'x' || 'twitter' => 'images/icons/link_x.svg',
     'github' => 'images/icons/link_github.svg',
@@ -45,6 +50,7 @@ class StaffSnsLink {
     'bluesky' => 'images/icons/link_bluesky.svg',
     'qiita' => 'images/icons/link_qiita.svg',
     'zenn' => 'images/icons/link_zenn.svg',
+    'mixi2' => 'images/icons/link_mixi2.png',
     _ => 'images/icons/link_globe.svg',
   };
 }
