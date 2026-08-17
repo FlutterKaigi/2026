@@ -23,8 +23,8 @@
       "schema": "venue",
       "data": {
         "name": {
-          "ja": "メインA",
-          "en": "メインA"
+          "ja": "JTCCホール",
+          "en": "JTCC Hall"
         },
         "order": 1,
         "createdAt": "2026-06-02T00:00:00Z",
@@ -36,8 +36,8 @@
       "schema": "venue",
       "data": {
         "name": {
-          "ja": "メインB",
-          "en": "メインB"
+          "ja": "UPSIDERホール",
+          "en": "UPSIDER Hall"
         },
         "order": 2,
         "createdAt": "2026-06-02T00:00:00Z",
@@ -49,8 +49,8 @@
       "schema": "venue",
       "data": {
         "name": {
-          "ja": "大B",
-          "en": "大B"
+          "ja": "Material",
+          "en": "Material"
         },
         "order": 3,
         "createdAt": "2026-06-02T00:00:00Z",
@@ -62,8 +62,8 @@
       "schema": "venue",
       "data": {
         "name": {
-          "ja": "大A",
-          "en": "大A"
+          "ja": "Cupertino",
+          "en": "Cupertino"
         },
         "order": 4,
         "createdAt": "2026-06-02T00:00:00Z",
