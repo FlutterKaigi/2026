@@ -80,9 +80,10 @@ class Home extends StatelessComponent {
         ]),
       ]),
       const EventSection(),
+      // スポンサー情報（JobBoards を含む）を先に並べ、スタッフは末尾に置く。
       const SponsorsSection(),
-      const StaffSection(),
       const HiringSection(),
+      const StaffSection(),
     ]);
   }
 

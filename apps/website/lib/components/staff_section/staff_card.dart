@@ -63,9 +63,10 @@ class StaffCard extends StatelessComponent {
         textAlign: .center,
       ),
       css('.staff-card__avatar', [
+        // 72px は 2025 の実績値。ブロンズスポンサー(144px)より小さく保つ。
         css('&').styles(
-          width: 150.px,
-          height: 150.px,
+          width: 72.px,
+          height: 72.px,
           radius: .circular(999.px),
           raw: const {'object-fit': 'cover', 'flex-shrink': '0'},
         ),
@@ -78,7 +79,7 @@ class StaffCard extends StatelessComponent {
             justifyContent: .center,
             backgroundColor: const Color('#F3EBFB'),
           ),
-          css('img').styles(width: 48.px, height: 48.px),
+          css('img').styles(width: 24.px, height: 24.px),
         ]),
       ]),
       css('.staff-card__name').styles(
@@ -127,12 +128,9 @@ class StaffCard extends StatelessComponent {
       ),
     ]),
 
-    // Mobile: two cards per row.
+    // Mobile: two cards per row. アバターは 72px のまま（縮めると視認性が落ちる）。
     css.media(MediaQuery.all(maxWidth: 640.px), [
-      css('.staff-card', [
-        css('&').styles(width: 150.px),
-        css('.staff-card__avatar').styles(width: 120.px, height: 120.px),
-      ]),
+      css('.staff-card').styles(width: 150.px),
     ]),
   ];
 }

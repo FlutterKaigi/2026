@@ -37,14 +37,13 @@ class StaffSection extends StatelessComponent {
   @css
   static List<StyleRule> get styles => [
     css('.staff-section', [
-      // White background so the section alternates with the tinted Sponsors
-      // section right above it (per the Figma design).
       css('&').styles(
         display: .flex,
         justifyContent: .center,
         width: 100.percent,
         padding: .symmetric(horizontal: 24.px, vertical: 128.px),
-        backgroundColor: onBrand,
+        // Event / Sponsors / Hiring と同一の tinted background に揃える。
+        raw: const {'background-color': '#FDF7FF'},
       ),
       css('.staff-section__inner').styles(
         display: .flex,
