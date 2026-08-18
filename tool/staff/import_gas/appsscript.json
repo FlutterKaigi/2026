@@ -11,6 +11,9 @@
   ],
   "urlFetchWhitelist": [
     "https://firestore.googleapis.com/",
-    "https://storage.googleapis.com/"
+    "https://storage.googleapis.com/",
+    "https://www.googleapis.com/drive/v3/",
+    "https://docs.google.com/feeds/vt",
+    "https://*.googleusercontent.com/"
   ]
 }

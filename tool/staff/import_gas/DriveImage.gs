@@ -48,50 +48,104 @@ function inspectDriveImage_(value) {
 }
 
 /**
- * @param {{file: GoogleAppsScript.Drive.File, mimeType: string}} image
- * @return {GoogleAppsScript.Base.Blob}
- */
-function loadDriveImageBlob_(image) {
-  try {
-    return image.file.getBlob().setContentType(image.mimeType);
-  } catch (error) {
-    throw new Error('Drive画像を読み込めません');
-  }
-}
-
-/**
  * アップロード用のアバター画像を返す。
  *
  * Apps Script にはネイティブの画像リサイズも webp エンコードも無いため、
- * Drive のサムネイル生成に委譲してリサイズ済み画像を取得する。生成できない
- * 場合や画像以外が返った場合は原本へフォールバックし、行は落とさない。
+ * Drive のサムネイル生成に委譲して 320px 正方形の webp を取得する。
+ * webp を取得できない場合は呼び出し側の画像エラー経路へ渡す。Drive API の
+ * 認証・権限エラーは fatal を維持し、それ以外は行単位のスキップ対象にする。
  *
  * @param {{fileId: string, mimeType: string, file: GoogleAppsScript.Drive.File}} image
  * @return {GoogleAppsScript.Base.Blob}
  */
 function loadStaffAvatarBlob_(image) {
+  var thumbnailLink;
   try {
-    var thumbnailUrl = buildDriveThumbnailUrl_(
-      fetchDriveThumbnailLink_(image.fileId),
-      STAFF_IMPORT_CONFIG.avatarPixelSize,
-    );
-    if (thumbnailUrl) {
-      // thumbnailLink は署名付き URL のため、OAuth token は付与しない。
-      var response = UrlFetchApp.fetch(thumbnailUrl, {
-        method: 'get',
-        muteHttpExceptions: true,
-        headers: {Accept: 'image/webp,image/png,image/jpeg'},
-      });
-      if (response.getResponseCode() === 200) {
-        var blob = response.getBlob();
-        var contentType = normalizeImageContentType_(blob.getContentType());
-        if (contentType) return blob.setContentType(contentType);
-      }
-    }
+    thumbnailLink = fetchDriveThumbnailLink_(image.fileId);
   } catch (error) {
-    // サムネイル生成は Drive 側の都合で失敗しうる。原本へフォールバックする。
+    throw sanitizeDriveThumbnailError_(error);
   }
-  return loadDriveImageBlob_(image);
+  if (!thumbnailLink) throw new Error('Drive画像のWebPサムネイルを取得できません');
+
+  var thumbnailUrl = buildDriveThumbnailUrl_(
+    thumbnailLink,
+    STAFF_IMPORT_CONFIG.avatarPixelSize,
+  );
+  var response;
+  try {
+    // thumbnailLink は署名付き URL のため、OAuth token は付与しない。
+    response = UrlFetchApp.fetch(thumbnailUrl, {
+      method: 'get',
+      muteHttpExceptions: true,
+      headers: {Accept: 'image/webp'},
+    });
+  } catch (error) {
+    throw new Error('Drive画像のWebPサムネイルを取得できません');
+  }
+
+  var responseCode;
+  try {
+    responseCode = response.getResponseCode();
+  } catch (error) {
+    throw new Error('Drive画像のWebPサムネイルを取得できません');
+  }
+  if (responseCode !== 200) {
+    throw new Error('Drive画像のWebPサムネイルを取得できません');
+  }
+
+  var blob;
+  var contentType;
+  try {
+    blob = response.getBlob();
+    contentType = normalizeImageContentType_(blob.getContentType());
+  } catch (error) {
+    throw new Error('Drive画像のWebPサムネイルを取得できません');
+  }
+  if (contentType !== 'image/webp') {
+    throw new Error('Drive画像をWebPへ変換できません');
+  }
+  var bytes;
+  try {
+    bytes = blob.getBytes();
+  } catch (error) {
+    throw new Error('Drive画像のWebPサムネイルを取得できません');
+  }
+  if (!hasWebpSignature_(bytes)) {
+    throw new Error('Drive画像をWebPへ変換できません');
+  }
+  return blob;
+}
+
+/**
+ * @param {*} sourceError
+ * @return {Error}
+ */
+function sanitizeDriveThumbnailError_(sourceError) {
+  var sanitized = new Error('Drive画像のWebPサムネイルを取得できません');
+  if (sourceError && sourceError.fatal === true) sanitized.fatal = true;
+  if (sourceError && typeof sourceError.statusCode === 'number') {
+    sanitized.statusCode = sourceError.statusCode;
+  }
+  return sanitized;
+}
+
+/**
+ * @param {number[]} bytes
+ * @return {boolean}
+ */
+function hasWebpSignature_(bytes) {
+  return Boolean(
+    bytes &&
+      bytes.length >= 12 &&
+      bytes[0] === 82 &&
+      bytes[1] === 73 &&
+      bytes[2] === 70 &&
+      bytes[3] === 70 &&
+      bytes[8] === 87 &&
+      bytes[9] === 69 &&
+      bytes[10] === 66 &&
+      bytes[11] === 80,
+  );
 }
 
 /**
@@ -117,7 +171,7 @@ function fetchDriveThumbnailLink_(fileId) {
 /**
  * サムネイル URL に出力サイズと webp 要求を指定する。
  *
- * googleusercontent 形式の `=s320-c-rw` は「長辺320・正方形クロップ・webp優先」。
+ * `s320-c-rw` は「長辺320・正方形クロップ・webp優先」。
  * 実際に webp が返るかは Drive 側の実装依存なので、呼び出し側で応答の
  * Content-Type を確認すること。
  *
@@ -128,8 +182,8 @@ function fetchDriveThumbnailLink_(fileId) {
 function buildDriveThumbnailUrl_(thumbnailLink, size) {
   var url = String(thumbnailLink || '').trim();
   if (!url) return '';
-  // docs.google.com/feeds/vt 形式: sz クエリで指定する（webp は要求できない）
-  if (/[?&]sz=/i.test(url)) return url.replace(/([?&]sz=)[^&]*/i, '$1s' + size);
+  // docs.google.com/feeds/vt 形式: sz クエリへ同じ変換オプションを指定する
+  if (/[?&]sz=/i.test(url)) return url.replace(/([?&]sz=)[^&]*/i, '$1s' + size + '-c-rw');
   // lh3.googleusercontent.com 形式: 末尾のオプション列 (=s220 など) を差し替える
   if (/=[a-z0-9-]+$/i.test(url)) return url.replace(/=[a-z0-9-]+$/i, '=s' + size + '-c-rw');
   return url + '=s' + size + '-c-rw';

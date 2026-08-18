@@ -83,11 +83,11 @@ Apps Script の「プロジェクトの設定 → スクリプト プロパテ�
 - 未対応者はアカウント名を名前に流用せず `SKIPPED_UNMAPPED`
 - 同じ `staffKey` の複数回答は最新タイムスタンプを採用。同時刻なら下の行を採用
 - 採用行へシート順で `order: 1..N` を付与
-- 画像は Drive のサムネイル生成で長辺 320px の正方形へ縮小し、webp を優先して取得
+- 画像は Drive のサムネイル生成で 320px 正方形へ縮小し、WebP の場合だけ Storage へ保存
 - 画像は `public/staff/{staffKey}/avatar` へ上書きし、既存のダウンロードトークンを再利用
 - Firestore は `staffMembers/staff-{staffKey}` へ条件付き upsert
 - 既存更新では `createdAt` を保持し、`updatedAt` をサーバー時刻で更新
-- Drive 画像の検証失敗や非致命的な Storage アップロード失敗は行単位でスキップ
+- Drive 画像の検証失敗、WebP サムネイルへの変換失敗、非致命的な Storage アップロード失敗は行単位でスキップ
 - 1 行の失敗後も他行を継続。画像アップロードの 401 / 403 など全体認証エラーは中断
 - Firestore にあるが回答シートにないドキュメントは削除しない
 
@@ -117,7 +117,7 @@ Apps Script 上の「セルフテスト」も外部への書き込みを行い�
 
 Apps Script にはネイティブの画像リサイズと webp エンコードがありません。スポンサーロゴの `convert-sponsor-logos.sh` が使う `cwebp` / `rsvg-convert` は GAS 上で実行できないため、アバターの縮小と webp 化は Drive のサムネイル生成 (`thumbnailLink` に `=s320-c-rw` を指定) に委譲しています。
 
-`-rw` による webp 応答は Drive 側の非公開動作です。応答の Content-Type を確認し、webp 以外なら縮小済みの png / jpeg として、サムネイル生成自体が失敗した場合は原本としてアップロードします。**実際に webp が返るかは STG インポート後に Storage 上のオブジェクトの Content-Type で確認してください。**
+`-rw` による WebP 応答は Drive 側の非公開動作です。HTTP 200、実際の Content-Type が `image/webp`、かつデータが RIFF/WEBP シグネチャを持つ場合だけ Storage へ保存します。Drive が PNG / JPEG などを返す、サムネイルを生成できない、または取得に失敗する場合は原本へフォールバックせず、その行を `SKIPPED_IMAGE` にします。
 
 オブジェクトパス `public/staff/{staffKey}/avatar` は拡張子を持たないため、形式が変わっても公開 URL は変わりません。
 

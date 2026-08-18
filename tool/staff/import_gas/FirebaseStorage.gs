@@ -26,6 +26,21 @@ function buildFirebaseDownloadUrl_(bucket, objectPath, token) {
  * @return {string}
  */
 function uploadStaffAvatar_(environment, staffKey, contentType, blob) {
+  var declaredContentType = String(contentType || '').split(';')[0].trim().toLowerCase();
+  var blobContentType = String(blob.getContentType() || '').split(';')[0].trim().toLowerCase();
+  if (declaredContentType !== 'image/webp' || blobContentType !== 'image/webp') {
+    throw new Error('WebP画像以外はStorageへ保存できません');
+  }
+  var imageBytes;
+  try {
+    imageBytes = blob.getBytes();
+  } catch (error) {
+    throw new Error('WebP画像を検証できないためStorageへ保存できません');
+  }
+  if (!hasWebpSignature_(imageBytes)) {
+    throw new Error('WebP画像以外はStorageへ保存できません');
+  }
+
   var objectPath = 'public/staff/' + staffKey + '/avatar';
   var existing = getStorageObjectMetadata_(environment.bucket, objectPath);
   var existingTokens = existing && existing.metadata
@@ -43,7 +58,7 @@ function uploadStaffAvatar_(environment, staffKey, contentType, blob) {
       metadata: {firebaseStorageDownloadTokens: token},
     },
     contentType,
-    blob.getBytes(),
+    imageBytes,
   );
 
   var uploadUrl =

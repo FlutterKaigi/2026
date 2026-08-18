@@ -5,6 +5,7 @@ const test = require('node:test');
 const vm = require('node:vm');
 
 const gasDir = path.resolve(__dirname, '..');
+const validWebpBytes = [82, 73, 70, 70, 4, 0, 0, 0, 87, 69, 66, 80, 86, 80, 56, 32];
 
 function loadGas(files) {
   const context = vm.createContext({
@@ -108,10 +109,10 @@ test('buildDriveThumbnailUrl_ requests a 320px square webp thumbnail', () => {
     gas.buildDriveThumbnailUrl_('https://lh3.googleusercontent.com/drive-storage/AbC_1-2', 320),
     'https://lh3.googleusercontent.com/drive-storage/AbC_1-2=s320-c-rw',
   );
-  // feeds/vt 形式: sz クエリだけを差し替え、webp は要求しない
+  // feeds/vt 形式: sz クエリへ同じ変換オプションを指定する
   assert.equal(
     gas.buildDriveThumbnailUrl_('https://docs.google.com/feeds/vt?id=abc&sz=s220&v=1', 320),
-    'https://docs.google.com/feeds/vt?id=abc&sz=s320&v=1',
+    'https://docs.google.com/feeds/vt?id=abc&sz=s320-c-rw&v=1',
   );
   assert.equal(gas.buildDriveThumbnailUrl_('', 320), '');
 });
@@ -124,6 +125,289 @@ test('normalizeImageContentType_ accepts only supported image types', () => {
   // サムネイル生成失敗時はエラーページが返るため、画像以外は弾く
   assert.equal(gas.normalizeImageContentType_('text/html'), '');
   assert.equal(gas.normalizeImageContentType_(null), '');
+});
+
+test('loadStaffAvatarBlob_ returns only a 320px square WebP thumbnail', () => {
+  const gas = loadGas(['Config.gs', 'DriveImage.gs']);
+  const webpBlob = {
+    getContentType: () => 'image/webp',
+    getBytes: () => validWebpBytes.slice(),
+  };
+  let requestedUrl;
+  let requestedOptions;
+  gas.fetchDriveThumbnailLink_ = () =>
+    'https://lh3.googleusercontent.com/drive-storage/signed-thumbnail=s220';
+  gas.UrlFetchApp = {
+    fetch: (url, options) => {
+      requestedUrl = url;
+      requestedOptions = options;
+      return {getResponseCode: () => 200, getBlob: () => webpBlob};
+    },
+  };
+
+  const result = gas.loadStaffAvatarBlob_({fileId: 'private-file-id'});
+
+  assert.equal(result, webpBlob);
+  assert.equal(
+    requestedUrl,
+    'https://lh3.googleusercontent.com/drive-storage/signed-thumbnail=s320-c-rw',
+  );
+  assert.deepEqual(plain(requestedOptions.headers), {Accept: 'image/webp'});
+});
+
+test('loadStaffAvatarBlob_ rejects non-WebP thumbnails without loading the original', () => {
+  const gas = loadGas(['Config.gs', 'DriveImage.gs']);
+  let returnedContentType = 'image/png';
+  gas.fetchDriveThumbnailLink_ = () =>
+    'https://lh3.googleusercontent.com/drive-storage/private-thumbnail=s220';
+  gas.UrlFetchApp = {
+    fetch: () => ({
+      getResponseCode: () => 200,
+      getBlob: () => ({getContentType: () => returnedContentType}),
+    }),
+  };
+
+  for (const contentType of ['image/png', 'image/jpeg', 'text/html']) {
+    returnedContentType = contentType;
+    assert.throws(
+      () =>
+        gas.loadStaffAvatarBlob_({
+          fileId: 'private-file-id',
+          file: {getBlob: () => assert.fail('original image must not be loaded')},
+        }),
+      (error) => {
+        assert.equal(error.message, 'Drive画像をWebPへ変換できません');
+        assert.doesNotMatch(error.message, /private-file-id|private-thumbnail/);
+        return true;
+      },
+    );
+  }
+});
+
+test('loadStaffAvatarBlob_ rejects a mislabeled blob without a WebP byte signature', () => {
+  const gas = loadGas(['Config.gs', 'DriveImage.gs']);
+  gas.fetchDriveThumbnailLink_ = () =>
+    'https://lh3.googleusercontent.com/drive-storage/private-thumbnail=s220';
+  gas.UrlFetchApp = {
+    fetch: () => ({
+      getResponseCode: () => 200,
+      getBlob: () => ({
+        getContentType: () => 'image/webp',
+        getBytes: () => [137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 0],
+      }),
+    }),
+  };
+
+  assert.throws(
+    () => gas.loadStaffAvatarBlob_({fileId: 'private-file-id'}),
+    /Drive画像をWebPへ変換できません/,
+  );
+});
+
+test('loadStaffAvatarBlob_ does not fall back when the thumbnail request fails', () => {
+  const gas = loadGas(['Config.gs', 'DriveImage.gs']);
+  gas.fetchDriveThumbnailLink_ = () =>
+    'https://lh3.googleusercontent.com/drive-storage/private-thumbnail=s220';
+  gas.UrlFetchApp = {
+    fetch: () => ({getResponseCode: () => 503}),
+  };
+
+  assert.throws(
+    () =>
+      gas.loadStaffAvatarBlob_({
+        fileId: 'private-file-id',
+        file: {getBlob: () => assert.fail('original image must not be loaded')},
+      }),
+    (error) => {
+      assert.equal(error.message, 'Drive画像のWebPサムネイルを取得できません');
+      assert.doesNotMatch(error.message, /private-file-id|private-thumbnail/);
+      return true;
+    },
+  );
+});
+
+test('loadStaffAvatarBlob_ sanitizes getBlob exceptions without falling back', () => {
+  const gas = loadGas(['Config.gs', 'DriveImage.gs']);
+  gas.fetchDriveThumbnailLink_ = () =>
+    'https://lh3.googleusercontent.com/drive-storage/private-thumbnail=s220';
+  gas.UrlFetchApp = {
+    fetch: () => ({
+      getResponseCode: () => 200,
+      getBlob: () => {
+        throw new Error('failed signed-url?token=secret for private-file-id');
+      },
+    }),
+  };
+
+  assert.throws(
+    () =>
+      gas.loadStaffAvatarBlob_({
+        fileId: 'private-file-id',
+        file: {getBlob: () => assert.fail('original image must not be loaded')},
+      }),
+    (error) => {
+      assert.equal(error.message, 'Drive画像のWebPサムネイルを取得できません');
+      assert.doesNotMatch(error.message, /signed-url|token|secret|private-file-id/);
+      return true;
+    },
+  );
+});
+
+test('loadStaffAvatarBlob_ sanitizes getBytes exceptions', () => {
+  const gas = loadGas(['Config.gs', 'DriveImage.gs']);
+  gas.fetchDriveThumbnailLink_ = () =>
+    'https://lh3.googleusercontent.com/drive-storage/private-thumbnail=s220';
+  gas.UrlFetchApp = {
+    fetch: () => ({
+      getResponseCode: () => 200,
+      getBlob: () => ({
+        getContentType: () => 'image/webp',
+        getBytes: () => {
+          throw new Error('signed-url?token=secret for private-file-id');
+        },
+      }),
+    }),
+  };
+
+  assert.throws(
+    () => gas.loadStaffAvatarBlob_({fileId: 'private-file-id'}),
+    (error) => {
+      assert.equal(error.message, 'Drive画像のWebPサムネイルを取得できません');
+      assert.doesNotMatch(error.message, /signed-url|token|secret|private-file-id/);
+      return true;
+    },
+  );
+});
+
+test('loadStaffAvatarBlob_ rejects a missing thumbnailLink without fetching', () => {
+  const gas = loadGas(['Config.gs', 'DriveImage.gs']);
+  gas.fetchDriveThumbnailLink_ = () => '';
+  gas.UrlFetchApp = {fetch: () => assert.fail('thumbnail must not be fetched')};
+
+  assert.throws(
+    () => gas.loadStaffAvatarBlob_({fileId: 'private-file-id'}),
+    /Drive画像のWebPサムネイルを取得できません/,
+  );
+});
+
+test('loadStaffAvatarBlob_ sanitizes thumbnail acquisition exceptions', () => {
+  const gas = loadGas(['Config.gs', 'DriveImage.gs']);
+  gas.fetchDriveThumbnailLink_ = () => {
+    throw new Error(
+      'failed https://private.example/signed-url?token=secret for private-file-id',
+    );
+  };
+
+  assert.throws(
+    () => gas.loadStaffAvatarBlob_({fileId: 'private-file-id'}),
+    (error) => {
+      assert.equal(error.message, 'Drive画像のWebPサムネイルを取得できません');
+      assert.doesNotMatch(error.message, /signed-url|token|secret|private-file-id/);
+      return true;
+    },
+  );
+});
+
+test('fatal thumbnail metadata errors stay fatal and abort the row import', () => {
+  const gas = loadGas(['Config.gs', 'DriveImage.gs', 'Code.gs']);
+  const sourceError = new Error(
+    'GET drive.googleapis.com/private-file-id?token=secret: permission denied',
+  );
+  sourceError.fatal = true;
+  sourceError.statusCode = 401;
+  gas.fetchDriveThumbnailLink_ = () => {
+    throw sourceError;
+  };
+  let storageWrites = 0;
+  let firestoreWrites = 0;
+  gas.uploadStaffAvatar_ = () => {
+    storageWrites += 1;
+  };
+  gas.upsertStaffDocument_ = () => {
+    firestoreWrites += 1;
+  };
+  const row = {
+    image: {fileId: 'private-file-id'},
+    staffKey: 'sample-one',
+    documentId: 'staff-sample-one',
+    firestoreData: {iconUrl: ''},
+    result: {},
+  };
+
+  assert.throws(() => gas.importPreparedRow_({target: 'STG'}, row), (error) => {
+    assert.equal(error.message, 'Drive画像のWebPサムネイルを取得できません');
+    assert.equal(error.fatal, true);
+    assert.equal(error.statusCode, 401);
+    assert.doesNotMatch(error.message, /private-file-id|token|permission|googleapis/);
+    return true;
+  });
+  assert.equal(row.result.importStatus, 'ERROR_IMAGE');
+  assert.equal(row.result.error, 'Drive画像のWebPサムネイルを取得できません');
+  assert.equal(storageWrites, 0);
+  assert.equal(firestoreWrites, 0);
+});
+
+test('avatar diagnostic uses strict production validation and logs only sanitized result data', () => {
+  const gas = loadGas(['Diagnostics.gs']);
+  const logs = [];
+  const inspectedImage = {fileId: 'private-file-id'};
+  gas.Logger = {log: (message) => logs.push(message)};
+  gas.inspectDriveImage_ = (icon) => {
+    assert.equal(icon, 'private-icon-url');
+    return inspectedImage;
+  };
+  gas.loadStaffAvatarBlob_ = (image) => {
+    assert.equal(image, inspectedImage);
+    return {
+      getContentType: () => 'IMAGE/WEBP; charset=binary',
+      getBytes: () => validWebpBytes.slice(),
+    };
+  };
+  gas.normalizeImageContentType_ = () => 'image/webp';
+
+  gas.reportAvatarTransform_({icon: 'private-icon-url'});
+
+  assert.equal(logs.length, 1);
+  assert.match(logs[0], /strict WebP validation succeeded/);
+  assert.match(logs[0], /contentType=image\/webp/);
+  assert.match(logs[0], /byteSize=16/);
+  assert.doesNotMatch(logs[0], /private-file-id|private-icon-url|charset/);
+});
+
+test('avatar diagnostic distinguishes skipped rows from fatal image errors', () => {
+  const gas = loadGas(['Diagnostics.gs']);
+  const logs = [];
+  gas.Logger = {log: (message) => logs.push(message)};
+  gas.inspectDriveImage_ = () => ({fileId: 'private-file-id'});
+
+  gas.loadStaffAvatarBlob_ = () => {
+    throw new Error('signed-url?token=secret');
+  };
+  gas.reportAvatarTransform_({icon: 'private-icon-url'});
+  const skippedLog = logs.pop();
+  assert.match(skippedLog, /SKIPPED_IMAGE.*import would skip this row/);
+
+  const fatalError = new Error('signed-url?token=secret');
+  fatalError.fatal = true;
+  gas.loadStaffAvatarBlob_ = () => {
+    throw fatalError;
+  };
+  assert.throws(() => gas.reportAvatarTransform_({icon: 'private-icon-url'}), (error) => {
+    assert.equal(error, fatalError);
+    return true;
+  });
+  const fatalLog = logs.pop();
+  assert.match(fatalLog, /ERROR_IMAGE.*import would abort/);
+  assert.doesNotMatch(
+    skippedLog + '\n' + fatalLog,
+    /signed-url|token|secret|private-file-id|private-icon-url/,
+  );
+});
+
+test('avatar diagnostic contains no stale original, PNG, or JPEG fallback policy', () => {
+  const source = fs.readFileSync(path.join(gasDir, 'Diagnostics.gs'), 'utf8');
+
+  assert.doesNotMatch(source, /原本がそのまま|image\/png,image\/jpeg|一部OK/);
 });
 
 test('resolveStaff_ maps a normalized account alias to a stable staff key', () => {
@@ -257,9 +541,9 @@ test('buildFirebaseDownloadUrl_ encodes the stable object path', () => {
 });
 
 test('uploadStaffAvatar_ uploads existing-token metadata and image bytes in one multipart request', () => {
-  const gas = loadGas(['FirebaseStorage.gs']);
+  const gas = loadGas(['DriveImage.gs', 'FirebaseStorage.gs']);
   const calls = [];
-  const imageBytes = [0, 255, 128, 10, 13, 42];
+  const imageBytes = validWebpBytes.concat([0, 255, 128, 10, 13, 42]);
   const response = (code, body) => ({
     getResponseCode: () => code,
     getContentText: () => JSON.stringify(body),
@@ -283,8 +567,8 @@ test('uploadStaffAvatar_ uploads existing-token metadata and image bytes in one 
   const downloadUrl = gas.uploadStaffAvatar_(
     {bucket: 'sample-project.firebasestorage.app'},
     'sample-one',
-    'image/png',
-    {getBytes: () => imageBytes.slice()},
+    'image/webp',
+    {getContentType: () => 'image/webp', getBytes: () => imageBytes.slice()},
   );
 
   assert.equal(calls.length, 2);
@@ -303,7 +587,7 @@ test('uploadStaffAvatar_ uploads existing-token metadata and image bytes in one 
   const metadataStart = Buffer.from(
     `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n`,
   );
-  const imageStart = Buffer.from(`\r\n--${boundary}\r\nContent-Type: image/png\r\n\r\n`);
+  const imageStart = Buffer.from(`\r\n--${boundary}\r\nContent-Type: image/webp\r\n\r\n`);
   const imageEnd = Buffer.from(`\r\n--${boundary}--\r\n`);
   assert.equal(payload.subarray(0, metadataStart.length).equals(metadataStart), true);
   const imageOffset = payload.indexOf(imageStart, metadataStart.length);
@@ -311,7 +595,7 @@ test('uploadStaffAvatar_ uploads existing-token metadata and image bytes in one 
   const metadata = JSON.parse(payload.subarray(metadataStart.length, imageOffset).toString('utf8'));
   assert.deepEqual(metadata, {
     name: 'public/staff/sample-one/avatar',
-    contentType: 'image/png',
+    contentType: 'image/webp',
     cacheControl: 'public,max-age=3600',
     metadata: {firebaseStorageDownloadTokens: 'existing-token'},
   });
@@ -327,7 +611,7 @@ test('uploadStaffAvatar_ uploads existing-token metadata and image bytes in one 
 });
 
 test('uploadStaffAvatar_ generates a token and uses generation zero for a new object', () => {
-  const gas = loadGas(['FirebaseStorage.gs']);
+  const gas = loadGas(['DriveImage.gs', 'FirebaseStorage.gs']);
   const calls = [];
   const uuids = ['new-token', 'multipart-boundary-id'];
   gas.Utilities = {
@@ -344,8 +628,8 @@ test('uploadStaffAvatar_ generates a token and uses generation zero for a new ob
   const downloadUrl = gas.uploadStaffAvatar_(
     {bucket: 'sample-project.firebasestorage.app'},
     'sample-two',
-    'image/jpeg',
-    {getBytes: () => [1, 2, 3]},
+    'image/webp',
+    {getContentType: () => 'image/webp', getBytes: () => validWebpBytes.slice()},
   );
 
   assert.equal(calls.length, 2);
@@ -356,6 +640,61 @@ test('uploadStaffAvatar_ generates a token and uses generation zero for a new ob
     /"firebaseStorageDownloadTokens":"new-token"/,
   );
   assert.match(downloadUrl, /token=new-token$/);
+});
+
+test('uploadStaffAvatar_ rejects non-WebP before any Storage API request', () => {
+  const gas = loadGas(['DriveImage.gs', 'FirebaseStorage.gs']);
+  let storageCalls = 0;
+  gas.fetchWithRetry_ = () => {
+    storageCalls += 1;
+    assert.fail('Storage API must not be called');
+  };
+
+  assert.throws(
+    () =>
+      gas.uploadStaffAvatar_(
+        {bucket: 'sample-project.firebasestorage.app'},
+        'sample-one',
+        'image/png',
+        {getContentType: () => 'image/png'},
+      ),
+    /WebP画像以外はStorageへ保存できません/,
+  );
+  assert.throws(
+    () =>
+      gas.uploadStaffAvatar_(
+        {bucket: 'sample-project.firebasestorage.app'},
+        'sample-one',
+        'image/webp',
+        {getContentType: () => 'image/jpeg'},
+      ),
+    /WebP画像以外はStorageへ保存できません/,
+  );
+  assert.equal(storageCalls, 0);
+});
+
+test('uploadStaffAvatar_ rejects mislabeled non-WebP bytes before any Storage API request', () => {
+  const gas = loadGas(['DriveImage.gs', 'FirebaseStorage.gs']);
+  let storageCalls = 0;
+  gas.fetchWithRetry_ = () => {
+    storageCalls += 1;
+    assert.fail('Storage API must not be called');
+  };
+
+  assert.throws(
+    () =>
+      gas.uploadStaffAvatar_(
+        {bucket: 'sample-project.firebasestorage.app'},
+        'sample-one',
+        'image/webp',
+        {
+          getContentType: () => 'image/webp',
+          getBytes: () => [255, 216, 255, 224, 0, 16, 74, 70, 73, 70, 0, 0],
+        },
+      ),
+    /WebP画像以外はStorageへ保存できません/,
+  );
+  assert.equal(storageCalls, 0);
 });
 
 test('stableStringify_ is deterministic across object key order', () => {

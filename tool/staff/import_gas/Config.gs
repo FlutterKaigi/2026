@@ -1,7 +1,7 @@
 var STAFF_IMPORT_CONFIG = Object.freeze({
   // 画像変換を伴う変更では bump する。computeInputHash_ に含まれるため、
   // STG 成功済みハッシュが無効になり、本番前に STG からのやり直しを強制する。
-  transformVersion: '2',
+  transformVersion: '3',
   mapSheetName: 'StaffNameMap',
   maxImageBytes: 10 * 1024 * 1024,
   // アップロードするアバターの長辺(px)。表示は 72px、Retina を考慮しても十分。
