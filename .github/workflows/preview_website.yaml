@@ -61,6 +61,15 @@ jobs:
           FIRESTORE_HOST: firestore.googleapis.com
           FIRESTORE_ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
 
+      # Generate the (git-ignored) staff data from the STG Firestore project
+      # (`staffMembers` collection) — same fallback behaviour as the sponsors.
+      - name: Generate staff data
+        run: dart run tool/generate_staff.dart
+        env:
+          FIREBASE_PROJECT_ID: ${{ vars.STG_FIREBASE_PROJECT_ID }}
+          FIRESTORE_HOST: firestore.googleapis.com
+          FIRESTORE_ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
+
       # Generate news data (packages/data `news` collection) from the STG
       # Firestore project. Unlike sponsor data this output is also committed
       # to git (news is not sensitive); regenerating here just keeps the
