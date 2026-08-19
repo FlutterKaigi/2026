@@ -41,6 +41,9 @@ enum AppLocale {
   /// Navigation href to the Job Boards section on the home page.
   String get jobBoardsAnchorHref => '$linkHref#job-boards';
 
+  /// Navigation href to the Staff section on the home page.
+  String get staffAnchorHref => '$linkHref#staff';
+
   /// The other supported locale (the site ships exactly two).
   AppLocale get other => this == AppLocale.ja ? AppLocale.en : AppLocale.ja;
 }
@@ -61,6 +64,19 @@ class Strings {
   };
 
   String get heroThemeName => '〜Assemble〜';
+
+  /// Hero CTA label — links out to the ticket-sales announcement on Medium.
+  String get heroTicketsCta => switch (locale) {
+    AppLocale.ja => 'チケットの販売を開始しました',
+    AppLocale.en => 'Tickets Now on Sale!',
+  };
+
+  /// Ticket-sales announcement on Medium — shared by the Hero CTA and the
+  /// EventInformation ticket button.
+  String get ticketsCtaUrl => switch (locale) {
+    AppLocale.ja => 'https://medium.com/flutterkaigi/flutterkaigi-2026のチケットを販売開始しました-99035b658a7b',
+    AppLocale.en => 'https://medium.com/flutterkaigi/ticket-sales-for-flutterkaigi-2026-are-now-open-1d7c809a3c72',
+  };
 
   // ── Header ──────────────────────────────────────────────────────────
 
@@ -101,22 +117,6 @@ class Strings {
     AppLocale.en => 'Session Submissions Closed',
   };
 
-  String get eventInfoComingSoon => switch (locale) {
-    AppLocale.ja => 'Coming soon...',
-    AppLocale.en => 'Coming soon...',
-  };
-
-  /// `date` 部分はマイルストーン側のロケール対応済み文字列を埋め込む。
-  String eventInfoTicketsOpensAt(String date) => switch (locale) {
-    AppLocale.ja => '$date 販売開始',
-    AppLocale.en => 'Opens $date',
-  };
-
-  String get eventInfoTicketsAriaLabel => switch (locale) {
-    AppLocale.ja => 'チケット販売は準備中です',
-    AppLocale.en => 'Tickets are not on sale yet',
-  };
-
   String get roadmapCardTitle => switch (locale) {
     AppLocale.ja => 'Roadmap',
     AppLocale.en => 'Roadmap',
@@ -127,21 +127,14 @@ class Strings {
     AppLocale.en => 'News',
   };
 
-  String get newsViewAllCta => switch (locale) {
-    AppLocale.ja => 'すべてのニュースを見る',
-    AppLocale.en => 'View All News',
+  String get newsShowAllCta => switch (locale) {
+    AppLocale.ja => 'すべてのニュースを表示',
+    AppLocale.en => 'Show All News',
   };
 
-  String get latestUpdatesCta => switch (locale) {
-    AppLocale.ja => 'FlutterKaigi 2026 スポンサー募集について',
-    AppLocale.en => 'FlutterKaigi 2026 Sponsorship Opportunities',
-  };
-
-  String get latestUpdatesCtaUrl => switch (locale) {
-    AppLocale.ja =>
-      'https://medium.com/flutterkaigi/flutterkaigi-2026-opportunities-guide-ja-0e8cdb0a4acb',
-    AppLocale.en =>
-      'https://medium.com/flutterkaigi/flutterkaigi-2026-opportunities-guide-en-1e5bd6c14461',
+  String get newsShowLessCta => switch (locale) {
+    AppLocale.ja => '閉じる',
+    AppLocale.en => 'Show Less',
   };
 
   // ── Sponsors ────────────────────────────────────────────────────────
@@ -161,6 +154,13 @@ class Strings {
     AppLocale.en => 'View details for $name',
   };
 
+  /// Accessible label for an individual sponsor's card, which links directly
+  /// to their GitHub profile rather than a detail page (in a new tab).
+  String sponsorGithubCardAriaLabel(String name) => switch (locale) {
+    AppLocale.ja => '$name の GitHub を見る（新しいタブで開く）',
+    AppLocale.en => "View $name's GitHub profile (opens in a new tab)",
+  };
+
   String get sponsorBackToList => switch (locale) {
     AppLocale.ja => 'スポンサー一覧に戻る',
     AppLocale.en => 'Back to Sponsors',
@@ -172,6 +172,19 @@ class Strings {
   String sponsorTierBadge(String tierLabel) => switch (locale) {
     AppLocale.ja => '$tierLabel スポンサー',
     AppLocale.en => '$tierLabel Sponsor',
+  };
+
+  // ── Staff ───────────────────────────────────────────────────────────
+
+  /// Section title / nav label (kept in English in both locales, per design).
+  String get staffTitle => 'Staff';
+
+  String get staffSubtitle => 'Members building FlutterKaigi 2026';
+
+  /// Accessible label for a staff member's SNS icon link.
+  String staffSnsAriaLabel(String name, String platform) => switch (locale) {
+    AppLocale.ja => '$name の $platform を見る（新しいタブで開く）',
+    AppLocale.en => "View $name's $platform (opens in a new tab)",
   };
 
   String get footerCopyright => switch (locale) {

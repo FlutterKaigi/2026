@@ -260,6 +260,7 @@ class _TierBadge extends StatelessWidget {
     SponsorTier.tool: Color(0xFF00897B),
     SponsorTier.community: Color(0xFF43A047),
     SponsorTier.individual: Color(0xFF7B1FA2),
+    SponsorTier.entertainment: Color(0xFFD81B60),
   };
 
   @override

@@ -1,10 +1,67 @@
+/// News ドメインモデル。
+///
+/// この File は手書きで Git 管理される。実データは `generated_news.dart` に
+/// 生成され、`tool/generate_news.dart` が `news` Firestore コレクション
+/// （packages/data、ダッシュボードが書き込むものと同じ）から生成する。
+/// スポンサー情報 (`generated_sponsors.dart`) と異なり、ニュースは機密情報
+/// ではないため生成後のファイルも gitignore せず Git 管理する。
+library;
+
 import '../l10n/strings.dart';
+import 'generated_news.dart';
 
-// News カードに掲載するニュース項目を、日本語と英語でそれぞれ独立して管理する。
-// 後で CSV や Headless CMS 等から自動生成する場合、`_newsJa` / `_newsEn` の
-// const リテラルだけを差し替えれば良いように分離している。
+/// ニュース1件（Firestore `news` コレクションの1ドキュメントに対応）。
+class NewsEntry {
+  const NewsEntry({
+    required this.id,
+    required this.titleJa,
+    required this.titleEn,
+    required this.urlJa,
+    required this.urlEn,
+    required this.publishedAt,
+  });
 
-/// News カード内のニュース1件。
+  final String id;
+  final String titleJa;
+  final String titleEn;
+  final String urlJa;
+  final String urlEn;
+
+  /// 公開日時（UTC）。日付表示のフォーマットにのみ使用する。
+  final DateTime publishedAt;
+
+  String titleFor(AppLocale locale) => switch (locale) {
+    AppLocale.ja => titleJa,
+    AppLocale.en => titleEn,
+  };
+
+  String urlFor(AppLocale locale) => switch (locale) {
+    AppLocale.ja => urlJa,
+    AppLocale.en => urlEn,
+  };
+
+  /// 表示用の日付文字列（例: "2026年6月17日" / "JUN 17, 2026"）。
+  /// uppercase 等の見た目はここで確定させ、ビュー側では変換しない。
+  ///
+  /// `publishedAt` は常にUTCなので、JST（会場・想定読者のタイムゾーン）の
+  /// 日付に変換してから年月日を取り出す。そのまま UTC の年月日を使うと、
+  /// JST 0:00〜8:59 に公開設定されたニュースが前日の日付で表示されてしまう。
+  String dateFor(AppLocale locale) {
+    final d = publishedAt.toUtc().add(const Duration(hours: 9));
+    return switch (locale) {
+      AppLocale.ja => '${d.year}年${d.month}月${d.day}日',
+      AppLocale.en => '${_monthAbbrEn[d.month]} ${d.day}, ${d.year}',
+    };
+  }
+}
+
+const _monthAbbrEn = [
+  '', // 1-indexed
+  'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN',
+  'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC',
+];
+
+/// NewsCard に表示する1件（指定ロケールで解決済みの表示用データ）。
 class NewsLink {
   const NewsLink({
     required this.date,
@@ -12,8 +69,7 @@ class NewsLink {
     required this.url,
   });
 
-  /// 表示用の日付文字列（例: "MAY 15, 2026" / "2026年5月15日"）。
-  /// uppercase はビュー側で適用するので、ここでは生の文字列のまま入れる。
+  /// 表示用の日付文字列。
   final String date;
 
   /// ニュース見出し。
@@ -23,48 +79,25 @@ class NewsLink {
   final String url;
 }
 
-const _newsJa = <NewsLink>[
-  NewsLink(
-    date: '2026年6月17日',
-    title: 'FlutterKaigi 2026 プロポーザル応募のススメ',
-    url:
-        'https://medium.com/flutterkaigi/flutterkaigi-2026-%E3%83%97%E3%83%AD%E3%83%9D%E3%83%BC%E3%82%B6%E3%83%AB%E5%BF%9C%E5%8B%9F%E3%81%AE%E3%82%B9%E3%82%B9%E3%83%A1-ea8978e0fd89',
-  ),
-  NewsLink(
-    date: '2026年5月11日',
-    title: 'FlutterKaigi 2026 スポンサー募集について',
-    url: 'https://medium.com/flutterkaigi/flutterkaigi-2026-opportunities-guide-ja-0e8cdb0a4acb',
-  ),
-  NewsLink(
-    date: '2026年3月9日',
-    title: 'FlutterKaigi 2026 開催のお知らせ',
-    url: 'https://medium.com/flutterkaigi/flutterkaigi-2026-開催のお知らせ-f78a1421fe08',
-  ),
-];
+/// NewsCard に初期表示する件数。それ以降はアコーディオンで展開する。
+const newsCardInitialCount = 3;
 
-const _newsEn = <NewsLink>[
-  NewsLink(
-    date: 'JUN 17, 2026',
-    title: 'A Guide to Submitting a Proposal for FlutterKaigi 2026',
-    url: 'https://medium.com/flutterkaigi/a-guide-to-submitting-a-proposal-for-flutterkaigi-2026-3fda9a01121d',
-  ),
-  NewsLink(
-    date: 'MAY 11, 2026',
-    title: 'FlutterKaigi 2026 Sponsorship Opportunities',
-    url: 'https://medium.com/flutterkaigi/flutterkaigi-2026-opportunities-guide-en-1e5bd6c14461',
-  ),
-  NewsLink(
-    date: 'MAR 9, 2026',
-    title: 'Announcement: FlutterKaigi 2026',
-    url: 'https://medium.com/flutterkaigi/flutterkaigi-2026-開催のお知らせ-f78a1421fe08',
-  ),
-];
-
-/// 指定ロケールに対応するニュース一覧を返す。
-List<NewsLink> newsForLocale(AppLocale locale) => switch (locale) {
-  AppLocale.ja => _newsJa,
-  AppLocale.en => _newsEn,
-};
-
-/// 「すべてのニュース」遷移先（ロケール非依存）。
-const newsViewAllUrl = 'https://medium.com/flutterkaigi';
+/// 指定ロケールのニュース一覧（公開日降順、全件）を返す。
+///
+/// 表示件数の絞り込みは呼び出し側（NewsCard）が [newsCardInitialCount] を
+/// 使って行う。Medium 側のページネーションが機能しなくなったため、全件を
+/// サイト内で表示できるようにする。
+List<NewsLink> newsForLocale(AppLocale locale) {
+  final sorted = [...generatedNews]
+    ..sort(
+      (a, b) => b.publishedAt.compareTo(a.publishedAt),
+    );
+  return [
+    for (final n in sorted)
+      NewsLink(
+        date: n.dateFor(locale),
+        title: n.titleFor(locale),
+        url: n.urlFor(locale),
+      ),
+  ];
+}

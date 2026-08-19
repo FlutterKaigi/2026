@@ -1,0 +1,164 @@
+name: Deploy App Android
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-app-android-production
+  cancel-in-progress: false
+
+permissions: {}
+
+defaults:
+  run:
+    shell: bash -euo pipefail {0}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      FIREBASE_PROJECT_ID: ${{ vars.PROD_FIREBASE_PROJECT_ID }}
+      ANDROID_PACKAGE_NAME: ${{ vars.ANDROID_PACKAGE_NAME }}
+      GOOGLE_PLAY_TRACK: ${{ vars.GOOGLE_PLAY_TRACK }}
+      ANDROID_SIGNING_KEYSTORE_BASE64: ${{ secrets.ANDROID_SIGNING_KEYSTORE_BASE64 }}
+      ANDROID_KEY_PROPERTIES_BASE64: ${{ secrets.ANDROID_KEY_PROPERTIES_BASE64 }}
+      GOOGLE_PLAY_SERVICE_ACCOUNT_BASE64: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_BASE64 }}
+      GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER_PROD }}
+      GCP_SERVICE_ACCOUNT: ${{ vars.GCP_SERVICE_ACCOUNT_PROD }}
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - id: flutter-version
+        run: echo "version=$(jq -r .flutter .fvmrc)" >> "$GITHUB_OUTPUT"
+
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version: ${{ steps.flutter-version.outputs.version }}
+          channel: stable
+          cache: true
+
+      - uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Resolve dependencies
+        run: flutter pub get
+
+      - name: Validate delivery configuration
+        run: |
+          for name in FIREBASE_PROJECT_ID ANDROID_PACKAGE_NAME GOOGLE_PLAY_TRACK ANDROID_SIGNING_KEYSTORE_BASE64 \
+            ANDROID_KEY_PROPERTIES_BASE64 GOOGLE_PLAY_SERVICE_ACCOUNT_BASE64 \
+            GCP_WORKLOAD_IDENTITY_PROVIDER GCP_SERVICE_ACCOUNT; do
+            if [ -z "${!name}" ]; then
+              echo "::error::$name is not configured as a Repository Variable or Secret."
+              exit 1
+            fi
+          done
+          if [ "$ANDROID_PACKAGE_NAME" != "jp.flutterkaigi.conf2026" ]; then
+            echo "::error::ANDROID_PACKAGE_NAME must match jp.flutterkaigi.conf2026."
+            exit 1
+          fi
+
+      - name: Authenticate to Firebase with Workload Identity Federation
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3
+        with:
+          project_id: ${{ vars.PROD_FIREBASE_PROJECT_ID }}
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER_PROD }}
+          service_account: ${{ vars.GCP_SERVICE_ACCOUNT_PROD }}
+
+      - name: Install pinned Firebase configuration tools
+        run: |
+          npm install --global firebase-tools@13.35.1
+          dart pub global activate flutterfire_cli 1.4.0
+          echo "$HOME/.pub-cache/bin" >> "$GITHUB_PATH"
+
+      - name: Generate production Firebase options
+        working-directory: apps/app
+        run: >-
+          flutterfire configure
+          --yes
+          --project="$FIREBASE_PROJECT_ID"
+          --platforms=android
+          --android-package-name="$ANDROID_PACKAGE_NAME"
+          --android-out=android/app/google-services.json
+          --out=lib/firebase_options.dart
+
+      - name: Validate generated production Firebase options
+        working-directory: apps/app
+        run: |
+          jq -e --arg project "$FIREBASE_PROJECT_ID" '.project_info.project_id == $project' \
+            android/app/google-services.json > /dev/null
+          jq -e --arg package "$ANDROID_PACKAGE_NAME" \
+            'any(.client[]; .client_info.android_client_info.package_name == $package)' \
+            android/app/google-services.json > /dev/null
+          grep -Fq "projectId: '$FIREBASE_PROJECT_ID'" lib/firebase_options.dart
+
+      - name: Install Google Play CLI
+        run: |
+          python3 -m venv "$RUNNER_TEMP/codemagic-cli"
+          "$RUNNER_TEMP/codemagic-cli/bin/pip" install codemagic-cli-tools==0.61.1
+          echo "$RUNNER_TEMP/codemagic-cli/bin" >> "$GITHUB_PATH"
+
+      - name: Restore signing and Google Play credentials
+        run: |
+          printf '%s' "$ANDROID_SIGNING_KEYSTORE_BASE64" | base64 -d \
+            > apps/app/android/app/release.jks
+          printf '%s' "$ANDROID_KEY_PROPERTIES_BASE64" | base64 -d \
+            > apps/app/android/key.properties
+          printf '%s' "$GOOGLE_PLAY_SERVICE_ACCOUNT_BASE64" | base64 -d \
+            > "$RUNNER_TEMP/google-play-service-account.json"
+
+      - name: Select next build number
+        run: |
+          latest_build_number="$(google-play get-latest-build-number \
+            --credentials="@file:$RUNNER_TEMP/google-play-service-account.json" \
+            --package-name="$ANDROID_PACKAGE_NAME" || echo 0)"
+          if ! [[ "$latest_build_number" =~ ^[0-9]+$ ]]; then
+            echo "::warning::Could not read the latest Play build number; using the GitHub run number."
+            latest_build_number=0
+          fi
+          candidate=$((GITHUB_RUN_NUMBER * 100 + GITHUB_RUN_ATTEMPT))
+          if (( candidate <= latest_build_number )); then
+            candidate=$((latest_build_number + 1))
+          fi
+          echo "BUILD_NUMBER=$candidate" >> "$GITHUB_ENV"
+
+      - name: Build signed Android App Bundle
+        working-directory: apps/app
+        run: >-
+          flutter build appbundle
+          --release
+          --no-pub
+          --build-number="$BUILD_NUMBER"
+          --dart-define-from-file=environments/.env.prod
+          --dart-define=FIREBASE_PROJECT_ID=$FIREBASE_PROJECT_ID
+          --dart-define=COMMIT_INFORMATION=${{ github.ref_name }}-${{ github.sha }}
+
+      - name: Upload AAB artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: FlutterKaigi-2026-android-${{ github.run_number }}
+          path: apps/app/build/app/outputs/bundle/release/app-release.aab
+          if-no-files-found: error
+
+      - name: Create release notes
+        run: >-
+          jq -n
+          --arg text "${GITHUB_REF_NAME} (${GITHUB_SHA:0:7})"
+          '[{"language":"ja-JP","text":$text}]'
+          > "$RUNNER_TEMP/release-notes.json"
+
+      - name: Upload AAB to Google Play Internal Testing
+        run: |
+          google-play bundles publish \
+            --credentials="@file:$RUNNER_TEMP/google-play-service-account.json" \
+            --bundle apps/app/build/app/outputs/bundle/release/app-release.aab \
+            --track "$GOOGLE_PLAY_TRACK" \
+            --release-notes="@file:$RUNNER_TEMP/release-notes.json"

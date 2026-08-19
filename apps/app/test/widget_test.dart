@@ -1,10 +1,11 @@
 import 'package:app/core/i18n/strings.g.dart';
-import 'package:app/feature/news/data/provider/news_repository.dart';
+import 'package:app/feature/news/data/provider/news_list_repository.dart';
 import 'package:app/feature/news/ui/page/news_list_page.dart';
 import 'package:data/data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 void main() {
@@ -22,7 +23,7 @@ void main() {
       TranslationProvider(
         child: ProviderScope(
           overrides: [
-            newsRepositoryProvider.overrideWithValue(
+            newsListRepositoryProvider.overrideWithValue(
               _FakeNewsRepository([news]),
             ),
           ],
@@ -38,6 +39,50 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('お知らせサンプル'), findsOneWidget);
+    expect(find.text('2026年5月1日'), findsOneWidget);
+  });
+
+  testWidgets('returns to the event overview from a direct news URL', (
+    tester,
+  ) async {
+    final router = GoRouter(
+      initialLocation: '/news',
+      routes: [
+        GoRoute(
+          path: '/info',
+          builder: (_, _) => const Scaffold(body: Text('event destination')),
+        ),
+        GoRoute(
+          path: '/news',
+          builder: (_, _) => const NewsListPage(),
+        ),
+      ],
+    );
+    addTearDown(router.dispose);
+
+    await tester.pumpWidget(
+      TranslationProvider(
+        child: ProviderScope(
+          overrides: [
+            newsListRepositoryProvider.overrideWithValue(
+              const _FakeNewsRepository([]),
+            ),
+          ],
+          child: MaterialApp.router(
+            routerConfig: router,
+            locale: const Locale('ja'),
+            supportedLocales: AppLocaleUtils.supportedLocales,
+            localizationsDelegates: GlobalMaterialLocalizations.delegates,
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('戻る'));
+    await tester.pumpAndSettle();
+
+    expect(router.routeInformationProvider.value.uri.path, '/info');
+    expect(find.text('event destination'), findsOneWidget);
   });
 }
 

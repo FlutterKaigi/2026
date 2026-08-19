@@ -20,10 +20,12 @@ class Header extends StatelessComponent {
     final strings = LocaleScope.stringsOf(context);
     final locale = strings.locale;
     // ナビリンク定義（desktop nav と mobile panel で共用）。
+    // 並び順はホームのセクション順と一致させる（Staff は末尾）。
     final navLinks = [
       (label: 'Event Info', href: locale.eventInfoAnchorHref),
       (label: 'Sponsors', href: locale.sponsorsAnchorHref),
       (label: 'Job Boards', href: locale.jobBoardsAnchorHref),
+      (label: 'Staff', href: locale.staffAnchorHref),
     ];
     return header([
       a(href: locale.linkHref, classes: 'brand', [.text('FlutterKaigi 2026')]),
@@ -32,8 +34,7 @@ class Header extends StatelessComponent {
         classes: 'nav',
         attributes: const {'aria-label': 'Primary'},
         [
-          for (final item in navLinks)
-            a(href: item.href, classes: 'nav__link', [.text(item.label)]),
+          for (final item in navLinks) a(href: item.href, classes: 'nav__link', [.text(item.label)]),
         ],
       ),
       div(classes: 'actions', [
@@ -76,8 +77,7 @@ class Header extends StatelessComponent {
           classes: 'mob-nav__panel',
           attributes: const {'aria-label': 'Primary'},
           [
-            for (final item in navLinks)
-              a(href: item.href, classes: 'mob-nav__link', [.text(item.label)]),
+            for (final item in navLinks) a(href: item.href, classes: 'mob-nav__link', [.text(item.label)]),
           ],
         ),
       ]),

@@ -4,6 +4,7 @@ import 'package:jaspr/jaspr.dart';
 import '../components/event_section.dart';
 import '../components/hiring_section.dart';
 import '../components/sponsors_section.dart';
+import '../components/staff_section.dart';
 import '../constants/generated_tokens.dart';
 import '../constants/theme.dart';
 import '../l10n/strings.dart';
@@ -60,11 +61,11 @@ class Home extends StatelessComponent {
             ),
           ]),
           a(
-            href: strings.latestUpdatesCtaUrl,
+            href: strings.ticketsCtaUrl,
             target: Target.blank,
             classes: 'hero__cta',
             [
-              span([.text(strings.latestUpdatesCta)]),
+              span([.text(strings.heroTicketsCta)]),
               span(
                 classes: 'hero__cta-arrow',
                 attributes: const {'aria-hidden': 'true'},
@@ -79,8 +80,10 @@ class Home extends StatelessComponent {
         ]),
       ]),
       const EventSection(),
+      // スポンサー情報（JobBoards を含む）を先に並べ、スタッフは末尾に置く。
       const SponsorsSection(),
       const HiringSection(),
+      const StaffSection(),
     ]);
   }
 

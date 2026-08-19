@@ -1,20 +1,190 @@
 app:
   title: FlutterKaigi 2026
+links:
+  openError: Could not open the link
 navigation:
-  news: News
-  info: Event Info
+  sessions: Sessions
+  sponsors: Sponsors
+  info: Event
+  account: Account
 news:
   title: News
   empty: There is no news yet
-  error: Failed to load news
+sponsors:
+  title: Sponsors
+  detailTitle: Sponsor Details
+  subtitle: The sponsors supporting FlutterKaigi 2026
+  empty: Sponsors have not been published yet
+  notFound: Sponsor not found
+  logoSemanticLabel: $name logo
+  githubCardSemanticLabel: View $name's GitHub profile
+  xCardSemanticLabel: View $name's X profile
+  externalCardSemanticLabel: Open $name's link
+  tierBadge: $tier Sponsor
+  jobBoards: Job Boards
+  jobBoardCta: Hiring information
+  recruitCta: Careers
+  connect: Connect
+# NOTE: Keep these notices in sync with footerTrademark in apps/website/lib/l10n/strings.dart
+trademarks:
+  flutterAffiliation: Flutter and the related logo are trademarks of Google LLC. FlutterKaigi is not affiliated with or otherwise sponsored by Google LLC.
+  flutterNameAndLogo: The Flutter name and the Flutter logo are trademarks of Google LLC.
+  revComm: RevComm is a registered trademark or trademark of RevComm Inc.
+sessionTimetable:
+  title: Timetable
+  dayButtonLabel: Day $day ($date)
+  view:
+    openRooms: Switch to room timeline
+    openList: Switch to list view
+    shared: Shared
+  empty: The timetable has not been published yet
+  emptyFiltered: There are no items for this day
+  venue:
+    unknown: Venue TBA
+  speaker:
+    none: Speaker TBA
+  type:
+    regular: Regular Talk
+    lightningTalk: Lightning Talk
+    beginnersLightningTalk: Beginners LT
+    event: Event
+sessionSearch:
+  title: Search sessions
+  hint: Search titles, descriptions, and speakers
+  clear: Clear search
+  allDates: All days
+  allTypes: All types
+  allLanguages: All languages
+  dateFilter: Filter by day
+  typeFilter: Filter by type
+  languageFilter: Filter by language
+  dateChip: Day
+  typeChip: Type
+  languageChip: Language
+  promptTitle: Find a session
+  promptBody: Enter a keyword or select a day, session type, or language
+  emptyTitle: No sessions found
+  emptyBody: Try changing the keyword or filters
+  resultCount:
+    one: $n session
+    other: $n sessions
+sessionDetails:
+  title: Session Details
+  description: Description
+  schedule: Schedule and Venue
+  speakers: Speakers
+  links: Links
+  sessionize: Sessionize
+  share: Share
+  notFound: Session not found
+sessionBookmark:
+  openBookmarked: Bookmarked sessions
+  add: Add bookmark
+  remove: Remove bookmark
+  updateFailed: Failed to update bookmark
+bookmarkedSessions:
+  title: Bookmarked Sessions
+  emptyTitle: No bookmarked sessions
+  emptyBody: Bookmark sessions to find them here.
+  openSessions: Open sessions
 eventInfo:
-  title: Event Info
+  title: Event Overview
+  newsTitle: Latest News
+  newsSubtitle: See the latest FlutterKaigi 2026 updates
+  logoSemanticLabel: FlutterKaigi 2026 logo
+  tagline: Connect, Converse, Ignite.
+  themeName: 〜Assemble〜
+  description: Japan's Flutter tech conference in 2026. Two days for sharing Flutter and Dart expertise and connecting with the community.
+  dateLabel: Date
+  date: October 29–30, 2026
+  venueLabel: Venue
+  venue: Hamamatsucho Convention Hall
+  viewMap: View Map
+  other: Other
+  officialWebsite: Official Website
+  codeOfConduct: Code of Conduct
+  privacyPolicy: Privacy Policy
+  exclusionPolicy: Exclusion of Anti-Social Forces
+  contact: Contact
+  sourceCode: View Source Code
+  ossLicenses: OSS Licenses
+auth:
+  signIn:
+    description: Choose how you want to sign in to the FlutterKaigi 2026 app
+    withGoogle: Sign in with Google
+    withApple: Sign in with Apple
+    withEmail: Sign in with email
+  email:
+    title: Sign in with email
+    emailLabel: Email address
+    passwordLabel: Password
+    emailRequired: Enter your email address
+    passwordRequired: Enter your password
+    showPassword: Show password
+    hidePassword: Hide password
+    signInButton: Sign in
+    createAccountButton: Create account
+    switchToCreateAccount: Create a new account
+    switchToSignIn: Sign in with an existing account
+    forgotPassword: Reset your password
+    resetEmailSent: Password reset email sent
+  account:
+    title: Account
+    signedIn: Signed in
+    signOut: Sign out
+    signOutError: Could not sign out
+    noEmail: No email address
+    delete: Delete account
+    deleteConfirmTitle: Delete your account?
+    deleteConfirmBody: Your account will be permanently deleted and cannot be restored. Re-authentication is required before deletion.
+    deleteConfirmAction: Delete
+    deletePasswordTitle: Confirm your password
+    deletePasswordBody: Enter your current password to delete your account.
+    deleted: Your account has been deleted
+    cancel: Cancel
+  error:
+    invalidEmail: The email address is badly formatted
+    userDisabled: This account has been disabled
+    invalidCredential: Incorrect email address or password
+    emailAlreadyInUse: This email address is already in use
+    weakPassword: The password is too weak. Choose a stronger password
+    tooManyRequests: Too many attempts. Please try again later
+    network: A network error occurred. Check your connection and try again
+    requiresRecentLogin: Recent authentication is required. Please try again
+    userMismatch: The re-authenticated account does not match the signed-in account
+    appleTokenRevocationFailed: Could not delete the account because revoking the Apple token failed. Please try again
+    unknown: Authentication failed. Please try again
+settings:
+  title: Settings
+  appearance: Appearance
+  appInfo: App Information
   version: Version
+  saveError: Could not save the setting
   themeMode:
     title: Theme
     system: System
     light: Light
     dark: Dark
+  language:
+    title: Language
+    japanese: 日本語
+    english: English
+licenses:
+  title: Licenses
+  searchHint: Search packages
+  clearSearch: Clear search
+  licenseCount:
+    one: "$n license"
+    other: "$n licenses"
+  notFound: License not found
+error:
+  title: Could not load data
+  message: Check your connection and try again.
+  permissionDenied: You do not have permission to view this information. Please contact FlutterKaigi staff.
+  unavailable: Check your connection and try again in a moment.
+  timeout: Loading is taking longer than expected. Please try again.
+  retry: Retry
+  imageSemanticLabel: Dashumaru looking troubled
 notFound:
   title: Page not found
   description: The page you are looking for does not exist or may have moved.
@@ -90,4 +260,3 @@ quiz:
     yourTeamUnranked: $name ($score pts)
     perfect: Visit the $sponsor booth to claim your prize!
     error: Failed to load results
-

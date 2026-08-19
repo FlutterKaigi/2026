@@ -37,7 +37,6 @@ class SessionEditPage extends HookConsumerWidget {
     final selectedSpeakerIds = useState<List<String>>(session?.speakerIds ?? const []);
     final isLightningTalk = useState(session?.isLightningTalk ?? false);
     final isBeginnersLightningTalk = useState(session?.isBeginnersLightningTalk ?? false);
-    final isHandsOn = useState(session?.isHandsOn ?? false);
     final isSaving = useState(false);
 
     Future<void> pickStartsAt() async {
@@ -71,7 +70,6 @@ class SessionEditPage extends HookConsumerWidget {
           speakerIds: selectedSpeakerIds.value,
           isLightningTalk: isLightningTalk.value,
           isBeginnersLightningTalk: isBeginnersLightningTalk.value,
-          isHandsOn: isHandsOn.value,
           sessionizeUrl: sessionizeUrlController.text.trim().isEmpty ? null : sessionizeUrlController.text.trim(),
           createdAt: session?.createdAt ?? DateTime.now(),
           updatedAt: DateTime.now(),
@@ -202,12 +200,6 @@ class SessionEditPage extends HookConsumerWidget {
                       title: const Text('初心者向けライトニングトーク'),
                       value: isBeginnersLightningTalk.value,
                       onChanged: (v) => isBeginnersLightningTalk.value = v,
-                      contentPadding: EdgeInsets.zero,
-                    ),
-                    SwitchListTile.adaptive(
-                      title: const Text('ハンズオン'),
-                      value: isHandsOn.value,
-                      onChanged: (v) => isHandsOn.value = v,
                       contentPadding: EdgeInsets.zero,
                     ),
                     const SizedBox(height: 24),
