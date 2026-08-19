@@ -98,6 +98,13 @@ const _kAcceptedStatus = 'Accepted';
 const _kCategorySessionFormat = 'Session format';
 const _kCategoryLanguage = 'Language';
 
+/// The CfS question holding the name a speaker wants shown publicly.
+///
+/// Sessionize has no built-in display name — this is a custom question on our
+/// own CfS form, so it arrives in `questionAnswers` rather than as a speaker
+/// field, and its question id is assigned per event. Resolve it by title.
+const _kQuestionDisplayName = 'Display name';
+
 Future<void> main(List<String> args) async {
   final dryRun = args.contains('--dry-run');
 
@@ -163,6 +170,7 @@ class _SessionizePayload {
     required this.speakers,
     required this.categories,
     required this.rooms,
+    required this.questions,
   });
 
   factory _SessionizePayload.fromJson(Map<String, dynamic> json) {
@@ -174,6 +182,7 @@ class _SessionizePayload {
       speakers: list('speakers'),
       categories: list('categories'),
       rooms: list('rooms'),
+      questions: list('questions'),
     );
   }
 
@@ -181,6 +190,7 @@ class _SessionizePayload {
   final List<Map<String, dynamic>> speakers;
   final List<Map<String, dynamic>> categories;
   final List<Map<String, dynamic>> rooms;
+  final List<Map<String, dynamic>> questions;
 }
 
 Future<_SessionizePayload> _fetchSessionize(String endpointId) async {
@@ -330,6 +340,37 @@ String? _xIdOf(Map<String, dynamic> speaker) {
     final segments = Uri.tryParse(url)?.pathSegments.where((s) => s.isNotEmpty).toList() ?? const [];
     if (segments.isEmpty) continue;
     return segments.first.replaceFirst('@', '');
+  }
+  return null;
+}
+
+/// The id of the [_kQuestionDisplayName] question, or null when the endpoint
+/// does not expose it.
+///
+/// The question only reaches the API once it is ticked under the endpoint's
+/// *Submission fields*, so a null here usually means that setting was turned
+/// off rather than that the question is gone.
+int? _resolveDisplayNameQuestionId(List<Map<String, dynamic>> questions) {
+  for (final question in questions) {
+    if ((question['question'] ?? '').toString().trim() != _kQuestionDisplayName) continue;
+    final id = _asInt(question['id']);
+    if (id != null) return id;
+  }
+  stderr.writeln(
+    "warning: the Sessionize endpoint exposes no '$_kQuestionDisplayName' "
+    "question; speaker names fall back to Sessionize's first/last name. Tick "
+    "it under 'Submission fields' on the API / Embed page to restore it.",
+  );
+  return null;
+}
+
+/// The speaker's answer to [questionId], if they gave one.
+String? _answerOf(Map<String, dynamic> speaker, int? questionId) {
+  if (questionId == null) return null;
+  for (final answer in ((speaker['questionAnswers'] as List?) ?? const []).whereType<Map<String, dynamic>>()) {
+    if (_asInt(answer['questionId']) != questionId) continue;
+    final value = (answer['answerValue'] ?? '').toString().trim();
+    if (value.isNotEmpty) return value;
   }
   return null;
 }
@@ -494,6 +535,8 @@ _Plan _buildPlan({
     }
   }
 
+  final displayNameQuestionId = _resolveDisplayNameQuestionId(payload.questions);
+
   for (final speaker in payload.speakers) {
     final id = (speaker['id'] ?? '').toString();
     if (id.isEmpty || !referencedSpeakerIds.contains(id)) continue;
@@ -501,6 +544,7 @@ _Plan _buildPlan({
     final write = _planSpeaker(
       id: id,
       speaker: speaker,
+      displayNameQuestionId: displayNameQuestionId,
       existing: existingSpeakers[id],
       now: now,
     );
@@ -597,10 +641,14 @@ _Write? _planTimelineEvent({
 _Write? _planSpeaker({
   required String id,
   required Map<String, dynamic> speaker,
+  required int? displayNameQuestionId,
   required Map<String, dynamic>? existing,
   required DateTime now,
 }) {
-  final name = (speaker['fullName'] ?? '').toString().trim();
+  // Speakers who want to be billed under a handle answer the display name
+  // question; `fullName` (Sessionize's first + last name) is the fallback for
+  // everyone else.
+  final name = _answerOf(speaker, displayNameQuestionId) ?? (speaker['fullName'] ?? '').toString().trim();
   if (name.isEmpty) return null;
 
   final avatarUrl = (speaker['profilePicture'] ?? '').toString().trim();
