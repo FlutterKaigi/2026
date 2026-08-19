@@ -4,6 +4,7 @@ export 'src/model/news.dart' show News;
 export 'src/model/quiz_answer.dart' show QuizAnswer;
 export 'src/model/quiz_event.dart' show QuizEvent, QuizEventStatus;
 export 'src/model/quiz_participant.dart' show QuizParticipant;
+export 'src/model/quiz_participant_account.dart' show QuizParticipantAccount;
 export 'src/model/quiz_question.dart' show QuizQuestion, QuizQuestionStatus;
 export 'src/model/quiz_question_secret.dart' show QuizQuestionSecret;
 export 'src/model/quiz_team.dart' show QuizTeam, QuizTeamMember;

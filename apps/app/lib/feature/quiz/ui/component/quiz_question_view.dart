@@ -44,7 +44,7 @@ class QuizQuestionView extends HookConsumerWidget {
     final theme = Theme.of(context);
     final t = Translations.of(context);
     final locale = Localizations.localeOf(context);
-    final uid = ref.watch(quizSignInProvider).value;
+    final uid = ref.watch(quizUserProvider).value?.uid;
     final teamAnswer = ref.watch(teamAnswerProvider).value;
     final sponsorName = ref.watch(
       quizSponsorsProvider.select(

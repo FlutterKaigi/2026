@@ -563,6 +563,7 @@ class Translations$quiz$ja {
 	String get entrySubtitle => 'スポンサー提供のクイズに参加';
 
 	late final Translations$quiz$list$ja list = Translations$quiz$list$ja.internal(_root);
+	late final Translations$quiz$signInRequired$ja signInRequired = Translations$quiz$signInRequired$ja.internal(_root);
 	late final Translations$quiz$errors$ja errors = Translations$quiz$errors$ja.internal(_root);
 	late final Translations$quiz$preparing$ja preparing = Translations$quiz$preparing$ja.internal(_root);
 	late final Translations$quiz$registration$ja registration = Translations$quiz$registration$ja.internal(_root);
@@ -718,6 +719,9 @@ class Translations$auth$account$ja {
 	/// ja: 'アカウント'
 	String get title => 'アカウント';
 
+	/// ja: '参加する'
+	String get features => '参加する';
+
 	/// ja: 'サインイン中'
 	String get signedIn => 'サインイン中';
 
@@ -851,6 +855,24 @@ class Translations$quiz$list$ja {
 	String get error => 'クイズ一覧を取得できませんでした';
 
 	late final Translations$quiz$list$status$ja status = Translations$quiz$list$status$ja.internal(_root);
+}
+
+// Path: quiz.signInRequired
+class Translations$quiz$signInRequired$ja {
+	Translations$quiz$signInRequired$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'サインインが必要です'
+	String get title => 'サインインが必要です';
+
+	/// ja: 'クイズ大会は参加と回答の記録をアカウントに紐づけます。 アカウントタブからサインインしてご参加ください。'
+	String get description => 'クイズ大会は参加と回答の記録をアカウントに紐づけます。 アカウントタブからサインインしてご参加ください。';
+
+	/// ja: 'アカウントへ'
+	String get button => 'アカウントへ';
 }
 
 // Path: quiz.errors
@@ -1222,6 +1244,7 @@ extension on Translations {
 			'auth.email.forgotPassword' => 'パスワードを再設定する',
 			'auth.email.resetEmailSent' => 'パスワード再設定メールを送信しました',
 			'auth.account.title' => 'アカウント',
+			'auth.account.features' => '参加する',
 			'auth.account.signedIn' => 'サインイン中',
 			'auth.account.signOut' => 'サインアウト',
 			'auth.account.signOutError' => 'サインアウトできませんでした',
@@ -1281,6 +1304,9 @@ extension on Translations {
 			'quiz.list.status.entryClosed' => '受付終了',
 			'quiz.list.status.inProgress' => '進行中',
 			'quiz.list.status.finished' => '結果発表',
+			'quiz.signInRequired.title' => 'サインインが必要です',
+			'quiz.signInRequired.description' => 'クイズ大会は参加と回答の記録をアカウントに紐づけます。 アカウントタブからサインインしてご参加ください。',
+			'quiz.signInRequired.button' => 'アカウントへ',
 			'quiz.errors.signInFailed' => 'サインインに失敗しました',
 			'quiz.errors.eventLoadFailed' => 'イベント情報の取得に失敗しました',
 			'quiz.preparing.title' => 'クイズは開催準備中です',

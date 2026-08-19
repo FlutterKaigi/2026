@@ -3,6 +3,7 @@ import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/router/router.dart';
 import 'package:app/feature/quiz/data/provider/quiz_providers.dart';
 import 'package:app/feature/quiz/ui/component/quiz_motion.dart';
+import 'package:app/feature/quiz/ui/component/quiz_sign_in_required_view.dart';
 import 'package:data/data.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -18,28 +19,37 @@ class QuizEventListPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final t = Translations.of(context);
-    final events = ref.watch(quizEventsProvider);
+    final user = ref.watch(quizUserProvider);
 
     return Scaffold(
       appBar: AppBar(title: Text(t.quiz.title)),
-      body: events.when(
-        loading: () => const Center(child: CircularProgressIndicator.adaptive()),
-        error: (_, _) => Center(child: Text(t.quiz.list.error)),
-        data: (events) => events.isEmpty
-            ? Center(child: Text(t.quiz.list.empty))
-            : ListView.separated(
-                padding: const EdgeInsets.all(16),
-                itemCount: events.length,
-                separatorBuilder: (_, _) => const SizedBox(height: 12),
-                itemBuilder: (context, index) {
-                  final event = events[index];
-                  return Entrance(
-                    delay: Duration(milliseconds: index * 60),
-                    child: _QuizEventTile(event: event),
-                  );
-                },
-              ),
-      ),
+      // 導線はサインイン後のアカウントタブにあるが、ディープリンクや途中での
+      // サインアウトでも未ログインのまま開かれうるのでここでも弾く。
+      body: switch (user) {
+        AsyncError() => Center(child: Text(t.quiz.errors.signInFailed)),
+        AsyncLoading() => const Center(child: CircularProgressIndicator.adaptive()),
+        AsyncData(:final value) when value == null => const QuizSignInRequiredView(),
+        AsyncData() => ref
+            .watch(quizEventsProvider)
+            .when(
+              loading: () => const Center(child: CircularProgressIndicator.adaptive()),
+              error: (_, _) => Center(child: Text(t.quiz.list.error)),
+              data: (events) => events.isEmpty
+                  ? Center(child: Text(t.quiz.list.empty))
+                  : ListView.separated(
+                      padding: const EdgeInsets.all(16),
+                      itemCount: events.length,
+                      separatorBuilder: (_, _) => const SizedBox(height: 12),
+                      itemBuilder: (context, index) {
+                        final event = events[index];
+                        return Entrance(
+                          delay: Duration(milliseconds: index * 60),
+                          child: _QuizEventTile(event: event),
+                        );
+                      },
+                    ),
+            ),
+      },
     );
   }
 }

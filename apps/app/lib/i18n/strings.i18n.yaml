@@ -131,6 +131,7 @@ auth:
     resetEmailSent: パスワード再設定メールを送信しました
   account:
     title: アカウント
+    features: 参加する
     signedIn: サインイン中
     signOut: サインアウト
     signOutError: サインアウトできませんでした
@@ -203,6 +204,11 @@ quiz:
       entryClosed: 受付終了
       inProgress: 進行中
       finished: 結果発表
+  signInRequired:
+    title: サインインが必要です
+    description: クイズ大会は参加と回答の記録をアカウントに紐づけます。
+      アカウントタブからサインインしてご参加ください。
+    button: アカウントへ
   errors:
     signInFailed: サインインに失敗しました
     eventLoadFailed: イベント情報の取得に失敗しました

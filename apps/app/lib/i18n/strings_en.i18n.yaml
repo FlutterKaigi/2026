@@ -130,6 +130,7 @@ auth:
     resetEmailSent: Password reset email sent
   account:
     title: Account
+    features: Take part
     signedIn: Signed in
     signOut: Sign out
     signOutError: Could not sign out
@@ -202,6 +203,11 @@ quiz:
       entryClosed: Entry closed
       inProgress: In progress
       finished: Results
+  signInRequired:
+    title: Sign-in required
+    description: The quiz links your entry and answers to your account.
+      Sign in from the Account tab to take part.
+    button: Go to Account
   errors:
     signInFailed: Failed to sign in
     eventLoadFailed: Failed to load the event

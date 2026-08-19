@@ -8,6 +8,7 @@ import 'package:app/feature/quiz/ui/component/quiz_motion.dart';
 import 'package:app/feature/quiz/ui/component/quiz_option_card.dart';
 import 'package:app/feature/quiz/ui/component/quiz_question_view.dart';
 import 'package:app/feature/quiz/ui/component/quiz_result_view.dart';
+import 'package:app/feature/quiz/ui/component/quiz_sign_in_required_view.dart';
 import 'package:app/feature/quiz/ui/component/quiz_team_badge.dart';
 import 'package:data/data.dart';
 import 'package:flutter/material.dart';
@@ -43,15 +44,16 @@ class _QuizPageBody extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final t = Translations.of(context);
-    // 画面表示時に匿名サインインを開始する（副作用として評価させる）。
-    final signIn = ref.watch(quizSignInProvider);
+    // クイズはログイン必須。サインアウトすると即座に案内へ切り替わる。
+    final user = ref.watch(quizUserProvider);
     final eventAsync = ref.watch(quizEventProvider);
 
     return Scaffold(
       appBar: AppBar(title: Text(t.quiz.title)),
-      body: switch (signIn) {
+      body: switch (user) {
         AsyncError() => _Centered(message: t.quiz.errors.signInFailed),
         AsyncLoading() => const _Loading(),
+        AsyncData(:final value) when value == null => const QuizSignInRequiredView(),
         AsyncData() => switch (eventAsync) {
           AsyncData(:final value) when value == null => const _PreparingView(),
           AsyncData(:final value) => _QuizBody(event: value!),
@@ -175,10 +177,15 @@ class _RegistrationForm extends HookConsumerWidget {
     final theme = Theme.of(context);
     final t = Translations.of(context);
     final locale = Localizations.localeOf(context);
-    final controller = useTextEditingController();
+    final user = ref.watch(quizUserProvider).value;
+    // ニックネームの初期値はログイン中のアカウントの表示名。会場で名乗りたい
+    // 名前に変えられるよう編集は可能なままにする。
+    final controller = useTextEditingController(
+      text: (user?.displayName ?? '').characters.take(20).toString(),
+    );
     final codeController = useTextEditingController();
     // TextField の入力に追従して参加ボタンの活性を更新する。
-    final text = useState('');
+    final text = useState(controller.text);
     final codeText = useState('');
     useEffect(() {
       void listener() => text.value = controller.text;
@@ -203,16 +210,32 @@ class _RegistrationForm extends HookConsumerWidget {
     final isValid = trimmed.isNotEmpty && trimmed.length <= 20 && code.isNotEmpty;
 
     Future<void> register() async {
-      final uid = ref.read(quizSignInProvider).value;
-      if (!isValid || uid == null || submitting.value) {
+      if (!isValid || user == null || submitting.value) {
         return;
       }
       submitting.value = true;
       errorMessage.value = null;
       try {
+        // 複数のプロバイダを紐づけたアカウントでは providerData の先頭が今回
+        // サインインに使ったものとは限らないため、ID トークンの
+        // sign_in_provider を優先する。セキュリティルールが同じ値と
+        // 突き合わせて検証する。
+        final tokenResult = await user.getIdTokenResult();
+        final providerData = user.providerData;
         await ref
             .read(quizParticipantRepositoryProvider)
-            .register(ref.read(quizEventIdProvider), uid, trimmed, code);
+            .register(
+              ref.read(quizEventIdProvider),
+              uid: user.uid,
+              displayName: trimmed,
+              entryCode: code,
+              signInProvider:
+                  tokenResult.signInProvider ??
+                  (providerData.isEmpty ? 'unknown' : providerData.first.providerId),
+              email: user.email,
+              accountName: user.displayName,
+              photoUrl: user.photoURL,
+            );
       } on Exception {
         // 主因は受付コード不一致（ルールで permission-denied）。
         errorMessage.value = t.quiz.registration.codeMismatch;

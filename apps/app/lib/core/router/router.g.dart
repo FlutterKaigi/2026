@@ -6,11 +6,7 @@ part of 'router.dart';
 // GoRouterGenerator
 // **************************************************************************
 
-List<RouteBase> get $appRoutes => [
-  $settingsRoute,
-  $appShellRoute,
-  $quizListRoute,
-];
+List<RouteBase> get $appRoutes => [$settingsRoute, $appShellRoute];
 
 RouteBase get $settingsRoute =>
     GoRouteData.$route(path: '/settings', factory: $SettingsRoute._fromState);
@@ -99,6 +95,16 @@ RouteBase get $appShellRoute => StatefulShellRouteData.$route(
             GoRouteData.$route(
               path: 'email',
               factory: $EmailSignInRoute._fromState,
+            ),
+            GoRouteData.$route(
+              path: 'quiz',
+              factory: $QuizListRoute._fromState,
+              routes: [
+                GoRouteData.$route(
+                  path: ':eventId',
+                  factory: $QuizRoute._fromState,
+                ),
+              ],
             ),
           ],
         ),
@@ -371,19 +377,11 @@ mixin $EmailSignInRoute on GoRouteData {
   void replace(BuildContext context) => context.replace(location);
 }
 
-RouteBase get $quizListRoute => GoRouteData.$route(
-  path: '/quiz',
-  factory: $QuizListRoute._fromState,
-  routes: [
-    GoRouteData.$route(path: ':eventId', factory: $QuizRoute._fromState),
-  ],
-);
-
 mixin $QuizListRoute on GoRouteData {
   static QuizListRoute _fromState(GoRouterState state) => const QuizListRoute();
 
   @override
-  String get location => GoRouteData.$location('/quiz');
+  String get location => GoRouteData.$location('/account/quiz');
 
   @override
   void go(BuildContext context) => context.go(location);
@@ -406,8 +404,9 @@ mixin $QuizRoute on GoRouteData {
   QuizRoute get _self => this as QuizRoute;
 
   @override
-  String get location =>
-      GoRouteData.$location('/quiz/${Uri.encodeComponent(_self.eventId)}');
+  String get location => GoRouteData.$location(
+    '/account/quiz/${Uri.encodeComponent(_self.eventId)}',
+  );
 
   @override
   void go(BuildContext context) => context.go(location);

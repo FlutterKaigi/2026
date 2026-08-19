@@ -8,7 +8,6 @@ abstract interface class AuthRepository {
   Stream<User?> authStateChanges();
   User? get currentUser;
   Future<void> signInWithGoogle();
-  Future<void> signInAnonymously();
   Future<void> signInWithApple();
   Future<void> signInWithEmailAndPassword({required String email, required String password});
   Future<void> createUserWithEmailAndPassword({required String email, required String password});
@@ -40,9 +39,6 @@ final class FirebaseAuthRepository implements AuthRepository {
   Future<void> signInWithGoogle() {
     return _signInWithOAuth(_googleProvider());
   }
-
-  @override
-  Future<void> signInAnonymously() => _auth.signInAnonymously();
 
   @override
   Future<void> signInWithApple() {

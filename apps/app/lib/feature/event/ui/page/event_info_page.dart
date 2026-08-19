@@ -73,13 +73,6 @@ class EventInfoPage extends ConsumerWidget {
                         child: Column(
                           children: [
                             _ExternalLinkTile(
-                              icon: Icons.quiz_outlined,
-                              title: t.quiz.title,
-                              external: false,
-                              onTap: () => unawaited(const QuizListRoute().push<void>(context)),
-                            ),
-                            const Divider(height: 1),
-                            _ExternalLinkTile(
                               icon: Icons.language,
                               title: t.eventInfo.officialWebsite,
                               onTap: () => unawaited(

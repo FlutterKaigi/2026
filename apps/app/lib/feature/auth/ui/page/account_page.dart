@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/log/talker.dart';
 import 'package:app/core/provider/environment.dart';
@@ -289,6 +291,28 @@ class _SignedInView extends StatelessWidget {
           textAlign: TextAlign.center,
           style: theme.textTheme.bodySmall?.copyWith(
             color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(height: 24),
+        // サインイン中だけ見えるアプリ機能への導線。クイズ大会は参加と回答の
+        // 記録をアカウントに紐づけるため、ここが唯一の入口になる。
+        Align(
+          alignment: AlignmentDirectional.centerStart,
+          child: Text(
+            t.auth.account.features,
+            style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Card.outlined(
+          margin: EdgeInsets.zero,
+          clipBehavior: Clip.antiAlias,
+          child: ListTile(
+            leading: const Icon(Icons.quiz_outlined),
+            title: Text(t.quiz.title),
+            subtitle: Text(t.quiz.entrySubtitle),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => unawaited(const QuizListRoute().push<void>(context)),
           ),
         ),
         const SizedBox(height: 24),

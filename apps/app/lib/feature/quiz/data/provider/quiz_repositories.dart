@@ -28,11 +28,6 @@ final quizAnswerRepositoryProvider = Provider<QuizAnswerRepository>(
   (ref) => FirestoreQuizAnswerRepository(),
 );
 
-/// 匿名認証を扱う認証リポジトリ。
-final quizAuthRepositoryProvider = Provider<AuthRepository>(
-  (ref) => FirebaseAuthRepository(),
-);
-
 /// スポンサー情報のリポジトリ。
 final quizSponsorRepositoryProvider = Provider<SponsorRepository>(
   (ref) => FirestoreSponsorRepository(),

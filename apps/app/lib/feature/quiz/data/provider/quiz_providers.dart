@@ -1,5 +1,7 @@
+import 'package:app/feature/auth/data/provider/auth_state.dart';
 import 'package:app/feature/quiz/data/provider/quiz_repositories.dart';
 import 'package:data/data.dart';
+import 'package:data/user.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 /// 対象イベントの ID。
@@ -11,37 +13,34 @@ final quizEventIdProvider = Provider<String>(
   dependencies: const [],
 );
 
+/// クイズ大会に参加できるサインイン中のユーザー。
+///
+/// クイズは参加・回答の記録を本人のアカウントに紐づけるため、実アカウントで
+/// のログインを必須にしている。未ログインと匿名認証はどちらも `null` として
+/// 扱い、Firestore のセキュリティルールでも同じ条件で弾く。
+final quizUserProvider = Provider<AsyncValue<User?>>((ref) {
+  return ref.watch(authStateChangesProvider).whenData(
+    (user) => (user == null || user.isAnonymous) ? null : user,
+  );
+});
+
 /// クイズイベントの一覧（作成の新しい順）。イベント一覧ページで使う。
 ///
 /// 非公開（draft）のイベントはセキュリティルールで読めないため、
-/// draft を除外した公開クエリで購読する。
-final quizEventsProvider = StreamProvider<List<QuizEvent>>(
-  (ref) => ref.watch(quizEventRepositoryProvider).watchPublished(),
-);
-
-/// 匿名サインインを行い、確定した `uid` を返す。
-///
-/// 画面表示時に評価され、未サインインなら `signInAnonymously()` を呼ぶ。
-/// 認証状態のストリームを購読し、最初に得られた非 null のユーザーの `uid` を
-/// 返す。サインイン済みならそのまま既存の `uid` を返す。
-final quizSignInProvider = FutureProvider<String>((ref) async {
-  final auth = ref.watch(quizAuthRepositoryProvider);
-  final current = await auth.authStateChanges().first;
-  if (current != null) {
-    return current.uid;
+/// draft を除外した公開クエリで購読する。ログイン前に読むと read が
+/// 拒否されるので、サインイン確定までは購読しない。
+final quizEventsProvider = StreamProvider<List<QuizEvent>>((ref) {
+  if (ref.watch(quizUserProvider).value == null) {
+    return const Stream<List<QuizEvent>>.empty();
   }
-  await auth.signInAnonymously();
-  final user = await auth.authStateChanges().firstWhere((user) => user != null);
-  return user!.uid;
+  return ref.watch(quizEventRepositoryProvider).watchPublished();
 });
 
 /// 対象イベントを購読する。
 ///
-/// サインイン完了後に評価されるよう [quizSignInProvider] に依存する。
-/// 匿名認証前に Firestore を読むと read が拒否されるのを避ける。
+/// ログイン確定後に評価されるよう [quizUserProvider] に依存する。
 final quizEventProvider = StreamProvider<QuizEvent?>((ref) {
-  final uid = ref.watch(quizSignInProvider).value;
-  if (uid == null) {
+  if (ref.watch(quizUserProvider).value == null) {
     return const Stream<QuizEvent?>.empty();
   }
   final eventId = ref.watch(quizEventIdProvider);
@@ -50,7 +49,7 @@ final quizEventProvider = StreamProvider<QuizEvent?>((ref) {
 
 /// 自分の参加者ドキュメントを購読する。未登録の間は `null` を流す。
 final myParticipantProvider = StreamProvider<QuizParticipant?>((ref) {
-  final uid = ref.watch(quizSignInProvider).value;
+  final uid = ref.watch(quizUserProvider).value?.uid;
   if (uid == null) {
     return const Stream<QuizParticipant?>.empty();
   }
@@ -60,8 +59,7 @@ final myParticipantProvider = StreamProvider<QuizParticipant?>((ref) {
 
 /// 参加者の一覧を購読する。参加人数の表示に使う。
 final quizParticipantsProvider = StreamProvider<List<QuizParticipant>>((ref) {
-  final uid = ref.watch(quizSignInProvider).value;
-  if (uid == null) {
+  if (ref.watch(quizUserProvider).value == null) {
     return const Stream<List<QuizParticipant>>.empty();
   }
   final eventId = ref.watch(quizEventIdProvider);
@@ -70,8 +68,7 @@ final quizParticipantsProvider = StreamProvider<List<QuizParticipant>>((ref) {
 
 /// 全チームを購読する。最終結果のランキング表示に使う。
 final quizTeamsProvider = StreamProvider<List<QuizTeam>>((ref) {
-  final uid = ref.watch(quizSignInProvider).value;
-  if (uid == null) {
+  if (ref.watch(quizUserProvider).value == null) {
     return const Stream<List<QuizTeam>>.empty();
   }
   final eventId = ref.watch(quizEventIdProvider);

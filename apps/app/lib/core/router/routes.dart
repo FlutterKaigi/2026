@@ -52,7 +52,13 @@ class SettingsRoute extends GoRouteData with $SettingsRoute {
       routes: [
         TypedGoRoute<AccountRoute>(
           path: '/account',
-          routes: [TypedGoRoute<EmailSignInRoute>(path: 'email')],
+          routes: [
+            TypedGoRoute<EmailSignInRoute>(path: 'email'),
+            TypedGoRoute<QuizListRoute>(
+              path: 'quiz',
+              routes: [TypedGoRoute<QuizRoute>(path: ':eventId')],
+            ),
+          ],
         ),
       ],
     ),
@@ -131,15 +137,10 @@ class EmailSignInRoute extends GoRouteData with $EmailSignInRoute {
   Widget build(BuildContext context, GoRouterState state) => const EmailSignInPage();
 }
 
-/// `/quiz` — the quiz event list.
+/// `/account/quiz` — the quiz event list.
 ///
-/// Lives outside [AppShellRoute] so it is a full-screen page (no bottom
-/// navigation). Entered by pushing from the event info page, so the app bar
-/// back button returns there.
-@TypedGoRoute<QuizListRoute>(
-  path: '/quiz',
-  routes: [TypedGoRoute<QuizRoute>(path: ':eventId')],
-)
+/// Lives under the account branch because taking part requires being signed
+/// in: the entry point is a tile on the signed-in account page.
 class QuizListRoute extends GoRouteData with $QuizListRoute {
   const QuizListRoute();
 
@@ -147,7 +148,7 @@ class QuizListRoute extends GoRouteData with $QuizListRoute {
   Widget build(BuildContext context, GoRouterState state) => const QuizEventListPage();
 }
 
-/// `/quiz/:eventId` — a single quiz event.
+/// `/account/quiz/:eventId` — a single quiz event.
 class QuizRoute extends GoRouteData with $QuizRoute {
   const QuizRoute(this.eventId);
 

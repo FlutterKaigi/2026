@@ -65,9 +65,6 @@ final class FakeAuthRepository implements AuthRepository {
   );
 
   @override
-  Future<void> signInAnonymously() => _run('signInAnonymously', FakeUser());
-
-  @override
   Future<void> signInWithApple() => _run(
     'signInWithApple',
     FakeUser(

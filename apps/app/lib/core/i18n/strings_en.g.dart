@@ -350,6 +350,7 @@ class _Translations$quiz$en extends Translations$quiz$ja {
 	@override String get title => 'Quiz';
 	@override String get entrySubtitle => 'Join sponsor-provided quizzes';
 	@override late final _Translations$quiz$list$en list = _Translations$quiz$list$en._(_root);
+	@override late final _Translations$quiz$signInRequired$en signInRequired = _Translations$quiz$signInRequired$en._(_root);
 	@override late final _Translations$quiz$errors$en errors = _Translations$quiz$errors$en._(_root);
 	@override late final _Translations$quiz$preparing$en preparing = _Translations$quiz$preparing$en._(_root);
 	@override late final _Translations$quiz$registration$en registration = _Translations$quiz$registration$en._(_root);
@@ -450,6 +451,7 @@ class _Translations$auth$account$en extends Translations$auth$account$ja {
 
 	// Translations
 	@override String get title => 'Account';
+	@override String get features => 'Take part';
 	@override String get signedIn => 'Signed in';
 	@override String get signOut => 'Sign out';
 	@override String get signOutError => 'Could not sign out';
@@ -519,6 +521,18 @@ class _Translations$quiz$list$en extends Translations$quiz$list$ja {
 	@override String get empty => 'No quizzes yet';
 	@override String get error => 'Failed to load quizzes';
 	@override late final _Translations$quiz$list$status$en status = _Translations$quiz$list$status$en._(_root);
+}
+
+// Path: quiz.signInRequired
+class _Translations$quiz$signInRequired$en extends Translations$quiz$signInRequired$ja {
+	_Translations$quiz$signInRequired$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Sign-in required';
+	@override String get description => 'The quiz links your entry and answers to your account. Sign in from the Account tab to take part.';
+	@override String get button => 'Go to Account';
 }
 
 // Path: quiz.errors
@@ -788,6 +802,7 @@ extension on TranslationsEn {
 			'auth.email.forgotPassword' => 'Reset your password',
 			'auth.email.resetEmailSent' => 'Password reset email sent',
 			'auth.account.title' => 'Account',
+			'auth.account.features' => 'Take part',
 			'auth.account.signedIn' => 'Signed in',
 			'auth.account.signOut' => 'Sign out',
 			'auth.account.signOutError' => 'Could not sign out',
@@ -847,6 +862,9 @@ extension on TranslationsEn {
 			'quiz.list.status.entryClosed' => 'Entry closed',
 			'quiz.list.status.inProgress' => 'In progress',
 			'quiz.list.status.finished' => 'Results',
+			'quiz.signInRequired.title' => 'Sign-in required',
+			'quiz.signInRequired.description' => 'The quiz links your entry and answers to your account. Sign in from the Account tab to take part.',
+			'quiz.signInRequired.button' => 'Go to Account',
 			'quiz.errors.signInFailed' => 'Failed to sign in',
 			'quiz.errors.eventLoadFailed' => 'Failed to load the event',
 			'quiz.preparing.title' => 'The quiz is being prepared',
