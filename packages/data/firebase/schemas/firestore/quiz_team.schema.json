@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/FlutterKaigi/2026/packages/data/firebase/schemas/firestore/quiz_team.schema.json",
+  "title": "QuizTeam",
+  "description": "Firestore document schema for the `quizEvents/{eventId}/teams` subcollection.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["tableNumber", "name", "memberUids", "members", "score"],
+  "properties": {
+    "tableNumber": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "memberUids": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "members": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["uid", "displayName"],
+        "properties": {
+          "uid": { "type": "string" },
+          "displayName": { "type": "string" }
+        }
+      }
+    },
+    "score": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "rank": {
+      "type": ["integer", "null"],
+      "minimum": 1
+    },
+    "perfectSponsorIds": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}

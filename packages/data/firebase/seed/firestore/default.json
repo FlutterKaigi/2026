@@ -121,6 +121,56 @@
       }
     },
     {
+      "path": "sponsors/example-silver",
+      "schema": "sponsor",
+      "data": {
+        "name": {
+          "ja": "サンプル シルバー",
+          "en": "Sample Silver Inc."
+        },
+        "nameKana": null,
+        "description": {
+          "ja": "シルバースポンサーのサンプルです。",
+          "en": "A sample silver sponsor."
+        },
+        "primaryLogoUrl": "https://example.com/sponsors/silver.png",
+        "secondaryLogoUrl": null,
+        "tier": "silver",
+        "slug": "example-silver",
+        "xUrl": null,
+        "websiteUrl": "https://example.com",
+        "recruitUrl": null,
+        "jobBoardUrl": null,
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "sponsors/example-bronze",
+      "schema": "sponsor",
+      "data": {
+        "name": {
+          "ja": "サンプル ブロンズ",
+          "en": "Sample Bronze Inc."
+        },
+        "nameKana": null,
+        "description": {
+          "ja": "ブロンズスポンサーのサンプルです。",
+          "en": "A sample bronze sponsor."
+        },
+        "primaryLogoUrl": "https://example.com/sponsors/bronze.png",
+        "secondaryLogoUrl": null,
+        "tier": "bronze",
+        "slug": "example-bronze",
+        "xUrl": null,
+        "websiteUrl": "https://example.com",
+        "recruitUrl": null,
+        "jobBoardUrl": null,
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
       "path": "sponsors/flutter",
       "schema": "sponsor",
       "data": {
@@ -728,6 +778,387 @@
         "order": 2,
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "quizEvents/half-1",
+      "schema": "quiz_event",
+      "data": {
+        "title": {
+          "ja": "前半戦クイズ大会",
+          "en": "First Half Quiz"
+        },
+        "status": "registration",
+        "currentQuestionId": null,
+        "sponsorIds": [
+          "example-platinum",
+          "example-gold",
+          "example-silver",
+          "example-bronze"
+        ],
+        "createdAt": "2026-06-02T00:00:00Z",
+        "updatedAt": "2026-06-02T00:00:00Z",
+        "capacity": 80,
+        "isPublic": true
+      }
+    },
+    {
+      "path": "quizEvents/half-1/secret/entry",
+      "schema": "quiz_entry_secret",
+      "data": {
+        "code": "123456"
+      }
+    },
+    {
+      "path": "quizEvents/half-1/questions/q1",
+      "schema": "quiz_question",
+      "data": {
+        "sponsorId": "example-platinum",
+        "order": 1,
+        "title": {
+          "ja": "Flutter の UI は主に何で構築する？",
+          "en": "What are Flutter UIs primarily built with?"
+        },
+        "options": [
+          {
+            "ja": "Widget",
+            "en": "Widget"
+          },
+          {
+            "ja": "Component",
+            "en": "Component"
+          },
+          {
+            "ja": "Directive",
+            "en": "Directive"
+          },
+          {
+            "ja": "Template",
+            "en": "Template"
+          }
+        ],
+        "durationSeconds": 180,
+        "status": "draft",
+        "openedAt": null,
+        "closesAt": null,
+        "correctOptionIndex": null,
+        "explanation": null
+      }
+    },
+    {
+      "path": "quizEvents/half-1/questions/q2",
+      "schema": "quiz_question",
+      "data": {
+        "sponsorId": "example-platinum",
+        "order": 2,
+        "title": {
+          "ja": "Dart はシングルスレッドのイベントループを持つ。",
+          "en": "Dart has a single-threaded event loop."
+        },
+        "options": [
+          {
+            "ja": "○",
+            "en": "True"
+          },
+          {
+            "ja": "×",
+            "en": "False"
+          }
+        ],
+        "durationSeconds": 180,
+        "status": "draft",
+        "openedAt": null,
+        "closesAt": null,
+        "correctOptionIndex": null,
+        "explanation": null
+      }
+    },
+    {
+      "path": "quizEvents/half-1/questions/q3",
+      "schema": "quiz_question",
+      "data": {
+        "sponsorId": "example-gold",
+        "order": 3,
+        "title": {
+          "ja": "状態を持たない Widget の基底クラスは？",
+          "en": "Which is the base class for widgets without state?"
+        },
+        "options": [
+          {
+            "ja": "StatelessWidget",
+            "en": "StatelessWidget"
+          },
+          {
+            "ja": "StatefulWidget",
+            "en": "StatefulWidget"
+          },
+          {
+            "ja": "InheritedWidget",
+            "en": "InheritedWidget"
+          },
+          {
+            "ja": "RenderObjectWidget",
+            "en": "RenderObjectWidget"
+          }
+        ],
+        "durationSeconds": 180,
+        "status": "draft",
+        "openedAt": null,
+        "closesAt": null,
+        "correctOptionIndex": null,
+        "explanation": null
+      }
+    },
+    {
+      "path": "quizEvents/half-1/questions/q4",
+      "schema": "quiz_question",
+      "data": {
+        "sponsorId": "example-gold",
+        "order": 4,
+        "title": {
+          "ja": "hot reload は State を保持したままコードを反映できる。",
+          "en": "Hot reload applies code changes while preserving State."
+        },
+        "options": [
+          {
+            "ja": "○",
+            "en": "True"
+          },
+          {
+            "ja": "×",
+            "en": "False"
+          }
+        ],
+        "durationSeconds": 180,
+        "status": "draft",
+        "openedAt": null,
+        "closesAt": null,
+        "correctOptionIndex": null,
+        "explanation": null
+      }
+    },
+    {
+      "path": "quizEvents/half-1/questions/q5",
+      "schema": "quiz_question",
+      "data": {
+        "sponsorId": "example-silver",
+        "order": 5,
+        "title": {
+          "ja": "パッケージの依存を宣言するファイルは？",
+          "en": "Which file declares package dependencies?"
+        },
+        "options": [
+          {
+            "ja": "pubspec.yaml",
+            "en": "pubspec.yaml"
+          },
+          {
+            "ja": "package.json",
+            "en": "package.json"
+          },
+          {
+            "ja": "Cargo.toml",
+            "en": "Cargo.toml"
+          },
+          {
+            "ja": "go.mod",
+            "en": "go.mod"
+          }
+        ],
+        "durationSeconds": 180,
+        "status": "draft",
+        "openedAt": null,
+        "closesAt": null,
+        "correctOptionIndex": null,
+        "explanation": null
+      }
+    },
+    {
+      "path": "quizEvents/half-1/questions/q6",
+      "schema": "quiz_question",
+      "data": {
+        "sponsorId": "example-silver",
+        "order": 6,
+        "title": {
+          "ja": "Flutter 標準の非同期 UI 構築 Widget は？",
+          "en": "Which widget builds UI from asynchronous values in Flutter?"
+        },
+        "options": [
+          {
+            "ja": "FutureBuilder",
+            "en": "FutureBuilder"
+          },
+          {
+            "ja": "AsyncWidget",
+            "en": "AsyncWidget"
+          },
+          {
+            "ja": "PromiseView",
+            "en": "PromiseView"
+          },
+          {
+            "ja": "AwaitBox",
+            "en": "AwaitBox"
+          }
+        ],
+        "durationSeconds": 180,
+        "status": "draft",
+        "openedAt": null,
+        "closesAt": null,
+        "correctOptionIndex": null,
+        "explanation": null
+      }
+    },
+    {
+      "path": "quizEvents/half-1/questions/q7",
+      "schema": "quiz_question",
+      "data": {
+        "sponsorId": "example-bronze",
+        "order": 7,
+        "title": {
+          "ja": "Dart の変数を不変にするキーワードの組み合わせは？",
+          "en": "Which keyword pair makes Dart variables immutable?"
+        },
+        "options": [
+          {
+            "ja": "final / const",
+            "en": "final / const"
+          },
+          {
+            "ja": "let / var",
+            "en": "let / var"
+          },
+          {
+            "ja": "val / mut",
+            "en": "val / mut"
+          },
+          {
+            "ja": "readonly / static",
+            "en": "readonly / static"
+          }
+        ],
+        "durationSeconds": 180,
+        "status": "draft",
+        "openedAt": null,
+        "closesAt": null,
+        "correctOptionIndex": null,
+        "explanation": null
+      }
+    },
+    {
+      "path": "quizEvents/half-1/questions/q8",
+      "schema": "quiz_question",
+      "data": {
+        "sponsorId": "example-bronze",
+        "order": 8,
+        "title": {
+          "ja": "レイアウトを縦方向に並べる Widget は Column である。",
+          "en": "Column arranges its children vertically."
+        },
+        "options": [
+          {
+            "ja": "○",
+            "en": "True"
+          },
+          {
+            "ja": "×",
+            "en": "False"
+          }
+        ],
+        "durationSeconds": 180,
+        "status": "draft",
+        "openedAt": null,
+        "closesAt": null,
+        "correctOptionIndex": null,
+        "explanation": null
+      }
+    },
+    {
+      "path": "quizEvents/half-1/questions/q1/secret/answer",
+      "schema": "quiz_question_secret",
+      "data": {
+        "correctOptionIndex": 0,
+        "explanation": {
+          "ja": "Flutter の UI はすべて Widget で構築します。",
+          "en": "Every piece of Flutter UI is built from widgets."
+        }
+      }
+    },
+    {
+      "path": "quizEvents/half-1/questions/q2/secret/answer",
+      "schema": "quiz_question_secret",
+      "data": {
+        "correctOptionIndex": 0,
+        "explanation": {
+          "ja": "Dart はシングルスレッドのイベントループ（isolate）で動作します。",
+          "en": "Dart runs on a single-threaded event loop (per isolate)."
+        }
+      }
+    },
+    {
+      "path": "quizEvents/half-1/questions/q3/secret/answer",
+      "schema": "quiz_question_secret",
+      "data": {
+        "correctOptionIndex": 0,
+        "explanation": {
+          "ja": "状態を持たない Widget は StatelessWidget を継承します。",
+          "en": "Widgets without mutable state extend StatelessWidget."
+        }
+      }
+    },
+    {
+      "path": "quizEvents/half-1/questions/q4/secret/answer",
+      "schema": "quiz_question_secret",
+      "data": {
+        "correctOptionIndex": 0,
+        "explanation": {
+          "ja": "hot reload は State を保持したままコード変更を反映します。",
+          "en": "Hot reload applies code changes while keeping the current State."
+        }
+      }
+    },
+    {
+      "path": "quizEvents/half-1/questions/q5/secret/answer",
+      "schema": "quiz_question_secret",
+      "data": {
+        "correctOptionIndex": 0,
+        "explanation": {
+          "ja": "Dart/Flutter の依存は pubspec.yaml で宣言します。",
+          "en": "Dart/Flutter dependencies are declared in pubspec.yaml."
+        }
+      }
+    },
+    {
+      "path": "quizEvents/half-1/questions/q6/secret/answer",
+      "schema": "quiz_question_secret",
+      "data": {
+        "correctOptionIndex": 0,
+        "explanation": {
+          "ja": "非同期の結果に応じて UI を組むには FutureBuilder を使います。",
+          "en": "FutureBuilder builds UI from the snapshot of a Future."
+        }
+      }
+    },
+    {
+      "path": "quizEvents/half-1/questions/q7/secret/answer",
+      "schema": "quiz_question_secret",
+      "data": {
+        "correctOptionIndex": 0,
+        "explanation": {
+          "ja": "実行時に一度だけ確定する final と、コンパイル時定数の const があります。",
+          "en": "Use final for run-time constants and const for compile-time constants."
+        }
+      }
+    },
+    {
+      "path": "quizEvents/half-1/questions/q8/secret/answer",
+      "schema": "quiz_question_secret",
+      "data": {
+        "correctOptionIndex": 0,
+        "explanation": {
+          "ja": "Column は子を縦方向に並べます。",
+          "en": "Column lays out its children vertically."
+        }
       }
     }
   ]
