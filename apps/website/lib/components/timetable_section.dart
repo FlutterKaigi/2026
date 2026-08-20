@@ -1,6 +1,7 @@
 import 'package:jaspr/dom.dart';
 import 'package:jaspr/jaspr.dart';
 
+import '../constants/generated_sessions.dart';
 import '../constants/generated_tokens.dart';
 import '../constants/theme.dart';
 import '../constants/timetable.dart';
@@ -16,58 +17,80 @@ import 'app_dialog.dart';
 /// hidden な radio input と `:checked ~` セレクタの組み合わせで表示日を
 /// 切り替える（SSG のまま動く）。
 ///
-/// 現状はデザイン確認用の仮データ（`constants/timetable.dart`）を表示。
+/// データはビルド時生成の `constants/generated_sessions.dart`（Firestore
+/// 由来、git 管理外）。タイムテーブル確定前は空になるため、その場合は
+/// タブとグリッドを出さず準備中メッセージのみを表示する。
 class TimetableSection extends StatelessComponent {
   const TimetableSection({super.key});
 
   @override
   Component build(BuildContext context) {
     final strings = LocaleScope.stringsOf(context);
+    // 会場が 1 つも無い＝タイムテーブル未確定。セッションが無ければ
+    // タイムラインイベントだけ出しても意味がないので同じ扱いにする。
+    final hasProgramme =
+        generatedTimetableRooms.isNotEmpty &&
+        generatedTimetableByDay.values.any((programme) => programme.entries.isNotEmpty);
     return section(id: 'timetable', classes: 'timetable-section', [
       div(classes: 'timetable-section__inner', [
         div(classes: 'timetable-section__header', [
           h2(classes: 'timetable-section__title', [.text(strings.timetableTitle)]),
           p(classes: 'timetable-section__subtitle', [.text(strings.timetableSubtitle)]),
         ]),
-        // タブ切替用の radio（sr-only で視覚のみ非表示）。tabs / day グリッド
-        // の兄弟要素であることが `:checked ~` セレクタの前提。キーボードでは
-        // Tab でグループに入り、矢印キーで Day を切り替えられる。
-        for (final day in TimetableDay.values)
-          input(
-            type: InputType.radio,
-            id: 'timetable-${day.name}',
-            name: 'timetable-day',
-            classes: 'timetable-day-input',
-            checked: day == TimetableDay.day1,
-          ),
-        div(classes: 'timetable-tabs', [
+        if (!hasProgramme)
+          p(classes: 'timetable-empty', [.text(strings.timetableComingSoon)])
+        else ...[
+          // タブ切替用の radio（sr-only で視覚のみ非表示）。tabs / day グリッド
+          // の兄弟要素であることが `:checked ~` セレクタの前提。キーボードでは
+          // Tab でグループに入り、矢印キーで Day を切り替えられる。
           for (final day in TimetableDay.values)
-            label(
-              classes: 'timetable-tab timetable-tab--${day.name}',
-              htmlFor: 'timetable-${day.name}',
+            input(
+              type: InputType.radio,
+              id: 'timetable-${day.name}',
+              name: 'timetable-day',
+              classes: 'timetable-day-input',
+              checked: day == TimetableDay.day1,
+            ),
+          div(classes: 'timetable-tabs', [
+            for (final day in TimetableDay.values)
+              label(
+                classes: 'timetable-tab timetable-tab--${day.name}',
+                htmlFor: 'timetable-${day.name}',
+                [
+                  span(classes: 'timetable-tab__day', [.text(day.label)]),
+                  span(classes: 'timetable-tab__date', [.text('${day.date} ${day.weekday}')]),
+                ],
+              ),
+          ]),
+          for (final day in TimetableDay.values)
+            div(
+              classes: 'timetable-day timetable-day--${day.name}',
+              // 列数は会場データ由来。CSS 側は var() 経由で受けるので、
+              // 縦積みに切り替えるメディアクエリを inline style が上書きしない。
+              styles: Styles(
+                raw: {'--tt-cols': '4.5rem repeat(${generatedTimetableRooms.length}, minmax(0, 1fr))'},
+              ),
               [
-                span(classes: 'timetable-tab__day', [.text(day.label)]),
-                span(classes: 'timetable-tab__date', [.text('${day.date} ${day.weekday}')]),
+                div(classes: 'timetable-rowhead', [
+                  div([]),
+                  for (final room in generatedTimetableRooms)
+                    div(
+                      classes: 'timetable-roomhead',
+                      styles: Styles(raw: {'--tt-room-color': room.colorHex}),
+                      [
+                        span(classes: 'timetable-roomhead__dot', []),
+                        .text(room.name.resolve(strings.locale)),
+                      ],
+                    ),
+                ]),
+                // 片方の日だけ未確定というケースもある。
+                if (generatedTimetableByDay[day]!.entries.isEmpty)
+                  p(classes: 'timetable-empty', [.text(strings.timetableComingSoon)])
+                else
+                  _DayGrid(day: day, strings: strings),
               ],
             ),
-        ]),
-        for (final day in TimetableDay.values)
-          div(classes: 'timetable-day timetable-day--${day.name}', [
-            div(classes: 'timetable-rowhead', [
-              div([]),
-              for (final room in timetableRooms)
-                div(
-                  classes: 'timetable-roomhead',
-                  styles: Styles(raw: {'--tt-room-color': room.colorHex}),
-                  [
-                    span(classes: 'timetable-roomhead__dot', []),
-                    .text(room.name),
-                  ],
-                ),
-            ]),
-            for (final (slotIndex, slot) in timetableByDay[day]!.indexed)
-              _SlotRow(slot: slot, day: day, slotIndex: slotIndex, strings: strings),
-          ]),
+        ],
       ]),
     ]);
   }
@@ -119,6 +142,16 @@ class TimetableSection extends StatelessComponent {
           },
         ),
       ]),
+
+      // タイムテーブル未確定時のプレースホルダー。空のグリッドを見せるより、
+      // 準備中であることを明示する。
+      css('.timetable-empty').styles(
+        color: const Color('#494456'),
+        fontFamily: uiFontFamily,
+        fontWeight: .w400,
+        textAlign: .center,
+        raw: const {'font-size': '0.95rem', 'line-height': '1.7'},
+      ),
 
       // ── Day tabs（radio + label による JS なし切替） ─────────────────
       // アクティブは M3 primary 塗り（サイト全体のフォーカスリング等と同系色。
@@ -206,12 +239,19 @@ class TimetableSection extends StatelessComponent {
         '& #timetable-day2:checked ~ .timetable-day--day2',
       ).styles(raw: const {'display': 'flex'}),
 
-      // 時刻列 + 会場カラムのグリッド。会場数は現状 4 固定
-      // （実データ連携時に会場データから列数を導出する）。
-      css('& .timetable-rowhead, & .timetable-row').styles(
+      // 時刻列 + 会場カラムのグリッド。列数は `.timetable-day` に inline で
+      // 載せた `--tt-cols`（会場データ由来）から受け取る。フォールバックは
+      // 従来どおり 4 会場。行は `.timetable-grid` に inline で載せた
+      // `--tt-rows`（その日の時刻境界の数）から受け取り、各枠は自分の
+      // `grid-row` / `grid-column` で明示配置される。
+      css('& .timetable-rowhead, & .timetable-grid').styles(
         display: .grid,
         gap: Gap.column(12.px),
-        raw: const {'grid-template-columns': '4.5rem repeat(4, minmax(0, 1fr))'},
+        raw: const {'grid-template-columns': 'var(--tt-cols, 4.5rem repeat(4, minmax(0, 1fr)))'},
+      ),
+      css('.timetable-grid').styles(
+        gap: Gap(row: 8.px, column: 12.px),
+        raw: const {'grid-template-rows': 'var(--tt-rows)'},
       ),
       css('.timetable-rowhead').styles(
         raw: const {'margin-bottom': '8px'},
@@ -238,23 +278,25 @@ class TimetableSection extends StatelessComponent {
         ),
       ]),
 
-      // ── 時刻セル ─────────────────────────────────────────────────────
+      // ── 時刻の目盛り ─────────────────────────────────────────────────
+      // 行の境界ごとに 1 つ。行はカードの高さで伸びるので、目盛りは行の上端
+      // （= その時刻そのもの）に揃える。1 日の最後の境界だけは行を持たない
+      // ため、最終行の下端に寄せる。
       css('.timetable-time', [
         css('&').styles(
           display: .flex,
-          flexDirection: .column,
-          alignItems: .end,
-          fontFamily: displayFontFamily,
-        ),
-        css('.timetable-time__start').styles(
+          justifyContent: .end,
+          alignSelf: .start,
           color: const Color('#1D1A25'),
+          fontFamily: displayFontFamily,
           fontWeight: .w600,
-          raw: const {'font-size': '0.95rem', 'line-height': '1.4'},
+          raw: const {
+            'grid-column': '1',
+            'font-size': '0.95rem',
+            'line-height': '1.4',
+          },
         ),
-        css('.timetable-time__end').styles(
-          color: const Color('#494456'),
-          raw: const {'font-size': '0.75rem'},
-        ),
+        css('&.timetable-time--last').styles(alignSelf: .end),
       ]),
 
       // ── セッションカード ─────────────────────────────────────────────
@@ -339,34 +381,56 @@ class TimetableSection extends StatelessComponent {
       ),
       // 会場チップ: desktop のカード内ではカラム位置で会場が分かるため
       // 非表示。カードが縦積みになる mobile とダイアログ内では表示する。
-      css('.timetable-card .timetable-chip--room').styles(
+      // 時刻チップも同様に、時刻列が消える縦積み時だけ出す（ダイアログには
+      // 専用の schedule 行があるので常に非表示）。
+      css(
+        '.timetable-card .timetable-chip--room, '
+        '& .timetable-chip--time',
+      ).styles(
         raw: const {'display': 'none'},
       ),
 
-      // スピーカーアイコン（カード / ダイアログ共用）。
+      // スピーカーアイコン（カード / ダイアログ共用）。複数登壇の場合は
+      // 少し重ねて横に並べ、白フチで輪郭を分ける。
+      css('.timetable-avatars').styles(
+        display: .flex,
+        alignItems: .center,
+        raw: const {'flex-shrink': '0'},
+      ),
       css('.timetable-avatar').styles(
         width: 24.px,
         height: 24.px,
         radius: .circular(999.px),
         raw: const {'object-fit': 'cover', 'flex-shrink': '0'},
       ),
+      css('.timetable-avatars .timetable-avatar + .timetable-avatar').styles(
+        raw: const {
+          'margin-left': '-6px',
+          'box-shadow': '0 0 0 2px #FFFFFF',
+        },
+      ),
 
       // ── タイムラインイベント（開場・休憩など）の全幅バー ─────────────
       // カードより一段引いた、塗りの薄い区切り表現。
-      css('.timetable-event').styles(
-        display: .flex,
-        alignItems: .center,
-        justifyContent: .center,
-        padding: .symmetric(horizontal: 16.px, vertical: 12.px),
-        color: const Color('#494456'),
-        fontFamily: uiFontFamily,
-        radius: .circular(16.px),
-        raw: const {
-          'grid-column': '2 / -1',
-          'font-size': '0.85rem',
-          'background-color': 'rgba(255, 255, 255, 0.6)',
-        },
-      ),
+      css('.timetable-event', [
+        css('&').styles(
+          display: .flex,
+          alignItems: .center,
+          justifyContent: .center,
+          gap: Gap.column(8.px),
+          padding: .symmetric(horizontal: 16.px, vertical: 12.px),
+          color: const Color('#494456'),
+          fontFamily: uiFontFamily,
+          radius: .circular(16.px),
+          raw: const {
+            'grid-column': '2 / -1',
+            'font-size': '0.85rem',
+            'background-color': 'rgba(255, 255, 255, 0.6)',
+          },
+        ),
+        // 時刻は左の目盛りと重複するので desktop では出さない。
+        css('.timetable-event__time').styles(raw: const {'display': 'none'}),
+      ]),
 
       // ── セッション詳細ダイアログ（AppDialog 内のコンテンツ） ─────────
       css('.timetable-dialog', [
@@ -424,20 +488,24 @@ class TimetableSection extends StatelessComponent {
           padding: .symmetric(horizontal: 24.px, vertical: 80.px),
         ),
         css('.timetable-rowhead').styles(raw: const {'display': 'none'}),
-        css('.timetable-row').styles(
+        // 4 カラムを畳んで開始時刻順の 1 列にする。grid の明示配置
+        // （grid-row / grid-column）は flex では効かないので、枠は
+        // `entries` の並び順そのままに縦に積まれる。
+        css('.timetable-grid').styles(
           display: .flex,
           flexDirection: .column,
           gap: Gap.row(8.px),
         ),
-        // 縦積みでは空き枠は隙間（gap ぶんの余白）にしかならないので消す。
-        css('.timetable-cell--empty').styles(raw: const {'display': 'none'}),
-        css('.timetable-time').styles(
-          flexDirection: .row,
-          alignItems: .baseline,
-          gap: Gap.column(6.px),
-        ),
-        css('.timetable-card .timetable-chip--room').styles(
+        // 目盛り列は畳んだ時点で意味を失う。時刻は各枠のチップで示す。
+        css('.timetable-time').styles(raw: const {'display': 'none'}),
+        css(
+          '.timetable-card .timetable-chip--room, '
+          '.timetable-card .timetable-chip--time',
+        ).styles(
           raw: const {'display': 'flex'},
+        ),
+        css('.timetable-event .timetable-event__time').styles(
+          raw: const {'display': 'inline'},
         ),
       ]),
     ]),
@@ -456,58 +524,79 @@ class TimetableSection extends StatelessComponent {
   ];
 }
 
-/// スピーカー写真が未登録（`speakerAvatarUrl` が null）の場合の
+/// スピーカー写真が未登録（`speakerAvatarUrls` の要素が null）の場合の
 /// フォールバック画像。
 const _avatarPlaceholderSrc = 'images/icons/avatar_placeholder.svg';
 
-/// スピーカー行（アイコン + 名前）。カードとダイアログで共用。
+/// スピーカー行（登壇者ごとのアイコン + 名前）。カードとダイアログで共用。
 /// カード側は `<button>` 内に入るため phrasing content の span で構成する
 /// （表示は CSS の flex で制御）。
-Component _speakerRow(String classes, String? avatarUrl, String name) {
+Component _speakerRow(String classes, List<String?> avatarUrls, String name) {
   return span(classes: classes, [
-    img(
-      classes: 'timetable-avatar',
-      src: avatarUrl ?? _avatarPlaceholderSrc,
-      alt: '',
-      attributes: const {'aria-hidden': 'true', 'loading': 'lazy'},
-    ),
+    span(classes: 'timetable-avatars', [
+      // ignore: unused_local_variable
+      for (final avatarUrl in avatarUrls.isEmpty ? const <String?>[null] : avatarUrls)
+        img(
+          classes: 'timetable-avatar',
+          // 写真を出せるようになったら `src: avatarUrl ?? _avatarPlaceholderSrc` に変更する
+          // ignore: unused_local_variable も削除する
+          // src: avatarUrl ?? _avatarPlaceholderSrc,
+          src: _avatarPlaceholderSrc,
+          alt: '',
+          attributes: const {'aria-hidden': 'true', 'loading': 'lazy'},
+        ),
+    ]),
     span([.text(name)]),
   ]);
 }
 
-class _SlotRow extends StatelessComponent {
-  const _SlotRow({
-    required this.slot,
-    required this.day,
-    required this.slotIndex,
-    required this.strings,
-  });
+/// 枠が占めるグリッド行。`grid-row: <開始境界> / <終了境界>`。
+///
+/// 終了時刻を持たないタイムラインイベントは開始と終了が同じ境界になり、
+/// `n / n` は行を持たない指定になってしまうため 1 行ぶんに落とす。
+String _gridRow(int startTick, int endTick) =>
+    endTick > startTick ? '${startTick + 1} / ${endTick + 1}' : '${startTick + 1} / span 1';
 
-  final TimetableSlot slot;
+/// 1 日分のグリッド本体。
+///
+/// 行はその日に現れる開始・終了時刻（`ticks`）で切り、各枠を自分の開始境界
+/// から終了境界まで `grid-row` で明示配置する。開始が揃わない枠を 1 行に
+/// 押し込めないので、30 分枠の裏で 10 分の LT が 3 本走るような並びも
+/// 時間軸を保ったまま表示できる。
+class _DayGrid extends StatelessComponent {
+  const _DayGrid({required this.day, required this.strings});
+
   final TimetableDay day;
-  final int slotIndex;
   final Strings strings;
 
   /// セッション詳細ダイアログの id（`popovertarget` で参照）。
-  String _dialogId(int roomIndex) => 'timetable-session-${day.name}-$slotIndex-$roomIndex';
+  String _dialogId(int entryIndex) => 'timetable-session-${day.name}-$entryIndex';
 
   @override
   Component build(BuildContext context) {
-    return div(classes: 'timetable-row', [
-      div(classes: 'timetable-time', [
-        span(classes: 'timetable-time__start', [.text(slot.start)]),
-        span(classes: 'timetable-time__end', [.text('– ${slot.end}')]),
-      ]),
-      if (slot.eventLabel case final label?)
-        div(classes: 'timetable-event', [.text(label.resolve(strings.locale))])
-      else
-        for (final (i, session) in slot.byRoom.indexed)
-          if (session == null)
-            div(classes: 'timetable-cell--empty', [])
-          else ...[
+    final programme = generatedTimetableByDay[day]!;
+    final ticks = programme.ticks;
+    // 最後の境界は行を持たない（n 個の境界に対し行は n-1 個）。その時刻だけは
+    // 最終行の下端へ寄せて描き、1 日の終わりが読めるようにする。
+    final rowCount = ticks.length - 1;
+    return div(
+      classes: 'timetable-grid',
+      styles: Styles(raw: {'--tt-rows': 'repeat($rowCount, minmax(0, auto))'}),
+      [
+        for (final (i, tick) in ticks.indexed)
+          div(
+            classes: i == rowCount ? 'timetable-time timetable-time--last' : 'timetable-time',
+            styles: Styles(raw: {'grid-row': '${i == rowCount ? rowCount : i + 1}'}),
+            [.text(tick)],
+          ),
+        for (final (i, entry) in programme.entries.indexed)
+          if ((entry.session, entry.roomIndex) case (final session?, final roomIndex?)) ...[
             _SessionCard(
               session: session,
-              room: timetableRooms[i],
+              room: generatedTimetableRooms[roomIndex],
+              start: ticks[entry.startTick],
+              end: ticks[entry.endTick],
+              gridArea: (row: _gridRow(entry.startTick, entry.endTick), column: '${roomIndex + 2}'),
               dialogId: _dialogId(i),
               strings: strings,
             ),
@@ -516,13 +605,48 @@ class _SlotRow extends StatelessComponent {
             _SessionDialog(
               id: _dialogId(i),
               session: session,
-              room: timetableRooms[i],
+              room: generatedTimetableRooms[roomIndex],
               day: day,
-              slot: slot,
+              start: ticks[entry.startTick],
+              end: ticks[entry.endTick],
               strings: strings,
             ),
-          ],
-    ]);
+          ] else if ((entry.eventLabel, entry.roomIndex) case (final label?, final roomIndex?)) ...[
+            // roomIndex を持つイベント（応援LT・ランチステージなど）は
+            // セッションと同じカード + ダイアログで表示する。概要や
+            // スピーカーを持たないだけなので、表示モデルごと流用できる。
+            _SessionCard(
+              session: TimetableSession(title: label),
+              room: generatedTimetableRooms[roomIndex],
+              start: ticks[entry.startTick],
+              end: ticks[entry.endTick],
+              gridArea: (row: _gridRow(entry.startTick, entry.endTick), column: '${roomIndex + 2}'),
+              dialogId: _dialogId(i),
+              strings: strings,
+            ),
+            _SessionDialog(
+              id: _dialogId(i),
+              session: TimetableSession(title: label),
+              room: generatedTimetableRooms[roomIndex],
+              day: day,
+              start: ticks[entry.startTick],
+              end: ticks[entry.endTick],
+              strings: strings,
+            ),
+          ] else if (entry.eventLabel case final label?)
+            div(
+              classes: 'timetable-event',
+              styles: Styles(raw: {'grid-row': _gridRow(entry.startTick, entry.endTick)}),
+              [
+                // 時刻列が消える縦積み時のための時刻。desktop では非表示。
+                span(classes: 'timetable-event__time', [
+                  .text('${ticks[entry.startTick]} – ${ticks[entry.endTick]}'),
+                ]),
+                span([.text(label.resolve(strings.locale))]),
+              ],
+            ),
+      ],
+    );
   }
 }
 
@@ -530,12 +654,18 @@ class _SessionCard extends StatelessComponent {
   const _SessionCard({
     required this.session,
     required this.room,
+    required this.start,
+    required this.end,
+    required this.gridArea,
     required this.dialogId,
     required this.strings,
   });
 
   final TimetableSession session;
   final TimetableRoom room;
+  final String start;
+  final String end;
+  final ({String row, String column}) gridArea;
   final String dialogId;
   final Strings strings;
 
@@ -547,15 +677,23 @@ class _SessionCard extends StatelessComponent {
       classes: 'timetable-card',
       type: ButtonType.button,
       attributes: {'popovertarget': dialogId},
-      styles: Styles(raw: {'--tt-room-color': room.colorHex}),
+      styles: Styles(
+        raw: {
+          '--tt-room-color': room.colorHex,
+          'grid-row': gridArea.row,
+          'grid-column': gridArea.column,
+        },
+      ),
       [
         // <button> 内は phrasing content 限定のため div/p でなく span を使う。
         span(classes: 'timetable-card__meta', [
-          span(classes: 'timetable-chip timetable-chip--room', [.text(room.name)]),
+          // 時刻列が消える縦積み時のための時刻。desktop では非表示。
+          span(classes: 'timetable-chip timetable-chip--time', [.text('$start – $end')]),
+          span(classes: 'timetable-chip timetable-chip--room', [.text(room.name.resolve(locale))]),
           for (final tag in session.tags) span(classes: 'timetable-chip', [.text(tag.resolve(locale))]),
         ]),
         span(classes: 'timetable-card__title', [.text(session.title.resolve(locale))]),
-        if (speaker != null) _speakerRow('timetable-card__speaker', session.speakerAvatarUrl, speaker),
+        if (speaker != null) _speakerRow('timetable-card__speaker', session.speakerAvatarUrls, speaker),
       ],
     );
   }
@@ -567,7 +705,8 @@ class _SessionDialog extends StatelessComponent {
     required this.session,
     required this.room,
     required this.day,
-    required this.slot,
+    required this.start,
+    required this.end,
     required this.strings,
   });
 
@@ -575,7 +714,8 @@ class _SessionDialog extends StatelessComponent {
   final TimetableSession session;
   final TimetableRoom room;
   final TimetableDay day;
-  final TimetableSlot slot;
+  final String start;
+  final String end;
   final Strings strings;
 
   @override
@@ -592,14 +732,14 @@ class _SessionDialog extends StatelessComponent {
           styles: Styles(raw: {'--tt-room-color': room.colorHex}),
           [
             div(classes: 'timetable-card__meta', [
-              span(classes: 'timetable-chip timetable-chip--room', [.text(room.name)]),
+              span(classes: 'timetable-chip timetable-chip--room', [.text(room.name.resolve(locale))]),
               for (final tag in session.tags) span(classes: 'timetable-chip', [.text(tag.resolve(locale))]),
             ]),
             h3(id: '$id-title', classes: 'timetable-dialog__title', [.text(session.title.resolve(locale))]),
             p(classes: 'timetable-dialog__schedule', [
-              .text('${day.label} ${day.date} ${day.weekday} / ${slot.start} – ${slot.end}'),
+              .text('${day.label} ${day.date} ${day.weekday} / $start – $end'),
             ]),
-            if (speaker != null) _speakerRow('timetable-dialog__speaker', session.speakerAvatarUrl, speaker),
+            if (speaker != null) _speakerRow('timetable-dialog__speaker', session.speakerAvatarUrls, speaker),
             if (description != null)
               div(classes: 'timetable-dialog__desc', [
                 for (final paragraph in description.split('\n')) p([.text(paragraph)]),
