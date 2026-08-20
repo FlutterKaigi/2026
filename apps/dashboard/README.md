@@ -47,14 +47,23 @@ Firebase Hosting へのデプロイは `dashboard:deploy:stg` / `dashboard:deplo
 firebase login
 ```
 
-## スポンサー・ニュースデータの本番反映
+## データの本番反映
 
-スポンサー一覧・ニュース一覧それぞれの画面にある「本番環境へ反映」ボタンで、STG の
-`sponsors` / `news` コレクションを本番環境へワンクリックで完全ミラーできる
-（作成・上書きに加えて、STG に存在しない本番側ドキュメントの**削除**も行う）。
+各画面の「本番環境へ反映」ボタンで、STG のデータを本番環境へワンクリックで完全ミラー
+できる（作成・上書きに加えて、STG に存在しない本番側ドキュメントの**削除**も行う）。
 
-- 実体は STG プロジェクトの Cloud Functions `syncSponsorsToProd` / `syncNewsToProd`（[functions/README.md](../../functions/README.md) 参照）
-- 実行前に dry run の結果（作成/更新/削除の件数）が確認ダイアログに表示される
+| 画面 | 反映されるコレクション |
+| --- | --- |
+| スポンサー一覧 | `sponsors` |
+| ニュース一覧 | `news` |
+| セッション一覧 | `venues` / `speakers` / `sessions` / `timelineEvents` |
+
+セッション系の 4 コレクションは相互に参照を持つ（`sessions.venueId` / `sessions.speakerIds` /
+`timelineEvents.venueId`）ため、個別ではなく**まとめて**反映する。参照切れを避けるため、
+参照される側から作成・上書きし、削除は逆順に実行される。
+
+- 実体は STG プロジェクトの Cloud Functions `syncCollectionsToProd`（[functions/README.md](../../functions/README.md) 参照）
+- 実行前に dry run の結果（作成/更新/削除の件数、複数コレクションの場合は内訳）が確認ダイアログに表示される
 - ボタンは stg / dev フレーバーでのみ表示（prod では非表示）
 - dev フレーバーでは `localhost:5001` の Functions エミュレータに接続する
 
