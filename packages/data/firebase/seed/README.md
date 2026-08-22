@@ -20,7 +20,12 @@ Seed files are small, reviewable fixtures for local development.
 The `schema` value maps to `packages/data/firebase/schemas/firestore/{schema}.schema.json`.
 
 `firestore/default.json` seeds one sample document set per collection this repo
-owns: `news`, `venues`, `sponsors` and `staffMembers`.
+owns: `news`, `venues`, `sponsors`, `staffMembers` and `users`.
+
+`users` documents are normally created by attendees from the app (the document
+id is their Firebase Auth uid). The seeded `users/seed-user-*` profiles only
+exist so other attendees' profiles can be viewed locally; they are not tied to
+any Auth Emulator account.
 
 `sessions`, `speakers` and `timelineEvents` are deliberately **not** seeded.
 Sessionize owns them, and `tool/import_sessions.dart` writes them under

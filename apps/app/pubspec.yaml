@@ -32,6 +32,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   cached_network_image: ^3.4.1
+  country_flags: ^4.1.2
 
 dev_dependencies:
   flutter_test:

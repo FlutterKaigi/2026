@@ -17,6 +17,63 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    // 参加者プロフィール。ドキュメント ID は Firebase Auth の uid。
+    // プロフィール交換で他の参加者にも見せる前提のため、サインイン済みなら読める。
+    // 書き込みは本人のみ。
+    function isOwner(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    function isValidSnsLink(link) {
+      return link is map
+        && link.keys().hasOnly(['type', 'value'])
+        && link.type is string && link.type.size() > 0
+        && link.value is string && link.value.size() > 0;
+    }
+
+    // packages/data/firebase/schemas/firestore/user_profile.schema.json と
+    // UserProfile の上限値 (displayNameMaxLength / bioMaxLength /
+    // snsLinksMaxCount) に合わせる。
+    function isValidUserProfile(data) {
+      return data.keys().hasOnly([
+          'displayName', 'avatarUrl', 'countryOrRegion', 'snsLinks', 'bio', 'createdAt', 'updatedAt'
+        ])
+        && data.displayName is string
+        && data.displayName.size() > 0 && data.displayName.size() <= 30
+        && (!('avatarUrl' in data) || data.avatarUrl == null
+          || (data.avatarUrl is string && data.avatarUrl.matches('^https://.+')))
+        && data.countryOrRegion is string && data.countryOrRegion.matches('^[A-Z]{2}$')
+        && (!('snsLinks' in data)
+          || (data.snsLinks is list && data.snsLinks.size() <= 10
+            // rules は list の要素を反復できないため、先頭 10 件を個別に検証する。
+            && (data.snsLinks.size() < 1 || isValidSnsLink(data.snsLinks[0]))
+            && (data.snsLinks.size() < 2 || isValidSnsLink(data.snsLinks[1]))
+            && (data.snsLinks.size() < 3 || isValidSnsLink(data.snsLinks[2]))
+            && (data.snsLinks.size() < 4 || isValidSnsLink(data.snsLinks[3]))
+            && (data.snsLinks.size() < 5 || isValidSnsLink(data.snsLinks[4]))
+            && (data.snsLinks.size() < 6 || isValidSnsLink(data.snsLinks[5]))
+            && (data.snsLinks.size() < 7 || isValidSnsLink(data.snsLinks[6]))
+            && (data.snsLinks.size() < 8 || isValidSnsLink(data.snsLinks[7]))
+            && (data.snsLinks.size() < 9 || isValidSnsLink(data.snsLinks[8]))
+            && (data.snsLinks.size() < 10 || isValidSnsLink(data.snsLinks[9]))))
+        && (!('bio' in data) || data.bio == null || (data.bio is string && data.bio.size() <= 300))
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    match /users/{uid} {
+      allow read: if signedIn();
+      allow create: if isOwner(uid)
+        && isValidUserProfile(request.resource.data)
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.updatedAt == request.time;
+      allow update: if isOwner(uid)
+        && isValidUserProfile(request.resource.data)
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.updatedAt == request.time;
+      allow delete: if isOwner(uid);
+    }
+
     match /news/{newsId} {
       allow read: if true;
       allow write: if hasAdminAccess();

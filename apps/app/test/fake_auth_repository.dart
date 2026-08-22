@@ -14,14 +14,25 @@ final class FakeUserInfo extends Fake implements UserInfo {
 
 /// A [User] stand-in exposing only the fields the UI reads.
 final class FakeUser extends Fake implements User {
-  FakeUser({this.email, this.displayName, List<String> providerIds = const []})
-    : providerData = [for (final id in providerIds) FakeUserInfo(id)];
+  FakeUser({
+    this.uid = 'fake-uid',
+    this.email,
+    this.displayName,
+    this.photoURL,
+    List<String> providerIds = const [],
+  }) : providerData = [for (final id in providerIds) FakeUserInfo(id)];
+
+  @override
+  final String uid;
 
   @override
   final String? email;
 
   @override
   final String? displayName;
+
+  @override
+  final String? photoURL;
 
   @override
   final List<UserInfo> providerData;
@@ -44,6 +55,9 @@ final class FakeAuthRepository implements AuthRepository {
   String? lastPassword;
   String? lastResetEmail;
   String? lastDeletePassword;
+
+  /// Whether the last [deleteAccount] call ran its `beforeDelete` hook.
+  bool beforeDeleteCalled = false;
 
   @override
   Stream<User?> authStateChanges() async* {
@@ -105,9 +119,16 @@ final class FakeAuthRepository implements AuthRepository {
   Future<void> signOut() => _run('signOut', null);
 
   @override
-  Future<void> deleteAccount({String? password}) {
+  Future<void> deleteAccount({String? password, Future<void> Function()? beforeDelete}) async {
     lastDeletePassword = password;
-    return _run('deleteAccount', null);
+    calledMethods.add('deleteAccount');
+    _throwIfConfigured();
+    if (beforeDelete != null) {
+      await beforeDelete();
+      beforeDeleteCalled = true;
+    }
+    _user = null;
+    _controller.add(null);
   }
 
   void dispose() {
