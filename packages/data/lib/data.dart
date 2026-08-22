@@ -1,3 +1,5 @@
+export 'src/country/country.dart' show Country, CountryRegion, findCountry;
+export 'src/country/generated_countries.dart' show countries;
 export 'src/firebase/firebase_initializer.dart' show FirebaseInitializer;
 export 'src/model/locale_map.dart' show LocaleMap;
 export 'src/model/news.dart' show News;
@@ -7,6 +9,7 @@ export 'src/model/staff_member.dart' show StaffMember;
 export 'src/model/session.dart' show Session;
 export 'src/model/sponsor.dart' show Sponsor, SponsorTier;
 export 'src/model/timeline_event.dart' show TimelineEvent;
+export 'src/model/user_profile.dart' show UserProfile;
 export 'src/model/venue.dart' show Venue;
 export 'src/repository/auth_repository.dart' show FirebaseAuthRepository, AuthRepository;
 export 'src/repository/news_repository.dart' show FirestoreNewsRepository, NewsRepository;
@@ -15,4 +18,5 @@ export 'src/repository/staff_member_repository.dart' show FirestoreStaffMemberRe
 export 'src/repository/session_repository.dart' show FirestoreSessionRepository, SessionRepository;
 export 'src/repository/sponsor_repository.dart' show FirestoreSponsorRepository, SponsorRepository;
 export 'src/repository/timeline_event_repository.dart' show FirestoreTimelineEventRepository, TimelineEventRepository;
+export 'src/repository/user_profile_repository.dart' show FirestoreUserProfileRepository, UserProfileRepository;
 export 'src/repository/venue_repository.dart' show FirestoreVenueRepository, VenueRepository;
