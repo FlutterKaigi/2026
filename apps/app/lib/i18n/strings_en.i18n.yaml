@@ -75,6 +75,8 @@ sessionDetails:
   speakers: Speakers
   links: Links
   sessionize: Sessionize
+  feedback: Send session feedback
+  feedbackDescription: Let us know what you thought of this session
   share: Share
   notFound: Session not found
 sessionBookmark:

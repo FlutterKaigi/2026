@@ -304,6 +304,12 @@ class Translations$sessionDetails$ja {
 	/// ja: 'Sessionize'
 	String get sessionize => 'Sessionize';
 
+	/// ja: 'セッションのフィードバックを送る'
+	String get feedback => 'セッションのフィードバックを送る';
+
+	/// ja: 'このセッションの感想をお聞かせください'
+	String get feedbackDescription => 'このセッションの感想をお聞かせください';
+
 	/// ja: '共有'
 	String get share => '共有';
 
@@ -857,13 +863,15 @@ extension on Translations {
 			'sessionSearch.promptBody' => 'キーワードを入力するか、日程・種類・言語を選択してください',
 			'sessionSearch.emptyTitle' => 'セッションが見つかりません',
 			'sessionSearch.emptyBody' => 'キーワードや絞り込み条件を変更してみてください',
-			'sessionSearch.resultCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(n, one: '${n}件のセッション', other: '${n}件のセッション', ),
+			'sessionSearch.resultCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(n, one: '${n}件のセッション', other: '${n}件のセッション', ), 
 			'sessionDetails.title' => 'セッション詳細',
 			'sessionDetails.description' => '概要',
 			'sessionDetails.schedule' => '日時・会場',
 			'sessionDetails.speakers' => '登壇者',
 			'sessionDetails.links' => 'リンク',
 			'sessionDetails.sessionize' => 'Sessionize',
+			'sessionDetails.feedback' => 'セッションのフィードバックを送る',
+			'sessionDetails.feedbackDescription' => 'このセッションの感想をお聞かせください',
 			'sessionDetails.share' => '共有',
 			'sessionDetails.notFound' => 'セッションが見つかりませんでした',
 			'sessionBookmark.openBookmarked' => 'ブックマークしたセッション',
@@ -950,7 +958,7 @@ extension on Translations {
 			'licenses.title' => 'ライセンス',
 			'licenses.searchHint' => 'パッケージを検索',
 			'licenses.clearSearch' => '検索をクリア',
-			'licenses.licenseCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(n, one: 'ライセンス: ${n}件', other: 'ライセンス: ${n}件', ),
+			'licenses.licenseCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(n, one: 'ライセンス: ${n}件', other: 'ライセンス: ${n}件', ), 
 			'licenses.notFound' => 'ライセンスが見つかりませんでした',
 			'error.title' => 'データを読み込めませんでした',
 			'error.message' => '通信状況を確認して、もう一度お試しください。',

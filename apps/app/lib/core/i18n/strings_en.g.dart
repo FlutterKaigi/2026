@@ -35,7 +35,7 @@ class TranslationsEn extends Translations with BaseTranslations<AppLocale, Trans
 
 	late final TranslationsEn _root = this; // ignore: unused_field
 
-	@override
+	@override 
 	TranslationsEn $copyWith({TranslationMetadata<AppLocale, Translations>? meta}) => TranslationsEn(meta: meta ?? this.$meta);
 
 	// Translations
@@ -196,6 +196,8 @@ class _Translations$sessionDetails$en extends Translations$sessionDetails$ja {
 	@override String get speakers => 'Speakers';
 	@override String get links => 'Links';
 	@override String get sessionize => 'Sessionize';
+	@override String get feedback => 'Send session feedback';
+	@override String get feedbackDescription => 'Let us know what you thought of this session';
 	@override String get share => 'Share';
 	@override String get notFound => 'Session not found';
 }
@@ -537,13 +539,15 @@ extension on TranslationsEn {
 			'sessionSearch.promptBody' => 'Enter a keyword or select a day, session type, or language',
 			'sessionSearch.emptyTitle' => 'No sessions found',
 			'sessionSearch.emptyBody' => 'Try changing the keyword or filters',
-			'sessionSearch.resultCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} session', other: '${n} sessions', ),
+			'sessionSearch.resultCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} session', other: '${n} sessions', ), 
 			'sessionDetails.title' => 'Session Details',
 			'sessionDetails.description' => 'Description',
 			'sessionDetails.schedule' => 'Schedule and Venue',
 			'sessionDetails.speakers' => 'Speakers',
 			'sessionDetails.links' => 'Links',
 			'sessionDetails.sessionize' => 'Sessionize',
+			'sessionDetails.feedback' => 'Send session feedback',
+			'sessionDetails.feedbackDescription' => 'Let us know what you thought of this session',
 			'sessionDetails.share' => 'Share',
 			'sessionDetails.notFound' => 'Session not found',
 			'sessionBookmark.openBookmarked' => 'Bookmarked sessions',
@@ -630,7 +634,7 @@ extension on TranslationsEn {
 			'licenses.title' => 'Licenses',
 			'licenses.searchHint' => 'Search packages',
 			'licenses.clearSearch' => 'Clear search',
-			'licenses.licenseCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} license', other: '${n} licenses', ),
+			'licenses.licenseCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} license', other: '${n} licenses', ), 
 			'licenses.notFound' => 'License not found',
 			'error.title' => 'Could not load data',
 			'error.message' => 'Check your connection and try again.',

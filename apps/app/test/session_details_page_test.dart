@@ -1,4 +1,5 @@
 import 'package:app/core/i18n/strings.g.dart';
+import 'package:app/core/provider/clock.dart';
 import 'package:app/core/provider/shared_preferences.dart';
 import 'package:app/core/router/router.dart';
 import 'package:app/feature/session/data/provider/session_detail_provider.dart';
@@ -262,6 +263,65 @@ void main() {
     }
   });
 
+  group('feedback link', () {
+    const feedbackUrl = 'https://sessionize.com/app/feedback/session-a';
+    final feedbackSession = _sessionWithSessionizeUrl(
+      id: 'session-a',
+      sessionizeUrl: 'https://sessionize.com/flutterkaigi-2026/session-a',
+    ).copyWith(feedbackUrl: feedbackUrl);
+
+    testWidgets('is hidden while the session has not ended', (tester) async {
+      await _pumpSessionDetailsPage(
+        tester,
+        sessionId: 'session-a',
+        sessionRepository: _FakeSessionRepository([feedbackSession]),
+        now: feedbackSession.endsAt.subtract(const Duration(minutes: 1)),
+      );
+      await _pumpProviderFrames(tester);
+
+      expect(find.byKey(const ValueKey('session-feedback-card')), findsNothing);
+      expect(find.text('セッションのフィードバックを送る'), findsNothing);
+    });
+
+    testWidgets('is shown once the session has ended', (tester) async {
+      await _pumpSessionDetailsPage(
+        tester,
+        sessionId: 'session-a',
+        sessionRepository: _FakeSessionRepository([feedbackSession]),
+        now: feedbackSession.endsAt,
+      );
+      await _pumpProviderFrames(tester);
+
+      expect(find.byKey(const ValueKey('session-feedback-card')), findsOneWidget);
+      expect(find.text('セッションのフィードバックを送る'), findsOneWidget);
+    });
+
+    testWidgets('is hidden after the session when no feedback URL is set', (tester) async {
+      await _pumpSessionDetailsPage(
+        tester,
+        sessionId: 'session-a',
+        now: DateTime.utc(2027),
+      );
+      await _pumpProviderFrames(tester);
+
+      expect(find.byKey(const ValueKey('session-feedback-card')), findsNothing);
+    });
+
+    testWidgets('is hidden when the feedback URL is not a hosted HTTPS URL', (tester) async {
+      await _pumpSessionDetailsPage(
+        tester,
+        sessionId: 'session-a',
+        sessionRepository: _FakeSessionRepository([
+          feedbackSession.copyWith(feedbackUrl: 'javascript:alert(1)'),
+        ]),
+        now: DateTime.utc(2027),
+      );
+      await _pumpProviderFrames(tester);
+
+      expect(find.byKey(const ValueKey('session-feedback-card')), findsNothing);
+    });
+  });
+
   testWidgets('shows not found when the session ID is unknown', (tester) async {
     await _pumpSessionDetailsPage(tester, sessionId: 'missing');
     await _pumpProviderFrames(tester);
@@ -353,6 +413,7 @@ Future<void> _pumpSessionDetailsPage(
   SpeakerRepository? speakerRepository,
   double? contentWidth,
   Size viewportSize = const Size(1200, 2400),
+  DateTime? now,
 }) async {
   final page = SessionDetailsPage(sessionId: sessionId);
   await _pumpWithProviders(
@@ -375,6 +436,7 @@ Future<void> _pumpSessionDetailsPage(
     venueRepository: venueRepository,
     speakerRepository: speakerRepository,
     viewportSize: viewportSize,
+    now: now,
   );
 }
 
@@ -385,6 +447,7 @@ Future<void> _pumpWithProviders(
   VenueRepository? venueRepository,
   SpeakerRepository? speakerRepository,
   Size viewportSize = const Size(1200, 2400),
+  DateTime? now,
 }) async {
   final preferences = await _prepareTester(
     tester,
@@ -396,6 +459,7 @@ Future<void> _pumpWithProviders(
       child: ProviderScope(
         overrides: [
           sharedPreferencesProvider.overrideWithValue(preferences),
+          if (now != null) clockProvider.overrideWithValue(() => now),
           sessionRepositoryProvider.overrideWithValue(
             sessionRepository ?? _FakeSessionRepository(_sessions),
           ),
