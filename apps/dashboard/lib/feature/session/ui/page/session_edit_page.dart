@@ -214,7 +214,7 @@ class SessionEditPage extends HookConsumerWidget {
                     OutlinedTextFormField(
                       controller: feedbackUrlController,
                       labelText: 'フィードバック URL',
-                      hintText: 'https://sessionize.com/...',
+                      hintText: 'https://sfeedback.com/...',
                       helperText: 'セッション終了後にアプリの詳細画面から開けるようになります',
                     ),
                   ],
