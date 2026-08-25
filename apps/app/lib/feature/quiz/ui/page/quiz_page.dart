@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:app/core/extension/locale_map_extension.dart';
 import 'package:app/core/i18n/strings.g.dart';
+import 'package:app/feature/profile/data/provider/user_profile_provider.dart';
 import 'package:app/feature/quiz/data/provider/quiz_providers.dart';
 import 'package:app/feature/quiz/data/provider/quiz_repositories.dart';
 import 'package:app/feature/quiz/ui/component/quiz_motion.dart';
@@ -167,10 +168,38 @@ class _QuizBody extends ConsumerWidget {
 ///
 /// 受付コードは会場の受付で案内される 6 桁の数字。コードの照合は
 /// セキュリティルールが行い、不一致は permission-denied で失敗する。
-class _RegistrationForm extends HookConsumerWidget {
+class _RegistrationForm extends ConsumerWidget {
   const _RegistrationForm({required this.event});
 
   final QuizEvent event;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final user = ref.watch(quizUserProvider).value;
+    // ニックネームの初期値はプロフィールの表示名（未作成ならアカウントの
+    // 表示名）。TextEditingController の初期値は初回 build で確定するため、
+    // プロフィールの読み込みが済んでからフォーム本体を構築する。
+    return switch (ref.watch(userProfileProvider)) {
+      AsyncLoading() => const _Loading(),
+      AsyncData(:final value) => _RegistrationFormBody(
+        event: event,
+        initialNickname: value?.displayName ?? user?.displayName ?? '',
+      ),
+      // プロフィールが読めなくても登録は妨げず、従来どおりアカウントの
+      // 表示名へフォールバックする。
+      AsyncError() => _RegistrationFormBody(
+        event: event,
+        initialNickname: user?.displayName ?? '',
+      ),
+    };
+  }
+}
+
+class _RegistrationFormBody extends HookConsumerWidget {
+  const _RegistrationFormBody({required this.event, required this.initialNickname});
+
+  final QuizEvent event;
+  final String initialNickname;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -178,10 +207,9 @@ class _RegistrationForm extends HookConsumerWidget {
     final t = Translations.of(context);
     final locale = Localizations.localeOf(context);
     final user = ref.watch(quizUserProvider).value;
-    // ニックネームの初期値はログイン中のアカウントの表示名。会場で名乗りたい
-    // 名前に変えられるよう編集は可能なままにする。
+    // 会場で名乗りたい名前に変えられるよう編集は可能なままにする。
     final controller = useTextEditingController(
-      text: (user?.displayName ?? '').characters.take(20).toString(),
+      text: initialNickname.characters.take(20).toString(),
     );
     final codeController = useTextEditingController();
     // TextField の入力に追従して参加ボタンの活性を更新する。
