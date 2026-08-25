@@ -52,6 +52,8 @@ class TranslationsEn extends Translations with BaseTranslations<AppLocale, Trans
 	@override late final _Translations$bookmarkedSessions$en bookmarkedSessions = _Translations$bookmarkedSessions$en._(_root);
 	@override late final _Translations$eventInfo$en eventInfo = _Translations$eventInfo$en._(_root);
 	@override late final _Translations$auth$en auth = _Translations$auth$en._(_root);
+	@override late final _Translations$profile$en profile = _Translations$profile$en._(_root);
+	@override late final _Translations$countryRegion$en countryRegion = _Translations$countryRegion$en._(_root);
 	@override late final _Translations$settings$en settings = _Translations$settings$en._(_root);
 	@override late final _Translations$licenses$en licenses = _Translations$licenses$en._(_root);
 	@override late final _Translations$error$en error = _Translations$error$en._(_root);
@@ -270,6 +272,65 @@ class _Translations$auth$en extends Translations$auth$ja {
 	@override late final _Translations$auth$error$en error = _Translations$auth$error$en._(_root);
 }
 
+// Path: profile
+class _Translations$profile$en extends Translations$profile$ja {
+	_Translations$profile$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Profile';
+	@override String get editTitle => 'Edit Profile';
+	@override String get createTitle => 'Create Profile';
+	@override String get promptTitle => 'Set up your profile';
+	@override String get promptBody => 'Add your country or region and social links to exchange profiles with other attendees at the venue.';
+	@override String get create => 'Create profile';
+	@override String get edit => 'Edit profile';
+	@override String get save => 'Save';
+	@override String get saved => 'Profile saved';
+	@override String get saveFailed => 'Could not save the profile';
+	@override String get visibilityNote => 'Your profile is visible to other signed-in attendees';
+	@override String get avatarSemanticLabel => 'Profile picture';
+	@override String get displayNameLabel => 'Display name';
+	@override String get displayNameRequired => 'Enter a display name';
+	@override String get countryLabel => 'Country / Region';
+	@override String get countryPlaceholder => 'Select';
+	@override String get countryRequired => 'Select your country or region';
+	@override String get countrySearchHint => 'Search countries and regions';
+	@override String countryNoResults({required Object query}) => 'No countries or regions match "${query}"';
+	@override String get countryNoResultsHint => 'You can also search by Japanese name or ISO code';
+	@override String get snsLinksLabel => 'Social links';
+	@override String get snsLinksEmpty => 'Add links to X, GitHub and more';
+	@override String get addSnsLink => 'Add a link';
+	@override String get removeSnsLink => 'Remove this link';
+	@override String get snsPlatformLabel => 'Service';
+	@override String get snsUrlLabel => 'URL';
+	@override String get snsUrlRequired => 'Enter a URL';
+	@override String get snsUrlInvalid => 'Enter a URL starting with https://';
+	@override String snsLinksMax({required Object n}) => 'You can add up to ${n} links';
+	@override String get snsPlatformOther => 'Other';
+	@override String get bioLabel => 'Bio';
+	@override String get bioHint => 'What you work on, what you\'d like to talk about today, etc.';
+	@override String get discardTitle => 'Discard changes?';
+	@override String get discardBody => 'Unsaved changes will be lost.';
+	@override String get discardAction => 'Discard';
+	@override String get keepEditing => 'Keep editing';
+}
+
+// Path: countryRegion
+class _Translations$countryRegion$en extends Translations$countryRegion$ja {
+	_Translations$countryRegion$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get asia => 'Asia';
+	@override String get oceania => 'Oceania';
+	@override String get americas => 'Americas';
+	@override String get europe => 'Europe';
+	@override String get africa => 'Africa';
+}
+
 // Path: settings
 class _Translations$settings$en extends Translations$settings$ja {
 	_Translations$settings$en._(TranslationsEn root) : this._root = root, super.internal(root);
@@ -415,6 +476,7 @@ class _Translations$auth$signIn$en extends Translations$auth$signIn$ja {
 	final TranslationsEn _root; // ignore: unused_field
 
 	// Translations
+	@override String get required => 'Sign in required';
 	@override String get description => 'Choose how you want to sign in to the FlutterKaigi 2026 app';
 	@override String get withGoogle => 'Sign in with Google';
 	@override String get withApple => 'Sign in with Apple';
@@ -462,6 +524,14 @@ class _Translations$auth$account$en extends Translations$auth$account$ja {
 	@override String get deleteConfirmAction => 'Delete';
 	@override String get deletePasswordTitle => 'Confirm your password';
 	@override String get deletePasswordBody => 'Enter your current password to delete your account.';
+	@override String get mission => 'Missions';
+	@override String get missionDescription => 'Judged by your participation in LT, profile exchange and SNS posts';
+	@override String get joinEvent => 'Join the event';
+	@override String get quiz => 'Quiz';
+	@override String get lightningTalks => 'Lightning Talks';
+	@override String get profileExchange => 'Profile exchange';
+	@override String get snsPost => 'Register SNS post';
+	@override String get comingSoon => 'This feature is coming soon';
 	@override String get deleted => 'Your account has been deleted';
 	@override String get cancel => 'Cancel';
 }
@@ -784,6 +854,7 @@ extension on TranslationsEn {
 			'eventInfo.contact' => 'Contact',
 			'eventInfo.sourceCode' => 'View Source Code',
 			'eventInfo.ossLicenses' => 'OSS Licenses',
+			'auth.signIn.required' => 'Sign in required',
 			'auth.signIn.description' => 'Choose how you want to sign in to the FlutterKaigi 2026 app',
 			'auth.signIn.withGoogle' => 'Sign in with Google',
 			'auth.signIn.withApple' => 'Sign in with Apple',
@@ -813,6 +884,14 @@ extension on TranslationsEn {
 			'auth.account.deleteConfirmAction' => 'Delete',
 			'auth.account.deletePasswordTitle' => 'Confirm your password',
 			'auth.account.deletePasswordBody' => 'Enter your current password to delete your account.',
+			'auth.account.mission' => 'Missions',
+			'auth.account.missionDescription' => 'Judged by your participation in LT, profile exchange and SNS posts',
+			'auth.account.joinEvent' => 'Join the event',
+			'auth.account.quiz' => 'Quiz',
+			'auth.account.lightningTalks' => 'Lightning Talks',
+			'auth.account.profileExchange' => 'Profile exchange',
+			'auth.account.snsPost' => 'Register SNS post',
+			'auth.account.comingSoon' => 'This feature is coming soon',
 			'auth.account.deleted' => 'Your account has been deleted',
 			'auth.account.cancel' => 'Cancel',
 			'auth.error.invalidEmail' => 'The email address is badly formatted',
@@ -826,6 +905,47 @@ extension on TranslationsEn {
 			'auth.error.userMismatch' => 'The re-authenticated account does not match the signed-in account',
 			'auth.error.appleTokenRevocationFailed' => 'Could not delete the account because revoking the Apple token failed. Please try again',
 			'auth.error.unknown' => 'Authentication failed. Please try again',
+			'profile.title' => 'Profile',
+			'profile.editTitle' => 'Edit Profile',
+			'profile.createTitle' => 'Create Profile',
+			'profile.promptTitle' => 'Set up your profile',
+			'profile.promptBody' => 'Add your country or region and social links to exchange profiles with other attendees at the venue.',
+			'profile.create' => 'Create profile',
+			'profile.edit' => 'Edit profile',
+			'profile.save' => 'Save',
+			'profile.saved' => 'Profile saved',
+			'profile.saveFailed' => 'Could not save the profile',
+			'profile.visibilityNote' => 'Your profile is visible to other signed-in attendees',
+			'profile.avatarSemanticLabel' => 'Profile picture',
+			'profile.displayNameLabel' => 'Display name',
+			'profile.displayNameRequired' => 'Enter a display name',
+			'profile.countryLabel' => 'Country / Region',
+			'profile.countryPlaceholder' => 'Select',
+			'profile.countryRequired' => 'Select your country or region',
+			'profile.countrySearchHint' => 'Search countries and regions',
+			'profile.countryNoResults' => ({required Object query}) => 'No countries or regions match "${query}"',
+			'profile.countryNoResultsHint' => 'You can also search by Japanese name or ISO code',
+			'profile.snsLinksLabel' => 'Social links',
+			'profile.snsLinksEmpty' => 'Add links to X, GitHub and more',
+			'profile.addSnsLink' => 'Add a link',
+			'profile.removeSnsLink' => 'Remove this link',
+			'profile.snsPlatformLabel' => 'Service',
+			'profile.snsUrlLabel' => 'URL',
+			'profile.snsUrlRequired' => 'Enter a URL',
+			'profile.snsUrlInvalid' => 'Enter a URL starting with https://',
+			'profile.snsLinksMax' => ({required Object n}) => 'You can add up to ${n} links',
+			'profile.snsPlatformOther' => 'Other',
+			'profile.bioLabel' => 'Bio',
+			'profile.bioHint' => 'What you work on, what you\'d like to talk about today, etc.',
+			'profile.discardTitle' => 'Discard changes?',
+			'profile.discardBody' => 'Unsaved changes will be lost.',
+			'profile.discardAction' => 'Discard',
+			'profile.keepEditing' => 'Keep editing',
+			'countryRegion.asia' => 'Asia',
+			'countryRegion.oceania' => 'Oceania',
+			'countryRegion.americas' => 'Americas',
+			'countryRegion.europe' => 'Europe',
+			'countryRegion.africa' => 'Africa',
 			'settings.title' => 'Settings',
 			'settings.appearance' => 'Appearance',
 			'settings.appInfo' => 'App Information',

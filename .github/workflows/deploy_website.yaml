@@ -83,6 +83,19 @@ jobs:
           FIRESTORE_HOST: firestore.googleapis.com
           FIRESTORE_ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
 
+      # Generate the (git-ignored) timetable data from the prod Firestore
+      # project (`sessions` / `speakers` / `venues` / `timelineEvents`, filled
+      # in by tool/import_sessions.dart). There is no sample fixture: with no
+      # token or an unreachable Firestore the generator emits an empty
+      # timetable, so the deploy still succeeds rather than shipping fake
+      # sessions.
+      - name: Generate session data
+        run: dart run tool/generate_sessions.dart
+        env:
+          FIREBASE_PROJECT_ID: ${{ vars.PROD_FIREBASE_PROJECT_ID }}
+          FIRESTORE_HOST: firestore.googleapis.com
+          FIRESTORE_ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
+
       - working-directory: apps/website
         run: dart run jaspr_cli:jaspr build
 

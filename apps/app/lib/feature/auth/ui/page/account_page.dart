@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:app/core/designsystem/theme/app_gradients.dart';
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/log/talker.dart';
 import 'package:app/core/provider/environment.dart';
@@ -13,6 +14,9 @@ import 'package:app/feature/auth/ui/auth_error_message.dart';
 import 'package:app/feature/auth/ui/widget/apple_sign_in_button.dart';
 import 'package:app/feature/auth/ui/widget/google_sign_in_button.dart';
 import 'package:app/feature/auth/ui/widget/sign_in_method_button_style.dart';
+import 'package:app/feature/profile/data/provider/user_profile_provider.dart';
+import 'package:app/feature/profile/data/provider/user_profile_repository.dart';
+import 'package:app/feature/profile/ui/widget/profile_summary_card_widget.dart';
 import 'package:data/data.dart';
 import 'package:data/user.dart';
 import 'package:flutter/foundation.dart';
@@ -45,6 +49,7 @@ class AccountPage extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final t = Translations.of(context);
     final authState = ref.watch(authStateChangesProvider);
+    final profileState = ref.watch(userProfileProvider);
     final isProcessing = useState(false);
     final showsAppleSignIn = ref.watch(appleSignInAvailabilityProvider);
 
@@ -119,7 +124,11 @@ class AccountPage extends HookConsumerWidget {
       }
 
       await runAuthAction(
-        (repository) => repository.deleteAccount(password: password),
+        (repository) => repository.deleteAccount(
+          password: password,
+          // 再認証が通ってから、トークンが失効する前にプロフィールを消す。
+          beforeDelete: () => ref.read(userProfileRepositoryProvider).delete(user.uid),
+        ),
         successMessage: t.auth.account.deleted,
       );
     }
@@ -137,27 +146,21 @@ class AccountPage extends HookConsumerWidget {
       ),
       body: switch (authState) {
         AsyncData(:final value) => AppScrollbar(
-          child: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
-              child: ConstrainedBox(
-                // 認証方法が変わっても操作領域が揃うよう、共通の最大幅にする。
-                constraints: const BoxConstraints(maxWidth: signInMethodButtonMaxWidth),
-                child: value == null
-                    ? _SignedOutView(
-                        isProcessing: isProcessing.value,
-                        showsAppleSignIn: showsAppleSignIn,
-                        onSignIn: runAuthAction,
-                      )
-                    : _SignedInView(
-                        user: value,
-                        isProcessing: isProcessing.value,
-                        onSignOut: () => runAuthAction((repository) => repository.signOut()),
-                        onDeleteAccount: () => deleteAccount(value),
-                      ),
-              ),
-            ),
-          ),
+          child: value == null
+              ? _SignedOutView(
+                  isProcessing: isProcessing.value,
+                  showsAppleSignIn: showsAppleSignIn,
+                  onSignIn: runAuthAction,
+                )
+              : _SignedInView(
+                  user: value,
+                  profileState: profileState,
+                  isProcessing: isProcessing.value,
+                  onRetryProfile: () => ref.invalidate(userProfileProvider),
+                  onSignOut: () => runAuthAction((repository) => repository.signOut()),
+                  onDeleteAccount: () => deleteAccount(value),
+                  onComingSoon: () => showMessage(t.auth.account.comingSoon),
+                ),
         ),
         AsyncError(:final error) => AppErrorView(
           error: error,
@@ -171,7 +174,15 @@ class AccountPage extends HookConsumerWidget {
   }
 }
 
-/// Sign-in method buttons shown while signed out.
+/// Height of the brand gradient band above the sign-in card, matching the
+/// event overview card on the event tab.
+const _signInBandHeight = 152.0;
+
+/// Inner padding of the sign-in card.
+const _signInCardPadding = 24.0;
+
+/// Centered sign-in card shown while signed out: brand band with the app
+/// logo, a short prompt and one button per sign-in method.
 class _SignedOutView extends StatelessWidget {
   const _SignedOutView({
     required this.isProcessing,
@@ -187,152 +198,321 @@ class _SignedOutView extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = Translations.of(context);
     final theme = Theme.of(context);
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Icon(
-          Icons.account_circle_outlined,
-          size: 64,
-          color: theme.colorScheme.primary,
-        ),
-        const SizedBox(height: 16),
-        Text(
-          t.auth.signIn.description,
-          textAlign: TextAlign.center,
-          style: theme.textTheme.bodyMedium,
-        ),
-        const SizedBox(height: 24),
-        GoogleSignInButton(
-          onPressed: isProcessing ? null : () async => onSignIn((repository) => repository.signInWithGoogle()),
-        ),
-        const SizedBox(height: 12),
-        if (showsAppleSignIn) ...[
-          AppleSignInButton(
-            onPressed: isProcessing ? null : () async => onSignIn((repository) => repository.signInWithApple()),
-          ),
-          const SizedBox(height: 12),
-        ],
-        OutlinedButton(
-          onPressed: isProcessing ? null : () async => const EmailSignInRoute().push<void>(context),
-          style: OutlinedButton.styleFrom(
-            minimumSize: const Size.fromHeight(signInMethodButtonHeight),
-            maximumSize: const Size.fromHeight(signInMethodButtonHeight),
-            padding: EdgeInsets.zero,
-            textStyle: signInMethodButtonLabelStyle,
-          ),
-          child: SizedBox.expand(
-            child: Stack(
-              alignment: Alignment.center,
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: ConstrainedBox(
+          // 認証方法が変わっても操作領域が揃うよう、ボタン列の共通の最大幅に
+          // カードの余白を足した幅で制限する(枠線は内側に描かれる)。
+          constraints: const BoxConstraints(maxWidth: signInMethodButtonMaxWidth + _signInCardPadding * 2),
+          child: Card.outlined(
+            margin: EdgeInsets.zero,
+            clipBehavior: Clip.antiAlias,
+            // 各サインインボタンを個別のセマンティクスノードとして残す。
+            semanticContainer: false,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const PositionedDirectional(
-                  start: signInMethodButtonIconInset,
-                  child: Icon(Icons.mail_outline, size: signInMethodButtonIconSize),
+                SizedBox(
+                  height: _signInBandHeight,
+                  child: DecoratedBox(
+                    decoration: const BoxDecoration(gradient: AppGradients.brand),
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Image.asset(
+                        'res/assets/shuriken-logo.png',
+                        fit: BoxFit.contain,
+                        semanticLabel: t.eventInfo.logoSemanticLabel,
+                      ),
+                    ),
+                  ),
                 ),
-                Text(t.auth.signIn.withEmail),
+                Padding(
+                  padding: const EdgeInsets.all(_signInCardPadding),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        t.auth.signIn.required,
+                        textAlign: TextAlign.center,
+                        style: theme.textTheme.titleLarge,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        t.auth.signIn.description,
+                        textAlign: TextAlign.center,
+                        style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                      ),
+                      const SizedBox(height: 24),
+                      GoogleSignInButton(
+                        onPressed: isProcessing
+                            ? null
+                            : () async => onSignIn((repository) => repository.signInWithGoogle()),
+                      ),
+                      const SizedBox(height: 8),
+                      if (showsAppleSignIn) ...[
+                        AppleSignInButton(
+                          onPressed: isProcessing
+                              ? null
+                              : () async => onSignIn((repository) => repository.signInWithApple()),
+                        ),
+                        const SizedBox(height: 8),
+                      ],
+                      OutlinedButton(
+                        onPressed: isProcessing ? null : () async => const EmailSignInRoute().push<void>(context),
+                        style: OutlinedButton.styleFrom(
+                          minimumSize: const Size.fromHeight(signInMethodButtonHeight),
+                          maximumSize: const Size.fromHeight(signInMethodButtonHeight),
+                          padding: EdgeInsets.zero,
+                          shape: const RoundedRectangleBorder(borderRadius: signInMethodButtonBorderRadius),
+                          textStyle: signInMethodButtonLabelStyle,
+                        ),
+                        child: SizedBox.expand(
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              const PositionedDirectional(
+                                start: signInMethodButtonIconInset,
+                                child: Icon(Icons.mail_outline, size: signInMethodButtonIconSize),
+                              ),
+                              Text(t.auth.signIn.withEmail),
+                            ],
+                          ),
+                        ),
+                      ),
+                      if (isProcessing) ...[
+                        const SizedBox(height: 24),
+                        const Center(child: CircularProgressIndicator()),
+                      ],
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
         ),
-        if (isProcessing) ...[
-          const SizedBox(height: 24),
-          const Center(child: CircularProgressIndicator()),
-        ],
-      ],
+      ),
     );
   }
 }
 
-/// Account summary and sign-out shown while signed in.
+/// Signed-in account tab: profile card, missions, event entry points and
+/// account actions as a top-aligned scrolling list.
 class _SignedInView extends StatelessWidget {
   const _SignedInView({
     required this.user,
+    required this.profileState,
     required this.isProcessing,
+    required this.onRetryProfile,
     required this.onSignOut,
     required this.onDeleteAccount,
+    required this.onComingSoon,
   });
 
   final User user;
+  final AsyncValue<UserProfile?> profileState;
   final bool isProcessing;
+  final VoidCallback onRetryProfile;
   final Future<void> Function() onSignOut;
   final Future<void> Function() onDeleteAccount;
+
+  /// Tapped an event entry point whose screen is not implemented yet.
+  final VoidCallback onComingSoon;
 
   @override
   Widget build(BuildContext context) {
     final t = Translations.of(context);
     final theme = Theme.of(context);
-    final title = user.displayName ?? user.email ?? t.auth.account.noEmail;
-    final subtitle = user.displayName != null ? user.email : null;
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+    final profile = profileState.value;
+    final title = profile?.displayName ?? user.displayName ?? user.email ?? t.auth.account.noEmail;
+    final subtitle = title != user.email ? user.email : null;
+
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
       children: [
-        CircleAvatar(
-          radius: 32,
-          child: Icon(Icons.person, size: 32, semanticLabel: t.auth.account.title),
-        ),
-        const SizedBox(height: 16),
-        Text(
-          title,
-          textAlign: TextAlign.center,
-          style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
-        ),
-        if (subtitle != null) ...[
-          const SizedBox(height: 4),
-          Text(
-            subtitle,
-            textAlign: TextAlign.center,
-            style: theme.textTheme.bodyMedium,
+        Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 640),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                switch (profileState) {
+                  AsyncData(:final value) => ProfileCard(
+                    title: title,
+                    subtitle: subtitle,
+                    avatarUrl: value?.avatarUrl ?? user.photoURL,
+                    profile: value,
+                    onEdit: () => const ProfileEditRoute().push<void>(context),
+                    onCreate: () => const ProfileEditRoute().push<void>(context),
+                  ),
+                  AsyncError(:final error) => _ProfileLoadError(error: error, onRetry: onRetryProfile),
+                  AsyncLoading() => const Card.outlined(
+                    margin: EdgeInsets.zero,
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(vertical: 32),
+                      child: Center(child: CircularProgressIndicator.adaptive()),
+                    ),
+                  ),
+                },
+                const SizedBox(height: 8),
+                Card.outlined(
+                  margin: EdgeInsets.zero,
+                  clipBehavior: Clip.antiAlias,
+                  semanticContainer: false,
+                  child: ListTile(
+                    minTileHeight: 56,
+                    leading: const Icon(Icons.track_changes_outlined, size: 22),
+                    title: Text(t.auth.account.mission, style: theme.textTheme.bodyMedium),
+                    subtitle: Text(t.auth.account.missionDescription, style: theme.textTheme.bodySmall),
+                    trailing: const Icon(Icons.chevron_right, size: 20),
+                    onTap: onComingSoon,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _SectionHeading(title: t.auth.account.joinEvent),
+                const SizedBox(height: 8),
+                Card.outlined(
+                  margin: EdgeInsets.zero,
+                  clipBehavior: Clip.antiAlias,
+                  semanticContainer: false,
+                  child: Column(
+                    children: [
+                      // クイズ大会は参加と回答の記録をアカウントに紐づけるため、
+                      // サインイン中のここが唯一の入口になる。
+                      _NavigationTile(
+                        icon: Icons.quiz_outlined,
+                        title: t.auth.account.quiz,
+                        onTap: () => unawaited(const QuizListRoute().push<void>(context)),
+                      ),
+                      const Divider(height: 1),
+                      _NavigationTile(
+                        icon: Icons.mic_none_outlined,
+                        title: t.auth.account.lightningTalks,
+                        onTap: onComingSoon,
+                      ),
+                      const Divider(height: 1),
+                      _NavigationTile(
+                        icon: Icons.qr_code_2_outlined,
+                        title: t.auth.account.profileExchange,
+                        onTap: onComingSoon,
+                      ),
+                      const Divider(height: 1),
+                      _NavigationTile(
+                        icon: Icons.image_outlined,
+                        title: t.auth.account.snsPost,
+                        onTap: onComingSoon,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _SectionHeading(title: t.auth.account.title),
+                const SizedBox(height: 8),
+                Card.outlined(
+                  margin: EdgeInsets.zero,
+                  clipBehavior: Clip.antiAlias,
+                  semanticContainer: false,
+                  child: Column(
+                    children: [
+                      _NavigationTile(
+                        icon: Icons.logout,
+                        title: t.auth.account.signOut,
+                        onTap: isProcessing ? null : () => unawaited(onSignOut()),
+                      ),
+                      const Divider(height: 1),
+                      _NavigationTile(
+                        icon: Icons.delete_outline,
+                        title: t.auth.account.delete,
+                        color: theme.colorScheme.error,
+                        showsChevron: false,
+                        onTap: isProcessing ? null : () => unawaited(onDeleteAccount()),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
-        ],
-        const SizedBox(height: 4),
-        Text(
-          t.auth.account.signedIn,
-          textAlign: TextAlign.center,
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
-        ),
-        const SizedBox(height: 24),
-        // サインイン中だけ見えるアプリ機能への導線。クイズ大会は参加と回答の
-        // 記録をアカウントに紐づけるため、ここが唯一の入口になる。
-        Align(
-          alignment: AlignmentDirectional.centerStart,
-          child: Text(
-            t.auth.account.features,
-            style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
-          ),
-        ),
-        const SizedBox(height: 8),
-        Card.outlined(
-          margin: EdgeInsets.zero,
-          clipBehavior: Clip.antiAlias,
-          child: ListTile(
-            leading: const Icon(Icons.quiz_outlined),
-            title: Text(t.quiz.title),
-            subtitle: Text(t.quiz.entrySubtitle),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => unawaited(const QuizListRoute().push<void>(context)),
-          ),
-        ),
-        const SizedBox(height: 24),
-        OutlinedButton.icon(
-          onPressed: isProcessing ? null : () async => onSignOut(),
-          style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(48)),
-          icon: const Icon(Icons.logout),
-          label: Text(t.auth.account.signOut),
-        ),
-        const SizedBox(height: 8),
-        TextButton.icon(
-          onPressed: isProcessing ? null : () async => onDeleteAccount(),
-          style: TextButton.styleFrom(
-            foregroundColor: theme.colorScheme.error,
-            minimumSize: const Size.fromHeight(48),
-          ),
-          icon: const Icon(Icons.delete_outline),
-          label: Text(t.auth.account.delete),
         ),
       ],
+    );
+  }
+}
+
+class _SectionHeading extends StatelessWidget {
+  const _SectionHeading({required this.title});
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) => Text(
+    title,
+    style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+  );
+}
+
+/// Dense in-app navigation row, matching the link tiles on the event tab.
+class _NavigationTile extends StatelessWidget {
+  const _NavigationTile({
+    required this.icon,
+    required this.title,
+    required this.onTap,
+    this.color,
+    this.showsChevron = true,
+  });
+
+  final IconData icon;
+  final String title;
+  final VoidCallback? onTap;
+
+  /// Overrides the icon and label color (e.g. the error color for delete).
+  final Color? color;
+  final bool showsChevron;
+
+  @override
+  Widget build(BuildContext context) => ListTile(
+    dense: true,
+    minTileHeight: 48,
+    enabled: onTap != null,
+    iconColor: color,
+    textColor: color,
+    leading: Icon(icon, size: 22),
+    title: Text(title, style: Theme.of(context).textTheme.bodyMedium),
+    trailing: showsChevron ? const Icon(Icons.chevron_right, size: 20) : null,
+    onTap: onTap,
+  );
+}
+
+/// Compact inline error for the profile section so the rest of the account
+/// tab (sign-out, delete) stays usable.
+class _ProfileLoadError extends StatelessWidget {
+  const _ProfileLoadError({required this.error, required this.onRetry});
+
+  final Object error;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = Translations.of(context);
+    final theme = Theme.of(context);
+    return Card.outlined(
+      margin: EdgeInsets.zero,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              t.error.title,
+              style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+            ),
+            const SizedBox(height: 4),
+            Text(t.error.message, style: theme.textTheme.bodySmall),
+            const SizedBox(height: 12),
+            OutlinedButton(onPressed: onRetry, child: Text(t.error.retry)),
+          ],
+        ),
+      ),
     );
   }
 }

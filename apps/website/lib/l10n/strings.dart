@@ -35,6 +35,9 @@ enum AppLocale {
   /// Navigation href to the Event Info section on the home page.
   String get eventInfoAnchorHref => '$linkHref#event-info';
 
+  /// Navigation href to the Timetable section on the home page.
+  String get timetableAnchorHref => '$linkHref#timetable';
+
   /// Navigation href to the Sponsors section on the home page.
   String get sponsorsAnchorHref => '$linkHref#sponsors';
 
@@ -135,6 +138,38 @@ class Strings {
   String get newsShowLessCta => switch (locale) {
     AppLocale.ja => '閉じる',
     AppLocale.en => 'Show Less',
+  };
+
+  String get latestUpdatesCta => switch (locale) {
+    AppLocale.ja => 'FlutterKaigi 2026 スポンサー募集について',
+    AppLocale.en => 'FlutterKaigi 2026 Sponsorship Opportunities',
+  };
+
+  String get latestUpdatesCtaUrl => switch (locale) {
+    AppLocale.ja => 'https://medium.com/flutterkaigi/flutterkaigi-2026-opportunities-guide-ja-0e8cdb0a4acb',
+    AppLocale.en => 'https://medium.com/flutterkaigi/flutterkaigi-2026-opportunities-guide-en-1e5bd6c14461',
+  };
+
+  // ── Dialog（共通） ───────────────────────────────────────────────────
+
+  String get dialogCloseLabel => switch (locale) {
+    AppLocale.ja => 'ダイアログを閉じる',
+    AppLocale.en => 'Close dialog',
+  };
+
+  // ── Timetable ───────────────────────────────────────────────────────
+
+  String get timetableTitle => 'Timetable';
+
+  String get timetableSubtitle => switch (locale) {
+    AppLocale.ja => 'FlutterKaigi 2026 当日のセッションタイムライン',
+    AppLocale.en => 'Session timeline for the two days of FlutterKaigi 2026',
+  };
+
+  /// タイムテーブル未確定（生成データが空）のときに表示する。
+  String get timetableComingSoon => switch (locale) {
+    AppLocale.ja => 'タイムテーブルは準備中です。確定次第このページで公開します。',
+    AppLocale.en => 'The timetable is being finalised. It will be published on this page once it is ready.',
   };
 
   // ── Sponsors ────────────────────────────────────────────────────────

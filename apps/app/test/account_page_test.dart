@@ -4,6 +4,9 @@ import 'package:app/feature/auth/data/provider/auth_repository.dart';
 import 'package:app/feature/auth/ui/page/account_page.dart';
 import 'package:app/feature/auth/ui/widget/apple_sign_in_button.dart';
 import 'package:app/feature/auth/ui/widget/google_sign_in_button.dart';
+import 'package:app/feature/profile/data/provider/user_profile_repository.dart';
+import 'package:app/feature/profile/ui/widget/country_flag_widget.dart';
+import 'package:data/data.dart';
 import 'package:data/user.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -11,16 +14,19 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import 'fake_auth_repository.dart';
+import 'fake_user_profile_repository.dart';
 
 void main() {
   Widget buildSubject(
     FakeAuthRepository repository, {
+    FakeUserProfileRepository? profileRepository,
     Flavor flavor = Flavor.production,
     bool showsAppleSignIn = false,
   }) => TranslationProvider(
     child: ProviderScope(
       overrides: [
         authRepositoryProvider.overrideWithValue(repository),
+        userProfileRepositoryProvider.overrideWithValue(profileRepository ?? FakeUserProfileRepository()),
         appleSignInAvailabilityProvider.overrideWithValue(
           showsAppleSignIn,
         ),
@@ -45,6 +51,15 @@ void main() {
   );
 
   setUp(() => LocaleSettings.setLocaleSync(AppLocale.ja));
+
+  /// サインイン後の画面はスクロールリストなので、テストの小さな画面では
+  /// 下部の操作を表示域に入れてからタップする。
+  Future<void> tapListItem(WidgetTester tester, String text) async {
+    await tester.ensureVisible(find.text(text));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(text));
+    await tester.pumpAndSettle();
+  }
 
   test('allows Apple sign-in only on production iOS', () {
     expect(
@@ -80,6 +95,7 @@ void main() {
     await tester.pumpWidget(buildSubject(repository));
     await tester.pumpAndSettle();
 
+    expect(find.text('サインインが必要です'), findsOneWidget);
     expect(find.bySemanticsLabel('Google でサインイン'), findsOneWidget);
     expect(find.text('Appleでサインイン'), findsNothing);
     expect(find.text('メールアドレスでサインイン'), findsOneWidget);
@@ -91,7 +107,7 @@ void main() {
     expect(find.text('Google User'), findsOneWidget);
     expect(find.text('google@example.com'), findsOneWidget);
     expect(find.text('サインイン中'), findsOneWidget);
-    expect(find.text('サインアウト'), findsOneWidget);
+    expect(find.text('サインインが必要です'), findsNothing);
   });
 
   testWidgets('shows Apple sign-in on production iOS', (tester) async {
@@ -216,8 +232,7 @@ void main() {
     expect(find.text('attendee@example.com'), findsOneWidget);
     expect(find.text('サインイン中'), findsOneWidget);
 
-    await tester.tap(find.text('サインアウト'));
-    await tester.pumpAndSettle();
+    await tapListItem(tester, 'サインアウト');
 
     expect(repository.calledMethods, ['signOut']);
     expect(find.bySemanticsLabel('Google でサインイン'), findsOneWidget);
@@ -235,8 +250,7 @@ void main() {
     await tester.pumpWidget(buildSubject(repository));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('アカウントを削除'));
-    await tester.pumpAndSettle();
+    await tapListItem(tester, 'アカウントを削除');
 
     expect(find.text('アカウントを削除しますか?'), findsOneWidget);
 
@@ -245,8 +259,74 @@ void main() {
 
     expect(repository.calledMethods, ['deleteAccount']);
     expect(repository.lastDeletePassword, isNull);
+    expect(repository.beforeDeleteCalled, isTrue);
     expect(find.text('アカウントを削除しました'), findsOneWidget);
     expect(find.bySemanticsLabel('Google でサインイン'), findsOneWidget);
+  });
+
+  testWidgets('deletes the profile document together with the account', (tester) async {
+    final repository = FakeAuthRepository(
+      initialUser: FakeUser(uid: 'uid-1', email: 'attendee@example.com', providerIds: const ['google.com']),
+    );
+    addTearDown(repository.dispose);
+    final profileRepository = FakeUserProfileRepository(initialProfile: _profile(id: 'uid-1'));
+    addTearDown(profileRepository.dispose);
+
+    await tester.pumpWidget(buildSubject(repository, profileRepository: profileRepository));
+    await tester.pumpAndSettle();
+
+    await tapListItem(tester, 'アカウントを削除');
+    await tester.tap(find.text('削除する'));
+    await tester.pumpAndSettle();
+
+    expect(profileRepository.deletedUids, ['uid-1']);
+    expect(repository.calledMethods, ['deleteAccount']);
+  });
+
+  testWidgets('invites a signed-in user without a profile to create one', (tester) async {
+    final repository = FakeAuthRepository(
+      initialUser: FakeUser(email: 'attendee@example.com', displayName: 'Attendee'),
+    );
+    addTearDown(repository.dispose);
+
+    await tester.pumpWidget(buildSubject(repository));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Attendee'), findsOneWidget);
+    expect(find.text('プロフィールを登録しましょう'), findsOneWidget);
+    expect(find.text('プロフィールを作成'), findsOneWidget);
+    expect(find.text('プロフィールを編集'), findsNothing);
+  });
+
+  testWidgets('shows the saved profile with country, links and bio', (tester) async {
+    final repository = FakeAuthRepository(
+      initialUser: FakeUser(uid: 'uid-1', email: 'attendee@example.com', displayName: 'Auth Name'),
+    );
+    addTearDown(repository.dispose);
+    final profileRepository = FakeUserProfileRepository(
+      initialProfile: _profile(
+        id: 'uid-1',
+        displayName: 'Profile Name',
+        countryOrRegion: 'TW',
+        snsLinks: const [SnsLink(type: 'github', value: 'https://github.com/example')],
+        bio: 'Flutter が好きです',
+      ),
+    );
+    addTearDown(profileRepository.dispose);
+
+    await tester.pumpWidget(buildSubject(repository, profileRepository: profileRepository));
+    await tester.pumpAndSettle();
+
+    // プロフィールの表示名が Auth の displayName より優先される。
+    expect(find.text('Profile Name'), findsOneWidget);
+    expect(find.text('Auth Name'), findsNothing);
+    expect(find.text('attendee@example.com'), findsOneWidget);
+    expect(find.text('台湾'), findsOneWidget);
+    expect(find.byType(CountryFlagIcon), findsOneWidget);
+    expect(find.text('GitHub'), findsOneWidget);
+    expect(find.text('Flutter が好きです'), findsOneWidget);
+    expect(find.text('プロフィールを編集'), findsOneWidget);
+    expect(find.text('プロフィールを登録しましょう'), findsNothing);
   });
 
   testWidgets('asks for the current password before deleting an email account', (tester) async {
@@ -261,8 +341,7 @@ void main() {
     await tester.pumpWidget(buildSubject(repository));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('アカウントを削除'));
-    await tester.pumpAndSettle();
+    await tapListItem(tester, 'アカウントを削除');
     await tester.tap(find.text('削除する'));
     await tester.pumpAndSettle();
 
@@ -291,8 +370,7 @@ void main() {
     await tester.pumpWidget(buildSubject(repository));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('アカウントを削除'));
-    await tester.pumpAndSettle();
+    await tapListItem(tester, 'アカウントを削除');
     await tester.tap(find.text('キャンセル'));
     await tester.pumpAndSettle();
 
@@ -300,3 +378,19 @@ void main() {
     expect(find.text('attendee@example.com'), findsOneWidget);
   });
 }
+
+UserProfile _profile({
+  required String id,
+  String displayName = 'Attendee',
+  String countryOrRegion = 'JP',
+  List<SnsLink> snsLinks = const [],
+  String? bio,
+}) => UserProfile(
+  id: id,
+  displayName: displayName,
+  countryOrRegion: countryOrRegion,
+  snsLinks: snsLinks,
+  bio: bio,
+  createdAt: DateTime.utc(2026, 8),
+  updatedAt: DateTime.utc(2026, 8),
+);

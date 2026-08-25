@@ -13,8 +13,6 @@ class Header extends StatelessComponent {
   /// pages where there's no per-locale counterpart).
   final String? altLocaleHref;
 
-  // TODO: Timeline を追加する場合はここに追記する。
-
   @override
   Component build(BuildContext context) {
     final strings = LocaleScope.stringsOf(context);
@@ -23,6 +21,7 @@ class Header extends StatelessComponent {
     // 並び順はホームのセクション順と一致させる（Staff は末尾）。
     final navLinks = [
       (label: 'Event Info', href: locale.eventInfoAnchorHref),
+      (label: 'Timetable', href: locale.timetableAnchorHref),
       (label: 'Sponsors', href: locale.sponsorsAnchorHref),
       (label: 'Job Boards', href: locale.jobBoardsAnchorHref),
       (label: 'Staff', href: locale.staffAnchorHref),

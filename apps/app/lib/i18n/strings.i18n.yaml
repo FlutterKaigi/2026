@@ -110,6 +110,7 @@ eventInfo:
   ossLicenses: OSSライセンス
 auth:
   signIn:
+    required: サインインが必要です
     description: FlutterKaigi 2026 アプリで利用するサインイン方法を選択してください
     withGoogle: Google でサインイン
     # NOTE: Apple 公式の日本語ボタン表記(スペースなし)に合わせる
@@ -142,6 +143,14 @@ auth:
     deleteConfirmAction: 削除する
     deletePasswordTitle: パスワードの確認
     deletePasswordBody: アカウントを削除するには、現在のパスワードを入力してください。
+    mission: ミッション
+    missionDescription: LT大会・プロフィール交換・SNS投稿登録の参加状況で判定
+    joinEvent: イベントに参加
+    quiz: クイズ大会
+    lightningTalks: LT大会
+    profileExchange: プロフィール交換
+    snsPost: SNS投稿登録
+    comingSoon: この機能は準備中です
     deleted: アカウントを削除しました
     cancel: キャンセル
   error:
@@ -156,6 +165,49 @@ auth:
     userMismatch: 再認証したアカウントがサインイン中のアカウントと一致しません
     appleTokenRevocationFailed: Appleのトークン失効に失敗したため、アカウントを削除できませんでした。もう一度お試しください
     unknown: 認証に失敗しました。もう一度お試しください
+profile:
+  title: プロフィール
+  editTitle: プロフィールを編集
+  createTitle: プロフィールを作成
+  promptTitle: プロフィールを登録しましょう
+  promptBody: 出身国・地域や SNS を登録すると、会場での参加者同士のプロフィール交換に使えます。
+  create: プロフィールを作成
+  edit: プロフィールを編集
+  save: 保存
+  saved: プロフィールを保存しました
+  saveFailed: プロフィールを保存できませんでした
+  visibilityNote: プロフィールはサインインしている他の参加者に公開されます
+  avatarSemanticLabel: プロフィール画像
+  displayNameLabel: 表示名
+  displayNameRequired: 表示名を入力してください
+  countryLabel: 出身国・地域
+  countryPlaceholder: 選択してください
+  countryRequired: 出身国・地域を選択してください
+  countrySearchHint: 国名・地域名で検索
+  countryNoResults: 「$query」に一致する国・地域が見つかりません
+  countryNoResultsHint: 英語名やISOコードでも検索できます
+  snsLinksLabel: SNS
+  snsLinksEmpty: X や GitHub などのリンクを追加できます
+  addSnsLink: SNSリンクを追加
+  removeSnsLink: このリンクを削除
+  snsPlatformLabel: サービス
+  snsUrlLabel: URL
+  snsUrlRequired: URL を入力してください
+  snsUrlInvalid: https:// から始まる URL を入力してください
+  snsLinksMax: SNSリンクは $n 件まで登録できます
+  snsPlatformOther: その他
+  bioLabel: 自己紹介
+  bioHint: 普段の仕事や、今日話したいことなど
+  discardTitle: 編集内容を破棄しますか?
+  discardBody: 保存していない変更は失われます。
+  discardAction: 破棄する
+  keepEditing: 編集を続ける
+countryRegion:
+  asia: アジア
+  oceania: オセアニア
+  americas: 北米・中南米
+  europe: ヨーロッパ
+  africa: アフリカ
 settings:
   title: 設定
   appearance: 表示設定

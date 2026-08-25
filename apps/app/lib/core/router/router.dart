@@ -8,6 +8,7 @@ import 'package:app/feature/event/ui/page/event_info_page.dart';
 import 'package:app/feature/license/ui/page/license_detail_page.dart';
 import 'package:app/feature/license/ui/page/license_page.dart';
 import 'package:app/feature/news/ui/page/news_list_page.dart';
+import 'package:app/feature/profile/ui/page/profile_edit_page.dart';
 import 'package:app/feature/quiz/ui/page/quiz_event_list_page.dart';
 import 'package:app/feature/quiz/ui/page/quiz_page.dart';
 import 'package:app/feature/session/ui/page/bookmarked_sessions_page.dart';

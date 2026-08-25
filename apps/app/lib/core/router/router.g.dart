@@ -97,6 +97,10 @@ RouteBase get $appShellRoute => StatefulShellRouteData.$route(
               factory: $EmailSignInRoute._fromState,
             ),
             GoRouteData.$route(
+              path: 'profile',
+              factory: $ProfileEditRoute._fromState,
+            ),
+            GoRouteData.$route(
               path: 'quiz',
               factory: $QuizListRoute._fromState,
               routes: [
@@ -362,6 +366,27 @@ mixin $EmailSignInRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/account/email');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $ProfileEditRoute on GoRouteData {
+  static ProfileEditRoute _fromState(GoRouterState state) =>
+      const ProfileEditRoute();
+
+  @override
+  String get location => GoRouteData.$location('/account/profile');
 
   @override
   void go(BuildContext context) => context.go(location);
