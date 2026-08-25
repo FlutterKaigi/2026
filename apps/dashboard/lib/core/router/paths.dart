@@ -13,4 +13,7 @@ abstract final class AppPaths {
   static const sessionEdit = 'edit';
   static const sponsors = '/sponsors';
   static const sponsorEdit = 'edit';
+  static const quiz = '/quiz';
+  static const quizConsole = ':eventId';
+  static const quizQuestionEdit = 'questions/edit';
 }

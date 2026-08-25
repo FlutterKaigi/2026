@@ -55,6 +55,10 @@ class SettingsRoute extends GoRouteData with $SettingsRoute {
           routes: [
             TypedGoRoute<EmailSignInRoute>(path: 'email'),
             TypedGoRoute<ProfileEditRoute>(path: 'profile'),
+            TypedGoRoute<QuizListRoute>(
+              path: 'quiz',
+              routes: [TypedGoRoute<QuizRoute>(path: ':eventId')],
+            ),
           ],
         ),
       ],
@@ -140,6 +144,27 @@ class ProfileEditRoute extends GoRouteData with $ProfileEditRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) => const ProfileEditPage();
+}
+
+/// `/account/quiz` — the quiz event list.
+///
+/// Lives under the account branch because taking part requires being signed
+/// in: the entry point is a tile on the signed-in account page.
+class QuizListRoute extends GoRouteData with $QuizListRoute {
+  const QuizListRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const QuizEventListPage();
+}
+
+/// `/account/quiz/:eventId` — a single quiz event.
+class QuizRoute extends GoRouteData with $QuizRoute {
+  const QuizRoute(this.eventId);
+
+  final String eventId;
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => QuizPage(eventId: eventId);
 }
 
 /// `/news` — the news list opened from the event overview.

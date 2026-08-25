@@ -377,10 +377,12 @@ class _SignedInView extends StatelessWidget {
                   semanticContainer: false,
                   child: Column(
                     children: [
+                      // クイズ大会は参加と回答の記録をアカウントに紐づけるため、
+                      // サインイン中のここが唯一の入口になる。
                       _NavigationTile(
                         icon: Icons.quiz_outlined,
                         title: t.auth.account.quiz,
-                        onTap: onComingSoon,
+                        onTap: () => unawaited(const QuizListRoute().push<void>(context)),
                       ),
                       const Divider(height: 1),
                       _NavigationTile(
