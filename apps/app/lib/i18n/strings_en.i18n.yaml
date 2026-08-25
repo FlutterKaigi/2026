@@ -269,8 +269,8 @@ quiz:
       you can join from this screen.
   registration:
     subtitle: A table-versus-table team battle. Join with a nickname!
-    participantCount: 'Participants:'
-    participantUnit: ''
+    participantCount: "Participants:"
+    participantUnit: ""
     nickname: Nickname
     nicknameHint: 1–20 characters
     entryCode: Entry code
@@ -294,7 +294,7 @@ quiz:
     description: The quiz is in progress.
       Results will be shown on this screen.
   question:
-    sponsoredBy: 'Sponsored by $name'
+    sponsoredBy: "Sponsored by $name"
     secondsUnit: s
     locked: Answers are closed
     submitFailed: Could not submit. The question may have closed.
@@ -308,13 +308,13 @@ quiz:
     correct: Correct!
     wrong: Not this time…
     yourAnswer: Your team's answer
-    teamScore: 'Current team score: $score pts'
+    teamScore: "Current team score: $score pts"
   result:
     title: Final results
     table: Table $table
     points: $score pts
     yourTeam: Your team
-    yourTeamRanked: '#$rank / $name ($score pts)'
+    yourTeamRanked: "#$rank / $name ($score pts)"
     yourTeamUnranked: $name ($score pts)
     perfect: Visit the $sponsor booth to claim your prize!
     error: Failed to load results

@@ -29,26 +29,27 @@ class QuizEventListPage extends ConsumerWidget {
         AsyncError() => Center(child: Text(t.quiz.errors.signInFailed)),
         AsyncLoading() => const Center(child: CircularProgressIndicator.adaptive()),
         AsyncData(:final value) when value == null => const QuizSignInRequiredView(),
-        AsyncData() => ref
-            .watch(quizEventsProvider)
-            .when(
-              loading: () => const Center(child: CircularProgressIndicator.adaptive()),
-              error: (_, _) => Center(child: Text(t.quiz.list.error)),
-              data: (events) => events.isEmpty
-                  ? Center(child: Text(t.quiz.list.empty))
-                  : ListView.separated(
-                      padding: const EdgeInsets.all(16),
-                      itemCount: events.length,
-                      separatorBuilder: (_, _) => const SizedBox(height: 12),
-                      itemBuilder: (context, index) {
-                        final event = events[index];
-                        return Entrance(
-                          delay: Duration(milliseconds: index * 60),
-                          child: _QuizEventTile(event: event),
-                        );
-                      },
-                    ),
-            ),
+        AsyncData() =>
+          ref
+              .watch(quizEventsProvider)
+              .when(
+                loading: () => const Center(child: CircularProgressIndicator.adaptive()),
+                error: (_, _) => Center(child: Text(t.quiz.list.error)),
+                data: (events) => events.isEmpty
+                    ? Center(child: Text(t.quiz.list.empty))
+                    : ListView.separated(
+                        padding: const EdgeInsets.all(16),
+                        itemCount: events.length,
+                        separatorBuilder: (_, _) => const SizedBox(height: 12),
+                        itemBuilder: (context, index) {
+                          final event = events[index];
+                          return Entrance(
+                            delay: Duration(milliseconds: index * 60),
+                            child: _QuizEventTile(event: event),
+                          );
+                        },
+                      ),
+              ),
       },
     );
   }

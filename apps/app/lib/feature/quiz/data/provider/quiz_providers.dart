@@ -19,9 +19,11 @@ final quizEventIdProvider = Provider<String>(
 /// のログインを必須にしている。未ログインと匿名認証はどちらも `null` として
 /// 扱い、Firestore のセキュリティルールでも同じ条件で弾く。
 final quizUserProvider = Provider<AsyncValue<User?>>((ref) {
-  return ref.watch(authStateChangesProvider).whenData(
-    (user) => (user == null || user.isAnonymous) ? null : user,
-  );
+  return ref
+      .watch(authStateChangesProvider)
+      .whenData(
+        (user) => (user == null || user.isAnonymous) ? null : user,
+      );
 });
 
 /// クイズイベントの一覧（作成の新しい順）。イベント一覧ページで使う。

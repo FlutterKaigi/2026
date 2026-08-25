@@ -295,7 +295,7 @@ quiz:
     description: クイズ大会は進行中です。
       結果発表はこの画面でご覧いただけます。
   question:
-    sponsoredBy: '提供: $name'
+    sponsoredBy: "提供: $name"
     secondsUnit: 秒
     locked: 回答を締め切りました
     submitFailed: 送信できませんでした。締め切られた可能性があります。
@@ -309,7 +309,7 @@ quiz:
     correct: 正解！
     wrong: 残念…
     yourAnswer: あなたのチームの回答
-    teamScore: '現在のチームスコア: $score 点'
+    teamScore: "現在のチームスコア: $score 点"
   result:
     title: 最終結果
     table: テーブル $table

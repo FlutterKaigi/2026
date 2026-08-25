@@ -82,20 +82,21 @@ class QuizResultView extends ConsumerWidget {
   /// `rank` 昇順で並べる。`rank` 未確定のチームは末尾に、その中では
   /// スコア降順で並べる。
   List<QuizTeam> _sortedByRank(List<QuizTeam> teams) {
-    final sorted = [...teams]..sort((a, b) {
-      final ra = a.rank;
-      final rb = b.rank;
-      if (ra != null && rb != null) {
-        return ra.compareTo(rb);
-      }
-      if (ra != null) {
-        return -1;
-      }
-      if (rb != null) {
-        return 1;
-      }
-      return b.score.compareTo(a.score);
-    });
+    final sorted = [...teams]
+      ..sort((a, b) {
+        final ra = a.rank;
+        final rb = b.rank;
+        if (ra != null && rb != null) {
+          return ra.compareTo(rb);
+        }
+        if (ra != null) {
+          return -1;
+        }
+        if (rb != null) {
+          return 1;
+        }
+        return b.score.compareTo(a.score);
+      });
     return sorted;
   }
 }

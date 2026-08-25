@@ -258,8 +258,7 @@ class _RegistrationFormBody extends HookConsumerWidget {
               displayName: trimmed,
               entryCode: code,
               signInProvider:
-                  tokenResult.signInProvider ??
-                  (providerData.isEmpty ? 'unknown' : providerData.first.providerId),
+                  tokenResult.signInProvider ?? (providerData.isEmpty ? 'unknown' : providerData.first.providerId),
               email: user.email,
               accountName: user.displayName,
               photoUrl: user.photoURL,

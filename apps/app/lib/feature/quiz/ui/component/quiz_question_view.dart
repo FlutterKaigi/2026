@@ -46,14 +46,16 @@ class QuizQuestionView extends HookConsumerWidget {
     final locale = Localizations.localeOf(context);
     final uid = ref.watch(quizUserProvider).value?.uid;
     final teamAnswer = ref.watch(teamAnswerProvider).value;
-    final sponsorName = ref.watch(
-      quizSponsorsProvider.select(
-        (sponsors) => sponsors.value
-            ?.where((sponsor) => sponsor.id == question.sponsorId)
-            .map((sponsor) => sponsor.name)
-            .firstOrNull,
-      ),
-    )?.resolve(locale);
+    final sponsorName = ref
+        .watch(
+          quizSponsorsProvider.select(
+            (sponsors) => sponsors.value
+                ?.where((sponsor) => sponsor.id == question.sponsorId)
+                .map((sponsor) => sponsor.name)
+                .firstOrNull,
+          ),
+        )
+        ?.resolve(locale);
 
     // 送信失敗を静かに表示するためのインラインメッセージ。締切直後の
     // permission-denied は正常系として扱う。
@@ -184,10 +186,7 @@ class QuizQuestionView extends HookConsumerWidget {
 
   /// `answeredBy`（uid）を表示名に解決する。見つからなければ「メンバー」。
   String _answeredByName(BuildContext context, QuizTeam team, String uid) {
-    return team.members
-            .where((member) => member.uid == uid)
-            .map((member) => member.displayName)
-            .firstOrNull ??
+    return team.members.where((member) => member.uid == uid).map((member) => member.displayName).firstOrNull ??
         Translations.of(context).quiz.question.member;
   }
 }
