@@ -32,6 +32,10 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   cached_network_image: ^3.4.1
+  # 3.11.0 は sdk ^3.6.0 のまま新しい SDK でしか使えない API（JSAny.isA）を
+  # 使っており、Flutter 3.41.7 の Web ビルド（dart2js）が失敗する。修正版が
+  # 出たら上限を外す。
+  firebase_core_web: ">=3.10.0 <3.11.0"
 
 dev_dependencies:
   flutter_test:
