@@ -14,6 +14,7 @@ Schemas committed so far, one per editable collection used by the dashboard:
 - `firestore/sponsor.schema.json` (`sponsors`)
 - `firestore/staff_member.schema.json` (`staffMembers`)
 - `firestore/timeline_event.schema.json` (`timelineEvents`)
+- `firestore/user_profile.schema.json` (`users`, written by the app, not the dashboard)
 - `firestore/venue.schema.json` (`venues`)
 
 Each file mirrors the matching model under `../../lib/src/model/`. When a model

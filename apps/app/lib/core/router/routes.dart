@@ -55,7 +55,10 @@ class SettingsRoute extends GoRouteData with $SettingsRoute {
       routes: [
         TypedGoRoute<AccountRoute>(
           path: '/account',
-          routes: [TypedGoRoute<EmailSignInRoute>(path: 'email')],
+          routes: [
+            TypedGoRoute<EmailSignInRoute>(path: 'email'),
+            TypedGoRoute<ProfileEditRoute>(path: 'profile'),
+          ],
         ),
       ],
     ),
@@ -132,6 +135,14 @@ class EmailSignInRoute extends GoRouteData with $EmailSignInRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) => const EmailSignInPage();
+}
+
+/// `/account/profile` — create or edit the signed-in user's profile.
+class ProfileEditRoute extends GoRouteData with $ProfileEditRoute {
+  const ProfileEditRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const ProfileEditPage();
 }
 
 /// `/news` — the news list opened from the event overview.

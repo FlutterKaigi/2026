@@ -115,6 +115,7 @@ eventInfo:
   ossLicenses: OSS Licenses
 auth:
   signIn:
+    required: Sign in required
     description: Choose how you want to sign in to the FlutterKaigi 2026 app
     withGoogle: Sign in with Google
     withApple: Sign in with Apple
@@ -145,6 +146,14 @@ auth:
     deleteConfirmAction: Delete
     deletePasswordTitle: Confirm your password
     deletePasswordBody: Enter your current password to delete your account.
+    mission: Missions
+    missionDescription: Judged by your participation in LT, profile exchange and SNS posts
+    joinEvent: Join the event
+    quiz: Quiz
+    lightningTalks: Lightning Talks
+    profileExchange: Profile exchange
+    snsPost: Register SNS post
+    comingSoon: This feature is coming soon
     deleted: Your account has been deleted
     cancel: Cancel
   error:
@@ -159,6 +168,49 @@ auth:
     userMismatch: The re-authenticated account does not match the signed-in account
     appleTokenRevocationFailed: Could not delete the account because revoking the Apple token failed. Please try again
     unknown: Authentication failed. Please try again
+profile:
+  title: Profile
+  editTitle: Edit Profile
+  createTitle: Create Profile
+  promptTitle: Set up your profile
+  promptBody: Add your country or region and social links to exchange profiles with other attendees at the venue.
+  create: Create profile
+  edit: Edit profile
+  save: Save
+  saved: Profile saved
+  saveFailed: Could not save the profile
+  visibilityNote: Your profile is visible to other signed-in attendees
+  avatarSemanticLabel: Profile picture
+  displayNameLabel: Display name
+  displayNameRequired: Enter a display name
+  countryLabel: Country / Region
+  countryPlaceholder: Select
+  countryRequired: Select your country or region
+  countrySearchHint: Search countries and regions
+  countryNoResults: No countries or regions match "$query"
+  countryNoResultsHint: You can also search by Japanese name or ISO code
+  snsLinksLabel: Social links
+  snsLinksEmpty: Add links to X, GitHub and more
+  addSnsLink: Add a link
+  removeSnsLink: Remove this link
+  snsPlatformLabel: Service
+  snsUrlLabel: URL
+  snsUrlRequired: Enter a URL
+  snsUrlInvalid: Enter a URL starting with https://
+  snsLinksMax: You can add up to $n links
+  snsPlatformOther: Other
+  bioLabel: Bio
+  bioHint: What you work on, what you'd like to talk about today, etc.
+  discardTitle: Discard changes?
+  discardBody: Unsaved changes will be lost.
+  discardAction: Discard
+  keepEditing: Keep editing
+countryRegion:
+  asia: Asia
+  oceania: Oceania
+  americas: Americas
+  europe: Europe
+  africa: Africa
 settings:
   title: Settings
   appearance: Appearance

@@ -49,6 +49,17 @@ Emulator接続時は次のように動作します。
 
 iOSのGoogleサインインはブラウザ経由(`signInWithProvider`)で行われ、`Info.plist`のコールバックスキームでアプリへ戻ります。本番版iOSのAppleサインインはSign in with Apple Capabilityを使用します。配布に必要なコールバックスキーム、Entitlements、Provisioning Profileはメンテナー向けWorkflowとApple Developer Portalで管理します。dev / stgのApp IDにSign in with Appleを有効化する必要はありません。Web OAuthを提供しないため、AppleのServices IDも使用しません。
 
+## プロフィール
+
+サインイン後、アカウントタブからプロフィール(`/account/profile`)を作成・編集できます。プロフィールはFirestoreの`users/{uid}`に保存され、サインイン済みの他の参加者から参照できます(プロフィール交換ミッション用)。項目は次のとおりです。
+
+- 表示名(必須、30文字まで)
+- 出身国・地域(必須、ISO 3166-1 alpha-2コードで保存)。`packages/data`の`countries`(Unicode CLDR由来、`fvm dart run melos countries:generate`で再生成)から地域別・英語名順で選択します。国旗は`country_flags`パッケージ(MIT、flag-iconsのSVG)で表示します(絵文字の国旗はiOSのFlutterで地域指示子が結合されず豆腐になるため不採用)
+- SNSリンク(任意、10件まで。`SnsLink.type`はダッシュボードのスタッフ編集と同じキー)
+- 自己紹介(任意、300文字まで)
+
+プロフィール画像はサインインプロバイダの`photoURL`を初回作成時に保存し、アプリ内でのアップロードには未対応です。アカウント削除では、再認証後・ユーザー削除前に`users/{uid}`も削除します。参加者種別と初参加フラグはネームプレートで把握する運用のため、プロフィールには持ちません。
+
 ## 配布
 
 GitHub Actionsによる配布先、Repository Variables／Secretsの設定は[App delivery setup](../../.github/APP_DELIVERY.md)を参照してください。

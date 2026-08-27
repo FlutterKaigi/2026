@@ -17,7 +17,11 @@ abstract interface class AuthRepository {
   /// 現在のユーザーを再認証してから完全に削除する。
   ///
   /// メール+パスワードのユーザーは再認証のため [password] が必須。
-  Future<void> deleteAccount({String? password});
+  /// [beforeDelete] は再認証の成功後、ユーザー削除の直前に呼ばれる。削除後は
+  /// トークンが失効して本人としての書き込みができなくなるため、ユーザーに
+  /// 紐づく Firestore ドキュメントの削除などはここで行う。失敗した場合は
+  /// 例外を伝播させ、アカウント削除自体を中断する。
+  Future<void> deleteAccount({String? password, Future<void> Function()? beforeDelete});
 }
 
 final class FirebaseAuthRepository implements AuthRepository {
@@ -90,7 +94,7 @@ final class FirebaseAuthRepository implements AuthRepository {
   Future<void> signOut() => _auth.signOut();
 
   @override
-  Future<void> deleteAccount({String? password}) async {
+  Future<void> deleteAccount({String? password, Future<void> Function()? beforeDelete}) async {
     final user = _auth.currentUser;
     if (user == null) {
       throw StateError('サインインしていないためアカウントを削除できません');
@@ -132,6 +136,9 @@ final class FirebaseAuthRepository implements AuthRepository {
       await _revokeAppleToken(appleCredential);
     }
 
+    if (beforeDelete != null) {
+      await beforeDelete();
+    }
     await user.delete();
   }
 
