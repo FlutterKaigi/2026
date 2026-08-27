@@ -35,7 +35,7 @@ class TranslationsEn extends Translations with BaseTranslations<AppLocale, Trans
 
 	late final TranslationsEn _root = this; // ignore: unused_field
 
-	@override
+	@override 
 	TranslationsEn $copyWith({TranslationMetadata<AppLocale, Translations>? meta}) => TranslationsEn(meta: meta ?? this.$meta);
 
 	// Translations
@@ -44,6 +44,7 @@ class TranslationsEn extends Translations with BaseTranslations<AppLocale, Trans
 	@override late final _Translations$navigation$en navigation = _Translations$navigation$en._(_root);
 	@override late final _Translations$news$en news = _Translations$news$en._(_root);
 	@override late final _Translations$sponsors$en sponsors = _Translations$sponsors$en._(_root);
+	@override late final _Translations$staffMembers$en staffMembers = _Translations$staffMembers$en._(_root);
 	@override late final _Translations$trademarks$en trademarks = _Translations$trademarks$en._(_root);
 	@override late final _Translations$sessionTimetable$en sessionTimetable = _Translations$sessionTimetable$en._(_root);
 	@override late final _Translations$sessionSearch$en sessionSearch = _Translations$sessionSearch$en._(_root);
@@ -123,6 +124,18 @@ class _Translations$sponsors$en extends Translations$sponsors$ja {
 	@override String get jobBoardCta => 'Hiring information';
 	@override String get recruitCta => 'Careers';
 	@override String get connect => 'Connect';
+}
+
+// Path: staffMembers
+class _Translations$staffMembers$en extends Translations$staffMembers$ja {
+	_Translations$staffMembers$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Staff';
+	@override String get empty => 'Staff profiles have not been published yet';
+	@override String get error => 'Failed to load staff profiles';
 }
 
 // Path: trademarks
@@ -252,6 +265,7 @@ class _Translations$eventInfo$en extends Translations$eventInfo$ja {
 	@override String get exclusionPolicy => 'Exclusion of Anti-Social Forces';
 	@override String get contact => 'Contact';
 	@override String get sourceCode => 'View Source Code';
+	@override String get staffMembers => 'Staff';
 	@override String get ossLicenses => 'OSS Licenses';
 }
 
@@ -505,6 +519,9 @@ extension on TranslationsEn {
 			'sponsors.jobBoardCta' => 'Hiring information',
 			'sponsors.recruitCta' => 'Careers',
 			'sponsors.connect' => 'Connect',
+			'staffMembers.title' => 'Staff',
+			'staffMembers.empty' => 'Staff profiles have not been published yet',
+			'staffMembers.error' => 'Failed to load staff profiles',
 			'trademarks.flutterAffiliation' => 'Flutter and the related logo are trademarks of Google LLC. FlutterKaigi is not affiliated with or otherwise sponsored by Google LLC.',
 			'trademarks.flutterNameAndLogo' => 'The Flutter name and the Flutter logo are trademarks of Google LLC.',
 			'trademarks.revComm' => 'RevComm is a registered trademark or trademark of RevComm Inc.',
@@ -537,7 +554,7 @@ extension on TranslationsEn {
 			'sessionSearch.promptBody' => 'Enter a keyword or select a day, session type, or language',
 			'sessionSearch.emptyTitle' => 'No sessions found',
 			'sessionSearch.emptyBody' => 'Try changing the keyword or filters',
-			'sessionSearch.resultCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} session', other: '${n} sessions', ),
+			'sessionSearch.resultCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} session', other: '${n} sessions', ), 
 			'sessionDetails.title' => 'Session Details',
 			'sessionDetails.description' => 'Description',
 			'sessionDetails.schedule' => 'Schedule and Venue',
@@ -573,6 +590,7 @@ extension on TranslationsEn {
 			'eventInfo.exclusionPolicy' => 'Exclusion of Anti-Social Forces',
 			'eventInfo.contact' => 'Contact',
 			'eventInfo.sourceCode' => 'View Source Code',
+			'eventInfo.staffMembers' => 'Staff',
 			'eventInfo.ossLicenses' => 'OSS Licenses',
 			'auth.signIn.description' => 'Choose how you want to sign in to the FlutterKaigi 2026 app',
 			'auth.signIn.withGoogle' => 'Sign in with Google',
@@ -630,7 +648,7 @@ extension on TranslationsEn {
 			'licenses.title' => 'Licenses',
 			'licenses.searchHint' => 'Search packages',
 			'licenses.clearSearch' => 'Clear search',
-			'licenses.licenseCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} license', other: '${n} licenses', ),
+			'licenses.licenseCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} license', other: '${n} licenses', ), 
 			'licenses.notFound' => 'License not found',
 			'error.title' => 'Could not load data',
 			'error.message' => 'Check your connection and try again.',

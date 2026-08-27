@@ -18,7 +18,10 @@ class SettingsRoute extends GoRouteData with $SettingsRoute {
   branches: [
     TypedStatefulShellBranch<EventInfoBranch>(
       routes: [
-        TypedGoRoute<EventInfoRoute>(path: '/info'),
+        TypedGoRoute<EventInfoRoute>(
+          path: '/info',
+          routes: [TypedGoRoute<StaffMemberListRoute>(path: 'staff')],
+        ),
         TypedGoRoute<NewsRoute>(path: '/news'),
         TypedGoRoute<LicenseRoute>(
           path: '/licenses',
@@ -219,4 +222,12 @@ class EventInfoRoute extends GoRouteData with $EventInfoRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) => const EventInfoPage();
+}
+
+/// `/info/staff` — the staff profile list.
+class StaffMemberListRoute extends GoRouteData with $StaffMemberListRoute {
+  const StaffMemberListRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const StaffMemberListPage();
 }

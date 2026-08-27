@@ -25,6 +25,10 @@ sponsors:
   jobBoardCta: Hiring information
   recruitCta: Careers
   connect: Connect
+staffMembers:
+  title: Staff
+  empty: Staff profiles have not been published yet
+  error: Failed to load staff profiles
 # NOTE: Keep these notices in sync with footerTrademark in apps/website/lib/l10n/strings.dart
 trademarks:
   flutterAffiliation: Flutter and the related logo are trademarks of Google LLC. FlutterKaigi is not affiliated with or otherwise sponsored by Google LLC.
@@ -107,6 +111,7 @@ eventInfo:
   exclusionPolicy: Exclusion of Anti-Social Forces
   contact: Contact
   sourceCode: View Source Code
+  staffMembers: Staff
   ossLicenses: OSS Licenses
 auth:
   signIn:
