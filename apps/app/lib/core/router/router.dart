@@ -16,6 +16,7 @@ import 'package:app/feature/session/ui/page/session_timetable_page.dart';
 import 'package:app/feature/settings/ui/page/settings_page.dart';
 import 'package:app/feature/sponsor/ui/page/sponsor_details_page.dart';
 import 'package:app/feature/sponsor/ui/page/sponsor_list_page.dart';
+import 'package:app/feature/staff/ui/page/staff_member_list_page.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';

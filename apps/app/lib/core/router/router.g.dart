@@ -34,7 +34,16 @@ RouteBase get $appShellRoute => StatefulShellRouteData.$route(
   branches: [
     StatefulShellBranchData.$branch(
       routes: [
-        GoRouteData.$route(path: '/info', factory: $EventInfoRoute._fromState),
+        GoRouteData.$route(
+          path: '/info',
+          factory: $EventInfoRoute._fromState,
+          routes: [
+            GoRouteData.$route(
+              path: 'staff',
+              factory: $StaffMemberListRoute._fromState,
+            ),
+          ],
+        ),
         GoRouteData.$route(path: '/news', factory: $NewsRoute._fromState),
         GoRouteData.$route(
           path: '/licenses',
@@ -114,6 +123,25 @@ mixin $EventInfoRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/info');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) => context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $StaffMemberListRoute on GoRouteData {
+  static StaffMemberListRoute _fromState(GoRouterState state) => const StaffMemberListRoute();
+
+  @override
+  String get location => GoRouteData.$location('/info/staff');
 
   @override
   void go(BuildContext context) => context.go(location);

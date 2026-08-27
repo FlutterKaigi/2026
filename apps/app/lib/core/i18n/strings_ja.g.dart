@@ -45,6 +45,7 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	late final Translations$navigation$ja navigation = Translations$navigation$ja.internal(_root);
 	late final Translations$news$ja news = Translations$news$ja.internal(_root);
 	late final Translations$sponsors$ja sponsors = Translations$sponsors$ja.internal(_root);
+	late final Translations$staffMembers$ja staffMembers = Translations$staffMembers$ja.internal(_root);
 	late final Translations$trademarks$ja trademarks = Translations$trademarks$ja.internal(_root);
 	late final Translations$sessionTimetable$ja sessionTimetable = Translations$sessionTimetable$ja.internal(_root);
 	late final Translations$sessionSearch$ja sessionSearch = Translations$sessionSearch$ja.internal(_root);
@@ -170,6 +171,24 @@ class Translations$sponsors$ja {
 
 	/// ja: 'Connect'
 	String get connect => 'Connect';
+}
+
+// Path: staffMembers
+class Translations$staffMembers$ja {
+	Translations$staffMembers$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'スタッフ'
+	String get title => 'スタッフ';
+
+	/// ja: 'スタッフはまだ公開されていません'
+	String get empty => 'スタッフはまだ公開されていません';
+
+	/// ja: 'スタッフ情報を取得できませんでした'
+	String get error => 'スタッフ情報を取得できませんでした';
 }
 
 // Path: trademarks
@@ -419,6 +438,9 @@ class Translations$eventInfo$ja {
 
 	/// ja: 'ソースコードを見る'
 	String get sourceCode => 'ソースコードを見る';
+
+	/// ja: 'スタッフ'
+	String get staffMembers => 'スタッフ';
 
 	/// ja: 'OSSライセンス'
 	String get ossLicenses => 'OSSライセンス';
@@ -995,6 +1017,9 @@ extension on Translations {
 			'sponsors.jobBoardCta' => '採用情報',
 			'sponsors.recruitCta' => '採用サイト',
 			'sponsors.connect' => 'Connect',
+			'staffMembers.title' => 'スタッフ',
+			'staffMembers.empty' => 'スタッフはまだ公開されていません',
+			'staffMembers.error' => 'スタッフ情報を取得できませんでした',
 			'trademarks.flutterAffiliation' => 'Flutter および関連するロゴは Google LLC の商標です。FlutterKaigi は Google LLC の承認または提携を受けておりません。',
 			'trademarks.flutterNameAndLogo' => 'Flutter の名称およびロゴは Google LLC の商標です。',
 			'trademarks.revComm' => 'RevCommは、株式会社 RevComm の登録商標または商標です。',
@@ -1063,6 +1088,7 @@ extension on Translations {
 			'eventInfo.exclusionPolicy' => '反社会的勢力排除に関する基本方針',
 			'eventInfo.contact' => 'お問い合わせ',
 			'eventInfo.sourceCode' => 'ソースコードを見る',
+			'eventInfo.staffMembers' => 'スタッフ',
 			'eventInfo.ossLicenses' => 'OSSライセンス',
 			'auth.signIn.required' => 'サインインが必要です',
 			'auth.signIn.description' => 'FlutterKaigi 2026 アプリで利用するサインイン方法を選択してください',
