@@ -72,3 +72,9 @@ int _twelveHour(int hour) {
 String _twoDigits(int value) {
   return value.toString().padLeft(2, '0');
 }
+
+/// Whether the session has already ended at [now].
+///
+/// Feedback collection opens the moment the scheduled slot ends, so the end
+/// time itself counts as "ended".
+bool hasSessionEnded({required DateTime endsAt, required DateTime now}) => !now.isBefore(endsAt);

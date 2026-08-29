@@ -325,6 +325,12 @@ class Translations$sessionDetails$ja {
 	/// ja: 'Sessionize'
 	String get sessionize => 'Sessionize';
 
+	/// ja: 'セッションのフィードバックを送る'
+	String get feedback => 'セッションのフィードバックを送る';
+
+	/// ja: 'このセッションの感想をお聞かせください'
+	String get feedbackDescription => 'このセッションの感想をお聞かせください';
+
 	/// ja: '共有'
 	String get share => '共有';
 
@@ -1059,6 +1065,8 @@ extension on Translations {
 			'sessionDetails.speakers' => '登壇者',
 			'sessionDetails.links' => 'リンク',
 			'sessionDetails.sessionize' => 'Sessionize',
+			'sessionDetails.feedback' => 'セッションのフィードバックを送る',
+			'sessionDetails.feedbackDescription' => 'このセッションの感想をお聞かせください',
 			'sessionDetails.share' => '共有',
 			'sessionDetails.notFound' => 'セッションが見つかりませんでした',
 			'sessionBookmark.openBookmarked' => 'ブックマークしたセッション',

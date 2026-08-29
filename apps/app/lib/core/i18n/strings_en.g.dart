@@ -211,6 +211,8 @@ class _Translations$sessionDetails$en extends Translations$sessionDetails$ja {
 	@override String get speakers => 'Speakers';
 	@override String get links => 'Links';
 	@override String get sessionize => 'Sessionize';
+	@override String get feedback => 'Send session feedback';
+	@override String get feedbackDescription => 'Let us know what you thought of this session';
 	@override String get share => 'Share';
 	@override String get notFound => 'Session not found';
 }
@@ -631,6 +633,8 @@ extension on TranslationsEn {
 			'sessionDetails.speakers' => 'Speakers',
 			'sessionDetails.links' => 'Links',
 			'sessionDetails.sessionize' => 'Sessionize',
+			'sessionDetails.feedback' => 'Send session feedback',
+			'sessionDetails.feedbackDescription' => 'Let us know what you thought of this session',
 			'sessionDetails.share' => 'Share',
 			'sessionDetails.notFound' => 'Session not found',
 			'sessionBookmark.openBookmarked' => 'Bookmarked sessions',
