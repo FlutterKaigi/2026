@@ -54,6 +54,7 @@ The pinned Flutter version is `3.41.7` (see `.fvmrc`).
 | `cp apps/app/lib/firebase_options.stub.dart apps/app/lib/firebase_options.dart` | Prepare the ignored Web Firebase stub for local app development |
 | `cd apps/app && fvm flutter run -d chrome --dart-define-from-file environments/.env.dev` | Run the Flutter app with dev environment variables |
 | `fvm dart run melos gen` | Regenerate Freezed/build_runner outputs for `apps/app` and `packages/data` |
+| `fvm dart run melos countries:generate` | Regenerate `packages/data/lib/src/country/generated_countries.dart` from Unicode CLDR (only when bumping the pinned CLDR version) |
 | `fvm dart run melos analyze` | Analyze all packages (website with `dart analyze`; app, dashboard, and `packages/data` with `flutter analyze`) |
 | `fvm dart run melos format` | `dart format` across all packages |
 | `fvm dart run melos test` | Run tests across all packages (website with `dart test`; app, dashboard, and `packages/data` with `flutter test`) |

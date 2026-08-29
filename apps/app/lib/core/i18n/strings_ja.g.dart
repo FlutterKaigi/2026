@@ -45,6 +45,7 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	late final Translations$navigation$ja navigation = Translations$navigation$ja.internal(_root);
 	late final Translations$news$ja news = Translations$news$ja.internal(_root);
 	late final Translations$sponsors$ja sponsors = Translations$sponsors$ja.internal(_root);
+	late final Translations$staffMembers$ja staffMembers = Translations$staffMembers$ja.internal(_root);
 	late final Translations$trademarks$ja trademarks = Translations$trademarks$ja.internal(_root);
 	late final Translations$sessionTimetable$ja sessionTimetable = Translations$sessionTimetable$ja.internal(_root);
 	late final Translations$sessionSearch$ja sessionSearch = Translations$sessionSearch$ja.internal(_root);
@@ -53,6 +54,8 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	late final Translations$bookmarkedSessions$ja bookmarkedSessions = Translations$bookmarkedSessions$ja.internal(_root);
 	late final Translations$eventInfo$ja eventInfo = Translations$eventInfo$ja.internal(_root);
 	late final Translations$auth$ja auth = Translations$auth$ja.internal(_root);
+	late final Translations$profile$ja profile = Translations$profile$ja.internal(_root);
+	late final Translations$countryRegion$ja countryRegion = Translations$countryRegion$ja.internal(_root);
 	late final Translations$settings$ja settings = Translations$settings$ja.internal(_root);
 	late final Translations$licenses$ja licenses = Translations$licenses$ja.internal(_root);
 	late final Translations$error$ja error = Translations$error$ja.internal(_root);
@@ -168,6 +171,24 @@ class Translations$sponsors$ja {
 
 	/// ja: 'Connect'
 	String get connect => 'Connect';
+}
+
+// Path: staffMembers
+class Translations$staffMembers$ja {
+	Translations$staffMembers$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'スタッフ'
+	String get title => 'スタッフ';
+
+	/// ja: 'スタッフはまだ公開されていません'
+	String get empty => 'スタッフはまだ公開されていません';
+
+	/// ja: 'スタッフ情報を取得できませんでした'
+	String get error => 'スタッフ情報を取得できませんでした';
 }
 
 // Path: trademarks
@@ -424,6 +445,9 @@ class Translations$eventInfo$ja {
 	/// ja: 'ソースコードを見る'
 	String get sourceCode => 'ソースコードを見る';
 
+	/// ja: 'スタッフ'
+	String get staffMembers => 'スタッフ';
+
 	/// ja: 'OSSライセンス'
 	String get ossLicenses => 'OSSライセンス';
 }
@@ -439,6 +463,147 @@ class Translations$auth$ja {
 	late final Translations$auth$email$ja email = Translations$auth$email$ja.internal(_root);
 	late final Translations$auth$account$ja account = Translations$auth$account$ja.internal(_root);
 	late final Translations$auth$error$ja error = Translations$auth$error$ja.internal(_root);
+}
+
+// Path: profile
+class Translations$profile$ja {
+	Translations$profile$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'プロフィール'
+	String get title => 'プロフィール';
+
+	/// ja: 'プロフィールを編集'
+	String get editTitle => 'プロフィールを編集';
+
+	/// ja: 'プロフィールを作成'
+	String get createTitle => 'プロフィールを作成';
+
+	/// ja: 'プロフィールを登録しましょう'
+	String get promptTitle => 'プロフィールを登録しましょう';
+
+	/// ja: '出身国・地域や SNS を登録すると、会場での参加者同士のプロフィール交換に使えます。'
+	String get promptBody => '出身国・地域や SNS を登録すると、会場での参加者同士のプロフィール交換に使えます。';
+
+	/// ja: 'プロフィールを作成'
+	String get create => 'プロフィールを作成';
+
+	/// ja: 'プロフィールを編集'
+	String get edit => 'プロフィールを編集';
+
+	/// ja: '保存'
+	String get save => '保存';
+
+	/// ja: 'プロフィールを保存しました'
+	String get saved => 'プロフィールを保存しました';
+
+	/// ja: 'プロフィールを保存できませんでした'
+	String get saveFailed => 'プロフィールを保存できませんでした';
+
+	/// ja: 'プロフィールはサインインしている他の参加者に公開されます'
+	String get visibilityNote => 'プロフィールはサインインしている他の参加者に公開されます';
+
+	/// ja: 'プロフィール画像'
+	String get avatarSemanticLabel => 'プロフィール画像';
+
+	/// ja: '表示名'
+	String get displayNameLabel => '表示名';
+
+	/// ja: '表示名を入力してください'
+	String get displayNameRequired => '表示名を入力してください';
+
+	/// ja: '出身国・地域'
+	String get countryLabel => '出身国・地域';
+
+	/// ja: '選択してください'
+	String get countryPlaceholder => '選択してください';
+
+	/// ja: '出身国・地域を選択してください'
+	String get countryRequired => '出身国・地域を選択してください';
+
+	/// ja: '国名・地域名で検索'
+	String get countrySearchHint => '国名・地域名で検索';
+
+	/// ja: '「$query」に一致する国・地域が見つかりません'
+	String countryNoResults({required Object query}) => '「${query}」に一致する国・地域が見つかりません';
+
+	/// ja: '英語名やISOコードでも検索できます'
+	String get countryNoResultsHint => '英語名やISOコードでも検索できます';
+
+	/// ja: 'SNS'
+	String get snsLinksLabel => 'SNS';
+
+	/// ja: 'X や GitHub などのリンクを追加できます'
+	String get snsLinksEmpty => 'X や GitHub などのリンクを追加できます';
+
+	/// ja: 'SNSリンクを追加'
+	String get addSnsLink => 'SNSリンクを追加';
+
+	/// ja: 'このリンクを削除'
+	String get removeSnsLink => 'このリンクを削除';
+
+	/// ja: 'サービス'
+	String get snsPlatformLabel => 'サービス';
+
+	/// ja: 'URL'
+	String get snsUrlLabel => 'URL';
+
+	/// ja: 'URL を入力してください'
+	String get snsUrlRequired => 'URL を入力してください';
+
+	/// ja: 'https:// から始まる URL を入力してください'
+	String get snsUrlInvalid => 'https:// から始まる URL を入力してください';
+
+	/// ja: 'SNSリンクは $n 件まで登録できます'
+	String snsLinksMax({required Object n}) => 'SNSリンクは ${n} 件まで登録できます';
+
+	/// ja: 'その他'
+	String get snsPlatformOther => 'その他';
+
+	/// ja: '自己紹介'
+	String get bioLabel => '自己紹介';
+
+	/// ja: '普段の仕事や、今日話したいことなど'
+	String get bioHint => '普段の仕事や、今日話したいことなど';
+
+	/// ja: '編集内容を破棄しますか?'
+	String get discardTitle => '編集内容を破棄しますか?';
+
+	/// ja: '保存していない変更は失われます。'
+	String get discardBody => '保存していない変更は失われます。';
+
+	/// ja: '破棄する'
+	String get discardAction => '破棄する';
+
+	/// ja: '編集を続ける'
+	String get keepEditing => '編集を続ける';
+}
+
+// Path: countryRegion
+class Translations$countryRegion$ja {
+	Translations$countryRegion$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'アジア'
+	String get asia => 'アジア';
+
+	/// ja: 'オセアニア'
+	String get oceania => 'オセアニア';
+
+	/// ja: '北米・中南米'
+	String get americas => '北米・中南米';
+
+	/// ja: 'ヨーロッパ'
+	String get europe => 'ヨーロッパ';
+
+	/// ja: 'アフリカ'
+	String get africa => 'アフリカ';
 }
 
 // Path: settings
@@ -611,6 +776,9 @@ class Translations$auth$signIn$ja {
 
 	// Translations
 
+	/// ja: 'サインインが必要です'
+	String get required => 'サインインが必要です';
+
 	/// ja: 'FlutterKaigi 2026 アプリで利用するサインイン方法を選択してください'
 	String get description => 'FlutterKaigi 2026 アプリで利用するサインイン方法を選択してください';
 
@@ -712,6 +880,30 @@ class Translations$auth$account$ja {
 
 	/// ja: 'アカウントを削除するには、現在のパスワードを入力してください。'
 	String get deletePasswordBody => 'アカウントを削除するには、現在のパスワードを入力してください。';
+
+	/// ja: 'ミッション'
+	String get mission => 'ミッション';
+
+	/// ja: 'LT大会・プロフィール交換・SNS投稿登録の参加状況で判定'
+	String get missionDescription => 'LT大会・プロフィール交換・SNS投稿登録の参加状況で判定';
+
+	/// ja: 'イベントに参加'
+	String get joinEvent => 'イベントに参加';
+
+	/// ja: 'クイズ大会'
+	String get quiz => 'クイズ大会';
+
+	/// ja: 'LT大会'
+	String get lightningTalks => 'LT大会';
+
+	/// ja: 'プロフィール交換'
+	String get profileExchange => 'プロフィール交換';
+
+	/// ja: 'SNS投稿登録'
+	String get snsPost => 'SNS投稿登録';
+
+	/// ja: 'この機能は準備中です'
+	String get comingSoon => 'この機能は準備中です';
 
 	/// ja: 'アカウントを削除しました'
 	String get deleted => 'アカウントを削除しました';
@@ -831,6 +1023,9 @@ extension on Translations {
 			'sponsors.jobBoardCta' => '採用情報',
 			'sponsors.recruitCta' => '採用サイト',
 			'sponsors.connect' => 'Connect',
+			'staffMembers.title' => 'スタッフ',
+			'staffMembers.empty' => 'スタッフはまだ公開されていません',
+			'staffMembers.error' => 'スタッフ情報を取得できませんでした',
 			'trademarks.flutterAffiliation' => 'Flutter および関連するロゴは Google LLC の商標です。FlutterKaigi は Google LLC の承認または提携を受けておりません。',
 			'trademarks.flutterNameAndLogo' => 'Flutter の名称およびロゴは Google LLC の商標です。',
 			'trademarks.revComm' => 'RevCommは、株式会社 RevComm の登録商標または商標です。',
@@ -901,7 +1096,9 @@ extension on Translations {
 			'eventInfo.exclusionPolicy' => '反社会的勢力排除に関する基本方針',
 			'eventInfo.contact' => 'お問い合わせ',
 			'eventInfo.sourceCode' => 'ソースコードを見る',
+			'eventInfo.staffMembers' => 'スタッフ',
 			'eventInfo.ossLicenses' => 'OSSライセンス',
+			'auth.signIn.required' => 'サインインが必要です',
 			'auth.signIn.description' => 'FlutterKaigi 2026 アプリで利用するサインイン方法を選択してください',
 			'auth.signIn.withGoogle' => 'Google でサインイン',
 			'auth.signIn.withApple' => 'Appleでサインイン',
@@ -930,6 +1127,14 @@ extension on Translations {
 			'auth.account.deleteConfirmAction' => '削除する',
 			'auth.account.deletePasswordTitle' => 'パスワードの確認',
 			'auth.account.deletePasswordBody' => 'アカウントを削除するには、現在のパスワードを入力してください。',
+			'auth.account.mission' => 'ミッション',
+			'auth.account.missionDescription' => 'LT大会・プロフィール交換・SNS投稿登録の参加状況で判定',
+			'auth.account.joinEvent' => 'イベントに参加',
+			'auth.account.quiz' => 'クイズ大会',
+			'auth.account.lightningTalks' => 'LT大会',
+			'auth.account.profileExchange' => 'プロフィール交換',
+			'auth.account.snsPost' => 'SNS投稿登録',
+			'auth.account.comingSoon' => 'この機能は準備中です',
 			'auth.account.deleted' => 'アカウントを削除しました',
 			'auth.account.cancel' => 'キャンセル',
 			'auth.error.invalidEmail' => 'メールアドレスの形式が正しくありません',
@@ -943,6 +1148,47 @@ extension on Translations {
 			'auth.error.userMismatch' => '再認証したアカウントがサインイン中のアカウントと一致しません',
 			'auth.error.appleTokenRevocationFailed' => 'Appleのトークン失効に失敗したため、アカウントを削除できませんでした。もう一度お試しください',
 			'auth.error.unknown' => '認証に失敗しました。もう一度お試しください',
+			'profile.title' => 'プロフィール',
+			'profile.editTitle' => 'プロフィールを編集',
+			'profile.createTitle' => 'プロフィールを作成',
+			'profile.promptTitle' => 'プロフィールを登録しましょう',
+			'profile.promptBody' => '出身国・地域や SNS を登録すると、会場での参加者同士のプロフィール交換に使えます。',
+			'profile.create' => 'プロフィールを作成',
+			'profile.edit' => 'プロフィールを編集',
+			'profile.save' => '保存',
+			'profile.saved' => 'プロフィールを保存しました',
+			'profile.saveFailed' => 'プロフィールを保存できませんでした',
+			'profile.visibilityNote' => 'プロフィールはサインインしている他の参加者に公開されます',
+			'profile.avatarSemanticLabel' => 'プロフィール画像',
+			'profile.displayNameLabel' => '表示名',
+			'profile.displayNameRequired' => '表示名を入力してください',
+			'profile.countryLabel' => '出身国・地域',
+			'profile.countryPlaceholder' => '選択してください',
+			'profile.countryRequired' => '出身国・地域を選択してください',
+			'profile.countrySearchHint' => '国名・地域名で検索',
+			'profile.countryNoResults' => ({required Object query}) => '「${query}」に一致する国・地域が見つかりません',
+			'profile.countryNoResultsHint' => '英語名やISOコードでも検索できます',
+			'profile.snsLinksLabel' => 'SNS',
+			'profile.snsLinksEmpty' => 'X や GitHub などのリンクを追加できます',
+			'profile.addSnsLink' => 'SNSリンクを追加',
+			'profile.removeSnsLink' => 'このリンクを削除',
+			'profile.snsPlatformLabel' => 'サービス',
+			'profile.snsUrlLabel' => 'URL',
+			'profile.snsUrlRequired' => 'URL を入力してください',
+			'profile.snsUrlInvalid' => 'https:// から始まる URL を入力してください',
+			'profile.snsLinksMax' => ({required Object n}) => 'SNSリンクは ${n} 件まで登録できます',
+			'profile.snsPlatformOther' => 'その他',
+			'profile.bioLabel' => '自己紹介',
+			'profile.bioHint' => '普段の仕事や、今日話したいことなど',
+			'profile.discardTitle' => '編集内容を破棄しますか?',
+			'profile.discardBody' => '保存していない変更は失われます。',
+			'profile.discardAction' => '破棄する',
+			'profile.keepEditing' => '編集を続ける',
+			'countryRegion.asia' => 'アジア',
+			'countryRegion.oceania' => 'オセアニア',
+			'countryRegion.americas' => '北米・中南米',
+			'countryRegion.europe' => 'ヨーロッパ',
+			'countryRegion.africa' => 'アフリカ',
 			'settings.title' => '設定',
 			'settings.appearance' => '表示設定',
 			'settings.appInfo' => 'アプリ情報',

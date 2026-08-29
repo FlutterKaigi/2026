@@ -729,6 +729,37 @@
         "createdAt": "2026-06-02T00:00:00Z",
         "updatedAt": "2026-06-02T00:00:00Z"
       }
+    },
+    {
+      "path": "users/seed-user-001",
+      "schema": "user_profile",
+      "data": {
+        "displayName": "参加者 太郎",
+        "avatarUrl": null,
+        "countryOrRegion": "JP",
+        "snsLinks": [
+          {
+            "type": "x",
+            "value": "https://x.com/example_attendee_001"
+          }
+        ],
+        "bio": "モバイルアプリを作っています。Riverpod の話がしたいです。",
+        "createdAt": "2026-08-01T00:00:00Z",
+        "updatedAt": "2026-08-01T00:00:00Z"
+      }
+    },
+    {
+      "path": "users/seed-user-002",
+      "schema": "user_profile",
+      "data": {
+        "displayName": "Jane Doe",
+        "avatarUrl": null,
+        "countryOrRegion": "US",
+        "snsLinks": [],
+        "bio": null,
+        "createdAt": "2026-08-01T00:00:00Z",
+        "updatedAt": "2026-08-01T00:00:00Z"
+      }
     }
   ]
 }

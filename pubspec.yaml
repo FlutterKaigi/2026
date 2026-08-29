@@ -182,6 +182,10 @@ melos:
       run: fvm dart run tool/generate_tokens.dart
       description: Regenerate apps/website/lib/constants/generated_tokens.dart from docs/design-system/tokens/
 
+    countries:generate:
+      run: fvm dart run tool/generate_countries.dart
+      description: Regenerate packages/data/lib/src/country/generated_countries.dart from Unicode CLDR territory data (pinned version in the script). Output is committed to git.
+
     sponsors:generate:
       run: fvm dart run tool/generate_sponsors.dart
       description: Regenerate apps/website/lib/constants/generated_sponsors.dart (+ web/images/sponsors/) from the Firestore emulator (or a configured STG/prod project). Git-ignored output.
