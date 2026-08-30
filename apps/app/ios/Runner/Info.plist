@@ -43,6 +43,9 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<!-- プロフィール交換の QR スキャン(mobile_scanner)に使用。 -->
+	<key>NSCameraUsageDescription</key>
+	<string>プロフィール交換で相手のQRコードを読み取るためにカメラを使用します。</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsLocalNetworking</key>
