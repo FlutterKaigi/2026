@@ -11,11 +11,12 @@ import 'package:app/feature/profile/ui/widget/profile_avatar_widget.dart';
 import 'package:app/feature/profile/ui/widget/sns_link_chip_widget.dart';
 import 'package:data/data.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 /// One entry in the exchange list: the other attendee's profile, joined from
 /// `users/{otherUid}` by [ProfileExchange.id].
-class ExchangedProfileCard extends ConsumerWidget {
+class ExchangedProfileCard extends HookConsumerWidget {
   const ExchangedProfileCard({required this.exchange, super.key});
 
   final ProfileExchange exchange;
@@ -25,6 +26,8 @@ class ExchangedProfileCard extends ConsumerWidget {
     final t = Translations.of(context);
     final profileState = ref.watch(exchangedUserProfileProvider(exchange.id));
     final myUid = ref.watch(authStateChangesProvider).value?.uid;
+    final isDeleting = useState(false);
+    final isSavingNote = useState(false);
 
     void showMessage(String message) {
       ScaffoldMessenger.of(context)
@@ -34,7 +37,7 @@ class ExchangedProfileCard extends ConsumerWidget {
 
     Future<void> handleDelete() async {
       final uid = myUid;
-      if (uid == null) {
+      if (uid == null || isDeleting.value) {
         return;
       }
       final confirmed = await showDialog<bool>(
@@ -61,6 +64,7 @@ class ExchangedProfileCard extends ConsumerWidget {
       if (confirmed != true || !context.mounted) {
         return;
       }
+      isDeleting.value = true;
       try {
         await ref.read(profileExchangeRepositoryProvider).delete(uid: uid, otherUid: exchange.id);
       } on Exception catch (error, stackTrace) {
@@ -68,12 +72,16 @@ class ExchangedProfileCard extends ConsumerWidget {
         if (context.mounted) {
           showMessage(t.exchange.deleteFailed);
         }
+      } finally {
+        if (context.mounted) {
+          isDeleting.value = false;
+        }
       }
     }
 
     Future<void> handleEditNote() async {
       final uid = myUid;
-      if (uid == null) {
+      if (uid == null || isSavingNote.value) {
         return;
       }
       final result = await showDialog<_NoteEditSaved>(
@@ -83,6 +91,7 @@ class ExchangedProfileCard extends ConsumerWidget {
       if (result == null || !context.mounted) {
         return;
       }
+      isSavingNote.value = true;
       try {
         await ref
             .read(profileExchangeRepositoryProvider)
@@ -91,6 +100,10 @@ class ExchangedProfileCard extends ConsumerWidget {
         ref.read(talkerProvider).handle(error, stackTrace);
         if (context.mounted) {
           showMessage(t.exchange.noteSaveFailed);
+        }
+      } finally {
+        if (context.mounted) {
+          isSavingNote.value = false;
         }
       }
     }
@@ -104,15 +117,19 @@ class ExchangedProfileCard extends ConsumerWidget {
           AsyncData(value: final profile?) => _ProfileContent(
             profile: profile,
             exchange: exchange,
+            isDeleting: isDeleting.value,
+            isSavingNote: isSavingNote.value,
             onDelete: () => unawaited(handleDelete()),
             onEditNote: () => unawaited(handleEditNote()),
           ),
           AsyncData() => _UnavailableContent(
             message: t.exchange.profileUnavailable,
+            isDeleting: isDeleting.value,
             onDelete: () => unawaited(handleDelete()),
           ),
           AsyncError() => _UnavailableContent(
             message: t.exchange.profileUnavailable,
+            isDeleting: isDeleting.value,
             onDelete: () => unawaited(handleDelete()),
           ),
           AsyncLoading() => const SizedBox(
@@ -129,12 +146,16 @@ class _ProfileContent extends StatelessWidget {
   const _ProfileContent({
     required this.profile,
     required this.exchange,
+    required this.isDeleting,
+    required this.isSavingNote,
     required this.onDelete,
     required this.onEditNote,
   });
 
   final UserProfile profile;
   final ProfileExchange exchange;
+  final bool isDeleting;
+  final bool isSavingNote;
   final VoidCallback onDelete;
   final VoidCallback onEditNote;
 
@@ -178,7 +199,13 @@ class _ProfileContent extends StatelessWidget {
                 ],
               ),
             ),
-            _CardActions(hasNote: note != null && note.isNotEmpty, onDelete: onDelete, onEditNote: onEditNote),
+            _CardActions(
+              hasNote: note != null && note.isNotEmpty,
+              isDeleting: isDeleting,
+              isSavingNote: isSavingNote,
+              onDelete: onDelete,
+              onEditNote: onEditNote,
+            ),
           ],
         ),
         if (bio != null && bio.isNotEmpty) ...[
@@ -219,33 +246,66 @@ class _ProfileContent extends StatelessWidget {
 /// Trailing delete / note-edit icon buttons, shown for both a resolvable
 /// profile and [_UnavailableContent] (deleting must stay possible even once
 /// the other attendee's profile can no longer be read).
+///
+/// Each button is disabled and swapped for a spinner while its own operation
+/// is in flight, and the other button is disabled alongside it so the two
+/// awaited repository calls can't race each other on the same document.
 class _CardActions extends StatelessWidget {
-  const _CardActions({required this.hasNote, required this.onDelete, this.onEditNote});
+  const _CardActions({
+    required this.hasNote,
+    required this.isDeleting,
+    required this.onDelete,
+    this.isSavingNote = false,
+    this.onEditNote,
+  });
 
   final bool hasNote;
+  final bool isDeleting;
+  final bool isSavingNote;
   final VoidCallback onDelete;
   final VoidCallback? onEditNote;
 
   @override
   Widget build(BuildContext context) {
     final t = Translations.of(context);
+    final isBusy = isDeleting || isSavingNote;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         if (onEditNote != null)
+          if (isSavingNote)
+            const _CardActionSpinner()
+          else
+            IconButton(
+              icon: Icon(hasNote ? Icons.edit_note : Icons.note_add_outlined),
+              tooltip: hasNote ? t.exchange.noteEditTooltip : t.exchange.noteAddTooltip,
+              onPressed: isBusy ? null : onEditNote,
+            ),
+        if (isDeleting)
+          const _CardActionSpinner()
+        else
           IconButton(
-            icon: Icon(hasNote ? Icons.edit_note : Icons.note_add_outlined),
-            tooltip: hasNote ? t.exchange.noteEditTooltip : t.exchange.noteAddTooltip,
-            onPressed: onEditNote,
+            icon: const Icon(Icons.delete_outline),
+            tooltip: t.exchange.deleteTooltip,
+            onPressed: isBusy ? null : onDelete,
           ),
-        IconButton(
-          icon: const Icon(Icons.delete_outline),
-          tooltip: t.exchange.deleteTooltip,
-          onPressed: onDelete,
-        ),
       ],
     );
   }
+}
+
+/// Matches an [IconButton]'s default tap target size, so the spinner doesn't
+/// shift surrounding layout when it swaps in for one.
+class _CardActionSpinner extends StatelessWidget {
+  const _CardActionSpinner();
+
+  @override
+  Widget build(BuildContext context) => const SizedBox.square(
+    dimension: 48,
+    child: Center(
+      child: SizedBox.square(dimension: 20, child: CircularProgressIndicator(strokeWidth: 2)),
+    ),
+  );
 }
 
 /// Shown when the other attendee's profile can no longer be read (deleted
@@ -253,9 +313,10 @@ class _CardActions extends StatelessWidget {
 /// then, so [onDelete] is still wired up; editing a note about someone whose
 /// profile is gone isn't useful, so no note button is shown.
 class _UnavailableContent extends StatelessWidget {
-  const _UnavailableContent({required this.message, required this.onDelete});
+  const _UnavailableContent({required this.message, required this.isDeleting, required this.onDelete});
 
   final String message;
+  final bool isDeleting;
   final VoidCallback onDelete;
 
   @override
@@ -271,7 +332,7 @@ class _UnavailableContent extends StatelessWidget {
           ).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
         ),
       ),
-      _CardActions(hasNote: false, onDelete: onDelete),
+      _CardActions(hasNote: false, isDeleting: isDeleting, onDelete: onDelete),
     ],
   );
 }
@@ -321,6 +382,7 @@ class _NoteEditDialogState extends State<_NoteEditDialog> {
         minLines: 2,
         onSubmitted: (_) => _save(),
         decoration: InputDecoration(
+          labelText: t.exchange.noteLabel,
           hintText: t.exchange.noteEditHint,
           border: const OutlineInputBorder(),
         ),

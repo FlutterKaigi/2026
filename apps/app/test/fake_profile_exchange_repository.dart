@@ -30,6 +30,15 @@ final class FakeProfileExchangeRepository implements ProfileExchangeRepository {
   /// When set, the next [updateNote] throws this error once.
   Exception? nextUpdateNoteError;
 
+  /// When set, the next [delete] awaits this before resolving, letting tests
+  /// assert on the in-flight state instead of it completing immediately.
+  Completer<void>? deleteGate;
+
+  /// When set, the next [updateNote] awaits this before resolving, letting
+  /// tests assert on the in-flight state instead of it completing
+  /// immediately.
+  Completer<void>? updateNoteGate;
+
   @override
   Stream<List<ProfileExchange>> watchAll(String uid) async* {
     yield List.unmodifiable(_exchangesByUid[uid] ?? const []);
@@ -59,6 +68,10 @@ final class FakeProfileExchangeRepository implements ProfileExchangeRepository {
   @override
   Future<void> delete({required String uid, required String otherUid}) async {
     deleteCalls.add((uid: uid, otherUid: otherUid));
+    final gate = deleteGate;
+    if (gate != null) {
+      await gate.future;
+    }
     final error = nextDeleteError;
     if (error != null) {
       nextDeleteError = null;
@@ -71,6 +84,10 @@ final class FakeProfileExchangeRepository implements ProfileExchangeRepository {
   @override
   Future<void> updateNote({required String uid, required String otherUid, required String? note}) async {
     updateNoteCalls.add((uid: uid, otherUid: otherUid, note: note));
+    final gate = updateNoteGate;
+    if (gate != null) {
+      await gate.future;
+    }
     final error = nextUpdateNoteError;
     if (error != null) {
       nextUpdateNoteError = null;
