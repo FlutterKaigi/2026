@@ -27,6 +27,10 @@ firebase functions:secrets:set EXCHANGE_TOKEN_SECRET --project flutterkaigi-2026
 エミュレータでは `functions/.secret.local`（Git 管理外）に
 `EXCHANGE_TOKEN_SECRET=<任意の値>` を書いて実行する。
 
+`functions/.env`（Git 管理外、後述の「セットアップ」参照）も必須。
+`SYNC_TARGET_PROJECT_ID` が未設定だとエミュレータ起動時に対話プロンプトで
+停止し、関数が 1 つも登録されない。
+
 ## syncCollectionsToProd
 
 STG プロジェクトにデプロイする callable function。管理ダッシュボード（STG）からの

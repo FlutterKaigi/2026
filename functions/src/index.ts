@@ -5,7 +5,7 @@ import { HttpsError, onCall } from "firebase-functions/v2/https";
 import { defineString } from "firebase-functions/params";
 import * as logger from "firebase-functions/logger";
 import { defaultFirestore } from "./firebase_admin";
-import { isEmulator } from "./environment";
+import { FUNCTIONS_REGION, isEmulator } from "./environment";
 
 export { issueExchangeToken, onProfileExchangeCreated } from "./profile_exchange";
 
@@ -14,7 +14,10 @@ export { issueExchangeToken, onProfileExchangeCreated } from "./profile_exchange
 // 例: SYNC_TARGET_PROJECT_ID=flutterkaigi-2026-283db
 const syncTargetProjectId = defineString("SYNC_TARGET_PROJECT_ID");
 
-setGlobalOptions({ region: "asia-northeast1" });
+// syncCollectionsToProd はこの setGlobalOptions のみでリージョンが決まる
+// （profile_exchange.ts の各関数は評価順の都合で個別に region を指定している。
+// 詳細は environment.ts の FUNCTIONS_REGION を参照）。
+setGlobalOptions({ region: FUNCTIONS_REGION });
 
 /**
  * 同期可能なコレクション。**参照される側が先**になるよう依存順に並べる。

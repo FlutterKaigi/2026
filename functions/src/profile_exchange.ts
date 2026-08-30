@@ -5,7 +5,7 @@ import { HttpsError, onCall } from "firebase-functions/v2/https";
 import { defineSecret } from "firebase-functions/params";
 import * as logger from "firebase-functions/logger";
 import { defaultFirestore } from "./firebase_admin";
-import { isEmulator } from "./environment";
+import { FUNCTIONS_REGION, isEmulator } from "./environment";
 
 const exchangeTokenSecret = defineSecret("EXCHANGE_TOKEN_SECRET");
 
@@ -74,6 +74,7 @@ export interface IssueExchangeTokenResult {
  */
 export const issueExchangeToken = onCall(
   {
+    region: FUNCTIONS_REGION,
     enforceAppCheck: !isEmulator,
     secrets: [exchangeTokenSecret],
   },
@@ -109,6 +110,7 @@ export const issueExchangeToken = onCall(
 export const onProfileExchangeCreated = onDocumentCreated(
   {
     document: "users/{uid}/exchanges/{otherUid}",
+    region: FUNCTIONS_REGION,
     secrets: [exchangeTokenSecret],
   },
   async (event) => {
