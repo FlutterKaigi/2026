@@ -54,6 +54,7 @@ class TranslationsEn extends Translations with BaseTranslations<AppLocale, Trans
 	@override late final _Translations$eventInfo$en eventInfo = _Translations$eventInfo$en._(_root);
 	@override late final _Translations$auth$en auth = _Translations$auth$en._(_root);
 	@override late final _Translations$profile$en profile = _Translations$profile$en._(_root);
+	@override late final _Translations$exchange$en exchange = _Translations$exchange$en._(_root);
 	@override late final _Translations$countryRegion$en countryRegion = _Translations$countryRegion$en._(_root);
 	@override late final _Translations$settings$en settings = _Translations$settings$en._(_root);
 	@override late final _Translations$licenses$en licenses = _Translations$licenses$en._(_root);
@@ -329,6 +330,36 @@ class _Translations$profile$en extends Translations$profile$ja {
 	@override String get discardBody => 'Unsaved changes will be lost.';
 	@override String get discardAction => 'Discard';
 	@override String get keepEditing => 'Keep editing';
+}
+
+// Path: exchange
+class _Translations$exchange$en extends Translations$exchange$ja {
+	_Translations$exchange$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Profile Exchange';
+	@override String get qrDescription => 'Show this QR code to another attendee and have them scan it to exchange profiles';
+	@override String get qrSemanticLabel => 'Profile exchange QR code';
+	@override String qrExpiresAt({required Object date}) => 'Valid until ${date}';
+	@override String get scanButton => 'Scan a QR code';
+	@override String get listButton => 'View exchanged profiles';
+	@override String get signInRequired => 'Sign in to show your QR code';
+	@override String get signInAction => 'Sign in';
+	@override String get profileRequired => 'Create a profile to show your QR code';
+	@override String get profileRequiredAction => 'Create profile';
+	@override String get scanTitle => 'Scan a QR code';
+	@override String get scanHint => 'Line up the other attendee\'s QR code within the frame';
+	@override String get scanCameraError => 'Camera unavailable. Please allow camera access in Settings';
+	@override String get scanInvalid => 'Could not read this code. Make sure it\'s a profile exchange QR code';
+	@override String get scanSelf => 'You can\'t scan your own QR code';
+	@override String get scanSucceeded => 'Profile exchanged';
+	@override String get scanFailed => 'Could not exchange profiles';
+	@override String get listTitle => 'Exchanged Profiles';
+	@override String get listEmpty => 'No exchanges yet';
+	@override String get listEmptyBody => 'Scan a QR code to exchange profiles with other attendees';
+	@override String get profileUnavailable => 'This profile is no longer available';
 }
 
 // Path: countryRegion
@@ -752,6 +783,27 @@ extension on TranslationsEn {
 			'profile.discardBody' => 'Unsaved changes will be lost.',
 			'profile.discardAction' => 'Discard',
 			'profile.keepEditing' => 'Keep editing',
+			'exchange.title' => 'Profile Exchange',
+			'exchange.qrDescription' => 'Show this QR code to another attendee and have them scan it to exchange profiles',
+			'exchange.qrSemanticLabel' => 'Profile exchange QR code',
+			'exchange.qrExpiresAt' => ({required Object date}) => 'Valid until ${date}',
+			'exchange.scanButton' => 'Scan a QR code',
+			'exchange.listButton' => 'View exchanged profiles',
+			'exchange.signInRequired' => 'Sign in to show your QR code',
+			'exchange.signInAction' => 'Sign in',
+			'exchange.profileRequired' => 'Create a profile to show your QR code',
+			'exchange.profileRequiredAction' => 'Create profile',
+			'exchange.scanTitle' => 'Scan a QR code',
+			'exchange.scanHint' => 'Line up the other attendee\'s QR code within the frame',
+			'exchange.scanCameraError' => 'Camera unavailable. Please allow camera access in Settings',
+			'exchange.scanInvalid' => 'Could not read this code. Make sure it\'s a profile exchange QR code',
+			'exchange.scanSelf' => 'You can\'t scan your own QR code',
+			'exchange.scanSucceeded' => 'Profile exchanged',
+			'exchange.scanFailed' => 'Could not exchange profiles',
+			'exchange.listTitle' => 'Exchanged Profiles',
+			'exchange.listEmpty' => 'No exchanges yet',
+			'exchange.listEmptyBody' => 'Scan a QR code to exchange profiles with other attendees',
+			'exchange.profileUnavailable' => 'This profile is no longer available',
 			'countryRegion.asia' => 'Asia',
 			'countryRegion.oceania' => 'Oceania',
 			'countryRegion.americas' => 'Americas',

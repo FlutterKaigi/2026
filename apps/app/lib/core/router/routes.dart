@@ -58,6 +58,13 @@ class SettingsRoute extends GoRouteData with $SettingsRoute {
           routes: [
             TypedGoRoute<EmailSignInRoute>(path: 'email'),
             TypedGoRoute<ProfileEditRoute>(path: 'profile'),
+            TypedGoRoute<ExchangeHomeRoute>(
+              path: 'exchange',
+              routes: [
+                TypedGoRoute<ExchangeScanRoute>(path: 'scan'),
+                TypedGoRoute<ExchangeListRoute>(path: 'list'),
+              ],
+            ),
           ],
         ),
       ],
@@ -143,6 +150,32 @@ class ProfileEditRoute extends GoRouteData with $ProfileEditRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) => const ProfileEditPage();
+}
+
+/// `/account/exchange` — the signed-in user's own QR code and the entry
+/// points to scan another attendee or view exchanged profiles.
+class ExchangeHomeRoute extends GoRouteData with $ExchangeHomeRoute {
+  const ExchangeHomeRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const ExchangeHomePage();
+}
+
+/// `/account/exchange/scan` — scans another attendee's profile-exchange QR
+/// code.
+class ExchangeScanRoute extends GoRouteData with $ExchangeScanRoute {
+  const ExchangeScanRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const ExchangeScanPage();
+}
+
+/// `/account/exchange/list` — the signed-in user's exchanged profiles.
+class ExchangeListRoute extends GoRouteData with $ExchangeListRoute {
+  const ExchangeListRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const ExchangeListPage();
 }
 
 /// `/news` — the news list opened from the event overview.

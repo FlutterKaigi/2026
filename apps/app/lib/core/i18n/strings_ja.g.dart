@@ -55,6 +55,7 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	late final Translations$eventInfo$ja eventInfo = Translations$eventInfo$ja.internal(_root);
 	late final Translations$auth$ja auth = Translations$auth$ja.internal(_root);
 	late final Translations$profile$ja profile = Translations$profile$ja.internal(_root);
+	late final Translations$exchange$ja exchange = Translations$exchange$ja.internal(_root);
 	late final Translations$countryRegion$ja countryRegion = Translations$countryRegion$ja.internal(_root);
 	late final Translations$settings$ja settings = Translations$settings$ja.internal(_root);
 	late final Translations$licenses$ja licenses = Translations$licenses$ja.internal(_root);
@@ -580,6 +581,78 @@ class Translations$profile$ja {
 
 	/// ja: '編集を続ける'
 	String get keepEditing => '編集を続ける';
+}
+
+// Path: exchange
+class Translations$exchange$ja {
+	Translations$exchange$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'プロフィール交換'
+	String get title => 'プロフィール交換';
+
+	/// ja: 'このQRコードを相手に見せて読み取ってもらうと、お互いのプロフィールを交換できます'
+	String get qrDescription => 'このQRコードを相手に見せて読み取ってもらうと、お互いのプロフィールを交換できます';
+
+	/// ja: 'プロフィール交換用のQRコード'
+	String get qrSemanticLabel => 'プロフィール交換用のQRコード';
+
+	/// ja: '有効期限 $date まで'
+	String qrExpiresAt({required Object date}) => '有効期限 ${date} まで';
+
+	/// ja: 'QRコードを読み取る'
+	String get scanButton => 'QRコードを読み取る';
+
+	/// ja: '交換した人を見る'
+	String get listButton => '交換した人を見る';
+
+	/// ja: 'サインインすると自分のQRコードを表示できます'
+	String get signInRequired => 'サインインすると自分のQRコードを表示できます';
+
+	/// ja: 'サインインする'
+	String get signInAction => 'サインインする';
+
+	/// ja: 'プロフィールを作成すると自分のQRコードを表示できます'
+	String get profileRequired => 'プロフィールを作成すると自分のQRコードを表示できます';
+
+	/// ja: 'プロフィールを作成する'
+	String get profileRequiredAction => 'プロフィールを作成する';
+
+	/// ja: 'QRコードを読み取る'
+	String get scanTitle => 'QRコードを読み取る';
+
+	/// ja: '相手の画面に表示されたQRコードを枠内に収めてください'
+	String get scanHint => '相手の画面に表示されたQRコードを枠内に収めてください';
+
+	/// ja: 'カメラを利用できません。設定でカメラへのアクセスを許可してください'
+	String get scanCameraError => 'カメラを利用できません。設定でカメラへのアクセスを許可してください';
+
+	/// ja: '読み取れませんでした。プロフィール交換用のQRコードか確認してください'
+	String get scanInvalid => '読み取れませんでした。プロフィール交換用のQRコードか確認してください';
+
+	/// ja: '自分のQRコードは読み取れません'
+	String get scanSelf => '自分のQRコードは読み取れません';
+
+	/// ja: 'プロフィールを交換しました'
+	String get scanSucceeded => 'プロフィールを交換しました';
+
+	/// ja: 'プロフィールを交換できませんでした'
+	String get scanFailed => 'プロフィールを交換できませんでした';
+
+	/// ja: '交換した人'
+	String get listTitle => '交換した人';
+
+	/// ja: 'まだ誰とも交換していません'
+	String get listEmpty => 'まだ誰とも交換していません';
+
+	/// ja: 'QRコードを読み取って、参加者とプロフィールを交換しましょう'
+	String get listEmptyBody => 'QRコードを読み取って、参加者とプロフィールを交換しましょう';
+
+	/// ja: 'このプロフィールは表示できません'
+	String get profileUnavailable => 'このプロフィールは表示できません';
 }
 
 // Path: countryRegion
@@ -1184,6 +1257,27 @@ extension on Translations {
 			'profile.discardBody' => '保存していない変更は失われます。',
 			'profile.discardAction' => '破棄する',
 			'profile.keepEditing' => '編集を続ける',
+			'exchange.title' => 'プロフィール交換',
+			'exchange.qrDescription' => 'このQRコードを相手に見せて読み取ってもらうと、お互いのプロフィールを交換できます',
+			'exchange.qrSemanticLabel' => 'プロフィール交換用のQRコード',
+			'exchange.qrExpiresAt' => ({required Object date}) => '有効期限 ${date} まで',
+			'exchange.scanButton' => 'QRコードを読み取る',
+			'exchange.listButton' => '交換した人を見る',
+			'exchange.signInRequired' => 'サインインすると自分のQRコードを表示できます',
+			'exchange.signInAction' => 'サインインする',
+			'exchange.profileRequired' => 'プロフィールを作成すると自分のQRコードを表示できます',
+			'exchange.profileRequiredAction' => 'プロフィールを作成する',
+			'exchange.scanTitle' => 'QRコードを読み取る',
+			'exchange.scanHint' => '相手の画面に表示されたQRコードを枠内に収めてください',
+			'exchange.scanCameraError' => 'カメラを利用できません。設定でカメラへのアクセスを許可してください',
+			'exchange.scanInvalid' => '読み取れませんでした。プロフィール交換用のQRコードか確認してください',
+			'exchange.scanSelf' => '自分のQRコードは読み取れません',
+			'exchange.scanSucceeded' => 'プロフィールを交換しました',
+			'exchange.scanFailed' => 'プロフィールを交換できませんでした',
+			'exchange.listTitle' => '交換した人',
+			'exchange.listEmpty' => 'まだ誰とも交換していません',
+			'exchange.listEmptyBody' => 'QRコードを読み取って、参加者とプロフィールを交換しましょう',
+			'exchange.profileUnavailable' => 'このプロフィールは表示できません',
 			'countryRegion.asia' => 'アジア',
 			'countryRegion.oceania' => 'オセアニア',
 			'countryRegion.americas' => '北米・中南米',
