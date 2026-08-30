@@ -15,7 +15,7 @@ export 'src/model/venue.dart' show Venue;
 export 'src/repository/auth_repository.dart' show FirebaseAuthRepository, AuthRepository;
 export 'src/repository/news_repository.dart' show FirestoreNewsRepository, NewsRepository;
 export 'src/repository/profile_exchange_repository.dart'
-    show FirestoreProfileExchangeRepository, ProfileExchangeRepository;
+    show FirestoreProfileExchangeRepository, ProfileExchangeAlreadyExistsException, ProfileExchangeRepository;
 export 'src/repository/speaker_repository.dart' show FirestoreSpeakerRepository, SpeakerRepository;
 export 'src/repository/staff_member_repository.dart' show FirestoreStaffMemberRepository, StaffMemberRepository;
 export 'src/repository/session_repository.dart' show FirestoreSessionRepository, SessionRepository;

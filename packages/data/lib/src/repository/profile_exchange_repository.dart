@@ -12,11 +12,18 @@ abstract interface class ProfileExchangeRepository {
   ///
   /// Writes directly without checking for an existing document first, so the
   /// call queues in the Firestore SDK's offline cache and [watchAll] reflects
-  /// it immediately even offline. Re-scanning the same attendee sends the
-  /// same write again; Firestore rules only allow changing `note` on an
-  /// existing document, so the server rejects it as a permission error
-  /// instead of rewriting `createdAt`/`origin`/`token`.
+  /// it immediately even offline. Re-scanning the same attendee (or scanning
+  /// someone whose mirror already added them) sends the same write again;
+  /// Firestore rules only allow changing `note` on an existing document, so
+  /// the server rejects it with `permission-denied`, which this surfaces as
+  /// [ProfileExchangeAlreadyExistsException] instead of a generic failure.
   Future<void> create({required String uid, required String otherUid, required String token});
+}
+
+/// Thrown by [ProfileExchangeRepository.create] when [otherUid] is already in
+/// [uid]'s exchange list.
+final class ProfileExchangeAlreadyExistsException implements Exception {
+  const ProfileExchangeAlreadyExistsException();
 }
 
 final class FirestoreProfileExchangeRepository implements ProfileExchangeRepository {
@@ -45,13 +52,20 @@ final class FirestoreProfileExchangeRepository implements ProfileExchangeReposit
   }
 
   @override
-  Future<void> create({required String uid, required String otherUid, required String token}) {
-    return _exchanges(uid).doc(otherUid).set(<String, dynamic>{
-      'createdAt': FieldValue.serverTimestamp(),
-      'origin': 'scan',
-      'token': token,
-      'note': null,
-    });
+  Future<void> create({required String uid, required String otherUid, required String token}) async {
+    try {
+      await _exchanges(uid).doc(otherUid).set(<String, dynamic>{
+        'createdAt': FieldValue.serverTimestamp(),
+        'origin': 'scan',
+        'token': token,
+        'note': null,
+      });
+    } on FirebaseException catch (exception) {
+      if (exception.code == 'permission-denied') {
+        throw const ProfileExchangeAlreadyExistsException();
+      }
+      rethrow;
+    }
   }
 }
 
