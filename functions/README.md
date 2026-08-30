@@ -1,7 +1,31 @@
 # Cloud Functions
 
-FlutterKaigi 2026 の Cloud Functions。現在は STG → 本番のデータ反映用に
-`syncCollectionsToProd` を提供する。
+FlutterKaigi 2026 の Cloud Functions。STG → 本番のデータ反映用の
+`syncCollectionsToProd` と、プロフィール交換用の `issueExchangeToken` /
+`onProfileExchangeCreated` を提供する。
+
+## プロフィール交換
+
+`functions/src/profile_exchange.ts` に実装がある（`index.ts` から re-export）。
+
+- `issueExchangeToken`（onCall）: サインイン済みユーザー自身の uid について、
+  署名付きトークン `v1.<uid>.<exp>.<sig>`（HMAC-SHA256、有効期限 24 時間）を発行する。
+  アプリはこのトークンを QR コードの中身として使う。
+- `onProfileExchangeCreated`（Firestore トリガー、`users/{uid}/exchanges/{otherUid}`
+  の作成時）: `origin: 'scan'` のドキュメントについてトークンを検証し、
+  相手側 `users/{otherUid}/exchanges/{uid}` を `origin: 'mirror'` で作成したうえで、
+  自分側の `token` を null 化する。トークンが不正・期限切れ・uid 不一致の場合は
+  作成されたドキュメントを削除する。`origin: 'mirror'` のドキュメントには反応しない
+  （自分自身のミラー書き込みを再度ミラーする無限ループを防ぐため）。
+
+両関数とも署名鍵を Firebase Functions のシークレット `EXCHANGE_TOKEN_SECRET` から読む。
+
+```bash
+firebase functions:secrets:set EXCHANGE_TOKEN_SECRET --project flutterkaigi-2026-stg
+```
+
+エミュレータでは `functions/.secret.local`（Git 管理外）に
+`EXCHANGE_TOKEN_SECRET=<任意の値>` を書いて実行する。
 
 ## syncCollectionsToProd
 
