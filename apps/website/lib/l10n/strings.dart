@@ -210,9 +210,15 @@ class Strings {
     AppLocale.en => 'Back to home',
   };
 
-  String get shareLinkPageGetIos => 'Download on the App Store';
+  String get shareLinkPageGetIos => switch (locale) {
+    AppLocale.ja => 'App Store からダウンロード',
+    AppLocale.en => 'Download on the App Store',
+  };
 
-  String get shareLinkPageGetAndroid => 'Get it on Google Play';
+  String get shareLinkPageGetAndroid => switch (locale) {
+    AppLocale.ja => 'Google Play で手に入れよう',
+    AppLocale.en => 'Get it on Google Play',
+  };
 
   // ── Dialog（共通） ───────────────────────────────────────────────────
 

@@ -33,10 +33,18 @@ class ExchangeCounterSection extends StatelessComponent {
           ]),
           p(classes: 'exchange-counter__caption', [.text(strings.exchangeCounterCaption)]),
         ]),
-        script(content: _script),
+        script(content: _script(_jsLocale(strings.locale))),
       ],
     );
   }
+
+  /// The `Intl.NumberFormat` locale for the page's own locale, so the digit
+  /// grouping matches the ja/en text around it instead of `toLocaleString()`
+  /// falling back to the visitor's `navigator.language`.
+  static String _jsLocale(AppLocale locale) => switch (locale) {
+    AppLocale.ja => 'ja-JP',
+    AppLocale.en => 'en-US',
+  };
 
   /// Fetches `counters/profileExchanges` from the public Firestore REST API
   /// (unauthenticated — `firestore.rules` allows `read` on `counters/*` for
@@ -44,7 +52,7 @@ class ExchangeCounterSection extends StatelessComponent {
   /// on success. Any failure (network error, non-200, App Check enforcement
   /// blocking the request, an unexpected response shape) is swallowed and
   /// simply leaves the section hidden — see the class doc comment.
-  static String get _script =>
+  static String _script(String jsLocale) =>
       '''
 (function () {
   var url = "https://firestore.googleapis.com/v1/projects/$firestoreProjectId/databases/(default)/documents/counters/profileExchanges";
@@ -60,7 +68,7 @@ class ExchangeCounterSection extends StatelessComponent {
       var section = document.getElementById("exchange-counter");
       var valueEl = document.getElementById("exchange-counter-value");
       if (!section || !valueEl) return;
-      valueEl.textContent = Number(value).toLocaleString();
+      valueEl.textContent = Number(value).toLocaleString("$jsLocale");
       section.classList.add("exchange-counter--visible");
     })
     .catch(function () {
