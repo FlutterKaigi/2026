@@ -251,7 +251,9 @@ exchange:
     success: プロフィールを交換しました
     selfScan: 自分のQRコードです
     malformed: 不正なQRコードです
+    expired: このQRコードは有効期限が切れています
     duplicate: 既に交換済みです
+    offlinePending: オフラインのため、オンライン復帰後に一覧へ反映されます
     genericError: 交換できませんでした。もう一度お試しください
   list:
     title: 交換した人一覧
@@ -271,6 +273,7 @@ exchange:
     noteSave: 保存
     noteSaved: メモを保存しました
     noteSaveFailed: メモを保存できませんでした
+    noteOfflinePending: オフラインのため、オンライン復帰後にメモが保存されます
     copyLink: リンクをコピー
     linkCopied: リンクをコピーしました
     openLinkFailed: リンクを開けませんでした

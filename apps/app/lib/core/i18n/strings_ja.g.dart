@@ -1111,8 +1111,14 @@ class Translations$exchange$scan$ja {
 	/// ja: '不正なQRコードです'
 	String get malformed => '不正なQRコードです';
 
+	/// ja: 'このQRコードは有効期限が切れています'
+	String get expired => 'このQRコードは有効期限が切れています';
+
 	/// ja: '既に交換済みです'
 	String get duplicate => '既に交換済みです';
+
+	/// ja: 'オフラインのため、オンライン復帰後に一覧へ反映されます'
+	String get offlinePending => 'オフラインのため、オンライン復帰後に一覧へ反映されます';
 
 	/// ja: '交換できませんでした。もう一度お試しください'
 	String get genericError => '交換できませんでした。もう一度お試しください';
@@ -1173,6 +1179,9 @@ class Translations$exchange$list$ja {
 
 	/// ja: 'メモを保存できませんでした'
 	String get noteSaveFailed => 'メモを保存できませんでした';
+
+	/// ja: 'オフラインのため、オンライン復帰後にメモが保存されます'
+	String get noteOfflinePending => 'オフラインのため、オンライン復帰後にメモが保存されます';
 
 	/// ja: 'リンクをコピー'
 	String get copyLink => 'リンクをコピー';
@@ -1456,7 +1465,9 @@ extension on Translations {
 			'exchange.scan.success' => 'プロフィールを交換しました',
 			'exchange.scan.selfScan' => '自分のQRコードです',
 			'exchange.scan.malformed' => '不正なQRコードです',
+			'exchange.scan.expired' => 'このQRコードは有効期限が切れています',
 			'exchange.scan.duplicate' => '既に交換済みです',
+			'exchange.scan.offlinePending' => 'オフラインのため、オンライン復帰後に一覧へ反映されます',
 			'exchange.scan.genericError' => '交換できませんでした。もう一度お試しください',
 			'exchange.list.title' => '交換した人一覧',
 			'exchange.list.countLabel' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(n, one: '${n} 人と交換しました', other: '${n} 人と交換しました', ), 
@@ -1473,6 +1484,7 @@ extension on Translations {
 			'exchange.list.noteSave' => '保存',
 			'exchange.list.noteSaved' => 'メモを保存しました',
 			'exchange.list.noteSaveFailed' => 'メモを保存できませんでした',
+			'exchange.list.noteOfflinePending' => 'オフラインのため、オンライン復帰後にメモが保存されます',
 			'exchange.list.copyLink' => 'リンクをコピー',
 			'exchange.list.linkCopied' => 'リンクをコピーしました',
 			'exchange.list.openLinkFailed' => 'リンクを開けませんでした',

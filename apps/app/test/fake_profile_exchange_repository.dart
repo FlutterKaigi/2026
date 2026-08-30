@@ -15,6 +15,12 @@ final class FakeProfileExchangeRepository implements ProfileExchangeRepository {
   /// When set, the next [createFromScan] throws this error once.
   Exception? nextCreateError;
 
+  /// When set, [createFromScan] waits this long before completing (or
+  /// throwing [nextCreateError]) — used to simulate a write stuck offline so
+  /// callers can exercise their timeout handling without waiting for a real
+  /// network hang.
+  Duration? createFromScanDelay;
+
   /// otherUids passed to [delete], in call order.
   final deletedOtherUids = <String>[];
 
@@ -31,6 +37,10 @@ final class FakeProfileExchangeRepository implements ProfileExchangeRepository {
 
   @override
   Future<void> createFromScan({required String uid, required String otherUid, required String token}) async {
+    final delay = createFromScanDelay;
+    if (delay != null) {
+      await Future<void>.delayed(delay);
+    }
     final error = nextCreateError;
     if (error != null) {
       nextCreateError = null;

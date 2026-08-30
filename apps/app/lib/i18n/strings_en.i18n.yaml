@@ -250,7 +250,9 @@ exchange:
     success: Profile exchanged
     selfScan: That's your own QR code
     malformed: This QR code is not valid
+    expired: This QR code has expired
     duplicate: You've already exchanged with this attendee
+    offlinePending: You're offline — this will sync to your list once you're back online
     genericError: Could not complete the exchange. Please try again
   list:
     title: Exchanged Profiles
@@ -270,6 +272,7 @@ exchange:
     noteSave: Save
     noteSaved: Note saved
     noteSaveFailed: Could not save the note
+    noteOfflinePending: You're offline — this note will save once you're back online
     copyLink: Copy link
     linkCopied: Link copied
     openLinkFailed: Could not open the link

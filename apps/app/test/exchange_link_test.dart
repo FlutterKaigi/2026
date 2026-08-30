@@ -16,6 +16,7 @@ void main() {
       final result = parseScannedExchangeToken('https://2026.flutterkaigi.jp/x/v1.uid-1.9999999999.sig');
       expect(result?.token, 'v1.uid-1.9999999999.sig');
       expect(result?.uid, 'uid-1');
+      expect(result?.expiresAt, DateTime.fromMillisecondsSinceEpoch(9999999999 * 1000, isUtc: true));
     });
 
     test('parses a bare token as a fallback', () {
@@ -42,6 +43,20 @@ void main() {
       expect(parseScannedExchangeToken('https://example.com/hello'), isNull);
     });
 
+    test('rejects a look-alike link on an unrelated host, even with a matching /x/ path', () {
+      // ホスト検証が無いと、たまたま `/x/<token>` 形式のパスを持つだけの
+      // 無関係なサイトの QR コードまで交換リンクとして解釈してしまう。
+      expect(parseScannedExchangeToken('https://example.com/x/v1.uid-1.9999999999.sig'), isNull);
+    });
+
+    test('rejects the exchange host over a non-https scheme', () {
+      expect(parseScannedExchangeToken('http://2026.flutterkaigi.jp/x/v1.uid-1.9999999999.sig'), isNull);
+    });
+
+    test('rejects a subdomain that merely contains the exchange host', () {
+      expect(parseScannedExchangeToken('https://2026.flutterkaigi.jp.evil.example/x/v1.uid-1.9999999999.sig'), isNull);
+    });
+
     test('rejects a token with the wrong version', () {
       expect(parseScannedExchangeToken('v2.uid-1.9999999999.sig'), isNull);
     });
@@ -52,6 +67,10 @@ void main() {
 
     test('rejects a token with an empty uid', () {
       expect(parseScannedExchangeToken('v1..9999999999.sig'), isNull);
+    });
+
+    test('rejects a token with a non-numeric expiry', () {
+      expect(parseScannedExchangeToken('v1.uid-1.not-a-number.sig'), isNull);
     });
 
     test('rejects plain unrelated text', () {

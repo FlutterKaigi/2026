@@ -614,7 +614,9 @@ class _Translations$exchange$scan$en extends Translations$exchange$scan$ja {
 	@override String get success => 'Profile exchanged';
 	@override String get selfScan => 'That\'s your own QR code';
 	@override String get malformed => 'This QR code is not valid';
+	@override String get expired => 'This QR code has expired';
 	@override String get duplicate => 'You\'ve already exchanged with this attendee';
+	@override String get offlinePending => 'You\'re offline — this will sync to your list once you\'re back online';
 	@override String get genericError => 'Could not complete the exchange. Please try again';
 }
 
@@ -643,6 +645,7 @@ class _Translations$exchange$list$en extends Translations$exchange$list$ja {
 	@override String get noteSave => 'Save';
 	@override String get noteSaved => 'Note saved';
 	@override String get noteSaveFailed => 'Could not save the note';
+	@override String get noteOfflinePending => 'You\'re offline — this note will save once you\'re back online';
 	@override String get copyLink => 'Copy link';
 	@override String get linkCopied => 'Link copied';
 	@override String get openLinkFailed => 'Could not open the link';
@@ -904,7 +907,9 @@ extension on TranslationsEn {
 			'exchange.scan.success' => 'Profile exchanged',
 			'exchange.scan.selfScan' => 'That\'s your own QR code',
 			'exchange.scan.malformed' => 'This QR code is not valid',
+			'exchange.scan.expired' => 'This QR code has expired',
 			'exchange.scan.duplicate' => 'You\'ve already exchanged with this attendee',
+			'exchange.scan.offlinePending' => 'You\'re offline — this will sync to your list once you\'re back online',
 			'exchange.scan.genericError' => 'Could not complete the exchange. Please try again',
 			'exchange.list.title' => 'Exchanged Profiles',
 			'exchange.list.countLabel' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: 'Exchanged with ${n} person', other: 'Exchanged with ${n} people', ), 
@@ -921,6 +926,7 @@ extension on TranslationsEn {
 			'exchange.list.noteSave' => 'Save',
 			'exchange.list.noteSaved' => 'Note saved',
 			'exchange.list.noteSaveFailed' => 'Could not save the note',
+			'exchange.list.noteOfflinePending' => 'You\'re offline — this note will save once you\'re back online',
 			'exchange.list.copyLink' => 'Copy link',
 			'exchange.list.linkCopied' => 'Link copied',
 			'exchange.list.openLinkFailed' => 'Could not open the link',

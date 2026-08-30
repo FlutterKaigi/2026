@@ -79,4 +79,55 @@ void main() {
 
     expect(outcome.kind, ExchangeScanOutcomeKind.error);
   });
+
+  test('rejects an expired token without writing anything', () async {
+    final repository = FakeProfileExchangeRepository(uid: currentUid);
+
+    final outcome = await handleScannedExchangeToken(
+      // exp = 1 (1970-01-01T00:00:01Z), long past.
+      raw: 'https://2026.flutterkaigi.jp/x/v1.uid-other.1.sig',
+      currentUid: currentUid,
+      repository: repository,
+      now: DateTime.utc(2026),
+    );
+
+    expect(outcome.kind, ExchangeScanOutcomeKind.expired);
+    expect(outcome.otherUid, 'uid-other');
+    expect(repository.exchangesFor(currentUid), isEmpty);
+  });
+
+  test('accepts a token that expires later the same second it is checked', () async {
+    final repository = FakeProfileExchangeRepository(uid: currentUid);
+    final now = DateTime.utc(2026);
+    final expSeconds = now.millisecondsSinceEpoch ~/ 1000 + 60;
+
+    final outcome = await handleScannedExchangeToken(
+      raw: 'https://2026.flutterkaigi.jp/x/v1.uid-other.$expSeconds.sig',
+      currentUid: currentUid,
+      repository: repository,
+      now: now,
+    );
+
+    expect(outcome.kind, ExchangeScanOutcomeKind.success);
+  });
+
+  test('reports offlinePending when the write does not resolve before the timeout', () async {
+    final repository = FakeProfileExchangeRepository(uid: currentUid)
+      ..createFromScanDelay = const Duration(milliseconds: 50);
+
+    final outcome = await handleScannedExchangeToken(
+      raw: 'https://2026.flutterkaigi.jp/x/$token',
+      currentUid: currentUid,
+      repository: repository,
+      timeout: const Duration(milliseconds: 10),
+    );
+
+    expect(outcome.kind, ExchangeScanOutcomeKind.offlinePending);
+    expect(outcome.otherUid, 'uid-other');
+
+    // 実際の書き込みは打ち切られておらず、タイムアウト後も裏で完了する
+    // (ローカルキャッシュへの反映は即時であるという前提のドキュメント通り)。
+    await Future<void>.delayed(const Duration(milliseconds: 100));
+    expect(repository.exchangesFor(currentUid), isNotEmpty);
+  });
 }

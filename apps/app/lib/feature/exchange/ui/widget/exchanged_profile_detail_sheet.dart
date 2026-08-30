@@ -1,4 +1,8 @@
+import 'dart:async';
+
 import 'package:app/core/i18n/strings.g.dart';
+import 'package:app/core/ui/launch_external_url.dart';
+import 'package:app/feature/exchange/data/exchange_write_timeout.dart';
 import 'package:app/feature/exchange/data/exchanged_profile.dart';
 import 'package:app/feature/exchange/data/provider/profile_exchange_repository_provider.dart';
 import 'package:app/feature/profile/data/sns_platform.dart';
@@ -10,7 +14,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 /// Opens a bottom sheet with [entry]'s profile details, SNS links and the
 /// signed-in user's private note.
@@ -41,6 +44,7 @@ class _ExchangedProfileDetailSheet extends HookConsumerWidget {
 
     Future<void> saveNote() async {
       isSavingNote.value = true;
+      String message;
       try {
         final note = noteController.text.trim();
         await ref
@@ -49,22 +53,21 @@ class _ExchangedProfileDetailSheet extends HookConsumerWidget {
               uid: currentUid,
               otherUid: entry.otherUid,
               note: note.isEmpty ? null : note,
-            );
-        if (context.mounted) {
-          ScaffoldMessenger.of(context)
-            ..hideCurrentSnackBar()
-            ..showSnackBar(SnackBar(content: Text(t.exchange.list.noteSaved)));
-        }
+            )
+            .timeout(exchangeWriteTimeout);
+        message = t.exchange.list.noteSaved;
+      } on TimeoutException {
+        // ローカルキャッシュへの書き込みは即時反映済みなので致命的ではない。
+        // オンライン復帰後に同期される旨だけ伝え、無限ローディングにしない。
+        message = t.exchange.list.noteOfflinePending;
       } on Object {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context)
-            ..hideCurrentSnackBar()
-            ..showSnackBar(SnackBar(content: Text(t.exchange.list.noteSaveFailed)));
-        }
-      } finally {
-        if (context.mounted) {
-          isSavingNote.value = false;
-        }
+        message = t.exchange.list.noteSaveFailed;
+      }
+      if (context.mounted) {
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(SnackBar(content: Text(message)));
+        isSavingNote.value = false;
       }
     }
 
@@ -111,6 +114,7 @@ class _ExchangedProfileDetailSheet extends HookConsumerWidget {
             controller: noteController,
             maxLines: 4,
             minLines: 2,
+            maxLength: ProfileExchange.noteMaxLength,
             enabled: !isSavingNote.value,
             decoration: InputDecoration(
               hintText: t.exchange.list.noteHint,
@@ -147,17 +151,13 @@ class _SnsLinkRow extends StatelessWidget {
 
     Future<void> open() async {
       final uri = Uri.tryParse(link.value);
-      var launched = false;
-      if (uri != null && uri.hasScheme) {
-        try {
-          launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
-        } on Object {
-          launched = false;
-        }
-      }
-      if (!launched && context.mounted) {
+      if (uri == null || !uri.hasScheme) {
         await _copy(context, message: t.exchange.list.openLinkFailed);
+        return;
       }
+      // 開けなかった場合のメッセージ表示は共通ヘルパーに任せる。手元へのコピーは
+      // 隣接するコピーボタン(常設)から行える。
+      await launchExternalUrl(context, uri: uri, failureMessage: t.exchange.list.openLinkFailed);
     }
 
     Future<void> copy() => _copy(context, message: t.exchange.list.linkCopied);
