@@ -8,6 +8,19 @@ import { setGlobalOptions } from "firebase-functions/v2";
 import { HttpsError, onCall } from "firebase-functions/v2/https";
 import { defineString } from "firebase-functions/params";
 import * as logger from "firebase-functions/logger";
+import { isEmulator } from "./env";
+import { sourceDb } from "./firebase";
+import {
+  issueExchangeCode,
+  issueExchangeToken,
+  redeemExchangeCode,
+} from "./exchange/callable";
+import {
+  onProfileExchangeCreated,
+  onUserProfileDeleted,
+} from "./exchange/triggers";
+
+export { issueExchangeCode, issueExchangeToken, redeemExchangeCode, onProfileExchangeCreated, onUserProfileDeleted };
 
 // デプロイ先（= 同期元）と同期先のリージョン・プロジェクト設定。
 // SYNC_TARGET_PROJECT_ID は functions/.env（Git 管理外）で指定する。
@@ -37,17 +50,6 @@ const ADMINS_COLLECTION = "admins";
 const ADMIN_EMAIL_PATTERN = /^[^@]+@flutterkaigi\.jp$/;
 // Firestore のバッチ書き込み上限 (500) に余裕を持たせたチャンクサイズ。
 const BATCH_CHUNK_SIZE = 400;
-
-const isEmulator = process.env.FUNCTIONS_EMULATOR === "true";
-
-// firebase-functions SDK は認証トークン検証用に内部の名前付きアプリを先に生成する
-// ことがあるため、「アプリ数 0 なら初期化」ではなくデフォルトアプリの有無で判定する。
-const DEFAULT_APP_NAME = "[DEFAULT]";
-
-function sourceDb(): Firestore {
-  const existing = getApps().find((app: App) => app.name === DEFAULT_APP_NAME);
-  return getFirestore(existing ?? initializeApp());
-}
 
 function targetDb(): Firestore {
   const projectId = syncTargetProjectId.value();

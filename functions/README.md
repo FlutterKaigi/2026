@@ -1,7 +1,8 @@
 # Cloud Functions
 
-FlutterKaigi 2026 の Cloud Functions。現在は STG → 本番のデータ反映用に
-`syncCollectionsToProd` を提供する。
+FlutterKaigi 2026 の Cloud Functions。STG → 本番のデータ反映用の
+`syncCollectionsToProd` に加えて、プロフィール交換機能（`users/{uid}/exchanges`）用の
+関数を提供する。
 
 ## syncCollectionsToProd
 
@@ -57,6 +58,67 @@ STG プロジェクトにデプロイする callable function。管理ダッシ�
 > App Check は `WebDebugProvider` になる。コンソールに出力されるデバッグトークンを
 > Firebase Console > App Check に登録しておくこと。
 
+## プロフィール交換 (`users/{uid}/exchanges`)
+
+参加者同士が QR コード（または 6 桁コードのフォールバック）でプロフィールを
+交換する機能のサーバー側。詳細な設計はプロフィール交換機能の Issue を参照。
+
+### `issueExchangeToken`（onCall・認証必須）
+
+自分の QR コード表示用に、署名付き交換トークン `v1.<uid>.<exp>.<sig>`
+（HMAC-SHA256、有効期限 24 時間）を発行する。端末にキャッシュしておけば、
+期限内はオフラインでも QR を表示し続けられる。
+
+QR ペイロードはこのトークンをそのまま使う。`users/{uid}` はサインイン済みなら
+誰でも read できるため、トークンの中身は秘密情報ではない。目的は uid を
+そのまま QR 化しないことと、期限切れ・改ざんされたトークンでの交換を防ぐこと。
+
+### `issueExchangeCode` / `redeemExchangeCode`（onCall・認証必須）
+
+カメラが使えない参加者向けの、6 桁コードによるフォールバック。
+
+- `issueExchangeCode`: 5 分間だけ有効な使い捨てコードを発行し、発行者の uid を
+  Admin 専用コレクション `exchangeCodes`（firestore.rules のデフォルト拒否で
+  クライアントからは読み書き不可）に保存する。
+- `redeemExchangeCode`: `{ code: "123456" }` を受け取り、コードを検証（存在・
+  期限・自分自身のコードでないこと）した上で **削除**（使い捨て）し、発行者の
+  `issueExchangeToken` と同形式のトークンを `{ uid, token }` で返す。クライアントは
+  これを使って QR スキャン時と同じ経路（`users/{me}/exchanges/{発行者のuid}` の
+  作成）で交換を成立させる。
+- 総当たり対策として、呼び出し元 uid ごとに `exchangeCodeRedeemAttempts` で
+  試行回数を記録し、5 分間に 10 回を超えたら `resource-exhausted` を返す
+  （コード単位ではなく呼び出し元単位にすることで、別々のコードを次々に試す
+  攻撃も抑える）。
+
+### `onProfileExchangeCreated`（Firestore トリガー: `users/{uid}/exchanges/{otherUid}` の作成）
+
+1. `origin == 'mirror'`（このトリガー自身が作った側）なら何もしない（ループ防止）
+2. `token` の署名・期限・uid 一致（`otherUid` と一致するか）を検証し、不正なら
+   作成されたドキュメントを削除する
+3. 相手側 `users/{otherUid}/exchanges/{uid}` を `origin: 'mirror'` で作成する
+   （既に存在する場合は触らない = 同じ相手を再スキャンしても重複しない）
+4. 自分側の `token` を null 化して残さない
+5. 新しいペアが成立した時だけ `counters/profileExchanges` を increment する
+
+### `onUserProfileDeleted`（Firestore トリガー: `users/{uid}` の削除）
+
+退会時に、本人の `exchanges` サブコレクションと、相手側に残ったミラーの両方を
+削除する。プロフィール本体が消えて表示できなくなるため、相手の一覧にも残さない。
+
+> 既知の制約: 本人が事前に `exchanges` から削除していた相手（＝退会時点で本人の
+> サブコレクションに残っていない相手）については、相手側のミラーは検出できず
+> 孤児として残る。
+
+### セットアップ（トークン署名鍵）
+
+```bash
+# 本番 / STG（デプロイ時に使う値。Secret Manager に保存される）
+firebase functions:secrets:set EXCHANGE_TOKEN_SECRET --project <プロジェクトID>
+
+# エミュレータ（Git 管理外の functions/.secret.local に書く）
+echo "EXCHANGE_TOKEN_SECRET=dev-secret" >> functions/.secret.local
+```
+
 ## セットアップ
 
 ```bash
@@ -106,3 +168,16 @@ Functions を含むエミュレータスイートを起動する（事前に `np
 Firestore エミュレータは複数プロジェクト ID を扱えるため、`.env` の
 `SYNC_TARGET_PROJECT_ID` に任意の ID を設定すればローカルで動作確認できる
 （`firebase.json` の `singleProjectMode` の警告は無視してよい）。
+
+## テスト
+
+Firestore/Functions を使わない純粋ロジック（トークンの発行・検証、6 桁コードの
+生成・形式チェック、レート制限）のみを Node 組み込みの
+[`node:test`](https://nodejs.org/api/test.html) で検証する。jest 等は導入していない。
+
+```bash
+npm test   # tsc でビルドしてから node --test lib/exchange/*.test.js を実行
+```
+
+トリガー・onCall 本体（Firestore / App Check に依存する部分）はテスト基盤がないため、
+デプロイ後にエミュレータまたは STG で手動確認する。

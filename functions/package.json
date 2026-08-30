@@ -9,7 +9,8 @@
   "scripts": {
     "build": "tsc",
     "build:watch": "tsc --watch",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "test": "tsc && node --test lib/exchange/*.test.js"
   },
   "dependencies": {
     "firebase-admin": "^13.4.0",
