@@ -392,7 +392,7 @@ class _SignedInView extends StatelessWidget {
                       _NavigationTile(
                         icon: Icons.qr_code_2_outlined,
                         title: t.auth.account.profileExchange,
-                        onTap: onComingSoon,
+                        onTap: () => const ExchangeHomeRoute().push<void>(context),
                       ),
                       const Divider(height: 1),
                       _NavigationTile(
