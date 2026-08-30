@@ -8,6 +8,7 @@ here as ISO-8601 `date-time` strings.
 
 Schemas committed so far, one per editable collection used by the dashboard:
 
+- `firestore/counters.schema.json` (`counters`, written by Cloud Functions, not the app or the dashboard)
 - `firestore/news.schema.json` (`news`)
 - `firestore/profile_exchange.schema.json` (`users/{uid}/exchanges`, written by the app, not the dashboard)
 - `firestore/session.schema.json` (`sessions`)

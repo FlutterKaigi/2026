@@ -780,6 +780,13 @@
         "token": null,
         "note": null
       }
+    },
+    {
+      "path": "counters/profileExchanges",
+      "schema": "counters",
+      "data": {
+        "count": 1
+      }
     }
   ]
 }
