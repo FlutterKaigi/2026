@@ -115,7 +115,7 @@ void main() {
     expect(find.text('このリンクの有効期限が切れています'), findsOneWidget);
   });
 
-  testWidgets('shows the usual sign-in prompt for a well-formed token when signed out', (tester) async {
+  testWidgets('shows a share-link-specific sign-in prompt for a well-formed token when signed out', (tester) async {
     final authRepository = FakeAuthRepository();
     addTearDown(authRepository.dispose);
     final exchangeRepository = FakeProfileExchangeRepository();
@@ -131,12 +131,38 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('サインインすると自分のQRコードを表示できます'), findsOneWidget);
+    // ExchangeHomePage 等の一般的な文言（自分のQRコードを表示できます）
+    // ではなく、共有リンクの文脈に合わせた文言が出る。
+    expect(find.text('サインインすると相手とプロフィールを交換できます'), findsOneWidget);
+    expect(find.text('サインインすると自分のQRコードを表示できます'), findsNothing);
     await tester.tap(find.text('サインインする'));
     await tester.pumpAndSettle();
 
     expect(find.text('account destination'), findsOneWidget);
   });
+
+  testWidgets(
+    'shows a share-link-specific profile prompt for a signed-in user without a profile',
+    (tester) async {
+      final authRepository = FakeAuthRepository(initialUser: FakeUser(uid: 'uid-1'));
+      addTearDown(authRepository.dispose);
+      final exchangeRepository = FakeProfileExchangeRepository();
+      addTearDown(exchangeRepository.dispose);
+
+      await tester.pumpWidget(
+        buildSubject(
+          token: futureToken('other-uid'),
+          authRepository: authRepository,
+          profileRepository: FakeUserProfileRepository(),
+          exchangeRepository: exchangeRepository,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('プロフィールを作成すると相手とプロフィールを交換できます'), findsOneWidget);
+      expect(find.text('プロフィールを作成すると自分のQRコードを表示できます'), findsNothing);
+    },
+  );
 
   testWidgets("shows a dedicated message for the holder's own link", (tester) async {
     final authRepository = FakeAuthRepository(initialUser: FakeUser(uid: 'uid-1'));

@@ -1,3 +1,4 @@
+import 'package:clock/clock.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'exchange_token.freezed.dart';
@@ -69,5 +70,8 @@ bool isExchangeTokenExpired(String token) {
   if (expSeconds == null) {
     return false;
   }
-  return DateTime.now().isAfter(DateTime.fromMillisecondsSinceEpoch(expSeconds * 1000));
+  // package:clock (not DateTime.now() directly), matching ExchangeCode.isExpired,
+  // so widget tests can advance this via the FakeAsync clock testWidgets runs
+  // every test body inside.
+  return clock.now().isAfter(DateTime.fromMillisecondsSinceEpoch(expSeconds * 1000));
 }

@@ -67,11 +67,17 @@ class _PendingShareLink extends HookConsumerWidget {
       // synchronously from a widget life-cycle callback (`useEffect` runs as
       // one), since a listener further down the same build could otherwise
       // observe an inconsistent state mid-build.
-      unawaited(Future(() => ref.read(pendingExchangeTokenProvider.notifier).set(token)));
+      final uid = ref.read(authStateChangesProvider).value?.uid;
+      unawaited(Future.microtask(() => ref.read(pendingExchangeTokenProvider.notifier).set(uid, token)));
       return null;
     }, [token]);
 
-    return ExchangeAccessGate(builder: (context) => _ShareLinkBody(token: token));
+    final t = Translations.of(context);
+    return ExchangeAccessGate(
+      signInTitle: t.exchange.shareLinkSignInRequired,
+      profileTitle: t.exchange.shareLinkProfileRequired,
+      builder: (context) => _ShareLinkBody(token: token),
+    );
   }
 }
 
@@ -104,7 +110,7 @@ class _ShareLinkBody extends HookConsumerWidget {
           myUid: myUid,
           repository: ref.read(profileExchangeRepositoryProvider),
         );
-        ref.read(pendingExchangeTokenProvider.notifier).clearIfCurrent(token);
+        ref.read(pendingExchangeTokenProvider.notifier).clearIfCurrent(myUid, token);
         if (resolved case PendingExchangeResolved(outcome: ExchangeCreateFailed(:final error, :final stackTrace))) {
           ref.read(talkerProvider).handle(error, stackTrace);
         }

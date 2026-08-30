@@ -391,6 +391,8 @@ class _Translations$exchange$en extends Translations$exchange$ja {
 	@override String get redeemInvalid => 'This code wasn\'t found, or it has expired';
 	@override String get redeemSelf => 'You can\'t enter your own code';
 	@override String get redeemRateLimited => 'Too many attempts. Please try again in a few minutes';
+	@override String get shareLinkSignInRequired => 'Sign in to exchange profiles with them';
+	@override String get shareLinkProfileRequired => 'Create a profile to exchange profiles with them';
 	@override String get shareLinkInvalidTitle => 'This link isn\'t valid';
 	@override String get shareLinkInvalidBody => 'Make sure it\'s a profile exchange link';
 	@override String get shareLinkExpiredTitle => 'This link has expired';
@@ -874,6 +876,8 @@ extension on TranslationsEn {
 			'exchange.redeemInvalid' => 'This code wasn\'t found, or it has expired',
 			'exchange.redeemSelf' => 'You can\'t enter your own code',
 			'exchange.redeemRateLimited' => 'Too many attempts. Please try again in a few minutes',
+			'exchange.shareLinkSignInRequired' => 'Sign in to exchange profiles with them',
+			'exchange.shareLinkProfileRequired' => 'Create a profile to exchange profiles with them',
 			'exchange.shareLinkInvalidTitle' => 'This link isn\'t valid',
 			'exchange.shareLinkInvalidBody' => 'Make sure it\'s a profile exchange link',
 			'exchange.shareLinkExpiredTitle' => 'This link has expired',

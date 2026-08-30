@@ -747,6 +747,12 @@ class Translations$exchange$ja {
 	/// ja: '試行回数が多すぎます。しばらくしてからもう一度お試しください'
 	String get redeemRateLimited => '試行回数が多すぎます。しばらくしてからもう一度お試しください';
 
+	/// ja: 'サインインすると相手とプロフィールを交換できます'
+	String get shareLinkSignInRequired => 'サインインすると相手とプロフィールを交換できます';
+
+	/// ja: 'プロフィールを作成すると相手とプロフィールを交換できます'
+	String get shareLinkProfileRequired => 'プロフィールを作成すると相手とプロフィールを交換できます';
+
 	/// ja: 'このリンクは無効です'
 	String get shareLinkInvalidTitle => 'このリンクは無効です';
 
@@ -1426,6 +1432,8 @@ extension on Translations {
 			'exchange.redeemInvalid' => 'コードが見つからないか、有効期限が切れています',
 			'exchange.redeemSelf' => '自分のコードは入力できません',
 			'exchange.redeemRateLimited' => '試行回数が多すぎます。しばらくしてからもう一度お試しください',
+			'exchange.shareLinkSignInRequired' => 'サインインすると相手とプロフィールを交換できます',
+			'exchange.shareLinkProfileRequired' => 'プロフィールを作成すると相手とプロフィールを交換できます',
 			'exchange.shareLinkInvalidTitle' => 'このリンクは無効です',
 			'exchange.shareLinkInvalidBody' => 'プロフィール交換用のリンクか確認してください',
 			'exchange.shareLinkExpiredTitle' => 'このリンクの有効期限が切れています',

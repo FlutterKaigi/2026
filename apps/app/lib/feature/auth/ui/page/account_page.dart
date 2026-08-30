@@ -73,14 +73,27 @@ class AccountPage extends HookConsumerWidget {
     // exchange. `handledToken` guards against redoing it if `profile` (a
     // stream value) emits again before the notifier's `state = null` clear is
     // observed.
-    final pendingToken = ref.watch(pendingExchangeTokenProvider);
+    final pending = ref.watch(pendingExchangeTokenProvider);
     final profile = profileState.value;
     final myUid = authState.value?.uid;
     final handledPendingToken = useState<String?>(null);
     useEffect(() {
-      if (pendingToken == null || myUid == null || profile == null) {
+      if (pending == null || myUid == null || profile == null) {
         return null;
       }
+      // A pending entry recorded under a real (non-null) uid only ever
+      // belongs to that uid — see `PendingExchangeTokenNotifier`'s doc
+      // comment. Discard rather than resolve it for a mismatched uid, and
+      // drop it outright so it can't be picked up by yet another account
+      // later on the same device.
+      if (pending.uid != null && pending.uid != myUid) {
+        // Deferred to a microtask: Riverpod disallows modifying a provider
+        // synchronously from a widget life-cycle callback (`useEffect` runs
+        // as one).
+        unawaited(Future.microtask(() => ref.read(pendingExchangeTokenProvider.notifier).clear()));
+        return null;
+      }
+      final pendingToken = pending.token;
       if (handledPendingToken.value == pendingToken) {
         return null;
       }
@@ -92,7 +105,7 @@ class AccountPage extends HookConsumerWidget {
           myUid: myUid,
           repository: ref.read(profileExchangeRepositoryProvider),
         );
-        ref.read(pendingExchangeTokenProvider.notifier).clearIfCurrent(pendingToken);
+        ref.read(pendingExchangeTokenProvider.notifier).clearIfCurrent(pending.uid, pendingToken);
         if (!context.mounted) {
           return;
         }
@@ -115,7 +128,7 @@ class AccountPage extends HookConsumerWidget {
 
       unawaited(resolve());
       return null;
-    }, [pendingToken, myUid, profile]);
+    }, [pending, myUid, profile]);
 
     Future<void> runAuthAction(
       Future<void> Function(AuthRepository repository) action, {
@@ -189,6 +202,7 @@ class AccountPage extends HookConsumerWidget {
             await ref.read(userProfileRepositoryProvider).delete(user.uid);
             await ref.read(exchangeTokenCacheRepositoryProvider).clear(user.uid);
             await ref.read(exchangeCodeCacheRepositoryProvider).clear(user.uid);
+            ref.read(pendingExchangeTokenProvider.notifier).clear();
           },
         ),
         successMessage: t.auth.account.deleted,
@@ -222,6 +236,7 @@ class AccountPage extends HookConsumerWidget {
                   onSignOut: () => runAuthAction((repository) async {
                     await ref.read(exchangeTokenCacheRepositoryProvider).clear(value.uid);
                     await ref.read(exchangeCodeCacheRepositoryProvider).clear(value.uid);
+                    ref.read(pendingExchangeTokenProvider.notifier).clear();
                     await repository.signOut();
                   }),
                   onDeleteAccount: () => deleteAccount(value),

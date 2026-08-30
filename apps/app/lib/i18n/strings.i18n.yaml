@@ -261,6 +261,8 @@ exchange:
   redeemInvalid: コードが見つからないか、有効期限が切れています
   redeemSelf: 自分のコードは入力できません
   redeemRateLimited: 試行回数が多すぎます。しばらくしてからもう一度お試しください
+  shareLinkSignInRequired: サインインすると相手とプロフィールを交換できます
+  shareLinkProfileRequired: プロフィールを作成すると相手とプロフィールを交換できます
   shareLinkInvalidTitle: このリンクは無効です
   shareLinkInvalidBody: プロフィール交換用のリンクか確認してください
   shareLinkExpiredTitle: このリンクの有効期限が切れています
