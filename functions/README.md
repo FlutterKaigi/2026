@@ -35,7 +35,7 @@ FlutterKaigi 2026 の Cloud Functions。STG → 本番のデータ反映用の
   本人の `exchanges` サブコレクション全件と、相手側に残ったミラー
   `users/{otherUid}/exchanges/{uid}` を削除する。`AuthRepository.deleteAccount`
   の `beforeDelete` が `users/{uid}` を削除する運用と組み合わせて動く。
-  500 件ずつのバッチ削除で、削除対象がなければ何もしない（re-run しても安全）。
+  400 件ずつのバッチ削除で、削除対象がなければ何もしない（re-run しても安全）。
 
 `exchangeCodes` と `exchangeCodeAttempts` は Firestore ルールでクライアントからの
 read/write を一切禁止しており、これらの関数のみが Admin SDK 経由で読み書きする。
