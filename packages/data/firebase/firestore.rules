@@ -80,13 +80,19 @@ service cloud.firestore {
       //
       // packages/data/firebase/schemas/firestore/profile_exchange.schema.json と
       // ProfileExchange の上限値 (noteMaxLength) に合わせる。
+      // isValidProfileExchange（create 時）と exchanges の update ルールの両方から
+      // 呼ぶので、上限値の変更箇所を 1 箇所にまとめておく。
+      function isValidNote(data) {
+        return !('note' in data) || data.note == null
+          || (data.note is string && data.note.size() <= 300);
+      }
+
       function isValidProfileExchange(data) {
         return data.keys().hasOnly(['createdAt', 'origin', 'token', 'note'])
           && data.createdAt is timestamp
           && data.origin in ['scan', 'mirror']
           && (!('token' in data) || data.token == null || data.token is string)
-          && (!('note' in data) || data.note == null
-            || (data.note is string && data.note.size() <= 300));
+          && isValidNote(data);
       }
 
       match /exchanges/{otherUid} {
@@ -102,8 +108,7 @@ service cloud.firestore {
         // Cloud Functions（Admin SDK）が行うため、クライアントの update では扱わない。
         allow update: if isOwner(uid)
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['note'])
-          && (!('note' in request.resource.data) || request.resource.data.note == null
-            || (request.resource.data.note is string && request.resource.data.note.size() <= 300));
+          && isValidNote(request.resource.data);
         allow delete: if isOwner(uid);
       }
     }

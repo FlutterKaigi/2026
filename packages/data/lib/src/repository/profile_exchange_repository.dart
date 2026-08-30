@@ -39,9 +39,24 @@ final class FirestoreProfileExchangeRepository implements ProfileExchangeReposit
   @override
   Stream<List<ProfileExchange>> watchAll(String uid) {
     final query = _exchanges(uid).orderBy('createdAt', descending: true);
-    return watchFirestoreQuery(query).map(
-      (snapshot) => snapshot.docs.map((doc) => ProfileExchange.fromJson({...doc.data(), 'id': doc.id})).toList(),
-    );
+    return watchFirestoreQuery(query).map((snapshot) => snapshot.docs.map(_toExchange).toList());
+  }
+
+  /// Parses one exchange document.
+  ///
+  /// `snapshots()` reports pending `FieldValue.serverTimestamp()` writes as
+  /// `null` (the SDK pins `ServerTimestampBehavior.none` for listeners), so
+  /// the local echo of [createFromScan] would fail to parse right after an
+  /// offline (or just-submitted) scan. Fill `createdAt` with the current time
+  /// until the server acknowledges the write, mirroring
+  /// `ServerTimestampBehavior.estimate` — see
+  /// `UserProfileRepository._toProfile` for the same workaround.
+  static ProfileExchange _toExchange(QueryDocumentSnapshot<Map<String, dynamic>> doc) {
+    final data = <String, dynamic>{...doc.data(), 'id': doc.id};
+    if (doc.metadata.hasPendingWrites) {
+      data['createdAt'] ??= DateTime.now();
+    }
+    return ProfileExchange.fromJson(data);
   }
 
   @override

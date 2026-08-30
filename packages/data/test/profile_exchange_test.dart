@@ -43,4 +43,25 @@ void main() {
 
     expect(exchange.toJson()['origin'], 'mirror');
   });
+
+  test(
+    'a null createdAt (an unresolved FieldValue.serverTimestamp() echoed from the local cache) '
+    'throws FormatException, so callers must fill it in before parsing '
+    '(see FirestoreProfileExchangeRepository._toExchange)',
+    () {
+      expect(
+        () => ProfileExchange.fromJson({'id': 'other-uid', 'createdAt': null, 'origin': 'scan', 'token': 'v1...'}),
+        throwsFormatException,
+      );
+
+      // The workaround: substitute an estimated timestamp before parsing.
+      final exchange = ProfileExchange.fromJson({
+        'id': 'other-uid',
+        'createdAt': DateTime.utc(2026, 8, 30),
+        'origin': 'scan',
+        'token': 'v1...',
+      });
+      expect(exchange.createdAt, DateTime.utc(2026, 8, 30));
+    },
+  );
 }
