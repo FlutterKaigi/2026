@@ -1,6 +1,6 @@
 import * as crypto from "node:crypto";
-import { FieldValue } from "firebase-admin/firestore";
-import { onDocumentCreated } from "firebase-functions/v2/firestore";
+import { DocumentReference, FieldValue, Timestamp } from "firebase-admin/firestore";
+import { onDocumentCreated, onDocumentDeleted } from "firebase-functions/v2/firestore";
 import { HttpsError, onCall } from "firebase-functions/v2/https";
 import { defineSecret } from "firebase-functions/params";
 import * as logger from "firebase-functions/logger";
@@ -67,6 +67,18 @@ export interface IssueExchangeTokenResult {
   expiresAt: number;
 }
 
+/** Reads the HMAC secret, failing loudly rather than signing with an empty key. */
+function requireExchangeTokenSecret(): string {
+  const secret = exchangeTokenSecret.value();
+  if (secret.length === 0) {
+    // defineSecret().value() returns "" (not a thrown error) when the secret
+    // isn't configured, and an empty HMAC key is reproducible by anyone.
+    logger.error("EXCHANGE_TOKEN_SECRET is not configured");
+    throw new HttpsError("internal", "プロフィール交換用のトークンを発行できませんでした。");
+  }
+  return secret;
+}
+
 /**
  * Issues a signed, time-limited token for the caller's own uid so the app can
  * embed it in a QR code without exposing the uid directly. The client caches
@@ -82,14 +94,7 @@ export const issueExchangeToken = onCall(
     if (request.auth == null) {
       throw new HttpsError("unauthenticated", "サインインが必要です。");
     }
-    const secret = exchangeTokenSecret.value();
-    if (secret.length === 0) {
-      // defineSecret().value() returns "" (not a thrown error) when the
-      // secret isn't configured, and an empty HMAC key is reproducible by
-      // anyone — so this must fail loudly rather than sign with it.
-      logger.error("EXCHANGE_TOKEN_SECRET is not configured");
-      throw new HttpsError("internal", "プロフィール交換用のトークンを発行できませんでした。");
-    }
+    const secret = requireExchangeTokenSecret();
     const expiresAt = Math.floor(Date.now() / 1000) + EXCHANGE_TOKEN_TTL_SECONDS;
     return {
       token: buildExchangeToken(request.auth.uid, expiresAt, secret),
@@ -98,14 +103,20 @@ export const issueExchangeToken = onCall(
   },
 );
 
+/** `counters/{counterId}` document id tallying every completed exchange pair. */
+const PROFILE_EXCHANGES_COUNTER_ID = "profileExchanges";
+
 /**
- * Mirrors a verified `scan` exchange to the other attendee and clears the
- * token from the scanning attendee's document.
+ * Mirrors a verified `scan` exchange to the other attendee, increments the
+ * `counters/profileExchanges` aggregate, and clears the token from the
+ * scanning attendee's document.
  *
  * `origin === 'mirror'` documents are created by this same trigger, so they
- * are skipped to avoid mirroring a mirror. An invalid/expired/tampered token,
- * or a token whose uid does not match the scanned attendee, is treated as a
- * forged exchange and the created document is deleted outright.
+ * are skipped to avoid mirroring a mirror (and are therefore never counted,
+ * which keeps the counter equal to the number of exchanged pairs). An
+ * invalid/expired/tampered token, or a token whose uid does not match the
+ * scanned attendee, is treated as a forged exchange and the created document
+ * is deleted outright.
  */
 export const onProfileExchangeCreated = onDocumentCreated(
   {
@@ -142,24 +153,244 @@ export const onProfileExchangeCreated = onDocumentCreated(
 
     const db = defaultFirestore();
     const mirrorRef = db.collection("users").doc(otherUid).collection("exchanges").doc(uid);
-    try {
-      // create() (not get-then-set) so a concurrent real scan from the other
-      // attendee — who may be verifying their own mirror of this exchange at
-      // the same moment — can never have its own `origin: 'scan'` document
-      // overwritten by this mirror; the loser just hits ALREADY_EXISTS below.
-      await mirrorRef.create({
+    const counterRef = db.collection("counters").doc(PROFILE_EXCHANGES_COUNTER_ID);
+    // Mirror creation and the counter increment commit atomically, and the
+    // mirror's existence gates both: onDocumentCreated retries at least once,
+    // so a retry that finds the mirror already present (from this trigger's
+    // own earlier attempt, or a concurrent real scan from the other attendee
+    // verifying their side at the same moment) must skip both writes rather
+    // than double-mirror or double-count.
+    await db.runTransaction(async (tx) => {
+      const mirrorSnapshot = await tx.get(mirrorRef);
+      if (mirrorSnapshot.exists) {
+        return;
+      }
+      tx.create(mirrorRef, {
         createdAt: FieldValue.serverTimestamp(),
         origin: "mirror",
         token: null,
         note: null,
       });
-    } catch (error) {
-      const alreadyExists = typeof error === "object" && error != null && (error as { code?: number }).code === 6;
-      if (!alreadyExists) {
-        throw error;
-      }
-    }
+      tx.set(counterRef, { count: FieldValue.increment(1) }, { merge: true });
+    });
 
     await snapshot.ref.update({ token: null });
   },
 );
+
+const EXCHANGE_CODE_LENGTH = 6;
+const EXCHANGE_CODE_TTL_MILLIS = 5 * 60 * 1000;
+const EXCHANGE_CODE_ISSUE_ATTEMPTS = 10;
+const MAX_REDEEM_FAILURES = 10;
+const REDEEM_BLOCK_DURATION_MILLIS = 10 * 60 * 1000;
+
+/** A cryptographically random zero-padded 6-digit code. */
+function randomExchangeCode(): string {
+  return crypto.randomInt(0, 10 ** EXCHANGE_CODE_LENGTH).toString().padStart(EXCHANGE_CODE_LENGTH, "0");
+}
+
+export interface IssueExchangeCodeResult {
+  code: string;
+  expiresAt: number;
+}
+
+/**
+ * Issues a short-lived 6-digit code for the caller's own uid — the fallback
+ * exchange path for camera-denied or otherwise QR-incapable devices.
+ *
+ * The code itself is too short to be a signed token (a forged 6-digit value
+ * is trivially guessable), so unlike [issueExchangeToken] it is looked up
+ * server-side: [redeemExchangeCode] reads `exchangeCodes/{code}` to find the
+ * issuing uid, then hands back a normal signed exchange token so the create()
+ * path stays the same for both QR and code exchanges.
+ */
+export const issueExchangeCode = onCall(
+  { enforceAppCheck: !isEmulator },
+  async (request): Promise<IssueExchangeCodeResult> => {
+    if (request.auth == null) {
+      throw new HttpsError("unauthenticated", "サインインが必要です。");
+    }
+    const uid = request.auth.uid;
+    const db = defaultFirestore();
+    const codesRef = db.collection("exchangeCodes");
+
+    // A fresh code invalidates any code this uid issued earlier, so an old
+    // code copied down by mistake can't still be redeemed.
+    const previous = await codesRef.where("uid", "==", uid).get();
+    if (!previous.empty) {
+      const batch = db.batch();
+      for (const doc of previous.docs) {
+        batch.delete(doc.ref);
+      }
+      await batch.commit();
+    }
+
+    const expiresAtMillis = Date.now() + EXCHANGE_CODE_TTL_MILLIS;
+    for (let attempt = 0; attempt < EXCHANGE_CODE_ISSUE_ATTEMPTS; attempt++) {
+      const code = randomExchangeCode();
+      try {
+        await codesRef.doc(code).create({
+          uid,
+          expiresAt: Timestamp.fromMillis(expiresAtMillis),
+        });
+        return { code, expiresAt: Math.floor(expiresAtMillis / 1000) };
+      } catch (error) {
+        if (!isAlreadyExists(error)) {
+          throw error;
+        }
+        // Collided with another attendee's live code; try another value.
+      }
+    }
+    throw new HttpsError("resource-exhausted", "コードを発行できませんでした。もう一度お試しください。");
+  },
+);
+
+function isAlreadyExists(error: unknown): boolean {
+  // google-gax status code 6 = ALREADY_EXISTS.
+  return typeof error === "object" && error != null && (error as { code?: number }).code === 6;
+}
+
+interface RedeemAttempts {
+  failCount?: number;
+  blockedUntil?: Timestamp;
+}
+
+/**
+ * Records one failed [redeemExchangeCode] call for [uid] and blocks further
+ * attempts once [MAX_REDEEM_FAILURES] is reached within a rolling window.
+ *
+ * A `blockedUntil` that has already passed resets the count, so a legitimate
+ * user isn't re-blocked by attempts made before their previous block expired.
+ */
+async function recordFailedRedeemAttempt(uid: string): Promise<void> {
+  const db = defaultFirestore();
+  const attemptsRef = db.collection("exchangeCodeAttempts").doc(uid);
+  await db.runTransaction(async (tx) => {
+    const snapshot = await tx.get(attemptsRef);
+    const data = snapshot.data() as RedeemAttempts | undefined;
+    const blockExpired = data?.blockedUntil != null && data.blockedUntil.toMillis() <= Date.now();
+    const current = blockExpired ? 0 : (data?.failCount ?? 0);
+    const next = current + 1;
+
+    const update: RedeemAttempts = { failCount: next };
+    if (next >= MAX_REDEEM_FAILURES) {
+      update.blockedUntil = Timestamp.fromMillis(Date.now() + REDEEM_BLOCK_DURATION_MILLIS);
+    }
+    tx.set(attemptsRef, update, { merge: true });
+  });
+}
+
+/** Clears [uid]'s failed-attempt count after a successful redemption. */
+async function resetRedeemAttempts(uid: string): Promise<void> {
+  await defaultFirestore().collection("exchangeCodeAttempts").doc(uid).delete();
+}
+
+/**
+ * Redeems a 6-digit code issued by [issueExchangeCode], returning a signed
+ * exchange token for the issuing attendee's uid in the same shape as
+ * [issueExchangeToken] — so the client feeds it into the same
+ * `users/{me}/exchanges/{otherUid}` create() path used for QR scans, rather
+ * than the code flow having its own way to create an exchange.
+ */
+export const redeemExchangeCode = onCall(
+  {
+    enforceAppCheck: !isEmulator,
+    secrets: [exchangeTokenSecret],
+  },
+  async (request): Promise<IssueExchangeTokenResult> => {
+    if (request.auth == null) {
+      throw new HttpsError("unauthenticated", "サインインが必要です。");
+    }
+    const uid = request.auth.uid;
+    const rawCode = request.data?.code;
+    if (typeof rawCode !== "string" || !/^\d{6}$/.test(rawCode.trim())) {
+      throw new HttpsError("invalid-argument", "6桁の数字を入力してください。");
+    }
+    const code = rawCode.trim();
+
+    const db = defaultFirestore();
+    const attemptsRef = db.collection("exchangeCodeAttempts").doc(uid);
+    const attemptsSnapshot = await attemptsRef.get();
+    const blockedUntil = (attemptsSnapshot.data() as RedeemAttempts | undefined)?.blockedUntil;
+    if (blockedUntil != null && blockedUntil.toMillis() > Date.now()) {
+      throw new HttpsError("resource-exhausted", "試行回数が多すぎます。しばらくしてからもう一度お試しください。");
+    }
+
+    const codeRef = db.collection("exchangeCodes").doc(code);
+    const codeSnapshot = await codeRef.get();
+    if (!codeSnapshot.exists) {
+      await recordFailedRedeemAttempt(uid);
+      throw new HttpsError("not-found", "コードが見つかりません。入力内容を確認してください。");
+    }
+    const codeData = codeSnapshot.data()!;
+    const otherUid = codeData.uid as string;
+    const expiresAt = codeData.expiresAt as Timestamp;
+    if (expiresAt.toMillis() < Date.now()) {
+      await codeRef.delete();
+      await recordFailedRedeemAttempt(uid);
+      throw new HttpsError("not-found", "コードの有効期限が切れています。");
+    }
+    if (otherUid === uid) {
+      // Not a brute-force signal (the caller can only ever produce their own
+      // uid's code by knowing it already), so this doesn't count as a
+      // failure.
+      throw new HttpsError("failed-precondition", "自分のコードは入力できません。");
+    }
+
+    // Consumed: a code is redeemable once, same as a QR scan's exchange
+    // create() failing with ALREADY_EXISTS on a second attempt.
+    await codeRef.delete();
+    await resetRedeemAttempts(uid);
+
+    const secret = requireExchangeTokenSecret();
+    const expiresAtSeconds = Math.floor(Date.now() / 1000) + EXCHANGE_TOKEN_TTL_SECONDS;
+    return {
+      token: buildExchangeToken(otherUid, expiresAtSeconds, secret),
+      expiresAt: expiresAtSeconds,
+    };
+  },
+);
+
+/** Firestore batched-write limit, matching `index.ts`'s `BATCH_CHUNK_SIZE`. */
+const DELETE_CHUNK_SIZE = 400;
+
+async function deleteInChunks(refs: DocumentReference[]): Promise<void> {
+  const db = defaultFirestore();
+  for (let i = 0; i < refs.length; i += DELETE_CHUNK_SIZE) {
+    const batch = db.batch();
+    for (const ref of refs.slice(i, i + DELETE_CHUNK_SIZE)) {
+      batch.delete(ref);
+    }
+    await batch.commit();
+  }
+}
+
+/**
+ * Cleans up profile-exchange data left behind when `users/{uid}` is deleted
+ * (see `AuthRepository.deleteAccount`'s `beforeDelete` hook, which removes
+ * that document as part of account deletion).
+ *
+ * Removes the deleted uid's own `exchanges` subcollection and, for every
+ * attendee it references, the mirror at `users/{otherUid}/exchanges/{uid}`.
+ * Every id in the deleted uid's own subcollection has such a mirror by
+ * construction (`onProfileExchangeCreated` creates one for both `scan` and
+ * the resulting `mirror` side), so no `collectionGroup` scan is needed to
+ * find them.
+ *
+ * Batched deletes handle a large exchange history without exceeding the
+ * per-batch write limit. Re-running against an already-cleaned uid finds no
+ * documents and deletes nothing, so an at-least-once retry can't loop or
+ * fail.
+ */
+export const onProfileExchangeOwnerDeleted = onDocumentDeleted("users/{uid}", async (event) => {
+  const { uid } = event.params;
+  const db = defaultFirestore();
+  const ownExchanges = db.collection("users").doc(uid).collection("exchanges");
+  const snapshot = await ownExchanges.get();
+
+  const refs = [
+    ...snapshot.docs.map((doc) => doc.ref),
+    ...snapshot.docs.map((doc) => db.collection("users").doc(doc.id).collection("exchanges").doc(uid)),
+  ];
+  await deleteInChunks(refs);
+});

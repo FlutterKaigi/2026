@@ -7,7 +7,13 @@ import * as logger from "firebase-functions/logger";
 import { defaultFirestore } from "./firebase_admin";
 import { FUNCTIONS_REGION, isEmulator } from "./environment";
 
-export { issueExchangeToken, onProfileExchangeCreated } from "./profile_exchange";
+export {
+  issueExchangeCode,
+  issueExchangeToken,
+  onProfileExchangeCreated,
+  onProfileExchangeOwnerDeleted,
+  redeemExchangeCode,
+} from "./profile_exchange";
 
 // デプロイ先（= 同期元）と同期先のリージョン・プロジェクト設定。
 // SYNC_TARGET_PROJECT_ID は functions/.env（Git 管理外）で指定する。
