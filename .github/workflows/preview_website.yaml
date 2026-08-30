@@ -108,7 +108,9 @@ jobs:
       # rather than the production domain (where this branch's per-sponsor images
       # are not yet deployed). Production deploy keeps the absolute default.
       - working-directory: apps/website
-        run: dart run jaspr_cli:jaspr build --dart-define=SITE_ORIGIN=
+        run: >
+          dart run jaspr_cli:jaspr build --dart-define=SITE_ORIGIN=
+          --dart-define=FIRESTORE_PROJECT_ID=${{ vars.STG_FIREBASE_PROJECT_ID }}
 
       - id: deploy
         uses: cloudflare/wrangler-action@ebbaa1584979971c8614a24965b4405ff95890e0 # v4.0.0
