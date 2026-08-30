@@ -95,6 +95,15 @@ jobs:
           FIRESTORE_HOST: firestore.googleapis.com
           FIRESTORE_ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
 
+      # Generate the profile-exchange counter from the STG Firestore project
+      # — same fallback behaviour as the sessions/news/staff/sponsor data.
+      - name: Generate exchange counter data
+        run: dart run tool/generate_exchange_counter.dart
+        env:
+          FIREBASE_PROJECT_ID: ${{ vars.STG_FIREBASE_PROJECT_ID }}
+          FIRESTORE_HOST: firestore.googleapis.com
+          FIRESTORE_ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
+
       # Empty SITE_ORIGIN → OGP `og:image`/`og:url` are emitted host-relative so
       # they resolve against the per-version preview origin (`*.workers.dev`)
       # rather than the production domain (where this branch's per-sponsor images

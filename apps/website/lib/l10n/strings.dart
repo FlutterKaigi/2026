@@ -222,6 +222,24 @@ class Strings {
     AppLocale.en => "View $name's $platform (opens in a new tab)",
   };
 
+  // ── Profile exchange counter ───────────────────────────────────────
+  // See components/exchange_counter_section.dart and issue-594.md section 8.
+  // `count` is a build-time snapshot (constants/generated_exchange_counter.dart),
+  // not a live number — the copy below is phrased accordingly ("so far") so it
+  // reads correctly even when it's showing a somewhat-stale count.
+
+  /// Shown instead of [exchangeCounterLabel] while the count is still 0 (no
+  /// exchanges recorded yet — most of the pre-event build/preview window).
+  String get exchangeCounterEmpty => switch (locale) {
+    AppLocale.ja => 'プロフィール交換機能で参加者同士がつながります。',
+    AppLocale.en => 'Attendees connect with each other via in-app profile exchange.',
+  };
+
+  String exchangeCounterLabel(int count) => switch (locale) {
+    AppLocale.ja => 'これまでに $count 件のプロフィールが交換されました',
+    AppLocale.en => count == 1 ? '$count profile exchanged so far' : '$count profiles exchanged so far',
+  };
+
   String get footerCopyright => switch (locale) {
     AppLocale.ja => '© 2021 - 2026 FlutterKaigi 実行委員会.',
     AppLocale.en => '© 2021 - 2026 FlutterKaigi Executive Committee.',

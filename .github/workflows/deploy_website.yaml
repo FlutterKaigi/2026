@@ -96,6 +96,17 @@ jobs:
           FIRESTORE_HOST: firestore.googleapis.com
           FIRESTORE_ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
 
+      # Generate the profile-exchange counter (packages/data `counters`
+      # collection, see issue-594.md section 8) from the prod Firestore
+      # project. Output is committed to git (a single non-sensitive integer);
+      # falls back to the committed copy (or 0) if Firestore is unreachable.
+      - name: Generate exchange counter data
+        run: dart run tool/generate_exchange_counter.dart
+        env:
+          FIREBASE_PROJECT_ID: ${{ vars.PROD_FIREBASE_PROJECT_ID }}
+          FIRESTORE_HOST: firestore.googleapis.com
+          FIRESTORE_ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
+
       - working-directory: apps/website
         run: dart run jaspr_cli:jaspr build
 

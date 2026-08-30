@@ -89,12 +89,12 @@ melos:
       description: Run all tests (website + app + dashboard + shared packages)
 
     website:serve:
-      run: fvm dart run melos run sponsors:generate && fvm dart run melos run staff:generate && fvm dart run melos run news:generate && fvm dart run melos run sessions:generate && fvm dart run melos exec --scope=website -- fvm dart run jaspr_cli:jaspr serve
-      description: Serve the jaspr website in dev mode (regenerates sponsor, staff, news and session data first)
+      run: fvm dart run melos run sponsors:generate && fvm dart run melos run staff:generate && fvm dart run melos run news:generate && fvm dart run melos run sessions:generate && fvm dart run melos run exchange-counter:generate && fvm dart run melos exec --scope=website -- fvm dart run jaspr_cli:jaspr serve
+      description: Serve the jaspr website in dev mode (regenerates sponsor, staff, news, session and exchange-counter data first)
 
     website:build:
-      run: fvm dart run melos run sponsors:generate && fvm dart run melos run staff:generate && fvm dart run melos run news:generate && fvm dart run melos run sessions:generate && fvm dart run melos exec --scope=website -- make build
-      description: Build the jaspr website for production (regenerates sponsor, staff, news and session data first)
+      run: fvm dart run melos run sponsors:generate && fvm dart run melos run staff:generate && fvm dart run melos run news:generate && fvm dart run melos run sessions:generate && fvm dart run melos run exchange-counter:generate && fvm dart run melos exec --scope=website -- make build
+      description: Build the jaspr website for production (regenerates sponsor, staff, news, session and exchange-counter data first)
 
     website:start:
       run: |
@@ -209,3 +209,7 @@ melos:
     sessions:generate:
       run: fvm dart run tool/generate_sessions.dart
       description: Regenerate apps/website/lib/constants/generated_sessions.dart from the Firestore emulator (or a configured STG/prod project). Git-ignored output.
+
+    exchange-counter:generate:
+      run: fvm dart run tool/generate_exchange_counter.dart
+      description: Regenerate apps/website/lib/constants/generated_exchange_counter.dart (the counters/profileExchanges count) from the Firestore emulator (or a configured STG/prod project). Output is committed to git (a single non-sensitive integer).
