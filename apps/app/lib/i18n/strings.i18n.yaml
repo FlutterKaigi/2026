@@ -232,6 +232,33 @@ exchange:
   listEmpty: まだ誰とも交換していません
   listEmptyBody: QRコードを読み取って、参加者とプロフィールを交換しましょう
   profileUnavailable: このプロフィールは表示できません
+  deleteTooltip: 削除
+  deleteConfirmTitle: 交換を削除しますか?
+  deleteConfirmBody: 自分の一覧からのみ削除されます。相手の一覧はそのまま残ります。
+  deleteConfirmAction: 削除する
+  deleteCancel: キャンセル
+  deleteFailed: 削除できませんでした
+  noteAddTooltip: メモを追加
+  noteEditTooltip: メモを編集
+  noteEditTitle: メモ
+  noteEditHint: 自分だけに見えるメモです
+  noteLabel: メモ
+  noteSave: 保存
+  noteCancel: キャンセル
+  noteSaveFailed: メモを保存できませんでした
+  codeSectionTitle: 6桁コードで交換
+  codeSectionDescription: カメラが使えないときは、6桁のコードを伝え合って交換できます
+  myCodeSemanticLabel: プロフィール交換用の6桁コード
+  myCodeExpiresAt: 有効期限 $date まで
+  myCodeExpired: コードの有効期限が切れました
+  myCodeRefresh: コードを再発行
+  enterCodeLabel: 相手のコードを入力
+  enterCodeHint: "123456"
+  enterCodeButton: 交換する
+  enterCodeInvalidFormat: 6桁の数字を入力してください
+  redeemInvalid: コードが見つからないか、有効期限が切れています
+  redeemSelf: 自分のコードは入力できません
+  redeemRateLimited: 試行回数が多すぎます。しばらくしてからもう一度お試しください
 countryRegion:
   asia: アジア
   oceania: オセアニア

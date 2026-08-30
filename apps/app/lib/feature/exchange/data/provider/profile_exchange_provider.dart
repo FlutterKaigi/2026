@@ -1,5 +1,6 @@
 import 'package:app/core/provider/shared_preferences.dart';
 import 'package:app/feature/auth/data/provider/auth_state.dart';
+import 'package:app/feature/exchange/data/exchange_code.dart';
 import 'package:app/feature/exchange/data/exchange_token.dart';
 import 'package:app/feature/exchange/data/provider/profile_exchange_repository.dart';
 import 'package:app/feature/profile/data/provider/user_profile_repository.dart';
@@ -102,6 +103,44 @@ class MyExchangeTokenNotifier extends AsyncNotifier<ExchangeToken> {
     final token = await ref.read(exchangeTokenIssuerProvider).issue();
     await ref.read(exchangeTokenCacheRepositoryProvider).write(uid, token);
     return token;
+  }
+}
+
+/// The signed-in user's own 6-digit code: the QR fallback for camera-denied
+/// or otherwise QR-incapable devices.
+///
+/// Unlike [myExchangeTokenProvider] this is never persisted and is
+/// `autoDispose` — the code is short-lived (5 minutes server-side) by
+/// design, so there is nothing worth caching across app restarts, and
+/// leaving the exchange home screen and coming back later should issue a
+/// fresh one rather than keep showing one that may already be invalid.
+final myExchangeCodeProvider = AsyncNotifierProvider.autoDispose<MyExchangeCodeNotifier, ExchangeCode>(
+  MyExchangeCodeNotifier.new,
+);
+
+class MyExchangeCodeNotifier extends AsyncNotifier<ExchangeCode> {
+  @override
+  Future<ExchangeCode> build() async {
+    // Watched (not read) so signing out or switching accounts re-runs build()
+    // instead of leaving the previous user's code state in place.
+    final uid = ref.watch(authStateChangesProvider).value?.uid;
+    if (uid == null) {
+      // This provider is only watched once ExchangeHomePage has confirmed a
+      // signed-in user with a profile; reaching build() without one means
+      // sign-out raced the widget teardown.
+      throw StateError('myExchangeCodeProvider requires a signed-in user.');
+    }
+    return ref.read(exchangeCodeIssuerProvider).issue();
+  }
+
+  /// Issues a fresh code, replacing the current one (e.g. once it expires).
+  Future<void> refresh() async {
+    final uid = ref.read(authStateChangesProvider).value?.uid;
+    if (uid == null) {
+      return;
+    }
+    state = const AsyncLoading<ExchangeCode>();
+    state = await AsyncValue.guard(() => ref.read(exchangeCodeIssuerProvider).issue());
   }
 }
 

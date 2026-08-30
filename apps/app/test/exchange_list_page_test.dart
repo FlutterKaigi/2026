@@ -126,6 +126,103 @@ void main() {
 
     expect(find.text('このプロフィールは表示できません'), findsOneWidget);
   });
+
+  testWidgets('deletes the exchange from the own list after confirming', (tester) async {
+    final authRepository = FakeAuthRepository(initialUser: FakeUser(uid: 'uid-1'));
+    addTearDown(authRepository.dispose);
+    final exchangeRepository = FakeProfileExchangeRepository(
+      initialExchangesByUid: {
+        'uid-1': [
+          ProfileExchange(id: 'uid-2', createdAt: DateTime.utc(2026, 8, 2), origin: ProfileExchangeOrigin.scan),
+        ],
+      },
+    );
+    addTearDown(exchangeRepository.dispose);
+    final profileRepository = FakeUserProfileRepository(initialProfile: _ownProfile());
+    addTearDown(profileRepository.dispose);
+    await profileRepository.save(
+      UserProfile(
+        id: 'uid-2',
+        displayName: 'Exchanged Attendee',
+        countryOrRegion: 'TW',
+        createdAt: DateTime.utc(2026, 8),
+        updatedAt: DateTime.utc(2026, 8),
+      ),
+    );
+
+    await tester.pumpWidget(
+      buildSubject(
+        authRepository: authRepository,
+        exchangeRepository: exchangeRepository,
+        profileRepository: profileRepository,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Exchanged Attendee'), findsOneWidget);
+
+    // キャンセルでは削除されない。
+    await tester.tap(find.byTooltip('削除'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('キャンセル'));
+    await tester.pumpAndSettle();
+
+    expect(exchangeRepository.deleteCalls, isEmpty);
+    expect(find.text('Exchanged Attendee'), findsOneWidget);
+
+    // 確認すると自分の一覧からのみ削除される。
+    await tester.tap(find.byTooltip('削除'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('削除する'));
+    await tester.pumpAndSettle();
+
+    expect(exchangeRepository.deleteCalls, [(uid: 'uid-1', otherUid: 'uid-2')]);
+    expect(find.text('Exchanged Attendee'), findsNothing);
+    expect(find.text('まだ誰とも交換していません'), findsOneWidget);
+  });
+
+  testWidgets('adds a note visible only from the own list', (tester) async {
+    final authRepository = FakeAuthRepository(initialUser: FakeUser(uid: 'uid-1'));
+    addTearDown(authRepository.dispose);
+    final exchangeRepository = FakeProfileExchangeRepository(
+      initialExchangesByUid: {
+        'uid-1': [
+          ProfileExchange(id: 'uid-2', createdAt: DateTime.utc(2026, 8, 2), origin: ProfileExchangeOrigin.scan),
+        ],
+      },
+    );
+    addTearDown(exchangeRepository.dispose);
+    final profileRepository = FakeUserProfileRepository(initialProfile: _ownProfile());
+    addTearDown(profileRepository.dispose);
+    await profileRepository.save(
+      UserProfile(
+        id: 'uid-2',
+        displayName: 'Exchanged Attendee',
+        countryOrRegion: 'TW',
+        createdAt: DateTime.utc(2026, 8),
+        updatedAt: DateTime.utc(2026, 8),
+      ),
+    );
+
+    await tester.pumpWidget(
+      buildSubject(
+        authRepository: authRepository,
+        exchangeRepository: exchangeRepository,
+        profileRepository: profileRepository,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byTooltip('メモを追加'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), 'ロビーで交換');
+    await tester.tap(find.text('保存'));
+    await tester.pumpAndSettle();
+
+    expect(exchangeRepository.updateNoteCalls, [(uid: 'uid-1', otherUid: 'uid-2', note: 'ロビーで交換')]);
+    expect(find.text('ロビーで交換'), findsOneWidget);
+    expect(find.byTooltip('メモを編集'), findsOneWidget);
+  });
 }
 
 /// The signed-in user's own profile, needed only to pass ExchangeAccessGate;

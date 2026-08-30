@@ -362,6 +362,33 @@ class _Translations$exchange$en extends Translations$exchange$ja {
 	@override String get listEmpty => 'No exchanges yet';
 	@override String get listEmptyBody => 'Scan a QR code to exchange profiles with other attendees';
 	@override String get profileUnavailable => 'This profile is no longer available';
+	@override String get deleteTooltip => 'Delete';
+	@override String get deleteConfirmTitle => 'Delete this exchange?';
+	@override String get deleteConfirmBody => 'This only removes it from your own list. The other attendee\'s list is unaffected.';
+	@override String get deleteConfirmAction => 'Delete';
+	@override String get deleteCancel => 'Cancel';
+	@override String get deleteFailed => 'Could not delete the exchange';
+	@override String get noteAddTooltip => 'Add a note';
+	@override String get noteEditTooltip => 'Edit note';
+	@override String get noteEditTitle => 'Note';
+	@override String get noteEditHint => 'Visible only to you';
+	@override String get noteLabel => 'Note';
+	@override String get noteSave => 'Save';
+	@override String get noteCancel => 'Cancel';
+	@override String get noteSaveFailed => 'Could not save the note';
+	@override String get codeSectionTitle => 'Exchange with a code';
+	@override String get codeSectionDescription => 'If the camera isn\'t available, share and enter a 6-digit code instead';
+	@override String get myCodeSemanticLabel => 'Profile exchange 6-digit code';
+	@override String myCodeExpiresAt({required Object date}) => 'Valid until ${date}';
+	@override String get myCodeExpired => 'This code has expired';
+	@override String get myCodeRefresh => 'Get a new code';
+	@override String get enterCodeLabel => 'Enter the other attendee\'s code';
+	@override String get enterCodeHint => '123456';
+	@override String get enterCodeButton => 'Exchange';
+	@override String get enterCodeInvalidFormat => 'Enter a 6-digit code';
+	@override String get redeemInvalid => 'This code wasn\'t found, or it has expired';
+	@override String get redeemSelf => 'You can\'t enter your own code';
+	@override String get redeemRateLimited => 'Too many attempts. Please try again in a few minutes';
 }
 
 // Path: countryRegion
@@ -808,6 +835,33 @@ extension on TranslationsEn {
 			'exchange.listEmpty' => 'No exchanges yet',
 			'exchange.listEmptyBody' => 'Scan a QR code to exchange profiles with other attendees',
 			'exchange.profileUnavailable' => 'This profile is no longer available',
+			'exchange.deleteTooltip' => 'Delete',
+			'exchange.deleteConfirmTitle' => 'Delete this exchange?',
+			'exchange.deleteConfirmBody' => 'This only removes it from your own list. The other attendee\'s list is unaffected.',
+			'exchange.deleteConfirmAction' => 'Delete',
+			'exchange.deleteCancel' => 'Cancel',
+			'exchange.deleteFailed' => 'Could not delete the exchange',
+			'exchange.noteAddTooltip' => 'Add a note',
+			'exchange.noteEditTooltip' => 'Edit note',
+			'exchange.noteEditTitle' => 'Note',
+			'exchange.noteEditHint' => 'Visible only to you',
+			'exchange.noteLabel' => 'Note',
+			'exchange.noteSave' => 'Save',
+			'exchange.noteCancel' => 'Cancel',
+			'exchange.noteSaveFailed' => 'Could not save the note',
+			'exchange.codeSectionTitle' => 'Exchange with a code',
+			'exchange.codeSectionDescription' => 'If the camera isn\'t available, share and enter a 6-digit code instead',
+			'exchange.myCodeSemanticLabel' => 'Profile exchange 6-digit code',
+			'exchange.myCodeExpiresAt' => ({required Object date}) => 'Valid until ${date}',
+			'exchange.myCodeExpired' => 'This code has expired',
+			'exchange.myCodeRefresh' => 'Get a new code',
+			'exchange.enterCodeLabel' => 'Enter the other attendee\'s code',
+			'exchange.enterCodeHint' => '123456',
+			'exchange.enterCodeButton' => 'Exchange',
+			'exchange.enterCodeInvalidFormat' => 'Enter a 6-digit code',
+			'exchange.redeemInvalid' => 'This code wasn\'t found, or it has expired',
+			'exchange.redeemSelf' => 'You can\'t enter your own code',
+			'exchange.redeemRateLimited' => 'Too many attempts. Please try again in a few minutes',
 			'countryRegion.asia' => 'Asia',
 			'countryRegion.oceania' => 'Oceania',
 			'countryRegion.americas' => 'Americas',

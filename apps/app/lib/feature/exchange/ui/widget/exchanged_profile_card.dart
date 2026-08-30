@@ -1,6 +1,11 @@
+import 'dart:async';
+
 import 'package:app/core/extension/locale_map_extension.dart';
 import 'package:app/core/i18n/strings.g.dart';
+import 'package:app/core/log/talker.dart';
+import 'package:app/feature/auth/data/provider/auth_state.dart';
 import 'package:app/feature/exchange/data/provider/profile_exchange_provider.dart';
+import 'package:app/feature/exchange/data/provider/profile_exchange_repository.dart';
 import 'package:app/feature/profile/ui/widget/country_flag_widget.dart';
 import 'package:app/feature/profile/ui/widget/profile_avatar_widget.dart';
 import 'package:app/feature/profile/ui/widget/sns_link_chip_widget.dart';
@@ -19,6 +24,76 @@ class ExchangedProfileCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final t = Translations.of(context);
     final profileState = ref.watch(exchangedUserProfileProvider(exchange.id));
+    final myUid = ref.watch(authStateChangesProvider).value?.uid;
+
+    void showMessage(String message) {
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(message)));
+    }
+
+    Future<void> handleDelete() async {
+      final uid = myUid;
+      if (uid == null) {
+        return;
+      }
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: Text(t.exchange.deleteConfirmTitle),
+          content: Text(t.exchange.deleteConfirmBody),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: Text(t.exchange.deleteCancel),
+            ),
+            FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: Theme.of(dialogContext).colorScheme.error,
+                foregroundColor: Theme.of(dialogContext).colorScheme.onError,
+              ),
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: Text(t.exchange.deleteConfirmAction),
+            ),
+          ],
+        ),
+      );
+      if (confirmed != true || !context.mounted) {
+        return;
+      }
+      try {
+        await ref.read(profileExchangeRepositoryProvider).delete(uid: uid, otherUid: exchange.id);
+      } on Exception catch (error, stackTrace) {
+        ref.read(talkerProvider).handle(error, stackTrace);
+        if (context.mounted) {
+          showMessage(t.exchange.deleteFailed);
+        }
+      }
+    }
+
+    Future<void> handleEditNote() async {
+      final uid = myUid;
+      if (uid == null) {
+        return;
+      }
+      final result = await showDialog<_NoteEditSaved>(
+        context: context,
+        builder: (_) => _NoteEditDialog(initialNote: exchange.note),
+      );
+      if (result == null || !context.mounted) {
+        return;
+      }
+      try {
+        await ref
+            .read(profileExchangeRepositoryProvider)
+            .updateNote(uid: uid, otherUid: exchange.id, note: result.note);
+      } on Exception catch (error, stackTrace) {
+        ref.read(talkerProvider).handle(error, stackTrace);
+        if (context.mounted) {
+          showMessage(t.exchange.noteSaveFailed);
+        }
+      }
+    }
 
     return Card.outlined(
       margin: EdgeInsets.zero,
@@ -26,9 +101,20 @@ class ExchangedProfileCard extends ConsumerWidget {
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: switch (profileState) {
-          AsyncData(value: final profile?) => _ProfileContent(profile: profile),
-          AsyncData() => _UnavailableContent(message: t.exchange.profileUnavailable),
-          AsyncError() => _UnavailableContent(message: t.exchange.profileUnavailable),
+          AsyncData(value: final profile?) => _ProfileContent(
+            profile: profile,
+            exchange: exchange,
+            onDelete: () => unawaited(handleDelete()),
+            onEditNote: () => unawaited(handleEditNote()),
+          ),
+          AsyncData() => _UnavailableContent(
+            message: t.exchange.profileUnavailable,
+            onDelete: () => unawaited(handleDelete()),
+          ),
+          AsyncError() => _UnavailableContent(
+            message: t.exchange.profileUnavailable,
+            onDelete: () => unawaited(handleDelete()),
+          ),
           AsyncLoading() => const SizedBox(
             height: 48,
             child: Center(child: CircularProgressIndicator.adaptive()),
@@ -40,9 +126,17 @@ class ExchangedProfileCard extends ConsumerWidget {
 }
 
 class _ProfileContent extends StatelessWidget {
-  const _ProfileContent({required this.profile});
+  const _ProfileContent({
+    required this.profile,
+    required this.exchange,
+    required this.onDelete,
+    required this.onEditNote,
+  });
 
   final UserProfile profile;
+  final ProfileExchange exchange;
+  final VoidCallback onDelete;
+  final VoidCallback onEditNote;
 
   @override
   Widget build(BuildContext context) {
@@ -50,6 +144,7 @@ class _ProfileContent extends StatelessWidget {
     final locale = Localizations.localeOf(context);
     final country = findCountry(profile.countryOrRegion);
     final bio = profile.bio?.trim();
+    final note = exchange.note?.trim();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -83,6 +178,7 @@ class _ProfileContent extends StatelessWidget {
                 ],
               ),
             ),
+            _CardActions(hasNote: note != null && note.isNotEmpty, onDelete: onDelete, onEditNote: onEditNote),
           ],
         ),
         if (bio != null && bio.isNotEmpty) ...[
@@ -99,17 +195,68 @@ class _ProfileContent extends StatelessWidget {
             ],
           ),
         ],
+        if (note != null && note.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(Icons.sticky_note_2_outlined, size: 16, color: theme.colorScheme.onSurfaceVariant),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  note,
+                  style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+/// Trailing delete / note-edit icon buttons, shown for both a resolvable
+/// profile and [_UnavailableContent] (deleting must stay possible even once
+/// the other attendee's profile can no longer be read).
+class _CardActions extends StatelessWidget {
+  const _CardActions({required this.hasNote, required this.onDelete, this.onEditNote});
+
+  final bool hasNote;
+  final VoidCallback onDelete;
+  final VoidCallback? onEditNote;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = Translations.of(context);
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (onEditNote != null)
+          IconButton(
+            icon: Icon(hasNote ? Icons.edit_note : Icons.note_add_outlined),
+            tooltip: hasNote ? t.exchange.noteEditTooltip : t.exchange.noteAddTooltip,
+            onPressed: onEditNote,
+          ),
+        IconButton(
+          icon: const Icon(Icons.delete_outline),
+          tooltip: t.exchange.deleteTooltip,
+          onPressed: onDelete,
+        ),
       ],
     );
   }
 }
 
 /// Shown when the other attendee's profile can no longer be read (deleted
-/// account, or a transient load error).
+/// account, or a transient load error). Deleting must stay reachable even
+/// then, so [onDelete] is still wired up; editing a note about someone whose
+/// profile is gone isn't useful, so no note button is shown.
 class _UnavailableContent extends StatelessWidget {
-  const _UnavailableContent({required this.message});
+  const _UnavailableContent({required this.message, required this.onDelete});
 
   final String message;
+  final VoidCallback onDelete;
 
   @override
   Widget build(BuildContext context) => Row(
@@ -124,6 +271,67 @@ class _UnavailableContent extends StatelessWidget {
           ).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
         ),
       ),
+      _CardActions(hasNote: false, onDelete: onDelete),
     ],
   );
+}
+
+/// Result of [_NoteEditDialog] once the user taps save; distinct from `null`
+/// (dialog dismissed) so an explicit save-with-empty-text can still clear the
+/// note.
+class _NoteEditSaved {
+  const _NoteEditSaved(this.note);
+
+  final String? note;
+}
+
+class _NoteEditDialog extends StatefulWidget {
+  const _NoteEditDialog({required this.initialNote});
+
+  final String? initialNote;
+
+  @override
+  State<_NoteEditDialog> createState() => _NoteEditDialogState();
+}
+
+class _NoteEditDialogState extends State<_NoteEditDialog> {
+  late final _controller = TextEditingController(text: widget.initialNote ?? '');
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _save() {
+    final trimmed = _controller.text.trim();
+    Navigator.of(context).pop(_NoteEditSaved(trimmed.isEmpty ? null : trimmed));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final t = Translations.of(context);
+    return AlertDialog(
+      title: Text(t.exchange.noteEditTitle),
+      content: TextField(
+        controller: _controller,
+        autofocus: true,
+        maxLength: ProfileExchange.noteMaxLength,
+        maxLines: 4,
+        minLines: 2,
+        onSubmitted: (_) => _save(),
+        decoration: InputDecoration(
+          hintText: t.exchange.noteEditHint,
+          border: const OutlineInputBorder(),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(t.exchange.noteCancel),
+        ),
+        FilledButton(onPressed: _save, child: Text(t.exchange.noteSave)),
+      ],
+    );
+  }
 }
