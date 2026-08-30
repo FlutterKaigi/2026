@@ -12,9 +12,7 @@ _StaffMember _$StaffMemberFromJson(Map<String, dynamic> json) => _StaffMember(
   iconUrl: json['iconUrl'] as String,
   greeting: json['greeting'] as String?,
   snsLinks:
-      (json['snsLinks'] as List<dynamic>?)
-          ?.map((e) => SnsLink.fromJson(e as Map<String, dynamic>))
-          .toList() ??
+      (json['snsLinks'] as List<dynamic>?)?.map((e) => SnsLink.fromJson(e as Map<String, dynamic>)).toList() ??
       const [],
   order: (json['order'] as num).toInt(),
   createdAt: const FirestoreDateTimeConverter().fromJson(json['createdAt']),

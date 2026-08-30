@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/FlutterKaigi/2026/packages/data/firebase/schemas/firestore/profile_exchange.schema.json",
+  "title": "ProfileExchange",
+  "description": "Firestore document schema for the `users/{uid}/exchanges` subcollection. The document id is the other attendee's Firebase Auth uid.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["createdAt", "origin"],
+  "properties": {
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "origin": {
+      "description": "'scan' = the owner scanned the other attendee's QR code. 'mirror' = written by the onDocumentCreated trigger for the other attendee.",
+      "type": "string",
+      "enum": ["scan", "mirror"]
+    },
+    "token": {
+      "description": "Present only until the trigger verifies a 'scan' write and clears it.",
+      "type": ["string", "null"]
+    },
+    "note": {
+      "type": ["string", "null"]
+    }
+  }
+}

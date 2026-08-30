@@ -74,6 +74,21 @@ service cloud.firestore {
       allow delete: if isOwner(uid);
     }
 
+    // プロフィール交換の履歴。読み取った側が自分のサブコレクションに作成し、
+    // 相手側は Cloud Functions のトリガーがミラーする（ここでは作成できない）。
+    match /users/{uid}/exchanges/{otherUid} {
+      allow read: if isOwner(uid);
+      allow create: if isOwner(uid)
+        && otherUid != uid
+        && request.resource.data.keys().hasOnly(['createdAt', 'origin', 'token', 'note'])
+        && request.resource.data.origin == 'scan'
+        && request.resource.data.token is string
+        && request.resource.data.createdAt == request.time;
+      allow update: if isOwner(uid)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['note']);
+      allow delete: if isOwner(uid);
+    }
+
     match /news/{newsId} {
       allow read: if true;
       allow write: if hasAdminAccess();

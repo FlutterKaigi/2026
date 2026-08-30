@@ -9,6 +9,7 @@ here as ISO-8601 `date-time` strings.
 Schemas committed so far, one per editable collection used by the dashboard:
 
 - `firestore/news.schema.json` (`news`)
+- `firestore/profile_exchange.schema.json` (`users/{uid}/exchanges`, written by the app, not the dashboard)
 - `firestore/session.schema.json` (`sessions`)
 - `firestore/speaker.schema.json` (`speakers`)
 - `firestore/sponsor.schema.json` (`sponsors`)

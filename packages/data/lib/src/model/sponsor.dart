@@ -21,6 +21,7 @@ abstract class Sponsor with _$Sponsor {
     String? primaryLogoUrl,
     String? secondaryLogoUrl,
     required SponsorTier tier,
+
     /// Web サイトの詳細ページのパス（`sponsors/<slug>`）に利用するスラッグ。
     String? slug,
     String? xUrl,
