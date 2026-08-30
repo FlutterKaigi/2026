@@ -8,6 +8,7 @@ import 'components/meta.dart';
 import 'constants/generated_sponsors.dart';
 import 'constants/sponsors.dart';
 import 'l10n/strings.dart';
+import 'pages/app_link_fallback.dart';
 import 'pages/home.dart';
 import 'pages/sponsor_detail.dart';
 
@@ -35,6 +36,16 @@ class App extends StatelessComponent {
               builder: (context, state) => _SponsorShell(locale: locale, sponsor: sponsor),
             ),
         ],
+        // Static fallback for the profile-exchange share link
+        // (`/x/<token>`, see `pages/app_link_fallback.dart`). A single
+        // locale-agnostic page — not one per [AppLocale] like the routes
+        // above — since `web/_redirects` rewrites every `/x/*` request to
+        // this exact generated file regardless of the visitor's language.
+        Route(
+          path: '/x',
+          title: 'FlutterKaigi 2026',
+          builder: (context, state) => const AppLinkFallbackPage(),
+        ),
       ],
     );
   }

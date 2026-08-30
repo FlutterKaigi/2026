@@ -1,0 +1,16 @@
+# Cloudflare Workers Static Assets headers file (same format as Cloudflare
+# Pages: https://developers.cloudflare.com/pages/configuration/headers/).
+#
+# apple-app-site-association has no file extension (required by Apple), so a
+# static file server has nothing to infer a content type from and would
+# otherwise serve it as application/octet-stream or text/plain — but Apple's
+# Universal Links verifier requires `Content-Type: application/json`. See
+# web/.well-known/README.md for the full Universal Links / App Links setup.
+/.well-known/apple-app-site-association
+  Content-Type: application/json
+
+# assetlinks.json is served correctly by extension already; set it
+# explicitly too since Google's own examples do the same and it costs
+# nothing to be unambiguous here.
+/.well-known/assetlinks.json
+  Content-Type: application/json

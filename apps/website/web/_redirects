@@ -1,0 +1,13 @@
+# Cloudflare Workers Static Assets redirects/rewrites file (same format as
+# Cloudflare Pages: https://developers.cloudflare.com/pages/configuration/redirects/).
+#
+# The profile-exchange share link (`https://2026.flutterkaigi.jp/x/<token>`,
+# see apps/app/lib/feature/exchange/data/exchange_link.dart) is opened by a
+# browser only when the app isn't installed / Universal Links / App Links
+# didn't intercept it. jaspr's static-site generation can't pre-render one
+# page per possible token, so every `/x/<token>` request is rewritten
+# (200 = rewrite, keeps the URL bar as-is) to the single generated fallback
+# page instead — see lib/pages/app_link_fallback.dart. The token itself is
+# never read or forwarded anywhere; this is a static asset lookup at the
+# Cloudflare edge, not a server request carrying the token onward.
+/x/*    /x/index.html    200

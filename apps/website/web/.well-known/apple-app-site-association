@@ -1,0 +1,15 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["TEAMID.jp.flutterkaigi.conf2026"],
+        "components": [
+          {
+            "/": "/x/*",
+            "comment": "Profile-exchange share link — see apps/app/lib/feature/exchange/data/exchange_link.dart"
+          }
+        ]
+      }
+    ]
+  }
+}
