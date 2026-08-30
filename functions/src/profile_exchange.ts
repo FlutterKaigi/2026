@@ -208,7 +208,7 @@ export interface IssueExchangeCodeResult {
  * path stays the same for both QR and code exchanges.
  */
 export const issueExchangeCode = onCall(
-  { enforceAppCheck: !isEmulator },
+  { region: FUNCTIONS_REGION, enforceAppCheck: !isEmulator },
   async (request): Promise<IssueExchangeCodeResult> => {
     if (request.auth == null) {
       throw new HttpsError("unauthenticated", "サインインが必要です。");
@@ -294,6 +294,7 @@ type RedeemOutcome =
  */
 export const redeemExchangeCode = onCall(
   {
+    region: FUNCTIONS_REGION,
     enforceAppCheck: !isEmulator,
     secrets: [exchangeTokenSecret],
   },
@@ -410,6 +411,7 @@ async function deleteInChunks(refs: DocumentReference[]): Promise<void> {
 export const onProfileExchangeOwnerDeleted = onDocumentDeleted(
   {
     document: "users/{uid}",
+    region: FUNCTIONS_REGION,
     // Re-running against an already-cleaned uid deletes nothing (see above),
     // so a retried delivery after a transient failure is safe.
     retry: true,
