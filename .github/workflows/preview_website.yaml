@@ -35,6 +35,14 @@ jobs:
 
       - run: dart pub get
 
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 24
+
+      - name: Test worker.js
+        working-directory: apps/website
+        run: npm test
+
       # Authenticate to GCP via Workload Identity Federation (keyless). A
       # service-account access token bypasses App Check enforcement (App Check
       # only gates clients, not trusted backends), so the generator can read the
