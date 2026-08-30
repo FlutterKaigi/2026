@@ -37,7 +37,7 @@ class ExchangeCounterSection extends StatelessComponent {
         justifyContent: .center,
         width: 100.percent,
         padding: .symmetric(horizontal: 24.px, vertical: 20.px),
-        raw: const {'background-color': '#F3EBFB'},
+        backgroundColor: eventCardSurfaceRoadmap,
       ),
       css('.exchange-counter__text').styles(
         color: const Color('#494456'),

@@ -21,6 +21,56 @@ served as `application/json` — see `web/_headers`, which sets that
 explicitly since the file itself has no extension for a static file server to
 infer a content type from.
 
+## 本番反映チェックリスト
+
+Universal Links / App Links は「実機 + 本番ドメインでの動作確認」でしか
+最終検証できない性質のもので、このリポジトリの CI だけでは完結しない。
+以下の順で実施し、チェックボックスとして PR の説明やフォローアップ Issue に
+そのまま転記して使う（誰が・いつ実施するかを明示するため）。
+
+- [ ] **プレースホルダーを解決する** — 下記「Values that are placeholders in
+      this repo」の手順で、`apple-app-site-association` の `TEAMID` と
+      `assetlinks.json` の `sha256_cert_fingerprints` を実際の値に置き換える。
+      `dart run tool/check_well_known_placeholders.dart`
+      （`fvm dart run melos well-known:check`）を実行して、どちらの
+      プレースホルダーも検出されなくなることをローカルで確認する。
+- [ ] **デプロイする** — `main` への push で `deploy_website.yaml` が自動的に
+      ビルド・デプロイする（`well-known:check` はこのワークフロー内でも
+      ビルド直前に自動実行され、まだプレースホルダーが残っていれば
+      GitHub Actions の Warning アノテーションとしてこの run 上に表示される
+      — 下記「CI ガードについて」参照）。
+- [ ] **Apple/Google 側の CDN・検証結果が反映されるのを確認する** — 下記
+      「Verifying after deploy」の `curl` / Digital Asset Links validator
+      の手順を実施する。反映は即時ではないことがある。
+- [ ] **実機で動作確認する** — 実際に配布された（または TestFlight /
+      内部テスト版の）アプリで `https://2026.flutterkaigi.jp/x/...` を
+      タップし、ブラウザの `/x/` フォールバックページではなくアプリが
+      直接開くことを確認する（iOS Simulator では検証不可）。
+
+### CI ガードについて
+
+`tool/check_well_known_placeholders.dart` は `deploy_website.yaml` /
+`preview_website.yaml` の両方でビルド直前に自動実行され、上記2つの
+プレースホルダーが残っていれば **警告のみ（ビルド・デプロイは失敗させない）**
+で知らせる。これは「サイレントに機能しないまま出荷される」ことを防ぐための
+最小限のガードで、意図的に warning 止まりにしてある
+（プレースホルダーのままでも JSON として妥当なため、ビルドやデプロイ自体は
+技術的に成功してしまう —「実機で動かない」だけが実害）。
+
+CI を **fail させたい場合**（例: プレースホルダー解決をリリースブロッカーに
+格上げしたいとき）は、コード変更なしでワークフロー側に1行足すだけで切り替え
+られる:
+
+```yaml
+- name: Check Universal Links / App Links placeholders
+  run: dart run tool/check_well_known_placeholders.dart
+  env:
+    FAIL_ON_WELL_KNOWN_PLACEHOLDER: 'true'
+```
+
+warning のまま運用するか fail 化するかはチーム判断のため、このリポジトリでは
+どちらか一方に決め打ちしていない。
+
 ## Values that are placeholders in this repo
 
 Neither value below exists anywhere in this repository (verified by

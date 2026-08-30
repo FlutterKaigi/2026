@@ -213,3 +213,7 @@ melos:
     exchange-counter:generate:
       run: fvm dart run tool/generate_exchange_counter.dart
       description: Regenerate apps/website/lib/constants/generated_exchange_counter.dart (the counters/profileExchanges count) from the Firestore emulator (or a configured STG/prod project). Output is committed to git (a single non-sensitive integer).
+
+    well-known:check:
+      run: fvm dart run tool/check_well_known_placeholders.dart
+      description: Warn (non-fatal) if apps/website/web/.well-known/{apple-app-site-association,assetlinks.json} still carry the placeholder Team ID / SHA-256 fingerprint. Runs automatically before every website deploy/preview build.

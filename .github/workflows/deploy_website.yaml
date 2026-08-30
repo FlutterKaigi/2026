@@ -107,6 +107,16 @@ jobs:
           FIRESTORE_HOST: firestore.googleapis.com
           FIRESTORE_ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
 
+      # Non-fatal (see tool/check_well_known_placeholders.dart docs): warns
+      # via a GitHub Actions annotation on this run if the Universal Links /
+      # App Links `.well-known` files still carry the placeholder Team ID /
+      # SHA-256 fingerprint checked in by PR3 — otherwise a still-unresolved
+      # placeholder ships silently (build/deploy both succeed either way; the
+      # app just never opens directly from a share link). See
+      # apps/website/web/.well-known/README.md's "本番反映チェックリスト".
+      - name: Check Universal Links / App Links placeholders
+        run: dart run tool/check_well_known_placeholders.dart
+
       - working-directory: apps/website
         run: dart run jaspr_cli:jaspr build
 

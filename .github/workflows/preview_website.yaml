@@ -104,6 +104,18 @@ jobs:
           FIRESTORE_HOST: firestore.googleapis.com
           FIRESTORE_ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
 
+      # Non-fatal (see tool/check_well_known_placeholders.dart docs): warns
+      # via a GitHub Actions annotation on this PR's run if the Universal
+      # Links / App Links `.well-known` files still carry the placeholder
+      # Team ID / SHA-256 fingerprint checked in by PR3 — surfacing this on
+      # every preview build catches an unresolved placeholder before it ever
+      # reaches main. See apps/website/web/.well-known/README.md's
+      # "本番反映チェックリスト" (the placeholders don't apply to preview
+      # deploys themselves, which live on *.workers.dev, not the production
+      # domain the AASA/assetlinks.json name).
+      - name: Check Universal Links / App Links placeholders
+        run: dart run tool/check_well_known_placeholders.dart
+
       # Empty SITE_ORIGIN → OGP `og:image`/`og:url` are emitted host-relative so
       # they resolve against the per-version preview origin (`*.workers.dev`)
       # rather than the production domain (where this branch's per-sponsor images
