@@ -131,6 +131,7 @@ class AccountPage extends HookConsumerWidget {
           beforeDelete: () async {
             await ref.read(userProfileRepositoryProvider).delete(user.uid);
             await ref.read(exchangeTokenCacheRepositoryProvider).clear(user.uid);
+            await ref.read(exchangeCodeCacheRepositoryProvider).clear(user.uid);
           },
         ),
         successMessage: t.auth.account.deleted,
@@ -163,6 +164,7 @@ class AccountPage extends HookConsumerWidget {
                   onRetryProfile: () => ref.invalidate(userProfileProvider),
                   onSignOut: () => runAuthAction((repository) async {
                     await ref.read(exchangeTokenCacheRepositoryProvider).clear(value.uid);
+                    await ref.read(exchangeCodeCacheRepositoryProvider).clear(value.uid);
                     await repository.signOut();
                   }),
                   onDeleteAccount: () => deleteAccount(value),

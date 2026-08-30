@@ -5,6 +5,7 @@ import 'package:app/feature/auth/data/provider/auth_repository.dart';
 import 'package:app/feature/auth/ui/page/account_page.dart';
 import 'package:app/feature/auth/ui/widget/apple_sign_in_button.dart';
 import 'package:app/feature/auth/ui/widget/google_sign_in_button.dart';
+import 'package:app/feature/exchange/data/exchange_code.dart';
 import 'package:app/feature/exchange/data/exchange_token.dart';
 import 'package:app/feature/exchange/data/provider/profile_exchange_provider.dart';
 import 'package:app/feature/profile/data/provider/user_profile_repository.dart';
@@ -25,6 +26,7 @@ void main() {
     FakeAuthRepository repository, {
     required SharedPreferences preferences,
     FakeUserProfileRepository? profileRepository,
+    ExchangeCodeCacheRepository? codeCache,
     Flavor flavor = Flavor.production,
     bool showsAppleSignIn = false,
   }) => TranslationProvider(
@@ -36,6 +38,7 @@ void main() {
           showsAppleSignIn,
         ),
         sharedPreferencesProvider.overrideWithValue(preferences),
+        if (codeCache != null) exchangeCodeCacheRepositoryProvider.overrideWithValue(codeCache),
         environmentProvider.overrideWithValue(
           Environment(
             appIdSuffix: '',
@@ -242,8 +245,10 @@ void main() {
       'fake-uid',
       ExchangeToken(value: 'v1.fake-uid.9999999999.deadbeef', expiresAt: DateTime.now().add(const Duration(hours: 24))),
     );
+    final codeCache = InMemoryExchangeCodeCacheRepository()
+      ..write('fake-uid', ExchangeCode(value: '123456', expiresAt: DateTime.now().add(const Duration(minutes: 5))));
 
-    await tester.pumpWidget(buildSubject(repository, preferences: preferences));
+    await tester.pumpWidget(buildSubject(repository, preferences: preferences, codeCache: codeCache));
     await tester.pumpAndSettle();
 
     expect(find.text('attendee@example.com'), findsOneWidget);
@@ -254,6 +259,7 @@ void main() {
     expect(repository.calledMethods, ['signOut']);
     expect(find.bySemanticsLabel('Google でサインイン'), findsOneWidget);
     expect(tokenCache.read('fake-uid'), isNull);
+    expect(codeCache.read('fake-uid'), isNull);
   });
 
   testWidgets('deletes a Google account after confirmation and clears the cached exchange token', (tester) async {
@@ -269,8 +275,10 @@ void main() {
       'fake-uid',
       ExchangeToken(value: 'v1.fake-uid.9999999999.deadbeef', expiresAt: DateTime.now().add(const Duration(hours: 24))),
     );
+    final codeCache = InMemoryExchangeCodeCacheRepository()
+      ..write('fake-uid', ExchangeCode(value: '123456', expiresAt: DateTime.now().add(const Duration(minutes: 5))));
 
-    await tester.pumpWidget(buildSubject(repository, preferences: preferences));
+    await tester.pumpWidget(buildSubject(repository, preferences: preferences, codeCache: codeCache));
     await tester.pumpAndSettle();
 
     await tapListItem(tester, 'アカウントを削除');
@@ -286,6 +294,7 @@ void main() {
     expect(find.text('アカウントを削除しました'), findsOneWidget);
     expect(find.bySemanticsLabel('Google でサインイン'), findsOneWidget);
     expect(tokenCache.read('fake-uid'), isNull);
+    expect(codeCache.read('fake-uid'), isNull);
   });
 
   testWidgets('deletes the profile document together with the account', (tester) async {

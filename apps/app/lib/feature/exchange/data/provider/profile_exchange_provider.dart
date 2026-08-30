@@ -106,14 +106,51 @@ class MyExchangeTokenNotifier extends AsyncNotifier<ExchangeToken> {
   }
 }
 
+/// In-memory cache of the signed-in user's most recently issued
+/// [ExchangeCode], keyed by uid.
+///
+/// Not persisted to disk: a 5-minute code has nothing worth surviving an app
+/// restart for (see [ExchangeCode]'s doc comment). It still needs to survive
+/// [myExchangeCodeProvider] itself, which is `autoDispose` — without a cache
+/// living outside that provider, leaving and re-entering the exchange screen
+/// would call `issueExchangeCode` on every visit even while the previous
+/// code is still valid. Keyed by uid, and cleared on sign-out / account
+/// deletion, for the same reason [ExchangeTokenCacheRepository] is: a
+/// device-scoped cache must not let one signed-in user's code survive into
+/// another user's session on the same device.
+abstract interface class ExchangeCodeCacheRepository {
+  ExchangeCode? read(String uid);
+
+  void write(String uid, ExchangeCode code);
+
+  Future<void> clear(String uid);
+}
+
+final class InMemoryExchangeCodeCacheRepository implements ExchangeCodeCacheRepository {
+  final _codesByUid = <String, ExchangeCode>{};
+
+  @override
+  ExchangeCode? read(String uid) => _codesByUid[uid];
+
+  @override
+  void write(String uid, ExchangeCode code) => _codesByUid[uid] = code;
+
+  @override
+  Future<void> clear(String uid) async => _codesByUid.remove(uid);
+}
+
+final exchangeCodeCacheRepositoryProvider = Provider<ExchangeCodeCacheRepository>(
+  (ref) => InMemoryExchangeCodeCacheRepository(),
+);
+
 /// The signed-in user's own 6-digit code: the QR fallback for camera-denied
 /// or otherwise QR-incapable devices.
 ///
-/// Unlike [myExchangeTokenProvider] this is never persisted and is
 /// `autoDispose` — the code is short-lived (5 minutes server-side) by
-/// design, so there is nothing worth caching across app restarts, and
-/// leaving the exchange home screen and coming back later should issue a
-/// fresh one rather than keep showing one that may already be invalid.
+/// design, so nothing needs to keep polling it once the exchange screen is
+/// left. The current code is still reused across re-entry as long as it
+/// hasn't expired, via [exchangeCodeCacheRepositoryProvider]; only an
+/// expired or not-yet-issued code triggers a fresh `issueExchangeCode` call.
 final myExchangeCodeProvider = AsyncNotifierProvider.autoDispose<MyExchangeCodeNotifier, ExchangeCode>(
   MyExchangeCodeNotifier.new,
 );
@@ -122,7 +159,8 @@ class MyExchangeCodeNotifier extends AsyncNotifier<ExchangeCode> {
   @override
   Future<ExchangeCode> build() async {
     // Watched (not read) so signing out or switching accounts re-runs build()
-    // instead of leaving the previous user's code state in place.
+    // and looks up the new uid's cache entry instead of reusing whatever the
+    // previous user's code happened to be.
     final uid = ref.watch(authStateChangesProvider).value?.uid;
     if (uid == null) {
       // This provider is only watched once ExchangeHomePage has confirmed a
@@ -130,17 +168,27 @@ class MyExchangeCodeNotifier extends AsyncNotifier<ExchangeCode> {
       // sign-out raced the widget teardown.
       throw StateError('myExchangeCodeProvider requires a signed-in user.');
     }
-    return ref.read(exchangeCodeIssuerProvider).issue();
+    final cached = ref.watch(exchangeCodeCacheRepositoryProvider).read(uid);
+    if (cached != null && !cached.isExpired) {
+      return cached;
+    }
+    return _issueAndCache(uid);
   }
 
-  /// Issues a fresh code, replacing the current one (e.g. once it expires).
+  /// Issues a fresh code even when a cached one is still valid.
   Future<void> refresh() async {
     final uid = ref.read(authStateChangesProvider).value?.uid;
     if (uid == null) {
       return;
     }
     state = const AsyncLoading<ExchangeCode>();
-    state = await AsyncValue.guard(() => ref.read(exchangeCodeIssuerProvider).issue());
+    state = await AsyncValue.guard(() => _issueAndCache(uid));
+  }
+
+  Future<ExchangeCode> _issueAndCache(String uid) async {
+    final code = await ref.read(exchangeCodeIssuerProvider).issue();
+    ref.read(exchangeCodeCacheRepositoryProvider).write(uid, code);
+    return code;
   }
 }
 
