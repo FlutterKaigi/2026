@@ -8,8 +8,7 @@ part of 'router.dart';
 
 List<RouteBase> get $appRoutes => [$settingsRoute, $appShellRoute];
 
-RouteBase get $settingsRoute =>
-    GoRouteData.$route(path: '/settings', factory: $SettingsRoute._fromState);
+RouteBase get $settingsRoute => GoRouteData.$route(path: '/settings', factory: $SettingsRoute._fromState);
 
 mixin $SettingsRoute on GoRouteData {
   static SettingsRoute _fromState(GoRouterState state) => const SettingsRoute();
@@ -24,8 +23,7 @@ mixin $SettingsRoute on GoRouteData {
   Future<T?> push<T>(BuildContext context) => context.push<T>(location);
 
   @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
+  void pushReplacement(BuildContext context) => context.pushReplacement(location);
 
   @override
   void replace(BuildContext context) => context.replace(location);
@@ -135,8 +133,7 @@ extension $AppShellRouteExtension on AppShellRoute {
 }
 
 mixin $EventInfoRoute on GoRouteData {
-  static EventInfoRoute _fromState(GoRouterState state) =>
-      const EventInfoRoute();
+  static EventInfoRoute _fromState(GoRouterState state) => const EventInfoRoute();
 
   @override
   String get location => GoRouteData.$location('/info');
@@ -148,16 +145,14 @@ mixin $EventInfoRoute on GoRouteData {
   Future<T?> push<T>(BuildContext context) => context.push<T>(location);
 
   @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
+  void pushReplacement(BuildContext context) => context.pushReplacement(location);
 
   @override
   void replace(BuildContext context) => context.replace(location);
 }
 
 mixin $StaffMemberListRoute on GoRouteData {
-  static StaffMemberListRoute _fromState(GoRouterState state) =>
-      const StaffMemberListRoute();
+  static StaffMemberListRoute _fromState(GoRouterState state) => const StaffMemberListRoute();
 
   @override
   String get location => GoRouteData.$location('/info/staff');
@@ -169,8 +164,7 @@ mixin $StaffMemberListRoute on GoRouteData {
   Future<T?> push<T>(BuildContext context) => context.push<T>(location);
 
   @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
+  void pushReplacement(BuildContext context) => context.pushReplacement(location);
 
   @override
   void replace(BuildContext context) => context.replace(location);
@@ -189,8 +183,7 @@ mixin $NewsRoute on GoRouteData {
   Future<T?> push<T>(BuildContext context) => context.push<T>(location);
 
   @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
+  void pushReplacement(BuildContext context) => context.pushReplacement(location);
 
   @override
   void replace(BuildContext context) => context.replace(location);
@@ -209,8 +202,7 @@ mixin $LicenseRoute on GoRouteData {
   Future<T?> push<T>(BuildContext context) => context.push<T>(location);
 
   @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
+  void pushReplacement(BuildContext context) => context.pushReplacement(location);
 
   @override
   void replace(BuildContext context) => context.replace(location);
@@ -234,16 +226,14 @@ mixin $LicenseDetailRoute on GoRouteData {
   Future<T?> push<T>(BuildContext context) => context.push<T>(location);
 
   @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
+  void pushReplacement(BuildContext context) => context.pushReplacement(location);
 
   @override
   void replace(BuildContext context) => context.replace(location);
 }
 
 mixin $SessionTimetableRoute on GoRouteData {
-  static SessionTimetableRoute _fromState(GoRouterState state) =>
-      const SessionTimetableRoute();
+  static SessionTimetableRoute _fromState(GoRouterState state) => const SessionTimetableRoute();
 
   @override
   String get location => GoRouteData.$location('/sessions');
@@ -255,16 +245,14 @@ mixin $SessionTimetableRoute on GoRouteData {
   Future<T?> push<T>(BuildContext context) => context.push<T>(location);
 
   @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
+  void pushReplacement(BuildContext context) => context.pushReplacement(location);
 
   @override
   void replace(BuildContext context) => context.replace(location);
 }
 
 mixin $SessionSearchRoute on GoRouteData {
-  static SessionSearchRoute _fromState(GoRouterState state) =>
-      const SessionSearchRoute();
+  static SessionSearchRoute _fromState(GoRouterState state) => const SessionSearchRoute();
 
   @override
   String get location => GoRouteData.$location('/sessions/search');
@@ -276,16 +264,14 @@ mixin $SessionSearchRoute on GoRouteData {
   Future<T?> push<T>(BuildContext context) => context.push<T>(location);
 
   @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
+  void pushReplacement(BuildContext context) => context.pushReplacement(location);
 
   @override
   void replace(BuildContext context) => context.replace(location);
 }
 
 mixin $BookmarkedSessionsRoute on GoRouteData {
-  static BookmarkedSessionsRoute _fromState(GoRouterState state) =>
-      const BookmarkedSessionsRoute();
+  static BookmarkedSessionsRoute _fromState(GoRouterState state) => const BookmarkedSessionsRoute();
 
   @override
   String get location => GoRouteData.$location('/sessions/bookmarked');
@@ -297,8 +283,7 @@ mixin $BookmarkedSessionsRoute on GoRouteData {
   Future<T?> push<T>(BuildContext context) => context.push<T>(location);
 
   @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
+  void pushReplacement(BuildContext context) => context.pushReplacement(location);
 
   @override
   void replace(BuildContext context) => context.replace(location);
@@ -322,8 +307,7 @@ mixin $SessionDetailsRoute on GoRouteData {
   Future<T?> push<T>(BuildContext context) => context.push<T>(location);
 
   @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
+  void pushReplacement(BuildContext context) => context.pushReplacement(location);
 
   @override
   void replace(BuildContext context) => context.replace(location);
@@ -342,8 +326,7 @@ mixin $SponsorRoute on GoRouteData {
   Future<T?> push<T>(BuildContext context) => context.push<T>(location);
 
   @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
+  void pushReplacement(BuildContext context) => context.pushReplacement(location);
 
   @override
   void replace(BuildContext context) => context.replace(location);
@@ -367,8 +350,7 @@ mixin $SponsorDetailsRoute on GoRouteData {
   Future<T?> push<T>(BuildContext context) => context.push<T>(location);
 
   @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
+  void pushReplacement(BuildContext context) => context.pushReplacement(location);
 
   @override
   void replace(BuildContext context) => context.replace(location);
@@ -387,16 +369,14 @@ mixin $AccountRoute on GoRouteData {
   Future<T?> push<T>(BuildContext context) => context.push<T>(location);
 
   @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
+  void pushReplacement(BuildContext context) => context.pushReplacement(location);
 
   @override
   void replace(BuildContext context) => context.replace(location);
 }
 
 mixin $EmailSignInRoute on GoRouteData {
-  static EmailSignInRoute _fromState(GoRouterState state) =>
-      const EmailSignInRoute();
+  static EmailSignInRoute _fromState(GoRouterState state) => const EmailSignInRoute();
 
   @override
   String get location => GoRouteData.$location('/account/email');
@@ -408,16 +388,14 @@ mixin $EmailSignInRoute on GoRouteData {
   Future<T?> push<T>(BuildContext context) => context.push<T>(location);
 
   @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
+  void pushReplacement(BuildContext context) => context.pushReplacement(location);
 
   @override
   void replace(BuildContext context) => context.replace(location);
 }
 
 mixin $ProfileEditRoute on GoRouteData {
-  static ProfileEditRoute _fromState(GoRouterState state) =>
-      const ProfileEditRoute();
+  static ProfileEditRoute _fromState(GoRouterState state) => const ProfileEditRoute();
 
   @override
   String get location => GoRouteData.$location('/account/profile');
@@ -429,16 +407,14 @@ mixin $ProfileEditRoute on GoRouteData {
   Future<T?> push<T>(BuildContext context) => context.push<T>(location);
 
   @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
+  void pushReplacement(BuildContext context) => context.pushReplacement(location);
 
   @override
   void replace(BuildContext context) => context.replace(location);
 }
 
 mixin $ExchangeHomeRoute on GoRouteData {
-  static ExchangeHomeRoute _fromState(GoRouterState state) =>
-      const ExchangeHomeRoute();
+  static ExchangeHomeRoute _fromState(GoRouterState state) => const ExchangeHomeRoute();
 
   @override
   String get location => GoRouteData.$location('/account/exchange');
@@ -450,16 +426,14 @@ mixin $ExchangeHomeRoute on GoRouteData {
   Future<T?> push<T>(BuildContext context) => context.push<T>(location);
 
   @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
+  void pushReplacement(BuildContext context) => context.pushReplacement(location);
 
   @override
   void replace(BuildContext context) => context.replace(location);
 }
 
 mixin $ExchangeScanRoute on GoRouteData {
-  static ExchangeScanRoute _fromState(GoRouterState state) =>
-      const ExchangeScanRoute();
+  static ExchangeScanRoute _fromState(GoRouterState state) => const ExchangeScanRoute();
 
   @override
   String get location => GoRouteData.$location('/account/exchange/scan');
@@ -471,16 +445,14 @@ mixin $ExchangeScanRoute on GoRouteData {
   Future<T?> push<T>(BuildContext context) => context.push<T>(location);
 
   @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
+  void pushReplacement(BuildContext context) => context.pushReplacement(location);
 
   @override
   void replace(BuildContext context) => context.replace(location);
 }
 
 mixin $ExchangeListRoute on GoRouteData {
-  static ExchangeListRoute _fromState(GoRouterState state) =>
-      const ExchangeListRoute();
+  static ExchangeListRoute _fromState(GoRouterState state) => const ExchangeListRoute();
 
   @override
   String get location => GoRouteData.$location('/account/exchange/list');
@@ -492,8 +464,7 @@ mixin $ExchangeListRoute on GoRouteData {
   Future<T?> push<T>(BuildContext context) => context.push<T>(location);
 
   @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
+  void pushReplacement(BuildContext context) => context.pushReplacement(location);
 
   @override
   void replace(BuildContext context) => context.replace(location);

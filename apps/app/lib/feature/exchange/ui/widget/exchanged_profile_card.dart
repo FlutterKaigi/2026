@@ -1,13 +1,9 @@
-import 'dart:async';
-
 import 'package:app/core/extension/locale_map_extension.dart';
 import 'package:app/core/i18n/strings.g.dart';
-import 'package:app/core/ui/launch_external_url.dart';
 import 'package:app/feature/exchange/data/provider/profile_exchange_provider.dart';
-import 'package:app/feature/profile/data/sns_platform.dart';
 import 'package:app/feature/profile/ui/widget/country_flag_widget.dart';
 import 'package:app/feature/profile/ui/widget/profile_avatar_widget.dart';
-import 'package:app/feature/profile/ui/widget/sns_link_icon_widget.dart';
+import 'package:app/feature/profile/ui/widget/sns_link_chip_widget.dart';
 import 'package:data/data.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -99,39 +95,11 @@ class _ProfileContent extends StatelessWidget {
             spacing: 8,
             runSpacing: 8,
             children: [
-              for (final link in profile.snsLinks) _SnsLinkChip(link: link),
+              for (final link in profile.snsLinks) SnsLinkChip(link: link),
             ],
           ),
         ],
       ],
-    );
-  }
-}
-
-class _SnsLinkChip extends StatelessWidget {
-  const _SnsLinkChip({required this.link});
-
-  final SnsLink link;
-
-  @override
-  Widget build(BuildContext context) {
-    final t = Translations.of(context);
-    final platform = SnsPlatform.fromKey(link.type);
-    final uri = Uri.tryParse(link.value);
-
-    return ActionChip(
-      avatar: SnsLinkIcon(platform: platform, size: 14),
-      label: Text(platform.label ?? t.profile.snsPlatformOther),
-      labelStyle: Theme.of(context).textTheme.labelMedium,
-      visualDensity: VisualDensity.compact,
-      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      padding: const EdgeInsets.symmetric(horizontal: 4),
-      tooltip: link.value,
-      onPressed: uri == null
-          ? null
-          : () => unawaited(
-              launchExternalUrl(context, uri: uri, failureMessage: t.links.openError),
-            ),
     );
   }
 }

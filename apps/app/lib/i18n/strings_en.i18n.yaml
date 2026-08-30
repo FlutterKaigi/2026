@@ -2,6 +2,7 @@ app:
   title: FlutterKaigi 2026
 links:
   openError: Could not open the link
+  copied: Link copied
 navigation:
   sessions: Sessions
   sponsors: Sponsors
@@ -224,6 +225,7 @@ exchange:
   scanInvalid: Could not read this code. Make sure it's a profile exchange QR code
   scanSelf: You can't scan your own QR code
   scanSucceeded: Profile exchanged
+  scanAlreadyExists: Already exchanged
   scanFailed: Could not exchange profiles
   listTitle: Exchanged Profiles
   listEmpty: No exchanges yet

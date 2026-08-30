@@ -9,24 +9,33 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 /// Persists the signed-in user's cached [ExchangeToken] so the QR code stays
 /// displayable offline until it expires.
+///
+/// Every entry point is keyed by uid: SharedPreferences is device-scoped, not
+/// account-scoped, so a uid-less key would let a token issued for one signed-in
+/// user survive into another user's session on the same device.
 abstract interface class ExchangeTokenCacheRepository {
-  ExchangeToken? read();
+  ExchangeToken? read(String uid);
 
-  Future<void> write(ExchangeToken token);
+  Future<void> write(String uid, ExchangeToken token);
+
+  /// Removes any cached token for [uid]. Called on sign-out and account
+  /// deletion so a stale token never lingers under a uid nobody is signed in
+  /// as.
+  Future<void> clear(String uid);
 }
 
 final class SharedPreferencesExchangeTokenCacheRepository implements ExchangeTokenCacheRepository {
   const SharedPreferencesExchangeTokenCacheRepository(this._preferences);
 
-  static const _valueKey = 'exchange_token_value';
-  static const _expiresAtKey = 'exchange_token_expires_at_millis';
-
   final SharedPreferences _preferences;
 
+  static String _valueKey(String uid) => 'exchange_token_value_$uid';
+  static String _expiresAtKey(String uid) => 'exchange_token_expires_at_millis_$uid';
+
   @override
-  ExchangeToken? read() {
-    final value = _preferences.getString(_valueKey);
-    final expiresAtMillis = _preferences.getInt(_expiresAtKey);
+  ExchangeToken? read(String uid) {
+    final value = _preferences.getString(_valueKey(uid));
+    final expiresAtMillis = _preferences.getInt(_expiresAtKey(uid));
     if (value == null || expiresAtMillis == null) {
       return null;
     }
@@ -37,9 +46,15 @@ final class SharedPreferencesExchangeTokenCacheRepository implements ExchangeTok
   }
 
   @override
-  Future<void> write(ExchangeToken token) async {
-    await _preferences.setString(_valueKey, token.value);
-    await _preferences.setInt(_expiresAtKey, token.expiresAt.millisecondsSinceEpoch);
+  Future<void> write(String uid, ExchangeToken token) async {
+    await _preferences.setString(_valueKey(uid), token.value);
+    await _preferences.setInt(_expiresAtKey(uid), token.expiresAt.millisecondsSinceEpoch);
+  }
+
+  @override
+  Future<void> clear(String uid) async {
+    await _preferences.remove(_valueKey(uid));
+    await _preferences.remove(_expiresAtKey(uid));
   }
 }
 
@@ -56,22 +71,36 @@ final myExchangeTokenProvider = AsyncNotifierProvider<MyExchangeTokenNotifier, E
 class MyExchangeTokenNotifier extends AsyncNotifier<ExchangeToken> {
   @override
   Future<ExchangeToken> build() async {
-    final cached = ref.watch(exchangeTokenCacheRepositoryProvider).read();
+    // Watched (not read) so signing out or switching accounts re-runs build()
+    // and looks up the new uid's cache entry instead of reusing whatever the
+    // previous user's token happened to be.
+    final uid = ref.watch(authStateChangesProvider).value?.uid;
+    if (uid == null) {
+      // This provider is only watched once ExchangeHomePage has confirmed a
+      // signed-in user with a profile; reaching build() without one means
+      // sign-out raced the widget teardown.
+      throw StateError('myExchangeTokenProvider requires a signed-in user.');
+    }
+    final cached = ref.watch(exchangeTokenCacheRepositoryProvider).read(uid);
     if (cached != null && !cached.isExpired) {
       return cached;
     }
-    return _issueAndCache();
+    return _issueAndCache(uid);
   }
 
   /// Issues a fresh token even when a cached one is still valid.
   Future<void> refresh() async {
+    final uid = ref.read(authStateChangesProvider).value?.uid;
+    if (uid == null) {
+      return;
+    }
     state = const AsyncLoading<ExchangeToken>();
-    state = await AsyncValue.guard(_issueAndCache);
+    state = await AsyncValue.guard(() => _issueAndCache(uid));
   }
 
-  Future<ExchangeToken> _issueAndCache() async {
+  Future<ExchangeToken> _issueAndCache(String uid) async {
     final token = await ref.read(exchangeTokenIssuerProvider).issue();
-    await ref.read(exchangeTokenCacheRepositoryProvider).write(token);
+    await ref.read(exchangeTokenCacheRepositoryProvider).write(uid, token);
     return token;
   }
 }
@@ -91,6 +120,10 @@ final exchangeListProvider = StreamProvider<List<ProfileExchange>>((ref) {
 });
 
 /// Joins one exchange list entry to the other attendee's [UserProfile].
-final exchangedUserProfileProvider = StreamProvider.family<UserProfile?, String>(
+///
+/// autoDispose: the exchange list can scroll through many other attendees in
+/// a session, and without it every `otherUid` ever shown would keep its
+/// Firestore snapshot listener alive for the rest of the app session.
+final exchangedUserProfileProvider = StreamProvider.autoDispose.family<UserProfile?, String>(
   (ref, otherUid) => ref.watch(userProfileRepositoryProvider).watch(otherUid),
 );

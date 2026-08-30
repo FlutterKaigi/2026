@@ -85,6 +85,9 @@ class Translations$links$ja {
 
 	/// ja: 'リンクを開けませんでした'
 	String get openError => 'リンクを開けませんでした';
+
+	/// ja: 'リンクをコピーしました'
+	String get copied => 'リンクをコピーしました';
 }
 
 // Path: navigation
@@ -639,6 +642,9 @@ class Translations$exchange$ja {
 	/// ja: 'プロフィールを交換しました'
 	String get scanSucceeded => 'プロフィールを交換しました';
 
+	/// ja: 'すでに交換済みです'
+	String get scanAlreadyExists => 'すでに交換済みです';
+
 	/// ja: 'プロフィールを交換できませんでした'
 	String get scanFailed => 'プロフィールを交換できませんでした';
 
@@ -1076,6 +1082,7 @@ extension on Translations {
 		return switch (path) {
 			'app.title' => 'FlutterKaigi 2026',
 			'links.openError' => 'リンクを開けませんでした',
+			'links.copied' => 'リンクをコピーしました',
 			'navigation.sessions' => 'セッション',
 			'navigation.sponsors' => 'スポンサー',
 			'navigation.info' => 'イベント',
@@ -1273,6 +1280,7 @@ extension on Translations {
 			'exchange.scanInvalid' => '読み取れませんでした。プロフィール交換用のQRコードか確認してください',
 			'exchange.scanSelf' => '自分のQRコードは読み取れません',
 			'exchange.scanSucceeded' => 'プロフィールを交換しました',
+			'exchange.scanAlreadyExists' => 'すでに交換済みです',
 			'exchange.scanFailed' => 'プロフィールを交換できませんでした',
 			'exchange.listTitle' => '交換した人',
 			'exchange.listEmpty' => 'まだ誰とも交換していません',

@@ -2,6 +2,7 @@ app:
   title: FlutterKaigi 2026
 links:
   openError: リンクを開けませんでした
+  copied: リンクをコピーしました
 navigation:
   sessions: セッション
   sponsors: スポンサー
@@ -225,6 +226,7 @@ exchange:
   scanInvalid: 読み取れませんでした。プロフィール交換用のQRコードか確認してください
   scanSelf: 自分のQRコードは読み取れません
   scanSucceeded: プロフィールを交換しました
+  scanAlreadyExists: すでに交換済みです
   scanFailed: プロフィールを交換できませんでした
   listTitle: 交換した人
   listEmpty: まだ誰とも交換していません

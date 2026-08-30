@@ -1,4 +1,3 @@
-import 'package:app/core/provider/environment.dart';
 import 'package:app/feature/exchange/data/exchange_token.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:data/data.dart';
@@ -13,17 +12,13 @@ final profileExchangeRepositoryProvider = Provider<ProfileExchangeRepository>(
   (ref) => FirestoreProfileExchangeRepository(),
 );
 
-/// The [FirebaseFunctions] client, routed to the local Emulator Suite on the
-/// develop flavor (mirrors `apps/dashboard`'s `CollectionSyncService`).
-final firebaseFunctionsProvider = Provider<FirebaseFunctions>((ref) {
-  final environment = ref.watch(environmentProvider);
-  final functions = FirebaseFunctions.instanceFor(region: _functionsRegion);
-  if (environment.flavor == Flavor.develop) {
-    final host = environment.firestoreHost.split(':').first;
-    functions.useFunctionsEmulator(host, 5001);
-  }
-  return functions;
-});
+/// The [FirebaseFunctions] client.
+///
+/// Emulator Suite routing is wired once in `FirebaseInitializer.ensureInitialized`
+/// (`main()`), the same place Firestore and Auth are routed, rather than here.
+final firebaseFunctionsProvider = Provider<FirebaseFunctions>(
+  (ref) => FirebaseFunctions.instanceFor(region: _functionsRegion),
+);
 
 /// Issues a signed [ExchangeToken] for the signed-in user via the
 /// `issueExchangeToken` callable function.
@@ -43,7 +38,7 @@ final class CloudFunctionsExchangeTokenIssuer implements ExchangeTokenIssuer {
     final token = data is Map ? data['token'] : null;
     final expiresAt = data is Map ? data['expiresAt'] : null;
     if (token is! String || expiresAt is! num) {
-      throw FormatException('issueExchangeToken から不正なレスポンスを受け取りました: $data');
+      throw FormatException('issueExchangeToken returned an unexpected response: $data');
     }
     return ExchangeToken(
       value: token,

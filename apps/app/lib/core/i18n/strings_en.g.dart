@@ -80,6 +80,7 @@ class _Translations$links$en extends Translations$links$ja {
 
 	// Translations
 	@override String get openError => 'Could not open the link';
+	@override String get copied => 'Link copied';
 }
 
 // Path: navigation
@@ -355,6 +356,7 @@ class _Translations$exchange$en extends Translations$exchange$ja {
 	@override String get scanInvalid => 'Could not read this code. Make sure it\'s a profile exchange QR code';
 	@override String get scanSelf => 'You can\'t scan your own QR code';
 	@override String get scanSucceeded => 'Profile exchanged';
+	@override String get scanAlreadyExists => 'Already exchanged';
 	@override String get scanFailed => 'Could not exchange profiles';
 	@override String get listTitle => 'Exchanged Profiles';
 	@override String get listEmpty => 'No exchanges yet';
@@ -602,6 +604,7 @@ extension on TranslationsEn {
 		return switch (path) {
 			'app.title' => 'FlutterKaigi 2026',
 			'links.openError' => 'Could not open the link',
+			'links.copied' => 'Link copied',
 			'navigation.sessions' => 'Sessions',
 			'navigation.sponsors' => 'Sponsors',
 			'navigation.info' => 'Event',
@@ -799,6 +802,7 @@ extension on TranslationsEn {
 			'exchange.scanInvalid' => 'Could not read this code. Make sure it\'s a profile exchange QR code',
 			'exchange.scanSelf' => 'You can\'t scan your own QR code',
 			'exchange.scanSucceeded' => 'Profile exchanged',
+			'exchange.scanAlreadyExists' => 'Already exchanged',
 			'exchange.scanFailed' => 'Could not exchange profiles',
 			'exchange.listTitle' => 'Exchanged Profiles',
 			'exchange.listEmpty' => 'No exchanges yet',

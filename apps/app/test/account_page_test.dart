@@ -1,9 +1,12 @@
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/provider/environment.dart';
+import 'package:app/core/provider/shared_preferences.dart';
 import 'package:app/feature/auth/data/provider/auth_repository.dart';
 import 'package:app/feature/auth/ui/page/account_page.dart';
 import 'package:app/feature/auth/ui/widget/apple_sign_in_button.dart';
 import 'package:app/feature/auth/ui/widget/google_sign_in_button.dart';
+import 'package:app/feature/exchange/data/exchange_token.dart';
+import 'package:app/feature/exchange/data/provider/profile_exchange_provider.dart';
 import 'package:app/feature/profile/data/provider/user_profile_repository.dart';
 import 'package:app/feature/profile/ui/widget/country_flag_widget.dart';
 import 'package:data/data.dart';
@@ -12,6 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'fake_auth_repository.dart';
 import 'fake_user_profile_repository.dart';
@@ -19,6 +23,7 @@ import 'fake_user_profile_repository.dart';
 void main() {
   Widget buildSubject(
     FakeAuthRepository repository, {
+    required SharedPreferences preferences,
     FakeUserProfileRepository? profileRepository,
     Flavor flavor = Flavor.production,
     bool showsAppleSignIn = false,
@@ -30,6 +35,7 @@ void main() {
         appleSignInAvailabilityProvider.overrideWithValue(
           showsAppleSignIn,
         ),
+        sharedPreferencesProvider.overrideWithValue(preferences),
         environmentProvider.overrideWithValue(
           Environment(
             appIdSuffix: '',
@@ -50,7 +56,13 @@ void main() {
     ),
   );
 
-  setUp(() => LocaleSettings.setLocaleSync(AppLocale.ja));
+  late SharedPreferences preferences;
+
+  setUp(() async {
+    LocaleSettings.setLocaleSync(AppLocale.ja);
+    SharedPreferences.setMockInitialValues(const {});
+    preferences = await SharedPreferences.getInstance();
+  });
 
   /// サインイン後の画面はスクロールリストなので、テストの小さな画面では
   /// 下部の操作を表示域に入れてからタップする。
@@ -92,7 +104,7 @@ void main() {
     final repository = FakeAuthRepository();
     addTearDown(repository.dispose);
 
-    await tester.pumpWidget(buildSubject(repository));
+    await tester.pumpWidget(buildSubject(repository, preferences: preferences));
     await tester.pumpAndSettle();
 
     expect(find.text('サインインが必要です'), findsOneWidget);
@@ -115,7 +127,7 @@ void main() {
     addTearDown(repository.dispose);
 
     await tester.pumpWidget(
-      buildSubject(repository, showsAppleSignIn: true),
+      buildSubject(repository, preferences: preferences, showsAppleSignIn: true),
     );
     await tester.pumpAndSettle();
 
@@ -133,7 +145,7 @@ void main() {
     addTearDown(repository.dispose);
 
     await tester.pumpWidget(
-      buildSubject(repository, flavor: Flavor.staging),
+      buildSubject(repository, preferences: preferences, flavor: Flavor.staging),
     );
     await tester.pumpAndSettle();
 
@@ -145,7 +157,7 @@ void main() {
     addTearDown(repository.dispose);
 
     await tester.pumpWidget(
-      buildSubject(repository, showsAppleSignIn: true),
+      buildSubject(repository, preferences: preferences, showsAppleSignIn: true),
     );
     await tester.pumpAndSettle();
 
@@ -165,7 +177,7 @@ void main() {
     addTearDown(repository.dispose);
 
     await tester.pumpWidget(
-      buildSubject(repository, showsAppleSignIn: true),
+      buildSubject(repository, preferences: preferences, showsAppleSignIn: true),
     );
     await tester.pumpAndSettle();
 
@@ -192,7 +204,7 @@ void main() {
     addTearDown(repository.dispose);
 
     await tester.pumpWidget(
-      buildSubject(repository, showsAppleSignIn: true),
+      buildSubject(repository, preferences: preferences, showsAppleSignIn: true),
     );
     await tester.pumpAndSettle();
 
@@ -210,7 +222,7 @@ void main() {
     final repository = FakeAuthRepository()..nextError = FirebaseAuthException(code: 'canceled');
     addTearDown(repository.dispose);
 
-    await tester.pumpWidget(buildSubject(repository));
+    await tester.pumpWidget(buildSubject(repository, preferences: preferences));
     await tester.pumpAndSettle();
 
     await tester.tap(find.bySemanticsLabel('Google でサインイン'));
@@ -220,13 +232,18 @@ void main() {
     expect(find.bySemanticsLabel('Google でサインイン'), findsOneWidget);
   });
 
-  testWidgets('signs out from the signed-in view', (tester) async {
+  testWidgets('signs out from the signed-in view and clears the cached exchange token', (tester) async {
     final repository = FakeAuthRepository(
       initialUser: FakeUser(email: 'attendee@example.com'),
     );
     addTearDown(repository.dispose);
+    final tokenCache = SharedPreferencesExchangeTokenCacheRepository(preferences);
+    await tokenCache.write(
+      'fake-uid',
+      ExchangeToken(value: 'v1.fake-uid.9999999999.deadbeef', expiresAt: DateTime.now().add(const Duration(hours: 24))),
+    );
 
-    await tester.pumpWidget(buildSubject(repository));
+    await tester.pumpWidget(buildSubject(repository, preferences: preferences));
     await tester.pumpAndSettle();
 
     expect(find.text('attendee@example.com'), findsOneWidget);
@@ -236,9 +253,10 @@ void main() {
 
     expect(repository.calledMethods, ['signOut']);
     expect(find.bySemanticsLabel('Google でサインイン'), findsOneWidget);
+    expect(tokenCache.read('fake-uid'), isNull);
   });
 
-  testWidgets('deletes a Google account after confirmation', (tester) async {
+  testWidgets('deletes a Google account after confirmation and clears the cached exchange token', (tester) async {
     final repository = FakeAuthRepository(
       initialUser: FakeUser(
         email: 'attendee@example.com',
@@ -246,8 +264,13 @@ void main() {
       ),
     );
     addTearDown(repository.dispose);
+    final tokenCache = SharedPreferencesExchangeTokenCacheRepository(preferences);
+    await tokenCache.write(
+      'fake-uid',
+      ExchangeToken(value: 'v1.fake-uid.9999999999.deadbeef', expiresAt: DateTime.now().add(const Duration(hours: 24))),
+    );
 
-    await tester.pumpWidget(buildSubject(repository));
+    await tester.pumpWidget(buildSubject(repository, preferences: preferences));
     await tester.pumpAndSettle();
 
     await tapListItem(tester, 'アカウントを削除');
@@ -262,6 +285,7 @@ void main() {
     expect(repository.beforeDeleteCalled, isTrue);
     expect(find.text('アカウントを削除しました'), findsOneWidget);
     expect(find.bySemanticsLabel('Google でサインイン'), findsOneWidget);
+    expect(tokenCache.read('fake-uid'), isNull);
   });
 
   testWidgets('deletes the profile document together with the account', (tester) async {
@@ -272,7 +296,7 @@ void main() {
     final profileRepository = FakeUserProfileRepository(initialProfile: _profile(id: 'uid-1'));
     addTearDown(profileRepository.dispose);
 
-    await tester.pumpWidget(buildSubject(repository, profileRepository: profileRepository));
+    await tester.pumpWidget(buildSubject(repository, preferences: preferences, profileRepository: profileRepository));
     await tester.pumpAndSettle();
 
     await tapListItem(tester, 'アカウントを削除');
@@ -289,7 +313,7 @@ void main() {
     );
     addTearDown(repository.dispose);
 
-    await tester.pumpWidget(buildSubject(repository));
+    await tester.pumpWidget(buildSubject(repository, preferences: preferences));
     await tester.pumpAndSettle();
 
     expect(find.text('Attendee'), findsOneWidget);
@@ -314,7 +338,7 @@ void main() {
     );
     addTearDown(profileRepository.dispose);
 
-    await tester.pumpWidget(buildSubject(repository, profileRepository: profileRepository));
+    await tester.pumpWidget(buildSubject(repository, preferences: preferences, profileRepository: profileRepository));
     await tester.pumpAndSettle();
 
     // プロフィールの表示名が Auth の displayName より優先される。
@@ -338,7 +362,7 @@ void main() {
     );
     addTearDown(repository.dispose);
 
-    await tester.pumpWidget(buildSubject(repository));
+    await tester.pumpWidget(buildSubject(repository, preferences: preferences));
     await tester.pumpAndSettle();
 
     await tapListItem(tester, 'アカウントを削除');
@@ -367,7 +391,7 @@ void main() {
     );
     addTearDown(repository.dispose);
 
-    await tester.pumpWidget(buildSubject(repository));
+    await tester.pumpWidget(buildSubject(repository, preferences: preferences));
     await tester.pumpAndSettle();
 
     await tapListItem(tester, 'アカウントを削除');

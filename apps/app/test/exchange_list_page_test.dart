@@ -41,7 +41,7 @@ void main() {
     addTearDown(authRepository.dispose);
     final exchangeRepository = FakeProfileExchangeRepository();
     addTearDown(exchangeRepository.dispose);
-    final profileRepository = FakeUserProfileRepository();
+    final profileRepository = FakeUserProfileRepository(initialProfile: _ownProfile());
     addTearDown(profileRepository.dispose);
 
     await tester.pumpWidget(
@@ -71,8 +71,10 @@ void main() {
       },
     );
     addTearDown(exchangeRepository.dispose);
-    final profileRepository = FakeUserProfileRepository(
-      initialProfile: UserProfile(
+    final profileRepository = FakeUserProfileRepository(initialProfile: _ownProfile());
+    addTearDown(profileRepository.dispose);
+    await profileRepository.save(
+      UserProfile(
         id: 'uid-2',
         displayName: 'Exchanged Attendee',
         countryOrRegion: 'TW',
@@ -82,7 +84,6 @@ void main() {
         updatedAt: DateTime.utc(2026, 8),
       ),
     );
-    addTearDown(profileRepository.dispose);
 
     await tester.pumpWidget(
       buildSubject(
@@ -111,7 +112,7 @@ void main() {
       },
     );
     addTearDown(exchangeRepository.dispose);
-    final profileRepository = FakeUserProfileRepository();
+    final profileRepository = FakeUserProfileRepository(initialProfile: _ownProfile());
     addTearDown(profileRepository.dispose);
 
     await tester.pumpWidget(
@@ -126,3 +127,13 @@ void main() {
     expect(find.text('このプロフィールは表示できません'), findsOneWidget);
   });
 }
+
+/// The signed-in user's own profile, needed only to pass ExchangeAccessGate;
+/// unrelated to the exchanged profile under test in each case.
+UserProfile _ownProfile() => UserProfile(
+  id: 'uid-1',
+  displayName: 'Me',
+  countryOrRegion: 'JP',
+  createdAt: DateTime.utc(2026, 8),
+  updatedAt: DateTime.utc(2026, 8),
+);

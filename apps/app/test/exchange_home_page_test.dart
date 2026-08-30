@@ -2,6 +2,7 @@ import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/provider/shared_preferences.dart';
 import 'package:app/feature/auth/data/provider/auth_repository.dart';
 import 'package:app/feature/exchange/data/exchange_token.dart';
+import 'package:app/feature/exchange/data/provider/profile_exchange_provider.dart';
 import 'package:app/feature/exchange/data/provider/profile_exchange_repository.dart';
 import 'package:app/feature/exchange/ui/page/exchange_home_page.dart';
 import 'package:app/feature/profile/data/provider/user_profile_repository.dart';
@@ -160,6 +161,35 @@ void main() {
     await tester.tap(find.text('QRコードを読み取る'));
     await tester.pumpAndSettle();
     expect(find.text('scan destination'), findsOneWidget);
+  });
+
+  testWidgets('ignores a cached token left behind by a different uid on the same device', (tester) async {
+    final authRepository = FakeAuthRepository(initialUser: FakeUser(uid: 'uid-2'));
+    addTearDown(authRepository.dispose);
+    final profileRepository = FakeUserProfileRepository(initialProfile: _profile(id: 'uid-2'));
+    addTearDown(profileRepository.dispose);
+    final tokenIssuer = _StubExchangeTokenIssuer();
+    final preferences = await emptyPreferences();
+    // uid-1 を名乗る別ユーザーが同じ端末で残していったキャッシュ。
+    await SharedPreferencesExchangeTokenCacheRepository(preferences).write(
+      'uid-1',
+      ExchangeToken(value: 'v1.uid-1.9999999999.deadbeef', expiresAt: DateTime.now().add(const Duration(hours: 24))),
+    );
+
+    await tester.pumpWidget(
+      buildSubject(
+        authRepository: authRepository,
+        profileRepository: profileRepository,
+        tokenIssuer: tokenIssuer,
+        router: buildRouter(),
+        preferences: preferences,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // uid-1 のキャッシュではなく uid-2 として新規発行される。
+    expect(tokenIssuer.issueCallCount, 1);
+    expect(find.text('QRコードを読み取る'), findsOneWidget);
   });
 
   testWidgets('shows an error with retry when issuing a token fails', (tester) async {
