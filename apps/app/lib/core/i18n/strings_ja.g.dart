@@ -720,6 +720,12 @@ class Translations$exchange$ja {
 	/// ja: 'コードを再発行'
 	String get myCodeRefresh => 'コードを再発行';
 
+	/// ja: 'コードをコピー'
+	String get myCodeCopy => 'コードをコピー';
+
+	/// ja: 'コードをコピーしました'
+	String get myCodeCopied => 'コードをコピーしました';
+
 	/// ja: '相手のコードを入力'
 	String get enterCodeLabel => '相手のコードを入力';
 
@@ -1387,6 +1393,8 @@ extension on Translations {
 			'exchange.myCodeExpiresAt' => ({required Object date}) => '有効期限 ${date} まで',
 			'exchange.myCodeExpired' => 'コードの有効期限が切れました',
 			'exchange.myCodeRefresh' => 'コードを再発行',
+			'exchange.myCodeCopy' => 'コードをコピー',
+			'exchange.myCodeCopied' => 'コードをコピーしました',
 			'exchange.enterCodeLabel' => '相手のコードを入力',
 			'exchange.enterCodeHint' => '123456',
 			'exchange.enterCodeButton' => '交換する',

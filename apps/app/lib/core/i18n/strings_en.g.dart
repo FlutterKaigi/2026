@@ -382,6 +382,8 @@ class _Translations$exchange$en extends Translations$exchange$ja {
 	@override String myCodeExpiresAt({required Object date}) => 'Valid until ${date}';
 	@override String get myCodeExpired => 'This code has expired';
 	@override String get myCodeRefresh => 'Get a new code';
+	@override String get myCodeCopy => 'Copy code';
+	@override String get myCodeCopied => 'Code copied';
 	@override String get enterCodeLabel => 'Enter the other attendee\'s code';
 	@override String get enterCodeHint => '123456';
 	@override String get enterCodeButton => 'Exchange';
@@ -855,6 +857,8 @@ extension on TranslationsEn {
 			'exchange.myCodeExpiresAt' => ({required Object date}) => 'Valid until ${date}',
 			'exchange.myCodeExpired' => 'This code has expired',
 			'exchange.myCodeRefresh' => 'Get a new code',
+			'exchange.myCodeCopy' => 'Copy code',
+			'exchange.myCodeCopied' => 'Code copied',
 			'exchange.enterCodeLabel' => 'Enter the other attendee\'s code',
 			'exchange.enterCodeHint' => '123456',
 			'exchange.enterCodeButton' => 'Exchange',

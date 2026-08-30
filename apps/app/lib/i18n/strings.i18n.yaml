@@ -252,6 +252,8 @@ exchange:
   myCodeExpiresAt: 有効期限 $date まで
   myCodeExpired: コードの有効期限が切れました
   myCodeRefresh: コードを再発行
+  myCodeCopy: コードをコピー
+  myCodeCopied: コードをコピーしました
   enterCodeLabel: 相手のコードを入力
   enterCodeHint: "123456"
   enterCodeButton: 交換する

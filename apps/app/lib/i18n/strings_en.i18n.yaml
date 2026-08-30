@@ -251,6 +251,8 @@ exchange:
   myCodeExpiresAt: Valid until $date
   myCodeExpired: This code has expired
   myCodeRefresh: Get a new code
+  myCodeCopy: Copy code
+  myCodeCopied: Code copied
   enterCodeLabel: Enter the other attendee's code
   enterCodeHint: "123456"
   enterCodeButton: Exchange

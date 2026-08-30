@@ -12,6 +12,7 @@ import 'package:app/feature/profile/data/provider/user_profile_repository.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:data/data.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
@@ -322,6 +323,82 @@ void main() {
 
     expect(codeIssuer.issueCallCount, 2);
     expect(find.textContaining('有効期限'), findsNWidgets(2));
+  });
+
+  testWidgets('copies the 6-digit code to the clipboard', (tester) async {
+    final authRepository = FakeAuthRepository(initialUser: FakeUser(uid: 'uid-1'));
+    addTearDown(authRepository.dispose);
+    final profileRepository = FakeUserProfileRepository(initialProfile: _profile(id: 'uid-1'));
+    addTearDown(profileRepository.dispose);
+    // flutter_test has no default handler for the clipboard platform
+    // channel, so an unmocked Clipboard.getData() call never completes.
+    // Clipboard.setData() happens to get a no-op response regardless, so
+    // only the read side needs this; capturing what was written is enough
+    // to assert on without a full read-back handler.
+    String? copiedText;
+    final messenger = TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+    messenger.setMockMethodCallHandler(SystemChannels.platform, (call) async {
+      if (call.method == 'Clipboard.setData') {
+        copiedText = (call.arguments as Map)['text'] as String?;
+      }
+      return null;
+    });
+    addTearDown(() => messenger.setMockMethodCallHandler(SystemChannels.platform, null));
+
+    await tester.pumpWidget(
+      buildSubject(
+        authRepository: authRepository,
+        profileRepository: profileRepository,
+        tokenIssuer: _StubExchangeTokenIssuer(),
+        codeIssuer: _StubExchangeCodeIssuer(),
+        router: buildRouter(),
+        preferences: await emptyPreferences(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.ensureVisible(find.byTooltip('コードをコピー'));
+    await tester.tap(find.byTooltip('コードをコピー'));
+    await tester.pumpAndSettle();
+
+    expect(copiedText, '123456');
+    expect(find.text('コードをコピーしました'), findsOneWidget);
+  });
+
+  testWidgets('reflects the code expiring on its own after time passes, without any interaction', (tester) async {
+    final authRepository = FakeAuthRepository(initialUser: FakeUser(uid: 'uid-1'));
+    addTearDown(authRepository.dispose);
+    final profileRepository = FakeUserProfileRepository(initialProfile: _profile(id: 'uid-1'));
+    addTearDown(profileRepository.dispose);
+    final codeIssuer = _StubExchangeCodeIssuer()..nextExpiresAt = DateTime.now().add(const Duration(seconds: 5));
+
+    await tester.pumpWidget(
+      buildSubject(
+        authRepository: authRepository,
+        profileRepository: profileRepository,
+        tokenIssuer: _StubExchangeTokenIssuer(),
+        codeIssuer: codeIssuer,
+        router: buildRouter(),
+        preferences: await emptyPreferences(),
+      ),
+    );
+    // Drains the async provider chain (auth -> profile -> code issuance)
+    // without pumpAndSettle, which would stop well short of the periodic
+    // re-check timer below (this is exactly how the bug reproduced: a
+    // pumpAndSettle-driven wait never reached the point where expiry gets
+    // re-evaluated).
+    await tester.pump();
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.text('123 456'), findsOneWidget);
+    expect(find.text('コードの有効期限が切れました'), findsNothing);
+
+    // No tap, no pumpAndSettle: only fake time passes, crossing both the
+    // 5-second expiry and the 20-second re-check interval.
+    await tester.pump(const Duration(seconds: 21));
+
+    expect(find.text('コードの有効期限が切れました'), findsOneWidget);
   });
 
   testWidgets("redeems another attendee's 6-digit code", (tester) async {

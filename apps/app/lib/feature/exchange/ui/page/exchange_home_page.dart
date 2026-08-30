@@ -168,8 +168,10 @@ class _QrCard extends StatelessWidget {
 /// by design — see [ExchangeCode]) and a manual refresh action.
 ///
 /// The expiry is shown as a fixed timestamp — the same style [_QrCard] uses
-/// for its 24-hour token — rather than a live-ticking countdown, so the
-/// widget never needs a repeating timer just to stay visually accurate.
+/// for its 24-hour token — rather than a live-ticking countdown. [_CodeDisplay]
+/// still re-evaluates [ExchangeCode.isExpired] on a coarse timer so the
+/// "expired" state appears on its own within seconds of the deadline, even
+/// with nothing else on screen changing.
 class _MyCodeCard extends ConsumerWidget {
   const _MyCodeCard();
 
@@ -197,7 +199,7 @@ class _MyCodeCard extends ConsumerWidget {
   }
 }
 
-class _CodeDisplay extends ConsumerWidget {
+class _CodeDisplay extends HookConsumerWidget {
   const _CodeDisplay({required this.code});
 
   final ExchangeCode code;
@@ -208,14 +210,53 @@ class _CodeDisplay extends ConsumerWidget {
     final theme = Theme.of(context);
     final locale = Localizations.localeOf(context);
 
+    // Forces a rebuild every 20s while the code is still valid, so
+    // `code.isExpired` (evaluated fresh below) flips the display to the
+    // expired state on its own once real time crosses the deadline, without
+    // a per-second countdown. Stops itself once expired: nothing left to
+    // re-check.
+    final tick = useState(0);
+    useEffect(() {
+      if (code.isExpired) {
+        return null;
+      }
+      final timer = Timer.periodic(const Duration(seconds: 20), (timer) {
+        tick.value++;
+        if (code.isExpired) {
+          timer.cancel();
+        }
+      });
+      return timer.cancel;
+    }, [code]);
+
+    Future<void> copyCode() async {
+      await Clipboard.setData(ClipboardData(text: code.value));
+      if (!context.mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(t.exchange.myCodeCopied)));
+    }
+
     return Column(
       children: [
-        Text(
-          _formatGrouped(code.value),
-          semanticsLabel: t.exchange.myCodeSemanticLabel,
-          style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w700, letterSpacing: 4),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              _formatGrouped(code.value),
+              semanticsLabel: t.exchange.myCodeSemanticLabel,
+              style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w700, letterSpacing: 4),
+            ),
+            const SizedBox(width: 4),
+            IconButton(
+              icon: const Icon(Icons.copy_outlined, size: 20),
+              tooltip: t.exchange.myCodeCopy,
+              onPressed: () => unawaited(copyCode()),
+            ),
+          ],
         ),
-        const SizedBox(height: 8),
         Text(
           code.isExpired
               ? t.exchange.myCodeExpired
