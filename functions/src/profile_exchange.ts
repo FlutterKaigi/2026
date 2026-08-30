@@ -81,9 +81,17 @@ export const issueExchangeToken = onCall(
     if (request.auth == null) {
       throw new HttpsError("unauthenticated", "サインインが必要です。");
     }
+    const secret = exchangeTokenSecret.value();
+    if (secret.length === 0) {
+      // defineSecret().value() returns "" (not a thrown error) when the
+      // secret isn't configured, and an empty HMAC key is reproducible by
+      // anyone — so this must fail loudly rather than sign with it.
+      logger.error("EXCHANGE_TOKEN_SECRET is not configured");
+      throw new HttpsError("internal", "プロフィール交換用のトークンを発行できませんでした。");
+    }
     const expiresAt = Math.floor(Date.now() / 1000) + EXCHANGE_TOKEN_TTL_SECONDS;
     return {
-      token: buildExchangeToken(request.auth.uid, expiresAt, exchangeTokenSecret.value()),
+      token: buildExchangeToken(request.auth.uid, expiresAt, secret),
       expiresAt,
     };
   },
@@ -114,10 +122,16 @@ export const onProfileExchangeCreated = onDocumentCreated(
     }
 
     const { uid, otherUid } = event.params;
-    const parsed = verifyExchangeToken(
-      typeof data.token === "string" ? data.token : "",
-      exchangeTokenSecret.value(),
-    );
+    const secret = exchangeTokenSecret.value();
+    // An empty secret (unconfigured — see issueExchangeToken) can never
+    // produce a token that verifies correctly, but treat it as an explicit
+    // configuration failure rather than letting every token fail silently.
+    if (secret.length === 0) {
+      logger.error("EXCHANGE_TOKEN_SECRET is not configured; rejecting the exchange", { uid, otherUid });
+      await snapshot.ref.delete();
+      return;
+    }
+    const parsed = verifyExchangeToken(typeof data.token === "string" ? data.token : "", secret);
     if (parsed == null || parsed.uid !== otherUid) {
       logger.warn("Rejected an invalid profile exchange token", { uid, otherUid });
       await snapshot.ref.delete();
@@ -126,14 +140,22 @@ export const onProfileExchangeCreated = onDocumentCreated(
 
     const db = defaultFirestore();
     const mirrorRef = db.collection("users").doc(otherUid).collection("exchanges").doc(uid);
-    const mirrorSnapshot = await mirrorRef.get();
-    if (!mirrorSnapshot.exists) {
-      await mirrorRef.set({
+    try {
+      // create() (not get-then-set) so a concurrent real scan from the other
+      // attendee — who may be verifying their own mirror of this exchange at
+      // the same moment — can never have its own `origin: 'scan'` document
+      // overwritten by this mirror; the loser just hits ALREADY_EXISTS below.
+      await mirrorRef.create({
         createdAt: FieldValue.serverTimestamp(),
         origin: "mirror",
         token: null,
         note: null,
       });
+    } catch (error) {
+      const alreadyExists = typeof error === "object" && error != null && (error as { code?: number }).code === 6;
+      if (!alreadyExists) {
+        throw error;
+      }
     }
 
     await snapshot.ref.update({ token: null });
