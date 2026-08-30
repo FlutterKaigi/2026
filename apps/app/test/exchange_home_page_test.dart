@@ -1,3 +1,4 @@
+import 'package:app/core/designsystem/theme/app_theme.dart';
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/provider/shared_preferences.dart';
 import 'package:app/feature/auth/data/provider/auth_repository.dart';
@@ -12,6 +13,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'fake_auth_repository.dart';
@@ -24,6 +26,7 @@ void main() {
     required ExchangeTokenIssuer tokenIssuer,
     required GoRouter router,
     required SharedPreferences preferences,
+    ThemeData? theme,
   }) => TranslationProvider(
     child: ProviderScope(
       // Riverpod 3 retries a throwing provider automatically; tests assert on
@@ -37,6 +40,7 @@ void main() {
       ],
       child: MaterialApp.router(
         routerConfig: router,
+        theme: theme,
         locale: const Locale('ja'),
         supportedLocales: AppLocaleUtils.supportedLocales,
         localizationsDelegates: GlobalMaterialLocalizations.delegates,
@@ -161,6 +165,30 @@ void main() {
     await tester.tap(find.text('QRコードを読み取る'));
     await tester.pumpAndSettle();
     expect(find.text('scan destination'), findsOneWidget);
+  });
+
+  testWidgets('keeps the QR code on a light background under a dark theme', (tester) async {
+    final authRepository = FakeAuthRepository(initialUser: FakeUser(uid: 'uid-1'));
+    addTearDown(authRepository.dispose);
+    final profileRepository = FakeUserProfileRepository(initialProfile: _profile(id: 'uid-1'));
+    addTearDown(profileRepository.dispose);
+
+    await tester.pumpWidget(
+      buildSubject(
+        authRepository: authRepository,
+        profileRepository: profileRepository,
+        tokenIssuer: _StubExchangeTokenIssuer(),
+        router: buildRouter(),
+        preferences: await emptyPreferences(),
+        theme: darkTheme(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final qrImageView = tester.widget<QrImageView>(find.byType(QrImageView));
+    expect(qrImageView.backgroundColor, Colors.white);
+    expect(qrImageView.eyeStyle.color, Colors.black);
+    expect(qrImageView.dataModuleStyle.color, Colors.black);
   });
 
   testWidgets('ignores a cached token left behind by a different uid on the same device', (tester) async {

@@ -107,10 +107,30 @@ class _QrCard extends StatelessWidget {
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            QrImageView(
-              data: qrPayload,
-              size: 220,
-              semanticsLabel: t.exchange.qrSemanticLabel,
+            // A QR reader binarizes the image assuming dark modules on a
+            // light background, so the code must stay white/black no matter
+            // which app theme is active — following Card.outlined's dark
+            // surface here would make the code fail to scan, not just be
+            // hard to see. `padding` is drawn inside `backgroundColor` (see
+            // qr_flutter's `_QrContentView`), so the package's own default
+            // already gives the modules a quiet zone that sits on white;
+            // it is restated explicitly rather than left implicit.
+            // The rounded clip keeps the white square from reading as a
+            // stray rectangle against the card's rounded corners.
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: QrImageView(
+                data: qrPayload,
+                size: 220,
+                padding: const EdgeInsets.all(10),
+                backgroundColor: Colors.white,
+                eyeStyle: const QrEyeStyle(eyeShape: QrEyeShape.square, color: Colors.black),
+                dataModuleStyle: const QrDataModuleStyle(
+                  dataModuleShape: QrDataModuleShape.square,
+                  color: Colors.black,
+                ),
+                semanticsLabel: t.exchange.qrSemanticLabel,
+              ),
             ),
             const SizedBox(height: 12),
             Text(
