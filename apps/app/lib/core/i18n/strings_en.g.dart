@@ -391,6 +391,14 @@ class _Translations$exchange$en extends Translations$exchange$ja {
 	@override String get redeemInvalid => 'This code wasn\'t found, or it has expired';
 	@override String get redeemSelf => 'You can\'t enter your own code';
 	@override String get redeemRateLimited => 'Too many attempts. Please try again in a few minutes';
+	@override String get shareLinkInvalidTitle => 'This link isn\'t valid';
+	@override String get shareLinkInvalidBody => 'Make sure it\'s a profile exchange link';
+	@override String get shareLinkExpiredTitle => 'This link has expired';
+	@override String get shareLinkExpiredBody => 'Ask the other attendee to share their QR code or link again';
+	@override String get shareLinkSelfTitle => 'This is your own share link';
+	@override String get shareLinkSelfBody => 'Other attendees who open this link can exchange profiles with you';
+	@override String get shareLinkGoHome => 'Back to home';
+	@override String get shareLinkViewList => 'View exchanged profiles';
 }
 
 // Path: countryRegion
@@ -866,6 +874,14 @@ extension on TranslationsEn {
 			'exchange.redeemInvalid' => 'This code wasn\'t found, or it has expired',
 			'exchange.redeemSelf' => 'You can\'t enter your own code',
 			'exchange.redeemRateLimited' => 'Too many attempts. Please try again in a few minutes',
+			'exchange.shareLinkInvalidTitle' => 'This link isn\'t valid',
+			'exchange.shareLinkInvalidBody' => 'Make sure it\'s a profile exchange link',
+			'exchange.shareLinkExpiredTitle' => 'This link has expired',
+			'exchange.shareLinkExpiredBody' => 'Ask the other attendee to share their QR code or link again',
+			'exchange.shareLinkSelfTitle' => 'This is your own share link',
+			'exchange.shareLinkSelfBody' => 'Other attendees who open this link can exchange profiles with you',
+			'exchange.shareLinkGoHome' => 'Back to home',
+			'exchange.shareLinkViewList' => 'View exchanged profiles',
 			'countryRegion.asia' => 'Asia',
 			'countryRegion.oceania' => 'Oceania',
 			'countryRegion.americas' => 'Americas',

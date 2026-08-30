@@ -14,7 +14,11 @@ import 'package:app/feature/auth/ui/auth_error_message.dart';
 import 'package:app/feature/auth/ui/widget/apple_sign_in_button.dart';
 import 'package:app/feature/auth/ui/widget/google_sign_in_button.dart';
 import 'package:app/feature/auth/ui/widget/sign_in_method_button_style.dart';
+import 'package:app/feature/exchange/data/exchange_scan_handler.dart';
+import 'package:app/feature/exchange/data/pending_exchange_resolver.dart';
+import 'package:app/feature/exchange/data/provider/pending_exchange_token_provider.dart';
 import 'package:app/feature/exchange/data/provider/profile_exchange_provider.dart';
+import 'package:app/feature/exchange/data/provider/profile_exchange_repository.dart';
 import 'package:app/feature/profile/data/provider/user_profile_provider.dart';
 import 'package:app/feature/profile/data/provider/user_profile_repository.dart';
 import 'package:app/feature/profile/ui/widget/profile_summary_card_widget.dart';
@@ -59,6 +63,59 @@ class AccountPage extends HookConsumerWidget {
         ..hideCurrentSnackBar()
         ..showSnackBar(SnackBar(content: Text(message)));
     }
+
+    // Fallback consumer for `pendingExchangeTokenProvider`: `ExchangeShareLinkPage`
+    // queues a share-link token here when it opens signed-out or profile-less,
+    // then consumes it itself once its own `ExchangeAccessGate` passes. If the
+    // visitor's sign-in / profile-creation detour lands back on this tab
+    // instead — the normal outcome, since neither flow returns to the
+    // original `/x/<token>` URL — this is what actually completes the
+    // exchange. `handledToken` guards against redoing it if `profile` (a
+    // stream value) emits again before the notifier's `state = null` clear is
+    // observed.
+    final pendingToken = ref.watch(pendingExchangeTokenProvider);
+    final profile = profileState.value;
+    final myUid = authState.value?.uid;
+    final handledPendingToken = useState<String?>(null);
+    useEffect(() {
+      if (pendingToken == null || myUid == null || profile == null) {
+        return null;
+      }
+      if (handledPendingToken.value == pendingToken) {
+        return null;
+      }
+      handledPendingToken.value = pendingToken;
+
+      Future<void> resolve() async {
+        final resolved = await resolvePendingExchangeToken(
+          token: pendingToken,
+          myUid: myUid,
+          repository: ref.read(profileExchangeRepositoryProvider),
+        );
+        ref.read(pendingExchangeTokenProvider.notifier).clearIfCurrent(pendingToken);
+        if (!context.mounted) {
+          return;
+        }
+        switch (resolved) {
+          case PendingExchangeResolved(outcome: ExchangeCreated()):
+            showMessage(t.exchange.scanSucceeded);
+          case PendingExchangeResolved(outcome: ExchangeAlreadyExists()):
+            showMessage(t.exchange.scanAlreadyExists);
+          case PendingExchangeResolved(outcome: ExchangeCreateFailed(:final error, :final stackTrace)):
+            ref.read(talkerProvider).handle(error, stackTrace);
+            showMessage(t.exchange.scanFailed);
+          case PendingExchangeSelf():
+            showMessage(t.exchange.shareLinkSelfTitle);
+          case PendingExchangeInvalid():
+            showMessage(t.exchange.shareLinkInvalidTitle);
+          case PendingExchangeExpired():
+            showMessage(t.exchange.shareLinkExpiredTitle);
+        }
+      }
+
+      unawaited(resolve());
+      return null;
+    }, [pendingToken, myUid, profile]);
 
     Future<void> runAuthAction(
       Future<void> Function(AuthRepository repository) action, {

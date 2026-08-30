@@ -52,3 +52,22 @@ ScannedExchangeToken? parseScannedExchangeToken(String raw) {
   }
   return (token: candidate, otherUid: match.group(1)!);
 }
+
+/// Best-effort local read of a token's embedded `exp` claim, for showing a
+/// "link expired" message without a round trip when a share link (unlike a
+/// freshly displayed QR) may be opened long after it was issued. Not the
+/// authoritative check — `onProfileExchangeCreated` still verifies the
+/// signature and expiry server-side regardless of this result, so a `false`
+/// here (including for a malformed token, deferred to that check) never
+/// grants anything on its own.
+bool isExchangeTokenExpired(String token) {
+  final parts = token.split('.');
+  if (parts.length != 4) {
+    return false;
+  }
+  final expSeconds = int.tryParse(parts[2]);
+  if (expSeconds == null) {
+    return false;
+  }
+  return DateTime.now().isAfter(DateTime.fromMillisecondsSinceEpoch(expSeconds * 1000));
+}
