@@ -185,10 +185,15 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    // backgroundColor is set explicitly by _QrCard; the module color and
+    // quiet-zone padding below are qr_flutter's own defaults, pinned here so
+    // a future default change in the package fails this test instead of
+    // silently breaking dark-mode scannability.
     final qrImageView = tester.widget<QrImageView>(find.byType(QrImageView));
     expect(qrImageView.backgroundColor, Colors.white);
     expect(qrImageView.eyeStyle.color, Colors.black);
     expect(qrImageView.dataModuleStyle.color, Colors.black);
+    expect(qrImageView.padding, const EdgeInsets.all(10));
   });
 
   testWidgets('ignores a cached token left behind by a different uid on the same device', (tester) async {
