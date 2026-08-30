@@ -54,6 +54,7 @@ class TranslationsEn extends Translations with BaseTranslations<AppLocale, Trans
 	@override late final _Translations$eventInfo$en eventInfo = _Translations$eventInfo$en._(_root);
 	@override late final _Translations$auth$en auth = _Translations$auth$en._(_root);
 	@override late final _Translations$profile$en profile = _Translations$profile$en._(_root);
+	@override late final _Translations$exchange$en exchange = _Translations$exchange$en._(_root);
 	@override late final _Translations$countryRegion$en countryRegion = _Translations$countryRegion$en._(_root);
 	@override late final _Translations$settings$en settings = _Translations$settings$en._(_root);
 	@override late final _Translations$licenses$en licenses = _Translations$licenses$en._(_root);
@@ -331,6 +332,19 @@ class _Translations$profile$en extends Translations$profile$ja {
 	@override String get keepEditing => 'Keep editing';
 }
 
+// Path: exchange
+class _Translations$exchange$en extends Translations$exchange$ja {
+	_Translations$exchange$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override late final _Translations$exchange$home$en home = _Translations$exchange$home$en._(_root);
+	@override late final _Translations$exchange$code$en code = _Translations$exchange$code$en._(_root);
+	@override late final _Translations$exchange$scan$en scan = _Translations$exchange$scan$en._(_root);
+	@override late final _Translations$exchange$list$en list = _Translations$exchange$list$en._(_root);
+}
+
 // Path: countryRegion
 class _Translations$countryRegion$en extends Translations$countryRegion$ja {
 	_Translations$countryRegion$en._(TranslationsEn root) : this._root = root, super.internal(root);
@@ -534,6 +548,105 @@ class _Translations$auth$error$en extends Translations$auth$error$ja {
 	@override String get userMismatch => 'The re-authenticated account does not match the signed-in account';
 	@override String get appleTokenRevocationFailed => 'Could not delete the account because revoking the Apple token failed. Please try again';
 	@override String get unknown => 'Authentication failed. Please try again';
+}
+
+// Path: exchange.home
+class _Translations$exchange$home$en extends Translations$exchange$home$ja {
+	_Translations$exchange$home$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Profile Exchange';
+	@override String get signInRequired => 'Sign in to exchange profiles';
+	@override String get signInAction => 'Sign in';
+	@override String get profileRequiredTitle => 'Set up your profile';
+	@override String get profileRequiredBody => 'Create your profile before exchanging profiles with other attendees.';
+	@override String get profileRequiredAction => 'Create profile';
+	@override String get qrTitle => 'Your QR code';
+	@override String get qrDescription => 'Let another attendee scan this QR code to exchange profiles.';
+	@override String qrExpiresAt({required Object date}) => 'Valid until ${date}';
+	@override String get qrOffline => 'You\'re offline, so a saved QR code is shown instead.';
+	@override String get qrLoadFailed => 'Could not issue a QR code';
+	@override String get refreshQr => 'Get a new QR code';
+	@override String get scanAction => 'Scan a QR code';
+	@override String get showCodeAction => 'Show 6-digit code';
+	@override String get enterCodeAction => 'Enter 6-digit code';
+	@override String get listAction => 'Exchanged profiles';
+}
+
+// Path: exchange.code
+class _Translations$exchange$code$en extends Translations$exchange$code$ja {
+	_Translations$exchange$code$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get showTitle => '6-digit code';
+	@override String get showDescription => 'Tell the other attendee this code.';
+	@override String expiresIn({required Object seconds}) => '${seconds} seconds left';
+	@override String get expired => 'This code has expired';
+	@override String get reissue => 'Get a new code';
+	@override String get issueFailed => 'Could not issue a code';
+	@override String get enterTitle => 'Enter a 6-digit code';
+	@override String get enterDescription => 'Enter the code the other attendee gave you.';
+	@override String get enterInvalidFormat => 'Enter a 6-digit number';
+	@override String get submit => 'Exchange';
+	@override String get notFound => 'This code was not found, or has expired';
+	@override String get expiredCode => 'This code has expired';
+	@override String get selfCode => 'You cannot use your own code';
+	@override String get rateLimited => 'Too many attempts. Please try again later';
+	@override String get genericError => 'Could not verify the code. Please try again';
+}
+
+// Path: exchange.scan
+class _Translations$exchange$scan$en extends Translations$exchange$scan$ja {
+	_Translations$exchange$scan$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Scan a QR code';
+	@override String get hint => 'Line up the other attendee\'s QR code in the frame';
+	@override String get permissionDeniedTitle => 'Camera unavailable';
+	@override String get permissionDeniedBody => 'Allow camera access to scan QR codes, or use a 6-digit code instead.';
+	@override String get enterCodeInstead => 'Enter a 6-digit code instead';
+	@override String get success => 'Profile exchanged';
+	@override String get selfScan => 'That\'s your own QR code';
+	@override String get malformed => 'This QR code is not valid';
+	@override String get duplicate => 'You\'ve already exchanged with this attendee';
+	@override String get genericError => 'Could not complete the exchange. Please try again';
+}
+
+// Path: exchange.list
+class _Translations$exchange$list$en extends Translations$exchange$list$ja {
+	_Translations$exchange$list$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Exchanged Profiles';
+	@override String countLabel({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n,
+		one: 'Exchanged with ${n} person',
+		other: 'Exchanged with ${n} people',
+	);
+	@override String get empty => 'No exchanges yet';
+	@override String get emptyBody => 'Scan a QR code to see attendees here';
+	@override String get deletedProfile => 'This profile has been deleted';
+	@override String get deleteAction => 'Remove from your list';
+	@override String get deleteConfirmTitle => 'Remove from your list?';
+	@override String get deleteConfirmBody => 'This will not remove you from their list.';
+	@override String get deleteConfirmAction => 'Remove';
+	@override String get cancel => 'Cancel';
+	@override String get noteLabel => 'Note';
+	@override String get noteHint => 'Keep a private note, like what you talked about';
+	@override String get noteSave => 'Save';
+	@override String get noteSaved => 'Note saved';
+	@override String get noteSaveFailed => 'Could not save the note';
+	@override String get copyLink => 'Copy link';
+	@override String get linkCopied => 'Link copied';
+	@override String get openLinkFailed => 'Could not open the link';
+	@override String exchangedAt({required Object date}) => 'Exchanged on ${date}';
 }
 
 // Path: settings.themeMode
@@ -752,6 +865,66 @@ extension on TranslationsEn {
 			'profile.discardBody' => 'Unsaved changes will be lost.',
 			'profile.discardAction' => 'Discard',
 			'profile.keepEditing' => 'Keep editing',
+			'exchange.home.title' => 'Profile Exchange',
+			'exchange.home.signInRequired' => 'Sign in to exchange profiles',
+			'exchange.home.signInAction' => 'Sign in',
+			'exchange.home.profileRequiredTitle' => 'Set up your profile',
+			'exchange.home.profileRequiredBody' => 'Create your profile before exchanging profiles with other attendees.',
+			'exchange.home.profileRequiredAction' => 'Create profile',
+			'exchange.home.qrTitle' => 'Your QR code',
+			'exchange.home.qrDescription' => 'Let another attendee scan this QR code to exchange profiles.',
+			'exchange.home.qrExpiresAt' => ({required Object date}) => 'Valid until ${date}',
+			'exchange.home.qrOffline' => 'You\'re offline, so a saved QR code is shown instead.',
+			'exchange.home.qrLoadFailed' => 'Could not issue a QR code',
+			'exchange.home.refreshQr' => 'Get a new QR code',
+			'exchange.home.scanAction' => 'Scan a QR code',
+			'exchange.home.showCodeAction' => 'Show 6-digit code',
+			'exchange.home.enterCodeAction' => 'Enter 6-digit code',
+			'exchange.home.listAction' => 'Exchanged profiles',
+			'exchange.code.showTitle' => '6-digit code',
+			'exchange.code.showDescription' => 'Tell the other attendee this code.',
+			'exchange.code.expiresIn' => ({required Object seconds}) => '${seconds} seconds left',
+			'exchange.code.expired' => 'This code has expired',
+			'exchange.code.reissue' => 'Get a new code',
+			'exchange.code.issueFailed' => 'Could not issue a code',
+			'exchange.code.enterTitle' => 'Enter a 6-digit code',
+			'exchange.code.enterDescription' => 'Enter the code the other attendee gave you.',
+			'exchange.code.enterInvalidFormat' => 'Enter a 6-digit number',
+			'exchange.code.submit' => 'Exchange',
+			'exchange.code.notFound' => 'This code was not found, or has expired',
+			'exchange.code.expiredCode' => 'This code has expired',
+			'exchange.code.selfCode' => 'You cannot use your own code',
+			'exchange.code.rateLimited' => 'Too many attempts. Please try again later',
+			'exchange.code.genericError' => 'Could not verify the code. Please try again',
+			'exchange.scan.title' => 'Scan a QR code',
+			'exchange.scan.hint' => 'Line up the other attendee\'s QR code in the frame',
+			'exchange.scan.permissionDeniedTitle' => 'Camera unavailable',
+			'exchange.scan.permissionDeniedBody' => 'Allow camera access to scan QR codes, or use a 6-digit code instead.',
+			'exchange.scan.enterCodeInstead' => 'Enter a 6-digit code instead',
+			'exchange.scan.success' => 'Profile exchanged',
+			'exchange.scan.selfScan' => 'That\'s your own QR code',
+			'exchange.scan.malformed' => 'This QR code is not valid',
+			'exchange.scan.duplicate' => 'You\'ve already exchanged with this attendee',
+			'exchange.scan.genericError' => 'Could not complete the exchange. Please try again',
+			'exchange.list.title' => 'Exchanged Profiles',
+			'exchange.list.countLabel' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: 'Exchanged with ${n} person', other: 'Exchanged with ${n} people', ), 
+			'exchange.list.empty' => 'No exchanges yet',
+			'exchange.list.emptyBody' => 'Scan a QR code to see attendees here',
+			'exchange.list.deletedProfile' => 'This profile has been deleted',
+			'exchange.list.deleteAction' => 'Remove from your list',
+			'exchange.list.deleteConfirmTitle' => 'Remove from your list?',
+			'exchange.list.deleteConfirmBody' => 'This will not remove you from their list.',
+			'exchange.list.deleteConfirmAction' => 'Remove',
+			'exchange.list.cancel' => 'Cancel',
+			'exchange.list.noteLabel' => 'Note',
+			'exchange.list.noteHint' => 'Keep a private note, like what you talked about',
+			'exchange.list.noteSave' => 'Save',
+			'exchange.list.noteSaved' => 'Note saved',
+			'exchange.list.noteSaveFailed' => 'Could not save the note',
+			'exchange.list.copyLink' => 'Copy link',
+			'exchange.list.linkCopied' => 'Link copied',
+			'exchange.list.openLinkFailed' => 'Could not open the link',
+			'exchange.list.exchangedAt' => ({required Object date}) => 'Exchanged on ${date}',
 			'countryRegion.asia' => 'Asia',
 			'countryRegion.oceania' => 'Oceania',
 			'countryRegion.americas' => 'Americas',

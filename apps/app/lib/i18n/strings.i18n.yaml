@@ -208,6 +208,73 @@ profile:
   discardBody: 保存していない変更は失われます。
   discardAction: 破棄する
   keepEditing: 編集を続ける
+exchange:
+  home:
+    title: プロフィール交換
+    signInRequired: プロフィール交換を利用するにはサインインしてください
+    signInAction: サインインする
+    profileRequiredTitle: プロフィールを作成しましょう
+    profileRequiredBody: プロフィール交換を利用するには、先にプロフィールを作成してください
+    profileRequiredAction: プロフィールを作成
+    qrTitle: 自分のQRコード
+    qrDescription: 相手にこのQRコードを読み取ってもらうと、プロフィールを交換できます
+    qrExpiresAt: "有効期限: $date まで"
+    qrOffline: オフラインのため、保存済みのQRコードを表示しています
+    qrLoadFailed: QRコードを発行できませんでした
+    refreshQr: QRコードを再発行
+    scanAction: QRコードを読み取る
+    showCodeAction: 6桁コードを表示
+    enterCodeAction: 6桁コードを入力
+    listAction: 交換した人一覧
+  code:
+    showTitle: 6桁コード
+    showDescription: このコードを相手に伝えてください
+    expiresIn: 残り $seconds 秒
+    expired: コードの有効期限が切れました
+    reissue: コードを再発行
+    issueFailed: コードを発行できませんでした
+    enterTitle: 6桁コードを入力
+    enterDescription: 相手から伝えられたコードを入力してください
+    enterInvalidFormat: 6桁の数字を入力してください
+    submit: 交換する
+    notFound: コードが見つからないか、有効期限が切れています
+    expiredCode: コードの有効期限が切れています
+    selfCode: 自分のコードは利用できません
+    rateLimited: 試行回数が多すぎます。しばらくしてからお試しください
+    genericError: コードを確認できませんでした。もう一度お試しください
+  scan:
+    title: QRコードを読み取る
+    hint: 相手のQRコードを枠内に写してください
+    permissionDeniedTitle: カメラを使用できません
+    permissionDeniedBody: カメラの使用を許可すると、QRコードを読み取れます。許可できない場合は6桁コードをご利用ください。
+    enterCodeInstead: 6桁コードを入力する
+    success: プロフィールを交換しました
+    selfScan: 自分のQRコードです
+    malformed: 不正なQRコードです
+    duplicate: 既に交換済みです
+    genericError: 交換できませんでした。もう一度お試しください
+  list:
+    title: 交換した人一覧
+    countLabel:
+      one: $n 人と交換しました
+      other: $n 人と交換しました
+    empty: まだ誰とも交換していません
+    emptyBody: QRコードを読み取ると、ここに一覧が表示されます
+    deletedProfile: 削除されたプロフィールです
+    deleteAction: 一覧から削除
+    deleteConfirmTitle: 一覧から削除しますか?
+    deleteConfirmBody: 相手の一覧からは削除されません。
+    deleteConfirmAction: 削除する
+    cancel: キャンセル
+    noteLabel: メモ
+    noteHint: 会話の内容など、自分だけのメモを残せます
+    noteSave: 保存
+    noteSaved: メモを保存しました
+    noteSaveFailed: メモを保存できませんでした
+    copyLink: リンクをコピー
+    linkCopied: リンクをコピーしました
+    openLinkFailed: リンクを開けませんでした
+    exchangedAt: $date に交換
 countryRegion:
   asia: アジア
   oceania: オセアニア

@@ -207,6 +207,73 @@ profile:
   discardBody: Unsaved changes will be lost.
   discardAction: Discard
   keepEditing: Keep editing
+exchange:
+  home:
+    title: Profile Exchange
+    signInRequired: Sign in to exchange profiles
+    signInAction: Sign in
+    profileRequiredTitle: Set up your profile
+    profileRequiredBody: Create your profile before exchanging profiles with other attendees.
+    profileRequiredAction: Create profile
+    qrTitle: Your QR code
+    qrDescription: Let another attendee scan this QR code to exchange profiles.
+    qrExpiresAt: Valid until $date
+    qrOffline: You're offline, so a saved QR code is shown instead.
+    qrLoadFailed: Could not issue a QR code
+    refreshQr: Get a new QR code
+    scanAction: Scan a QR code
+    showCodeAction: Show 6-digit code
+    enterCodeAction: Enter 6-digit code
+    listAction: Exchanged profiles
+  code:
+    showTitle: 6-digit code
+    showDescription: Tell the other attendee this code.
+    expiresIn: $seconds seconds left
+    expired: This code has expired
+    reissue: Get a new code
+    issueFailed: Could not issue a code
+    enterTitle: Enter a 6-digit code
+    enterDescription: Enter the code the other attendee gave you.
+    enterInvalidFormat: Enter a 6-digit number
+    submit: Exchange
+    notFound: This code was not found, or has expired
+    expiredCode: This code has expired
+    selfCode: You cannot use your own code
+    rateLimited: Too many attempts. Please try again later
+    genericError: Could not verify the code. Please try again
+  scan:
+    title: Scan a QR code
+    hint: Line up the other attendee's QR code in the frame
+    permissionDeniedTitle: Camera unavailable
+    permissionDeniedBody: Allow camera access to scan QR codes, or use a 6-digit code instead.
+    enterCodeInstead: Enter a 6-digit code instead
+    success: Profile exchanged
+    selfScan: That's your own QR code
+    malformed: This QR code is not valid
+    duplicate: You've already exchanged with this attendee
+    genericError: Could not complete the exchange. Please try again
+  list:
+    title: Exchanged Profiles
+    countLabel:
+      one: Exchanged with $n person
+      other: Exchanged with $n people
+    empty: No exchanges yet
+    emptyBody: Scan a QR code to see attendees here
+    deletedProfile: This profile has been deleted
+    deleteAction: Remove from your list
+    deleteConfirmTitle: Remove from your list?
+    deleteConfirmBody: This will not remove you from their list.
+    deleteConfirmAction: Remove
+    cancel: Cancel
+    noteLabel: Note
+    noteHint: Keep a private note, like what you talked about
+    noteSave: Save
+    noteSaved: Note saved
+    noteSaveFailed: Could not save the note
+    copyLink: Copy link
+    linkCopied: Link copied
+    openLinkFailed: Could not open the link
+    exchangedAt: Exchanged on $date
 countryRegion:
   asia: Asia
   oceania: Oceania

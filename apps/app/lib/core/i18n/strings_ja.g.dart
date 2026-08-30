@@ -55,6 +55,7 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	late final Translations$eventInfo$ja eventInfo = Translations$eventInfo$ja.internal(_root);
 	late final Translations$auth$ja auth = Translations$auth$ja.internal(_root);
 	late final Translations$profile$ja profile = Translations$profile$ja.internal(_root);
+	late final Translations$exchange$ja exchange = Translations$exchange$ja.internal(_root);
 	late final Translations$countryRegion$ja countryRegion = Translations$countryRegion$ja.internal(_root);
 	late final Translations$settings$ja settings = Translations$settings$ja.internal(_root);
 	late final Translations$licenses$ja licenses = Translations$licenses$ja.internal(_root);
@@ -582,6 +583,19 @@ class Translations$profile$ja {
 	String get keepEditing => '編集を続ける';
 }
 
+// Path: exchange
+class Translations$exchange$ja {
+	Translations$exchange$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+	late final Translations$exchange$home$ja home = Translations$exchange$home$ja.internal(_root);
+	late final Translations$exchange$code$ja code = Translations$exchange$code$ja.internal(_root);
+	late final Translations$exchange$scan$ja scan = Translations$exchange$scan$ja.internal(_root);
+	late final Translations$exchange$list$ja list = Translations$exchange$list$ja.internal(_root);
+}
+
 // Path: countryRegion
 class Translations$countryRegion$ja {
 	Translations$countryRegion$ja.internal(this._root);
@@ -954,6 +968,225 @@ class Translations$auth$error$ja {
 	String get unknown => '認証に失敗しました。もう一度お試しください';
 }
 
+// Path: exchange.home
+class Translations$exchange$home$ja {
+	Translations$exchange$home$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'プロフィール交換'
+	String get title => 'プロフィール交換';
+
+	/// ja: 'プロフィール交換を利用するにはサインインしてください'
+	String get signInRequired => 'プロフィール交換を利用するにはサインインしてください';
+
+	/// ja: 'サインインする'
+	String get signInAction => 'サインインする';
+
+	/// ja: 'プロフィールを作成しましょう'
+	String get profileRequiredTitle => 'プロフィールを作成しましょう';
+
+	/// ja: 'プロフィール交換を利用するには、先にプロフィールを作成してください'
+	String get profileRequiredBody => 'プロフィール交換を利用するには、先にプロフィールを作成してください';
+
+	/// ja: 'プロフィールを作成'
+	String get profileRequiredAction => 'プロフィールを作成';
+
+	/// ja: '自分のQRコード'
+	String get qrTitle => '自分のQRコード';
+
+	/// ja: '相手にこのQRコードを読み取ってもらうと、プロフィールを交換できます'
+	String get qrDescription => '相手にこのQRコードを読み取ってもらうと、プロフィールを交換できます';
+
+	/// ja: '有効期限: $date まで'
+	String qrExpiresAt({required Object date}) => '有効期限: ${date} まで';
+
+	/// ja: 'オフラインのため、保存済みのQRコードを表示しています'
+	String get qrOffline => 'オフラインのため、保存済みのQRコードを表示しています';
+
+	/// ja: 'QRコードを発行できませんでした'
+	String get qrLoadFailed => 'QRコードを発行できませんでした';
+
+	/// ja: 'QRコードを再発行'
+	String get refreshQr => 'QRコードを再発行';
+
+	/// ja: 'QRコードを読み取る'
+	String get scanAction => 'QRコードを読み取る';
+
+	/// ja: '6桁コードを表示'
+	String get showCodeAction => '6桁コードを表示';
+
+	/// ja: '6桁コードを入力'
+	String get enterCodeAction => '6桁コードを入力';
+
+	/// ja: '交換した人一覧'
+	String get listAction => '交換した人一覧';
+}
+
+// Path: exchange.code
+class Translations$exchange$code$ja {
+	Translations$exchange$code$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: '6桁コード'
+	String get showTitle => '6桁コード';
+
+	/// ja: 'このコードを相手に伝えてください'
+	String get showDescription => 'このコードを相手に伝えてください';
+
+	/// ja: '残り $seconds 秒'
+	String expiresIn({required Object seconds}) => '残り ${seconds} 秒';
+
+	/// ja: 'コードの有効期限が切れました'
+	String get expired => 'コードの有効期限が切れました';
+
+	/// ja: 'コードを再発行'
+	String get reissue => 'コードを再発行';
+
+	/// ja: 'コードを発行できませんでした'
+	String get issueFailed => 'コードを発行できませんでした';
+
+	/// ja: '6桁コードを入力'
+	String get enterTitle => '6桁コードを入力';
+
+	/// ja: '相手から伝えられたコードを入力してください'
+	String get enterDescription => '相手から伝えられたコードを入力してください';
+
+	/// ja: '6桁の数字を入力してください'
+	String get enterInvalidFormat => '6桁の数字を入力してください';
+
+	/// ja: '交換する'
+	String get submit => '交換する';
+
+	/// ja: 'コードが見つからないか、有効期限が切れています'
+	String get notFound => 'コードが見つからないか、有効期限が切れています';
+
+	/// ja: 'コードの有効期限が切れています'
+	String get expiredCode => 'コードの有効期限が切れています';
+
+	/// ja: '自分のコードは利用できません'
+	String get selfCode => '自分のコードは利用できません';
+
+	/// ja: '試行回数が多すぎます。しばらくしてからお試しください'
+	String get rateLimited => '試行回数が多すぎます。しばらくしてからお試しください';
+
+	/// ja: 'コードを確認できませんでした。もう一度お試しください'
+	String get genericError => 'コードを確認できませんでした。もう一度お試しください';
+}
+
+// Path: exchange.scan
+class Translations$exchange$scan$ja {
+	Translations$exchange$scan$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'QRコードを読み取る'
+	String get title => 'QRコードを読み取る';
+
+	/// ja: '相手のQRコードを枠内に写してください'
+	String get hint => '相手のQRコードを枠内に写してください';
+
+	/// ja: 'カメラを使用できません'
+	String get permissionDeniedTitle => 'カメラを使用できません';
+
+	/// ja: 'カメラの使用を許可すると、QRコードを読み取れます。許可できない場合は6桁コードをご利用ください。'
+	String get permissionDeniedBody => 'カメラの使用を許可すると、QRコードを読み取れます。許可できない場合は6桁コードをご利用ください。';
+
+	/// ja: '6桁コードを入力する'
+	String get enterCodeInstead => '6桁コードを入力する';
+
+	/// ja: 'プロフィールを交換しました'
+	String get success => 'プロフィールを交換しました';
+
+	/// ja: '自分のQRコードです'
+	String get selfScan => '自分のQRコードです';
+
+	/// ja: '不正なQRコードです'
+	String get malformed => '不正なQRコードです';
+
+	/// ja: '既に交換済みです'
+	String get duplicate => '既に交換済みです';
+
+	/// ja: '交換できませんでした。もう一度お試しください'
+	String get genericError => '交換できませんでした。もう一度お試しください';
+}
+
+// Path: exchange.list
+class Translations$exchange$list$ja {
+	Translations$exchange$list$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: '交換した人一覧'
+	String get title => '交換した人一覧';
+
+	/// ja: '(one) {$n 人と交換しました} (other) {$n 人と交換しました}'
+	String countLabel({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(n,
+		one: '${n} 人と交換しました',
+		other: '${n} 人と交換しました',
+	);
+
+	/// ja: 'まだ誰とも交換していません'
+	String get empty => 'まだ誰とも交換していません';
+
+	/// ja: 'QRコードを読み取ると、ここに一覧が表示されます'
+	String get emptyBody => 'QRコードを読み取ると、ここに一覧が表示されます';
+
+	/// ja: '削除されたプロフィールです'
+	String get deletedProfile => '削除されたプロフィールです';
+
+	/// ja: '一覧から削除'
+	String get deleteAction => '一覧から削除';
+
+	/// ja: '一覧から削除しますか?'
+	String get deleteConfirmTitle => '一覧から削除しますか?';
+
+	/// ja: '相手の一覧からは削除されません。'
+	String get deleteConfirmBody => '相手の一覧からは削除されません。';
+
+	/// ja: '削除する'
+	String get deleteConfirmAction => '削除する';
+
+	/// ja: 'キャンセル'
+	String get cancel => 'キャンセル';
+
+	/// ja: 'メモ'
+	String get noteLabel => 'メモ';
+
+	/// ja: '会話の内容など、自分だけのメモを残せます'
+	String get noteHint => '会話の内容など、自分だけのメモを残せます';
+
+	/// ja: '保存'
+	String get noteSave => '保存';
+
+	/// ja: 'メモを保存しました'
+	String get noteSaved => 'メモを保存しました';
+
+	/// ja: 'メモを保存できませんでした'
+	String get noteSaveFailed => 'メモを保存できませんでした';
+
+	/// ja: 'リンクをコピー'
+	String get copyLink => 'リンクをコピー';
+
+	/// ja: 'リンクをコピーしました'
+	String get linkCopied => 'リンクをコピーしました';
+
+	/// ja: 'リンクを開けませんでした'
+	String get openLinkFailed => 'リンクを開けませんでした';
+
+	/// ja: '$date に交換'
+	String exchangedAt({required Object date}) => '${date} に交換';
+}
+
 // Path: settings.themeMode
 class Translations$settings$themeMode$ja {
 	Translations$settings$themeMode$ja.internal(this._root);
@@ -1184,6 +1417,66 @@ extension on Translations {
 			'profile.discardBody' => '保存していない変更は失われます。',
 			'profile.discardAction' => '破棄する',
 			'profile.keepEditing' => '編集を続ける',
+			'exchange.home.title' => 'プロフィール交換',
+			'exchange.home.signInRequired' => 'プロフィール交換を利用するにはサインインしてください',
+			'exchange.home.signInAction' => 'サインインする',
+			'exchange.home.profileRequiredTitle' => 'プロフィールを作成しましょう',
+			'exchange.home.profileRequiredBody' => 'プロフィール交換を利用するには、先にプロフィールを作成してください',
+			'exchange.home.profileRequiredAction' => 'プロフィールを作成',
+			'exchange.home.qrTitle' => '自分のQRコード',
+			'exchange.home.qrDescription' => '相手にこのQRコードを読み取ってもらうと、プロフィールを交換できます',
+			'exchange.home.qrExpiresAt' => ({required Object date}) => '有効期限: ${date} まで',
+			'exchange.home.qrOffline' => 'オフラインのため、保存済みのQRコードを表示しています',
+			'exchange.home.qrLoadFailed' => 'QRコードを発行できませんでした',
+			'exchange.home.refreshQr' => 'QRコードを再発行',
+			'exchange.home.scanAction' => 'QRコードを読み取る',
+			'exchange.home.showCodeAction' => '6桁コードを表示',
+			'exchange.home.enterCodeAction' => '6桁コードを入力',
+			'exchange.home.listAction' => '交換した人一覧',
+			'exchange.code.showTitle' => '6桁コード',
+			'exchange.code.showDescription' => 'このコードを相手に伝えてください',
+			'exchange.code.expiresIn' => ({required Object seconds}) => '残り ${seconds} 秒',
+			'exchange.code.expired' => 'コードの有効期限が切れました',
+			'exchange.code.reissue' => 'コードを再発行',
+			'exchange.code.issueFailed' => 'コードを発行できませんでした',
+			'exchange.code.enterTitle' => '6桁コードを入力',
+			'exchange.code.enterDescription' => '相手から伝えられたコードを入力してください',
+			'exchange.code.enterInvalidFormat' => '6桁の数字を入力してください',
+			'exchange.code.submit' => '交換する',
+			'exchange.code.notFound' => 'コードが見つからないか、有効期限が切れています',
+			'exchange.code.expiredCode' => 'コードの有効期限が切れています',
+			'exchange.code.selfCode' => '自分のコードは利用できません',
+			'exchange.code.rateLimited' => '試行回数が多すぎます。しばらくしてからお試しください',
+			'exchange.code.genericError' => 'コードを確認できませんでした。もう一度お試しください',
+			'exchange.scan.title' => 'QRコードを読み取る',
+			'exchange.scan.hint' => '相手のQRコードを枠内に写してください',
+			'exchange.scan.permissionDeniedTitle' => 'カメラを使用できません',
+			'exchange.scan.permissionDeniedBody' => 'カメラの使用を許可すると、QRコードを読み取れます。許可できない場合は6桁コードをご利用ください。',
+			'exchange.scan.enterCodeInstead' => '6桁コードを入力する',
+			'exchange.scan.success' => 'プロフィールを交換しました',
+			'exchange.scan.selfScan' => '自分のQRコードです',
+			'exchange.scan.malformed' => '不正なQRコードです',
+			'exchange.scan.duplicate' => '既に交換済みです',
+			'exchange.scan.genericError' => '交換できませんでした。もう一度お試しください',
+			'exchange.list.title' => '交換した人一覧',
+			'exchange.list.countLabel' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(n, one: '${n} 人と交換しました', other: '${n} 人と交換しました', ), 
+			'exchange.list.empty' => 'まだ誰とも交換していません',
+			'exchange.list.emptyBody' => 'QRコードを読み取ると、ここに一覧が表示されます',
+			'exchange.list.deletedProfile' => '削除されたプロフィールです',
+			'exchange.list.deleteAction' => '一覧から削除',
+			'exchange.list.deleteConfirmTitle' => '一覧から削除しますか?',
+			'exchange.list.deleteConfirmBody' => '相手の一覧からは削除されません。',
+			'exchange.list.deleteConfirmAction' => '削除する',
+			'exchange.list.cancel' => 'キャンセル',
+			'exchange.list.noteLabel' => 'メモ',
+			'exchange.list.noteHint' => '会話の内容など、自分だけのメモを残せます',
+			'exchange.list.noteSave' => '保存',
+			'exchange.list.noteSaved' => 'メモを保存しました',
+			'exchange.list.noteSaveFailed' => 'メモを保存できませんでした',
+			'exchange.list.copyLink' => 'リンクをコピー',
+			'exchange.list.linkCopied' => 'リンクをコピーしました',
+			'exchange.list.openLinkFailed' => 'リンクを開けませんでした',
+			'exchange.list.exchangedAt' => ({required Object date}) => '${date} に交換',
 			'countryRegion.asia' => 'アジア',
 			'countryRegion.oceania' => 'オセアニア',
 			'countryRegion.americas' => '北米・中南米',
