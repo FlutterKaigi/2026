@@ -24,7 +24,7 @@ library;
 import 'dart:convert';
 import 'dart:io';
 
-const _outDir = 'apps/website/web/.well-known';
+const outDir = 'apps/website/web/.well-known';
 
 /// The share-link path Universal Links / App Links should open the app for
 /// — matches `exchangeShareBaseUrl` in
@@ -32,21 +32,34 @@ const _outDir = 'apps/website/web/.well-known';
 const _shareLinkPath = '/x/*';
 
 Future<void> main() async {
-  final wroteApple = _writeAppleFile();
-  final wroteAndroid = _writeAndroidFile();
-  if (!wroteApple && !wroteAndroid) {
-    stdout.writeln('No Universal Links / App Links Repository Variables configured; skipping $_outDir.');
+  final apple = appleAppSiteAssociation(Platform.environment);
+  final android = assetlinks(Platform.environment);
+  if (apple != null) {
+    _write('apple-app-site-association', apple);
+  } else {
+    stdout.writeln('warning: APPLE_TEAM_ID / IOS_BUNDLE_ID not set; skipping apple-app-site-association.');
+  }
+  if (android != null) {
+    _write('assetlinks.json', android);
+  } else {
+    stdout.writeln(
+      'warning: ANDROID_PACKAGE_NAME / PROD_ANDROID_SHA256_FINGERPRINTS not set; skipping assetlinks.json.',
+    );
+  }
+  if (apple == null && android == null) {
+    stdout.writeln('No Universal Links / App Links Repository Variables configured; skipping $outDir.');
   }
 }
 
-bool _writeAppleFile() {
-  final teamId = (Platform.environment['APPLE_TEAM_ID'] ?? '').trim();
-  final bundleId = (Platform.environment['IOS_BUNDLE_ID'] ?? '').trim();
+/// The `apple-app-site-association` content for [env], or `null` when
+/// `APPLE_TEAM_ID` / `IOS_BUNDLE_ID` aren't both set.
+Map<String, Object?>? appleAppSiteAssociation(Map<String, String> env) {
+  final teamId = (env['APPLE_TEAM_ID'] ?? '').trim();
+  final bundleId = (env['IOS_BUNDLE_ID'] ?? '').trim();
   if (teamId.isEmpty || bundleId.isEmpty) {
-    stdout.writeln('warning: APPLE_TEAM_ID / IOS_BUNDLE_ID not set; skipping apple-app-site-association.');
-    return false;
+    return null;
   }
-  _write('apple-app-site-association', {
+  return {
     'applinks': {
       'apps': <String>[],
       'details': [
@@ -56,24 +69,23 @@ bool _writeAppleFile() {
         },
       ],
     },
-  });
-  return true;
+  };
 }
 
-bool _writeAndroidFile() {
-  final packageName = (Platform.environment['ANDROID_PACKAGE_NAME'] ?? '').trim();
-  final fingerprints = (Platform.environment['PROD_ANDROID_SHA256_FINGERPRINTS'] ?? '')
+/// The `assetlinks.json` content for [env], or `null` when
+/// `ANDROID_PACKAGE_NAME` / `PROD_ANDROID_SHA256_FINGERPRINTS` aren't both
+/// set (an empty fingerprint list counts as unset).
+List<Object?>? assetlinks(Map<String, String> env) {
+  final packageName = (env['ANDROID_PACKAGE_NAME'] ?? '').trim();
+  final fingerprints = (env['PROD_ANDROID_SHA256_FINGERPRINTS'] ?? '')
       .split(',')
       .map((f) => f.trim())
       .where((f) => f.isNotEmpty)
       .toList();
   if (packageName.isEmpty || fingerprints.isEmpty) {
-    stdout.writeln(
-      'warning: ANDROID_PACKAGE_NAME / PROD_ANDROID_SHA256_FINGERPRINTS not set; skipping assetlinks.json.',
-    );
-    return false;
+    return null;
   }
-  _write('assetlinks.json', [
+  return [
     {
       'relation': ['delegate_permission/common.handle_all_urls'],
       'target': {
@@ -82,12 +94,11 @@ bool _writeAndroidFile() {
         'sha256_cert_fingerprints': fingerprints,
       },
     },
-  ]);
-  return true;
+  ];
 }
 
 void _write(String fileName, Object content) {
-  final dir = Directory(_outDir)..createSync(recursive: true);
+  final dir = Directory(outDir)..createSync(recursive: true);
   final file = File('${dir.path}/$fileName');
   const encoder = JsonEncoder.withIndent('  ');
   file.writeAsStringSync('${encoder.convert(content)}\n');
