@@ -16,6 +16,13 @@ import '../l10n/strings.dart';
 /// actual exchange only happens inside the app), so echoing it back would
 /// only add a second place it's visible to anyone looking over the visitor's
 /// shoulder or screen-sharing.
+///
+/// The full URL — token included — is also kept from leaving the browser by
+/// other means: `_ShareLinkFallbackShell` omits `Analytics` (its
+/// `gtag('config', ...)` would otherwise fire an automatic `page_view`
+/// carrying `page_location`) and sets `<meta name="referrer"
+/// content="no-referrer">` so no request this page makes carries the URL out
+/// as a Referer header either.
 class ShareLinkFallbackPage extends StatelessComponent {
   const ShareLinkFallbackPage({super.key});
 
