@@ -2,6 +2,16 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<!-- Universal Links for the profile-exchange share link
+	     (https://2026.flutterkaigi.jp/x/<token>, see
+	     apps/app/lib/feature/exchange/data/exchange_link.dart). Requires the
+	     matching apple-app-site-association served from
+	     apps/website/web/.well-known/ to list this app's Team ID + bundle ID
+	     app ID — see that file and its README for the manual setup steps. -->
+	<key>com.apple.developer.associated-domains</key>
+	<array>
+		<string>applinks:2026.flutterkaigi.jp</string>
+	</array>
 	<key>com.apple.developer.devicecheck.appattest-environment</key>
 	<string>production</string>
 </dict>

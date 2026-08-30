@@ -9,6 +9,25 @@ class SettingsRoute extends GoRouteData with $SettingsRoute {
   Widget build(BuildContext context, GoRouterState state) => const SettingsPage();
 }
 
+/// `/x/:token` — Universal Link (iOS) / App Link (Android) landing page for a
+/// shared or scanned profile-exchange link. Kept as a top-level route (not
+/// nested under [AccountBranch]) since it is reached from outside the app —
+/// via `applinks:2026.flutterkaigi.jp` (`ios/Runner/Runner.entitlements`) or
+/// the `autoVerify` intent filter (`android/app/src/main/AndroidManifest.xml`)
+/// — rather than through the bottom navigation, and should not carry the tab
+/// shell's chrome. Mirrors the website's static `/x/` fallback page
+/// (`apps/website`) for the case where the app isn't installed. See
+/// `apps/app/lib/feature/exchange/data/exchange_link.dart` for the URL format.
+@TypedGoRoute<ExchangeLinkRoute>(path: '/x/:token')
+class ExchangeLinkRoute extends GoRouteData with $ExchangeLinkRoute {
+  const ExchangeLinkRoute({required this.token});
+
+  final String token;
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => ExchangeLinkPage(token: token);
+}
+
 /// Shell hosting the main bottom/rail navigation destinations.
 ///
 /// Uses [StatefulShellRoute.indexedStack] so switching tabs swaps branches

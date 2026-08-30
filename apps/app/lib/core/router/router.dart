@@ -6,6 +6,7 @@ import 'package:app/feature/auth/ui/page/account_page.dart';
 import 'package:app/feature/auth/ui/page/email_sign_in_page.dart';
 import 'package:app/feature/event/ui/page/event_info_page.dart';
 import 'package:app/feature/exchange/ui/page/exchange_home_page.dart';
+import 'package:app/feature/exchange/ui/page/exchange_link_page.dart';
 import 'package:app/feature/exchange/ui/page/exchange_list_page.dart';
 import 'package:app/feature/exchange/ui/page/exchange_scan_page.dart';
 import 'package:app/feature/license/ui/page/license_detail_page.dart';

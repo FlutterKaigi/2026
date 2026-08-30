@@ -594,6 +594,7 @@ class Translations$exchange$ja {
 	late final Translations$exchange$code$ja code = Translations$exchange$code$ja.internal(_root);
 	late final Translations$exchange$scan$ja scan = Translations$exchange$scan$ja.internal(_root);
 	late final Translations$exchange$list$ja list = Translations$exchange$list$ja.internal(_root);
+	late final Translations$exchange$link$ja link = Translations$exchange$link$ja.internal(_root);
 }
 
 // Path: countryRegion
@@ -1196,6 +1197,42 @@ class Translations$exchange$list$ja {
 	String exchangedAt({required Object date}) => '${date} に交換';
 }
 
+// Path: exchange.link
+class Translations$exchange$link$ja {
+	Translations$exchange$link$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'プロフィール交換'
+	String get title => 'プロフィール交換';
+
+	/// ja: 'このリンクからプロフィールを交換するにはサインインしてください'
+	String get signInRequired => 'このリンクからプロフィールを交換するにはサインインしてください';
+
+	/// ja: 'サインインする'
+	String get signInAction => 'サインインする';
+
+	/// ja: 'プロフィールを作成しましょう'
+	String get profileRequiredTitle => 'プロフィールを作成しましょう';
+
+	/// ja: 'プロフィール交換を利用するには、先にプロフィールを作成してください'
+	String get profileRequiredBody => 'プロフィール交換を利用するには、先にプロフィールを作成してください';
+
+	/// ja: 'プロフィールを作成'
+	String get profileRequiredAction => 'プロフィールを作成';
+
+	/// ja: '処理しています…'
+	String get processing => '処理しています…';
+
+	/// ja: '交換した人一覧を見る'
+	String get viewListAction => '交換した人一覧を見る';
+
+	/// ja: '閉じる'
+	String get doneAction => '閉じる';
+}
+
 // Path: settings.themeMode
 class Translations$settings$themeMode$ja {
 	Translations$settings$themeMode$ja.internal(this._root);
@@ -1489,6 +1526,15 @@ extension on Translations {
 			'exchange.list.linkCopied' => 'リンクをコピーしました',
 			'exchange.list.openLinkFailed' => 'リンクを開けませんでした',
 			'exchange.list.exchangedAt' => ({required Object date}) => '${date} に交換',
+			'exchange.link.title' => 'プロフィール交換',
+			'exchange.link.signInRequired' => 'このリンクからプロフィールを交換するにはサインインしてください',
+			'exchange.link.signInAction' => 'サインインする',
+			'exchange.link.profileRequiredTitle' => 'プロフィールを作成しましょう',
+			'exchange.link.profileRequiredBody' => 'プロフィール交換を利用するには、先にプロフィールを作成してください',
+			'exchange.link.profileRequiredAction' => 'プロフィールを作成',
+			'exchange.link.processing' => '処理しています…',
+			'exchange.link.viewListAction' => '交換した人一覧を見る',
+			'exchange.link.doneAction' => '閉じる',
 			'countryRegion.asia' => 'アジア',
 			'countryRegion.oceania' => 'オセアニア',
 			'countryRegion.americas' => '北米・中南米',

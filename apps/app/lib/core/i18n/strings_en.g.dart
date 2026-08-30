@@ -343,6 +343,7 @@ class _Translations$exchange$en extends Translations$exchange$ja {
 	@override late final _Translations$exchange$code$en code = _Translations$exchange$code$en._(_root);
 	@override late final _Translations$exchange$scan$en scan = _Translations$exchange$scan$en._(_root);
 	@override late final _Translations$exchange$list$en list = _Translations$exchange$list$en._(_root);
+	@override late final _Translations$exchange$link$en link = _Translations$exchange$link$en._(_root);
 }
 
 // Path: countryRegion
@@ -652,6 +653,24 @@ class _Translations$exchange$list$en extends Translations$exchange$list$ja {
 	@override String exchangedAt({required Object date}) => 'Exchanged on ${date}';
 }
 
+// Path: exchange.link
+class _Translations$exchange$link$en extends Translations$exchange$link$ja {
+	_Translations$exchange$link$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Profile Exchange';
+	@override String get signInRequired => 'Sign in to complete this exchange';
+	@override String get signInAction => 'Sign in';
+	@override String get profileRequiredTitle => 'Set up your profile';
+	@override String get profileRequiredBody => 'Create your profile before exchanging profiles with other attendees.';
+	@override String get profileRequiredAction => 'Create profile';
+	@override String get processing => 'Processing…';
+	@override String get viewListAction => 'View exchanged profiles';
+	@override String get doneAction => 'Done';
+}
+
 // Path: settings.themeMode
 class _Translations$settings$themeMode$en extends Translations$settings$themeMode$ja {
 	_Translations$settings$themeMode$en._(TranslationsEn root) : this._root = root, super.internal(root);
@@ -931,6 +950,15 @@ extension on TranslationsEn {
 			'exchange.list.linkCopied' => 'Link copied',
 			'exchange.list.openLinkFailed' => 'Could not open the link',
 			'exchange.list.exchangedAt' => ({required Object date}) => 'Exchanged on ${date}',
+			'exchange.link.title' => 'Profile Exchange',
+			'exchange.link.signInRequired' => 'Sign in to complete this exchange',
+			'exchange.link.signInAction' => 'Sign in',
+			'exchange.link.profileRequiredTitle' => 'Set up your profile',
+			'exchange.link.profileRequiredBody' => 'Create your profile before exchanging profiles with other attendees.',
+			'exchange.link.profileRequiredAction' => 'Create profile',
+			'exchange.link.processing' => 'Processing…',
+			'exchange.link.viewListAction' => 'View exchanged profiles',
+			'exchange.link.doneAction' => 'Done',
 			'countryRegion.asia' => 'Asia',
 			'countryRegion.oceania' => 'Oceania',
 			'countryRegion.americas' => 'Americas',

@@ -278,6 +278,16 @@ exchange:
     linkCopied: リンクをコピーしました
     openLinkFailed: リンクを開けませんでした
     exchangedAt: $date に交換
+  link:
+    title: プロフィール交換
+    signInRequired: このリンクからプロフィールを交換するにはサインインしてください
+    signInAction: サインインする
+    profileRequiredTitle: プロフィールを作成しましょう
+    profileRequiredBody: プロフィール交換を利用するには、先にプロフィールを作成してください
+    profileRequiredAction: プロフィールを作成
+    processing: 処理しています…
+    viewListAction: 交換した人一覧を見る
+    doneAction: 閉じる
 countryRegion:
   asia: アジア
   oceania: オセアニア

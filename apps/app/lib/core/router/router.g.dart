@@ -6,7 +6,11 @@ part of 'router.dart';
 // GoRouterGenerator
 // **************************************************************************
 
-List<RouteBase> get $appRoutes => [$settingsRoute, $appShellRoute];
+List<RouteBase> get $appRoutes => [
+  $settingsRoute,
+  $exchangeLinkRoute,
+  $appShellRoute,
+];
 
 RouteBase get $settingsRoute => GoRouteData.$route(
   path: '/settings',
@@ -19,6 +23,33 @@ mixin $SettingsRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/settings');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) => context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+RouteBase get $exchangeLinkRoute => GoRouteData.$route(
+  path: '/x/:token',
+  hasOverriddenOnExit: false,
+  factory: $ExchangeLinkRoute._fromState,
+);
+
+mixin $ExchangeLinkRoute on GoRouteData {
+  static ExchangeLinkRoute _fromState(GoRouterState state) => ExchangeLinkRoute(token: state.pathParameters['token']!);
+
+  ExchangeLinkRoute get _self => this as ExchangeLinkRoute;
+
+  @override
+  String get location => GoRouteData.$location('/x/${Uri.encodeComponent(_self.token)}');
 
   @override
   void go(BuildContext context) => context.go(location);

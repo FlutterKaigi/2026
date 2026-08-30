@@ -30,6 +30,22 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+            <!-- App Links for the profile-exchange share link
+                 (https://2026.flutterkaigi.jp/x/<token>, see
+                 apps/app/lib/feature/exchange/data/exchange_link.dart).
+                 android:autoVerify triggers Google's Digital Asset Links
+                 check against apps/website/web/.well-known/assetlinks.json
+                 (package name + signing-cert SHA-256 fingerprint) — see that
+                 file and its README for the manual setup steps. -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data
+                    android:scheme="https"
+                    android:host="2026.flutterkaigi.jp"
+                    android:pathPrefix="/x"/>
+            </intent-filter>
         </activity>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->

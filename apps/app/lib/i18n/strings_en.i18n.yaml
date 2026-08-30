@@ -277,6 +277,16 @@ exchange:
     linkCopied: Link copied
     openLinkFailed: Could not open the link
     exchangedAt: Exchanged on $date
+  link:
+    title: Profile Exchange
+    signInRequired: Sign in to complete this exchange
+    signInAction: Sign in
+    profileRequiredTitle: Set up your profile
+    profileRequiredBody: Create your profile before exchanging profiles with other attendees.
+    profileRequiredAction: Create profile
+    processing: Processing…
+    viewListAction: View exchanged profiles
+    doneAction: Done
 countryRegion:
   asia: Asia
   oceania: Oceania
