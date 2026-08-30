@@ -10,6 +10,7 @@ import { defineString } from "firebase-functions/params";
 import * as logger from "firebase-functions/logger";
 import { isEmulator } from "./env";
 import { sourceDb } from "./firebase";
+import { REGION } from "./region";
 import {
   issueExchangeCode,
   issueExchangeToken,
@@ -27,7 +28,15 @@ export { issueExchangeCode, issueExchangeToken, redeemExchangeCode, onProfileExc
 // 例: SYNC_TARGET_PROJECT_ID=flutterkaigi-2026-283db
 const syncTargetProjectId = defineString("SYNC_TARGET_PROJECT_ID");
 
-setGlobalOptions({ region: "asia-northeast1" });
+// 注意: この呼び出しは、他ファイルで定義された関数（`./exchange/*` など）には
+// 効かない。TypeScript が CommonJS へトランスパイルする際、`import` はファイル
+// 本体の他の文より先に `require(...)` として実行されるため、import 先のモジュール
+// 内で即時評価される `onCall(...)` / `onDocumentCreated(...)` はこの
+// `setGlobalOptions` の呼び出しより前にオプションを確定させてしまう
+// （詳細・実測結果は `./region.ts` を参照）。他ファイルの関数は各々の options に
+// `region: REGION` を明示している。ここに残しているのは、この index.ts に
+// 直接書かれる `syncCollectionsToProd` のような関数向けの既定値としてのみ。
+setGlobalOptions({ region: REGION });
 
 /**
  * 同期可能なコレクション。**参照される側が先**になるよう依存順に並べる。
@@ -230,6 +239,9 @@ async function commitInChunks(
  */
 export const syncCollectionsToProd = onCall(
   {
+    // setGlobalOptions からも継承されるが、import 順序に依存しないよう明示する
+    // （詳細は上の setGlobalOptions 呼び出しのコメントと `./region.ts` を参照）。
+    region: REGION,
     // ダッシュボード（Web）は App Check (reCAPTCHA v3) を有効化済み。
     // エミュレータでは App Check トークンを発行できないため無効にする。
     enforceAppCheck: !isEmulator,

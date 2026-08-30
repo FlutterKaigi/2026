@@ -7,10 +7,11 @@
     "node": "22"
   },
   "scripts": {
-    "build": "tsc",
+    "clean": "rm -rf lib",
+    "build": "npm run clean && tsc -p tsconfig.build.json",
     "build:watch": "tsc --watch",
     "lint": "tsc --noEmit",
-    "test": "tsc && node --test lib/exchange/*.test.js"
+    "test": "npm run clean && tsc && node --test lib/exchange/*.test.js"
   },
   "dependencies": {
     "firebase-admin": "^13.4.0",

@@ -3,6 +3,7 @@ import { onDocumentCreated, onDocumentDeleted } from "firebase-functions/v2/fire
 import * as logger from "firebase-functions/logger";
 
 import { sourceDb } from "../firebase";
+import { REGION } from "../region";
 import { exchangeTokenSecret } from "./secret";
 import { verifyExchangeToken } from "./token";
 
@@ -17,9 +18,18 @@ const PROFILE_EXCHANGES_COUNTER_DOC = "profileExchanges";
  *   （既に存在する場合は触らない = 同じ相手を再スキャンしても重複しない）
  * - 自分側の `token` を null 化して残さない
  * - 新しいペアが成立した時だけ `counters/profileExchanges` を increment する
+ *
+ * 既知の制約（S1）: 「新しいペアが成立した」の判定は `mirrorRef` の存在有無のみで
+ * 行っており、過去にカウント済みかどうかを覚えておく永続的な記録を持たない。
+ * そのため、両者が各々の一覧から該当の交換を削除した後（削除は仕様上許可されている）
+ * 片方が再スキャンすると、相手側のミラーは既に無いため「新規ペア成立」と誤判定され、
+ * カウンタが二重加算されうる。データモデル上この 2 つのケース（本当に初対面 /
+ * 一度交換して両者が削除した後の再交換）を区別する情報が無いため、現状は許容する。
+ * 厳密化する場合は Admin 専用の `exchangePairs/{sortedUidPair}`
+ * のような「カウント済みフラグ」ドキュメントを別途持たせる必要がある。
  */
 export const onProfileExchangeCreated = onDocumentCreated(
-  { document: "users/{uid}/exchanges/{otherUid}", secrets: [exchangeTokenSecret] },
+  { document: "users/{uid}/exchanges/{otherUid}", region: REGION, secrets: [exchangeTokenSecret] },
   async (event) => {
     const snapshot = event.data;
     if (snapshot === undefined) {
@@ -80,7 +90,7 @@ export const onProfileExchangeCreated = onDocumentCreated(
  * プロフィール本体が消えて表示できなくなるため、相手の一覧にも残さない。
  */
 export const onUserProfileDeleted = onDocumentDeleted(
-  "users/{uid}",
+  { document: "users/{uid}", region: REGION },
   async (event) => {
     const { uid } = event.params;
     const db = sourceDb();

@@ -3,6 +3,7 @@ import * as logger from "firebase-functions/logger";
 
 import { isEmulator } from "../env";
 import { sourceDb } from "../firebase";
+import { REGION } from "../region";
 import { EXCHANGE_CODE_TTL_SECONDS, generateExchangeCode, isValidExchangeCodeFormat } from "./code";
 import { AttemptWindow, recordAttempt } from "./rate_limit";
 import { exchangeTokenSecret } from "./secret";
@@ -47,7 +48,7 @@ function requireAuth(auth: { uid: string } | null | undefined): { uid: string } 
  * 表示し続けられる。
  */
 export const issueExchangeToken = onCall(
-  { enforceAppCheck: !isEmulator, secrets: [exchangeTokenSecret] },
+  { region: REGION, enforceAppCheck: !isEmulator, secrets: [exchangeTokenSecret] },
   async (request): Promise<{ token: string; expiresInSeconds: number }> => {
     const auth = requireAuth(request.auth);
     const token = signExchangeToken(auth.uid, exchangeTokenSecret.value());
@@ -62,7 +63,7 @@ export const issueExchangeToken = onCall(
  * (`exchangeCodes`) に保存する。クライアントからは読み書きできない。
  */
 export const issueExchangeCode = onCall(
-  { enforceAppCheck: !isEmulator },
+  { region: REGION, enforceAppCheck: !isEmulator },
   async (request): Promise<{ code: string; expiresInSeconds: number }> => {
     const auth = requireAuth(request.auth);
     const db = sourceDb();
@@ -100,7 +101,7 @@ export const issueExchangeCode = onCall(
  * コードは検証の成否を問わず削除する（再利用・総当たりの手がかりを残さない）。
  */
 export const redeemExchangeCode = onCall(
-  { enforceAppCheck: !isEmulator, secrets: [exchangeTokenSecret] },
+  { region: REGION, enforceAppCheck: !isEmulator, secrets: [exchangeTokenSecret] },
   async (request): Promise<{ uid: string; token: string }> => {
     const auth = requireAuth(request.auth);
     const rawCode = request.data?.code;
@@ -112,13 +113,21 @@ export const redeemExchangeCode = onCall(
     await enforceRedeemRateLimit(db, auth.uid);
 
     const ref = db.collection(EXCHANGE_CODES_COLLECTION).doc(rawCode);
-    const snapshot = await ref.get();
-    if (!snapshot.exists) {
-      throw new HttpsError("not-found", "コードが見つからないか、有効期限が切れています。");
-    }
-    const data = snapshot.data() as ExchangeCodeDocument;
-    // 単一利用トークンとして扱う。検証結果に関わらずここで削除する。
-    await ref.delete();
+    // get→delete を 1 つのトランザクションにまとめ、同時 redeem による二重成立を
+    // 防ぐ。同じコードに対して 2 つの呼び出しがほぼ同時に来た場合、先に commit した
+    // 側だけがドキュメントを読み delete できる。後着はコミット時にコンテンション
+    // （読み取り集合が他方の書き込みで無効化されたこと）を検出して自動的に
+    // リトライされ（クライアントライブラリの既定動作）、再読み取り時には
+    // ドキュメントが既に存在しないため not-found として弾かれる。
+    const data = await db.runTransaction(async (tx) => {
+      const snapshot = await tx.get(ref);
+      if (!snapshot.exists) {
+        throw new HttpsError("not-found", "コードが見つからないか、有効期限が切れています。");
+      }
+      // 単一利用トークンとして扱う。検証結果に関わらずここで削除する。
+      tx.delete(ref);
+      return snapshot.data() as ExchangeCodeDocument;
+    });
 
     if (data.expiresAtMillis <= Date.now()) {
       throw new HttpsError("deadline-exceeded", "コードの有効期限が切れています。");
