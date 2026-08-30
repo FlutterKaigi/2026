@@ -123,6 +123,9 @@ export const onProfileExchangeCreated = onDocumentCreated(
     document: "users/{uid}/exchanges/{otherUid}",
     region: FUNCTIONS_REGION,
     secrets: [exchangeTokenSecret],
+    // Idempotent (see the mirror-existence check below), so a retried
+    // delivery after a transient failure is safe.
+    retry: true,
   },
   async (event) => {
     const snapshot = event.data;
@@ -256,34 +259,31 @@ interface RedeemAttempts {
 }
 
 /**
- * Records one failed [redeemExchangeCode] call for [uid] and blocks further
- * attempts once [MAX_REDEEM_FAILURES] is reached within a rolling window.
+ * Computes the [RedeemAttempts] update for one failed [redeemExchangeCode]
+ * call, blocking further attempts once [MAX_REDEEM_FAILURES] is reached
+ * within a rolling window.
  *
  * A `blockedUntil` that has already passed resets the count, so a legitimate
  * user isn't re-blocked by attempts made before their previous block expired.
+ * Pure (no I/O) so the caller can apply it inside a transaction alongside the
+ * read it was computed from.
  */
-async function recordFailedRedeemAttempt(uid: string): Promise<void> {
-  const db = defaultFirestore();
-  const attemptsRef = db.collection("exchangeCodeAttempts").doc(uid);
-  await db.runTransaction(async (tx) => {
-    const snapshot = await tx.get(attemptsRef);
-    const data = snapshot.data() as RedeemAttempts | undefined;
-    const blockExpired = data?.blockedUntil != null && data.blockedUntil.toMillis() <= Date.now();
-    const current = blockExpired ? 0 : (data?.failCount ?? 0);
-    const next = current + 1;
-
-    const update: RedeemAttempts = { failCount: next };
-    if (next >= MAX_REDEEM_FAILURES) {
-      update.blockedUntil = Timestamp.fromMillis(Date.now() + REDEEM_BLOCK_DURATION_MILLIS);
-    }
-    tx.set(attemptsRef, update, { merge: true });
-  });
+function nextFailedRedeemAttempts(current: RedeemAttempts | undefined): RedeemAttempts {
+  const blockExpired = current?.blockedUntil != null && current.blockedUntil.toMillis() <= Date.now();
+  const failCount = (blockExpired ? 0 : (current?.failCount ?? 0)) + 1;
+  const update: RedeemAttempts = { failCount };
+  if (failCount >= MAX_REDEEM_FAILURES) {
+    update.blockedUntil = Timestamp.fromMillis(Date.now() + REDEEM_BLOCK_DURATION_MILLIS);
+  }
+  return update;
 }
 
-/** Clears [uid]'s failed-attempt count after a successful redemption. */
-async function resetRedeemAttempts(uid: string): Promise<void> {
-  await defaultFirestore().collection("exchangeCodeAttempts").doc(uid).delete();
-}
+type RedeemOutcome =
+  | { kind: "blocked" }
+  | { kind: "not-found" }
+  | { kind: "expired" }
+  | { kind: "self" }
+  | { kind: "success"; otherUid: string };
 
 /**
  * Redeems a 6-digit code issued by [issueExchangeCode], returning a signed
@@ -310,44 +310,69 @@ export const redeemExchangeCode = onCall(
 
     const db = defaultFirestore();
     const attemptsRef = db.collection("exchangeCodeAttempts").doc(uid);
-    const attemptsSnapshot = await attemptsRef.get();
-    const blockedUntil = (attemptsSnapshot.data() as RedeemAttempts | undefined)?.blockedUntil;
-    if (blockedUntil != null && blockedUntil.toMillis() > Date.now()) {
-      throw new HttpsError("resource-exhausted", "試行回数が多すぎます。しばらくしてからもう一度お試しください。");
-    }
-
     const codeRef = db.collection("exchangeCodes").doc(code);
-    const codeSnapshot = await codeRef.get();
-    if (!codeSnapshot.exists) {
-      await recordFailedRedeemAttempt(uid);
-      throw new HttpsError("not-found", "コードが見つかりません。入力内容を確認してください。");
-    }
-    const codeData = codeSnapshot.data()!;
-    const otherUid = codeData.uid as string;
-    const expiresAt = codeData.expiresAt as Timestamp;
-    if (expiresAt.toMillis() < Date.now()) {
-      await codeRef.delete();
-      await recordFailedRedeemAttempt(uid);
-      throw new HttpsError("not-found", "コードの有効期限が切れています。");
-    }
-    if (otherUid === uid) {
-      // Not a brute-force signal (the caller can only ever produce their own
-      // uid's code by knowing it already), so this doesn't count as a
-      // failure.
-      throw new HttpsError("failed-precondition", "自分のコードは入力できません。");
-    }
 
-    // Consumed: a code is redeemable once, same as a QR scan's exchange
-    // create() failing with ALREADY_EXISTS on a second attempt.
-    await codeRef.delete();
-    await resetRedeemAttempts(uid);
+    // The block check, the failure-count increment, and the code's
+    // read-then-delete all happen inside one transaction so a burst of
+    // concurrent calls from the same uid can't all read "not blocked yet" /
+    // "code still exists" before any of them commits: Firestore serializes
+    // (via retry-on-conflict) transactions that touch the same documents,
+    // so only one call in a burst can win a given code, and the Nth failure
+    // that crosses MAX_REDEEM_FAILURES is guaranteed to be observed by every
+    // later call in the same burst rather than racing past it.
+    const outcome = await db.runTransaction<RedeemOutcome>(async (tx) => {
+      const [attemptsSnapshot, codeSnapshot] = await Promise.all([tx.get(attemptsRef), tx.get(codeRef)]);
+      const attemptsData = attemptsSnapshot.data() as RedeemAttempts | undefined;
+      if (attemptsData?.blockedUntil != null && attemptsData.blockedUntil.toMillis() > Date.now()) {
+        return { kind: "blocked" };
+      }
 
-    const secret = requireExchangeTokenSecret();
-    const expiresAtSeconds = Math.floor(Date.now() / 1000) + EXCHANGE_TOKEN_TTL_SECONDS;
-    return {
-      token: buildExchangeToken(otherUid, expiresAtSeconds, secret),
-      expiresAt: expiresAtSeconds,
-    };
+      if (!codeSnapshot.exists) {
+        tx.set(attemptsRef, nextFailedRedeemAttempts(attemptsData), { merge: true });
+        return { kind: "not-found" };
+      }
+      const codeData = codeSnapshot.data()!;
+      const otherUid = codeData.uid as string;
+      const expiresAt = codeData.expiresAt as Timestamp;
+      if (expiresAt.toMillis() < Date.now()) {
+        tx.delete(codeRef);
+        tx.set(attemptsRef, nextFailedRedeemAttempts(attemptsData), { merge: true });
+        return { kind: "expired" };
+      }
+      if (otherUid === uid) {
+        // Not a brute-force signal (the caller can only ever produce their
+        // own uid's code by knowing it already), so this doesn't count as a
+        // failure, and the code stays redeemable for its actual owner.
+        return { kind: "self" };
+      }
+
+      // Consumed: a code is redeemable once, same as a QR scan's exchange
+      // create() failing with ALREADY_EXISTS on a second attempt. Reading
+      // and deleting inside the same transaction closes the window where two
+      // concurrent redeems could both observe the code as existing.
+      tx.delete(codeRef);
+      tx.delete(attemptsRef);
+      return { kind: "success", otherUid };
+    });
+
+    switch (outcome.kind) {
+      case "blocked":
+        throw new HttpsError("resource-exhausted", "試行回数が多すぎます。しばらくしてからもう一度お試しください。");
+      case "not-found":
+        throw new HttpsError("not-found", "コードが見つかりません。入力内容を確認してください。");
+      case "expired":
+        throw new HttpsError("not-found", "コードの有効期限が切れています。");
+      case "self":
+        throw new HttpsError("failed-precondition", "自分のコードは入力できません。");
+      case "success": {
+        const secret = requireExchangeTokenSecret();
+        const expiresAtSeconds = Math.floor(Date.now() / 1000) + EXCHANGE_TOKEN_TTL_SECONDS;
+        return {
+          token: buildExchangeToken(outcome.otherUid, expiresAtSeconds, secret),
+          expiresAt: expiresAtSeconds,
+        };
+      }
+    }
   },
 );
 
@@ -382,15 +407,23 @@ async function deleteInChunks(refs: DocumentReference[]): Promise<void> {
  * documents and deletes nothing, so an at-least-once retry can't loop or
  * fail.
  */
-export const onProfileExchangeOwnerDeleted = onDocumentDeleted("users/{uid}", async (event) => {
-  const { uid } = event.params;
-  const db = defaultFirestore();
-  const ownExchanges = db.collection("users").doc(uid).collection("exchanges");
-  const snapshot = await ownExchanges.get();
+export const onProfileExchangeOwnerDeleted = onDocumentDeleted(
+  {
+    document: "users/{uid}",
+    // Re-running against an already-cleaned uid deletes nothing (see above),
+    // so a retried delivery after a transient failure is safe.
+    retry: true,
+  },
+  async (event) => {
+    const { uid } = event.params;
+    const db = defaultFirestore();
+    const ownExchanges = db.collection("users").doc(uid).collection("exchanges");
+    const snapshot = await ownExchanges.get();
 
-  const refs = [
-    ...snapshot.docs.map((doc) => doc.ref),
-    ...snapshot.docs.map((doc) => db.collection("users").doc(doc.id).collection("exchanges").doc(uid)),
-  ];
-  await deleteInChunks(refs);
-});
+    const refs = [
+      ...snapshot.docs.map((doc) => doc.ref),
+      ...snapshot.docs.map((doc) => db.collection("users").doc(doc.id).collection("exchanges").doc(uid)),
+    ];
+    await deleteInChunks(refs);
+  },
+);
