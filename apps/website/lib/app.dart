@@ -9,6 +9,7 @@ import 'constants/generated_sponsors.dart';
 import 'constants/sponsors.dart';
 import 'l10n/strings.dart';
 import 'pages/home.dart';
+import 'pages/share_link_fallback.dart';
 import 'pages/sponsor_detail.dart';
 
 class App extends StatelessComponent {
@@ -34,6 +35,11 @@ class App extends StatelessComponent {
               title: '${sponsor.name.resolve(locale)} | FlutterKaigi 2026',
               builder: (context, state) => _SponsorShell(locale: locale, sponsor: sponsor),
             ),
+          Route(
+            path: locale.shareLinkFallbackRoutePath,
+            title: 'FlutterKaigi 2026',
+            builder: (context, state) => _ShareLinkFallbackShell(locale: locale),
+          ),
         ],
       ],
     );
@@ -82,6 +88,24 @@ class _SponsorShell extends StatelessComponent {
       child: div(classes: 'main', [
         Header(altLocaleHref: locale.other.sponsorHref(sponsor.slug)),
         SponsorDetailPage(sponsor: sponsor),
+        const Footer(),
+      ]),
+    );
+  }
+}
+
+class _ShareLinkFallbackShell extends StatelessComponent {
+  const _ShareLinkFallbackShell({required this.locale});
+
+  final AppLocale locale;
+
+  @override
+  Component build(BuildContext context) {
+    return LocaleScope(
+      locale: locale,
+      child: div(classes: 'main', [
+        Header(altLocaleHref: locale.other.shareLinkFallbackHref),
+        const ShareLinkFallbackPage(),
         const Footer(),
       ]),
     );

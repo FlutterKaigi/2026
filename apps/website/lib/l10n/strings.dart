@@ -47,6 +47,16 @@ enum AppLocale {
   /// Navigation href to the Staff section on the home page.
   String get staffAnchorHref => '$linkHref#staff';
 
+  /// Navigation href for the profile-exchange share-link fallback page.
+  String get shareLinkFallbackHref => '${linkHref}x';
+
+  /// Jaspr Router route path (absolute, **no** baseHref) for the
+  /// profile-exchange share-link fallback page — this drives the SSG output
+  /// directory. Matches every `/x/<token>` request via the Worker script
+  /// (`apps/website/worker.js`), which forwards them all to this one static
+  /// page — see its doc comment for why.
+  String get shareLinkFallbackRoutePath => '${homePath == '/' ? '' : homePath}/x';
+
   /// The other supported locale (the site ships exactly two).
   AppLocale get other => this == AppLocale.ja ? AppLocale.en : AppLocale.ja;
 }
@@ -149,6 +159,60 @@ class Strings {
     AppLocale.ja => 'https://medium.com/flutterkaigi/flutterkaigi-2026-opportunities-guide-ja-0e8cdb0a4acb',
     AppLocale.en => 'https://medium.com/flutterkaigi/flutterkaigi-2026-opportunities-guide-en-1e5bd6c14461',
   };
+
+  // ── Profile exchange ────────────────────────────────────────────────
+
+  /// Live count of `counters/profileExchanges` — hidden entirely (see
+  /// `ExchangeCounterSection`) when the client-side fetch hasn't
+  /// (yet, or ever) succeeded, so these strings only ever appear alongside
+  /// a real number.
+  String get exchangeCounterTitle => switch (locale) {
+    AppLocale.ja => 'プロフィール交換',
+    AppLocale.en => 'Profile Exchanges',
+  };
+
+  String get exchangeCounterCaption => switch (locale) {
+    AppLocale.ja => '会場で交換されたプロフィールの件数（リアルタイム）',
+    AppLocale.en => 'Profiles exchanged at the venue, updated live',
+  };
+
+  String get exchangeCounterUnit => switch (locale) {
+    AppLocale.ja => '件',
+    AppLocale.en => 'exchanges',
+  };
+
+  // ── Share-link fallback page (`/x/<token>`) ────────────────────────
+
+  String get shareLinkPageTitle => switch (locale) {
+    AppLocale.ja => 'アプリでプロフィールを交換',
+    AppLocale.en => 'Open the App to Exchange Profiles',
+  };
+
+  String get shareLinkPageLead => switch (locale) {
+    AppLocale.ja => 'このリンクは FlutterKaigi 2026 アプリで参加者同士のプロフィールを交換するためのものです。',
+    AppLocale.en => 'This link is for exchanging attendee profiles in the FlutterKaigi 2026 app.',
+  };
+
+  String get shareLinkPageAppInstalledHint => switch (locale) {
+    AppLocale.ja => 'アプリをインストール済みの場合は自動的に開きます。開かない場合は、アプリを起動してから相手にもう一度リンクを共有してもらってください。',
+    AppLocale.en =>
+      "If you already have the app installed, it should have opened automatically. If it didn't, open the app "
+          'and ask the other attendee to share the link again.',
+  };
+
+  String get shareLinkPageComingSoon => switch (locale) {
+    AppLocale.ja => 'アプリの配布情報は近日公開予定です。公開までしばらくお待ちください。',
+    AppLocale.en => 'App download details will be announced soon. Thanks for your patience.',
+  };
+
+  String get shareLinkPageBackHome => switch (locale) {
+    AppLocale.ja => 'トップページに戻る',
+    AppLocale.en => 'Back to home',
+  };
+
+  String get shareLinkPageGetIos => 'Download on the App Store';
+
+  String get shareLinkPageGetAndroid => 'Get it on Google Play';
 
   // ── Dialog（共通） ───────────────────────────────────────────────────
 
