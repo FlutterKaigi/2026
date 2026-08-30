@@ -72,6 +72,47 @@ service cloud.firestore {
         && request.resource.data.createdAt == resource.data.createdAt
         && request.resource.data.updatedAt == request.time;
       allow delete: if isOwner(uid);
+
+      // プロフィール交換の記録。ドキュメント ID は相手の uid。
+      // 自分がスキャンした側だけが自分のリストに作成でき（origin: 'scan'）、
+      // 相手側のミラー（origin: 'mirror'）は Cloud Functions トリガーが作成する
+      // （Admin SDK は Firestore ルールの対象外）。
+      //
+      // packages/data/firebase/schemas/firestore/profile_exchange.schema.json と
+      // ProfileExchange の上限値 (noteMaxLength) に合わせる。
+      function isValidProfileExchange(data) {
+        return data.keys().hasOnly(['createdAt', 'origin', 'token', 'note'])
+          && data.createdAt is timestamp
+          && data.origin in ['scan', 'mirror']
+          && (!('token' in data) || data.token == null || data.token is string)
+          && (!('note' in data) || data.note == null
+            || (data.note is string && data.note.size() <= 300));
+      }
+
+      match /exchanges/{otherUid} {
+        allow read: if isOwner(uid);
+        // 読み取った側が自分のリストにだけ作成できる。相手側はトリガーがミラーする。
+        allow create: if isOwner(uid)
+          && otherUid != uid
+          && isValidProfileExchange(request.resource.data)
+          && request.resource.data.origin == 'scan'
+          && request.resource.data.token is string
+          && request.resource.data.createdAt == request.time;
+        // 自分専用メモの更新のみを許可する。トークンの検証・null 化やミラー作成は
+        // Cloud Functions（Admin SDK）が行うため、クライアントの update では扱わない。
+        allow update: if isOwner(uid)
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['note'])
+          && (!('note' in request.resource.data) || request.resource.data.note == null
+            || (request.resource.data.note is string && request.resource.data.note.size() <= 300));
+        allow delete: if isOwner(uid);
+      }
+    }
+
+    // プロフィール交換数などの集計値。書き込みは Cloud Functions（Admin SDK）のみ。
+    // website から未認証で参照するため read は公開する。
+    match /counters/{counterId} {
+      allow read: if true;
+      allow write: if false;
     }
 
     match /news/{newsId} {

@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/FlutterKaigi/2026/packages/data/firebase/schemas/firestore/counter.schema.json",
+  "title": "Counter",
+  "description": "Firestore document schema for the `counters` collection. Each document is a single named aggregate value, written only by Cloud Functions (e.g. `counters/profileExchanges` increments once per exchanged pair). Read is public so the website can display totals without authentication.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["count"],
+  "properties": {
+    "count": {
+      "type": "integer",
+      "minimum": 0
+    }
+  }
+}

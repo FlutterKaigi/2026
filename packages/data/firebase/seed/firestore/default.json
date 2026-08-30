@@ -760,6 +760,33 @@
         "createdAt": "2026-08-01T00:00:00Z",
         "updatedAt": "2026-08-01T00:00:00Z"
       }
+    },
+    {
+      "path": "users/seed-user-001/exchanges/seed-user-002",
+      "schema": "profile_exchange",
+      "data": {
+        "createdAt": "2026-08-30T09:00:00Z",
+        "origin": "scan",
+        "token": null,
+        "note": "会場のロビーで名刺交換しました。"
+      }
+    },
+    {
+      "path": "users/seed-user-002/exchanges/seed-user-001",
+      "schema": "profile_exchange",
+      "data": {
+        "createdAt": "2026-08-30T09:00:00Z",
+        "origin": "mirror",
+        "token": null,
+        "note": null
+      }
+    },
+    {
+      "path": "counters/profileExchanges",
+      "schema": "counter",
+      "data": {
+        "count": 1
+      }
     }
   ]
 }

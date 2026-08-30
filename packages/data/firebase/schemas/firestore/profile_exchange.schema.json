@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/FlutterKaigi/2026/packages/data/firebase/schemas/firestore/profile_exchange.schema.json",
+  "title": "ProfileExchange",
+  "description": "Firestore document schema for the `users/{uid}/exchanges` subcollection. The document id is the other attendee's Firebase Auth uid. `origin: 'scan'` documents are created by the owning attendee; `origin: 'mirror'` documents are created by a Cloud Function trigger on the other attendee's behalf.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["createdAt", "origin"],
+  "properties": {
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "origin": {
+      "type": "string",
+      "enum": ["scan", "mirror"]
+    },
+    "token": {
+      "description": "Signed exchange token presented on scan. Cleared to null by a Cloud Function once verified, so it never lingers.",
+      "type": ["string", "null"]
+    },
+    "note": {
+      "description": "Free-form note visible only to the owner of this subcollection.",
+      "type": ["string", "null"],
+      "maxLength": 300
+    }
+  }
+}
