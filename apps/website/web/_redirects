@@ -10,4 +10,23 @@
 # page instead — see lib/pages/app_link_fallback.dart. The token itself is
 # never read or forwarded anywhere; this is a static asset lookup at the
 # Cloudflare edge, not a server request carrying the token onward.
-/x/*    /x/index.html    200
+#
+# The rewrite destination is `/x`, NOT `/x/index.html` or `/x/` — Cloudflare
+# rejects this file at deploy time ("Invalid _redirects configuration ...
+# Infinite loop detected", code 100324) for either of those. Its validator
+# applies the platform's default `html_handling` normalization (which strips
+# a trailing `/index.html`, `/index`, or `.html` from a path) to the rewrite
+# destination and re-checks it against every rule's source pattern; both
+# `/x/index.html` and `/x/` normalize to `/x/`, which still matches this
+# rule's own source glob `/x/*` (a glob's trailing `/*` matches a path ending
+# in just `/`, since `*` matches the empty string) — so the platform judges
+# the rule as pointing back into itself. `/x` (no trailing slash, no `.html`
+# suffix) has nothing left to strip, and doesn't start with `/x/`, so it
+# cannot re-match `/x/*`: no loop, by the same rule the validator applies.
+# Static asset resolution for a 200 rewrite still finds the generated
+# `x/index.html` at that destination through ordinary directory-index
+# lookup, without re-running redirect/normalization logic against it (that
+# logic only fires for the *original*, user-facing request) — confirmed by
+# inspecting the jaspr build output (`build/jaspr/x/index.html`), which is
+# unaffected by this change; only this rewrite target moved.
+/x/*    /x    200
