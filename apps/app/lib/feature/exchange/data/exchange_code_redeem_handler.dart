@@ -93,10 +93,14 @@ final class ExchangeCodeRedeemHandler {
   }
 }
 
-/// Issues a short-lived [ExchangeCode] for the signed-in user via the
-/// `issueExchangeCode` callable function.
+/// Returns the signed-in user's live [ExchangeCode] via the
+/// `issueExchangeCode` callable function, issuing one when they have none.
+///
+/// `rotate: true` asks for a brand-new code instead, invalidating the current
+/// one server-side — the explicit reissue action, not something to do on a
+/// plain screen visit.
 abstract interface class ExchangeCodeIssuer {
-  Future<ExchangeCode> issue();
+  Future<ExchangeCode> issue({bool rotate = false});
 }
 
 /// Redeems another attendee's [ExchangeCode] via the `redeemExchangeCode`

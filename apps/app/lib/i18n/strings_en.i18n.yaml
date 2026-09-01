@@ -246,7 +246,7 @@ exchange:
   noteCancel: Cancel
   noteSaveFailed: Could not save the note
   codeSectionTitle: Exchange with a code
-  codeSectionDescription: If the camera isn't available, share and enter a 6-digit code instead
+  codeSectionDescription: If the camera isn't available, share and enter a 6-digit code instead. The same code works for everyone until it expires
   myCodeSemanticLabel: Profile exchange 6-digit code
   myCodeExpiresAt: Valid until $date
   myCodeExpired: This code has expired

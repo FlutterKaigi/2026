@@ -54,6 +54,7 @@ void main() {
       await _readCode(secondVisit);
 
       expect(codeIssuer.issueCallCount, 2);
+      expect(codeIssuer.lastRotate, isFalse, reason: 'an expired code is replaced by a plain issue, not a rotation');
     });
 
     test("keeps separate uids on the same cache instance from seeing each other's code", () async {
@@ -115,12 +116,16 @@ Future<ExchangeCode> _readCode(ProviderContainer container) async {
 class _StubExchangeCodeIssuer implements ExchangeCodeIssuer {
   int issueCallCount = 0;
 
+  /// Whether the most recent [issue] asked for a brand-new code.
+  bool lastRotate = false;
+
   /// Overrides the next issued code's expiry; defaults to 5 minutes from now.
   DateTime? nextExpiresAt;
 
   @override
-  Future<ExchangeCode> issue() async {
+  Future<ExchangeCode> issue({bool rotate = false}) async {
     issueCallCount++;
+    lastRotate = rotate;
     return ExchangeCode(
       value: '123456',
       expiresAt: nextExpiresAt ?? DateTime.now().add(const Duration(minutes: 5)),

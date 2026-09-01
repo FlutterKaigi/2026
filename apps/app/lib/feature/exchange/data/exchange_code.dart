@@ -3,12 +3,16 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'exchange_code.freezed.dart';
 
-/// A short-lived 6-digit code for exchanging profiles without a camera,
+/// A time-limited 6-digit code for exchanging profiles without a camera,
 /// issued by the `issueExchangeCode` callable function.
 ///
-/// Unlike `ExchangeToken` this is never persisted to disk: the whole point of
-/// the code fallback is a live, short window (5 minutes server-side), so
-/// there is nothing worth surviving an app restart for.
+/// Redeemable by any number of attendees until [expiresAt] (5 minutes
+/// server-side), so one attendee can read their code out to the people around
+/// them the way they would hold up a QR code.
+///
+/// Unlike `ExchangeToken` this is never persisted to disk: `issueExchangeCode`
+/// hands back the same live code rather than minting a new one, so an app
+/// restart recovers it without a local copy.
 @freezed
 abstract class ExchangeCode with _$ExchangeCode {
   const factory ExchangeCode({

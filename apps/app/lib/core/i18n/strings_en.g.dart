@@ -377,7 +377,7 @@ class _Translations$exchange$en extends Translations$exchange$ja {
 	@override String get noteCancel => 'Cancel';
 	@override String get noteSaveFailed => 'Could not save the note';
 	@override String get codeSectionTitle => 'Exchange with a code';
-	@override String get codeSectionDescription => 'If the camera isn\'t available, share and enter a 6-digit code instead';
+	@override String get codeSectionDescription => 'If the camera isn\'t available, share and enter a 6-digit code instead. The same code works for everyone until it expires';
 	@override String get myCodeSemanticLabel => 'Profile exchange 6-digit code';
 	@override String myCodeExpiresAt({required Object date}) => 'Valid until ${date}';
 	@override String get myCodeExpired => 'This code has expired';
@@ -852,7 +852,7 @@ extension on TranslationsEn {
 			'exchange.noteCancel' => 'Cancel',
 			'exchange.noteSaveFailed' => 'Could not save the note',
 			'exchange.codeSectionTitle' => 'Exchange with a code',
-			'exchange.codeSectionDescription' => 'If the camera isn\'t available, share and enter a 6-digit code instead',
+			'exchange.codeSectionDescription' => 'If the camera isn\'t available, share and enter a 6-digit code instead. The same code works for everyone until it expires',
 			'exchange.myCodeSemanticLabel' => 'Profile exchange 6-digit code',
 			'exchange.myCodeExpiresAt' => ({required Object date}) => 'Valid until ${date}',
 			'exchange.myCodeExpired' => 'This code has expired',

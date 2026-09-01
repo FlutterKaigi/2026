@@ -247,7 +247,7 @@ exchange:
   noteCancel: キャンセル
   noteSaveFailed: メモを保存できませんでした
   codeSectionTitle: 6桁コードで交換
-  codeSectionDescription: カメラが使えないときは、6桁のコードを伝え合って交換できます
+  codeSectionDescription: カメラが使えないときは、6桁のコードを伝え合って交換できます。有効期限内なら、同じコードを何人でも入力できます
   myCodeSemanticLabel: プロフィール交換用の6桁コード
   myCodeExpiresAt: 有効期限 $date まで
   myCodeExpired: コードの有効期限が切れました

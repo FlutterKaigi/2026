@@ -705,8 +705,8 @@ class Translations$exchange$ja {
 	/// ja: '6桁コードで交換'
 	String get codeSectionTitle => '6桁コードで交換';
 
-	/// ja: 'カメラが使えないときは、6桁のコードを伝え合って交換できます'
-	String get codeSectionDescription => 'カメラが使えないときは、6桁のコードを伝え合って交換できます';
+	/// ja: 'カメラが使えないときは、6桁のコードを伝え合って交換できます。有効期限内なら、同じコードを何人でも入力できます'
+	String get codeSectionDescription => 'カメラが使えないときは、6桁のコードを伝え合って交換できます。有効期限内なら、同じコードを何人でも入力できます';
 
 	/// ja: 'プロフィール交換用の6桁コード'
 	String get myCodeSemanticLabel => 'プロフィール交換用の6桁コード';
@@ -1388,7 +1388,7 @@ extension on Translations {
 			'exchange.noteCancel' => 'キャンセル',
 			'exchange.noteSaveFailed' => 'メモを保存できませんでした',
 			'exchange.codeSectionTitle' => '6桁コードで交換',
-			'exchange.codeSectionDescription' => 'カメラが使えないときは、6桁のコードを伝え合って交換できます',
+			'exchange.codeSectionDescription' => 'カメラが使えないときは、6桁のコードを伝え合って交換できます。有効期限内なら、同じコードを何人でも入力できます',
 			'exchange.myCodeSemanticLabel' => 'プロフィール交換用の6桁コード',
 			'exchange.myCodeExpiresAt' => ({required Object date}) => '有効期限 ${date} まで',
 			'exchange.myCodeExpired' => 'コードの有効期限が切れました',
