@@ -534,14 +534,10 @@ const _avatarPlaceholderSrc = 'images/icons/avatar_placeholder.svg';
 Component _speakerRow(String classes, List<String?> avatarUrls, String name) {
   return span(classes: classes, [
     span(classes: 'timetable-avatars', [
-      // ignore: unused_local_variable
       for (final avatarUrl in avatarUrls.isEmpty ? const <String?>[null] : avatarUrls)
         img(
           classes: 'timetable-avatar',
-          // 写真を出せるようになったら `src: avatarUrl ?? _avatarPlaceholderSrc` に変更する
-          // ignore: unused_local_variable も削除する
-          // src: avatarUrl ?? _avatarPlaceholderSrc,
-          src: _avatarPlaceholderSrc,
+          src: avatarUrl ?? _avatarPlaceholderSrc,
           alt: '',
           attributes: const {'aria-hidden': 'true', 'loading': 'lazy'},
         ),
