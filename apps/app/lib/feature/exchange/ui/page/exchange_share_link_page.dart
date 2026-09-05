@@ -62,15 +62,27 @@ class _PendingShareLink extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final authState = ref.watch(authStateChangesProvider);
+    // On a cold start straight from the link the auth stream hasn't emitted
+    // yet, and queueing then would record `uid: null` for a visitor who is in
+    // fact signed in — the recorded uid is what stops a queued token from
+    // resolving under another account (see `PendingExchangeTokenNotifier`).
+    // Waiting for the first emission records the real uid. A later sign-out
+    // doesn't re-queue under the new state, because it clears the entry
+    // outright.
+    final isAuthResolved = authState.hasValue || authState.hasError;
     useEffect(() {
+      if (!isAuthResolved) {
+        return null;
+      }
       // Deferred to a microtask: Riverpod disallows modifying a provider
       // synchronously from a widget life-cycle callback (`useEffect` runs as
       // one), since a listener further down the same build could otherwise
       // observe an inconsistent state mid-build.
-      final uid = ref.read(authStateChangesProvider).value?.uid;
+      final uid = authState.value?.uid;
       unawaited(Future.microtask(() => ref.read(pendingExchangeTokenProvider.notifier).set(uid, token)));
       return null;
-    }, [token]);
+    }, [token, isAuthResolved]);
 
     final t = Translations.of(context);
     return ExchangeAccessGate(
@@ -110,7 +122,7 @@ class _ShareLinkBody extends HookConsumerWidget {
           myUid: myUid,
           repository: ref.read(profileExchangeRepositoryProvider),
         );
-        ref.read(pendingExchangeTokenProvider.notifier).clearIfCurrent(myUid, token);
+        ref.read(pendingExchangeTokenProvider.notifier).clearIfCurrent(token);
         if (resolved case PendingExchangeResolved(outcome: ExchangeCreateFailed(:final error, :final stackTrace))) {
           ref.read(talkerProvider).handle(error, stackTrace);
         }

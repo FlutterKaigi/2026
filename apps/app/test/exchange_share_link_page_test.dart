@@ -1,5 +1,6 @@
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/feature/auth/data/provider/auth_repository.dart';
+import 'package:app/feature/exchange/data/provider/pending_exchange_token_provider.dart';
 import 'package:app/feature/exchange/data/provider/profile_exchange_repository.dart';
 import 'package:app/feature/exchange/ui/page/exchange_share_link_page.dart';
 import 'package:app/feature/profile/data/provider/user_profile_repository.dart';
@@ -72,6 +73,9 @@ void main() {
     createdAt: DateTime.utc(2026, 8),
     updatedAt: DateTime.utc(2026, 8),
   );
+
+  PendingExchangeToken? readPendingToken(WidgetTester tester) =>
+      ProviderScope.containerOf(tester.element(find.byType(ExchangeShareLinkPage))).read(pendingExchangeTokenProvider);
 
   setUp(() => LocaleSettings.setLocaleSync(AppLocale.ja));
 
@@ -163,6 +167,56 @@ void main() {
       expect(find.text('プロフィールを作成すると自分のQRコードを表示できます'), findsNothing);
     },
   );
+
+  testWidgets(
+    'queues the token under the signed-in uid, not under the uid the auth stream had yet to emit',
+    (tester) async {
+      final authRepository = FakeAuthRepository(initialUser: FakeUser(uid: 'uid-1'));
+      addTearDown(authRepository.dispose);
+      final exchangeRepository = FakeProfileExchangeRepository();
+      addTearDown(exchangeRepository.dispose);
+      final token = futureToken('other-uid');
+
+      await tester.pumpWidget(
+        buildSubject(
+          token: token,
+          authRepository: authRepository,
+          // プロフィール未作成なので、トークンは消化されず保留されたままになる。
+          profileRepository: FakeUserProfileRepository(),
+          exchangeRepository: exchangeRepository,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // 認証ストリームが最初のフレームでまだ値を出していない
+      // （リンクからのコールドスタートと同じ）状態でも、uid を null で
+      // 記録しない。null の記録は次にサインインした別アカウントでも
+      // 消化できてしまう。
+      expect(readPendingToken(tester), (uid: 'uid-1', token: token));
+    },
+  );
+
+  testWidgets('clears the queued token once it has resolved the exchange itself', (tester) async {
+    final authRepository = FakeAuthRepository(initialUser: FakeUser(uid: 'uid-1'));
+    addTearDown(authRepository.dispose);
+    final exchangeRepository = FakeProfileExchangeRepository();
+    addTearDown(exchangeRepository.dispose);
+
+    await tester.pumpWidget(
+      buildSubject(
+        token: futureToken('other-uid'),
+        authRepository: authRepository,
+        profileRepository: FakeUserProfileRepository(initialProfile: ownProfile()),
+        exchangeRepository: exchangeRepository,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(exchangeRepository.createCalls, hasLength(1));
+    // 保留が残っていると、アカウントタブに移動した時点で
+    // `AccountPage` が同じトークンをもう一度処理してしまう。
+    expect(readPendingToken(tester), isNull);
+  });
 
   testWidgets("shows a dedicated message for the holder's own link", (tester) async {
     final authRepository = FakeAuthRepository(initialUser: FakeUser(uid: 'uid-1'));

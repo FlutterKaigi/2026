@@ -105,7 +105,7 @@ class AccountPage extends HookConsumerWidget {
           myUid: myUid,
           repository: ref.read(profileExchangeRepositoryProvider),
         );
-        ref.read(pendingExchangeTokenProvider.notifier).clearIfCurrent(pending.uid, pendingToken);
+        ref.read(pendingExchangeTokenProvider.notifier).clearIfCurrent(pendingToken);
         if (!context.mounted) {
           return;
         }

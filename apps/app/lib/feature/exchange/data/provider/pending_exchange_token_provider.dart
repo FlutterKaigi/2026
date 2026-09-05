@@ -32,12 +32,20 @@ class PendingExchangeTokenNotifier extends Notifier<PendingExchangeToken?> {
 
   void set(String? uid, String token) => state = (uid: uid, token: token);
 
-  /// Clears the pending entry only if it is still exactly [uid] / [token] —
-  /// a consumer that finished handling an older value should never clobber a
+  /// Clears the pending entry only if [token] is still the queued one — a
+  /// consumer that finished handling an older value should never clobber a
   /// newer link opened in the meantime.
-  void clearIfCurrent(String? uid, String token) {
-    final current = state;
-    if (current != null && current.uid == uid && current.token == token) {
+  ///
+  /// The recorded uid is deliberately not part of that comparison. A consumer
+  /// resolves under the uid signed in at resolve time, which need not be the
+  /// one the entry was queued under: a token queued while nobody was signed
+  /// in is resolved by whoever signs in during the detour. Requiring the two
+  /// to match would leave the entry behind for the next consumer to redo an
+  /// exchange that already went through. Only resolving is uid-sensitive —
+  /// `AccountPage` discards a mismatched entry rather than resolving it —
+  /// while dropping one is safe under any uid.
+  void clearIfCurrent(String token) {
+    if (state?.token == token) {
       state = null;
     }
   }
