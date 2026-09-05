@@ -6,7 +6,11 @@ part of 'router.dart';
 // GoRouterGenerator
 // **************************************************************************
 
-List<RouteBase> get $appRoutes => [$settingsRoute, $appShellRoute];
+List<RouteBase> get $appRoutes => [
+  $settingsRoute,
+  $shareLinkRoute,
+  $appShellRoute,
+];
 
 RouteBase get $settingsRoute => GoRouteData.$route(path: '/settings', factory: $SettingsRoute._fromState);
 
@@ -15,6 +19,29 @@ mixin $SettingsRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/settings');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) => context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+RouteBase get $shareLinkRoute => GoRouteData.$route(path: '/x/:token', factory: $ShareLinkRoute._fromState);
+
+mixin $ShareLinkRoute on GoRouteData {
+  static ShareLinkRoute _fromState(GoRouterState state) => ShareLinkRoute(token: state.pathParameters['token']!);
+
+  ShareLinkRoute get _self => this as ShareLinkRoute;
+
+  @override
+  String get location => GoRouteData.$location('/x/${Uri.encodeComponent(_self.token)}');
 
   @override
   void go(BuildContext context) => context.go(location);

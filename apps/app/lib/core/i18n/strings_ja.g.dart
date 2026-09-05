@@ -746,6 +746,36 @@ class Translations$exchange$ja {
 
 	/// ja: '試行回数が多すぎます。しばらくしてからもう一度お試しください'
 	String get redeemRateLimited => '試行回数が多すぎます。しばらくしてからもう一度お試しください';
+
+	/// ja: 'サインインすると相手とプロフィールを交換できます'
+	String get shareLinkSignInRequired => 'サインインすると相手とプロフィールを交換できます';
+
+	/// ja: 'プロフィールを作成すると相手とプロフィールを交換できます'
+	String get shareLinkProfileRequired => 'プロフィールを作成すると相手とプロフィールを交換できます';
+
+	/// ja: 'このリンクは無効です'
+	String get shareLinkInvalidTitle => 'このリンクは無効です';
+
+	/// ja: 'プロフィール交換用のリンクか確認してください'
+	String get shareLinkInvalidBody => 'プロフィール交換用のリンクか確認してください';
+
+	/// ja: 'このリンクの有効期限が切れています'
+	String get shareLinkExpiredTitle => 'このリンクの有効期限が切れています';
+
+	/// ja: '相手にもう一度QRコードかリンクを共有してもらってください'
+	String get shareLinkExpiredBody => '相手にもう一度QRコードかリンクを共有してもらってください';
+
+	/// ja: 'これは自分の共有リンクです'
+	String get shareLinkSelfTitle => 'これは自分の共有リンクです';
+
+	/// ja: '他の参加者がこのリンクを開くと、あなたとプロフィールを交換できます'
+	String get shareLinkSelfBody => '他の参加者がこのリンクを開くと、あなたとプロフィールを交換できます';
+
+	/// ja: 'ホームに戻る'
+	String get shareLinkGoHome => 'ホームに戻る';
+
+	/// ja: '交換した人を見る'
+	String get shareLinkViewList => '交換した人を見る';
 }
 
 // Path: countryRegion
@@ -1402,6 +1432,16 @@ extension on Translations {
 			'exchange.redeemInvalid' => 'コードが見つからないか、有効期限が切れています',
 			'exchange.redeemSelf' => '自分のコードは入力できません',
 			'exchange.redeemRateLimited' => '試行回数が多すぎます。しばらくしてからもう一度お試しください',
+			'exchange.shareLinkSignInRequired' => 'サインインすると相手とプロフィールを交換できます',
+			'exchange.shareLinkProfileRequired' => 'プロフィールを作成すると相手とプロフィールを交換できます',
+			'exchange.shareLinkInvalidTitle' => 'このリンクは無効です',
+			'exchange.shareLinkInvalidBody' => 'プロフィール交換用のリンクか確認してください',
+			'exchange.shareLinkExpiredTitle' => 'このリンクの有効期限が切れています',
+			'exchange.shareLinkExpiredBody' => '相手にもう一度QRコードかリンクを共有してもらってください',
+			'exchange.shareLinkSelfTitle' => 'これは自分の共有リンクです',
+			'exchange.shareLinkSelfBody' => '他の参加者がこのリンクを開くと、あなたとプロフィールを交換できます',
+			'exchange.shareLinkGoHome' => 'ホームに戻る',
+			'exchange.shareLinkViewList' => '交換した人を見る',
 			'countryRegion.asia' => 'アジア',
 			'countryRegion.oceania' => 'オセアニア',
 			'countryRegion.americas' => '北米・中南米',

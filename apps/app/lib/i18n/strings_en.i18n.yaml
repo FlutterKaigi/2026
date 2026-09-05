@@ -260,6 +260,16 @@ exchange:
   redeemInvalid: This code wasn't found, or it has expired
   redeemSelf: You can't enter your own code
   redeemRateLimited: Too many attempts. Please try again in a few minutes
+  shareLinkSignInRequired: Sign in to exchange profiles with them
+  shareLinkProfileRequired: Create a profile to exchange profiles with them
+  shareLinkInvalidTitle: This link isn't valid
+  shareLinkInvalidBody: Make sure it's a profile exchange link
+  shareLinkExpiredTitle: This link has expired
+  shareLinkExpiredBody: Ask the other attendee to share their QR code or link again
+  shareLinkSelfTitle: This is your own share link
+  shareLinkSelfBody: Other attendees who open this link can exchange profiles with you
+  shareLinkGoHome: Back to home
+  shareLinkViewList: View exchanged profiles
 countryRegion:
   asia: Asia
   oceania: Oceania

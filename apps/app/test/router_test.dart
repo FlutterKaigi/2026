@@ -27,5 +27,9 @@ void main() {
     expect(const ExchangeHomeRoute().location, '/account/exchange');
     expect(const ExchangeScanRoute().location, '/account/exchange/scan');
     expect(const ExchangeListRoute().location, '/account/exchange/list');
+    expect(
+      const ShareLinkRoute(token: 'v1.other-uid.9999999999.deadbeef').location,
+      '/x/v1.other-uid.9999999999.deadbeef',
+    );
   });
 }

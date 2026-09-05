@@ -16,6 +16,8 @@ import 'package:website/components/staff_section/staff_card.dart'
     as _staff_card;
 import 'package:website/components/app_dialog.dart' as _app_dialog;
 import 'package:website/components/event_section.dart' as _event_section;
+import 'package:website/components/exchange_counter_section.dart'
+    as _exchange_counter_section;
 import 'package:website/components/footer.dart' as _footer;
 import 'package:website/components/header.dart' as _header;
 import 'package:website/components/hiring_section.dart' as _hiring_section;
@@ -24,6 +26,7 @@ import 'package:website/components/staff_section.dart' as _staff_section;
 import 'package:website/components/timetable_section.dart'
     as _timetable_section;
 import 'package:website/pages/home.dart' as _home;
+import 'package:website/pages/share_link_fallback.dart' as _share_link_fallback;
 import 'package:website/pages/sponsor_detail.dart' as _sponsor_detail;
 import 'package:website/app.dart' as _app;
 
@@ -54,6 +57,7 @@ ServerOptions get defaultServerOptions => ServerOptions(
     ..._staff_card.StaffCard.styles,
     ..._app_dialog.AppDialog.styles,
     ..._event_section.EventSection.styles,
+    ..._exchange_counter_section.ExchangeCounterSection.styles,
     ..._footer.Footer.styles,
     ..._header.Header.styles,
     ..._hiring_section.HiringSection.styles,
@@ -61,6 +65,7 @@ ServerOptions get defaultServerOptions => ServerOptions(
     ..._staff_section.StaffSection.styles,
     ..._timetable_section.TimetableSection.styles,
     ..._home.Home.styles,
+    ..._share_link_fallback.ShareLinkFallbackPage.styles,
     ..._sponsor_detail.SponsorDetailPage.styles,
     ..._app.App.styles,
   ],

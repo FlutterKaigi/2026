@@ -2,6 +2,7 @@ import 'package:jaspr/dom.dart';
 import 'package:jaspr/jaspr.dart';
 import 'package:jaspr_router/jaspr_router.dart';
 
+import 'components/analytics.dart';
 import 'components/footer.dart';
 import 'components/header.dart';
 import 'components/meta.dart';
@@ -9,6 +10,7 @@ import 'constants/generated_sponsors.dart';
 import 'constants/sponsors.dart';
 import 'l10n/strings.dart';
 import 'pages/home.dart';
+import 'pages/share_link_fallback.dart';
 import 'pages/sponsor_detail.dart';
 
 class App extends StatelessComponent {
@@ -34,6 +36,11 @@ class App extends StatelessComponent {
               title: '${sponsor.name.resolve(locale)} | FlutterKaigi 2026',
               builder: (context, state) => _SponsorShell(locale: locale, sponsor: sponsor),
             ),
+          Route(
+            path: locale.shareLinkFallbackRoutePath,
+            title: 'FlutterKaigi 2026',
+            builder: (context, state) => _ShareLinkFallbackShell(locale: locale),
+          ),
         ],
       ],
     );
@@ -62,6 +69,7 @@ class _HomeShell extends StatelessComponent {
       child: div(classes: 'main', [
         Header(altLocaleHref: locale.other.linkHref),
         const SiteHead(),
+        const Analytics(),
         const Home(),
         const Footer(),
       ]),
@@ -82,6 +90,31 @@ class _SponsorShell extends StatelessComponent {
       child: div(classes: 'main', [
         Header(altLocaleHref: locale.other.sponsorHref(sponsor.slug)),
         SponsorDetailPage(sponsor: sponsor),
+        const Analytics(),
+        const Footer(),
+      ]),
+    );
+  }
+}
+
+class _ShareLinkFallbackShell extends StatelessComponent {
+  const _ShareLinkFallbackShell({required this.locale});
+
+  final AppLocale locale;
+
+  @override
+  Component build(BuildContext context) {
+    return LocaleScope(
+      locale: locale,
+      child: div(classes: 'main', [
+        Header(altLocaleHref: locale.other.shareLinkFallbackHref),
+        // The token is in this page's own URL, so no outbound request from it
+        // should carry that URL back out as a Referer header. No `Analytics`
+        // here either — see `ShareLinkFallbackPage`'s doc comment.
+        Document.head(
+          children: [meta(name: 'referrer', content: 'no-referrer')],
+        ),
+        const ShareLinkFallbackPage(),
         const Footer(),
       ]),
     );
