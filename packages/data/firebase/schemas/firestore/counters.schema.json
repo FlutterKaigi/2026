@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/FlutterKaigi/2026/packages/data/firebase/schemas/firestore/counters.schema.json",
+  "title": "Counter",
+  "description": "Firestore document schema for `counters/{counterId}` aggregate counters (e.g. `counters/profileExchanges`), incremented by Cloud Functions triggers. Not written by the app or the dashboard.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["count"],
+  "properties": {
+    "count": {
+      "type": "integer",
+      "minimum": 0
+    }
+  }
+}

@@ -659,6 +659,93 @@ class Translations$exchange$ja {
 
 	/// ja: 'このプロフィールは表示できません'
 	String get profileUnavailable => 'このプロフィールは表示できません';
+
+	/// ja: '削除'
+	String get deleteTooltip => '削除';
+
+	/// ja: '交換を削除しますか?'
+	String get deleteConfirmTitle => '交換を削除しますか?';
+
+	/// ja: '自分の一覧からのみ削除されます。相手の一覧はそのまま残ります。'
+	String get deleteConfirmBody => '自分の一覧からのみ削除されます。相手の一覧はそのまま残ります。';
+
+	/// ja: '削除する'
+	String get deleteConfirmAction => '削除する';
+
+	/// ja: 'キャンセル'
+	String get deleteCancel => 'キャンセル';
+
+	/// ja: '削除できませんでした'
+	String get deleteFailed => '削除できませんでした';
+
+	/// ja: 'メモを追加'
+	String get noteAddTooltip => 'メモを追加';
+
+	/// ja: 'メモを編集'
+	String get noteEditTooltip => 'メモを編集';
+
+	/// ja: 'メモ'
+	String get noteEditTitle => 'メモ';
+
+	/// ja: '自分だけに見えるメモです'
+	String get noteEditHint => '自分だけに見えるメモです';
+
+	/// ja: 'メモ'
+	String get noteLabel => 'メモ';
+
+	/// ja: '保存'
+	String get noteSave => '保存';
+
+	/// ja: 'キャンセル'
+	String get noteCancel => 'キャンセル';
+
+	/// ja: 'メモを保存できませんでした'
+	String get noteSaveFailed => 'メモを保存できませんでした';
+
+	/// ja: '6桁コードで交換'
+	String get codeSectionTitle => '6桁コードで交換';
+
+	/// ja: 'カメラが使えないときは、6桁のコードを伝え合って交換できます。有効期限内なら、同じコードを何人でも入力できます'
+	String get codeSectionDescription => 'カメラが使えないときは、6桁のコードを伝え合って交換できます。有効期限内なら、同じコードを何人でも入力できます';
+
+	/// ja: 'プロフィール交換用の6桁コード'
+	String get myCodeSemanticLabel => 'プロフィール交換用の6桁コード';
+
+	/// ja: '有効期限 $date まで'
+	String myCodeExpiresAt({required Object date}) => '有効期限 ${date} まで';
+
+	/// ja: 'コードの有効期限が切れました'
+	String get myCodeExpired => 'コードの有効期限が切れました';
+
+	/// ja: 'コードを再発行'
+	String get myCodeRefresh => 'コードを再発行';
+
+	/// ja: 'コードをコピー'
+	String get myCodeCopy => 'コードをコピー';
+
+	/// ja: 'コードをコピーしました'
+	String get myCodeCopied => 'コードをコピーしました';
+
+	/// ja: '相手のコードを入力'
+	String get enterCodeLabel => '相手のコードを入力';
+
+	/// ja: '123456'
+	String get enterCodeHint => '123456';
+
+	/// ja: '交換する'
+	String get enterCodeButton => '交換する';
+
+	/// ja: '6桁の数字を入力してください'
+	String get enterCodeInvalidFormat => '6桁の数字を入力してください';
+
+	/// ja: 'コードが見つからないか、有効期限が切れています'
+	String get redeemInvalid => 'コードが見つからないか、有効期限が切れています';
+
+	/// ja: '自分のコードは入力できません'
+	String get redeemSelf => '自分のコードは入力できません';
+
+	/// ja: '試行回数が多すぎます。しばらくしてからもう一度お試しください'
+	String get redeemRateLimited => '試行回数が多すぎます。しばらくしてからもう一度お試しください';
 }
 
 // Path: countryRegion
@@ -1286,6 +1373,35 @@ extension on Translations {
 			'exchange.listEmpty' => 'まだ誰とも交換していません',
 			'exchange.listEmptyBody' => 'QRコードを読み取って、参加者とプロフィールを交換しましょう',
 			'exchange.profileUnavailable' => 'このプロフィールは表示できません',
+			'exchange.deleteTooltip' => '削除',
+			'exchange.deleteConfirmTitle' => '交換を削除しますか?',
+			'exchange.deleteConfirmBody' => '自分の一覧からのみ削除されます。相手の一覧はそのまま残ります。',
+			'exchange.deleteConfirmAction' => '削除する',
+			'exchange.deleteCancel' => 'キャンセル',
+			'exchange.deleteFailed' => '削除できませんでした',
+			'exchange.noteAddTooltip' => 'メモを追加',
+			'exchange.noteEditTooltip' => 'メモを編集',
+			'exchange.noteEditTitle' => 'メモ',
+			'exchange.noteEditHint' => '自分だけに見えるメモです',
+			'exchange.noteLabel' => 'メモ',
+			'exchange.noteSave' => '保存',
+			'exchange.noteCancel' => 'キャンセル',
+			'exchange.noteSaveFailed' => 'メモを保存できませんでした',
+			'exchange.codeSectionTitle' => '6桁コードで交換',
+			'exchange.codeSectionDescription' => 'カメラが使えないときは、6桁のコードを伝え合って交換できます。有効期限内なら、同じコードを何人でも入力できます',
+			'exchange.myCodeSemanticLabel' => 'プロフィール交換用の6桁コード',
+			'exchange.myCodeExpiresAt' => ({required Object date}) => '有効期限 ${date} まで',
+			'exchange.myCodeExpired' => 'コードの有効期限が切れました',
+			'exchange.myCodeRefresh' => 'コードを再発行',
+			'exchange.myCodeCopy' => 'コードをコピー',
+			'exchange.myCodeCopied' => 'コードをコピーしました',
+			'exchange.enterCodeLabel' => '相手のコードを入力',
+			'exchange.enterCodeHint' => '123456',
+			'exchange.enterCodeButton' => '交換する',
+			'exchange.enterCodeInvalidFormat' => '6桁の数字を入力してください',
+			'exchange.redeemInvalid' => 'コードが見つからないか、有効期限が切れています',
+			'exchange.redeemSelf' => '自分のコードは入力できません',
+			'exchange.redeemRateLimited' => '試行回数が多すぎます。しばらくしてからもう一度お試しください',
 			'countryRegion.asia' => 'アジア',
 			'countryRegion.oceania' => 'オセアニア',
 			'countryRegion.americas' => '北米・中南米',

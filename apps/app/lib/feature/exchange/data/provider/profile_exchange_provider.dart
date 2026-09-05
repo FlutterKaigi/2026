@@ -1,5 +1,6 @@
 import 'package:app/core/provider/shared_preferences.dart';
 import 'package:app/feature/auth/data/provider/auth_state.dart';
+import 'package:app/feature/exchange/data/exchange_code.dart';
 import 'package:app/feature/exchange/data/exchange_token.dart';
 import 'package:app/feature/exchange/data/provider/profile_exchange_repository.dart';
 import 'package:app/feature/profile/data/provider/user_profile_repository.dart';
@@ -102,6 +103,93 @@ class MyExchangeTokenNotifier extends AsyncNotifier<ExchangeToken> {
     final token = await ref.read(exchangeTokenIssuerProvider).issue();
     await ref.read(exchangeTokenCacheRepositoryProvider).write(uid, token);
     return token;
+  }
+}
+
+/// In-memory cache of the signed-in user's live [ExchangeCode], keyed by uid.
+///
+/// Not persisted to disk: `issueExchangeCode` returns the same live code on a
+/// plain call, so an app restart recovers it (see [ExchangeCode]'s doc
+/// comment). It still needs to survive [myExchangeCodeProvider] itself, which
+/// is `autoDispose` — without a cache living outside that provider, leaving
+/// and re-entering the exchange screen would spend a callable round trip on
+/// every visit just to be handed back the code already on screen. Keyed by
+/// uid, and cleared on sign-out / account deletion, for the same reason
+/// [ExchangeTokenCacheRepository] is: a device-scoped cache must not let one
+/// signed-in user's code survive into another user's session on the same
+/// device.
+abstract interface class ExchangeCodeCacheRepository {
+  ExchangeCode? read(String uid);
+
+  void write(String uid, ExchangeCode code);
+
+  Future<void> clear(String uid);
+}
+
+final class InMemoryExchangeCodeCacheRepository implements ExchangeCodeCacheRepository {
+  final _codesByUid = <String, ExchangeCode>{};
+
+  @override
+  ExchangeCode? read(String uid) => _codesByUid[uid];
+
+  @override
+  void write(String uid, ExchangeCode code) => _codesByUid[uid] = code;
+
+  @override
+  Future<void> clear(String uid) async => _codesByUid.remove(uid);
+}
+
+final exchangeCodeCacheRepositoryProvider = Provider<ExchangeCodeCacheRepository>(
+  (ref) => InMemoryExchangeCodeCacheRepository(),
+);
+
+/// The signed-in user's own 6-digit code: the QR fallback for camera-denied
+/// or otherwise QR-incapable devices.
+///
+/// `autoDispose` — the code is short-lived (5 minutes server-side) by
+/// design, so nothing needs to keep polling it once the exchange screen is
+/// left. The current code is still reused across re-entry as long as it
+/// hasn't expired, via [exchangeCodeCacheRepositoryProvider]; only an
+/// expired or not-yet-issued code triggers an `issueExchangeCode` call.
+final myExchangeCodeProvider = AsyncNotifierProvider.autoDispose<MyExchangeCodeNotifier, ExchangeCode>(
+  MyExchangeCodeNotifier.new,
+);
+
+class MyExchangeCodeNotifier extends AsyncNotifier<ExchangeCode> {
+  @override
+  Future<ExchangeCode> build() async {
+    // Watched (not read) so signing out or switching accounts re-runs build()
+    // and looks up the new uid's cache entry instead of reusing whatever the
+    // previous user's code happened to be.
+    final uid = ref.watch(authStateChangesProvider).value?.uid;
+    if (uid == null) {
+      // This provider is only watched once ExchangeHomePage has confirmed a
+      // signed-in user with a profile; reaching build() without one means
+      // sign-out raced the widget teardown.
+      throw StateError('myExchangeCodeProvider requires a signed-in user.');
+    }
+    final cached = ref.watch(exchangeCodeCacheRepositoryProvider).read(uid);
+    if (cached != null && !cached.isExpired) {
+      return cached;
+    }
+    return _issueAndCache(uid);
+  }
+
+  /// Replaces the current code with a brand-new one, invalidating it
+  /// server-side even when it is still valid.
+  Future<void> refresh() async {
+    final uid = ref.read(authStateChangesProvider).value?.uid;
+    if (uid == null) {
+      return;
+    }
+    state = const AsyncLoading<ExchangeCode>();
+    state = await AsyncValue.guard(() => _issueAndCache(uid, rotate: true));
+  }
+
+  Future<ExchangeCode> _issueAndCache(String uid, {bool rotate = false}) async {
+    final code = await ref.read(exchangeCodeIssuerProvider).issue(rotate: rotate);
+    ref.read(exchangeCodeCacheRepositoryProvider).write(uid, code);
+    return code;
   }
 }
 

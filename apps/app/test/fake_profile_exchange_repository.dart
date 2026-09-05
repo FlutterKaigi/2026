@@ -18,6 +18,27 @@ final class FakeProfileExchangeRepository implements ProfileExchangeRepository {
   /// Arguments passed to [create], in call order.
   final createCalls = <({String uid, String otherUid, String token})>[];
 
+  /// Arguments passed to [delete], in call order.
+  final deleteCalls = <({String uid, String otherUid})>[];
+
+  /// Arguments passed to [updateNote], in call order.
+  final updateNoteCalls = <({String uid, String otherUid, String? note})>[];
+
+  /// When set, the next [delete] throws this error once.
+  Exception? nextDeleteError;
+
+  /// When set, the next [updateNote] throws this error once.
+  Exception? nextUpdateNoteError;
+
+  /// When set, the next [delete] awaits this before resolving, letting tests
+  /// assert on the in-flight state instead of it completing immediately.
+  Completer<void>? deleteGate;
+
+  /// When set, the next [updateNote] awaits this before resolving, letting
+  /// tests assert on the in-flight state instead of it completing
+  /// immediately.
+  Completer<void>? updateNoteGate;
+
   @override
   Stream<List<ProfileExchange>> watchAll(String uid) async* {
     yield List.unmodifiable(_exchangesByUid[uid] ?? const []);
@@ -43,6 +64,49 @@ final class FakeProfileExchangeRepository implements ProfileExchangeRepository {
     );
     _controller.add(null);
   }
+
+  @override
+  Future<void> delete({required String uid, required String otherUid}) async {
+    deleteCalls.add((uid: uid, otherUid: otherUid));
+    final gate = deleteGate;
+    if (gate != null) {
+      await gate.future;
+    }
+    final error = nextDeleteError;
+    if (error != null) {
+      nextDeleteError = null;
+      throw error;
+    }
+    _exchangesByUid[uid]?.removeWhere((exchange) => exchange.id == otherUid);
+    _controller.add(null);
+  }
+
+  @override
+  Future<void> updateNote({required String uid, required String otherUid, required String? note}) async {
+    updateNoteCalls.add((uid: uid, otherUid: otherUid, note: note));
+    final gate = updateNoteGate;
+    if (gate != null) {
+      await gate.future;
+    }
+    final error = nextUpdateNoteError;
+    if (error != null) {
+      nextUpdateNoteError = null;
+      throw error;
+    }
+    final exchanges = _exchangesByUid[uid];
+    if (exchanges == null) {
+      return;
+    }
+    final index = exchanges.indexWhere((exchange) => exchange.id == otherUid);
+    if (index == -1) {
+      return;
+    }
+    exchanges[index] = exchanges[index].copyWith(note: note);
+    _controller.add(null);
+  }
+
+  @override
+  Future<int> countAll(String uid) async => _exchangesByUid[uid]?.length ?? 0;
 
   void dispose() {
     unawaited(_controller.close());

@@ -18,6 +18,22 @@ abstract interface class ProfileExchangeRepository {
   /// the server rejects it with `permission-denied`, which this surfaces as
   /// [ProfileExchangeAlreadyExistsException] instead of a generic failure.
   Future<void> create({required String uid, required String otherUid, required String token});
+
+  /// Removes `users/{uid}/exchanges/{otherUid}` from [uid]'s own list only.
+  ///
+  /// The mirror at `users/{otherUid}/exchanges/{uid}` is untouched by design
+  /// (see the design doc's "相互交換 + 自分側だけの削除"): the exchange already
+  /// happened, so the other attendee's list is unaffected by this side
+  /// removing it from their own.
+  Future<void> delete({required String uid, required String otherUid});
+
+  /// Sets the free-form [note] on `users/{uid}/exchanges/{otherUid}`, visible
+  /// only to [uid]. Pass `null` to clear it.
+  Future<void> updateNote({required String uid, required String otherUid, required String? note});
+
+  /// Counts [uid]'s exchange list via a Firestore aggregation query, without
+  /// reading each document.
+  Future<int> countAll(String uid);
 }
 
 /// Thrown by [ProfileExchangeRepository.create] when [otherUid] is already in
@@ -66,6 +82,19 @@ final class FirestoreProfileExchangeRepository implements ProfileExchangeReposit
       }
       rethrow;
     }
+  }
+
+  @override
+  Future<void> delete({required String uid, required String otherUid}) => _exchanges(uid).doc(otherUid).delete();
+
+  @override
+  Future<void> updateNote({required String uid, required String otherUid, required String? note}) =>
+      _exchanges(uid).doc(otherUid).update(<String, dynamic>{'note': note});
+
+  @override
+  Future<int> countAll(String uid) async {
+    final snapshot = await _exchanges(uid).count().get();
+    return snapshot.count ?? 0;
   }
 }
 

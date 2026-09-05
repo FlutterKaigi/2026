@@ -39,4 +39,7 @@ abstract class ProfileExchange with _$ProfileExchange {
   }) = _ProfileExchange;
 
   factory ProfileExchange.fromJson(Map<String, dynamic> json) => _$ProfileExchangeFromJson(json);
+
+  /// Upper bound on [note] length, enforced in Firestore rules too.
+  static const noteMaxLength = 200;
 }

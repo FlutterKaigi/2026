@@ -231,6 +231,35 @@ exchange:
   listEmpty: No exchanges yet
   listEmptyBody: Scan a QR code to exchange profiles with other attendees
   profileUnavailable: This profile is no longer available
+  deleteTooltip: Delete
+  deleteConfirmTitle: Delete this exchange?
+  deleteConfirmBody: This only removes it from your own list. The other attendee's list is unaffected.
+  deleteConfirmAction: Delete
+  deleteCancel: Cancel
+  deleteFailed: Could not delete the exchange
+  noteAddTooltip: Add a note
+  noteEditTooltip: Edit note
+  noteEditTitle: Note
+  noteEditHint: Visible only to you
+  noteLabel: Note
+  noteSave: Save
+  noteCancel: Cancel
+  noteSaveFailed: Could not save the note
+  codeSectionTitle: Exchange with a code
+  codeSectionDescription: If the camera isn't available, share and enter a 6-digit code instead. The same code works for everyone until it expires
+  myCodeSemanticLabel: Profile exchange 6-digit code
+  myCodeExpiresAt: Valid until $date
+  myCodeExpired: This code has expired
+  myCodeRefresh: Get a new code
+  myCodeCopy: Copy code
+  myCodeCopied: Code copied
+  enterCodeLabel: Enter the other attendee's code
+  enterCodeHint: "123456"
+  enterCodeButton: Exchange
+  enterCodeInvalidFormat: Enter a 6-digit code
+  redeemInvalid: This code wasn't found, or it has expired
+  redeemSelf: You can't enter your own code
+  redeemRateLimited: Too many attempts. Please try again in a few minutes
 countryRegion:
   asia: Asia
   oceania: Oceania

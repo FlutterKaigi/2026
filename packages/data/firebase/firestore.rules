@@ -75,9 +75,10 @@ service cloud.firestore {
     }
 
     // packages/data/firebase/schemas/firestore/profile_exchange.schema.json と
-    // ProfileExchange.note (String?) に合わせる。
+    // ProfileExchange.noteMaxLength (200) に合わせる。
     function isValidExchangeNote(data) {
-      return !('note' in data) || data.note == null || data.note is string;
+      return !('note' in data) || data.note == null
+        || (data.note is string && data.note.size() <= 200);
     }
 
     // プロフィール交換の履歴。読み取った側が自分のサブコレクションに作成し、
@@ -130,6 +131,27 @@ service cloud.firestore {
     match /sponsors/{sponsorId} {
       allow read: if true;
       allow write: if hasAdminAccess();
+    }
+
+    // 6桁コードのフォールバック交換で使う短命ドキュメント。issueExchangeCode /
+    // redeemExchangeCode コールが Admin SDK 経由で読み書きする。read を許すと
+    // 総当たりでコードを引き当てられるため、クライアントからは read/write とも
+    // 一切許可しない。
+    match /exchangeCodes/{code} {
+      allow read, write: if false;
+    }
+
+    // redeemExchangeCode の失敗試行回数（ドキュメント ID は呼び出し元 uid）。
+    // 同様に Function からのみ読み書きする。
+    match /exchangeCodeAttempts/{uid} {
+      allow read, write: if false;
+    }
+
+    // 集計値。website からの未認証 read を想定して公開し、更新は
+    // Cloud Functions トリガーのみに限定する。
+    match /counters/{counterId} {
+      allow read: if true;
+      allow write: if false;
     }
 
     // 未定義のパスを明示的に拒否（多層防御）。
