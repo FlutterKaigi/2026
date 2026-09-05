@@ -107,6 +107,20 @@ RouteBase get $appShellRoute => StatefulShellRouteData.$route(
               path: 'profile',
               factory: $ProfileEditRoute._fromState,
             ),
+            GoRouteData.$route(
+              path: 'exchange',
+              factory: $ExchangeHomeRoute._fromState,
+              routes: [
+                GoRouteData.$route(
+                  path: 'scan',
+                  factory: $ExchangeScanRoute._fromState,
+                ),
+                GoRouteData.$route(
+                  path: 'list',
+                  factory: $ExchangeListRoute._fromState,
+                ),
+              ],
+            ),
           ],
         ),
       ],
@@ -385,6 +399,63 @@ mixin $ProfileEditRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/account/profile');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) => context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $ExchangeHomeRoute on GoRouteData {
+  static ExchangeHomeRoute _fromState(GoRouterState state) => const ExchangeHomeRoute();
+
+  @override
+  String get location => GoRouteData.$location('/account/exchange');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) => context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $ExchangeScanRoute on GoRouteData {
+  static ExchangeScanRoute _fromState(GoRouterState state) => const ExchangeScanRoute();
+
+  @override
+  String get location => GoRouteData.$location('/account/exchange/scan');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) => context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $ExchangeListRoute on GoRouteData {
+  static ExchangeListRoute _fromState(GoRouterState state) => const ExchangeListRoute();
+
+  @override
+  String get location => GoRouteData.$location('/account/exchange/list');
 
   @override
   void go(BuildContext context) => context.go(location);

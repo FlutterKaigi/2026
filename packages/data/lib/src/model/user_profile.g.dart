@@ -12,9 +12,7 @@ _UserProfile _$UserProfileFromJson(Map<String, dynamic> json) => _UserProfile(
   avatarUrl: json['avatarUrl'] as String?,
   countryOrRegion: json['countryOrRegion'] as String,
   snsLinks:
-      (json['snsLinks'] as List<dynamic>?)
-          ?.map((e) => SnsLink.fromJson(e as Map<String, dynamic>))
-          .toList() ??
+      (json['snsLinks'] as List<dynamic>?)?.map((e) => SnsLink.fromJson(e as Map<String, dynamic>)).toList() ??
       const [],
   bio: json['bio'] as String?,
   createdAt: const FirestoreDateTimeConverter().fromJson(json['createdAt']),

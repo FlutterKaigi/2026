@@ -74,6 +74,29 @@ service cloud.firestore {
       allow delete: if isOwner(uid);
     }
 
+    // packages/data/firebase/schemas/firestore/profile_exchange.schema.json と
+    // ProfileExchange.note (String?) に合わせる。
+    function isValidExchangeNote(data) {
+      return !('note' in data) || data.note == null || data.note is string;
+    }
+
+    // プロフィール交換の履歴。読み取った側が自分のサブコレクションに作成し、
+    // 相手側は Cloud Functions のトリガーがミラーする（ここでは作成できない）。
+    match /users/{uid}/exchanges/{otherUid} {
+      allow read: if isOwner(uid);
+      allow create: if isOwner(uid)
+        && otherUid != uid
+        && request.resource.data.keys().hasOnly(['createdAt', 'origin', 'token', 'note'])
+        && request.resource.data.origin == 'scan'
+        && request.resource.data.token is string
+        && request.resource.data.createdAt == request.time
+        && isValidExchangeNote(request.resource.data);
+      allow update: if isOwner(uid)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['note'])
+        && isValidExchangeNote(request.resource.data);
+      allow delete: if isOwner(uid);
+    }
+
     match /news/{newsId} {
       allow read: if true;
       allow write: if hasAdminAccess();

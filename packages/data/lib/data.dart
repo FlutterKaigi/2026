@@ -3,6 +3,7 @@ export 'src/country/generated_countries.dart' show countries;
 export 'src/firebase/firebase_initializer.dart' show FirebaseInitializer;
 export 'src/model/locale_map.dart' show LocaleMap;
 export 'src/model/news.dart' show News;
+export 'src/model/profile_exchange.dart' show ProfileExchange, ProfileExchangeOrigin;
 export 'src/model/sns_link.dart' show SnsLink;
 export 'src/model/speaker.dart' show Speaker;
 export 'src/model/staff_member.dart' show StaffMember;
@@ -13,6 +14,8 @@ export 'src/model/user_profile.dart' show UserProfile;
 export 'src/model/venue.dart' show Venue;
 export 'src/repository/auth_repository.dart' show FirebaseAuthRepository, AuthRepository;
 export 'src/repository/news_repository.dart' show FirestoreNewsRepository, NewsRepository;
+export 'src/repository/profile_exchange_repository.dart'
+    show FirestoreProfileExchangeRepository, ProfileExchangeAlreadyExistsException, ProfileExchangeRepository;
 export 'src/repository/speaker_repository.dart' show FirestoreSpeakerRepository, SpeakerRepository;
 export 'src/repository/staff_member_repository.dart' show FirestoreStaffMemberRepository, StaffMemberRepository;
 export 'src/repository/session_repository.dart' show FirestoreSessionRepository, SessionRepository;

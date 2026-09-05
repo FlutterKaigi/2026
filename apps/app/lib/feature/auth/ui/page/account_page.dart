@@ -14,6 +14,7 @@ import 'package:app/feature/auth/ui/auth_error_message.dart';
 import 'package:app/feature/auth/ui/widget/apple_sign_in_button.dart';
 import 'package:app/feature/auth/ui/widget/google_sign_in_button.dart';
 import 'package:app/feature/auth/ui/widget/sign_in_method_button_style.dart';
+import 'package:app/feature/exchange/data/provider/profile_exchange_provider.dart';
 import 'package:app/feature/profile/data/provider/user_profile_provider.dart';
 import 'package:app/feature/profile/data/provider/user_profile_repository.dart';
 import 'package:app/feature/profile/ui/widget/profile_summary_card_widget.dart';
@@ -127,7 +128,10 @@ class AccountPage extends HookConsumerWidget {
         (repository) => repository.deleteAccount(
           password: password,
           // 再認証が通ってから、トークンが失効する前にプロフィールを消す。
-          beforeDelete: () => ref.read(userProfileRepositoryProvider).delete(user.uid),
+          beforeDelete: () async {
+            await ref.read(userProfileRepositoryProvider).delete(user.uid);
+            await ref.read(exchangeTokenCacheRepositoryProvider).clear(user.uid);
+          },
         ),
         successMessage: t.auth.account.deleted,
       );
@@ -157,7 +161,10 @@ class AccountPage extends HookConsumerWidget {
                   profileState: profileState,
                   isProcessing: isProcessing.value,
                   onRetryProfile: () => ref.invalidate(userProfileProvider),
-                  onSignOut: () => runAuthAction((repository) => repository.signOut()),
+                  onSignOut: () => runAuthAction((repository) async {
+                    await ref.read(exchangeTokenCacheRepositoryProvider).clear(value.uid);
+                    await repository.signOut();
+                  }),
                   onDeleteAccount: () => deleteAccount(value),
                   onComingSoon: () => showMessage(t.auth.account.comingSoon),
                 ),
@@ -392,7 +399,7 @@ class _SignedInView extends StatelessWidget {
                       _NavigationTile(
                         icon: Icons.qr_code_2_outlined,
                         title: t.auth.account.profileExchange,
-                        onTap: onComingSoon,
+                        onTap: () => const ExchangeHomeRoute().push<void>(context),
                       ),
                       const Divider(height: 1),
                       _NavigationTile(

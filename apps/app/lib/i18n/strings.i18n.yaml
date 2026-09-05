@@ -2,6 +2,7 @@ app:
   title: FlutterKaigi 2026
 links:
   openError: リンクを開けませんでした
+  copied: リンクをコピーしました
 navigation:
   sessions: セッション
   sponsors: スポンサー
@@ -208,6 +209,29 @@ profile:
   discardBody: 保存していない変更は失われます。
   discardAction: 破棄する
   keepEditing: 編集を続ける
+exchange:
+  title: プロフィール交換
+  qrDescription: このQRコードを相手に見せて読み取ってもらうと、お互いのプロフィールを交換できます
+  qrSemanticLabel: プロフィール交換用のQRコード
+  qrExpiresAt: 有効期限 $date まで
+  scanButton: QRコードを読み取る
+  listButton: 交換した人を見る
+  signInRequired: サインインすると自分のQRコードを表示できます
+  signInAction: サインインする
+  profileRequired: プロフィールを作成すると自分のQRコードを表示できます
+  profileRequiredAction: プロフィールを作成する
+  scanTitle: QRコードを読み取る
+  scanHint: 相手の画面に表示されたQRコードを枠内に収めてください
+  scanCameraError: カメラを利用できません。設定でカメラへのアクセスを許可してください
+  scanInvalid: 読み取れませんでした。プロフィール交換用のQRコードか確認してください
+  scanSelf: 自分のQRコードは読み取れません
+  scanSucceeded: プロフィールを交換しました
+  scanAlreadyExists: すでに交換済みです
+  scanFailed: プロフィールを交換できませんでした
+  listTitle: 交換した人
+  listEmpty: まだ誰とも交換していません
+  listEmptyBody: QRコードを読み取って、参加者とプロフィールを交換しましょう
+  profileUnavailable: このプロフィールは表示できません
 countryRegion:
   asia: アジア
   oceania: オセアニア

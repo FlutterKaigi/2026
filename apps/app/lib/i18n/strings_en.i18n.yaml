@@ -2,6 +2,7 @@ app:
   title: FlutterKaigi 2026
 links:
   openError: Could not open the link
+  copied: Link copied
 navigation:
   sessions: Sessions
   sponsors: Sponsors
@@ -207,6 +208,29 @@ profile:
   discardBody: Unsaved changes will be lost.
   discardAction: Discard
   keepEditing: Keep editing
+exchange:
+  title: Profile Exchange
+  qrDescription: Show this QR code to another attendee and have them scan it to exchange profiles
+  qrSemanticLabel: Profile exchange QR code
+  qrExpiresAt: Valid until $date
+  scanButton: Scan a QR code
+  listButton: View exchanged profiles
+  signInRequired: Sign in to show your QR code
+  signInAction: Sign in
+  profileRequired: Create a profile to show your QR code
+  profileRequiredAction: Create profile
+  scanTitle: Scan a QR code
+  scanHint: Line up the other attendee's QR code within the frame
+  scanCameraError: Camera unavailable. Please allow camera access in Settings
+  scanInvalid: Could not read this code. Make sure it's a profile exchange QR code
+  scanSelf: You can't scan your own QR code
+  scanSucceeded: Profile exchanged
+  scanAlreadyExists: Already exchanged
+  scanFailed: Could not exchange profiles
+  listTitle: Exchanged Profiles
+  listEmpty: No exchanges yet
+  listEmptyBody: Scan a QR code to exchange profiles with other attendees
+  profileUnavailable: This profile is no longer available
 countryRegion:
   asia: Asia
   oceania: Oceania
