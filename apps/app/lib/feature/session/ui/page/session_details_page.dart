@@ -1,4 +1,5 @@
 import 'package:app/core/i18n/strings.g.dart';
+import 'package:app/core/ui/widget/app_error_view.dart';
 import 'package:app/feature/session/data/provider/session_detail_provider.dart';
 import 'package:app/feature/session/data/provider/session_timetable_provider.dart';
 import 'package:app/feature/session/ui/widget/session_details_content_widget.dart';
@@ -31,16 +32,11 @@ class SessionDetailsPage extends ConsumerWidget {
                 ),
               )
             : SessionDetailsContentWidget(data: value),
-      AsyncError() => Scaffold(
+      AsyncError(:final error) => Scaffold(
         appBar: AppBar(title: Text(t.sessionDetails.title)),
-        body: SessionDetailsMessageStateWidget(
-          icon: Icons.error_outline,
-          message: t.sessionDetails.error,
-          action: FilledButton.icon(
-            onPressed: () => _refresh(ref),
-            icon: const Icon(Icons.refresh),
-            label: Text(t.common.retry),
-          ),
+        body: AppErrorView(
+          error: error,
+          onRetry: () => _refresh(ref),
         ),
       ),
       AsyncLoading() => Scaffold(

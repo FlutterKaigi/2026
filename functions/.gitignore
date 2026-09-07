@@ -6,6 +6,7 @@ node_modules/
 .env
 .env.*
 !.env.example
+.secret.local
 
 # Firebase ローカル状態
 .firebase/

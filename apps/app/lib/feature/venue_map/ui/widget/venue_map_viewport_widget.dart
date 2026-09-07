@@ -112,7 +112,7 @@ class _VenueMapErrorStateWidget extends StatelessWidget {
                   FilledButton.icon(
                     onPressed: onRetry,
                     icon: const Icon(Icons.refresh),
-                    label: Text(t.common.retry),
+                    label: Text(t.error.retry),
                   ),
                 ],
               ),

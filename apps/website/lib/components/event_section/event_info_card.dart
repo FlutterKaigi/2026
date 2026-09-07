@@ -2,7 +2,6 @@ import 'package:jaspr/dom.dart';
 import 'package:jaspr/jaspr.dart';
 
 import '../../constants/event_info.dart';
-import '../../constants/roadmap_milestones.dart';
 import '../../constants/theme.dart';
 import '../../l10n/strings.dart';
 
@@ -13,7 +12,6 @@ class EventInfoCard extends StatelessComponent {
   Component build(BuildContext context) {
     final locale = LocaleScope.of(context);
     final strings = Strings(locale);
-    final ticketsOpen = milestoneByGate(MilestoneGate.tickets);
 
     return article(classes: 'event-info-card', [
       div(classes: 'event-info-card__head', [
@@ -52,30 +50,15 @@ class EventInfoCard extends StatelessComponent {
           .text(strings.eventInfoTicketsLabel),
         ]),
         div(classes: 'event-info-card__cta-row', [
-          button(
+          a(
+            href: strings.ticketsCtaUrl,
+            target: Target.blank,
+            classes: 'event-info-card__cta event-info-card__cta--active',
             [
-              img(
-                classes: 'event-info-card__cta-icon',
-                src: 'images/icons/hourglass.svg',
-                alt: '',
-                attributes: const {'aria-hidden': 'true'},
-              ),
               span(classes: 'event-info-card__cta-label', [
-                .text(strings.eventInfoComingSoon),
+                .text(strings.eventInfoGetTicketsCta),
               ]),
-              if (ticketsOpen != null)
-                span(classes: 'event-info-card__cta-meta', [
-                  .text(
-                    strings.eventInfoTicketsOpensAt(
-                      ticketsOpen.dateFor(locale),
-                    ),
-                  ),
-                ]),
             ],
-            classes: 'event-info-card__cta',
-            type: ButtonType.button,
-            disabled: true,
-            attributes: {'aria-label': strings.eventInfoTicketsAriaLabel},
           ),
           button(
             [
@@ -193,7 +176,7 @@ class EventInfoCard extends StatelessComponent {
         alignItems: .center,
         raw: const {'margin-top': '4px', 'gap': '16px 24px'},
       ),
-      // Disabled CTA：時計アイコン+ラベル+販売開始日のmeta行。
+      // Disabled CTA：ラベルのみ。
       // `<button disabled>` 標準 disabled でブラウザのキーボード操作・aria 伝達を任せる。
       // デスクトップは inline-flex で内容幅、タブレット以下はカード幅いっぱい。
       css('.event-info-card__cta', [
@@ -224,43 +207,31 @@ class EventInfoCard extends StatelessComponent {
             'text-decoration': 'none',
           },
         ),
-        // セッション応募 CTA：活性リンク。クリック可能であることを示す。
+        // チケット購入 CTA：活性リンク。M3 Filled button（primary 地に onPrimary
+        // 文字）にして、隣の disabled ボタン（40%濃度の primary）や薄い
+        // primaryContainer よりも確実に強い見た目にする — primaryContainer だと
+        // カード面 (event-info-card の背景) との明度差がほぼ無く、disabled
+        // ボタンより弱く見えてしまっていた。
         css('&.event-info-card__cta--active').styles(
-          backgroundColor: primaryContainer,
-          color: onPrimaryContainer,
+          backgroundColor: primary,
+          color: onPrimary,
           raw: const {
             'cursor': 'pointer',
             'transition': 'background-color 150ms ease',
           },
         ),
-        // M3 State Layer (Hover 8%) — onPrimaryContainer 由来のオーバーレイを
-        // 単色の primaryContainer 上に重ねる。background-color の差し替えだと
-        // 半透明色の背後にカード面が透けるため、linear-gradient で塗り重ねる。
+        // M3 State Layer (Hover 8%) — onPrimary 由来のオーバーレイを単色の
+        // primary 上に重ねる。background-color の差し替えだと半透明色の背後に
+        // カード面が透けるため、linear-gradient で塗り重ねる。
         css('&.event-info-card__cta--active:hover').styles(
           raw: const {
             'background-image':
                 'linear-gradient('
-                '$onPrimaryContainerHoverHex, $onPrimaryContainerHoverHex)',
+                '$onPrimaryHoverHex, $onPrimaryHoverHex)',
           },
-        ),
-        css('.event-info-card__cta-icon').styles(
-          width: 16.px,
-          height: 16.px,
-          raw: const {'flex-shrink': '0', 'opacity': '0.9'},
         ),
         css('.event-info-card__cta-label').styles(
           raw: const {'white-space': 'nowrap'},
-        ),
-        css('.event-info-card__cta-meta').styles(
-          fontWeight: .w400,
-          raw: const {
-            'font-size': '12px',
-            'line-height': '16px',
-            'opacity': '0.85',
-            'padding-left': '6px',
-            'border-left': '1px solid rgba(255, 255, 255, 0.4)',
-            'margin-left': '2px',
-          },
         ),
       ]),
     ]),
@@ -285,16 +256,6 @@ class EventInfoCard extends StatelessComponent {
           raw: const {
             'grid-template-columns': 'minmax(0, 1fr)',
             'gap': '20px',
-          },
-        ),
-        // 狭い画面では meta の縦区切り線をやめて自然に折り返す。
-        css('.event-info-card__cta .event-info-card__cta-meta').styles(
-          raw: const {
-            'border-left': 'none',
-            'padding-left': '0',
-            'margin-left': '0',
-            'flex-basis': '100%',
-            'text-align': 'center',
           },
         ),
       ]),

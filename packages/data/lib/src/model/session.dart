@@ -21,8 +21,11 @@ abstract class Session with _$Session {
     @Default([]) List<String> speakerIds,
     @Default(false) bool isLightningTalk,
     @Default(false) bool isBeginnersLightningTalk,
-    @Default(false) bool isHandsOn,
     String? sessionizeUrl,
+
+    /// Attendee feedback form (Sessionize). Owned by the dashboard, never
+    /// written by the Sessionize import.
+    String? feedbackUrl,
     @FirestoreDateTimeConverter() required DateTime createdAt,
     @FirestoreDateTimeConverter() required DateTime updatedAt,
   }) = _Session;

@@ -1,34 +1,79 @@
 app:
   title: FlutterKaigi 2026
+links:
+  openError: リンクを開けませんでした
+  copied: リンクをコピーしました
 navigation:
-  news: お知らせ
   sessions: セッション
-  info: 情報
   venueMap: 会場マップ
+  sponsors: スポンサー
+  info: イベント
+  account: アカウント
 news:
   title: お知らせ
   empty: お知らせはまだありません
-  error: お知らせを取得できませんでした
+sponsors:
+  title: スポンサー
+  detailTitle: スポンサー詳細
+  subtitle: FlutterKaigi 2026 を支えてくださるスポンサーの皆様
+  empty: スポンサーはまだ公開されていません
+  notFound: スポンサーが見つかりませんでした
+  logoSemanticLabel: $name のロゴ
+  githubCardSemanticLabel: $name の GitHub を見る
+  xCardSemanticLabel: $name の X を見る
+  externalCardSemanticLabel: $name のリンクを開く
+  tierBadge: $tier スポンサー
+  jobBoards: Job Boards
+  jobBoardCta: 採用情報
+  recruitCta: 採用サイト
+  connect: Connect
+staffMembers:
+  title: スタッフ
+  empty: スタッフはまだ公開されていません
+  error: スタッフ情報を取得できませんでした
+# NOTE: apps/website/lib/l10n/strings.dart の footerTrademark と同一文言を維持すること
+trademarks:
+  flutterAffiliation: Flutter および関連するロゴは Google LLC の商標です。FlutterKaigi は Google LLC の承認または提携を受けておりません。
+  flutterNameAndLogo: Flutter の名称およびロゴは Google LLC の商標です。
+  revComm: RevCommは、株式会社 RevComm の登録商標または商標です。
 sessionTimetable:
   title: タイムテーブル
   dayButtonLabel: $day日目 ($date)
+  view:
+    openRooms: 会場別タイムラインに切り替え
+    openList: リスト表示に切り替え
+    shared: 共通
   empty: タイムテーブルはまだ公開されていません
-  emptyFiltered: 選択した会場の予定はありません
-  error: タイムテーブルを取得できませんでした
-  timeFormat:
-    twentyFourHour: 24時間
-    amPm: 午前/午後
+  emptyFiltered: この日の予定はありません
   venue:
-    all: すべて
     unknown: 会場未定
   speaker:
     none: 登壇者未定
   type:
-    regular: 通常セッション
+    regular: セッション
     lightningTalk: LT
     beginnersLightningTalk: 初心者向けLT
-    handsOn: ハンズオン
     event: イベント
+sessionSearch:
+  title: セッションを検索
+  hint: タイトル・概要・登壇者を検索
+  clear: 検索条件をクリア
+  allDates: すべての日程
+  allTypes: すべての種類
+  allLanguages: すべての言語
+  dateFilter: 日程で絞り込み
+  typeFilter: 種類で絞り込み
+  languageFilter: 言語で絞り込み
+  dateChip: 日程
+  typeChip: 種類
+  languageChip: 言語
+  promptTitle: セッションを探す
+  promptBody: キーワードを入力するか、日程・種類・言語を選択してください
+  emptyTitle: セッションが見つかりません
+  emptyBody: キーワードや絞り込み条件を変更してみてください
+  resultCount:
+    one: $n件のセッション
+    other: $n件のセッション
 sessionDetails:
   title: セッション詳細
   description: 概要
@@ -36,9 +81,10 @@ sessionDetails:
   speakers: 登壇者
   links: リンク
   sessionize: Sessionize
+  feedback: セッションのフィードバックを送る
+  feedbackDescription: このセッションの感想をお聞かせください
   share: 共有
   notFound: セッションが見つかりませんでした
-  error: セッションを取得できませんでした
 sessionBookmark:
   openBookmarked: ブックマークしたセッション
   add: ブックマークに追加
@@ -49,7 +95,6 @@ bookmarkedSessions:
   emptyTitle: ブックマークしたセッションはありません
   emptyBody: 気になるセッションをブックマークすると、ここからすぐに見つけられます
   openSessions: タイムテーブルを開く
-  error: ブックマークしたセッションを取得できませんでした
 venueMap:
   title: 会場マップ
   loadError: 会場マップを読み込めませんでした
@@ -74,8 +119,184 @@ venueMap:
       elevators: エレベーター
       entrance: 入口
 eventInfo:
-  title: 情報
+  title: イベント概要
+  newsTitle: 最新のお知らせ
+  newsSubtitle: FlutterKaigi 2026 の最新情報を確認
+  logoSemanticLabel: FlutterKaigi 2026 ロゴ
+  tagline: 会って、話して、熱くなる。
+  themeName: 〜Assemble〜
+  description: 2026年、日本国内で Flutter をメインに扱う技術カンファレンス。Flutter や Dart の知見を共有し、参加者同士がつながる2日間です。
+  dateLabel: 日程
+  date: 2026年10月29日(木) – 30日(金)
+  venueLabel: 会場
+  venue: 浜松町コンベンションホール
+  viewMap: 地図を見る
+  other: その他
+  officialWebsite: 公式Webサイト
+  codeOfConduct: 行動規範
+  privacyPolicy: プライバシーポリシー
+  exclusionPolicy: 反社会的勢力排除に関する基本方針
+  contact: お問い合わせ
+  sourceCode: ソースコードを見る
+  staffMembers: スタッフ
+  ossLicenses: OSSライセンス
+auth:
+  signIn:
+    required: サインインが必要です
+    description: FlutterKaigi 2026 アプリで利用するサインイン方法を選択してください
+    withGoogle: Google でサインイン
+    # NOTE: Apple 公式の日本語ボタン表記(スペースなし)に合わせる
+    withApple: Appleでサインイン
+    withEmail: メールアドレスでサインイン
+  email:
+    title: メールアドレスでサインイン
+    emailLabel: メールアドレス
+    passwordLabel: パスワード
+    emailRequired: メールアドレスを入力してください
+    passwordRequired: パスワードを入力してください
+    showPassword: パスワードを表示
+    hidePassword: パスワードを隠す
+    signInButton: サインイン
+    createAccountButton: アカウントを作成
+    switchToCreateAccount: アカウントを新規作成する
+    switchToSignIn: 既存のアカウントでサインインする
+    forgotPassword: パスワードを再設定する
+    resetEmailSent: パスワード再設定メールを送信しました
+  account:
+    title: アカウント
+    signedIn: サインイン中
+    signOut: サインアウト
+    signOutError: サインアウトできませんでした
+    noEmail: メールアドレス未設定
+    delete: アカウントを削除
+    deleteConfirmTitle: アカウントを削除しますか?
+    deleteConfirmBody: アカウントは完全に削除され、元に戻すことはできません。削除の前に再認証が必要です。
+    deleteConfirmAction: 削除する
+    deletePasswordTitle: パスワードの確認
+    deletePasswordBody: アカウントを削除するには、現在のパスワードを入力してください。
+    mission: ミッション
+    missionDescription: LT大会・プロフィール交換・SNS投稿登録の参加状況で判定
+    joinEvent: イベントに参加
+    quiz: クイズ大会
+    lightningTalks: LT大会
+    profileExchange: プロフィール交換
+    snsPost: SNS投稿登録
+    comingSoon: この機能は準備中です
+    deleted: アカウントを削除しました
+    cancel: キャンセル
+  error:
+    invalidEmail: メールアドレスの形式が正しくありません
+    userDisabled: このアカウントは利用できません
+    invalidCredential: メールアドレスまたはパスワードが正しくありません
+    emailAlreadyInUse: このメールアドレスは既に登録されています
+    weakPassword: パスワードが簡単すぎます。より複雑なパスワードを設定してください
+    tooManyRequests: 試行回数の上限に達しました。しばらくしてからもう一度お試しください
+    network: 通信に失敗しました。通信状況を確認してもう一度お試しください
+    requiresRecentLogin: 確認のため再認証が必要です。もう一度お試しください
+    userMismatch: 再認証したアカウントがサインイン中のアカウントと一致しません
+    appleTokenRevocationFailed: Appleのトークン失効に失敗したため、アカウントを削除できませんでした。もう一度お試しください
+    unknown: 認証に失敗しました。もう一度お試しください
+profile:
+  title: プロフィール
+  editTitle: プロフィールを編集
+  createTitle: プロフィールを作成
+  promptTitle: プロフィールを登録しましょう
+  promptBody: 出身国・地域や SNS を登録すると、会場での参加者同士のプロフィール交換に使えます。
+  create: プロフィールを作成
+  edit: プロフィールを編集
+  save: 保存
+  saved: プロフィールを保存しました
+  saveFailed: プロフィールを保存できませんでした
+  visibilityNote: プロフィールはサインインしている他の参加者に公開されます
+  avatarSemanticLabel: プロフィール画像
+  displayNameLabel: 表示名
+  displayNameRequired: 表示名を入力してください
+  countryLabel: 出身国・地域
+  countryPlaceholder: 選択してください
+  countryRequired: 出身国・地域を選択してください
+  countrySearchHint: 国名・地域名で検索
+  countryNoResults: 「$query」に一致する国・地域が見つかりません
+  countryNoResultsHint: 英語名やISOコードでも検索できます
+  snsLinksLabel: SNS
+  snsLinksEmpty: X や GitHub などのリンクを追加できます
+  addSnsLink: SNSリンクを追加
+  removeSnsLink: このリンクを削除
+  snsPlatformLabel: サービス
+  snsUrlLabel: URL
+  snsUrlRequired: URL を入力してください
+  snsUrlInvalid: https:// から始まる URL を入力してください
+  snsLinksMax: SNSリンクは $n 件まで登録できます
+  snsPlatformOther: その他
+  bioLabel: 自己紹介
+  bioHint: 普段の仕事や、今日話したいことなど
+  discardTitle: 編集内容を破棄しますか?
+  discardBody: 保存していない変更は失われます。
+  discardAction: 破棄する
+  keepEditing: 編集を続ける
+exchange:
+  title: プロフィール交換
+  qrDescription: このQRコードを相手に見せて読み取ってもらうと、お互いのプロフィールを交換できます
+  qrSemanticLabel: プロフィール交換用のQRコード
+  qrExpiresAt: 有効期限 $date まで
+  scanButton: QRコードを読み取る
+  listButton: 交換した人を見る
+  signInRequired: サインインすると自分のQRコードを表示できます
+  signInAction: サインインする
+  profileRequired: プロフィールを作成すると自分のQRコードを表示できます
+  profileRequiredAction: プロフィールを作成する
+  scanTitle: QRコードを読み取る
+  scanHint: 相手の画面に表示されたQRコードを枠内に収めてください
+  scanCameraError: カメラを利用できません。設定でカメラへのアクセスを許可してください
+  scanInvalid: 読み取れませんでした。プロフィール交換用のQRコードか確認してください
+  scanSelf: 自分のQRコードは読み取れません
+  scanSucceeded: プロフィールを交換しました
+  scanAlreadyExists: すでに交換済みです
+  scanFailed: プロフィールを交換できませんでした
+  listTitle: 交換した人
+  listEmpty: まだ誰とも交換していません
+  listEmptyBody: QRコードを読み取って、参加者とプロフィールを交換しましょう
+  profileUnavailable: このプロフィールは表示できません
+  deleteTooltip: 削除
+  deleteConfirmTitle: 交換を削除しますか?
+  deleteConfirmBody: 自分の一覧からのみ削除されます。相手の一覧はそのまま残ります。
+  deleteConfirmAction: 削除する
+  deleteCancel: キャンセル
+  deleteFailed: 削除できませんでした
+  noteAddTooltip: メモを追加
+  noteEditTooltip: メモを編集
+  noteEditTitle: メモ
+  noteEditHint: 自分だけに見えるメモです
+  noteLabel: メモ
+  noteSave: 保存
+  noteCancel: キャンセル
+  noteSaveFailed: メモを保存できませんでした
+  codeSectionTitle: 6桁コードで交換
+  codeSectionDescription: カメラが使えないときは、6桁のコードを伝え合って交換できます。有効期限内なら、同じコードを何人でも入力できます
+  myCodeSemanticLabel: プロフィール交換用の6桁コード
+  myCodeExpiresAt: 有効期限 $date まで
+  myCodeExpired: コードの有効期限が切れました
+  myCodeRefresh: コードを再発行
+  myCodeCopy: コードをコピー
+  myCodeCopied: コードをコピーしました
+  enterCodeLabel: 相手のコードを入力
+  enterCodeHint: "123456"
+  enterCodeButton: 交換する
+  enterCodeInvalidFormat: 6桁の数字を入力してください
+  redeemInvalid: コードが見つからないか、有効期限が切れています
+  redeemSelf: 自分のコードは入力できません
+  redeemRateLimited: 試行回数が多すぎます。しばらくしてからもう一度お試しください
+countryRegion:
+  asia: アジア
+  oceania: オセアニア
+  americas: 北米・中南米
+  europe: ヨーロッパ
+  africa: アフリカ
+settings:
+  title: 設定
+  appearance: 表示設定
+  appInfo: アプリ情報
   version: バージョン
+  saveError: 設定を保存できませんでした
   themeMode:
     title: テーマ
     system: システムに合わせる
@@ -85,8 +306,22 @@ eventInfo:
     title: 表示言語
     japanese: 日本語
     english: English
+licenses:
+  title: ライセンス
+  searchHint: パッケージを検索
+  clearSearch: 検索をクリア
+  licenseCount:
+    one: "ライセンス: $n件"
+    other: "ライセンス: $n件"
+  notFound: ライセンスが見つかりませんでした
+error:
+  title: データを読み込めませんでした
+  message: 通信状況を確認して、もう一度お試しください。
+  permissionDenied: この情報を表示する権限がありません。FlutterKaigi スタッフへお問い合わせください。
+  unavailable: 通信状況を確認して、しばらくしてからもう一度お試しください。
+  timeout: 読み込みに時間がかかっています。もう一度お試しください。
+  retry: 再試行
+  imageSemanticLabel: 困った表情のダシュマル
 notFound:
   title: ページが見つかりません
   description: お探しのページは存在しないか、移動した可能性があります。
-common:
-  retry: 再試行

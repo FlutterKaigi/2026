@@ -1,5 +1,10 @@
 # App delivery setup
 
+> [!NOTE]
+> この文書は、公開リポジトリで管理するメンテナー向けの配布Runbookです。
+> Secret、Token、秘密鍵、パスワード、Service Account JSON、Debug Tokenの実値は記載しません。
+> 外部Contributorのローカル開発には、ここで説明するstg／prodの権限や設定は不要です。
+
 `apps/app`のCI/CDは次のworkflowで構成します。
 
 | Workflow | Trigger | Delivery target |
@@ -12,7 +17,7 @@
 
 ## GitHub側の登録場所
 
-2025年版と同様にGitHub Environmentsは使用しません。環境差分はRepository Variableの接頭辞（`STG`／`PROD`）と`apps/app/environments/.env.stg`／`.env.prod`で管理します。Firebase OptionsはコミットやSecret登録をせず、各ビルドでFlutterFire CLIから生成します。
+環境差分はRepository Variableの接頭辞（`STG`／`PROD`）と`apps/app/environments/.env.stg`／`.env.prod`で管理します。Firebase OptionsはコミットやSecret登録をせず、各ビルドでFlutterFire CLIから生成します。
 
 ### Repository Variables
 
@@ -20,7 +25,7 @@ Repositoryの`Settings > Secrets and variables > Actions > Variables > New repos
 
 | Variable | 設定値 | 取得元・取得方法 |
 | --- | --- | --- |
-| `CLOUDFLARE_ACCOUNT_ID` | `cdd8f59359fe226645e7b541cdc53b57` | Cloudflare Dashboardの`Workers & Pages > Overview > Account details`で`Account ID`をコピーします。Accountホームのメニューから`Copy account ID`でも取得できます。現在値は`apps/website/wrangler.toml`でも確認できます。[Cloudflare: Find account and zone IDs](https://developers.cloudflare.com/fundamentals/account/find-account-and-zone-ids/) |
+| `CLOUDFLARE_ACCOUNT_ID` | Cloudflare Account ID | Cloudflare Dashboardの`Workers & Pages > Overview > Account details`で`Account ID`をコピーします。Repositoryに記録された値は`apps/website/wrangler.toml`でも確認できます。[Cloudflare: Find account and zone IDs](https://developers.cloudflare.com/fundamentals/account/find-account-and-zone-ids/) |
 | `STG_FIREBASE_PROJECT_ID` | `flutterkaigi-2026-stg` | Firebase Consoleでstg Projectを開き、歯車アイコンの`Project settings > General > Project ID`を確認します。これはProject作成時に決まる公開識別子です。 |
 | `PROD_FIREBASE_PROJECT_ID` | `flutterkaigi-2026-283db` | Firebase Consoleでprod Projectを開き、`Project settings > General > Project ID`を確認します。 |
 | `STG_APP_FIREBASE_WEB_APP_ID` | stg AppのWeb App ID | stg Firebase Projectの`Project settings > General > Your apps > 対象Web App > App ID`から、`1:...:web:...`形式の値をコピーします。 |
@@ -45,7 +50,7 @@ Repositoryの`Settings > Secrets and variables > Actions > Secrets > New reposit
 
 | Secret | 使用先 | 取得元・取得方法 |
 | --- | --- | --- |
-| `CLOUDFLARE_API_TOKEN` | Web Preview／Production共通 | Cloudflare Dashboardの`Manage Account > Account API Tokens`から作成します。既存Tokenが後述の権限を満たす場合は再利用できます。 |
+| `CLOUDFLARE_API_TOKEN` | Web Preview／Production | Cloudflare Dashboardの`Manage Account > Account API Tokens`から、後述の権限とResource範囲に限定して作成します。 |
 | `APP_STORE_CONNECT_API_KEY_BASE64` | iOS Production | App Store ConnectからダウンロードしたTeam Key（`.p8`）をBase64化します。 |
 | `ANDROID_SIGNING_KEYSTORE_BASE64` | Android Production | チームで生成・保管するAndroid Upload Key（`release.jks`）をBase64化します。 |
 | `ANDROID_KEY_PROPERTIES_BASE64` | Android Production | Upload Keyのaliasとパスワードを記載した`key.properties`をBase64化します。 |
@@ -55,11 +60,11 @@ Repositoryの`Settings > Secrets and variables > Actions > Secrets > New reposit
 
 ### `CLOUDFLARE_ACCOUNT_ID`
 
-取得場所は`Workers & Pages > Overview > Account details > Account ID`です。このRepositoryでは`cdd8f59359fe226645e7b541cdc53b57`を使用します。Wranglerによる非対話CIにはAccount IDとAPI Tokenが必要です。[CloudflareのGitHub Actions手順](https://developers.cloudflare.com/workers/ci-cd/external-cicd/github-actions/)も参照してください。
+取得場所は`Workers & Pages > Overview > Account details > Account ID`です。Repositoryに記録された値は`apps/website/wrangler.toml`を参照してください。Wranglerによる非対話CIにはAccount IDとAPI Tokenが必要です。[CloudflareのGitHub Actions手順](https://developers.cloudflare.com/workers/ci-cd/external-cicd/github-actions/)も参照してください。
 
 ### `CLOUDFLARE_API_TOKEN`
 
-PreviewとProductionで同じRepository Secretを使用します。既存の`CLOUDFLARE_API_TOKEN`が次の権限とResource範囲を満たす場合は、そのTokenをそのまま使用できます。
+Web配布WorkflowはRepository Secretの`CLOUDFLARE_API_TOKEN`を使用します。Tokenの権限とResource範囲は次のとおりです。
 
 1. Cloudflare Dashboardで`Manage Account > Account API Tokens`を開きます。Account Tokenを作れない場合は`My Profile > API Tokens`からUser Tokenを作成します。
 2. `Create Token`を選択します。
@@ -80,10 +85,11 @@ PRマージ前にApp Store Connectへのアップロードまで確認する場�
 1. Apple Developerの`Certificates, Identifiers & Profiles > Identifiers > + > App IDs`を開きます。
 2. `Explicit App ID`を選び、本番は`jp.flutterkaigi.conf2026`、stg実機を使う場合は`jp.flutterkaigi.conf2026.stg`を登録します。XcodeのBundle IDと完全一致させます。[AppleのApp ID登録手順](https://developer.apple.com/help/account/identifiers/register-an-app-id/)を参照してください。
 3. App Store Connectの`Apps > + > New App`を開き、Bundle IDに`jp.flutterkaigi.conf2026`を選んでアプリレコードを作成します。
+4. Sign in with Appleは本番iOSだけで使用します。本番App IDでCapabilityを有効化しますが、stg App IDでの有効化とServices IDの作成は不要です。
 
 ### `APPLE_TEAM_ID`
 
-[Apple Developer Account](https://developer.apple.com/account/)の`Membership details > Team ID`から取得します。2025年と同じTeamを使う場合でも、現在のMembership detailsで値を再確認してください。
+[Apple Developer Account](https://developer.apple.com/account/)の`Membership details > Team ID`から取得し、現在のMembership detailsに表示される値を使用してください。
 
 ### App Store Connect API Key一式
 
@@ -247,18 +253,18 @@ App CIは実Projectへ接続しません。`firebase_options.stub.dart`をGit管
 
 OptionsをGit管理外にしても、それだけをデータ保護の境界にはできません。クライアント配布物からSDK設定を取得できるため、Firestore／Storage Rulesのテスト、API KeyのAPI・Application restrictions、App Check enforcementを配布前に確認します。[Firebase App Check](https://firebase.google.com/docs/app-check)はAuthenticationとSecurity Rulesを補完する仕組みです。
 
-## 最終チェック
+## 設定チェックリスト
 
-- Repository Variablesを17件登録した（既存Website用WIF 4件を共用）
-- `ENABLE_APP_WEB_PRODUCTION_DEPLOY`を未登録または`false`にし、`apps/app`のProduction Web配布を停止した
-- Repository Secretsを5件登録した
-- Web PreviewとProductionで共用するCloudflare Tokenの権限を確認した
-- Apple Team Keyの3値を登録し、`.p8`原本を安全に保管した
-- Android Upload Keyの2つのBase64値を登録し、原本を安全に保管した
-- Google Play Service AccountへTesting Trackだけの権限を付与した
-- Firebaseへstg/prodそれぞれ3プラットフォームのAppを登録した
-- Firebase App Checkへstg/prodの公式Appを登録し、WebのSite Keyと許可Domainを設定した
-- stg/prodのCI Service AccountへFirebase ViewerとAPI Keys Viewerを付与した
-- `firebase_options.dart`、`google-services.json`、`GoogleService-Info.plist`がGit管理外であることを確認した
-- Firestore／Storage Rules、API Key restrictions、App Check enforcementを確認した
-- RepositoryのBranch protectionで`App CI / spelling`、`App CI / style`、`App CI / validate`を必須Checkに設定した
+- 配布に必要なRepository Variablesを登録している
+- `ENABLE_APP_WEB_PRODUCTION_DEPLOY`を未登録または`false`にし、`apps/app`のProduction Web配布を停止している
+- 上記のRepository Secretsを登録し、実値をRepository、Issue、PR、ログへ出力していない
+- Cloudflare Tokenの権限とResource範囲を必要最小限にしている
+- Apple Team Keyの3値を登録し、`.p8`原本を安全に保管している
+- Android Upload Keyの2つのBase64値を登録し、原本を安全に保管している
+- Google Play Service AccountへTesting Trackだけの権限を付与している
+- Firebaseへstg/prodそれぞれ3プラットフォームのAppを登録している
+- Firebase App Checkへstg/prodの公式Appを登録し、WebのSite Keyと許可Domainを設定している
+- stg/prodのCI Service AccountへFirebase ViewerとAPI Keys Viewerを付与している
+- `firebase_options.dart`、`google-services.json`、`GoogleService-Info.plist`がGit管理外であることを確認している
+- Firestore／Storage Rules、API Key restrictions、App Check enforcementを確認している
+- RepositoryのBranch protectionで`App CI / style`と`App CI / validate`を必須Checkに設定している

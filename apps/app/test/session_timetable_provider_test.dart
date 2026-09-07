@@ -9,7 +9,6 @@ void main() {
       timelineEvents: _timelineEvents,
       venues: _venues,
       speakers: _speakers,
-      selectedVenueId: null,
     );
 
     expect(data.days, hasLength(1));
@@ -29,28 +28,12 @@ void main() {
     expect(data.days.single.entries.last.speakers.single.name, 'Speaker A');
   });
 
-  test('filters venue-specific entries while keeping shared timeline events', () {
-    final data = buildSessionTimetableData(
-      sessions: _sessions,
-      timelineEvents: _timelineEvents,
-      venues: _venues,
-      speakers: _speakers,
-      selectedVenueId: 'room-a',
-    );
-
-    expect(
-      data.days.single.entries.map((entry) => entry.id),
-      ['opening', 'room-a-session'],
-    );
-  });
-
   test('builds event dates dynamically and selects the first day by default', () {
     final data = buildSessionTimetableData(
       sessions: [..._sessions, _dayTwoSession],
       timelineEvents: _timelineEvents,
       venues: _venues,
       speakers: _speakers,
-      selectedVenueId: null,
     );
 
     expect(
@@ -58,8 +41,8 @@ void main() {
       [DateTime(2026, 10, 31), DateTime(2026, 11)],
     );
     expect(data.selectedDate, DateTime(2026, 10, 31));
-    expect(data.days, hasLength(1));
-    expect(data.days.single.date, DateTime(2026, 10, 31));
+    expect(data.days, hasLength(2));
+    expect(data.days.first.date, DateTime(2026, 10, 31));
     expect(
       data.selectedDay?.entries.map((entry) => entry.id),
       ['opening', 'room-b-session', 'room-a-session'],
@@ -72,40 +55,17 @@ void main() {
       timelineEvents: _timelineEvents,
       venues: _venues,
       speakers: _speakers,
-      selectedVenueId: null,
       selectedDate: DateTime(2026, 11),
     );
 
     expect(data.selectedDate, DateTime(2026, 11));
     expect(data.selectedDay?.date, DateTime(2026, 11));
-    expect(data.days, hasLength(1));
-    expect(data.days.single.date, DateTime(2026, 11));
+    expect(data.days, hasLength(2));
+    expect(data.days.last.date, DateTime(2026, 11));
     expect(
-      data.days.single.entries.map((entry) => entry.id),
+      data.days.last.entries.map((entry) => entry.id),
       ['day-two-session'],
     );
-  });
-
-  test('keeps event day buttons when venue filter has no entries on the selected day', () {
-    final data = buildSessionTimetableData(
-      sessions: [..._sessions, _dayTwoSession],
-      timelineEvents: _timelineEvents,
-      venues: _venues,
-      speakers: _speakers,
-      selectedVenueId: 'room-b',
-      selectedDate: DateTime(2026, 11),
-    );
-
-    expect(
-      data.availableDates,
-      [DateTime(2026, 10, 31), DateTime(2026, 11)],
-    );
-    expect(data.selectedVenueId, 'room-b');
-    expect(data.selectedDay?.entries, isEmpty);
-    expect(data.days, hasLength(1));
-    expect(data.days.single.date, DateTime(2026, 11));
-    expect(data.days.single.entries, isEmpty);
-    expect(data.isEmpty, isTrue);
   });
 }
 

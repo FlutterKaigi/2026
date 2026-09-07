@@ -62,13 +62,16 @@ class AppLocaleNotifier extends Notifier<AppLocale> {
 
   /// Updates the active locale and persists the choice.
   Future<void> set(AppLocale locale) async {
-    await LocaleSettings.setLocale(locale);
-    await ref
+    final saved = await ref
         .read(sharedPreferencesProvider)
         .setString(
           _prefsKey,
           locale.languageCode,
         );
+    if (!saved) {
+      throw StateError('Could not persist the app locale.');
+    }
+    await LocaleSettings.setLocale(locale);
     state = locale;
   }
 }

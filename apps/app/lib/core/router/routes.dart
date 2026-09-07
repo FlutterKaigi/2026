@@ -1,5 +1,14 @@
 part of 'router.dart';
 
+/// `/settings` — appearance, language, and app information.
+@TypedGoRoute<SettingsRoute>(path: '/settings')
+class SettingsRoute extends GoRouteData with $SettingsRoute {
+  const SettingsRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const SettingsPage();
+}
+
 /// Shell hosting the main bottom/rail navigation destinations.
 ///
 /// Uses [StatefulShellRoute.indexedStack] so switching tabs swaps branches
@@ -7,14 +16,27 @@ part of 'router.dart';
 /// navigation and scroll state.
 @TypedStatefulShellRoute<AppShellRoute>(
   branches: [
-    TypedStatefulShellBranch<NewsBranch>(
-      routes: [TypedGoRoute<NewsRoute>(path: '/news')],
+    TypedStatefulShellBranch<EventInfoBranch>(
+      routes: [
+        TypedGoRoute<EventInfoRoute>(
+          path: '/info',
+          routes: [TypedGoRoute<StaffMemberListRoute>(path: 'staff')],
+        ),
+        TypedGoRoute<NewsRoute>(path: '/news'),
+        TypedGoRoute<LicenseRoute>(
+          path: '/licenses',
+          routes: [
+            TypedGoRoute<LicenseDetailRoute>(path: ':packageName'),
+          ],
+        ),
+      ],
     ),
     TypedStatefulShellBranch<SessionBranch>(
       routes: [
         TypedGoRoute<SessionTimetableRoute>(
           path: '/sessions',
           routes: [
+            TypedGoRoute<SessionSearchRoute>(path: 'search'),
             TypedGoRoute<BookmarkedSessionsRoute>(path: 'bookmarked'),
             TypedGoRoute<SessionDetailsRoute>(path: ':sessionId'),
           ],
@@ -24,8 +46,31 @@ part of 'router.dart';
     TypedStatefulShellBranch<VenueMapBranch>(
       routes: [TypedGoRoute<VenueMapRoute>(path: '/venue-map')],
     ),
-    TypedStatefulShellBranch<EventInfoBranch>(
-      routes: [TypedGoRoute<EventInfoRoute>(path: '/info')],
+    TypedStatefulShellBranch<SponsorBranch>(
+      routes: [
+        TypedGoRoute<SponsorRoute>(
+          path: '/sponsors',
+          routes: [TypedGoRoute<SponsorDetailsRoute>(path: ':sponsorKey')],
+        ),
+      ],
+    ),
+    TypedStatefulShellBranch<AccountBranch>(
+      routes: [
+        TypedGoRoute<AccountRoute>(
+          path: '/account',
+          routes: [
+            TypedGoRoute<EmailSignInRoute>(path: 'email'),
+            TypedGoRoute<ProfileEditRoute>(path: 'profile'),
+            TypedGoRoute<ExchangeHomeRoute>(
+              path: 'exchange',
+              routes: [
+                TypedGoRoute<ExchangeScanRoute>(path: 'scan'),
+                TypedGoRoute<ExchangeListRoute>(path: 'list'),
+              ],
+            ),
+          ],
+        ),
+      ],
     ),
   ],
 )
@@ -38,13 +83,13 @@ class AppShellRoute extends StatefulShellRouteData {
     GoRouterState state,
     StatefulNavigationShell navigationShell,
   ) {
-    final t = context.t;
+    final t = Translations.of(context);
     return RootScaffold(
       navigationShell: navigationShell,
       destinations: [
         RootDestination(
-          icon: Icons.campaign_outlined,
-          label: t.navigation.news,
+          icon: Icons.event_outlined,
+          label: t.navigation.info,
         ),
         RootDestination(
           icon: Icons.calendar_today_outlined,
@@ -55,18 +100,23 @@ class AppShellRoute extends StatefulShellRouteData {
           label: t.navigation.venueMap,
         ),
         RootDestination(
-          icon: Icons.info_outline,
-          label: t.navigation.info,
+          icon: Icons.business_outlined,
+          label: t.navigation.sponsors,
+        ),
+        RootDestination(
+          icon: Icons.person_outline,
+          label: t.navigation.account,
         ),
       ],
     );
   }
 }
 
-/// Branch hosting the news tab. Branch order must match the order of
+/// Branch hosting the event overview and its news destination. Branch order
+/// must match the order of
 /// [RootScaffold.destinations] built in [AppShellRoute.builder].
-class NewsBranch extends StatefulShellBranchData {
-  const NewsBranch();
+class EventInfoBranch extends StatefulShellBranchData {
+  const EventInfoBranch();
 }
 
 /// Branch hosting the session timetable tab.
@@ -79,17 +129,93 @@ class VenueMapBranch extends StatefulShellBranchData {
   const VenueMapBranch();
 }
 
-/// Branch hosting the event info tab.
-class EventInfoBranch extends StatefulShellBranchData {
-  const EventInfoBranch();
+/// Branch hosting the sponsors tab.
+class SponsorBranch extends StatefulShellBranchData {
+  const SponsorBranch();
 }
 
-/// `/news` — the news list.
+/// Branch hosting the account tab.
+class AccountBranch extends StatefulShellBranchData {
+  const AccountBranch();
+}
+
+/// `/account` — sign-in options while signed out, account info while signed
+/// in.
+class AccountRoute extends GoRouteData with $AccountRoute {
+  const AccountRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const AccountPage();
+}
+
+/// `/account/email` — email/password sign-in and account creation.
+class EmailSignInRoute extends GoRouteData with $EmailSignInRoute {
+  const EmailSignInRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const EmailSignInPage();
+}
+
+/// `/account/profile` — create or edit the signed-in user's profile.
+class ProfileEditRoute extends GoRouteData with $ProfileEditRoute {
+  const ProfileEditRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const ProfileEditPage();
+}
+
+/// `/account/exchange` — the signed-in user's own QR code and the entry
+/// points to scan another attendee or view exchanged profiles.
+class ExchangeHomeRoute extends GoRouteData with $ExchangeHomeRoute {
+  const ExchangeHomeRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const ExchangeHomePage();
+}
+
+/// `/account/exchange/scan` — scans another attendee's profile-exchange QR
+/// code.
+class ExchangeScanRoute extends GoRouteData with $ExchangeScanRoute {
+  const ExchangeScanRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const ExchangeScanPage();
+}
+
+/// `/account/exchange/list` — the signed-in user's exchanged profiles.
+class ExchangeListRoute extends GoRouteData with $ExchangeListRoute {
+  const ExchangeListRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const ExchangeListPage();
+}
+
+/// `/news` — the news list opened from the event overview.
 class NewsRoute extends GoRouteData with $NewsRoute {
   const NewsRoute();
 
   @override
   Widget build(BuildContext context, GoRouterState state) => const NewsListPage();
+}
+
+/// `/licenses` — bundled OSS packages and their license counts.
+class LicenseRoute extends GoRouteData with $LicenseRoute {
+  const LicenseRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const OssLicensePage();
+}
+
+/// `/licenses/:packageName` — license text for one bundled package.
+class LicenseDetailRoute extends GoRouteData with $LicenseDetailRoute {
+  const LicenseDetailRoute({required this.packageName});
+
+  final String packageName;
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => LicenseDetailPage(
+    packageName: packageName,
+  );
 }
 
 /// `/sessions` — the session timetable.
@@ -98,6 +224,14 @@ class SessionTimetableRoute extends GoRouteData with $SessionTimetableRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) => const SessionTimetablePage();
+}
+
+/// `/sessions/search` — local search across published sessions.
+class SessionSearchRoute extends GoRouteData with $SessionSearchRoute {
+  const SessionSearchRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const SessionSearchPage();
 }
 
 /// `/sessions/bookmarked` — locally bookmarked sessions.
@@ -126,10 +260,38 @@ class VenueMapRoute extends GoRouteData with $VenueMapRoute {
   Widget build(BuildContext context, GoRouterState state) => const VenueMapPage();
 }
 
+/// `/sponsors` — the sponsor logo wall.
+class SponsorRoute extends GoRouteData with $SponsorRoute {
+  const SponsorRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const SponsorListPage();
+}
+
+/// `/sponsors/:sponsorKey` — sponsor details.
+class SponsorDetailsRoute extends GoRouteData with $SponsorDetailsRoute {
+  const SponsorDetailsRoute({
+    required this.sponsorKey,
+  });
+
+  final String sponsorKey;
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => SponsorDetailsPage(sponsorKey: sponsorKey);
+}
+
 /// `/info` — event and app information.
 class EventInfoRoute extends GoRouteData with $EventInfoRoute {
   const EventInfoRoute();
 
   @override
   Widget build(BuildContext context, GoRouterState state) => const EventInfoPage();
+}
+
+/// `/info/staff` — the staff profile list.
+class StaffMemberListRoute extends GoRouteData with $StaffMemberListRoute {
+  const StaffMemberListRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const StaffMemberListPage();
 }

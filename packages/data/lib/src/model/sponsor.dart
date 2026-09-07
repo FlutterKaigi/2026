@@ -7,7 +7,7 @@ part 'sponsor.freezed.dart';
 part 'sponsor.g.dart';
 
 @JsonEnum()
-enum SponsorTier { platinum, gold, silver, bronze, tool, community, individual }
+enum SponsorTier { platinum, gold, silver, bronze, tool, community, individual, entertainment }
 
 @freezed
 abstract class Sponsor with _$Sponsor {
@@ -21,6 +21,7 @@ abstract class Sponsor with _$Sponsor {
     String? primaryLogoUrl,
     String? secondaryLogoUrl,
     required SponsorTier tier,
+
     /// Web サイトの詳細ページのパス（`sponsors/<slug>`）に利用するスラッグ。
     String? slug,
     String? xUrl,

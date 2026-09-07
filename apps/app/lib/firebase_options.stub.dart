@@ -10,5 +10,6 @@ abstract final class DefaultFirebaseOptions {
     appId: '1:000000000000:web:0000000000000000000000',
     messagingSenderId: '000000000000',
     projectId: 'dev-flutterkaigi-2026',
+    authDomain: 'dev-flutterkaigi-2026.firebaseapp.com',
   );
 }

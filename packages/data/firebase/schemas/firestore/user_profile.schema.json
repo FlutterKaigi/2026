@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/FlutterKaigi/2026/packages/data/firebase/schemas/firestore/user_profile.schema.json",
+  "title": "UserProfile",
+  "description": "Firestore document schema for the `users` collection. The document id is the Firebase Auth uid. Profiles are readable by every signed-in attendee, so they carry no email or other account data.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["displayName", "countryOrRegion", "createdAt", "updatedAt"],
+  "properties": {
+    "displayName": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 30
+    },
+    "avatarUrl": {
+      "type": ["string", "null"],
+      "format": "uri"
+    },
+    "countryOrRegion": {
+      "description": "ISO 3166-1 alpha-2 code (plus `XK`), see packages/data/lib/src/country/generated_countries.dart.",
+      "type": "string",
+      "pattern": "^[A-Z]{2}$"
+    },
+    "snsLinks": {
+      "type": "array",
+      "maxItems": 10,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["type", "value"],
+        "properties": {
+          "type": { "type": "string", "minLength": 1 },
+          "value": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "bio": {
+      "type": ["string", "null"],
+      "maxLength": 300
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

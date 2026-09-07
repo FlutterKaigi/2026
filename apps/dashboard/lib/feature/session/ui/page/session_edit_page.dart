@@ -30,6 +30,7 @@ class SessionEditPage extends HookConsumerWidget {
     final descJaController = useTextEditingController(text: session?.description.ja ?? '');
     final descEnController = useTextEditingController(text: session?.description.en ?? '');
     final sessionizeUrlController = useTextEditingController(text: session?.sessionizeUrl ?? '');
+    final feedbackUrlController = useTextEditingController(text: session?.feedbackUrl ?? '');
     final primaryLocale = useState(session?.primaryLocale ?? 'ja');
     final startsAt = useState<DateTime>(session?.startsAt ?? DateTime.now());
     final endsAt = useState<DateTime>(session?.endsAt ?? DateTime.now().add(const Duration(minutes: 40)));
@@ -37,7 +38,6 @@ class SessionEditPage extends HookConsumerWidget {
     final selectedSpeakerIds = useState<List<String>>(session?.speakerIds ?? const []);
     final isLightningTalk = useState(session?.isLightningTalk ?? false);
     final isBeginnersLightningTalk = useState(session?.isBeginnersLightningTalk ?? false);
-    final isHandsOn = useState(session?.isHandsOn ?? false);
     final isSaving = useState(false);
 
     Future<void> pickStartsAt() async {
@@ -71,8 +71,8 @@ class SessionEditPage extends HookConsumerWidget {
           speakerIds: selectedSpeakerIds.value,
           isLightningTalk: isLightningTalk.value,
           isBeginnersLightningTalk: isBeginnersLightningTalk.value,
-          isHandsOn: isHandsOn.value,
           sessionizeUrl: sessionizeUrlController.text.trim().isEmpty ? null : sessionizeUrlController.text.trim(),
+          feedbackUrl: feedbackUrlController.text.trim().isEmpty ? null : feedbackUrlController.text.trim(),
           createdAt: session?.createdAt ?? DateTime.now(),
           updatedAt: DateTime.now(),
         );
@@ -204,17 +204,18 @@ class SessionEditPage extends HookConsumerWidget {
                       onChanged: (v) => isBeginnersLightningTalk.value = v,
                       contentPadding: EdgeInsets.zero,
                     ),
-                    SwitchListTile.adaptive(
-                      title: const Text('ハンズオン'),
-                      value: isHandsOn.value,
-                      onChanged: (v) => isHandsOn.value = v,
-                      contentPadding: EdgeInsets.zero,
-                    ),
                     const SizedBox(height: 24),
                     OutlinedTextFormField(
                       controller: sessionizeUrlController,
                       labelText: 'Sessionize URL',
                       hintText: 'https://sessionize.com/...',
+                    ),
+                    const SizedBox(height: 16),
+                    OutlinedTextFormField(
+                      controller: feedbackUrlController,
+                      labelText: 'フィードバック URL',
+                      hintText: 'https://sfeedback.com/...',
+                      helperText: 'セッション終了後にアプリの詳細画面から開けるようになります',
                     ),
                   ],
                 ),

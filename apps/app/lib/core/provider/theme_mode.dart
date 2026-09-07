@@ -15,7 +15,10 @@ class ThemeModeNotifier extends Notifier<ThemeMode> {
 
   /// Updates the active [ThemeMode] and persists the choice.
   Future<void> set(ThemeMode mode) async {
-    await ref.read(sharedPreferencesProvider).setString(_prefsKey, mode.name);
+    final saved = await ref.read(sharedPreferencesProvider).setString(_prefsKey, mode.name);
+    if (!saved) {
+      throw StateError('Could not persist the theme mode.');
+    }
     state = mode;
   }
 }

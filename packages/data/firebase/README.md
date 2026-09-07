@@ -38,6 +38,7 @@ packages/data/firebase/
 Run commands from the repository root.
 
 ```bash
+cp apps/app/lib/firebase_options.stub.dart apps/app/lib/firebase_options.dart
 fvm dart run melos firebase:emulators
 ```
 

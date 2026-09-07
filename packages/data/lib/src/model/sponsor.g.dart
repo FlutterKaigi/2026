@@ -48,4 +48,5 @@ const _$SponsorTierEnumMap = {
   SponsorTier.tool: 'tool',
   SponsorTier.community: 'community',
   SponsorTier.individual: 'individual',
+  SponsorTier.entertainment: 'entertainment',
 };

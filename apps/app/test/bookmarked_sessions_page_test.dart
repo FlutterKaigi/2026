@@ -25,6 +25,8 @@ void main() {
   });
 
   testWidgets('opens the bookmarked sessions screen from the timetable app bar', (tester) async {
+    GoRouter.optionURLReflectsImperativeAPIs = true;
+    addTearDown(() => GoRouter.optionURLReflectsImperativeAPIs = false);
     final router = _buildRouter(initialLocation: '/sessions');
 
     await _pumpWithProviders(
@@ -45,6 +47,10 @@ void main() {
 
     expect(find.text('ブックマークしたセッション'), findsWidgets);
     expect(find.text('Early Session'), findsOneWidget);
+    expect(
+      router.routeInformationProvider.value.uri.path,
+      '/sessions/bookmarked',
+    );
   });
 
   testWidgets('shows only bookmarked sessions sorted by start time', (tester) async {
@@ -63,13 +69,32 @@ void main() {
   });
 
   testWidgets('opens session details with the bookmarked session ID', (tester) async {
-    await _pumpBookmarkedRoute(tester, bookmarkedIds: const {'early-session'});
+    GoRouter.optionURLReflectsImperativeAPIs = true;
+    addTearDown(() => GoRouter.optionURLReflectsImperativeAPIs = false);
+    final router = _buildRouter(initialLocation: '/sessions/bookmarked');
+
+    await _pumpWithProviders(
+      tester,
+      MaterialApp.router(
+        routerConfig: router,
+        theme: ThemeData(splashFactory: NoSplash.splashFactory),
+        locale: const Locale('en'),
+        supportedLocales: AppLocaleUtils.supportedLocales,
+        localizationsDelegates: GlobalMaterialLocalizations.delegates,
+      ),
+      bookmarkedIds: const {'early-session'},
+    );
+    await _pumpProviderFrames(tester);
 
     await tester.tap(_cardForText('Early Session'));
     await tester.pumpAndSettle();
 
     expect(find.text('Early details'), findsOneWidget);
     expect(find.text('Room A'), findsWidgets);
+    expect(
+      router.routeInformationProvider.value.uri.path,
+      '/sessions/early-session',
+    );
   });
 
   testWidgets('removing a bookmark immediately removes it from the bookmarked screen', (tester) async {
@@ -163,7 +188,7 @@ void main() {
       sessionListValue: AsyncError(Exception('sessions'), StackTrace.current),
     );
 
-    expect(find.text('ブックマークしたセッションを取得できませんでした'), findsOneWidget);
+    expect(find.text('データを読み込めませんでした'), findsOneWidget);
     expect(find.text('再試行'), findsOneWidget);
   });
 
@@ -173,7 +198,7 @@ void main() {
       AsyncError(Exception('bookmarks'), StackTrace.current),
     );
 
-    expect(find.text('ブックマークしたセッションを取得できませんでした'), findsOneWidget);
+    expect(find.text('データを読み込めませんでした'), findsOneWidget);
   });
 
   testWidgets('retry action is available from the bookmarked screen error state', (tester) async {
@@ -182,7 +207,7 @@ void main() {
       AsyncError(Exception('bookmarks'), StackTrace.current),
     );
 
-    expect(find.text('ブックマークしたセッションを取得できませんでした'), findsOneWidget);
+    expect(find.text('データを読み込めませんでした'), findsOneWidget);
     await tester.tap(find.text('再試行'));
     await tester.pump();
 

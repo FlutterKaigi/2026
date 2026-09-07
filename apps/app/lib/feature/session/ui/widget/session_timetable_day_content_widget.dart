@@ -2,24 +2,18 @@ import 'dart:math' as math;
 
 import 'package:app/core/extension/locale_map_extension.dart';
 import 'package:app/core/i18n/strings.g.dart';
-import 'package:app/feature/session/data/provider/session_time_format.dart';
 import 'package:app/feature/session/data/provider/session_timetable_provider.dart';
 import 'package:app/feature/session/ui/widget/session_card_widget.dart';
 import 'package:app/feature/session/util/event_time.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:intl/intl.dart' hide TextDirection;
 
 const _entryContentGap = 12.0;
 const _entryBottomSpacing = 16.0;
-const _parallelEntryGap = 12.0;
-const _parallelScrollbarExtent = 10.0;
 const _timeLabelTopPadding = 4.0;
 const _timelineGapAfterTimeLabel = 6.0;
 const _timeColumnSafetyMargin = 4.0;
 
-class SessionTimetableDayContentWidget extends ConsumerWidget {
+class SessionTimetableDayContentWidget extends StatelessWidget {
   const SessionTimetableDayContentWidget({
     required this.day,
     super.key,
@@ -28,9 +22,9 @@ class SessionTimetableDayContentWidget extends ConsumerWidget {
   final SessionTimetableDay day;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final entryGroups = day.entryGroups;
-    final timeFormat = ref.watch(sessionTimeFormatProvider);
+    const timeFormat = EventTimeFormat.twentyFourHour;
     final locale = Localizations.localeOf(context).toLanguageTag();
     final textDirection = Directionality.of(context);
     final timeLabelStyle = _timeLabelTextStyle(context);
@@ -57,10 +51,10 @@ class SessionTimetableDayContentWidget extends ConsumerWidget {
         Divider(
           color: Theme.of(context).colorScheme.outlineVariant,
           thickness: 1,
-          height: 8,
+          height: 1,
           indent: 0,
         ),
-        _DayHeaderWidget(date: day.date),
+        const SizedBox(height: 8),
         for (var index = 0; index < entryGroups.length; index++)
           _TimetableEntryGroupTileWidget(
             entries: entryGroups[index],
@@ -70,58 +64,6 @@ class SessionTimetableDayContentWidget extends ConsumerWidget {
             timeColumnWidth: timeColumnWidth,
           ),
       ],
-    );
-  }
-}
-
-class _DayHeaderWidget extends StatelessWidget {
-  const _DayHeaderWidget({required this.date});
-
-  final DateTime date;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: colorScheme.surfaceContainerHighest,
-          border: Border.all(color: colorScheme.outlineVariant),
-          borderRadius: const BorderRadius.all(
-            Radius.circular(8),
-          ),
-        ),
-        child: IntrinsicHeight(
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              DecoratedBox(
-                decoration: BoxDecoration(
-                  color: colorScheme.primary,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(3),
-                    bottomLeft: Radius.circular(3),
-                  ),
-                ),
-                child: const SizedBox(width: 4),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                child: Text(
-                  DateFormat('yyyy/MM/dd').format(date),
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }
@@ -191,7 +133,7 @@ class _TimetableEntryGroupTileWidget extends StatelessWidget {
                         entry: firstEntry,
                         timeFormat: timeFormat,
                       )
-                    : _ParallelTimetableEntriesScrollerWidget(
+                    : _ParallelTimetableEntriesColumnWidget(
                         entries: entries,
                         timeFormat: timeFormat,
                       ),
@@ -271,6 +213,7 @@ class _TimetableEntryCardWidget extends StatelessWidget {
         ? SessionCardWidget(
             entry: entry,
             timeFormat: timeFormat,
+            compact: true,
           )
         : _TimelineEventCardWidget(
             entry: entry,
@@ -279,8 +222,8 @@ class _TimetableEntryCardWidget extends StatelessWidget {
   }
 }
 
-class _ParallelTimetableEntriesScrollerWidget extends HookWidget {
-  const _ParallelTimetableEntriesScrollerWidget({
+class _ParallelTimetableEntriesColumnWidget extends StatelessWidget {
+  const _ParallelTimetableEntriesColumnWidget({
     required this.entries,
     required this.timeFormat,
   });
@@ -290,107 +233,16 @@ class _ParallelTimetableEntriesScrollerWidget extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scrollController = useScrollController();
-    useListenable(scrollController);
-
-    final colorScheme = Theme.of(context).colorScheme;
-    final position = scrollController.hasClients ? scrollController.position : null;
-    final showStartFade = position != null && position.extentBefore > 1;
-    final showEndFade = position == null || position.extentAfter > 1;
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final viewportWidth = constraints.maxWidth;
-        final peekWidth = math.min<double>(36, viewportWidth * 0.14);
-        final cardWidth = math.min<double>(
-          320,
-          math.max<double>(184, viewportWidth - _parallelEntryGap - peekWidth),
-        );
-
-        return Stack(
-          children: [
-            Scrollbar(
-              controller: scrollController,
-              thumbVisibility: true,
-              trackVisibility: true,
-              interactive: true,
-              child: SingleChildScrollView(
-                controller: scrollController,
-                scrollDirection: Axis.horizontal,
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: _parallelScrollbarExtent),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      for (var index = 0; index < entries.length; index++) ...[
-                        SizedBox(
-                          width: cardWidth,
-                          child: _TimetableEntryCardWidget(
-                            entry: entries[index],
-                            timeFormat: timeFormat,
-                          ),
-                        ),
-                        if (index < entries.length - 1) const SizedBox(width: _parallelEntryGap),
-                      ],
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            if (showStartFade)
-              PositionedDirectional(
-                start: 0,
-                top: 0,
-                bottom: _parallelScrollbarExtent,
-                child: _ScrollEdgeFadeWidget(
-                  color: colorScheme.surface,
-                  alignment: AlignmentDirectional.centerStart,
-                ),
-              ),
-            if (showEndFade)
-              PositionedDirectional(
-                end: 0,
-                top: 0,
-                bottom: _parallelScrollbarExtent,
-                child: _ScrollEdgeFadeWidget(
-                  color: colorScheme.surface,
-                  alignment: AlignmentDirectional.centerEnd,
-                ),
-              ),
-          ],
-        );
-      },
-    );
-  }
-}
-
-class _ScrollEdgeFadeWidget extends StatelessWidget {
-  const _ScrollEdgeFadeWidget({
-    required this.color,
-    required this.alignment,
-  });
-
-  final Color color;
-  final AlignmentDirectional alignment;
-
-  @override
-  Widget build(BuildContext context) {
-    final isStart = alignment == AlignmentDirectional.centerStart;
-
-    return IgnorePointer(
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: isStart ? AlignmentDirectional.centerStart : AlignmentDirectional.centerEnd,
-            end: isStart ? AlignmentDirectional.centerEnd : AlignmentDirectional.centerStart,
-            colors: [
-              color,
-              color.withValues(alpha: 0),
-            ],
+    return Column(
+      children: [
+        for (var index = 0; index < entries.length; index++) ...[
+          _TimetableEntryCardWidget(
+            entry: entries[index],
+            timeFormat: timeFormat,
           ),
-        ),
-        child: const SizedBox(width: 32),
-      ),
+          if (index < entries.length - 1) const SizedBox(height: 12),
+        ],
+      ],
     );
   }
 }

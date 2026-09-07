@@ -70,11 +70,3 @@ const eventRoadmap = <RoadmapMilestone>[
     gate: MilestoneGate.conference,
   ),
 ];
-
-/// 指定 gate のマイルストーンを返す。見つからない場合は null。
-RoadmapMilestone? milestoneByGate(MilestoneGate gate) {
-  for (final m in eventRoadmap) {
-    if (m.gate == gate) return m;
-  }
-  return null;
-}
