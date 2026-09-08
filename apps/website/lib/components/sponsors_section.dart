@@ -2,6 +2,7 @@ import 'package:jaspr/dom.dart';
 import 'package:jaspr/jaspr.dart';
 
 import '../constants/generated_sponsors.dart';
+import '../constants/generated_tokens.dart';
 import '../constants/sponsors.dart';
 import '../constants/theme.dart';
 import '../l10n/strings.dart';
@@ -9,13 +10,15 @@ import '../l10n/strings.dart';
 /// Home-page Sponsors section: a centered "logo wall" grouped by tier.
 ///
 /// Tiers and logo-cell sizes follow the Figma layout (node 656:2718):
-/// Platinum 256 / Gold 192 / Silver·Bronze·Tool·Student·Community 144.
+/// Platinum 256 / Gold·Amusement 192 / Silver·Bronze·Tool·Student·Community 144.
 /// Each of those logos links to `sponsors/{slug}`. Individual sponsors (96px
 /// avatar) are the exception — see [_IndividualSponsorCard] — and link out to
 /// GitHub instead.
 /// Firestore document id of Flutter (Google) — pinned to the front of the
 /// sponsor wall regardless of the default id-ascending order.
 const String _pinnedFirstId = 'D2026-015';
+
+String _tierHeading(SponsorTier tier) => tier == SponsorTier.entertainment ? 'Amusement Sponsor' : tier.label;
 
 class SponsorsSection extends StatelessComponent {
   const SponsorsSection({super.key});
@@ -46,12 +49,20 @@ class SponsorsSection extends StatelessComponent {
           p(classes: 'sponsors-section__subtitle', [.text(strings.sponsorsSubtitle)]),
         ]),
         for (final entry in byTier.entries)
-          div(classes: 'sponsors-tier', [
-            h3(classes: 'sponsors-tier__heading', [.text(entry.key.label)]),
-            div(classes: 'sponsors-tier__grid', [
-              for (final sponsor in entry.value) _SponsorLogoCard(sponsor: sponsor, strings: strings),
-            ]),
-          ]),
+          div(
+            classes: entry.key == SponsorTier.entertainment
+                ? 'sponsors-tier sponsors-tier--amusement'
+                : 'sponsors-tier',
+            [
+              h3(
+                classes: 'sponsors-tier__heading',
+                [.text(_tierHeading(entry.key))],
+              ),
+              div(classes: 'sponsors-tier__grid', [
+                for (final sponsor in entry.value) _SponsorLogoCard(sponsor: sponsor, strings: strings),
+              ]),
+            ],
+          ),
       ]),
     ]);
   }
@@ -116,6 +127,10 @@ class SponsorsSection extends StatelessComponent {
           fontWeight: .w400,
           textAlign: .center,
           raw: const {'font-size': '22px', 'line-height': '28px'},
+        ),
+        css('&.sponsors-tier--amusement .sponsors-tier__heading').styles(
+          fontWeight: .w500,
+          raw: tokenFontCss(fontM3HeadlineMedium),
         ),
         css('.sponsors-tier__grid').styles(
           display: .flex,
@@ -300,7 +315,7 @@ class _SponsorLogoCard extends StatelessComponent {
 
   static String _sizeClass(SponsorTier tier) => switch (tier) {
     SponsorTier.platinum => 'sponsor-card--xl',
-    SponsorTier.gold => 'sponsor-card--lg',
+    SponsorTier.gold || SponsorTier.entertainment => 'sponsor-card--lg',
     _ => 'sponsor-card--md',
   };
 
