@@ -1250,7 +1250,8 @@
       "icon": "person",
       "materialIcon": "record_voice_over_outlined",
       "mapLabel": {
-        "en": "Ask the\nspeaker"
+        "ja": "Ask the\nSpeaker",
+        "en": "Ask the\nSpeaker"
       }
     }
   ],

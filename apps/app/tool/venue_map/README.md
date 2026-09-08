@@ -51,6 +51,7 @@ fvm flutter run -d web-server -t tool/venue_map/preview.dart --web-port 8766
 ```
 
 `?theme=dark&locale=en` でダークテーマ・英語を確認できます。この起動ファイルは開発確認用です。
+ヘッダーの設定ボタンから、実際の設定画面でテーマ・言語を切り替えることもできます。
 
 ```sh
 fvm flutter test test/venue_map_test.dart

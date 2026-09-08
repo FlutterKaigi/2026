@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:app/core/i18n/strings.g.dart';
+import 'package:app/core/ui/widget/settings_icon_button.dart';
 import 'package:app/feature/venue_map/data/venue_floor_plan.dart';
 import 'package:app/feature/venue_map/provider/venue_map_view_mode.dart';
 import 'package:app/feature/venue_map/ui/widget/venue_map_2d_controller.dart';
@@ -118,7 +119,11 @@ class _VenueMapPageState extends ConsumerState<VenueMapPage> {
     _hasOpenedThreeD = _hasOpenedThreeD || mode == VenueMapViewMode.threeD;
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      appBar: AppBar(title: Text(t.title)),
+      appBar: AppBar(
+        toolbarHeight: 52,
+        title: Text(t.title, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+        actions: const [SettingsIconButton()],
+      ),
       body: SafeArea(
         top: false,
         child: Column(

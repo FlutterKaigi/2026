@@ -66,7 +66,11 @@ void main() {
     for (final place in plan.places.where((place) => place.type == VenuePlaceType.facility)) {
       expect(icons[place.materialIcon], String.fromCharCode(place.iconData.codePoint), reason: place.id);
       expect(place.mapLabel('en'), isNotEmpty, reason: '${place.id} needs text alongside its icon');
-      expect(place.mapLabel('ja'), place.icon == 'wc' ? 'WC' : '');
+      if (place.id == 'ask_speaker') {
+        expect(place.mapLabel('ja').replaceAll('\n', ' '), 'Ask the Speaker');
+      } else {
+        expect(place.mapLabel('ja'), place.icon == 'wc' ? 'WC' : '');
+      }
     }
     expect(plan.find('mens_wc')!.mapLabel('en').replaceAll('\n', ' '), 'Men’s restroom');
     expect(plan.find('womens_wc')!.mapLabel('en').replaceAll('\n', ' '), 'Women’s restroom');
