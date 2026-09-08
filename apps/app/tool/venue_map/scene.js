@@ -178,13 +178,20 @@ function initialize(config) {
     frame = null,
     fitZoom = 1,
     cameraInitialized = false;
-  const glyph = { info: "ⓘ", wc: "WC", lift: "EV", entry: "↪", person: "Ask" };
   const labelNodes = places.map((p) => {
     const el = document.createElement("button");
     el.className = `label ${p.type}`;
     el.onclick = () => send("selected", { id: p.id });
     labels.append(el);
-    return { p, el };
+    const svg = document.getElementById("label-connectors");
+    const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    const dot = document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "circle",
+    );
+    dot.setAttribute("r", "2.5");
+    svg.append(line, dot);
+    return { p, el, line, dot, offsetX: 0, offsetY: 0 };
   });
   function configure(next) {
     config = next;
@@ -203,18 +210,24 @@ function initialize(config) {
     artUniforms.mapPaper.value.set(colors.service);
     for (const { p, el } of labelNodes) {
       const name = p.name[config.language] || p.name.ja;
-      el.textContent =
-        p.type === "facility" ? glyph[p.icon] : name.replace(" HALL", "\nHALL");
-      if (p.icon === "wc") {
-        el.classList.add("wc");
-        el.textContent =
-          (config.language === "en"
-            ? p.id === "mens_wc"
-              ? "Men"
-              : "Women"
-            : p.id === "mens_wc"
-              ? "男性"
-              : "女性") + "\nWC";
+      if (p.type === "facility") {
+        const content = document.createElement("span");
+        content.className = "facility-content";
+        content.setAttribute("aria-hidden", "true");
+        const icon = document.createElement("span");
+        icon.className = "material-icon";
+        icon.textContent = MAP_ICONS[p.materialIcon];
+        content.append(icon);
+        const caption =
+          p.mapLabel?.[config.language] ?? (p.icon === "wc" ? "WC" : "");
+        if (caption) {
+          const text = document.createElement("span");
+          text.textContent = caption;
+          content.append(text);
+        }
+        el.replaceChildren(content);
+      } else {
+        el.textContent = name.replace(" HALL", "\nHALL");
       }
       el.title = name;
       el.setAttribute("aria-label", name);
@@ -249,56 +262,57 @@ function initialize(config) {
   }
   function projectLabels() {
     const w = stage.clientWidth,
-      h = stage.clientHeight,
-      occupied = [];
-    const ordered = [...labelNodes].sort(
-      (a, b) =>
-        (a.p.id === selected
-          ? -9
-          : a.p.type === "hall"
-            ? 0
-            : a.p.type === "foyer"
-              ? 1
-              : 2) -
-        (b.p.id === selected
-          ? -9
-          : b.p.type === "hall"
-            ? 0
-            : b.p.type === "foyer"
-              ? 1
-              : 2),
-    );
-    for (const { p, el } of ordered) {
+      h = stage.clientHeight;
+    const items = [];
+    for (const node of labelNodes) {
+      const { p, el, line, dot } = node;
       const v = point(p.anchor, 0.8).project(camera);
       const x = ((v.x + 1) * w) / 2,
         y = ((1 - v.y) * h) / 2;
-      let visible =
-        (p.id !== "ask_speaker" ||
-          selected === p.id ||
-          camera.zoom > fitZoom * 1.4) &&
-        v.z > -1 &&
-        v.z < 1;
+      const visible =
+        v.z > -1 && v.z < 1 && x >= 0 && x <= w && y >= 0 && y <= h;
+      el.hidden = !visible;
+      line.style.visibility = dot.style.visibility = "hidden";
+      if (!visible) continue;
+      items.push({
+        node,
+        anchorX: x,
+        anchorY: y,
+        width: el.offsetWidth,
+        height: el.offsetHeight,
+        offsetX: node.offsetX,
+        offsetY: node.offsetY,
+        priority:
+          p.icon === "wc"
+            ? 0
+            : p.id === selected
+              ? 1
+              : p.type === "hall"
+                ? 2
+                : p.type === "foyer"
+                  ? 3
+                  : 4,
+      });
+    }
+    for (const item of layoutMapLabels(items, w, h)) {
+      const { node, x, y, anchorX, anchorY, left, right, top, bottom } = item;
+      const { el, line, dot } = node;
+      node.offsetX = x - anchorX;
+      node.offsetY = y - anchorY;
       el.style.left = x + "px";
       el.style.top = y + "px";
-      el.hidden = !visible;
-      if (!visible) continue;
-      const bw = el.offsetWidth,
-        bh = el.offsetHeight,
-        box = { l: x - bw / 2, r: x + bw / 2, t: y - bh / 2, b: y + bh / 2 };
-      if (x < 0 || x > w || y < 0 || y > h) visible = false;
-      if (
-        p.id !== selected &&
-        occupied.some(
-          (b) =>
-            box.l < b.r + 3 &&
-            box.r > b.l - 3 &&
-            box.t < b.b + 3 &&
-            box.b > b.t - 3,
-        )
-      )
-        visible = false;
-      el.hidden = !visible;
-      if (visible) occupied.push(box);
+      el.style.zIndex = String(10 - item.priority);
+      const endX = Math.max(left, Math.min(right, anchorX));
+      const endY = Math.max(top, Math.min(bottom, anchorY));
+      if (Math.hypot(endX - anchorX, endY - anchorY) > 3) {
+        line.style.visibility = dot.style.visibility = "visible";
+        line.setAttribute("x1", anchorX);
+        line.setAttribute("y1", anchorY);
+        line.setAttribute("x2", endX);
+        line.setAttribute("y2", endY);
+        dot.setAttribute("cx", anchorX);
+        dot.setAttribute("cy", anchorY);
+      }
     }
   }
   function draw() {

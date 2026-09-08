@@ -15,7 +15,9 @@ class VenuePlace {
       palette = json['palette']! as String,
       polygon = (json['polygon']! as List).map(_point).toList(),
       anchor = _point(json['anchor']),
-      icon = json['icon'] as String?;
+      icon = json['icon'] as String?,
+      materialIcon = json['materialIcon'] as String?,
+      mapLabels = Map<String, String>.from(json['mapLabel'] as Map? ?? const {});
 
   final String id;
   final Map<String, String> names;
@@ -25,18 +27,22 @@ class VenuePlace {
   final List<Offset> polygon;
   final Offset anchor;
   final String? icon;
+  final String? materialIcon;
+  final Map<String, String> mapLabels;
 
   String name(String languageCode) => names[languageCode] ?? names['ja']!;
   String subtitle(String languageCode) => subtitles[languageCode] ?? subtitles['ja']!;
+  String mapLabel(String languageCode) => mapLabels[languageCode] ?? (icon == 'wc' ? 'WC' : '');
 
   Path get path => Path()..addPolygon(polygon, true);
 
-  IconData get iconData => switch (icon) {
-    'info' => Icons.info_outline,
-    'wc' => id == 'mens_wc' ? Icons.man : Icons.woman,
-    'lift' => Icons.elevator_outlined,
-    'entry' => Icons.login,
-    'person' => Icons.record_voice_over_outlined,
+  IconData get iconData => switch (materialIcon) {
+    'info_outline' => Icons.info_outline,
+    'man' => Icons.man,
+    'woman' => Icons.woman,
+    'elevator_outlined' => Icons.elevator_outlined,
+    'login' => Icons.login,
+    'record_voice_over_outlined' => Icons.record_voice_over_outlined,
     _ => type == VenuePlaceType.foyer ? Icons.storefront_outlined : Icons.meeting_room_outlined,
   };
 

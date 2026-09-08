@@ -1007,7 +1007,11 @@
         432,
         313
       ],
-      "icon": "info"
+      "icon": "info",
+      "materialIcon": "info_outline",
+      "mapLabel": {
+        "en": "Information"
+      }
     },
     {
       "id": "mens_wc",
@@ -1059,7 +1063,11 @@
         335,
         317
       ],
-      "icon": "wc"
+      "icon": "wc",
+      "materialIcon": "man",
+      "mapLabel": {
+        "en": "Men’s\nrestroom"
+      }
     },
     {
       "id": "womens_wc",
@@ -1111,7 +1119,11 @@
         537,
         321
       ],
-      "icon": "wc"
+      "icon": "wc",
+      "materialIcon": "woman",
+      "mapLabel": {
+        "en": "Women’s\nrestroom"
+      }
     },
     {
       "id": "elevators",
@@ -1147,7 +1159,11 @@
         264,
         172
       ],
-      "icon": "lift"
+      "icon": "lift",
+      "materialIcon": "elevator_outlined",
+      "mapLabel": {
+        "en": "Elevators"
+      }
     },
     {
       "id": "entrance_hall_lounge",
@@ -1191,7 +1207,11 @@
         453,
         361
       ],
-      "icon": "entry"
+      "icon": "entry",
+      "materialIcon": "login",
+      "mapLabel": {
+        "en": "Entrance"
+      }
     },
     {
       "id": "ask_speaker",
@@ -1227,7 +1247,11 @@
         726,
         189
       ],
-      "icon": "person"
+      "icon": "person",
+      "materialIcon": "record_voice_over_outlined",
+      "mapLabel": {
+        "en": "Ask the\nspeaker"
+      }
     }
   ],
   "artBox": {

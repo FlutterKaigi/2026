@@ -1,4 +1,5 @@
 <!doctype html>
+<!-- __ICON_LICENSE__ -->
 <html lang="ja">
   <meta charset="utf-8" />
   <meta
@@ -11,6 +12,13 @@
       src: url(data:font/ttf;base64,__FONT__) format("truetype");
       font-weight: 100 900;
       font-display: swap;
+    }
+    @font-face {
+      font-family: VenueMapIcons;
+      src: url(data:font/otf;base64,__ICON_FONT__) format("opentype");
+      font-weight: normal;
+      font-style: normal;
+      font-display: block;
     }
     * {
       box-sizing: border-box;
@@ -26,13 +34,23 @@
       font-family: VenueMap, sans-serif;
     }
     #stage,
-    #labels {
+    #labels,
+    #label-connectors {
       position: absolute;
       inset: 0;
     }
     #labels {
       pointer-events: none;
       overflow: hidden;
+    }
+    #label-connectors {
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      overflow: hidden;
+      stroke: var(--onSurfaceVariant);
+      stroke-width: 1.5;
+      fill: var(--onSurfaceVariant);
     }
     canvas {
       display: block;
@@ -42,6 +60,7 @@
       position: absolute;
       transform: translate(-50%, -50%);
       min-width: 48px;
+      max-width: calc(100% - 8px);
       min-height: 48px;
       padding: 4px 6px;
       border: 1px solid var(--outline);
@@ -57,11 +76,24 @@
       touch-action: manipulation;
     }
     .label.facility {
-      font-weight: 600;
-      font-size: calc(16px * var(--text-scale, 1));
+      padding: 2px 5px;
+      font-weight: 500;
+      font-size: calc(11px * var(--text-scale, 1));
+      line-height: 1.45;
     }
-    .label.facility.wc {
-      font-size: calc(12px * var(--text-scale, 1));
+    .facility-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .material-icon {
+      font-family: VenueMapIcons;
+      font-size: 24px;
+      font-weight: normal;
+      font-style: normal;
+      line-height: 1;
+      -webkit-font-smoothing: antialiased;
     }
     .label.selected {
       border: 2px solid var(--primary);
@@ -77,13 +109,16 @@
     }
   </style>
   <div id="stage"></div>
+  <svg id="label-connectors" aria-hidden="true"></svg>
   <div id="labels"></div>
   <script type="module">
     __VENDOR__;
     {
       const PLAN = __PLAN__;
+      const MAP_ICONS = __ICONS__;
       const ART_BOX = PLAN.artBox;
       const MAP_ART = "data:image/png;base64,__ART__";
+      __LABEL_LAYOUT__;
       __SCENE__;
     }
   </script>

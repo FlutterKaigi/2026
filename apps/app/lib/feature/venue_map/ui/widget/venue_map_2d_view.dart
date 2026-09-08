@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:app/feature/venue_map/data/venue_floor_plan.dart';
 import 'package:app/feature/venue_map/ui/widget/venue_map_2d_controller.dart';
+import 'package:app/feature/venue_map/ui/widget/venue_map_label_layout.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
@@ -24,6 +25,7 @@ class VenueMap2DView extends StatefulWidget {
 }
 
 class _VenueMap2DViewState extends State<VenueMap2DView> {
+  final _labelOffsets = <String, Offset>{};
   double _startScale = 1;
   Offset _anchor = Offset.zero;
 
@@ -148,39 +150,58 @@ class _VenueMap2DViewState extends State<VenueMap2DView> {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
     final language = Localizations.localeOf(context).languageCode;
-    final occupied = <Rect>[];
-    final result = <Widget>[];
-    final ordered = [...widget.plan.places]
-      ..sort((a, b) {
-        int priority(VenuePlace p) => p.id == widget.selected?.id ? -1 : p.type.index;
-        return priority(a).compareTo(priority(b));
-      });
-    for (final place in ordered) {
-      final selected = place.id == widget.selected?.id;
-      final facility = place.type == VenuePlaceType.facility;
-      if (place.id == 'ask_speaker' && !selected && camera.scale < camera.fitScale * 1.4) {
+    final items = <VenueMapLabelAnchor>[];
+    final style = theme.textTheme.labelMedium!.copyWith(fontWeight: FontWeight.w700);
+    for (final place in widget.plan.places) {
+      final point = camera.project(place.anchor);
+      if (!(Offset.zero & camera.viewport).contains(point)) {
         continue;
       }
-      final point = camera.project(place.anchor);
-      final label = place.name(language).replaceFirst(' HALL', '\nHALL');
-      final style = theme.textTheme.labelMedium!.copyWith(fontWeight: FontWeight.w700);
+      final facility = place.type == VenuePlaceType.facility;
+      final restroom = place.icon == 'wc';
+      final label = facility ? place.mapLabel(language) : place.name(language).replaceFirst(' HALL', '\nHALL');
       final painter = TextPainter(
-        text: TextSpan(text: label, style: style),
+        text: TextSpan(text: label, style: facility ? theme.textTheme.labelSmall : style),
         textDirection: Directionality.of(context),
         textScaler: MediaQuery.textScalerOf(context),
       )..layout();
       final size = facility
-          ? const Size(48, 48)
+          ? Size(math.max(48, painter.width + 12), label.isNotEmpty ? math.max(48, painter.height + 30) : 48)
           : Size(math.max(48, painter.width + 12), math.max(48, painter.height + 8));
       painter.dispose();
-      final box = Rect.fromCenter(center: point, width: size.width, height: size.height);
-      if (!box.overlaps(Offset.zero & camera.viewport)) {
-        continue;
-      }
-      if (!selected && occupied.any((other) => other.inflate(2).overlaps(box))) {
-        continue;
-      }
-      occupied.add(box);
+      items.add(
+        VenueMapLabelAnchor(
+          id: place.id,
+          anchor: point,
+          size: size,
+          priority: restroom
+              ? 0
+              : place.id == widget.selected?.id
+              ? 1
+              : place.type == VenuePlaceType.hall
+              ? 2
+              : place.type == VenuePlaceType.foyer
+              ? 3
+              : 4,
+          previousOffset: _labelOffsets[place.id] ?? Offset.zero,
+        ),
+      );
+    }
+    final placements = layoutVenueMapLabels(items, camera.viewport);
+    final result = <Widget>[
+      Positioned.fill(
+        child: IgnorePointer(child: CustomPaint(painter: _LabelConnectorPainter(placements, colors.onSurfaceVariant))),
+      ),
+    ];
+    // Draw the higher-priority labels last, so restroom buttons remain tappable even in a tiny viewport.
+    for (final placement in placements.reversed) {
+      final place = widget.plan.find(placement.item.id)!;
+      final selected = place.id == widget.selected?.id;
+      final facility = place.type == VenuePlaceType.facility;
+      final caption = place.mapLabel(language);
+      final label = place.name(language).replaceFirst(' HALL', '\nHALL');
+      final box = placement.rect;
+      _labelOffsets[place.id] = box.center - placement.item.anchor;
       result.add(
         Positioned.fromRect(
           rect: box,
@@ -203,7 +224,20 @@ class _VenueMap2DViewState extends State<VenueMap2DView> {
                   child: Center(
                     child: ExcludeSemantics(
                       child: facility
-                          ? Icon(place.iconData, color: selected ? colors.onPrimaryContainer : place.color(colors))
+                          ? Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(place.iconData, color: selected ? colors.onPrimaryContainer : place.color(colors)),
+                                if (caption.isNotEmpty)
+                                  Text(
+                                    caption,
+                                    textAlign: TextAlign.center,
+                                    style: theme.textTheme.labelSmall!.copyWith(
+                                      color: selected ? colors.onPrimaryContainer : place.color(colors),
+                                    ),
+                                  ),
+                              ],
+                            )
                           : Text(
                               label,
                               textAlign: TextAlign.center,
@@ -262,4 +296,30 @@ class _RoomTintPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_RoomTintPainter oldDelegate) => oldDelegate.plan != plan || oldDelegate.colors != colors;
+}
+
+class _LabelConnectorPainter extends CustomPainter {
+  const _LabelConnectorPainter(this.placements, this.color);
+  final List<VenueMapLabelPlacement> placements;
+  final Color color;
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 1.5;
+    for (final placement in placements) {
+      final anchor = placement.item.anchor;
+      final box = placement.rect;
+      final end = Offset(anchor.dx.clamp(box.left, box.right), anchor.dy.clamp(box.top, box.bottom));
+      if ((anchor - end).distance > 3) {
+        canvas
+          ..drawLine(anchor, end, paint)
+          ..drawCircle(anchor, 2.5, paint);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(_LabelConnectorPainter oldDelegate) =>
+      oldDelegate.placements != placements || oldDelegate.color != color;
 }

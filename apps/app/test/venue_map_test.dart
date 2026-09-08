@@ -59,6 +59,19 @@ void main() {
     expect(plan.find('main_hall_a')!.matches('メインホール'), isTrue);
   });
 
+  test('2D and bundled 3D use identical Material icons and readable English facility labels', () async {
+    final html = await rootBundle.loadString('assets/html/venue_floor_plan_webview.html');
+    final embedded = RegExp(r'const MAP_ICONS = (\{[^;]+\});').firstMatch(html)!;
+    final icons = Map<String, String>.from(jsonDecode(embedded.group(1)!) as Map);
+    for (final place in plan.places.where((place) => place.type == VenuePlaceType.facility)) {
+      expect(icons[place.materialIcon], String.fromCharCode(place.iconData.codePoint), reason: place.id);
+      expect(place.mapLabel('en'), isNotEmpty, reason: '${place.id} needs text alongside its icon');
+      expect(place.mapLabel('ja'), place.icon == 'wc' ? 'WC' : '');
+    }
+    expect(plan.find('mens_wc')!.mapLabel('en').replaceAll('\n', ' '), 'Men’s restroom');
+    expect(plan.find('womens_wc')!.mapLabel('en').replaceAll('\n', ' '), 'Women’s restroom');
+  });
+
   test('camera fits both orientations, focuses once, and preserves a subsequent pan on resize', () {
     final camera = VenueMap2DController();
     addTearDown(camera.dispose);
@@ -185,6 +198,77 @@ void main() {
     expect(find.text('Women’s restroom'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('all on-screen places stay labelled after selection, zooming out and rotation', (tester) async {
+    tester.view.physicalSize = const Size(360, 740);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await pumpMap(tester);
+    final camera = tester.widget<VenueMap2DView>(find.byType(VenueMap2DView)).controller;
+
+    void expectAllLabels() {
+      final boxes = <Rect>[];
+      for (final place in plan.places) {
+        if (!(Offset.zero & camera.viewport).contains(camera.project(place.anchor))) {
+          continue;
+        }
+        final label = find.byTooltip(place.name('ja'));
+        expect(label, findsOneWidget, reason: '${place.id} must stay visible');
+        final box = tester.getRect(label);
+        expect(box.size.width, greaterThanOrEqualTo(48));
+        expect(box.size.height, greaterThanOrEqualTo(48));
+        for (final other in boxes) {
+          expect(box.overlaps(other), isFalse, reason: '${place.id} must remain readable and tappable');
+        }
+        boxes.add(box);
+      }
+    }
+
+    expectAllLabels();
+    await tester.tap(find.byTooltip(plan.find('hall_entrance_information')!.name('ja')));
+    await tester.pumpAndSettle();
+    expectAllLabels();
+    for (var rotation = 0; rotation < 4; rotation++) {
+      camera.rotate();
+      camera.zoom(.7);
+      await tester.pumpAndSettle();
+      expectAllLabels();
+      expect(find.byTooltip(plan.find('mens_wc')!.name('ja')), findsOneWidget);
+      expect(find.byTooltip(plan.find('womens_wc')!.name('ja')), findsOneWidget);
+    }
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('English facility names are visible on the compact map without hovering', (tester) async {
+    tester.view.physicalSize = const Size(360, 740);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await pumpMap(tester, english: true);
+    final camera = tester.widget<VenueMap2DView>(find.byType(VenueMap2DView)).controller;
+    for (var orientation = 0; orientation < 2; orientation++) {
+      final boxes = <Rect>[];
+      for (final place in plan.places) {
+        final box = tester.getRect(find.byTooltip(place.name('en')));
+        for (final other in boxes) {
+          expect(
+            box.overlaps(other),
+            isFalse,
+            reason: '${place.id} needs a readable label: orientation=$orientation, $box, $other',
+          );
+        }
+        boxes.add(box);
+        if (place.type == VenuePlaceType.facility) {
+          expect(find.text(place.mapLabel('en')), findsOneWidget);
+        }
+      }
+      camera.rotate();
+      await tester.pumpAndSettle();
+    }
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('3D failure offers a working 2D fallback', (tester) async {
     SharedPreferences.setMockInitialValues({VenueMapViewModeNotifier.preferencesKey: 'threeD'});
     final prefs = await SharedPreferences.getInstance();
