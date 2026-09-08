@@ -399,13 +399,65 @@ class Translations$venueMap$ja {
 	/// ja: '会場マップ'
 	String get title => '会場マップ';
 
+	/// ja: '浜松町コンベンションホール · 5F'
+	String get floor => '浜松町コンベンションホール · 5F';
+
 	/// ja: '会場マップを読み込めませんでした'
 	String get loadError => '会場マップを読み込めませんでした';
 
-	/// ja: '再試行してください。表示されない場合は、アプリを再起動してください。'
-	String get loadErrorDescription => '再試行してください。表示されない場合は、アプリを再起動してください。';
+	/// ja: '再試行してください。'
+	String get loadErrorDescription => '再試行してください。';
 
-	late final Translations$venueMap$controls$ja controls = Translations$venueMap$controls$ja.internal(_root);
+	/// ja: '場所を探す'
+	String get search => '場所を探す';
+
+	/// ja: 'ホール・設備を検索'
+	String get searchHint => 'ホール・設備を検索';
+
+	/// ja: 'すべて'
+	String get all => 'すべて';
+
+	/// ja: 'ホール'
+	String get halls => 'ホール';
+
+	/// ja: 'ブース'
+	String get booths => 'ブース';
+
+	/// ja: '設備'
+	String get facilities => '設備';
+
+	/// ja: '一致する場所がありません'
+	String get noResults => '一致する場所がありません';
+
+	/// ja: '選択を解除'
+	String get clearSelection => '選択を解除';
+
+	/// ja: '拡大'
+	String get zoomIn => '拡大';
+
+	/// ja: '縮小'
+	String get zoomOut => '縮小';
+
+	/// ja: '全体を表示'
+	String get fit => '全体を表示';
+
+	/// ja: '地図の向きを変える'
+	String get rotate => '地図の向きを変える';
+
+	/// ja: '2D'
+	String get twoD => '2D';
+
+	/// ja: '3D'
+	String get threeD => '3D';
+
+	/// ja: '地図の表示方法'
+	String get viewMode => '地図の表示方法';
+
+	/// ja: '2Dで表示'
+	String get useTwoD => '2Dで表示';
+
+	/// ja: '表示方法を保存できませんでした'
+	String get saveFailed => '表示方法を保存できませんでした';
 }
 
 // Path: eventInfo
@@ -958,18 +1010,6 @@ class Translations$sessionTimetable$type$ja {
 	String get event => 'イベント';
 }
 
-// Path: venueMap.controls
-class Translations$venueMap$controls$ja {
-	Translations$venueMap$controls$ja.internal(this._root);
-
-	final Translations _root; // ignore: unused_field
-
-	// Translations
-	late final Translations$venueMap$controls$view$ja view = Translations$venueMap$controls$view$ja.internal(_root);
-	late final Translations$venueMap$controls$labels$ja labels = Translations$venueMap$controls$labels$ja.internal(_root);
-	late final Translations$venueMap$controls$highlight$ja highlight = Translations$venueMap$controls$highlight$ja.internal(_root);
-}
-
 // Path: auth.signIn
 class Translations$auth$signIn$ja {
 	Translations$auth$signIn$ja.internal(this._root);
@@ -1195,78 +1235,6 @@ class Translations$settings$language$ja {
 	String get english => 'English';
 }
 
-// Path: venueMap.controls.view
-class Translations$venueMap$controls$view$ja {
-	Translations$venueMap$controls$view$ja.internal(this._root);
-
-	final Translations _root; // ignore: unused_field
-
-	// Translations
-
-	/// ja: '表示'
-	String get title => '表示';
-
-	/// ja: '3D表示'
-	String get threeD => '3D表示';
-
-	/// ja: '上面表示'
-	String get top => '上面表示';
-}
-
-// Path: venueMap.controls.labels
-class Translations$venueMap$controls$labels$ja {
-	Translations$venueMap$controls$labels$ja.internal(this._root);
-
-	final Translations _root; // ignore: unused_field
-
-	// Translations
-
-	/// ja: 'ラベル'
-	String get title => 'ラベル';
-
-	/// ja: 'ラベル非表示'
-	String get hide => 'ラベル非表示';
-
-	/// ja: 'ラベル表示'
-	String get show => 'ラベル表示';
-
-	/// ja: '縮小'
-	String get decreaseSize => '縮小';
-
-	/// ja: '拡大'
-	String get increaseSize => '拡大';
-}
-
-// Path: venueMap.controls.highlight
-class Translations$venueMap$controls$highlight$ja {
-	Translations$venueMap$controls$highlight$ja.internal(this._root);
-
-	final Translations _root; // ignore: unused_field
-
-	// Translations
-
-	/// ja: 'ハイライト'
-	String get title => 'ハイライト';
-
-	/// ja: 'メインホール'
-	String get mainHalls => 'メインホール';
-
-	/// ja: '展示ホール'
-	String get exhibitionHalls => '展示ホール';
-
-	/// ja: 'グランドホール'
-	String get grandHalls => 'グランドホール';
-
-	/// ja: 'トイレ'
-	String get toilets => 'トイレ';
-
-	/// ja: 'エレベーター'
-	String get elevators => 'エレベーター';
-
-	/// ja: '入口'
-	String get entrance => '入口';
-}
-
 /// The flat map containing all translations for locale <ja>.
 /// Only for edge cases! For simple maps, use the map function of this library.
 ///
@@ -1354,23 +1322,26 @@ extension on Translations {
 			'bookmarkedSessions.emptyBody' => '気になるセッションをブックマークすると、ここからすぐに見つけられます',
 			'bookmarkedSessions.openSessions' => 'タイムテーブルを開く',
 			'venueMap.title' => '会場マップ',
+			'venueMap.floor' => '浜松町コンベンションホール · 5F',
 			'venueMap.loadError' => '会場マップを読み込めませんでした',
-			'venueMap.loadErrorDescription' => '再試行してください。表示されない場合は、アプリを再起動してください。',
-			'venueMap.controls.view.title' => '表示',
-			'venueMap.controls.view.threeD' => '3D表示',
-			'venueMap.controls.view.top' => '上面表示',
-			'venueMap.controls.labels.title' => 'ラベル',
-			'venueMap.controls.labels.hide' => 'ラベル非表示',
-			'venueMap.controls.labels.show' => 'ラベル表示',
-			'venueMap.controls.labels.decreaseSize' => '縮小',
-			'venueMap.controls.labels.increaseSize' => '拡大',
-			'venueMap.controls.highlight.title' => 'ハイライト',
-			'venueMap.controls.highlight.mainHalls' => 'メインホール',
-			'venueMap.controls.highlight.exhibitionHalls' => '展示ホール',
-			'venueMap.controls.highlight.grandHalls' => 'グランドホール',
-			'venueMap.controls.highlight.toilets' => 'トイレ',
-			'venueMap.controls.highlight.elevators' => 'エレベーター',
-			'venueMap.controls.highlight.entrance' => '入口',
+			'venueMap.loadErrorDescription' => '再試行してください。',
+			'venueMap.search' => '場所を探す',
+			'venueMap.searchHint' => 'ホール・設備を検索',
+			'venueMap.all' => 'すべて',
+			'venueMap.halls' => 'ホール',
+			'venueMap.booths' => 'ブース',
+			'venueMap.facilities' => '設備',
+			'venueMap.noResults' => '一致する場所がありません',
+			'venueMap.clearSelection' => '選択を解除',
+			'venueMap.zoomIn' => '拡大',
+			'venueMap.zoomOut' => '縮小',
+			'venueMap.fit' => '全体を表示',
+			'venueMap.rotate' => '地図の向きを変える',
+			'venueMap.twoD' => '2D',
+			'venueMap.threeD' => '3D',
+			'venueMap.viewMode' => '地図の表示方法',
+			'venueMap.useTwoD' => '2Dで表示',
+			'venueMap.saveFailed' => '表示方法を保存できませんでした',
 			'eventInfo.title' => 'イベント概要',
 			'eventInfo.newsTitle' => '最新のお知らせ',
 			'eventInfo.newsSubtitle' => 'FlutterKaigi 2026 の最新情報を確認',

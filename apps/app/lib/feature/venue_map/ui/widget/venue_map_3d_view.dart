@@ -1,249 +1,195 @@
 import 'dart:async';
-import 'dart:convert';
 
-import 'package:app/feature/venue_map/ui/widget/venue_map_control_bar_widget.dart';
-import 'package:app/feature/venue_map/ui/widget/venue_map_viewport_widget.dart';
+import 'package:app/core/i18n/strings.g.dart';
+import 'package:app/feature/venue_map/data/venue_floor_plan.dart';
+import 'package:app/feature/venue_map/ui/widget/venue_map_3d_surface_native.dart'
+    if (dart.library.js_interop) 'package:app/feature/venue_map/ui/widget/venue_map_3d_surface_web.dart';
 import 'package:flutter/material.dart';
-import 'package:webview_flutter/webview_flutter.dart';
+
+typedef VenueMapSend = void Function(Map<String, Object?> command);
+
+class VenueMap3DController {
+  VenueMapSend? _send;
+  Map<String, Object?>? _configuration;
+  String? _pendingFocus;
+
+  void configure(Map<String, Object?> configuration) {
+    _configuration = configuration;
+    _send?.call(configuration);
+  }
+
+  void connect(VenueMapSend send) {
+    _send = send;
+    if (_configuration case final configuration?) {
+      send(configuration);
+    }
+    if (_pendingFocus case final id?) {
+      _pendingFocus = null;
+      focus(id);
+    }
+  }
+
+  void disconnect() => _send = null;
+
+  void focus(String id) {
+    if (_send == null) {
+      _pendingFocus = id;
+    } else {
+      _send?.call({'action': 'focus', 'value': id});
+    }
+  }
+
+  void fit() => _send?.call({'action': 'fit'});
+  void zoom(double factor) => _send?.call({'action': 'zoom', 'value': factor});
+}
 
 class VenueMap3DView extends StatefulWidget {
   const VenueMap3DView({
-    required this.languageCode,
+    required this.controller,
+    required this.active,
+    required this.selected,
+    required this.onSelected,
+    required this.onUseTwoD,
     super.key,
   });
 
-  final String languageCode;
+  final VenueMap3DController controller;
+  final bool active;
+  final VenuePlace? selected;
+  final ValueChanged<String> onSelected;
+  final VoidCallback onUseTwoD;
 
   @override
   State<VenueMap3DView> createState() => _VenueMap3DViewState();
 }
 
 class _VenueMap3DViewState extends State<VenueMap3DView> {
-  static const _assetPath = 'assets/html/venue_floor_plan_webview.html';
-
-  late final WebViewController _controller;
-  bool _isLoading = true;
-  String? _loadError;
-  String? _labelLanguageCode;
-  double? _viewportWidth;
-  String? _surfaceColorHex;
-
-  bool get _canRunCommands => !_isLoading && _loadError == null;
+  bool _loading = true;
+  bool _error = false;
+  int _generation = 0;
+  Timer? _loadTimeout;
 
   @override
   void initState() {
     super.initState();
-    _controller = WebViewController();
-    unawaited(_configureAndLoadMap());
+    _startLoadTimeout();
+  }
+
+  void _startLoadTimeout() {
+    _loadTimeout?.cancel();
+    _loadTimeout = Timer(const Duration(seconds: 20), () => _onMessage({'type': 'error'}));
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _syncMapSurfaceColor();
-    _syncLabelLanguage();
+    _configure();
   }
 
   @override
-  void didUpdateWidget(covariant VenueMap3DView oldWidget) {
+  void didUpdateWidget(VenueMap3DView oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.languageCode != widget.languageCode) {
-      _syncLabelLanguage();
-    }
+    _configure();
   }
 
-  Future<void> _configureAndLoadMap() async {
-    try {
-      await _controller.setJavaScriptMode(JavaScriptMode.unrestricted);
-      await _controller.setNavigationDelegate(
-        NavigationDelegate(
-          onPageStarted: (_) {
-            if (!mounted) {
-              return;
-            }
-            setState(() {
-              _isLoading = true;
-              _loadError = null;
-              _surfaceColorHex = null;
-              _labelLanguageCode = null;
-            });
-          },
-          onPageFinished: (_) {
-            if (!mounted || _loadError != null) {
-              return;
-            }
-            setState(() => _isLoading = false);
-            _syncMapSurfaceColor();
-            _syncLabelLanguage();
-            _fitMapToViewportWidth();
-          },
-          onWebResourceError: (error) {
-            if (!mounted || !_isCriticalWebResourceError(error)) {
-              return;
-            }
-            setState(() {
-              _isLoading = false;
-              _loadError = 'web-resource-error';
-            });
-          },
-        ),
-      );
-      await _loadMap(updateState: false);
-    } on Object catch (_) {
-      _showLoadError();
-    }
-  }
-
-  Future<void> _loadMap({bool updateState = true}) async {
-    if (updateState) {
-      setState(() {
-        _isLoading = true;
-        _loadError = null;
-      });
-    }
-    try {
-      await _controller.loadFlutterAsset(_assetPath);
-    } on Object catch (_) {
-      _showLoadError();
-    }
-  }
-
-  void _retryLoadMap() {
-    unawaited(_loadMap());
-  }
-
-  void _showLoadError() {
-    if (!mounted) {
-      return;
-    }
-    setState(() {
-      _isLoading = false;
-      _loadError = 'load-error';
+  void _configure() {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    String hex(Color color) => '#${color.toARGB32().toRadixString(16).substring(2)}';
+    widget.controller.configure({
+      'action': 'configure',
+      'active': widget.active,
+      'selected': widget.selected?.id,
+      'language': Localizations.localeOf(context).languageCode,
+      'textScale': MediaQuery.textScalerOf(context).scale(12) / 12,
+      'colors': {
+        'surface': hex(colors.surface),
+        'background': hex(colors.surfaceContainerLowest),
+        'service': hex(colors.surfaceContainerHighest),
+        'onSurface': hex(colors.onSurface),
+        'outline': hex(colors.outlineVariant),
+        'primary': hex(colors.primary),
+        'primaryContainer': hex(colors.primaryContainer),
+        'onPrimaryContainer': hex(colors.onPrimaryContainer),
+        'secondary': hex(colors.secondary),
+        'onSecondaryContainer': hex(colors.onSecondaryContainer),
+        'tertiary': hex(colors.tertiary),
+        'onTertiaryContainer': hex(colors.onTertiaryContainer),
+        'onSurfaceVariant': hex(colors.onSurfaceVariant),
+        'dark': colors.brightness == Brightness.dark,
+      },
     });
   }
 
-  bool _isCriticalWebResourceError(WebResourceError error) {
-    final url = error.url;
-    return error.isForMainFrame == true || url == null || url.contains(_assetPath);
-  }
-
-  void _runMapCommand(String javaScript) {
-    if (!_canRunCommands) {
+  void _onMessage(Map<String, Object?> message) {
+    if (!mounted) {
       return;
     }
-
-    unawaited(
-      _controller.runJavaScript(javaScript).catchError((Object error) {
-        if (!mounted) {
-          return;
+    switch (message['type']) {
+      case 'loaded':
+        _loadTimeout?.cancel();
+        setState(() => _loading = false);
+      case 'error':
+        _loadTimeout?.cancel();
+        widget.controller.disconnect();
+        setState(() => _error = true);
+      case 'selected':
+        if (message['id'] case final String id) {
+          widget.onSelected(id);
         }
-        setState(() => _loadError = 'map-command-error');
-      }),
-    );
+    }
   }
 
-  void _updateViewportWidth(double width) {
-    if (width <= 0 || (_viewportWidth != null && (width - _viewportWidth!).abs() < 1)) {
-      return;
-    }
-    _viewportWidth = width;
-    _fitMapToViewportWidth();
-  }
-
-  void _fitMapToViewportWidth() {
-    final width = _viewportWidth;
-    if (!_canRunCommands || width == null) {
-      return;
-    }
-
-    final javaScript =
-        '''
-if (window.FloorPlan3D && window.FloorPlan3D.fitToScreenWidth) {
-  window.FloorPlan3D.fitToScreenWidth(${width.toStringAsFixed(1)});
-}
-''';
-    unawaited(_controller.runJavaScript(javaScript).catchError((Object _) {}));
-  }
-
-  void _syncLabelLanguage() {
-    if (!_canRunCommands) {
-      return;
-    }
-
-    final languageCode = widget.languageCode == 'ja' ? 'ja' : 'en';
-    if (languageCode == _labelLanguageCode) {
-      return;
-    }
-    _labelLanguageCode = languageCode;
-
-    final encodedLanguageCode = jsonEncode(languageCode);
-    final javaScript =
-        '''
-window.__venueMapLanguage = $encodedLanguageCode;
-if (window.FloorPlan3D && window.FloorPlan3D.setLabelLanguage) {
-  window.FloorPlan3D.setLabelLanguage($encodedLanguageCode);
-}
-''';
-    unawaited(_controller.runJavaScript(javaScript).catchError((Object _) {}));
-  }
-
-  void _syncMapSurfaceColor() {
-    if (!_canRunCommands) {
-      return;
-    }
-
-    final surfaceColorHex = _colorToCssHex(Theme.of(context).colorScheme.surface);
-    if (surfaceColorHex == _surfaceColorHex) {
-      return;
-    }
-    _surfaceColorHex = surfaceColorHex;
-
-    final javaScript =
-        '''
-window.__venueMapSurfaceColor = '$surfaceColorHex';
-document.documentElement.style.setProperty('--venue-map-surface', '$surfaceColorHex');
-if (window.FloorPlan3D && window.FloorPlan3D.setSurfaceColor) {
-  window.FloorPlan3D.setSurfaceColor('$surfaceColorHex');
-}
-''';
-    unawaited(_controller.runJavaScript(javaScript).catchError((Object _) {}));
-  }
-
-  String _colorToCssHex(Color color) {
-    final rgb = color.toARGB32() & 0x00ffffff;
-    return '#${rgb.toRadixString(16).padLeft(6, '0').toUpperCase()}';
+  @override
+  void dispose() {
+    _loadTimeout?.cancel();
+    widget.controller.disconnect();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        VenueMapControlBarWidget(
-          enabled: _canRunCommands,
-          onCommand: _runMapCommand,
-        ),
-        Expanded(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                if (!mounted) {
-                  return;
-                }
-                _updateViewportWidth(constraints.maxWidth);
-              });
-
-              return Padding(
-                padding: EdgeInsets.zero,
-                child: VenueMapViewportWidget(
-                  controller: _controller,
-                  isLoading: _isLoading,
-                  loadError: _loadError,
-                  onRetry: _retryLoadMap,
-                ),
-              );
-            },
+    final t = context.t;
+    if (_error) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.map_outlined, size: 32),
+              const SizedBox(height: 16),
+              Text(t.venueMap.loadError, style: Theme.of(context).textTheme.titleMedium, textAlign: TextAlign.center),
+              const SizedBox(height: 16),
+              FilledButton(onPressed: widget.onUseTwoD, child: Text(t.venueMap.useTwoD)),
+              TextButton(
+                onPressed: () => setState(() {
+                  _generation++;
+                  _error = false;
+                  _loading = true;
+                  _startLoadTimeout();
+                }),
+                child: Text(t.error.retry),
+              ),
+            ],
           ),
         ),
+      );
+    }
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        VenueMap3DSurface(
+          key: ValueKey(_generation),
+          interactive: widget.active,
+          onReady: widget.controller.connect,
+          onMessage: _onMessage,
+        ),
+        if (_loading)
+          ColoredBox(
+            color: Theme.of(context).colorScheme.surface,
+            child: const Center(child: CircularProgressIndicator.adaptive()),
+          ),
       ],
     );
   }

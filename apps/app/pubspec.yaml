@@ -32,6 +32,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   webview_flutter: ^4.14.1
+  web: ^1.1.1
   cached_network_image: ^3.4.1
   country_flags: ^4.1.2
   # 3.11.0 は sdk ^3.6.0 のまま新しい SDK でしか使えない API（JSAny.isA）を
@@ -58,6 +59,7 @@ flutter:
 
   assets:
     - assets/html/venue_floor_plan_webview.html
+    - assets/venue_map/
     - res/assets/dashumaru_magao.webp
     - res/assets/fonts/NotoSansJP/OFL.txt
     # Google 公式の Sign in with Google ボタン素材。

@@ -97,27 +97,26 @@ bookmarkedSessions:
   openSessions: Open sessions
 venueMap:
   title: Venue Map
+  floor: Hamamatsucho Convention Hall · 5F
   loadError: Could not load the venue map
-  loadErrorDescription: Please try again. If the map still does not appear, restart the app.
-  controls:
-    view:
-      title: View
-      threeD: 3D View
-      top: Top View
-    labels:
-      title: Labels
-      hide: Hide Labels
-      show: Show Labels
-      decreaseSize: Smaller
-      increaseSize: Larger
-    highlight:
-      title: Highlight
-      mainHalls: Main Halls
-      exhibitionHalls: Exhibition Halls
-      grandHalls: Grand Halls
-      toilets: Toilets
-      elevators: Elevators
-      entrance: Entrance
+  loadErrorDescription: Please try again.
+  search: Find a place
+  searchHint: Search halls and facilities
+  all: All
+  halls: Halls
+  booths: Booths
+  facilities: Facilities
+  noResults: No matching places
+  clearSelection: Clear selection
+  zoomIn: Zoom in
+  zoomOut: Zoom out
+  fit: Show entire floor
+  rotate: Rotate map
+  twoD: 2D
+  threeD: 3D
+  viewMode: Map view
+  useTwoD: Show in 2D
+  saveFailed: Could not save the view preference
 eventInfo:
   title: Event Overview
   newsTitle: Latest News

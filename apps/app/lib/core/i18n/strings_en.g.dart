@@ -255,9 +255,26 @@ class _Translations$venueMap$en extends Translations$venueMap$ja {
 
 	// Translations
 	@override String get title => 'Venue Map';
+	@override String get floor => 'Hamamatsucho Convention Hall · 5F';
 	@override String get loadError => 'Could not load the venue map';
-	@override String get loadErrorDescription => 'Please try again. If the map still does not appear, restart the app.';
-	@override late final _Translations$venueMap$controls$en controls = _Translations$venueMap$controls$en._(_root);
+	@override String get loadErrorDescription => 'Please try again.';
+	@override String get search => 'Find a place';
+	@override String get searchHint => 'Search halls and facilities';
+	@override String get all => 'All';
+	@override String get halls => 'Halls';
+	@override String get booths => 'Booths';
+	@override String get facilities => 'Facilities';
+	@override String get noResults => 'No matching places';
+	@override String get clearSelection => 'Clear selection';
+	@override String get zoomIn => 'Zoom in';
+	@override String get zoomOut => 'Zoom out';
+	@override String get fit => 'Show entire floor';
+	@override String get rotate => 'Rotate map';
+	@override String get twoD => '2D';
+	@override String get threeD => '3D';
+	@override String get viewMode => 'Map view';
+	@override String get useTwoD => 'Show in 2D';
+	@override String get saveFailed => 'Could not save the view preference';
 }
 
 // Path: eventInfo
@@ -527,18 +544,6 @@ class _Translations$sessionTimetable$type$en extends Translations$sessionTimetab
 	@override String get event => 'Event';
 }
 
-// Path: venueMap.controls
-class _Translations$venueMap$controls$en extends Translations$venueMap$controls$ja {
-	_Translations$venueMap$controls$en._(TranslationsEn root) : this._root = root, super.internal(root);
-
-	final TranslationsEn _root; // ignore: unused_field
-
-	// Translations
-	@override late final _Translations$venueMap$controls$view$en view = _Translations$venueMap$controls$view$en._(_root);
-	@override late final _Translations$venueMap$controls$labels$en labels = _Translations$venueMap$controls$labels$en._(_root);
-	@override late final _Translations$venueMap$controls$highlight$en highlight = _Translations$venueMap$controls$highlight$en._(_root);
-}
-
 // Path: auth.signIn
 class _Translations$auth$signIn$en extends Translations$auth$signIn$ja {
 	_Translations$auth$signIn$en._(TranslationsEn root) : this._root = root, super.internal(root);
@@ -650,48 +655,6 @@ class _Translations$settings$language$en extends Translations$settings$language$
 	@override String get english => 'English';
 }
 
-// Path: venueMap.controls.view
-class _Translations$venueMap$controls$view$en extends Translations$venueMap$controls$view$ja {
-	_Translations$venueMap$controls$view$en._(TranslationsEn root) : this._root = root, super.internal(root);
-
-	final TranslationsEn _root; // ignore: unused_field
-
-	// Translations
-	@override String get title => 'View';
-	@override String get threeD => '3D View';
-	@override String get top => 'Top View';
-}
-
-// Path: venueMap.controls.labels
-class _Translations$venueMap$controls$labels$en extends Translations$venueMap$controls$labels$ja {
-	_Translations$venueMap$controls$labels$en._(TranslationsEn root) : this._root = root, super.internal(root);
-
-	final TranslationsEn _root; // ignore: unused_field
-
-	// Translations
-	@override String get title => 'Labels';
-	@override String get hide => 'Hide Labels';
-	@override String get show => 'Show Labels';
-	@override String get decreaseSize => 'Smaller';
-	@override String get increaseSize => 'Larger';
-}
-
-// Path: venueMap.controls.highlight
-class _Translations$venueMap$controls$highlight$en extends Translations$venueMap$controls$highlight$ja {
-	_Translations$venueMap$controls$highlight$en._(TranslationsEn root) : this._root = root, super.internal(root);
-
-	final TranslationsEn _root; // ignore: unused_field
-
-	// Translations
-	@override String get title => 'Highlight';
-	@override String get mainHalls => 'Main Halls';
-	@override String get exhibitionHalls => 'Exhibition Halls';
-	@override String get grandHalls => 'Grand Halls';
-	@override String get toilets => 'Toilets';
-	@override String get elevators => 'Elevators';
-	@override String get entrance => 'Entrance';
-}
-
 /// The flat map containing all translations for locale <en>.
 /// Only for edge cases! For simple maps, use the map function of this library.
 ///
@@ -779,23 +742,26 @@ extension on TranslationsEn {
 			'bookmarkedSessions.emptyBody' => 'Bookmark sessions to find them here.',
 			'bookmarkedSessions.openSessions' => 'Open sessions',
 			'venueMap.title' => 'Venue Map',
+			'venueMap.floor' => 'Hamamatsucho Convention Hall · 5F',
 			'venueMap.loadError' => 'Could not load the venue map',
-			'venueMap.loadErrorDescription' => 'Please try again. If the map still does not appear, restart the app.',
-			'venueMap.controls.view.title' => 'View',
-			'venueMap.controls.view.threeD' => '3D View',
-			'venueMap.controls.view.top' => 'Top View',
-			'venueMap.controls.labels.title' => 'Labels',
-			'venueMap.controls.labels.hide' => 'Hide Labels',
-			'venueMap.controls.labels.show' => 'Show Labels',
-			'venueMap.controls.labels.decreaseSize' => 'Smaller',
-			'venueMap.controls.labels.increaseSize' => 'Larger',
-			'venueMap.controls.highlight.title' => 'Highlight',
-			'venueMap.controls.highlight.mainHalls' => 'Main Halls',
-			'venueMap.controls.highlight.exhibitionHalls' => 'Exhibition Halls',
-			'venueMap.controls.highlight.grandHalls' => 'Grand Halls',
-			'venueMap.controls.highlight.toilets' => 'Toilets',
-			'venueMap.controls.highlight.elevators' => 'Elevators',
-			'venueMap.controls.highlight.entrance' => 'Entrance',
+			'venueMap.loadErrorDescription' => 'Please try again.',
+			'venueMap.search' => 'Find a place',
+			'venueMap.searchHint' => 'Search halls and facilities',
+			'venueMap.all' => 'All',
+			'venueMap.halls' => 'Halls',
+			'venueMap.booths' => 'Booths',
+			'venueMap.facilities' => 'Facilities',
+			'venueMap.noResults' => 'No matching places',
+			'venueMap.clearSelection' => 'Clear selection',
+			'venueMap.zoomIn' => 'Zoom in',
+			'venueMap.zoomOut' => 'Zoom out',
+			'venueMap.fit' => 'Show entire floor',
+			'venueMap.rotate' => 'Rotate map',
+			'venueMap.twoD' => '2D',
+			'venueMap.threeD' => '3D',
+			'venueMap.viewMode' => 'Map view',
+			'venueMap.useTwoD' => 'Show in 2D',
+			'venueMap.saveFailed' => 'Could not save the view preference',
 			'eventInfo.title' => 'Event Overview',
 			'eventInfo.newsTitle' => 'Latest News',
 			'eventInfo.newsSubtitle' => 'See the latest FlutterKaigi 2026 updates',

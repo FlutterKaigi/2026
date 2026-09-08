@@ -97,27 +97,26 @@ bookmarkedSessions:
   openSessions: タイムテーブルを開く
 venueMap:
   title: 会場マップ
+  floor: 浜松町コンベンションホール · 5F
   loadError: 会場マップを読み込めませんでした
-  loadErrorDescription: 再試行してください。表示されない場合は、アプリを再起動してください。
-  controls:
-    view:
-      title: 表示
-      threeD: 3D表示
-      top: 上面表示
-    labels:
-      title: ラベル
-      hide: ラベル非表示
-      show: ラベル表示
-      decreaseSize: 縮小
-      increaseSize: 拡大
-    highlight:
-      title: ハイライト
-      mainHalls: メインホール
-      exhibitionHalls: 展示ホール
-      grandHalls: グランドホール
-      toilets: トイレ
-      elevators: エレベーター
-      entrance: 入口
+  loadErrorDescription: 再試行してください。
+  search: 場所を探す
+  searchHint: ホール・設備を検索
+  all: すべて
+  halls: ホール
+  booths: ブース
+  facilities: 設備
+  noResults: 一致する場所がありません
+  clearSelection: 選択を解除
+  zoomIn: 拡大
+  zoomOut: 縮小
+  fit: 全体を表示
+  rotate: 地図の向きを変える
+  twoD: 2D
+  threeD: 3D
+  viewMode: 地図の表示方法
+  useTwoD: 2Dで表示
+  saveFailed: 表示方法を保存できませんでした
 eventInfo:
   title: イベント概要
   newsTitle: 最新のお知らせ
