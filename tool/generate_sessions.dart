@@ -254,6 +254,12 @@ class _Entry {
   final int? column;
   final _Cell? cell;
   final _Text? eventLabel;
+
+  /// Where the entry stops on the grid when that differs from [end]; see
+  /// [_clampBarsToOverlappingEntries].
+  DateTime? layoutEndOverride;
+
+  DateTime get layoutEnd => layoutEndOverride ?? end;
 }
 
 /// Venues as timetable columns, ordered by `order` (unset last) then id so the
@@ -371,6 +377,8 @@ Map<String, _Day> _buildDays(_Data data, List<_Room> rooms) {
     byDay[dayRef]!.add(_Entry.event(e.startsAt, end, _text(e.title), column: column));
   }
 
+  _clampBarsToOverlappingEntries(byDay);
+
   return byDay.map((dayRef, entries) {
     entries.sort((a, b) {
       final byStart = a.start.compareTo(b.start);
@@ -386,10 +394,36 @@ Map<String, _Day> _buildDays(_Data data, List<_Room> rooms) {
     // Every start and end is a row boundary: an entry spans from its own start
     // tick to its own end tick, so entries never have to share a row.
     final ticks = <DateTime>{
-      for (final e in entries) ...[e.start, e.end],
+      for (final e in entries) ...[e.start, e.layoutEnd, e.end],
     }.toList()..sort();
     return MapEntry(dayRef, (ticks: ticks, entries: entries));
   });
+}
+
+/// Pulls a full-width bar's grid end up to where the first entry that overlaps
+/// it starts.
+///
+/// The overlap is real, not a data error: the lunch stage opens a few minutes
+/// before the lunch break ends. Left alone the two would be drawn on top of
+/// each other in the same grid cells, so only the bar's *layout* end moves —
+/// [_Entry.end] keeps the real time the bar shows on the stacked layout.
+///
+/// A bar that is overlapped from its very start has nowhere to shrink to and
+/// is left as it is.
+void _clampBarsToOverlappingEntries(Map<String, List<_Entry>> byDay) {
+  for (final entries in byDay.values) {
+    for (final bar in entries) {
+      if (bar.eventLabel == null || bar.column != null) continue;
+      DateTime? firstOverlap;
+      for (final other in entries) {
+        if (other.column == null) continue;
+        final overlaps = other.start.isBefore(bar.end) && bar.start.isBefore(other.end);
+        if (!overlaps || !other.start.isAfter(bar.start)) continue;
+        if (firstOverlap == null || other.start.isBefore(firstOverlap)) firstOverlap = other.start;
+      }
+      bar.layoutEndOverride = firstOverlap;
+    }
+  }
 }
 
 _Cell _buildCell(Session s, Map<String, Speaker> speakersById) {
@@ -499,12 +533,16 @@ void _writeDart({required List<_Room> rooms, required Map<String, _Day> days}) {
       ..writeln('    entries: [');
     for (final entry in day.entries) {
       final startTick = tickIndex[entry.start]!;
-      final endTick = tickIndex[entry.end]!;
+      final endTick = tickIndex[entry.layoutEnd]!;
+      final labelEndTick = tickIndex[entry.end]!;
       if (entry.eventLabel case final label?) {
         out
           ..writeln('      TimetableEntry.event(')
           ..writeln('        startTick: $startTick,')
           ..writeln('        endTick: $endTick,');
+        if (labelEndTick != endTick) {
+          out.writeln('        labelEndTick: $labelEndTick,');
+        }
         if (entry.column case final column?) {
           out.writeln('        roomIndex: $column,');
         }

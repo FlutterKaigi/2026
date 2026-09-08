@@ -636,7 +636,7 @@ class _DayGrid extends StatelessComponent {
               [
                 // 時刻列が消える縦積み時のための時刻。desktop では非表示。
                 span(classes: 'timetable-event__time', [
-                  .text('${ticks[entry.startTick]} – ${ticks[entry.endTick]}'),
+                  .text('${ticks[entry.startTick]} – ${ticks[entry.labelEndTick ?? entry.endTick]}'),
                 ]),
                 span([.text(label.resolve(strings.locale))]),
               ],

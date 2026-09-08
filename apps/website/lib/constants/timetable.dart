@@ -88,17 +88,24 @@ class TimetableEntry {
     required this.endTick,
     required int this.roomIndex,
     required TimetableSession this.session,
-  }) : eventLabel = null;
+  }) : eventLabel = null,
+       labelEndTick = null;
 
   const TimetableEntry.event({
     required this.startTick,
     required this.endTick,
     this.roomIndex,
     required LocalizedText this.eventLabel,
+    this.labelEndTick,
   }) : session = null;
 
   final int startTick;
   final int endTick;
+
+  /// 表示する終了時刻の境界。全幅バーが会場つきの枠と重なるとき、[endTick] は
+  /// 重ね描きを避けるためその枠の開始位置まで切り上げられるので、バーに出す
+  /// 時刻だけは本来の終了時刻を指すこれを使う。差がなければ null。
+  final int? labelEndTick;
 
   /// `generatedTimetableRooms` 上の位置。全幅イベントは null。
   final int? roomIndex;
