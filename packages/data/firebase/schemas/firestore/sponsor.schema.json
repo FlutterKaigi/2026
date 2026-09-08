@@ -42,7 +42,7 @@
     },
     "tier": {
       "type": "string",
-      "enum": ["platinum", "gold", "silver", "bronze", "tool", "community", "individual"]
+      "enum": ["platinum", "gold", "silver", "bronze", "tool", "entertainment", "community", "individual"]
     },
     "slug": {
       "description": "Web サイトの詳細ページのパス (`sponsors/<slug>`) に利用するスラッグ。",
