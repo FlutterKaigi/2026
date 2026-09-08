@@ -260,10 +260,18 @@ class _Entry {
   final _Text? eventDescription;
 
   /// Where the entry stops on the grid when that differs from [end]; see
-  /// [_clampBarsToOverlappingEntries].
-  DateTime? layoutEndOverride;
+  /// [_clampBarsToOverlappingEntries]. Only a full-width bar ever sets one.
+  DateTime? _layoutEndOverride;
 
-  DateTime get layoutEnd => layoutEndOverride ?? end;
+  set layoutEndOverride(DateTime? value) {
+    assert(
+      eventLabel != null && column == null,
+      'only a full-width bar is clamped; sessions and venue-bound events keep their own end',
+    );
+    _layoutEndOverride = value;
+  }
+
+  DateTime get layoutEnd => _layoutEndOverride ?? end;
 }
 
 /// Venues as timetable columns, ordered by `order` (unset last) then id so the
@@ -422,20 +430,45 @@ Map<String, _Day> _buildDays(_Data data, List<_Room> rooms) {
 /// each other in the same grid cells, so only the bar's *layout* end moves —
 /// [_Entry.end] keeps the real time the bar shows on the stacked layout.
 ///
-/// A bar that is overlapped from its very start has nowhere to shrink to and
-/// is left as it is.
+/// A bar is one grid block, so it can only be shortened, never split. The two
+/// shapes that cannot be drawn correctly are reported rather than silently
+/// accepted: a bar overlapped from its very start has nowhere to shrink to, and
+/// a bar whose overlap ends before it does loses the rest of its length.
 void _clampBarsToOverlappingEntries(Map<String, List<_Entry>> byDay) {
   for (final entries in byDay.values) {
     for (final bar in entries) {
       if (bar.eventLabel == null || bar.column != null) continue;
-      DateTime? firstOverlap;
-      for (final other in entries) {
-        if (other.column == null) continue;
-        final overlaps = other.start.isBefore(bar.end) && bar.start.isBefore(other.end);
-        if (!overlaps || !other.start.isAfter(bar.start)) continue;
-        if (firstOverlap == null || other.start.isBefore(firstOverlap)) firstOverlap = other.start;
+
+      final overlapping = [
+        for (final other in entries)
+          if (other.column != null && other.start.isBefore(bar.end) && bar.start.isBefore(other.end)) other,
+      ];
+      if (overlapping.isEmpty) continue;
+
+      final label = bar.eventLabel!.ja;
+      final clampable = [
+        for (final other in overlapping)
+          if (other.start.isAfter(bar.start)) other.start,
+      ];
+      if (clampable.isEmpty) {
+        stderr.writeln(
+          'warning: full-width event \'$label\' at ${_hhmm(bar.start)} is overlapped from its '
+          'start; drawing it under the overlapping entries.',
+        );
+        continue;
       }
+
+      final firstOverlap = clampable.reduce((a, b) => a.isBefore(b) ? a : b);
       bar.layoutEndOverride = firstOverlap;
+
+      final lastOverlapEnd = overlapping.map((e) => e.end).reduce((a, b) => a.isAfter(b) ? a : b);
+      if (lastOverlapEnd.isBefore(bar.end)) {
+        stderr.writeln(
+          'warning: full-width event \'$label\' is drawn only up to ${_hhmm(firstOverlap)}; '
+          'the overlap ends at ${_hhmm(lastOverlapEnd)} but the bar cannot be split, so '
+          '${_hhmm(lastOverlapEnd)}–${_hhmm(bar.end)} is not shown.',
+        );
+      }
     }
   }
 }
@@ -474,15 +507,18 @@ _Cell _buildCell(Session s, Map<String, Speaker> speakersById) {
   );
 }
 
-/// Falls each locale back to the other so a single-language entry still renders
-/// on both site locales (`LocaleMap` itself does not — both fields are just
-/// required strings).
+/// [_text] for a field that may be absent: an unset value and one that is
+/// blank in both locales both collapse to null, so callers have a single
+/// "nothing to show" case.
 _Text? _optionalText(LocaleMap? value) {
   if (value == null) return null;
   final text = _text(value);
   return text.ja.isEmpty && text.en.isEmpty ? null : text;
 }
 
+/// Falls each locale back to the other so a single-language entry still renders
+/// on both site locales (`LocaleMap` itself does not — both fields are just
+/// required strings).
 _Text _text(LocaleMap value) => (
   ja: _firstNonEmpty([value.ja, value.en]),
   en: _firstNonEmpty([value.en, value.ja]),
