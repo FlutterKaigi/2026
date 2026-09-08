@@ -11,7 +11,8 @@ import 'sponsors.dart' show LocalizedText;
 /// 開催日。タブ切替の単位。
 enum TimetableDay {
   day1(label: 'Day 1', date: '10.29', weekday: 'THU'),
-  day2(label: 'Day 2', date: '10.30', weekday: 'FRI');
+  day2(label: 'Day 2', date: '10.30', weekday: 'FRI')
+  ;
 
   const TimetableDay({
     required this.label,
@@ -89,6 +90,7 @@ class TimetableEntry {
     required int this.roomIndex,
     required TimetableSession this.session,
   }) : eventLabel = null,
+       eventDescription = null,
        labelEndTick = null;
 
   const TimetableEntry.event({
@@ -96,6 +98,7 @@ class TimetableEntry {
     required this.endTick,
     this.roomIndex,
     required LocalizedText this.eventLabel,
+    this.eventDescription,
     this.labelEndTick,
   }) : session = null;
 
@@ -111,4 +114,7 @@ class TimetableEntry {
   final int? roomIndex;
   final TimetableSession? session;
   final LocalizedText? eventLabel;
+
+  /// 会場つきイベントの概要。ダイアログでのみ使う。
+  final LocalizedText? eventDescription;
 }

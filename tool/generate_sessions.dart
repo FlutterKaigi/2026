@@ -245,15 +245,19 @@ typedef _Cell = ({
 /// ([column] / [cell]), a full-width timeline event ([eventLabel] only), or a
 /// room-bound timeline event ([eventLabel] + [column] — e.g. the lunch stage).
 class _Entry {
-  _Entry.session(this.start, this.end, int this.column, _Cell this.cell) : eventLabel = null;
+  _Entry.session(this.start, this.end, int this.column, _Cell this.cell) : eventLabel = null, eventDescription = null;
 
-  _Entry.event(this.start, this.end, this.eventLabel, {this.column}) : cell = null;
+  _Entry.event(this.start, this.end, this.eventLabel, {this.column, this.eventDescription}) : cell = null;
 
   final DateTime start;
   final DateTime end;
   final int? column;
   final _Cell? cell;
   final _Text? eventLabel;
+
+  /// Only room-bound events carry one: a full-width bar has no dialog to show
+  /// it in.
+  final _Text? eventDescription;
 
   /// Where the entry stops on the grid when that differs from [end]; see
   /// [_clampBarsToOverlappingEntries].
@@ -374,7 +378,17 @@ Map<String, _Day> _buildDays(_Data data, List<_Room> rooms) {
         continue;
       }
     }
-    byDay[dayRef]!.add(_Entry.event(e.startsAt, end, _text(e.title), column: column));
+    byDay[dayRef]!.add(
+      _Entry.event(
+        e.startsAt,
+        end,
+        _text(e.title),
+        column: column,
+        // A full-width bar is a plain label with no dialog, so a description
+        // on one has nowhere to go.
+        eventDescription: column == null ? null : _optionalText(e.description),
+      ),
+    );
   }
 
   _clampBarsToOverlappingEntries(byDay);
@@ -463,6 +477,12 @@ _Cell _buildCell(Session s, Map<String, Speaker> speakersById) {
 /// Falls each locale back to the other so a single-language entry still renders
 /// on both site locales (`LocaleMap` itself does not — both fields are just
 /// required strings).
+_Text? _optionalText(LocaleMap? value) {
+  if (value == null) return null;
+  final text = _text(value);
+  return text.ja.isEmpty && text.en.isEmpty ? null : text;
+}
+
 _Text _text(LocaleMap value) => (
   ja: _firstNonEmpty([value.ja, value.en]),
   en: _firstNonEmpty([value.en, value.ja]),
@@ -546,9 +566,11 @@ void _writeDart({required List<_Room> rooms, required Map<String, _Day> days}) {
         if (entry.column case final column?) {
           out.writeln('        roomIndex: $column,');
         }
-        out
-          ..writeln('        eventLabel: ${_localizedText(label)},')
-          ..writeln('      ),');
+        out.writeln('        eventLabel: ${_localizedText(label)},');
+        if (entry.eventDescription case final description?) {
+          out.writeln('        eventDescription: ${_localizedText(description)},');
+        }
+        out.writeln('      ),');
         continue;
       }
       final cell = entry.cell!;

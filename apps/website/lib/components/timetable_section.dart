@@ -609,10 +609,10 @@ class _DayGrid extends StatelessComponent {
             ),
           ] else if ((entry.eventLabel, entry.roomIndex) case (final label?, final roomIndex?)) ...[
             // roomIndex を持つイベント（応援LT・ランチステージなど）は
-            // セッションと同じカード + ダイアログで表示する。概要や
-            // スピーカーを持たないだけなので、表示モデルごと流用できる。
+            // セッションと同じカード + ダイアログで表示する。スピーカーを
+            // 持たないだけなので、表示モデルごと流用できる。
             _SessionCard(
-              session: TimetableSession(title: label),
+              session: TimetableSession(title: label, description: entry.eventDescription),
               room: generatedTimetableRooms[roomIndex],
               start: ticks[entry.startTick],
               end: ticks[entry.endTick],
@@ -622,7 +622,7 @@ class _DayGrid extends StatelessComponent {
             ),
             _SessionDialog(
               id: _dialogId(i),
-              session: TimetableSession(title: label),
+              session: TimetableSession(title: label, description: entry.eventDescription),
               room: generatedTimetableRooms[roomIndex],
               day: day,
               start: ticks[entry.startTick],
