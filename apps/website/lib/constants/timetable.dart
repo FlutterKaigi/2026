@@ -11,8 +11,7 @@ import 'sponsors.dart' show LocalizedText;
 /// 開催日。タブ切替の単位。
 enum TimetableDay {
   day1(label: 'Day 1', date: '10.29', weekday: 'THU'),
-  day2(label: 'Day 2', date: '10.30', weekday: 'FRI')
-  ;
+  day2(label: 'Day 2', date: '10.30', weekday: 'FRI');
 
   const TimetableDay({
     required this.label,
@@ -106,7 +105,7 @@ class TimetableEntry {
   final int endTick;
 
   /// 表示する終了時刻の境界。全幅バーが会場つきの枠と重なるとき、[endTick] は
-  /// 重ね描きを避けるためその枠の開始位置まで切り上げられるので、バーに出す
+  /// 重ね描きを避けるためその枠の開始位置まで手前に詰められるので、バーに出す
   /// 時刻だけは本来の終了時刻を指すこれを使う。差がなければ null。
   final int? labelEndTick;
 

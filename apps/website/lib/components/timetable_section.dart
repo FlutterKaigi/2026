@@ -612,7 +612,7 @@ class _DayGrid extends StatelessComponent {
             // セッションと同じカード + ダイアログで表示する。スピーカーを
             // 持たないだけなので、表示モデルごと流用できる。
             _SessionCard(
-              session: TimetableSession(title: label, description: entry.eventDescription),
+              session: TimetableSession(title: label),
               room: generatedTimetableRooms[roomIndex],
               start: ticks[entry.startTick],
               end: ticks[entry.endTick],
