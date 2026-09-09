@@ -88,19 +88,23 @@ class _PendingShareLink extends HookConsumerWidget {
     return ExchangeAccessGate(
       signInTitle: t.exchange.shareLinkSignInRequired,
       profileTitle: t.exchange.shareLinkProfileRequired,
-      builder: (context) => _ShareLinkBody(token: token),
+      // Opening a second link while the first one's result is on screen keeps
+      // the same `/x/:token` route, so without a token-derived key the body's
+      // element — and with it the "already started" guard and the rendered
+      // result — would be reused and the new token never resolved.
+      builder: (context) => _ShareLinkBody(key: ValueKey(token), token: token),
     );
   }
 }
 
 /// Resolves [token] against the now-confirmed signed-in, profile-having user
-/// and renders the outcome. Runs at most once per page instance regardless
-/// of rebuilds (the `useRef` guard), and clears the pending token it just
+/// and renders the outcome. Runs at most once per [token] regardless of
+/// rebuilds (the `useRef` guard), and clears the pending token it just
 /// handled so `AccountPage`'s own listener (the fallback for a sign-in
 /// detour that ends up back there instead of on this page) doesn't also
 /// attempt it.
 class _ShareLinkBody extends HookConsumerWidget {
-  const _ShareLinkBody({required this.token});
+  const _ShareLinkBody({required this.token, super.key});
 
   final String token;
 
@@ -117,14 +121,23 @@ class _ShareLinkBody extends HookConsumerWidget {
       started.value = true;
 
       Future<void> resolve() async {
+        // Leaving the page mid-flight disposes this `ref`, so everything that
+        // still has to happen once the exchange lands — dropping the pending
+        // token above all, or it would be replayed by `AccountPage` — is read
+        // before the await. Only the on-screen result is skipped afterwards.
+        final pendingTokens = ref.read(pendingExchangeTokenProvider.notifier);
+        final talker = ref.read(talkerProvider);
         final resolved = await resolvePendingExchangeToken(
           token: token,
           myUid: myUid,
           repository: ref.read(profileExchangeRepositoryProvider),
         );
-        ref.read(pendingExchangeTokenProvider.notifier).clearIfCurrent(token);
+        pendingTokens.clearIfCurrent(token);
         if (resolved case PendingExchangeResolved(outcome: ExchangeCreateFailed(:final error, :final stackTrace))) {
-          ref.read(talkerProvider).handle(error, stackTrace);
+          talker.handle(error, stackTrace);
+        }
+        if (!context.mounted) {
+          return;
         }
         result.value = resolved;
       }

@@ -100,12 +100,21 @@ class AccountPage extends HookConsumerWidget {
       handledPendingToken.value = pendingToken;
 
       Future<void> resolve() async {
+        // Leaving the tab mid-flight disposes this `ref`, so everything that
+        // still has to happen once the exchange lands — dropping the pending
+        // token above all, or it would be replayed on the next visit — is read
+        // before the await. Only the snack bar is skipped afterwards.
+        final pendingTokens = ref.read(pendingExchangeTokenProvider.notifier);
+        final talker = ref.read(talkerProvider);
         final resolved = await resolvePendingExchangeToken(
           token: pendingToken,
           myUid: myUid,
           repository: ref.read(profileExchangeRepositoryProvider),
         );
-        ref.read(pendingExchangeTokenProvider.notifier).clearIfCurrent(pendingToken);
+        pendingTokens.clearIfCurrent(pendingToken);
+        if (resolved case PendingExchangeResolved(outcome: ExchangeCreateFailed(:final error, :final stackTrace))) {
+          talker.handle(error, stackTrace);
+        }
         if (!context.mounted) {
           return;
         }
@@ -114,8 +123,7 @@ class AccountPage extends HookConsumerWidget {
             showMessage(t.exchange.scanSucceeded);
           case PendingExchangeResolved(outcome: ExchangeAlreadyExists()):
             showMessage(t.exchange.scanAlreadyExists);
-          case PendingExchangeResolved(outcome: ExchangeCreateFailed(:final error, :final stackTrace)):
-            ref.read(talkerProvider).handle(error, stackTrace);
+          case PendingExchangeResolved(outcome: ExchangeCreateFailed()):
             showMessage(t.exchange.scanFailed);
           case PendingExchangeSelf():
             showMessage(t.exchange.shareLinkSelfTitle);

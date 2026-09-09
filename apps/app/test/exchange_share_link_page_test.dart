@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/feature/auth/data/provider/auth_repository.dart';
 import 'package:app/feature/exchange/data/provider/pending_exchange_token_provider.dart';
@@ -16,13 +18,15 @@ import 'fake_profile_exchange_repository.dart';
 import 'fake_user_profile_repository.dart';
 
 void main() {
+  late GoRouter router;
+
   Widget buildSubject({
     required String token,
     required FakeAuthRepository authRepository,
     required FakeUserProfileRepository profileRepository,
     required FakeProfileExchangeRepository exchangeRepository,
   }) {
-    final router = GoRouter(
+    router = GoRouter(
       initialLocation: '/x/$token',
       routes: [
         GoRoute(
@@ -74,8 +78,10 @@ void main() {
     updatedAt: DateTime.utc(2026, 8),
   );
 
+  // `MaterialApp` rather than `ExchangeShareLinkPage`, so the pending token is
+  // still readable in the tests that navigate away from the share link.
   PendingExchangeToken? readPendingToken(WidgetTester tester) =>
-      ProviderScope.containerOf(tester.element(find.byType(ExchangeShareLinkPage))).read(pendingExchangeTokenProvider);
+      ProviderScope.containerOf(tester.element(find.byType(MaterialApp))).read(pendingExchangeTokenProvider);
 
   setUp(() => LocaleSettings.setLocaleSync(AppLocale.ja));
 
@@ -262,6 +268,71 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('list destination'), findsOneWidget);
+  });
+
+  testWidgets('resolves a second share link opened while the first result is on screen', (tester) async {
+    final authRepository = FakeAuthRepository(initialUser: FakeUser(uid: 'uid-1'));
+    addTearDown(authRepository.dispose);
+    final exchangeRepository = FakeProfileExchangeRepository();
+    addTearDown(exchangeRepository.dispose);
+    final firstToken = futureToken('other-uid');
+    final secondToken = futureToken('another-uid');
+
+    await tester.pumpWidget(
+      buildSubject(
+        token: firstToken,
+        authRepository: authRepository,
+        profileRepository: FakeUserProfileRepository(initialProfile: ownProfile()),
+        exchangeRepository: exchangeRepository,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(exchangeRepository.createCalls, hasLength(1));
+
+    // 同じ `/x/:token` ルートなので Widget の状態が引き継がれ、
+    // 1 人目の結果を表示したままだと 2 人目の交換が走らなかった。
+    router.go('/x/$secondToken');
+    await tester.pumpAndSettle();
+
+    expect(exchangeRepository.createCalls.map((call) => call.otherUid), ['other-uid', 'another-uid']);
+    expect(readPendingToken(tester), isNull);
+  });
+
+  testWidgets('clears the queued token when the visitor leaves before the exchange lands', (tester) async {
+    final authRepository = FakeAuthRepository(initialUser: FakeUser(uid: 'uid-1'));
+    addTearDown(authRepository.dispose);
+    final exchangeRepository = FakeProfileExchangeRepository();
+    addTearDown(exchangeRepository.dispose);
+    final gate = Completer<void>();
+    exchangeRepository.createGate = gate;
+
+    await tester.pumpWidget(
+      buildSubject(
+        token: futureToken('other-uid'),
+        authRepository: authRepository,
+        profileRepository: FakeUserProfileRepository(initialProfile: ownProfile()),
+        exchangeRepository: exchangeRepository,
+      ),
+    );
+    // ゲートで交換を止めている間はローディングインジケータが回り続けるため、
+    // `pumpAndSettle` ではなく `pump` で進める。
+    await tester.pump();
+    await tester.pump();
+
+    expect(exchangeRepository.createCalls, hasLength(1));
+
+    router.go('/info');
+    await tester.pumpAndSettle();
+    expect(find.text('home destination'), findsOneWidget);
+
+    gate.complete();
+    await tester.pumpAndSettle();
+
+    // 破棄済みの WidgetRef を触って例外になると、交換は成立しているのに
+    // 保留トークンが残り、アカウント画面で再処理されてしまう。
+    expect(tester.takeException(), isNull);
+    expect(readPendingToken(tester), isNull);
   });
 
   testWidgets('reports an already-existing exchange without erroring', (tester) async {

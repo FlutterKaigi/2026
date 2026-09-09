@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/provider/environment.dart';
 import 'package:app/core/provider/shared_preferences.dart';
@@ -35,6 +37,7 @@ void main() {
     String? pendingExchangeTokenUid,
     Flavor flavor = Flavor.production,
     bool showsAppleSignIn = false,
+    ValueNotifier<bool>? showsAccountPage,
   }) => TranslationProvider(
     child: ProviderScope(
       overrides: [
@@ -65,7 +68,15 @@ void main() {
         locale: const Locale('ja'),
         supportedLocales: AppLocaleUtils.supportedLocales,
         localizationsDelegates: GlobalMaterialLocalizations.delegates,
-        home: const AccountPage(),
+        // `showsAccountPage` を渡すと、`ProviderScope` を保ったまま
+        // AccountPage だけを外せる（別タブへの移動と同じ状況）。
+        home: switch (showsAccountPage) {
+          null => const AccountPage(),
+          final listenable => ValueListenableBuilder(
+            valueListenable: listenable,
+            builder: (_, shows, _) => shows ? const AccountPage() : const Scaffold(body: Text('別のタブ')),
+          ),
+        },
       ),
     ),
   );
@@ -440,6 +451,55 @@ void main() {
         (uid: 'uid-1', otherUid: 'other-uid', token: 'v1.other-uid.$expSeconds.deadbeef'),
       ]);
       expect(find.text('プロフィールを交換しました'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'clears the pending share-link token even when the tab is left before the exchange lands',
+    (tester) async {
+      final repository = FakeAuthRepository(
+        initialUser: FakeUser(uid: 'uid-1', email: 'attendee@example.com'),
+      );
+      addTearDown(repository.dispose);
+      final profileRepository = FakeUserProfileRepository(
+        initialProfile: _profile(id: 'uid-1'),
+      );
+      addTearDown(profileRepository.dispose);
+      final exchangeRepository = FakeProfileExchangeRepository();
+      addTearDown(exchangeRepository.dispose);
+      final gate = Completer<void>();
+      exchangeRepository.createGate = gate;
+      final showsAccountPage = ValueNotifier(true);
+      addTearDown(showsAccountPage.dispose);
+      final expSeconds = DateTime.now().add(const Duration(hours: 1)).millisecondsSinceEpoch ~/ 1000;
+
+      await tester.pumpWidget(
+        buildSubject(
+          repository,
+          preferences: preferences,
+          profileRepository: profileRepository,
+          exchangeRepository: exchangeRepository,
+          pendingExchangeToken: 'v1.other-uid.$expSeconds.deadbeef',
+          showsAccountPage: showsAccountPage,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(exchangeRepository.createCalls, hasLength(1));
+
+      showsAccountPage.value = false;
+      await tester.pumpAndSettle();
+
+      gate.complete();
+      await tester.pumpAndSettle();
+
+      // 破棄済みの WidgetRef を触って例外になると、交換は成立しているのに
+      // 保留トークンが残り、次にこのタブへ戻ったときに再処理される。
+      expect(tester.takeException(), isNull);
+      expect(
+        ProviderScope.containerOf(tester.element(find.byType(MaterialApp))).read(pendingExchangeTokenProvider),
+        isNull,
+      );
     },
   );
 
