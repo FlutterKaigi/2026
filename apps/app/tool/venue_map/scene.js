@@ -35,8 +35,8 @@ function initialize(config) {
   const light = new DirectionalLight(0xffffff, 2);
   light.position.set(-12, 35, 15);
   scene.add(light);
-  const unit = 0.055,
-    center = [434.5, 214],
+  const unit = 0.028,
+    center = [PLAN.bounds.x + PLAN.bounds.w / 2, PLAN.bounds.y + PLAN.bounds.h / 2],
     zoneMeshes = new Map(),
     targets = [];
   const point = (p, y = 0.12) =>
@@ -50,15 +50,6 @@ function initialize(config) {
     bindings.push([m, role]);
     return m;
   };
-  const palette = (p) =>
-    ({
-      purple: "primary",
-      blue: "tertiary",
-      rose: "secondary",
-      teal: "onTertiaryContainer",
-      gold: "onSecondaryContainer",
-      neutral: "onSurfaceVariant",
-    })[p];
   function prism(poly, depth, color, y = 0) {
     const shape = new Shape();
     poly.forEach((p, i) => {
@@ -76,102 +67,60 @@ function initialize(config) {
     return mesh;
   }
   prism(PLAN.outline, 0.14, "surface", -0.14);
-  const artUniforms = {
-    mapIsDark: { value: 0 },
-    mapInk: { value: new Color() },
-    mapPaper: { value: new Color() },
-  };
+  const textureLoader = new TextureLoader();
   let artMaterial;
-  if (MAP_ART) {
-    const texture = new TextureLoader().load(MAP_ART, () => draw());
+  const lightArt = textureLoader.load(MAP_ART, () => draw());
+  const darkArt = textureLoader.load(MAP_ART_DARK, () => draw());
+  for (const texture of [lightArt, darkArt]) {
     texture.colorSpace = SRGBColorSpace;
     texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
-    artMaterial = new MeshBasicMaterial({ map: texture, toneMapped: false });
-    artMaterial.onBeforeCompile = (shader) => {
-      Object.assign(shader.uniforms, artUniforms);
-      shader.fragmentShader =
-        "uniform float mapIsDark; uniform vec3 mapInk; uniform vec3 mapPaper;\n" +
-        shader.fragmentShader;
-      shader.fragmentShader = shader.fragmentShader.replace(
-        "#include <map_fragment>",
-        `#include <map_fragment>
-        if(mapIsDark>.5){float luminance=dot(diffuseColor.rgb,vec3(.2126,.7152,.0722));diffuseColor.rgb=mix(mapInk,mapPaper,luminance);}`,
-      );
-    };
-    const plane = new Mesh(
-      new PlaneGeometry(ART_BOX.w * unit, ART_BOX.h * unit),
-      artMaterial,
-    );
-    plane.rotation.x = -Math.PI / 2;
-    plane.position.copy(
-      point([ART_BOX.x + ART_BOX.w / 2, ART_BOX.y + ART_BOX.h / 2], 0.006),
-    );
-    scene.add(plane);
   }
-  PLAN.service.forEach((poly) => prism(poly, 0.52, "service", 0.014));
-  function wall(a, b) {
-    const pa = point(a),
-      pb = point(b),
-      dx = pb.x - pa.x,
-      dz = pb.z - pa.z,
-      length = Math.hypot(dx, dz);
-    if (length < 0.01) return;
-    const mesh = new Mesh(
-      new BoxGeometry(length, 0.66, 0.075),
-      material("surface"),
-    );
-    mesh.position.set((pa.x + pb.x) / 2, 0.4, (pa.z + pb.z) / 2);
+  artMaterial = new MeshBasicMaterial({map: lightArt, toneMapped: false});
+  const floorArt = new Mesh(new PlaneGeometry(ART_BOX.w * unit, ART_BOX.h * unit), artMaterial);
+  floorArt.rotation.x = -Math.PI / 2;
+  floorArt.position.copy(point([ART_BOX.x + ART_BOX.w / 2, ART_BOX.y + ART_BOX.h / 2], .006));
+  scene.add(floorArt);
+
+  // Only the reviewed wall segments are extruded; openings are never inferred
+  // by cutting arbitrary gaps into closed room rectangles.
+  function wall(a, b, height = .64, thickness = .065) {
+    const pa = point(a), pb = point(b), dx = pb.x - pa.x, dz = pb.z - pa.z;
+    const length = Math.hypot(dx, dz);
+    if (length < .01) return;
+    const mesh = new Mesh(new BoxGeometry(length, height, thickness), material("service"));
+    mesh.position.set((pa.x + pb.x) / 2, height / 2 + .02, (pa.z + pb.z) / 2);
     mesh.rotation.y = -Math.atan2(dz, dx);
     scene.add(mesh);
   }
-  function roomWalls(p) {
-    p.polygon.forEach((a, i) => {
-      const b = p.polygon[(i + 1) % p.polygon.length];
-      if (a[0] !== b[0]) {
-        wall(a, b);
-        return;
-      }
-      const low = Math.min(a[1], b[1]),
-        high = Math.max(a[1], b[1]);
-      const cuts = PLAN.doors
-        .filter((d) => Math.abs(d.x - a[0]) < 2 && d.y > low && d.y < high)
-        .sort((a, b) => a.y - b.y);
-      let start = low;
-      for (const door of cuts) {
-        wall([a[0], start], [a[0], door.y - 6]);
-        start = door.y + 6;
-      }
-      wall([a[0], start], [a[0], high]);
-    });
-  }
-  places.forEach((p) => {
-    if (p.id === "ask_speaker") return;
-    const mesh = prism(p.polygon, 0.022, palette(p.palette), 0.014);
-    if (MAP_ART) {
-      mesh.material.transparent = true;
-      mesh.material.opacity = 0.015;
-      mesh.material.depthWrite = false;
-    }
-    mesh.userData.zoneId = p.id;
+  PLAN.walls.forEach(([a, b]) => wall(a, b));
+  function hitArea(polygon, id, y = .025) {
+    const shape = new Shape();
+    polygon.forEach((p, i) => { const v = point(p); i ? shape.lineTo(v.x, -v.z) : shape.moveTo(v.x, -v.z); });
+    shape.closePath();
+    const m = new MeshBasicMaterial({color: config.colors.primary, transparent: true, opacity: 0, depthWrite: false, toneMapped: false});
+    const mesh = new Mesh(new ShapeGeometry(shape), m);
+    mesh.rotation.x = -Math.PI / 2;
+    mesh.position.y = y;
+    mesh.userData.zoneId = id;
+    scene.add(mesh);
     targets.push(mesh);
-    zoneMeshes.set(p.id, mesh);
-    if (
-      p.type === "hall" ||
-      ["mens_wc", "womens_wc", "elevators"].includes(p.id)
-    )
-      roomWalls(p);
+    return mesh;
+  }
+  // Higher hit planes give nested facilities and numbered tables precedence.
+  places.forEach((p) => zoneMeshes.set(p.id, hitArea(p.polygon, p.id, p.type === "sponsor" ? .30 : p.type === "facility" ? .04 : .02)));
+  PLAN.publicEntrances.forEach(e => hitArea(e.polygon, e.placeId, .035));
+  PLAN.restrictedAreas.forEach(poly => hitArea(poly, null, .045));
+  PLAN.booths.forEach(({rect: [x, y, w, h], color}) => {
+    const mesh = prism(rect(x, y, w, h), .23, "surface", .03);
+    // Every booth uses the same visitor-facing color in both themes.
+    bindings.splice(bindings.findIndex(([m]) => m === mesh.material), 1);
+    mesh.material.color.set(color);
   });
-  PLAN.booths.forEach(([x, y, w, h]) =>
-    prism(rect(x, y, w, h), 0.24, "primaryContainer", 0.04),
-  );
-  PLAN.stairs.forEach(([x, y, w, h]) => {
-    for (let i = 0; i < 7; i++)
-      prism(
-        rect(x, y + (i * h) / 7, w, h / 7 - 1),
-        0.04 + i * 0.025,
-        "service",
-        0.02,
-      );
+  PLAN.escalators.forEach(({bank, x0, x1, y0, y1}) => {
+    wall([x0, y0], [x1, y0], .12, .055);
+    wall([bank === "west" ? x0-11 : x0, y1], [x1, y1], .12, .055);
+    // Flat boarding ends face the shared central landing. The paired runs
+    // follow the east/west direction, not the north/south room orientation.
   });
   let selected = null,
     active = true,
@@ -205,12 +154,12 @@ function initialize(config) {
     );
     document.documentElement.lang = config.language;
     bindings.forEach(([m, role]) => m.color.set(colors[role]));
-    artUniforms.mapIsDark.value = colors.dark ? 1 : 0;
-    artUniforms.mapInk.value.set(colors.onSurfaceVariant);
-    artUniforms.mapPaper.value.set(colors.service);
+    artMaterial.map = colors.dark ? darkArt : lightArt;
     for (const { p, el } of labelNodes) {
       const name = p.name[config.language] || p.name.ja;
-      if (p.type === "facility") {
+      if (p.type === "sponsor") {
+        el.textContent = String(p.boothNumber);
+      } else if (p.type === "facility") {
         const content = document.createElement("span");
         content.className = "facility-content";
         content.setAttribute("aria-hidden", "true");
@@ -229,9 +178,10 @@ function initialize(config) {
       } else {
         el.textContent = name.replace(" HALL", "\nHALL");
       }
-      el.title = name;
-      el.setAttribute("aria-label", name);
-      el.style.setProperty("--color", colors[palette(p.palette)]);
+      el.title = p.boothNumber ? p.boothNumber + " · " + name : name;
+      el.setAttribute("aria-label", el.title);
+      const marker = ({booth:PLAN.colors.booth,purple:"#8061BD",blue:"#408FC3",rose:"#945838",teal:"#326E58",gold:"#B98227",pink:"#CE6BA5"})[p.palette] || colors.onSurfaceVariant;
+      el.style.setProperty("--color", colors.dark ? new Color(marker).lerp(new Color("white"), .4).getStyle() : marker);
     }
     highlight(config.selected);
     active = config.active;
@@ -246,13 +196,8 @@ function initialize(config) {
   function highlight(id) {
     selected = id;
     for (const [key, mesh] of zoneMeshes) {
-      mesh.material.emissive.set(
-        key === id ? config.colors.primary : "#000000",
-      );
-      mesh.material.emissiveIntensity = key === id ? 0.12 : 0;
-      if (MAP_ART)
-        mesh.material.opacity =
-          key === id ? 0.48 : config.colors.dark ? 0.16 : 0.015;
+      mesh.material.color.set(config.colors.primary);
+      mesh.material.opacity = key === id ? .28 : 0;
     }
     labelNodes.forEach(({ p, el }) => {
       el.classList.toggle("selected", p.id === id);
@@ -263,14 +208,17 @@ function initialize(config) {
   function projectLabels() {
     const w = stage.clientWidth,
       h = stage.clientHeight;
+    // At an oblique angle the floor is compressed; use its smaller projected
+    // scale so booth numbers do not spill far away from their tables.
+    const detailed = camera.zoom * 20 * unit * Math.cos(controls.getPolarAngle()) >= .5;
     const items = [];
     for (const node of labelNodes) {
       const { p, el, line, dot } = node;
       const v = point(p.anchor, 0.8).project(camera);
       const x = ((v.x + 1) * w) / 2,
         y = ((1 - v.y) * h) / 2;
-      const visible =
-        v.z > -1 && v.z < 1 && x >= 0 && x <= w && y >= 0 && y <= h;
+      const visible = v.z > -1 && v.z < 1 && x >= 0 && x <= w && y >= 0 && y <= h && (p.type !== "sponsor" || detailed || p.id === selected);
+      el.classList.toggle("compact", !detailed && p.id !== selected && !p.id.startsWith("ask_"));
       el.hidden = !visible;
       line.style.visibility = dot.style.visibility = "hidden";
       if (!visible) continue;
@@ -324,7 +272,6 @@ function initialize(config) {
     frame = null;
     if (!active) return;
     controls.update();
-    draw();
     frame = requestAnimationFrame(tick);
   }
   function setFrustum(w, h) {
@@ -353,7 +300,7 @@ function initialize(config) {
     const points = PLAN.outline.map((v) => point(v, 0.8).project(camera));
     const maxX = Math.max(...points.map((v) => Math.abs(v.x))),
       maxY = Math.max(...points.map((v) => Math.abs(v.y)));
-    camera.zoom = Math.min(0.87 / maxX, 0.78 / maxY, 100);
+    camera.zoom = Math.min(0.94 / maxX, 0.88 / maxY, 100);
     fitZoom = camera.zoom;
     controls.minZoom = fitZoom * 0.7;
     controls.maxZoom = fitZoom * 6;
@@ -380,7 +327,7 @@ function initialize(config) {
     camera.zoom = Math.max(
       fitZoom,
       Math.min(
-        fitZoom * 2.2,
+        fitZoom * (["sponsor", "facility"].includes(p.type) ? 4.5 : 2.2),
         (w - 72) / (40 * radiusX),
         (h - 80) / (40 * radiusY),
       ),
@@ -432,11 +379,12 @@ function initialize(config) {
     );
     raycaster.setFromCamera(mouse, camera);
     const hit = raycaster.intersectObjects(targets)[0];
-    if (hit) {
+    if (hit?.object.userData.zoneId) {
       send("selected", { id: hit.object.userData.zoneId });
     }
   });
 
+  controls.addEventListener("change", draw);
   const observer = new ResizeObserver(resize);
   observer.observe(stage);
   renderer.domElement.addEventListener("webglcontextlost", (event) => {
@@ -449,6 +397,13 @@ function initialize(config) {
     configure,
     focus: focusSelection,
     fit,
+    rotate() {
+      const offset = camera.position.clone().sub(controls.target);
+      offset.applyAxisAngle(new Vector3(0, 1, 0), Math.PI / 2);
+      camera.position.copy(controls.target).add(offset);
+      controls.update();
+      draw();
+    },
     zoom(factor) {
       camera.zoom = Math.max(
         controls.minZoom,
@@ -469,6 +424,7 @@ window.VenueMap = {
         if (command.action === "focus") api.focus(command.value);
         if (command.action === "fit") api.fit();
         if (command.action === "zoom") api.zoom(command.value);
+        if (command.action === "rotate") api.rotate();
       }
     } catch (error) {
       send("error");

@@ -411,8 +411,17 @@ class Translations$venueMap$ja {
 	/// ja: '場所を探す'
 	String get search => '場所を探す';
 
-	/// ja: 'ホール・設備を検索'
-	String get searchHint => 'ホール・設備を検索';
+	/// ja: 'ホール・スポンサー名・番号・設備'
+	String get searchHint => 'ホール・スポンサー名・番号・設備';
+
+	/// ja: '検索をクリア'
+	String get clearSearch => '検索をクリア';
+
+	/// ja: '件'
+	String get placesCount => '件';
+
+	/// ja: '地図で見る'
+	String get showOnMap => '地図で見る';
 
 	/// ja: 'すべて'
 	String get all => 'すべて';
@@ -420,8 +429,8 @@ class Translations$venueMap$ja {
 	/// ja: 'ホール'
 	String get halls => 'ホール';
 
-	/// ja: 'ブース'
-	String get booths => 'ブース';
+	/// ja: 'スポンサー'
+	String get booths => 'スポンサー';
 
 	/// ja: '設備'
 	String get facilities => '設備';
@@ -1326,10 +1335,13 @@ extension on Translations {
 			'venueMap.loadError' => '会場マップを読み込めませんでした',
 			'venueMap.loadErrorDescription' => '再試行してください。',
 			'venueMap.search' => '場所を探す',
-			'venueMap.searchHint' => 'ホール・設備を検索',
+			'venueMap.searchHint' => 'ホール・スポンサー名・番号・設備',
+			'venueMap.clearSearch' => '検索をクリア',
+			'venueMap.placesCount' => '件',
+			'venueMap.showOnMap' => '地図で見る',
 			'venueMap.all' => 'すべて',
 			'venueMap.halls' => 'ホール',
-			'venueMap.booths' => 'ブース',
+			'venueMap.booths' => 'スポンサー',
 			'venueMap.facilities' => '設備',
 			'venueMap.noResults' => '一致する場所がありません',
 			'venueMap.clearSelection' => '選択を解除',

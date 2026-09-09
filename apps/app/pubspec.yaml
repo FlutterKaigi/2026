@@ -59,7 +59,10 @@ flutter:
 
   assets:
     - assets/html/venue_floor_plan_webview.html
-    - assets/venue_map/
+    - assets/venue_map/floor_plan.json
+    - assets/venue_map/floor_map_base.png
+    - assets/venue_map/floor_map_base_dark.png
+    - assets/venue_map/THREE_LICENSE.txt
     - res/assets/dashumaru_magao.webp
     - res/assets/fonts/NotoSansJP/OFL.txt
     # Google 公式の Sign in with Google ボタン素材。

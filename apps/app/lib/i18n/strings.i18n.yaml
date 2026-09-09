@@ -101,10 +101,13 @@ venueMap:
   loadError: 会場マップを読み込めませんでした
   loadErrorDescription: 再試行してください。
   search: 場所を探す
-  searchHint: ホール・設備を検索
+  searchHint: ホール・スポンサー名・番号・設備
+  clearSearch: 検索をクリア
+  placesCount: 件
+  showOnMap: 地図で見る
   all: すべて
   halls: ホール
-  booths: ブース
+  booths: スポンサー
   facilities: 設備
   noResults: 一致する場所がありません
   clearSelection: 選択を解除

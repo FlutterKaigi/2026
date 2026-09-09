@@ -19,11 +19,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+  late Map<String, Object?> sourcePlan;
   late VenueFloorPlan plan;
   setUpAll(() async {
-    plan = VenueFloorPlan.fromJson(
-      Map<String, Object?>.from(jsonDecode(await rootBundle.loadString('assets/venue_map/floor_plan.json')) as Map),
+    sourcePlan = Map<String, Object?>.from(
+      jsonDecode(await rootBundle.loadString('assets/venue_map/floor_plan.json')) as Map,
     );
+    plan = VenueFloorPlan.fromJson(sourcePlan);
   });
 
   test('view preference defaults to 2D and survives a new provider container', () async {
@@ -59,21 +61,83 @@ void main() {
     expect(plan.find('main_hall_a')!.matches('メインホール'), isTrue);
   });
 
-  test('2D and bundled 3D use identical Material icons and readable English facility labels', () async {
+  test('reviewed map contains every numbered sponsor and visitor facility without sponsor ranks', () {
+    final sponsors = plan.places.where((p) => p.type == VenuePlaceType.sponsor).toList();
+    expect(sponsors.map((p) => p.boothNumber), List.generate(22, (i) => i + 1));
+    expect(sponsors.first.name('ja'), 'Flutter');
+    expect(sponsors.map((p) => p.markerColor).toSet(), hasLength(1));
+    expect((sourcePlan['booths']! as List).map((b) => (b as Map)['color']).toSet(), hasLength(1));
+    for (final p in sponsors) {
+      expect(p.subtitle('ja'), matches(RegExp(r'^ホワイエ[12]$')));
+      expect(p.subtitle('en'), matches(RegExp(r'^Foyer [12]$')));
+    }
+    expect(plan.find('elevators'), isNull);
+    expect(plan.find('accessible_wc')!.iconData, Icons.accessible);
+    expect(plan.find('ask_up')!.relatedHallId, 'main_hall_b');
+    expect(plan.find('ask_jt')!.relatedHallId, 'main_hall_a');
+    expect(plan.find('ask_b')!.relatedHallId, 'grand_hall_b');
+    expect(plan.places.where((p) => p.id.startsWith('trash_')), hasLength(2));
+    expect(sourcePlan['escalators'], hasLength(4));
+    for (final point in [
+      const Offset(860, 703),
+      const Offset(860, 738),
+      const Offset(1020, 703),
+      const Offset(1020, 738),
+    ]) {
+      expect(plan.placeAt(point)?.id, 'escalators');
+    }
+    for (final p in plan.places) {
+      expect(plan.isRestricted(p.anchor), isFalse, reason: p.id);
+      expect(plan.placeAt(p.anchor)?.id, p.id, reason: p.id);
+    }
+  });
+
+  test('booth numbers have readable contrast on their shared color', () {
+    for (final p in plan.places.where((p) => p.boothNumber != null)) {
+      final a = p.markerColor.computeLuminance();
+      final b = p.markerTextColor.computeLuminance();
+      final contrast = ((a > b ? a : b) + .05) / ((a < b ? a : b) + .05);
+      expect(contrast, greaterThanOrEqualTo(4.5), reason: p.id);
+    }
+  });
+
+  test('search accepts exact booth numbers, circled numbers, names and both languages', () {
+    expect(plan.places.where((p) => p.matches('1')).map((p) => p.id), ['sponsor_1']);
+    expect(plan.places.where((p) => p.matches('#15')).map((p) => p.id), ['sponsor_15']);
+    expect(plan.find('sponsor_22')!.matches('㉒'), isTrue);
+    expect(plan.find('sponsor_2')!.matches('日本トレカ'), isTrue);
+    expect(plan.find('sponsor_6')!.matches('HACOMONO'), isTrue);
+    expect(plan.find('accessible_wc')!.matches('accessible'), isTrue);
+  });
+
+  test('hall entrances select their hall and closed areas remain unselectable', () {
+    for (final (point, id) in [
+      (const Offset(444, 355), 'main_hall_a'),
+      (const Offset(444, 617), 'main_hall_b'),
+      (const Offset(1407, 328), 'grand_hall_a'),
+      (const Offset(1407, 647), 'grand_hall_b'),
+    ]) {
+      expect(plan.placeAt(point)?.id, id);
+    }
+    for (final point in [const Offset(800, 200), const Offset(1390, 180), const Offset(1340, 670), Offset.zero]) {
+      expect(plan.placeAt(point), isNull);
+    }
+    expect(plan.publicEntrances, hasLength(10));
+  });
+
+  test('2D and offline 3D use the identical reviewed geometry and icon glyphs', () async {
     final html = await rootBundle.loadString('assets/html/venue_floor_plan_webview.html');
+    final embeddedPlan = RegExp(r'const PLAN = (\{[^\n]+\});').firstMatch(html)!;
+    expect(jsonDecode(embeddedPlan.group(1)!), sourcePlan);
     final embedded = RegExp(r'const MAP_ICONS = (\{[^;]+\});').firstMatch(html)!;
     final icons = Map<String, String>.from(jsonDecode(embedded.group(1)!) as Map);
-    for (final place in plan.places.where((place) => place.type == VenuePlaceType.facility)) {
-      expect(icons[place.materialIcon], String.fromCharCode(place.iconData.codePoint), reason: place.id);
-      expect(place.mapLabel('en'), isNotEmpty, reason: '${place.id} needs text alongside its icon');
-      if (place.id == 'ask_speaker') {
-        expect(place.mapLabel('ja').replaceAll('\n', ' '), 'Ask the Speaker');
-      } else {
-        expect(place.mapLabel('ja'), place.icon == 'wc' ? 'WC' : '');
-      }
+    for (final p in plan.places.where((p) => p.type == VenuePlaceType.facility)) {
+      expect(icons[p.materialIcon], String.fromCharCode(p.iconData.codePoint), reason: p.id);
+      expect(p.mapLabel('en'), isNotEmpty);
     }
-    expect(plan.find('mens_wc')!.mapLabel('en').replaceAll('\n', ' '), 'Men’s restroom');
-    expect(plan.find('womens_wc')!.mapLabel('en').replaceAll('\n', ' '), 'Women’s restroom');
+    expect(html.contains('MAP_ART_DARK'), isTrue);
+    expect((await rootBundle.load(plan.artAsset)).lengthInBytes, greaterThan(10000));
+    expect((await rootBundle.load(plan.artAssetDark)).lengthInBytes, greaterThan(10000));
   });
 
   test('camera fits both orientations, focuses once, and preserves a subsequent pan on resize', () {
@@ -203,7 +267,9 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('all on-screen places stay labelled after selection, zooming out and rotation', (tester) async {
+  testWidgets('visible labels stay readable across selection and rotation; dense booth labels appear on zoom', (
+    tester,
+  ) async {
     tester.view.physicalSize = const Size(360, 740);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
@@ -217,11 +283,14 @@ void main() {
         if (!(Offset.zero & camera.viewport).contains(camera.project(place.anchor))) {
           continue;
         }
-        final label = find.byTooltip(place.name('ja'));
+        if (place.type == VenuePlaceType.sponsor && camera.scale < .5) {
+          continue;
+        }
+        final label = find.byTooltip(place.semanticsLabel('ja'));
         expect(label, findsOneWidget, reason: '${place.id} must stay visible');
         final box = tester.getRect(label);
-        expect(box.size.width, greaterThanOrEqualTo(48));
-        expect(box.size.height, greaterThanOrEqualTo(48));
+        expect(box.size.width, greaterThanOrEqualTo(24));
+        expect(box.size.height, greaterThanOrEqualTo(24));
         for (final other in boxes) {
           expect(box.overlaps(other), isFalse, reason: '${place.id} must remain readable and tappable');
         }
@@ -238,38 +307,50 @@ void main() {
       camera.zoom(.7);
       await tester.pumpAndSettle();
       expectAllLabels();
-      expect(find.byTooltip(plan.find('mens_wc')!.name('ja')), findsOneWidget);
+      expect(
+        find.byTooltip(plan.find('mens_wc')!.name('ja')),
+        findsOneWidget,
+        reason:
+            'rotation=$rotation viewport=${camera.viewport} scale=${camera.scale} mens=${camera.project(plan.find('mens_wc')!.anchor)}',
+      );
       expect(find.byTooltip(plan.find('womens_wc')!.name('ja')), findsOneWidget);
     }
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('English facility names are visible on the compact map without hovering', (tester) async {
-    tester.view.physicalSize = const Size(360, 740);
+  testWidgets('sponsor directory selects a numbered table and clearing search restores the list', (tester) async {
+    tester.view.physicalSize = const Size(1100, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await pumpMap(tester);
+    await tester.tap(find.widgetWithText(FilterChip, 'スポンサー 22'));
+    await tester.enterText(find.byType(TextField), '15');
+    await tester.pumpAndSettle();
+    expect(find.widgetWithText(ListTile, 'GENDA'), findsOneWidget);
+    expect(find.widgetWithText(ListTile, 'Flutter'), findsNothing);
+    await tester.tap(find.widgetWithText(ListTile, 'GENDA'));
+    await tester.pumpAndSettle();
+    final map = tester.widget<VenueMap2DView>(find.byType(VenueMap2DView));
+    expect(map.selected?.boothNumber, 15);
+    expect(find.byTooltip('15 · GENDA'), findsOneWidget);
+    await tester.tap(find.byTooltip('検索をクリア'));
+    await tester.pumpAndSettle();
+    expect(find.widgetWithText(ListTile, 'Flutter'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('English restroom captions appear after zoom without overflowing', (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
     await pumpMap(tester, english: true);
     final camera = tester.widget<VenueMap2DView>(find.byType(VenueMap2DView)).controller;
-    for (var orientation = 0; orientation < 2; orientation++) {
-      final boxes = <Rect>[];
-      for (final place in plan.places) {
-        final box = tester.getRect(find.byTooltip(place.name('en')));
-        for (final other in boxes) {
-          expect(
-            box.overlaps(other),
-            isFalse,
-            reason: '${place.id} needs a readable label: orientation=$orientation, $box, $other',
-          );
-        }
-        boxes.add(box);
-        if (place.type == VenuePlaceType.facility) {
-          expect(find.text(place.mapLabel('en')), findsOneWidget);
-        }
-      }
-      camera.rotate();
-      await tester.pumpAndSettle();
-    }
+    camera.focus(plan.find('accessible_wc')!);
+    await tester.pumpAndSettle();
+    expect(find.text('Accessible'), findsOneWidget);
+    expect(find.byTooltip('Accessible restroom'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 

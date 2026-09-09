@@ -51,6 +51,8 @@ class _VenueMap3DSurfaceState extends State<VenueMap3DSurface> {
   void didUpdateWidget(VenueMap3DSurface oldWidget) {
     super.didUpdateWidget(oldWidget);
     _frame?.style.pointerEvents = widget.interactive ? 'auto' : 'none';
+    _frame?.setAttribute('aria-hidden', widget.interactive ? 'false' : 'true');
+    _frame?.tabIndex = widget.interactive ? 0 : -1;
   }
 
   void _send(Map<String, Object?> command) {
@@ -78,6 +80,8 @@ class _VenueMap3DSurfaceState extends State<VenueMap3DSurface> {
         ..border = '0'
         ..width = '100%'
         ..height = '100%';
+      frame.setAttribute('aria-hidden', widget.interactive ? 'false' : 'true');
+      frame.tabIndex = widget.interactive ? 0 : -1;
     },
   );
 }

@@ -1,7 +1,7 @@
 // Place every on-screen label near its anchor. A collision moves a label; it never removes it.
 function layoutMapLabels(items, width, height) {
   const margin = 4,
-    gap = 6;
+    gap = 3;
   const placed = [];
   const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
   const ordered = items

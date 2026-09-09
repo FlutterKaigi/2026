@@ -41,6 +41,7 @@ class VenueMap3DController {
 
   void fit() => _send?.call({'action': 'fit'});
   void zoom(double factor) => _send?.call({'action': 'zoom', 'value': factor});
+  void rotate() => _send?.call({'action': 'rotate'});
 }
 
 class VenueMap3DView extends StatefulWidget {

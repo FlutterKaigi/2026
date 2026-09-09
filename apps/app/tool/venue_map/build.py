@@ -62,7 +62,8 @@ for key, value in {
     '__ICON_LICENSE__': (sdk / 'bin/cache/artifacts/material_fonts/MaterialIcons_LICENSE.txt').read_text(),
     '__VENDOR__': (ROOT / 'vendor/three-r160.js').read_text(),
     '__PLAN__': json.dumps(PLAN, ensure_ascii=False, separators=(',', ':')),
-    '__ART__': encoded(APP / 'assets/venue_map/floor_map.png'),
+    '__ART__': encoded(APP / PLAN['artAsset']),
+    '__ART_DARK__': encoded(APP / PLAN['artAssetDark']),
     '__LABEL_LAYOUT__': (ROOT / 'label-layout.js').read_text(),
     '__SCENE__': (ROOT / 'scene.js').read_text(),
 }.items():

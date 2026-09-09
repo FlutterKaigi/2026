@@ -41,10 +41,12 @@ function render(
     height = 612,
     selected = "hall_entrance_information",
     zoom = 1,
+    polarAngle = 0,
   } = {},
 ) {
   const element = () => ({
     style: {},
+    classList: {toggle() {}},
     attributes: {},
     setAttribute(key, value) {
       this.attributes[key] = value;
@@ -70,6 +72,8 @@ function render(
     labelNodes: labels,
     selected,
     camera: { zoom },
+    controls: { getPolarAngle: () => polarAngle },
+    unit: .028,
     fitZoom: 1,
     point: (anchor) => ({
       project: () => ({
@@ -186,6 +190,21 @@ test("off-screen places do not create misleading labels at the edge", () => {
   const [wc] = render([{ ...measured[7], anchor: [-20, 200] }]);
   assert.equal(wc.el.hidden, true);
   assert.equal(wc.line.style.visibility, "hidden");
+});
+
+test("dense booth numbers appear on zoom and a selected booth remains identifiable", () => {
+  const booth = {...measured[0], id: "sponsor_1", type: "sponsor", width: 24, height: 24};
+  assert.equal(render([booth], {zoom: .7, selected: null})[0].el.hidden, true);
+  assert.equal(render([booth], {zoom: 1.2, selected: null})[0].el.hidden, false);
+  assert.equal(render([booth], {zoom: .7, selected: "sponsor_1"})[0].el.hidden, false);
+});
+
+test("tilting the floor postpones dense booth numbers until its compressed axis is readable", () => {
+  const booth = {...measured[0], id: "sponsor_1", type: "sponsor", width: 24, height: 24};
+  const view = {zoom: 1.2, polarAngle: Math.PI / 3, selected: null};
+  assert.equal(render([booth], view)[0].el.hidden, true);
+  assert.equal(render([booth], {...view, zoom: 2})[0].el.hidden, false);
+  assert.equal(render([booth], {...view, selected: "sponsor_1"})[0].el.hidden, false);
 });
 
 test("English captions remain readable when the compact 3D map rotates", () => {

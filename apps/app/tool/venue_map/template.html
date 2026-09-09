@@ -59,12 +59,12 @@
     .label {
       position: absolute;
       transform: translate(-50%, -50%);
-      min-width: 48px;
+      min-width: 36px;
       max-width: calc(100% - 8px);
-      min-height: 48px;
+      min-height: 36px;
       padding: 4px 6px;
-      border: 1px solid var(--outline);
-      border-radius: 12px;
+      border: 1px solid transparent;
+      border-radius: 8px;
       font:
         700 calc(12px * var(--text-scale, 1))/1.4 VenueMap,
         sans-serif;
@@ -81,6 +81,18 @@
       font-size: calc(11px * var(--text-scale, 1));
       line-height: 1.45;
     }
+    .label.sponsor {
+      color: var(--onSurface);
+      min-width: 24px;
+      min-height: 24px;
+      width: calc(24px * var(--text-scale, 1));
+      height: calc(24px * var(--text-scale, 1));
+      border-radius: 50%;
+      border: 1.5px solid var(--color);
+      padding: 0;
+    }
+    .label.facility.compact .facility-content > span:not(.material-icon) { display: none; }
+    .label.facility.compact { min-width: 32px; min-height: 32px; padding: 3px; }
     .facility-content {
       display: flex;
       flex-direction: column;
@@ -118,6 +130,7 @@
       const MAP_ICONS = __ICONS__;
       const ART_BOX = PLAN.artBox;
       const MAP_ART = "data:image/png;base64,__ART__";
+      const MAP_ART_DARK = "data:image/png;base64,__ART_DARK__";
       __LABEL_LAYOUT__;
       __SCENE__;
     }

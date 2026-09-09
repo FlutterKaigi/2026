@@ -68,9 +68,13 @@ class VenueMap2DController extends ChangeNotifier {
     final points = place.polygon.map(orient);
     final radiusX = points.map((p) => (p.dx - center.dx).abs()).reduce(math.max) + 24;
     final radiusY = points.map((p) => (p.dy - center.dy).abs()).reduce(math.max) + 24;
+    final maxFocus = place.type == VenuePlaceType.sponsor || place.type == VenuePlaceType.facility ? 4.5 : 2.2;
     scale = math.max(
       fitScale,
-      math.min(fitScale * 2.2, math.min((viewport.width - 64) / (radiusX * 2), (viewport.height - 64) / (radiusY * 2))),
+      math.min(
+        fitScale * maxFocus,
+        math.min((viewport.width - 64) / (radiusX * 2), (viewport.height - 64) / (radiusY * 2)),
+      ),
     );
     offset = viewport.center(Offset.zero) - center * scale;
     notifyListeners();

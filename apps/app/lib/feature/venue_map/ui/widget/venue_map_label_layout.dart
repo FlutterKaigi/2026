@@ -27,7 +27,7 @@ class VenueMapLabelPlacement {
 /// The same placement rule is used by the 3D asset's label-layout.js.
 List<VenueMapLabelPlacement> layoutVenueMapLabels(List<VenueMapLabelAnchor> items, Size viewport) {
   const margin = 4.0;
-  const gap = 6.0;
+  const gap = 3.0;
   final placed = <VenueMapLabelPlacement>[];
   final ordered = items.indexed.toList()
     ..sort((a, b) {

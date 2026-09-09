@@ -40,6 +40,18 @@ class _VenueMapPageState extends ConsumerState<VenueMapPage> {
     setState(() => _savingMode = true);
     try {
       await ref.read(venueMapViewModeProvider.notifier).set(mode);
+      if (_selected case final selected? when mounted) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) {
+            return;
+          }
+          if (mode == VenueMapViewMode.twoD) {
+            _twoD.focus(selected);
+          } else {
+            _threeD.focus(selected.id);
+          }
+        });
+      }
     } on Object {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.t.venueMap.saveFailed)));
@@ -196,12 +208,11 @@ class _VenueMapPageState extends ConsumerState<VenueMapPage> {
                                 const SizedBox(width: 16),
                                 Text('5F', style: theme.textTheme.titleMedium),
                                 const Spacer(),
-                                if (mode == VenueMapViewMode.twoD)
-                                  IconButton(
-                                    tooltip: t.rotate,
-                                    onPressed: _twoD.rotate,
-                                    icon: const Icon(Icons.screen_rotation_alt),
-                                  ),
+                                IconButton(
+                                  tooltip: t.rotate,
+                                  onPressed: mode == VenueMapViewMode.twoD ? _twoD.rotate : _threeD.rotate,
+                                  icon: const Icon(Icons.screen_rotation_alt),
+                                ),
                                 IconButton(
                                   tooltip: t.zoomOut,
                                   onPressed: () =>
@@ -226,9 +237,25 @@ class _VenueMapPageState extends ConsumerState<VenueMapPage> {
                         ],
                       ),
                     );
+                    VenuePlace? related;
+                    if (_selected?.relatedHallId case final id?) {
+                      related = plan.find(id);
+                    } else if (_selected?.type == VenuePlaceType.hall) {
+                      for (final p in plan.places) {
+                        if (p.relatedHallId == _selected!.id) {
+                          related = p;
+                        }
+                      }
+                    }
                     final summary = _selected == null
                         ? const SizedBox.shrink()
-                        : VenuePlaceSummary(place: _selected!, onClear: () => setState(() => _selected = null));
+                        : VenuePlaceSummary(
+                            place: _selected!,
+                            onClear: () => setState(() => _selected = null),
+                            onFocus: () => _select(_selected!),
+                            related: related,
+                            onRelated: _select,
+                          );
                     if (wide) {
                       return Row(
                         children: [

@@ -14,12 +14,10 @@ class VenueMap2DView extends StatefulWidget {
     required this.onSelected,
     super.key,
   });
-
   final VenueFloorPlan plan;
   final VenueMap2DController controller;
   final VenuePlace? selected;
   final ValueChanged<VenuePlace> onSelected;
-
   @override
   State<VenueMap2DView> createState() => _VenueMap2DViewState();
 }
@@ -34,7 +32,7 @@ class _VenueMap2DViewState extends State<VenueMap2DView> {
     final colors = Theme.of(context).colorScheme;
     final camera = widget.controller;
     return ColoredBox(
-      color: colors.surfaceContainerLowest,
+      color: colors.brightness == Brightness.dark ? const Color(0xFF18232E) : const Color(0xFFFCFDFE),
       child: LayoutBuilder(
         builder: (context, constraints) {
           camera.layout(constraints.biggest, widget.plan);
@@ -59,9 +57,10 @@ class _VenueMap2DViewState extends State<VenueMap2DView> {
               return Listener(
                 onPointerSignal: (event) {
                   if (event is PointerScrollEvent) {
-                    GestureBinding.instance.pointerSignalResolver.register(event, (_) {
-                      camera.zoom(math.exp(-event.scrollDelta.dy * .002), focalPoint: event.localPosition);
-                    });
+                    GestureBinding.instance.pointerSignalResolver.register(
+                      event,
+                      (_) => camera.zoom(math.exp(-event.scrollDelta.dy * .002), focalPoint: event.localPosition),
+                    );
                   }
                 },
                 child: GestureDetector(
@@ -76,12 +75,9 @@ class _VenueMap2DViewState extends State<VenueMap2DView> {
                     worldAnchor: _anchor,
                   ),
                   onTapUp: (details) {
-                    final point = camera.unproject(details.localPosition);
-                    for (final place in widget.plan.places.reversed) {
-                      if (place.path.contains(point)) {
-                        widget.onSelected(place);
-                        break;
-                      }
+                    final place = widget.plan.placeAt(camera.unproject(details.localPosition));
+                    if (place != null) {
+                      widget.onSelected(place);
                     }
                   },
                   child: ClipRect(
@@ -100,14 +96,19 @@ class _VenueMap2DViewState extends State<VenueMap2DView> {
                                 children: [
                                   Positioned.fromRect(
                                     rect: widget.plan.artBox,
-                                    child: _floorArt(colors),
+                                    child: Image.asset(
+                                      colors.brightness == Brightness.dark
+                                          ? widget.plan.artAssetDark
+                                          : widget.plan.artAsset,
+                                      fit: BoxFit.fill,
+                                      excludeFromSemantics: true,
+                                      gaplessPlayback: true,
+                                    ),
                                   ),
-                                  if (colors.brightness == Brightness.dark)
-                                    Positioned.fill(child: CustomPaint(painter: _RoomTintPainter(widget.plan, colors))),
                                   if (widget.selected case final place?)
                                     Positioned.fill(
                                       child: CustomPaint(
-                                        painter: _SelectionPainter(place, colors.primary, camera.scale),
+                                        painter: _SelectionPainter(place, place.color(colors), camera.scale),
                                       ),
                                     ),
                                 ],
@@ -128,141 +129,170 @@ class _VenueMap2DViewState extends State<VenueMap2DView> {
     );
   }
 
-  Widget _floorArt(ColorScheme colors) {
-    final image = Image.asset('assets/venue_map/floor_map.png', fit: BoxFit.fill, excludeFromSemantics: true);
-    if (colors.brightness != Brightness.dark) {
-      return image;
-    }
-    // Map the drawing's luminance onto theme paper/ink, preserving readable walls in dark mode.
-    final paper = colors.surfaceContainerHighest;
-    final ink = colors.onSurfaceVariant;
-    final matrix = <double>[];
-    for (final (background, foreground) in [(paper.r, ink.r), (paper.g, ink.g), (paper.b, ink.b)]) {
-      final difference = background - foreground;
-      matrix.addAll([difference * .2126, difference * .7152, difference * .0722, 0, foreground * 255]);
-    }
-    matrix.addAll([0, 0, 0, 1, 0]);
-    return ColorFiltered(colorFilter: ColorFilter.matrix(matrix), child: image);
-  }
-
   List<Widget> _labels(BuildContext context) {
     final camera = widget.controller;
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
     final language = Localizations.localeOf(context).languageCode;
+    final textScale = MediaQuery.textScalerOf(context).scale(12) / 12;
     final items = <VenueMapLabelAnchor>[];
-    final style = theme.textTheme.labelMedium!.copyWith(fontWeight: FontWeight.w700);
+    final captions = <String, String>{};
+    final detailed = camera.scale >= .5;
     for (final place in widget.plan.places) {
       final point = camera.project(place.anchor);
       if (!(Offset.zero & camera.viewport).contains(point)) {
         continue;
       }
+      final selected = place.id == widget.selected?.id;
+      // Table footprints always remain on the floor. Numbers appear when there
+      // is enough room; every sponsor is also available in the searchable list.
+      if (place.type == VenuePlaceType.sponsor && !detailed && !selected) {
+        continue;
+      }
       final facility = place.type == VenuePlaceType.facility;
-      final restroom = place.icon == 'wc';
-      final label = facility ? place.mapLabel(language) : place.name(language).replaceFirst(' HALL', '\nHALL');
+      final sponsor = place.type == VenuePlaceType.sponsor;
+      final caption = sponsor
+          ? '${place.boothNumber}'
+          : facility
+          ? (detailed || selected || place.id.startsWith('ask_') ? place.mapLabel(language) : '')
+          : place.name(language).replaceFirst(' HALL', '\nHALL');
+      captions[place.id] = caption;
       final painter = TextPainter(
-        text: TextSpan(text: label, style: facility ? theme.textTheme.labelSmall : style),
+        text: TextSpan(
+          text: caption,
+          style: theme.textTheme.labelSmall!.copyWith(
+            fontSize: facility ? 10 : 12,
+            height: 1.25,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
         textDirection: Directionality.of(context),
         textScaler: MediaQuery.textScalerOf(context),
-      )..layout();
-      final size = facility
-          ? Size(math.max(48, painter.width + 12), label.isNotEmpty ? math.max(48, painter.height + 30) : 48)
-          : Size(math.max(48, painter.width + 12), math.max(48, painter.height + 8));
+      )..layout(maxWidth: math.max(60, camera.viewport.width - 32));
+      final size = sponsor
+          ? Size(24 * textScale, 24 * textScale)
+          : facility
+          ? Size(math.max(32, painter.width + 14), caption.isEmpty ? 32 : 34 + painter.height)
+          : Size(math.max(48, painter.width + 12), math.max(36, painter.height + 8));
       painter.dispose();
       items.add(
         VenueMapLabelAnchor(
           id: place.id,
           anchor: point,
           size: size,
-          priority: restroom
+          priority: selected
               ? 0
-              : place.id == widget.selected?.id
+              : place.icon == 'wc'
               ? 1
               : place.type == VenuePlaceType.hall
               ? 2
-              : place.type == VenuePlaceType.foyer
-              ? 3
-              : 4,
+              : sponsor
+              ? 5
+              : 3,
           previousOffset: _labelOffsets[place.id] ?? Offset.zero,
         ),
       );
     }
     final placements = layoutVenueMapLabels(items, camera.viewport);
-    final result = <Widget>[
+    return [
       Positioned.fill(
         child: IgnorePointer(child: CustomPaint(painter: _LabelConnectorPainter(placements, colors.onSurfaceVariant))),
       ),
+      for (final placement in placements.reversed) _label(context, placement, captions[placement.item.id]!, textScale),
     ];
-    // Draw the higher-priority labels last, so restroom buttons remain tappable even in a tiny viewport.
-    for (final placement in placements.reversed) {
-      final place = widget.plan.find(placement.item.id)!;
-      final selected = place.id == widget.selected?.id;
-      final facility = place.type == VenuePlaceType.facility;
-      final caption = place.mapLabel(language);
-      final label = place.name(language).replaceFirst(' HALL', '\nHALL');
-      final box = placement.rect;
-      _labelOffsets[place.id] = box.center - placement.item.anchor;
-      result.add(
-        Positioned.fromRect(
-          rect: box,
-          child: Semantics(
-            button: true,
-            selected: selected,
-            label: place.name(language),
-            child: Tooltip(
-              message: place.name(language),
-              excludeFromSemantics: true,
-              child: Material(
-                color: selected ? colors.primaryContainer : colors.surface.withValues(alpha: .9),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  side: BorderSide(color: selected ? colors.primary : colors.outlineVariant),
-                ),
-                child: InkWell(
-                  onTap: () => widget.onSelected(place),
-                  borderRadius: BorderRadius.circular(12),
-                  child: Center(
-                    child: ExcludeSemantics(
-                      child: facility
-                          ? Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(place.iconData, color: selected ? colors.onPrimaryContainer : place.color(colors)),
-                                if (caption.isNotEmpty)
-                                  Text(
-                                    caption,
-                                    textAlign: TextAlign.center,
-                                    style: theme.textTheme.labelSmall!.copyWith(
-                                      color: selected ? colors.onPrimaryContainer : place.color(colors),
-                                    ),
-                                  ),
-                              ],
-                            )
-                          : Text(
-                              label,
-                              textAlign: TextAlign.center,
-                              style: style.copyWith(color: selected ? colors.onPrimaryContainer : place.color(colors)),
-                            ),
-                    ),
-                  ),
+  }
+
+  Widget _label(BuildContext context, VenueMapLabelPlacement placement, String caption, double textScale) {
+    final place = widget.plan.find(placement.item.id)!;
+    final selected = place.id == widget.selected?.id;
+    final colors = Theme.of(context).colorScheme;
+    final language = Localizations.localeOf(context).languageCode;
+    final sponsor = place.type == VenuePlaceType.sponsor;
+    final facility = place.type == VenuePlaceType.facility;
+    final color = place.color(colors);
+    _labelOffsets[place.id] = placement.rect.center - placement.item.anchor;
+    return Positioned.fromRect(
+      rect: placement.rect,
+      child: Semantics(
+        button: true,
+        selected: selected,
+        label: place.semanticsLabel(language),
+        child: Tooltip(
+          message: place.semanticsLabel(language),
+          excludeFromSemantics: true,
+          child: Material(
+            color: sponsor
+                ? (selected ? place.markerColor : colors.surface)
+                : selected
+                ? colors.primaryContainer
+                : colors.surface.withValues(alpha: .88),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(sponsor ? 20 : 8),
+              side: BorderSide(
+                color: sponsor
+                    ? color
+                    : selected
+                    ? colors.primary
+                    : Colors.transparent,
+                width: selected ? 2 : 1.5,
+              ),
+            ),
+            child: InkWell(
+              onTap: () => widget.onSelected(place),
+              borderRadius: BorderRadius.circular(12),
+              child: Center(
+                child: ExcludeSemantics(
+                  child: facility
+                      ? Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(place.iconData, size: 22, color: selected ? colors.onPrimaryContainer : color),
+                            if (caption.isNotEmpty)
+                              Text(
+                                caption,
+                                textAlign: TextAlign.center,
+                                softWrap: false,
+                                style: Theme.of(context).textTheme.labelSmall!.copyWith(
+                                  fontSize: 10,
+                                  height: 1.25,
+                                  color: selected ? colors.onPrimaryContainer : color,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                          ],
+                        )
+                      : Text(
+                          caption,
+                          textAlign: TextAlign.center,
+                          softWrap: false,
+                          style: Theme.of(context).textTheme.labelSmall!.copyWith(
+                            fontSize: 12,
+                            height: 1.25,
+                            fontWeight: FontWeight.w700,
+                            color: sponsor && selected
+                                ? place.markerTextColor
+                                : selected
+                                ? colors.onPrimaryContainer
+                                : sponsor
+                                ? colors.onSurface
+                                : color,
+                          ),
+                        ),
                 ),
               ),
             ),
           ),
         ),
-      );
-    }
-    return result;
+      ),
+    );
   }
 }
 
 class _SelectionPainter extends CustomPainter {
   const _SelectionPainter(this.place, this.color, this.scale);
-
   final VenuePlace place;
   final Color color;
   final double scale;
-
   @override
   void paint(Canvas canvas, Size size) {
     canvas
@@ -272,30 +302,23 @@ class _SelectionPainter extends CustomPainter {
         Paint()
           ..color = color
           ..style = PaintingStyle.stroke
-          ..strokeWidth = 2 / scale,
+          ..strokeWidth = 3 / scale,
       );
+    if (place.type == VenuePlaceType.sponsor) {
+      canvas.drawCircle(
+        place.anchor,
+        23 / scale,
+        Paint()
+          ..color = color.withValues(alpha: .25)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 5 / scale,
+      );
+    }
   }
 
   @override
   bool shouldRepaint(_SelectionPainter oldDelegate) =>
       oldDelegate.place != place || oldDelegate.color != color || oldDelegate.scale != scale;
-}
-
-class _RoomTintPainter extends CustomPainter {
-  const _RoomTintPainter(this.plan, this.colors);
-  final VenueFloorPlan plan;
-  final ColorScheme colors;
-  @override
-  void paint(Canvas canvas, Size size) {
-    for (final place in plan.places) {
-      if (place.type != VenuePlaceType.facility) {
-        canvas.drawPath(place.path, Paint()..color = place.color(colors).withValues(alpha: .16));
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(_RoomTintPainter oldDelegate) => oldDelegate.plan != plan || oldDelegate.colors != colors;
 }
 
 class _LabelConnectorPainter extends CustomPainter {
@@ -305,16 +328,16 @@ class _LabelConnectorPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = color
-      ..strokeWidth = 1.5;
+      ..color = color.withValues(alpha: .55)
+      ..strokeWidth = 1;
     for (final placement in placements) {
       final anchor = placement.item.anchor;
       final box = placement.rect;
       final end = Offset(anchor.dx.clamp(box.left, box.right), anchor.dy.clamp(box.top, box.bottom));
-      if ((anchor - end).distance > 3) {
+      if ((anchor - end).distance > 4) {
         canvas
           ..drawLine(anchor, end, paint)
-          ..drawCircle(anchor, 2.5, paint);
+          ..drawCircle(anchor, 2, paint);
       }
     }
   }

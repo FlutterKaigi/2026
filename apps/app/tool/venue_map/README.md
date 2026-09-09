@@ -1,60 +1,62 @@
 # 会場マップ
 
-アプリの `VenueMapPage` が操作 UI、検索、選択状態を持ちます。Material 3 の部品とアプリの
-`ColorScheme` / `TextTheme` を使い、日本語・英語とライト・ダークテーマに対応します。
+アプリの2D・3D表示は、確認済みの会場マップ v17 と同じ形状・配置を使います。
+40か所（4ホール、2ホワイエ、22社のブース、12設備）を共通データに登録しています。
 
-- 2D は Flutter で描画し、初回起動時の表示方法です。
-- 表示方法だけを SharedPreferences に保存します。ページを作り直したときは会場全体を表示します。
-- 場所の選択はハイライトと一度のカメラ移動です。その後のパン・ズーム・回転は選択から独立しています。
-- 検索の開閉、選択解除、テーマ変更、画面サイズ変更では選択位置へ戻しません。
-- 画面内の場所のラベルはすべて表示します。重なる場合は近くへずらし、引き出し線で実際の位置を示します。
-  トイレは配置を先に確保します。回転・縮小・選択を理由にラベルを省略しません。
-- 設備は2D・3Dで同じMaterialアイコンを使用します。英語ではアイコンに設備名を添えます。
-- スマホは下部の検索ボタンと選択カード、大きな画面は検索サイドバーを使います。
-- 3D は iOS / Android の WebView と Web の iframe で表示します。非表示中は描画を停止します。
-  読み込めない場合は再試行または 2D への切り替えができます。
+## 表示と操作
 
-## 図面と素材
+- 2D：文字のないフロア画像の上に、Flutterの選択可能なラベルを配置します。パン、ピンチ、拡大・縮小、90度回転、全体表示に対応します。ラベルは回転しても正立します。
+- 3D：同じ床面、117本の壁線分、スポンサーの机、4本のエスカレーターをThree.jsで表示します。ホールやトイレの壁は確定済みの線分を立ち上げ、入口を再推定しません。ドラッグ回転、パン、ズーム、90度回転、全体表示に対応します。
+- ホール・スポンサー・設備をタップ、または一覧から選択すると、その場所を強調して表示します。選択を解除してもカメラを戻しません。
+- 2D・3Dを切り替えると、選択していた場所に移動します。表示方法は保存します。
+- スマートフォンは下部の検索シート、大画面は左側の検索一覧を使用します。
+- スポンサーは机の位置に番号を表示し、名前とホワイエは一覧・選択カードで確認できます。ブースは共通色に統一し、ランクによる色分けや表記は掲載しません。検索は名前、整数番号、`#15`、`㉒`にも対応します。
+- 縮小時はホールと設備を優先し、ブース番号は拡大すると表示します。3Dでは地図の傾きによる圧縮も考慮します。選択したブースの番号は常に表示します。検索一覧には縮尺に関係なく全22社を掲載します。
+- ホールと対応するAsk the Speakerの間は、選択カードから移動できます。
+- 日本語・英語、ライト・ダーク、文字拡大に対応します。ホール・設備の色を保ち、番号の前景色はコントラストを確保します。
+- 3DはWebのiframe、iOS・AndroidのWebViewに対応します。非表示・検索シート表示中は描画を停止し、Webではフォーカス対象からも外します。読み込み失敗時は再試行または2Dに切り替えられます。
 
-`assets/venue_map/floor_plan.json` は添付された詳細図面（871 × 449）の座標を基準にした共通データです。
-ホールの形・名称・設備の位置を更新する際は、このファイルを変更します。
-設備の `materialIcon` と `mapLabel` も2D・3D共通です。
-`floor_map.png` は確認済みの文字なし画像を使っています。
-`artBox` は画像の外壁を図面の座標へ合わせる位置とサイズです。
+エレベーターは掲載していません。一般利用外の範囲は共通のグレーで示します。
+多目的トイレ、男女トイレの入口、ホールの両開き扉10組、左右2本ずつのエスカレーター、3か所のAsk、2か所のゴミ箱を反映しています。
 
-3D の `scene.js` は同じ JSON と画像を使います。操作は `configure`（テーマ・言語・選択・表示状態）、
-`focus`（一度の移動）、`fit`、`zoom` に分かれています。
-3D は普通の OrbitControls のパン・ズームで近づきます。選択を追跡する独自の回転処理はありません。
+## 共通データと生成
 
-## 3D アセットの再生成
+`build-visitor-map-v17.mjs` が確認済みの作図形状を持ち、`build-app-map.mjs` がそこからアプリ用素材を出力します。
+構造に使っているSVGの直線コマンド以外が追加された場合、エクスポーターはエラーで停止します。
 
-リポジトリルートから実行します。
+生成する素材：
+
+- `assets/venue_map/floor_plan.json`：1774 × 810の共通座標、床領域、壁、入口、机、設備、検索情報。
+- `assets/venue_map/floor_map_base.png` / `floor_map_base_dark.png`：ラベルを除いたフロア画像。日本語の焼き込みを避け、各表示がラベルを描画します。
+- `assets/venue_map/floor_map_base.svg`：同じフロア画像のベクター原稿。アプリのバンドルには含めません。
+- `assets/html/venue_floor_plan_webview.html`：Three.js r160、OrbitControls、共通JSON、両テーマの床面、アプリのNoto Sans JPとMaterial Iconsのサブセットを埋め込んだ3D素材。マップ表示時の外部通信は不要です。
+
+リポジトリルートで次の順序で実行します。Node.jsとSharp、Python 3、設定済みのFlutter SDKが必要です。
 
 ```sh
+node apps/app/tool/venue_map/build-app-map.mjs
 python3 apps/app/tool/venue_map/build.py
 ```
 
-生成先は `assets/html/venue_floor_plan_webview.html` です。Three.js r160 / OrbitControls、画像、図面データ、
-アプリで使う Noto Sans JP のラベル用サブセットを埋め込み、ネットワーク接続を必要としません。
-Materialアイコンも設定済みのFlutter SDKから必要な字形を取り出して埋め込みます。
-Material Iconsのライセンスは生成HTML内に含まれ、アプリではFlutterのライセンス一覧から参照できます。
-Three.js は既存のアプリのバンドルから切り出したものです。ライセンスは
-`assets/venue_map/THREE_LICENSE.txt`、フォントは既存の `res/assets/fonts/NotoSansJP/OFL.txt` にあります。
-フォントのサブセット生成には設定済みの Flutter SDK 内の `font-subset` を使用します。
+3Dベンダーコードのライセンスは `assets/venue_map/THREE_LICENSE.txt`、Noto Sans JPは `res/assets/fonts/NotoSansJP/OFL.txt` にあります。Material IconsのライセンスはHTML内にも埋め込みます。
 
-## 実装画面のプレビュー
+## 確認
 
-Firebase なしで実際のページを起動できます。`apps/app` で実行します。
+`apps/app` ディレクトリからFirebase初期化なしで実際の会場マップページを起動できます。
 
 ```sh
-fvm flutter run -d web-server -t tool/venue_map/preview.dart --web-port 8766
+fvm flutter run --no-pub -d web-server -t tool/venue_map/preview.dart --web-port 8772
 ```
 
-`?theme=dark&locale=en` でダークテーマ・英語を確認できます。この起動ファイルは開発確認用です。
-ヘッダーの設定ボタンから、実際の設定画面でテーマ・言語を切り替えることもできます。
+`?theme=dark&locale=en` でダークテーマ・英語を確認できます。
 
 ```sh
-fvm flutter test test/venue_map_test.dart
+fvm flutter test --no-pub test/venue_map_test.dart
 node --test tool/venue_map/label-layout.test.cjs
 fvm dart analyze
+fvm flutter build web --no-pub --release -t tool/venue_map/preview.dart --output=build/venue-map-preview
 ```
+
+テストでは配置・番号・ブースの共通色、入口の選択、設備、検索、2D/3Dのデータ一致、カメラ、狭い画面と文字拡大、ラベルの重なり、番号のコントラスト、3Dエラー時の2D復帰を確認します。
+
+2026-09-09のiOSシミュレータービルド確認では、既存のSwift Package依存解決が失敗しました。`cloud_functions` が `firebase-ios-sdk 12.17.0`、`cloud_firestore` が `12.15.0` を要求して衝突しています。Web版の両モードは実画面で確認済みですが、iOS上の実行は未確認です。
