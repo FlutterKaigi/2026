@@ -55,31 +55,31 @@ const hallSpecs=[
   ['grand_hall_a','Cupertino','大ホール A','Grand Hall A','rose','M1432 144H1726V418H1432V389H1407V307H1432Z',[1580,279]],
   ['grand_hall_b','Material','大ホール B','Grand Hall B','teal','M1432 434H1726V739H1432V668H1407V624H1432V517H1407V440H1432Z',[1580,584]],
 ];
-for(const [id,name,sub,subEn,color,d,anchor] of hallSpecs)place(id,name,name,sub,subEn,'hall',color,paths(d)[0],anchor);
-place('exhibition_hall_1','ホワイエ1','Foyer 1','スポンサーブース','Sponsor booths','foyer','neutral',box(472,364,469,185),[718,456]);
-place('exhibition_hall_2','ホワイエ2','Foyer 2','スポンサーブース','Sponsor booths','foyer','neutral',box(942,364,463,185),[1163,456]);
+// Event names identify destinations. Venue aliases remain searchable without
+// competing with those names in the directory; foyers are circulation space.
+for(const [id,name,sub,subEn,color,d,anchor] of hallSpecs)place(id,name,name,'','','hall',color,paths(d)[0],anchor,{keywords:[sub,subEn]});
 function facility(id,name,en,sub,subEn,color,d,anchor,icon,mapJa,mapEn,extras={}) {
   return place(id,name,en,sub,subEn,'facility',color,typeof d==='string'?paths(d)[0]:d,anchor,{materialIcon:icon,mapLabel:{ja:mapJa,en:mapEn},...extras});
 }
-facility('hall_entrance_information','インフォメーション','Information','ホール出入口付近','Near the hall entrance','blue',box(874,595,58,65),[903,617],'info_outline','案内','Info');
-facility('mens_wc','男性用トイレ','Men’s restroom','ホワイエ1側・入口2か所','Foyer 1 side · Two entrances','blue','M548 568H838V588H800V664H520V642H548Z',[669,615],'man','男性用トイレ','Men’s\nrestroom',{icon:'wc'});
-facility('womens_wc','女性用トイレ','Women’s restroom','ホワイエ2側・入口2か所','Foyer 2 side · Two entrances','pink','M968 568H1012V608H1042V620H1088V568H1272V592H1260V664H1020V644H988V588H968Z',[1163,615],'woman','女性用トイレ','Women’s\nrestroom',{icon:'wc'});
-facility('accessible_wc','多目的トイレ','Accessible restroom','女性用トイレ左側・専用入口','Beside the women’s restroom · Separate entrance','blue',box(1042,568,46,52),[1063,592],'accessible','多目的','Accessible',{icon:'wc'});
-facility('entrance_hall_lounge','ホール出入口','Hall entrance','エスカレーターからホワイエへ','From the escalators to the foyers','neutral',box(842,543,122,44),[903,563],'login','出入口','Entrance');
-facility('escalators','エスカレーター','Escalators','ホール出入口の両側','On either side of the hall entrance','neutral',box(634,682,585,81),[939,720],'escalator','エスカレーター','Escalators');
-for(const [id,label,hall,color,x,y] of [
-  ['ask_up','Ask UP','UPSIDER HALL','blue',468,567],
-  ['ask_jt','Ask JT','JTCC HALL','purple',521,567],
-  ['ask_b','Ask B','Material','pink',1384,488],
-]) facility(id,label,label,`${hall} の登壇者に質問できます`,`Ask the Speaker · ${hall}`,color,box(x-20,y-20,40,40),[x,y],'record_voice_over_outlined',label,label,{relatedHallId:hallSpecs.find(h=>h[1]===hall)[0]});
-facility('trash_cupertino','ゴミ箱（Cupertino）','Trash · Cupertino','Cupertino 内・左上','Upper left inside Cupertino','gold',box(1450,165,28,34),[1464,182],'delete_outline','ゴミ箱','Trash');
-facility('trash_foyer','ゴミ箱（ホワイエ2）','Trash · Foyer 2','Cupertino 入口付近','Near the Cupertino entrance','gold',box(1364,383,28,34),[1378,400],'delete_outline','ゴミ箱','Trash');
-facility('creative_board','クリエイティブボード','Creative board','ホワイエ1・上側','Foyer 1 · Upper side','purple',box(808,380,110,22),[863,391],'palette_outlined','ボード','Board');
+facility('hall_entrance_information','インフォメーション','Information','','','blue',box(874,595,58,65),[903,617],'info_outline','案内','Info');
+facility('mens_wc','男性用トイレ','Men’s restroom','','','blue','M548 568H838V588H800V664H520V642H548Z',[669,615],'man','男性用トイレ','Men’s\nrestroom',{icon:'wc'});
+facility('womens_wc','女性用トイレ','Women’s restroom','','','pink','M968 568H1012V608H1042V620H1088V568H1272V592H1260V664H1020V644H988V588H968Z',[1163,615],'woman','女性用トイレ','Women’s\nrestroom',{icon:'wc'});
+facility('accessible_wc','多目的トイレ','Accessible restroom','','','blue',box(1042,568,46,52),[1063,592],'accessible','多目的','Accessible',{icon:'wc'});
+facility('entrance_hall_lounge','ホール出入口','Hall entrance','','','neutral',box(842,543,122,44),[903,563],'login','出入口','Entrance');
+facility('escalators','エスカレーター','Escalators','','','neutral',box(634,682,585,81),[939,720],'escalator','エスカレーター','Escalators');
+for(const [id,hall,hallId,color,x,y] of [
+  ['ask_up','UPSIDER','main_hall_b','blue',468,567],
+  ['ask_jt','JTCC','main_hall_a','purple',521,567],
+  ['ask_b','Material','grand_hall_b','pink',1384,488],
+]) facility(id,'Ask the Speaker','Ask the Speaker',hall,hall,color,box(x-20,y-20,40,40),[x,y],'record_voice_over_outlined',`Ask the Speaker\n${hall}`,`Ask the Speaker\n${hall}`,{relatedHallId:hallId});
+facility('trash_cupertino','ゴミ箱（Cupertino）','Trash · Cupertino','','','gold',box(1450,165,28,34),[1464,182],'delete_outline','ゴミ箱','Trash');
+facility('trash_foyer','ゴミ箱（Cupertino入口付近）','Trash · Near Cupertino entrance','','','gold',box(1364,383,28,34),[1378,400],'delete_outline','ゴミ箱','Trash');
+facility('creative_board','クリエイティブボード','Creative board','','','purple',box(808,380,110,22),[863,391],'palette_outlined','ボード','Board');
 for(const s of sponsors) {
   const [x,y,w,h]=s.table;
   const name=sponsorNames.get(s.no);
   if(!name)throw new Error(`Missing official name for booth ${s.no}`);
-  place(`sponsor_${s.no}`,name.ja,name.en,`ホワイエ${s.foyer}`,`Foyer ${s.foyer}`,'sponsor','booth',box(x,y,w,h),[x+w/2,y+h/2],{boothNumber:s.no,table:s.table,keywords:[...new Set([s.displayNo,`#${s.no}`,String(s.no),s.name,s.name.replaceAll('’',"'")])]});
+  place(`sponsor_${s.no}`,name.ja,name.en,'','','sponsor','booth',box(x,y,w,h),[x+w/2,y+h/2],{boothNumber:s.no,table:s.table,keywords:[...new Set([s.displayNo,`#${s.no}`,String(s.no),s.name,s.name.replaceAll('’',"'")])]});
 }
 const base=structuralPlan+escalatorRuns.map(escalatorTreads).join('')+rect(808,380,110,22,C.jtcc,3)+sponsors.map(s=>rect(...s.table,boothColor,1.8)).join('')+hallDoors.map(doorPair).join('')+rect(26,77,1718,686,'none',6,C.ink,4);
 const baseSvg=wrap(base,1774,810,'FlutterKaigi 2026 visitor floor');

@@ -57,7 +57,7 @@ void main() {
     expect(plan.find('grand_hall_b')!.name('ja'), 'Material');
     expect(plan.find('grand_hall_a')!.anchor.dy, lessThan(plan.find('grand_hall_b')!.anchor.dy));
     expect(plan.find('mens_wc')!.matches('restroom'), isTrue);
-    expect(plan.find('exhibition_hall_2')!.matches('ホワイエ 2'), isTrue);
+    expect(plan.places.where((p) => p.type == VenuePlaceType.foyer), isEmpty);
     expect(plan.find('main_hall_a')!.matches('メインホール'), isTrue);
   });
 
@@ -68,8 +68,8 @@ void main() {
     expect(sponsors.map((p) => p.markerColor).toSet(), hasLength(1));
     expect((sourcePlan['booths']! as List).map((b) => (b as Map)['color']).toSet(), hasLength(1));
     for (final p in sponsors) {
-      expect(p.subtitle('ja'), matches(RegExp(r'^ホワイエ[12]$')));
-      expect(p.subtitle('en'), matches(RegExp(r'^Foyer [12]$')));
+      expect(p.subtitle('ja'), isEmpty);
+      expect(p.subtitle('en'), isEmpty);
     }
     expect(plan.find('elevators'), isNull);
     expect(plan.find('accessible_wc')!.iconData, Icons.accessible);

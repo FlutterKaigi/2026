@@ -1530,8 +1530,8 @@
         "en": "JTCC HALL"
       },
       "subtitle": {
-        "ja": "メインホール A",
-        "en": "Main Hall A"
+        "ja": "",
+        "en": ""
       },
       "type": "hall",
       "palette": "purple",
@@ -1576,6 +1576,10 @@
       "anchor": [
         217,
         282
+      ],
+      "keywords": [
+        "メインホール A",
+        "Main Hall A"
       ]
     },
     {
@@ -1585,8 +1589,8 @@
         "en": "UPSIDER HALL"
       },
       "subtitle": {
-        "ja": "メインホール B",
-        "en": "Main Hall B"
+        "ja": "",
+        "en": ""
       },
       "type": "hall",
       "palette": "blue",
@@ -1647,6 +1651,10 @@
       "anchor": [
         217,
         586
+      ],
+      "keywords": [
+        "メインホール B",
+        "Main Hall B"
       ]
     },
     {
@@ -1656,8 +1664,8 @@
         "en": "Cupertino"
       },
       "subtitle": {
-        "ja": "大ホール A",
-        "en": "Grand Hall A"
+        "ja": "",
+        "en": ""
       },
       "type": "hall",
       "palette": "rose",
@@ -1702,6 +1710,10 @@
       "anchor": [
         1580,
         279
+      ],
+      "keywords": [
+        "大ホール A",
+        "Grand Hall A"
       ]
     },
     {
@@ -1711,8 +1723,8 @@
         "en": "Material"
       },
       "subtitle": {
-        "ja": "大ホール B",
-        "en": "Grand Hall B"
+        "ja": "",
+        "en": ""
       },
       "type": "hall",
       "palette": "teal",
@@ -1773,76 +1785,10 @@
       "anchor": [
         1580,
         584
-      ]
-    },
-    {
-      "id": "exhibition_hall_1",
-      "name": {
-        "ja": "ホワイエ1",
-        "en": "Foyer 1"
-      },
-      "subtitle": {
-        "ja": "スポンサーブース",
-        "en": "Sponsor booths"
-      },
-      "type": "foyer",
-      "palette": "neutral",
-      "polygon": [
-        [
-          472,
-          364
-        ],
-        [
-          941,
-          364
-        ],
-        [
-          941,
-          549
-        ],
-        [
-          472,
-          549
-        ]
       ],
-      "anchor": [
-        718,
-        456
-      ]
-    },
-    {
-      "id": "exhibition_hall_2",
-      "name": {
-        "ja": "ホワイエ2",
-        "en": "Foyer 2"
-      },
-      "subtitle": {
-        "ja": "スポンサーブース",
-        "en": "Sponsor booths"
-      },
-      "type": "foyer",
-      "palette": "neutral",
-      "polygon": [
-        [
-          942,
-          364
-        ],
-        [
-          1405,
-          364
-        ],
-        [
-          1405,
-          549
-        ],
-        [
-          942,
-          549
-        ]
-      ],
-      "anchor": [
-        1163,
-        456
+      "keywords": [
+        "大ホール B",
+        "Grand Hall B"
       ]
     },
     {
@@ -1852,8 +1798,8 @@
         "en": "Information"
       },
       "subtitle": {
-        "ja": "ホール出入口付近",
-        "en": "Near the hall entrance"
+        "ja": "",
+        "en": ""
       },
       "type": "facility",
       "palette": "blue",
@@ -1892,8 +1838,8 @@
         "en": "Men’s restroom"
       },
       "subtitle": {
-        "ja": "ホワイエ1側・入口2か所",
-        "en": "Foyer 1 side · Two entrances"
+        "ja": "",
+        "en": ""
       },
       "type": "facility",
       "palette": "blue",
@@ -1953,8 +1899,8 @@
         "en": "Women’s restroom"
       },
       "subtitle": {
-        "ja": "ホワイエ2側・入口2か所",
-        "en": "Foyer 2 side · Two entrances"
+        "ja": "",
+        "en": ""
       },
       "type": "facility",
       "palette": "pink",
@@ -2046,8 +1992,8 @@
         "en": "Accessible restroom"
       },
       "subtitle": {
-        "ja": "女性用トイレ左側・専用入口",
-        "en": "Beside the women’s restroom · Separate entrance"
+        "ja": "",
+        "en": ""
       },
       "type": "facility",
       "palette": "blue",
@@ -2087,8 +2033,8 @@
         "en": "Hall entrance"
       },
       "subtitle": {
-        "ja": "エスカレーターからホワイエへ",
-        "en": "From the escalators to the foyers"
+        "ja": "",
+        "en": ""
       },
       "type": "facility",
       "palette": "neutral",
@@ -2127,8 +2073,8 @@
         "en": "Escalators"
       },
       "subtitle": {
-        "ja": "ホール出入口の両側",
-        "en": "On either side of the hall entrance"
+        "ja": "",
+        "en": ""
       },
       "type": "facility",
       "palette": "neutral",
@@ -2163,12 +2109,12 @@
     {
       "id": "ask_up",
       "name": {
-        "ja": "Ask UP",
-        "en": "Ask UP"
+        "ja": "Ask the Speaker",
+        "en": "Ask the Speaker"
       },
       "subtitle": {
-        "ja": "UPSIDER HALL の登壇者に質問できます",
-        "en": "Ask the Speaker · UPSIDER HALL"
+        "ja": "UPSIDER",
+        "en": "UPSIDER"
       },
       "type": "facility",
       "palette": "blue",
@@ -2196,20 +2142,20 @@
       ],
       "materialIcon": "record_voice_over_outlined",
       "mapLabel": {
-        "ja": "Ask UP",
-        "en": "Ask UP"
+        "ja": "Ask the Speaker\nUPSIDER",
+        "en": "Ask the Speaker\nUPSIDER"
       },
       "relatedHallId": "main_hall_b"
     },
     {
       "id": "ask_jt",
       "name": {
-        "ja": "Ask JT",
-        "en": "Ask JT"
+        "ja": "Ask the Speaker",
+        "en": "Ask the Speaker"
       },
       "subtitle": {
-        "ja": "JTCC HALL の登壇者に質問できます",
-        "en": "Ask the Speaker · JTCC HALL"
+        "ja": "JTCC",
+        "en": "JTCC"
       },
       "type": "facility",
       "palette": "purple",
@@ -2237,20 +2183,20 @@
       ],
       "materialIcon": "record_voice_over_outlined",
       "mapLabel": {
-        "ja": "Ask JT",
-        "en": "Ask JT"
+        "ja": "Ask the Speaker\nJTCC",
+        "en": "Ask the Speaker\nJTCC"
       },
       "relatedHallId": "main_hall_a"
     },
     {
       "id": "ask_b",
       "name": {
-        "ja": "Ask B",
-        "en": "Ask B"
+        "ja": "Ask the Speaker",
+        "en": "Ask the Speaker"
       },
       "subtitle": {
-        "ja": "Material の登壇者に質問できます",
-        "en": "Ask the Speaker · Material"
+        "ja": "Material",
+        "en": "Material"
       },
       "type": "facility",
       "palette": "pink",
@@ -2278,8 +2224,8 @@
       ],
       "materialIcon": "record_voice_over_outlined",
       "mapLabel": {
-        "ja": "Ask B",
-        "en": "Ask B"
+        "ja": "Ask the Speaker\nMaterial",
+        "en": "Ask the Speaker\nMaterial"
       },
       "relatedHallId": "grand_hall_b"
     },
@@ -2290,8 +2236,8 @@
         "en": "Trash · Cupertino"
       },
       "subtitle": {
-        "ja": "Cupertino 内・左上",
-        "en": "Upper left inside Cupertino"
+        "ja": "",
+        "en": ""
       },
       "type": "facility",
       "palette": "gold",
@@ -2326,12 +2272,12 @@
     {
       "id": "trash_foyer",
       "name": {
-        "ja": "ゴミ箱（ホワイエ2）",
-        "en": "Trash · Foyer 2"
+        "ja": "ゴミ箱（Cupertino入口付近）",
+        "en": "Trash · Near Cupertino entrance"
       },
       "subtitle": {
-        "ja": "Cupertino 入口付近",
-        "en": "Near the Cupertino entrance"
+        "ja": "",
+        "en": ""
       },
       "type": "facility",
       "palette": "gold",
@@ -2370,8 +2316,8 @@
         "en": "Creative board"
       },
       "subtitle": {
-        "ja": "ホワイエ1・上側",
-        "en": "Foyer 1 · Upper side"
+        "ja": "",
+        "en": ""
       },
       "type": "facility",
       "palette": "purple",
@@ -2410,8 +2356,8 @@
         "en": "Flutter(Google Inc.)"
       },
       "subtitle": {
-        "ja": "ホワイエ1",
-        "en": "Foyer 1"
+        "ja": "",
+        "en": ""
       },
       "type": "sponsor",
       "palette": "booth",
@@ -2458,8 +2404,8 @@
         "en": "JAPAN TRADING CARD CENTER"
       },
       "subtitle": {
-        "ja": "ホワイエ1",
-        "en": "Foyer 1"
+        "ja": "",
+        "en": ""
       },
       "type": "sponsor",
       "palette": "booth",
@@ -2506,8 +2452,8 @@
         "en": "UPSIDER, Inc."
       },
       "subtitle": {
-        "ja": "ホワイエ1",
-        "en": "Foyer 1"
+        "ja": "",
+        "en": ""
       },
       "type": "sponsor",
       "palette": "booth",
@@ -2554,8 +2500,8 @@
         "en": "YUMEMI（Accenture)"
       },
       "subtitle": {
-        "ja": "ホワイエ2",
-        "en": "Foyer 2"
+        "ja": "",
+        "en": ""
       },
       "type": "sponsor",
       "palette": "booth",
@@ -2602,8 +2548,8 @@
         "en": "Bitkey Inc."
       },
       "subtitle": {
-        "ja": "ホワイエ2",
-        "en": "Foyer 2"
+        "ja": "",
+        "en": ""
       },
       "type": "sponsor",
       "palette": "booth",
@@ -2650,8 +2596,8 @@
         "en": "hacomono.inc"
       },
       "subtitle": {
-        "ja": "ホワイエ2",
-        "en": "Foyer 2"
+        "ja": "",
+        "en": ""
       },
       "type": "sponsor",
       "palette": "booth",
@@ -2698,8 +2644,8 @@
         "en": "ASSIGN Inc"
       },
       "subtitle": {
-        "ja": "ホワイエ2",
-        "en": "Foyer 2"
+        "ja": "",
+        "en": ""
       },
       "type": "sponsor",
       "palette": "booth",
@@ -2746,8 +2692,8 @@
         "en": "RevenueCat. Inc."
       },
       "subtitle": {
-        "ja": "ホワイエ2",
-        "en": "Foyer 2"
+        "ja": "",
+        "en": ""
       },
       "type": "sponsor",
       "palette": "booth",
@@ -2794,8 +2740,8 @@
         "en": "CodeRabbit"
       },
       "subtitle": {
-        "ja": "ホワイエ1",
-        "en": "Foyer 1"
+        "ja": "",
+        "en": ""
       },
       "type": "sponsor",
       "palette": "booth",
@@ -2842,8 +2788,8 @@
         "en": "CyberAgent, Inc."
       },
       "subtitle": {
-        "ja": "ホワイエ1",
-        "en": "Foyer 1"
+        "ja": "",
+        "en": ""
       },
       "type": "sponsor",
       "palette": "booth",
@@ -2890,8 +2836,8 @@
         "en": "RevComm Inc."
       },
       "subtitle": {
-        "ja": "ホワイエ1",
-        "en": "Foyer 1"
+        "ja": "",
+        "en": ""
       },
       "type": "sponsor",
       "palette": "booth",
@@ -2938,8 +2884,8 @@
         "en": "GMO CONNECT Inc."
       },
       "subtitle": {
-        "ja": "ホワイエ1",
-        "en": "Foyer 1"
+        "ja": "",
+        "en": ""
       },
       "type": "sponsor",
       "palette": "booth",
@@ -2986,8 +2932,8 @@
         "en": "sukedachi"
       },
       "subtitle": {
-        "ja": "ホワイエ1",
-        "en": "Foyer 1"
+        "ja": "",
+        "en": ""
       },
       "type": "sponsor",
       "palette": "booth",
@@ -3034,8 +2980,8 @@
         "en": "Edencrew"
       },
       "subtitle": {
-        "ja": "ホワイエ1",
-        "en": "Foyer 1"
+        "ja": "",
+        "en": ""
       },
       "type": "sponsor",
       "palette": "booth",
@@ -3082,8 +3028,8 @@
         "en": "GENDA Inc."
       },
       "subtitle": {
-        "ja": "ホワイエ2",
-        "en": "Foyer 2"
+        "ja": "",
+        "en": ""
       },
       "type": "sponsor",
       "palette": "booth",
@@ -3130,8 +3076,8 @@
         "en": "TRUSTDOCK"
       },
       "subtitle": {
-        "ja": "ホワイエ2",
-        "en": "Foyer 2"
+        "ja": "",
+        "en": ""
       },
       "type": "sponsor",
       "palette": "booth",
@@ -3178,8 +3124,8 @@
         "en": "SODA inc."
       },
       "subtitle": {
-        "ja": "ホワイエ2",
-        "en": "Foyer 2"
+        "ja": "",
+        "en": ""
       },
       "type": "sponsor",
       "palette": "booth",
@@ -3226,8 +3172,8 @@
         "en": "HireRoo, Inc."
       },
       "subtitle": {
-        "ja": "ホワイエ2",
-        "en": "Foyer 2"
+        "ja": "",
+        "en": ""
       },
       "type": "sponsor",
       "palette": "booth",
@@ -3274,8 +3220,8 @@
         "en": "Linc'well Inc."
       },
       "subtitle": {
-        "ja": "ホワイエ2",
-        "en": "Foyer 2"
+        "ja": "",
+        "en": ""
       },
       "type": "sponsor",
       "palette": "booth",
@@ -3322,8 +3268,8 @@
         "en": "Xtone Ltd."
       },
       "subtitle": {
-        "ja": "ホワイエ2",
-        "en": "Foyer 2"
+        "ja": "",
+        "en": ""
       },
       "type": "sponsor",
       "palette": "booth",
@@ -3370,8 +3316,8 @@
         "en": "ANDPAD Inc."
       },
       "subtitle": {
-        "ja": "ホワイエ2",
-        "en": "Foyer 2"
+        "ja": "",
+        "en": ""
       },
       "type": "sponsor",
       "palette": "booth",
@@ -3418,8 +3364,8 @@
         "en": "Classmethod, Inc."
       },
       "subtitle": {
-        "ja": "ホワイエ2",
-        "en": "Foyer 2"
+        "ja": "",
+        "en": ""
       },
       "type": "sponsor",
       "palette": "booth",

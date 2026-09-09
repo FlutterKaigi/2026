@@ -178,7 +178,8 @@ function initialize(config) {
       } else {
         el.textContent = name.replace(" HALL", "\nHALL");
       }
-      el.title = p.boothNumber ? p.boothNumber + " · " + name : name;
+      const hall = p.subtitle[config.language] || p.subtitle.ja;
+      el.title = p.boothNumber ? p.boothNumber + " · " + name : p.relatedHallId ? name + " · " + hall : name;
       el.setAttribute("aria-label", el.title);
       const marker = ({booth:PLAN.colors.booth,purple:"#8061BD",blue:"#408FC3",rose:"#945838",teal:"#326E58",gold:"#B98227",pink:"#CE6BA5"})[p.palette] || colors.onSurfaceVariant;
       el.style.setProperty("--color", colors.dark ? new Color(marker).lerp(new Color("white"), .4).getStyle() : marker);

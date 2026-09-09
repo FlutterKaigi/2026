@@ -26,13 +26,7 @@ class _VenuePlaceSearchState extends State<VenuePlaceSearch> {
     final t = context.t.venueMap;
     final theme = Theme.of(context);
     final language = Localizations.localeOf(context).languageCode;
-    final places = widget.plan.places
-        .where(
-          (p) =>
-              (_type == null || p.type == _type || (_type == VenuePlaceType.hall && p.type == VenuePlaceType.foyer)) &&
-              p.matches(_query),
-        )
-        .toList();
+    final places = widget.plan.places.where((p) => (_type == null || p.type == _type) && p.matches(_query)).toList();
     return CustomScrollView(
       slivers: [
         SliverToBoxAdapter(
@@ -106,7 +100,9 @@ class _VenuePlaceSearchState extends State<VenuePlaceSearch> {
                       label: place.semanticsLabel(language),
                       child: ExcludeSemantics(child: Text(place.name(language))),
                     ),
-                    subtitle: Text(place.subtitle(language)),
+                    subtitle: place.subtitle(language).isEmpty
+                        ? null
+                        : ExcludeSemantics(child: Text(place.subtitle(language))),
                     selected: place.id == widget.selected?.id,
                     selectedTileColor: theme.colorScheme.primaryContainer,
                     onTap: () => widget.onSelected(place),
@@ -145,7 +141,7 @@ class VenuePlaceSummary extends StatelessWidget {
             contentPadding: const EdgeInsets.only(left: 16, right: 8),
             leading: VenuePlaceBadge(place: place),
             title: Text(place.name(language), style: Theme.of(context).textTheme.titleMedium),
-            subtitle: Text(place.subtitle(language)),
+            subtitle: place.subtitle(language).isEmpty ? null : Text(place.subtitle(language)),
             trailing: IconButton(
               tooltip: context.t.venueMap.clearSelection,
               onPressed: onClear,

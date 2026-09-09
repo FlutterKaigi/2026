@@ -39,8 +39,11 @@ class VenuePlace {
   String name(String languageCode) => names[languageCode] ?? names['ja']!;
   String subtitle(String languageCode) => subtitles[languageCode] ?? subtitles['ja']!;
   String mapLabel(String languageCode) => mapLabels[languageCode] ?? '';
-  String semanticsLabel(String languageCode) =>
-      boothNumber == null ? name(languageCode) : '$boothNumber · ${name(languageCode)}';
+  String semanticsLabel(String languageCode) => boothNumber != null
+      ? '$boothNumber · ${name(languageCode)}'
+      : relatedHallId != null
+      ? '${name(languageCode)} · ${subtitle(languageCode)}'
+      : name(languageCode);
 
   Path get path => Path()..addPolygon(polygon, true);
 
