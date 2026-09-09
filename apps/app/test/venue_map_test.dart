@@ -64,7 +64,7 @@ void main() {
   test('reviewed map contains every numbered sponsor and visitor facility without sponsor ranks', () {
     final sponsors = plan.places.where((p) => p.type == VenuePlaceType.sponsor).toList();
     expect(sponsors.map((p) => p.boothNumber), List.generate(22, (i) => i + 1));
-    expect(sponsors.first.name('ja'), 'Flutter');
+    expect(sponsors.first.name('ja'), 'Flutter(Google Inc.)');
     expect(sponsors.map((p) => p.markerColor).toSet(), hasLength(1));
     expect((sourcePlan['booths']! as List).map((b) => (b as Map)['color']).toSet(), hasLength(1));
     for (final p in sponsors) {
@@ -327,16 +327,16 @@ void main() {
     await tester.tap(find.widgetWithText(FilterChip, 'スポンサー 22'));
     await tester.enterText(find.byType(TextField), '15');
     await tester.pumpAndSettle();
-    expect(find.widgetWithText(ListTile, 'GENDA'), findsOneWidget);
-    expect(find.widgetWithText(ListTile, 'Flutter'), findsNothing);
-    await tester.tap(find.widgetWithText(ListTile, 'GENDA'));
+    expect(find.widgetWithText(ListTile, '株式会社GENDA'), findsOneWidget);
+    expect(find.widgetWithText(ListTile, 'Flutter(Google Inc.)'), findsNothing);
+    await tester.tap(find.widgetWithText(ListTile, '株式会社GENDA'));
     await tester.pumpAndSettle();
     final map = tester.widget<VenueMap2DView>(find.byType(VenueMap2DView));
     expect(map.selected?.boothNumber, 15);
-    expect(find.byTooltip('15 · GENDA'), findsOneWidget);
+    expect(find.byTooltip('15 · 株式会社GENDA'), findsOneWidget);
     await tester.tap(find.byTooltip('検索をクリア'));
     await tester.pumpAndSettle();
-    expect(find.widgetWithText(ListTile, 'Flutter'), findsOneWidget);
+    expect(find.widgetWithText(ListTile, 'Flutter(Google Inc.)'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 

@@ -2406,8 +2406,8 @@
     {
       "id": "sponsor_1",
       "name": {
-        "ja": "Flutter",
-        "en": "Flutter"
+        "ja": "Flutter(Google Inc.)",
+        "en": "Flutter(Google Inc.)"
       },
       "subtitle": {
         "ja": "ホワイエ1",
@@ -2455,7 +2455,7 @@
       "id": "sponsor_2",
       "name": {
         "ja": "日本トレカセンター",
-        "en": "日本トレカセンター"
+        "en": "JAPAN TRADING CARD CENTER"
       },
       "subtitle": {
         "ja": "ホワイエ1",
@@ -2502,8 +2502,8 @@
     {
       "id": "sponsor_3",
       "name": {
-        "ja": "UPSIDER",
-        "en": "UPSIDER"
+        "ja": "株式会社UPSIDER",
+        "en": "UPSIDER, Inc."
       },
       "subtitle": {
         "ja": "ホワイエ1",
@@ -2551,7 +2551,7 @@
       "id": "sponsor_4",
       "name": {
         "ja": "ゆめみ（アクセンチュア）",
-        "en": "ゆめみ（アクセンチュア）"
+        "en": "YUMEMI（Accenture)"
       },
       "subtitle": {
         "ja": "ホワイエ2",
@@ -2598,8 +2598,8 @@
     {
       "id": "sponsor_5",
       "name": {
-        "ja": "ビットキー",
-        "en": "ビットキー"
+        "ja": "株式会社ビットキー",
+        "en": "Bitkey Inc."
       },
       "subtitle": {
         "ja": "ホワイエ2",
@@ -2646,8 +2646,8 @@
     {
       "id": "sponsor_6",
       "name": {
-        "ja": "hacomono",
-        "en": "hacomono"
+        "ja": "株式会社hacomono",
+        "en": "hacomono.inc"
       },
       "subtitle": {
         "ja": "ホワイエ2",
@@ -2694,8 +2694,8 @@
     {
       "id": "sponsor_7",
       "name": {
-        "ja": "アサイン",
-        "en": "アサイン"
+        "ja": "株式会社アサイン",
+        "en": "ASSIGN Inc"
       },
       "subtitle": {
         "ja": "ホワイエ2",
@@ -2742,8 +2742,8 @@
     {
       "id": "sponsor_8",
       "name": {
-        "ja": "RevenueCat",
-        "en": "RevenueCat"
+        "ja": "RevenueCat. Inc.",
+        "en": "RevenueCat. Inc."
       },
       "subtitle": {
         "ja": "ホワイエ2",
@@ -2838,8 +2838,8 @@
     {
       "id": "sponsor_10",
       "name": {
-        "ja": "サイバーエージェント",
-        "en": "サイバーエージェント"
+        "ja": "株式会社サイバーエージェント",
+        "en": "CyberAgent, Inc."
       },
       "subtitle": {
         "ja": "ホワイエ1",
@@ -2887,7 +2887,7 @@
       "id": "sponsor_11",
       "name": {
         "ja": "RevComm",
-        "en": "RevComm"
+        "en": "RevComm Inc."
       },
       "subtitle": {
         "ja": "ホワイエ1",
@@ -2934,8 +2934,8 @@
     {
       "id": "sponsor_12",
       "name": {
-        "ja": "GMOコネクト",
-        "en": "GMOコネクト"
+        "ja": "GMOコネクト株式会社",
+        "en": "GMO CONNECT Inc."
       },
       "subtitle": {
         "ja": "ホワイエ1",
@@ -2982,8 +2982,8 @@
     {
       "id": "sponsor_13",
       "name": {
-        "ja": "助太刀",
-        "en": "助太刀"
+        "ja": "株式会社助太刀",
+        "en": "sukedachi"
       },
       "subtitle": {
         "ja": "ホワイエ1",
@@ -3030,7 +3030,7 @@
     {
       "id": "sponsor_14",
       "name": {
-        "ja": "Edencrew",
+        "ja": "(株)エデンクル",
         "en": "Edencrew"
       },
       "subtitle": {
@@ -3078,8 +3078,8 @@
     {
       "id": "sponsor_15",
       "name": {
-        "ja": "GENDA",
-        "en": "GENDA"
+        "ja": "株式会社GENDA",
+        "en": "GENDA Inc."
       },
       "subtitle": {
         "ja": "ホワイエ2",
@@ -3174,8 +3174,8 @@
     {
       "id": "sponsor_17",
       "name": {
-        "ja": "SODA",
-        "en": "SODA"
+        "ja": "株式会社SODA",
+        "en": "SODA inc."
       },
       "subtitle": {
         "ja": "ホワイエ2",
@@ -3222,8 +3222,8 @@
     {
       "id": "sponsor_18",
       "name": {
-        "ja": "ハイヤールー",
-        "en": "ハイヤールー"
+        "ja": "株式会社ハイヤールー",
+        "en": "HireRoo, Inc."
       },
       "subtitle": {
         "ja": "ホワイエ2",
@@ -3270,8 +3270,8 @@
     {
       "id": "sponsor_19",
       "name": {
-        "ja": "Linc'well",
-        "en": "Linc'well"
+        "ja": "株式会社Linc'well",
+        "en": "Linc'well Inc."
       },
       "subtitle": {
         "ja": "ホワイエ2",
@@ -3318,8 +3318,8 @@
     {
       "id": "sponsor_20",
       "name": {
-        "ja": "エクストーン",
-        "en": "エクストーン"
+        "ja": "株式会社エクストーン",
+        "en": "Xtone Ltd."
       },
       "subtitle": {
         "ja": "ホワイエ2",
@@ -3366,8 +3366,8 @@
     {
       "id": "sponsor_21",
       "name": {
-        "ja": "アンドパッド",
-        "en": "アンドパッド"
+        "ja": "株式会社アンドパッド",
+        "en": "ANDPAD Inc."
       },
       "subtitle": {
         "ja": "ホワイエ2",
@@ -3414,8 +3414,8 @@
     {
       "id": "sponsor_22",
       "name": {
-        "ja": "クラスメソッド",
-        "en": "クラスメソッド"
+        "ja": "クラスメソッド株式会社",
+        "en": "Classmethod, Inc."
       },
       "subtitle": {
         "ja": "ホワイエ2",

@@ -9,6 +9,8 @@ let sharp;
 try { sharp=require('sharp'); }
 catch { sharp=require('/Users/yuheisuzuki/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/sharp'); }
 const assets=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../../assets/venue_map');
+const sponsorNameSource=JSON.parse(await fs.readFile(new URL('./sponsor-names.json',import.meta.url),'utf8'));
+const sponsorNames=new Map(sponsorNameSource.sponsors.map(s=>[s.number,s]));
 const box=(x,y,w,h)=>[[x,y],[x+w,y],[x+w,y+h],[x,y+h]];
 const boothColor='#54788A';
 
@@ -75,7 +77,9 @@ facility('trash_foyer','ゴミ箱（ホワイエ2）','Trash · Foyer 2','Cupert
 facility('creative_board','クリエイティブボード','Creative board','ホワイエ1・上側','Foyer 1 · Upper side','purple',box(808,380,110,22),[863,391],'palette_outlined','ボード','Board');
 for(const s of sponsors) {
   const [x,y,w,h]=s.table;
-  place(`sponsor_${s.no}`,s.name,s.name,`ホワイエ${s.foyer}`,`Foyer ${s.foyer}`,'sponsor','booth',box(x,y,w,h),[x+w/2,y+h/2],{boothNumber:s.no,table:s.table,keywords:[s.displayNo,`#${s.no}`,String(s.no),s.name.replaceAll('’',"'")]});
+  const name=sponsorNames.get(s.no);
+  if(!name)throw new Error(`Missing official name for booth ${s.no}`);
+  place(`sponsor_${s.no}`,name.ja,name.en,`ホワイエ${s.foyer}`,`Foyer ${s.foyer}`,'sponsor','booth',box(x,y,w,h),[x+w/2,y+h/2],{boothNumber:s.no,table:s.table,keywords:[...new Set([s.displayNo,`#${s.no}`,String(s.no),s.name,s.name.replaceAll('’',"'")])]});
 }
 const base=structuralPlan+escalatorRuns.map(escalatorTreads).join('')+rect(808,380,110,22,C.jtcc,3)+sponsors.map(s=>rect(...s.table,boothColor,1.8)).join('')+hallDoors.map(doorPair).join('')+rect(26,77,1718,686,'none',6,C.ink,4);
 const baseSvg=wrap(base,1774,810,'FlutterKaigi 2026 visitor floor');
