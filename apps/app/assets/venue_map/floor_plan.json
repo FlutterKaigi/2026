@@ -2113,8 +2113,8 @@
         "en": "Ask the Speaker"
       },
       "subtitle": {
-        "ja": "UPSIDER",
-        "en": "UPSIDER"
+        "ja": "UPSIDER HALL",
+        "en": "UPSIDER HALL"
       },
       "type": "facility",
       "palette": "blue",
@@ -2142,8 +2142,8 @@
       ],
       "materialIcon": "record_voice_over_outlined",
       "mapLabel": {
-        "ja": "Ask the Speaker\nUPSIDER",
-        "en": "Ask the Speaker\nUPSIDER"
+        "ja": "Ask the Speaker\nUPSIDER HALL",
+        "en": "Ask the Speaker\nUPSIDER HALL"
       },
       "relatedHallId": "main_hall_b"
     },
@@ -2154,8 +2154,8 @@
         "en": "Ask the Speaker"
       },
       "subtitle": {
-        "ja": "JTCC",
-        "en": "JTCC"
+        "ja": "JTCC HALL",
+        "en": "JTCC HALL"
       },
       "type": "facility",
       "palette": "purple",
@@ -2183,8 +2183,8 @@
       ],
       "materialIcon": "record_voice_over_outlined",
       "mapLabel": {
-        "ja": "Ask the Speaker\nJTCC",
-        "en": "Ask the Speaker\nJTCC"
+        "ja": "Ask the Speaker\nJTCC HALL",
+        "en": "Ask the Speaker\nJTCC HALL"
       },
       "relatedHallId": "main_hall_a"
     },

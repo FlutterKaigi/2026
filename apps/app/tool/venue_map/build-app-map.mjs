@@ -68,8 +68,8 @@ facility('accessible_wc','多目的トイレ','Accessible restroom','','','blue'
 facility('entrance_hall_lounge','ホール出入口','Hall entrance','','','neutral',box(842,543,122,44),[903,563],'login','出入口','Entrance');
 facility('escalators','エスカレーター','Escalators','','','neutral',box(634,682,585,81),[939,720],'escalator','エスカレーター','Escalators');
 for(const [id,hall,hallId,color,x,y] of [
-  ['ask_up','UPSIDER','main_hall_b','blue',468,567],
-  ['ask_jt','JTCC','main_hall_a','purple',521,567],
+  ['ask_up','UPSIDER HALL','main_hall_b','blue',468,567],
+  ['ask_jt','JTCC HALL','main_hall_a','purple',521,567],
   ['ask_b','Material','grand_hall_b','pink',1384,488],
 ]) facility(id,'Ask the Speaker','Ask the Speaker',hall,hall,color,box(x-20,y-20,40,40),[x,y],'record_voice_over_outlined',`Ask the Speaker\n${hall}`,`Ask the Speaker\n${hall}`,{relatedHallId:hallId});
 facility('trash_cupertino','ゴミ箱（Cupertino）','Trash · Cupertino','','','gold',box(1450,165,28,34),[1464,182],'delete_outline','ゴミ箱','Trash');
