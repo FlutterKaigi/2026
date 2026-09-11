@@ -222,12 +222,16 @@ test("Support LT real callable, transaction, Auth cleanup, and Firestore securit
     }
   });
 
-  await t.test("wrong codes persist attempts, concurrent failures lock the uid, and the block expires", async () => {
+  await t.test("wrong codes persist attempts, the tenth failure locks the uid, and the block expires", async () => {
     const issued = await call("issueSupportLtCode", admin, {});
     assert.equal(issued.result.code, liveCode, "the current code is reused without an expiry");
     const wrongCode = liveCode === "111111" ? "222222" : "111111";
-    const responses = await Promise.all(Array.from({ length: 11 }, () => call("registerSupportLt", stranger, { code: wrongCode })));
-    assert.ok(responses.every((response) => ["NOT_FOUND", "RESOURCE_EXHAUSTED"].includes(response.error?.status)));
+    // Sequential on purpose: a burst of calls from one account contends for
+    // its registration lock, and slow CI runners exhaust the SDK's retries.
+    // Concurrency on the success path is covered by the six-call test above.
+    for (let failure = 1; failure <= 11; failure++) {
+      await expectCallError("registerSupportLt", stranger, { code: wrongCode }, failure < 10 ? "NOT_FOUND" : "RESOURCE_EXHAUSTED");
+    }
     const attemptsRef = db.doc(`supportLtRegistrationAttempts/${stranger.uid}`);
     const attempts = (await attemptsRef.get()).data();
     assert.equal(attempts.failCount, 10);

@@ -359,6 +359,15 @@ test("disabled accounts are rejected but keep their registration for re-enabling
   assert.equal(documents.get(`supportLtRegistrations/${USER.uid}`), registration);
 });
 
+test("exhausted transaction retries surface as a retryable aborted error", async () => {
+  const { dependencies, documents } = fixture({ "supportLtSettings/current": liveSettings() });
+  const contended = Object.assign(new Error("10 ABORTED: Transaction lock timeout."), { code: 10 });
+  const db = { ...dependencies.db, runTransaction: async () => { throw contended; } };
+  await rejectsCode(registerSupportLtForUser(USER, { code: "000000" }, { ...dependencies, db }), "aborted");
+  assert.equal(documents.has(`supportLtRegistrations/${USER.uid}`), false);
+  assert.equal(documents.has("supportLtSettings/attempts"), false, "a contended call is not a failed guess");
+});
+
 test("transient Auth failure inside the transaction cannot commit registration or attempts", async () => {
   for (const code of ["000000", "111111"]) {
     const { dependencies, events, documents } = fixture({ "supportLtSettings/current": liveSettings() });

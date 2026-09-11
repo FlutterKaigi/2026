@@ -161,6 +161,11 @@ function recordSharedFailure(db: Firestore, now: number): Promise<unknown> {
   return db.doc(SHARED_ATTEMPTS_PATH).set({ counts: { [sharedBucket(now)]: FieldValue.increment(1) } }, { merge: true });
 }
 
+/** gRPC status 10 (ABORTED) is what Firestore reports after transaction retries are exhausted. */
+function isFirestoreAborted(error: unknown): boolean {
+  return typeof error === "object" && error != null && "code" in error && error.code === 10;
+}
+
 function nonEmptyName(value: unknown): string | undefined {
   return typeof value === "string" && value.trim().length > 0 ? value.trim() : undefined;
 }
@@ -237,6 +242,12 @@ export async function registerSupportLtForUser(
     // or it would wait on its own lock indefinitely.
     if (error instanceof InactiveSupportLtUserError && error.deleted) {
       await deleteSupportLtUserData(user.uid, db);
+    }
+    // Many simultaneous calls from one account contend for its registration
+    // lock; once the SDK's retries are exhausted, report a retryable status
+    // instead of an opaque internal error.
+    if (isFirestoreAborted(error)) {
+      throw new HttpsError("aborted", "混み合っています。少し待ってからもう一度お試しください。");
     }
     throw error;
   });
