@@ -239,22 +239,29 @@ test("Support LT real callable, transaction, Auth cleanup, and Firestore securit
     assert.equal((await db.doc(`supportLtRegistrations/${stranger.uid}`).get()).data().displayName, stranger.uid);
     assert.equal((await attemptsRef.get()).exists, false);
     const shared = (await db.doc("supportLtSettings/attempts").get()).data();
-    assert.ok(shared.failCount >= 10, "shared counter tracks every account's failures");
-    assert.equal(shared.blockedUntil, undefined);
+    assert.ok(Object.values(shared.counts).reduce((sum, count) => sum + count, 0) >= 10,
+      "shared counter tracks every account's failures");
     const repeated = await call("registerSupportLt", attendee, { code: wrongCode });
     assert.deepEqual(repeated.result, { registeredAt, alreadyRegistered: true });
   });
 
   await t.test("a shared block stops every account and rotation lifts it", async () => {
     const blocker = await createUser("blocker");
-    await db.doc("supportLtSettings/attempts").set({
-      failCount: 199, windowStartedAt: Timestamp.now(),
-    });
+    // Seed this and the next ten-minute bucket so a bucket boundary during
+    // the test cannot lift the block early.
+    const bucket = Math.floor(Date.now() / 600_000);
+    await db.doc("supportLtSettings/attempts").set({ counts: { [bucket]: 199, [bucket + 1]: 199 } });
     const wrongCode = liveCode === "111111" ? "222222" : "111111";
-    await expectCallError("registerSupportLt", blocker, { code: wrongCode }, "RESOURCE_EXHAUSTED");
+    // The 200th failure is still reported as a wrong code; the block applies
+    // to every call after it, including correct codes from other accounts.
+    await expectCallError("registerSupportLt", blocker, { code: wrongCode }, "NOT_FOUND");
+    assert.equal((await db.doc("supportLtSettings/attempts").get()).data().counts[bucket], 200);
     const fresh = await createUser("blocked-bystander");
     await expectCallError("registerSupportLt", fresh, { code: liveCode }, "RESOURCE_EXHAUSTED");
+    await expectCallError("registerSupportLt", blocker, { code: wrongCode }, "RESOURCE_EXHAUSTED");
     assert.equal((await db.doc(`supportLtRegistrationAttempts/${fresh.uid}`).get()).exists, false);
+    assert.equal((await db.doc(`supportLtRegistrationAttempts/${blocker.uid}`).get()).data().failCount, 1,
+      "a shared block records no further per-user failures");
     const rotated = await call("issueSupportLtCode", admin, { rotate: true });
     liveCode = rotated.result.code;
     assert.equal((await db.doc("supportLtSettings/attempts").get()).exists, false);

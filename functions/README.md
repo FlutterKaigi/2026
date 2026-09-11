@@ -24,11 +24,14 @@ FlutterKaigi 2026 の Cloud Functions。STG → 本番のデータ反映用の
   表示名は登録時のプロフィール名 → Auth 名 → uid の順で選び、メールは保存しない。
 - 失敗したコード検証は `supportLtRegistrationAttempts/{uid}` に保存し、10 分以内の
   10 回失敗で以後 10 分間拒否する。加えて全アカウント合計の失敗を
-  `supportLtSettings/attempts` に保存し、10 分以内の 200 回失敗でコード自体を
-  10 分間ロックする（使い捨てアカウントによる総当たり対策）。ロックは
-  `rotate: true` での再発行でも解除される。10 回目・200 回目とロック中は
-  `resource-exhausted`、不一致・未発行は `not-found`、入力形式不正は `invalid-argument`。
-  失敗回数の更新は例外を投げる前にコミットし、並行リクエストでも制限を適用する。
+  `supportLtSettings/attempts` に 10 分単位のバケットごとに記録し、同じバケットで
+  200 回失敗するとそのバケットが終わるまでコード自体をロックする（使い捨て
+  アカウントによる総当たり対策）。ロックは `rotate: true` での再発行でも解除される。
+  10 回目とロック中は `resource-exhausted`、不一致・未発行は `not-found`、
+  入力形式不正は `invalid-argument`。uid 単位の失敗回数の更新は例外を投げる前に
+  コミットし、並行リクエストでも制限を適用する。全体カウンタは単一のホットな
+  ドキュメントなのでトランザクションには含めず、判定は通常の読み取り、更新は
+  コミット後の `FieldValue.increment` で行う（ロック競合による ABORTED を防ぐ）。
   プロフィール `users/{uid}` はコード一致後にのみ読み取る。
 - `onSupportLtUserDeleted` は Firebase Auth のアカウント削除時に登録と失敗試行を
   削除する。プロフィールがないユーザーも対象となる。Auth lifecycle のため

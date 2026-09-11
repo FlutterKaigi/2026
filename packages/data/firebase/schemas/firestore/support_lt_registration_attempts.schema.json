@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/FlutterKaigi/2026/packages/data/firebase/schemas/firestore/support_lt_registration_attempts.schema.json",
   "title": "SupportLtRegistrationAttempts",
-  "description": "Server-only rate-limit state. supportLtRegistrationAttempts/{uid} counts one account's failed code checks: ten within a ten-minute window block that account for ten minutes; successful registration or Auth account deletion removes the document. supportLtSettings/attempts uses the same shape for failures across all accounts: 200 within a ten-minute window block the code for ten minutes, and rotating the code removes the document.",
+  "description": "Server-only rate-limit state at supportLtRegistrationAttempts/{uid}: ten failed code checks within a ten-minute window block that account for ten minutes. Successful registration or Auth account deletion removes the document. Failures across all accounts are counted separately in supportLtSettings/attempts (see support_lt_shared_attempts.schema.json).",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -13,7 +13,7 @@
     "failCount": {
       "type": "integer",
       "minimum": 1,
-      "maximum": 200
+      "maximum": 10
     },
     "windowStartedAt": {
       "type": "string",

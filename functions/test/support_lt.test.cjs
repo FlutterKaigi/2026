@@ -1,6 +1,6 @@
 const assert = require("node:assert/strict");
 const { test } = require("node:test");
-const { Timestamp } = require("firebase-admin/firestore");
+const { FieldValue, Timestamp } = require("firebase-admin/firestore");
 const {
   issueSupportLtCodeForUser,
   registerSupportLtForUser,
@@ -8,6 +8,7 @@ const {
 } = require("../lib/support_lt_service.js");
 
 const NOW = 1_800_000_000_000;
+const BUCKET = String(Math.floor(NOW / 600_000));
 const ADMIN = {
   uid: "admin",
   token: {
@@ -26,9 +27,31 @@ const USER = {
 function fixture(entries = {}) {
   const documents = new Map(Object.entries(entries));
   const events = [];
+  // Non-transactional merge writes support FieldValue.increment on one nested level.
+  const merge = (path, data) => {
+    const current = { ...(documents.get(path) ?? {}) };
+    for (const [key, value] of Object.entries(data)) {
+      if (value != null && typeof value === "object" && !("isEqual" in value)) {
+        current[key] = { ...(current[key] ?? {}) };
+        for (const [nested, nestedValue] of Object.entries(value)) {
+          current[key][nested] = nestedValue.isEqual?.(FieldValue.increment(1))
+            ? (current[key][nested] ?? 0) + 1
+            : nestedValue;
+        }
+      } else {
+        current[key] = value;
+      }
+    }
+    documents.set(path, current);
+  };
   const ref = (path) => ({
     path,
-    get: async () => snapshot(path),
+    get: async () => { events.push(`plain-read:${path}`); return snapshot(path); },
+    set: async (data, options) => {
+      events.push(`plain-write:${path}`);
+      if (options?.merge) merge(path, data);
+      else documents.set(path, data);
+    },
   });
   const snapshot = (path) => ({
     exists: documents.has(path),
@@ -143,7 +166,7 @@ test("current code is reused indefinitely and explicit rotation always changes e
   const original = liveSettings({ issuedAt: Timestamp.fromMillis(NOW - 30 * 86_400_000) });
   const { dependencies, documents } = fixture({
     "admins/admin": {}, "supportLtSettings/current": original,
-    "supportLtSettings/attempts": { failCount: 200, windowStartedAt: Timestamp.fromMillis(NOW), blockedUntil: Timestamp.fromMillis(NOW + 600_000) },
+    "supportLtSettings/attempts": { counts: { [BUCKET]: 200 } },
   });
   const result = await issueSupportLtCodeForUser(ADMIN, { rotate: false }, dependencies);
   assert.deepEqual(result, { code: original.code, issuedAt: NOW - 30 * 86_400_000 });
@@ -222,27 +245,40 @@ test("missing and incorrect codes persist per-user and shared failed attempts be
     const entries = settings ? { "supportLtSettings/current": settings } : {};
     const { dependencies, documents, events } = fixture(entries);
     await rejectsCode(registerSupportLtForUser(USER, { code: "000000" }, dependencies), "not-found");
-    for (const path of [`supportLtRegistrationAttempts/${USER.uid}`, "supportLtSettings/attempts"]) {
-      const attempts = documents.get(path);
-      assert.equal(attempts.failCount, 1);
-      assert.equal(attempts.windowStartedAt.toMillis(), NOW);
-    }
+    const attempts = documents.get(`supportLtRegistrationAttempts/${USER.uid}`);
+    assert.equal(attempts.failCount, 1);
+    assert.equal(attempts.windowStartedAt.toMillis(), NOW);
+    assert.deepEqual(documents.get("supportLtSettings/attempts"), { counts: { [BUCKET]: 1 } });
     assert.equal(events.includes(`read:users/${USER.uid}`), false, "profile is not read for a failed guess");
+    // The hot shared document never takes part in the transaction.
+    assert.equal(events.includes("read:supportLtSettings/attempts"), false);
+    assert.ok(events.indexOf("transaction-commit") < events.indexOf("plain-write:supportLtSettings/attempts"));
   }
 });
 
-test("shared failures across accounts block the code for everyone until rotation", async () => {
+test("shared failures across accounts block the code for everyone in the bucket until rotation", async () => {
   const { dependencies, documents } = fixture({
     "supportLtSettings/current": liveSettings(),
-    "supportLtSettings/attempts": { failCount: 199, windowStartedAt: Timestamp.fromMillis(NOW - 1000) },
+    "supportLtSettings/attempts": { counts: { [BUCKET]: 199, "0": 5 } },
   });
-  await rejectsCode(registerSupportLtForUser({ uid: "guesser", token: {} }, { code: "111111" }, dependencies), "resource-exhausted");
-  const shared = documents.get("supportLtSettings/attempts");
-  assert.equal(shared.failCount, 200);
-  assert.equal(shared.blockedUntil.toMillis(), NOW + 600_000);
+  await rejectsCode(registerSupportLtForUser({ uid: "guesser", token: {} }, { code: "111111" }, dependencies), "not-found");
+  assert.deepEqual(documents.get("supportLtSettings/attempts"), { counts: { [BUCKET]: 200, "0": 5 } });
   await rejectsCode(registerSupportLtForUser(USER, { code: "000000" }, dependencies), "resource-exhausted");
   assert.equal(documents.has(`supportLtRegistrations/${USER.uid}`), false);
   assert.equal(documents.has(`supportLtRegistrationAttempts/${USER.uid}`), false, "a shared block records no per-user failure");
+  assert.deepEqual(documents.get("supportLtSettings/attempts"), { counts: { [BUCKET]: 200, "0": 5 } });
+  // The next ten-minute bucket starts with a fresh budget.
+  await registerSupportLtForUser(USER, { code: "000000" }, { ...dependencies, now: () => NOW + 600_000 });
+});
+
+test("a per-user lock from the tenth failure counts once toward the shared budget", async () => {
+  const { dependencies, documents } = fixture({
+    "supportLtSettings/current": liveSettings(),
+    [`supportLtRegistrationAttempts/${USER.uid}`]: { failCount: 9, windowStartedAt: Timestamp.fromMillis(NOW - 1000) },
+  });
+  await rejectsCode(registerSupportLtForUser(USER, { code: "111111" }, dependencies), "resource-exhausted");
+  await rejectsCode(registerSupportLtForUser(USER, { code: "111111" }, dependencies), "resource-exhausted");
+  assert.deepEqual(documents.get("supportLtSettings/attempts"), { counts: { [BUCKET]: 1 } });
 });
 
 test("ten failures within ten minutes lock attempts and a valid code cannot bypass lock", async () => {
@@ -293,7 +329,8 @@ test("active Auth lookup holds the registration document read lock and precedes 
     if (existing) entries[`supportLtRegistrations/${USER.uid}`] = existing;
     const { dependencies, events } = fixture(entries);
     await registerSupportLtForUser(USER, { code: "000000" }, dependencies);
-    assert.deepEqual(events.slice(0, 2), [`read:supportLtRegistrations/${USER.uid}`, `auth:${USER.uid}`]);
+    const transactional = events.filter((event) => !event.startsWith("plain-"));
+    assert.deepEqual(transactional.slice(0, 2), [`read:supportLtRegistrations/${USER.uid}`, `auth:${USER.uid}`]);
   }
 });
 
