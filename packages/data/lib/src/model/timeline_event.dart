@@ -13,6 +13,10 @@ abstract class TimelineEvent with _$TimelineEvent {
   const factory TimelineEvent({
     required String id,
     required LocaleMap title,
+
+    /// 概要。会場つきイベント（ランチステージ・学生支援など）でのみ使う。
+    /// Sessionize から取り込むイベントは概要を持たないため null になる。
+    LocaleMap? description,
     @FirestoreDateTimeConverter() required DateTime startsAt,
     @FirestoreNullableDateTimeConverter() DateTime? endsAt,
     String? venueId,
