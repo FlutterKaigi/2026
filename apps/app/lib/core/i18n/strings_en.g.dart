@@ -35,7 +35,7 @@ class TranslationsEn extends Translations with BaseTranslations<AppLocale, Trans
 
 	late final TranslationsEn _root = this; // ignore: unused_field
 
-	@override 
+	@override
 	TranslationsEn $copyWith({TranslationMetadata<AppLocale, Translations>? meta}) => TranslationsEn(meta: meta ?? this.$meta);
 
 	// Translations
@@ -51,6 +51,7 @@ class TranslationsEn extends Translations with BaseTranslations<AppLocale, Trans
 	@override late final _Translations$sessionDetails$en sessionDetails = _Translations$sessionDetails$en._(_root);
 	@override late final _Translations$sessionBookmark$en sessionBookmark = _Translations$sessionBookmark$en._(_root);
 	@override late final _Translations$bookmarkedSessions$en bookmarkedSessions = _Translations$bookmarkedSessions$en._(_root);
+	@override late final _Translations$venueMap$en venueMap = _Translations$venueMap$en._(_root);
 	@override late final _Translations$eventInfo$en eventInfo = _Translations$eventInfo$en._(_root);
 	@override late final _Translations$auth$en auth = _Translations$auth$en._(_root);
 	@override late final _Translations$profile$en profile = _Translations$profile$en._(_root);
@@ -91,6 +92,7 @@ class _Translations$navigation$en extends Translations$navigation$ja {
 
 	// Translations
 	@override String get sessions => 'Sessions';
+	@override String get venueMap => 'Venue Map';
 	@override String get sponsors => 'Sponsors';
 	@override String get info => 'Event';
 	@override String get account => 'Account';
@@ -243,6 +245,39 @@ class _Translations$bookmarkedSessions$en extends Translations$bookmarkedSession
 	@override String get emptyTitle => 'No bookmarked sessions';
 	@override String get emptyBody => 'Bookmark sessions to find them here.';
 	@override String get openSessions => 'Open sessions';
+}
+
+// Path: venueMap
+class _Translations$venueMap$en extends Translations$venueMap$ja {
+	_Translations$venueMap$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Venue Map';
+	@override String get floor => 'Hamamatsucho Convention Hall · 5F';
+	@override String get loadError => 'Could not load the venue map';
+	@override String get loadErrorDescription => 'Please try again.';
+	@override String get search => 'Find a place';
+	@override String get searchHint => 'Hall, sponsor, booth number, facility';
+	@override String get clearSearch => 'Clear search';
+	@override String get placesCount => 'places';
+	@override String get showOnMap => 'Show on map';
+	@override String get all => 'All';
+	@override String get halls => 'Halls';
+	@override String get booths => 'Sponsors';
+	@override String get facilities => 'Facilities';
+	@override String get noResults => 'No matching places';
+	@override String get clearSelection => 'Clear selection';
+	@override String get zoomIn => 'Zoom in';
+	@override String get zoomOut => 'Zoom out';
+	@override String get fit => 'Show entire floor';
+	@override String get rotate => 'Rotate map';
+	@override String get twoD => '2D';
+	@override String get threeD => '3D';
+	@override String get viewMode => 'Map view';
+	@override String get useTwoD => 'Show in 2D';
+	@override String get saveFailed => 'Could not save the view preference';
 }
 
 // Path: eventInfo
@@ -635,6 +670,7 @@ extension on TranslationsEn {
 			'links.openError' => 'Could not open the link',
 			'links.copied' => 'Link copied',
 			'navigation.sessions' => 'Sessions',
+			'navigation.venueMap' => 'Venue Map',
 			'navigation.sponsors' => 'Sponsors',
 			'navigation.info' => 'Event',
 			'navigation.account' => 'Account',
@@ -689,7 +725,7 @@ extension on TranslationsEn {
 			'sessionSearch.promptBody' => 'Enter a keyword or select a day, session type, or language',
 			'sessionSearch.emptyTitle' => 'No sessions found',
 			'sessionSearch.emptyBody' => 'Try changing the keyword or filters',
-			'sessionSearch.resultCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} session', other: '${n} sessions', ), 
+			'sessionSearch.resultCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} session', other: '${n} sessions', ),
 			'sessionDetails.title' => 'Session Details',
 			'sessionDetails.description' => 'Description',
 			'sessionDetails.schedule' => 'Schedule and Venue',
@@ -708,6 +744,30 @@ extension on TranslationsEn {
 			'bookmarkedSessions.emptyTitle' => 'No bookmarked sessions',
 			'bookmarkedSessions.emptyBody' => 'Bookmark sessions to find them here.',
 			'bookmarkedSessions.openSessions' => 'Open sessions',
+			'venueMap.title' => 'Venue Map',
+			'venueMap.floor' => 'Hamamatsucho Convention Hall · 5F',
+			'venueMap.loadError' => 'Could not load the venue map',
+			'venueMap.loadErrorDescription' => 'Please try again.',
+			'venueMap.search' => 'Find a place',
+			'venueMap.searchHint' => 'Hall, sponsor, booth number, facility',
+			'venueMap.clearSearch' => 'Clear search',
+			'venueMap.placesCount' => 'places',
+			'venueMap.showOnMap' => 'Show on map',
+			'venueMap.all' => 'All',
+			'venueMap.halls' => 'Halls',
+			'venueMap.booths' => 'Sponsors',
+			'venueMap.facilities' => 'Facilities',
+			'venueMap.noResults' => 'No matching places',
+			'venueMap.clearSelection' => 'Clear selection',
+			'venueMap.zoomIn' => 'Zoom in',
+			'venueMap.zoomOut' => 'Zoom out',
+			'venueMap.fit' => 'Show entire floor',
+			'venueMap.rotate' => 'Rotate map',
+			'venueMap.twoD' => '2D',
+			'venueMap.threeD' => '3D',
+			'venueMap.viewMode' => 'Map view',
+			'venueMap.useTwoD' => 'Show in 2D',
+			'venueMap.saveFailed' => 'Could not save the view preference',
 			'eventInfo.title' => 'Event Overview',
 			'eventInfo.newsTitle' => 'Latest News',
 			'eventInfo.newsSubtitle' => 'See the latest FlutterKaigi 2026 updates',
@@ -886,7 +946,7 @@ extension on TranslationsEn {
 			'licenses.title' => 'Licenses',
 			'licenses.searchHint' => 'Search packages',
 			'licenses.clearSearch' => 'Clear search',
-			'licenses.licenseCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} license', other: '${n} licenses', ), 
+			'licenses.licenseCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} license', other: '${n} licenses', ),
 			'licenses.notFound' => 'License not found',
 			'error.title' => 'Could not load data',
 			'error.message' => 'Check your connection and try again.',
