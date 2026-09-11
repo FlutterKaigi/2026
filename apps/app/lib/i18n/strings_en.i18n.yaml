@@ -176,10 +176,10 @@ auth:
     deletePasswordTitle: Confirm your password
     deletePasswordBody: Enter your current password to delete your account.
     mission: Missions
-    missionDescription: Judged by your participation in LT, profile exchange and SNS posts
+    missionDescription: Judged by your participation in Support LT, profile exchange and SNS posts
     joinEvent: Join the event
     quiz: Quiz
-    lightningTalks: Lightning Talks
+    lightningTalks: Join Support LT
     profileExchange: Profile exchange
     snsPost: Register SNS post
     comingSoon: This feature is coming soon
@@ -286,6 +286,24 @@ exchange:
   redeemInvalid: This code wasn't found, or it has expired
   redeemSelf: You can't enter your own code
   redeemRateLimited: Too many attempts. Please try again in a few minutes
+supportLt:
+  title: Support LT Registration
+  description: Enter the 6-digit code provided by the organizers to register your participation in Support LT
+  codeLabel: Registration code
+  register: Register participation
+  submitting: Registering…
+  registeredTitle: Registration complete
+  registeredBody: Enjoy Support LT
+  registeredStatus: Registered
+  backToAccount: Back to account
+  signInRequired: Sign in to register your participation in Support LT
+  invalidFormat: Enter a 6-digit code
+  invalidCode: This code is incorrect. Check the code provided by the organizers
+  rateLimited: Too many attempts. Please try again in a few minutes
+  networkError: A network error occurred. Check your connection and try again
+  sessionExpired: Your sign-in session has expired. Please sign in again
+  permissionDenied: Registration is not permitted. Please ask the organizers
+  registrationFailed: Could not register your participation. Please try again
 countryRegion:
   asia: Asia
   oceania: Oceania

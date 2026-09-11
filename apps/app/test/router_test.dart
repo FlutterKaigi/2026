@@ -24,6 +24,7 @@ void main() {
     );
     expect(const AccountRoute().location, '/account');
     expect(const EmailSignInRoute().location, '/account/email');
+    expect(const SupportLtRoute().location, '/account/support-lt');
     expect(const ExchangeHomeRoute().location, '/account/exchange');
     expect(const ExchangeScanRoute().location, '/account/exchange/scan');
     expect(const ExchangeListRoute().location, '/account/exchange/list');

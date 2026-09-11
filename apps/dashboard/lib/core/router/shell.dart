@@ -40,6 +40,7 @@ part of 'router.dart';
         TypedGoRoute<SponsorEditRoute>(path: AppPaths.sponsorEdit),
       ],
     ),
+    TypedGoRoute<SupportLtRoute>(path: AppPaths.supportLt),
   ],
 )
 class AppShellRoute extends ShellRouteData {

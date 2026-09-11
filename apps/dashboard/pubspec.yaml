@@ -25,6 +25,7 @@ dependencies:
 
   # security
   firebase_app_check: ^0.4.5
+  firebase_core: ^4.10.0
 
   # cloud functions (STG → 本番 データ反映)
   cloud_functions: ^6.0.4

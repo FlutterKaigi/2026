@@ -1,9 +1,7 @@
 import 'dart:async';
 
-import 'package:app/core/designsystem/theme/app_gradients.dart';
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/log/talker.dart';
-import 'package:app/core/provider/environment.dart';
 import 'package:app/core/router/router.dart';
 import 'package:app/core/ui/widget/app_error_view.dart';
 import 'package:app/core/ui/widget/app_scrollbar.dart';
@@ -11,35 +9,17 @@ import 'package:app/core/ui/widget/settings_icon_button.dart';
 import 'package:app/feature/auth/data/provider/auth_repository.dart';
 import 'package:app/feature/auth/data/provider/auth_state.dart';
 import 'package:app/feature/auth/ui/auth_error_message.dart';
-import 'package:app/feature/auth/ui/widget/apple_sign_in_button.dart';
-import 'package:app/feature/auth/ui/widget/google_sign_in_button.dart';
-import 'package:app/feature/auth/ui/widget/sign_in_method_button_style.dart';
+import 'package:app/feature/auth/ui/widget/sign_in_card.dart';
 import 'package:app/feature/exchange/data/provider/profile_exchange_provider.dart';
 import 'package:app/feature/profile/data/provider/user_profile_provider.dart';
 import 'package:app/feature/profile/data/provider/user_profile_repository.dart';
 import 'package:app/feature/profile/ui/widget/profile_summary_card_widget.dart';
+import 'package:app/feature/support_lt/data/provider/support_lt_provider.dart';
 import 'package:data/data.dart';
 import 'package:data/user.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-
-/// Whether the current build may expose native Sign in with Apple.
-bool isAppleSignInAvailable({
-  required Flavor flavor,
-  required bool isWeb,
-  required TargetPlatform platform,
-}) => flavor == Flavor.production && !isWeb && platform == TargetPlatform.iOS;
-
-final appleSignInAvailabilityProvider = Provider<bool>((ref) {
-  final environment = ref.watch(environmentProvider);
-  return isAppleSignInAvailable(
-    flavor: environment.flavor,
-    isWeb: kIsWeb,
-    platform: defaultTargetPlatform,
-  );
-});
 
 /// The account tab: sign-in options while signed out, account info while
 /// signed in.
@@ -52,7 +32,6 @@ class AccountPage extends HookConsumerWidget {
     final authState = ref.watch(authStateChangesProvider);
     final profileState = ref.watch(userProfileProvider);
     final isProcessing = useState(false);
-    final showsAppleSignIn = ref.watch(appleSignInAvailabilityProvider);
 
     void showMessage(String message) {
       ScaffoldMessenger.of(context)
@@ -152,11 +131,7 @@ class AccountPage extends HookConsumerWidget {
       body: switch (authState) {
         AsyncData(:final value) => AppScrollbar(
           child: value == null
-              ? _SignedOutView(
-                  isProcessing: isProcessing.value,
-                  showsAppleSignIn: showsAppleSignIn,
-                  onSignIn: runAuthAction,
-                )
+              ? const _SignedOutView()
               : _SignedInView(
                   user: value,
                   profileState: profileState,
@@ -183,122 +158,19 @@ class AccountPage extends HookConsumerWidget {
   }
 }
 
-/// Height of the brand gradient band above the sign-in card, matching the
-/// event overview card on the event tab.
-const _signInBandHeight = 152.0;
-
-/// Inner padding of the sign-in card.
-const _signInCardPadding = 24.0;
-
-/// Centered sign-in card shown while signed out: brand band with the app
-/// logo, a short prompt and one button per sign-in method.
+/// Centered sign-in card shown while signed out.
 class _SignedOutView extends StatelessWidget {
-  const _SignedOutView({
-    required this.isProcessing,
-    required this.showsAppleSignIn,
-    required this.onSignIn,
-  });
-
-  final bool isProcessing;
-  final bool showsAppleSignIn;
-  final Future<void> Function(Future<void> Function(AuthRepository repository) action) onSignIn;
+  const _SignedOutView();
 
   @override
   Widget build(BuildContext context) {
     final t = Translations.of(context);
-    final theme = Theme.of(context);
     return Center(
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
-        child: ConstrainedBox(
-          // 認証方法が変わっても操作領域が揃うよう、ボタン列の共通の最大幅に
-          // カードの余白を足した幅で制限する(枠線は内側に描かれる)。
-          constraints: const BoxConstraints(maxWidth: signInMethodButtonMaxWidth + _signInCardPadding * 2),
-          child: Card.outlined(
-            margin: EdgeInsets.zero,
-            clipBehavior: Clip.antiAlias,
-            // 各サインインボタンを個別のセマンティクスノードとして残す。
-            semanticContainer: false,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                SizedBox(
-                  height: _signInBandHeight,
-                  child: DecoratedBox(
-                    decoration: const BoxDecoration(gradient: AppGradients.brand),
-                    child: Padding(
-                      padding: const EdgeInsets.all(20),
-                      child: Image.asset(
-                        'res/assets/shuriken-logo.png',
-                        fit: BoxFit.contain,
-                        semanticLabel: t.eventInfo.logoSemanticLabel,
-                      ),
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(_signInCardPadding),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Text(
-                        t.auth.signIn.required,
-                        textAlign: TextAlign.center,
-                        style: theme.textTheme.titleLarge,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        t.auth.signIn.description,
-                        textAlign: TextAlign.center,
-                        style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-                      ),
-                      const SizedBox(height: 24),
-                      GoogleSignInButton(
-                        onPressed: isProcessing
-                            ? null
-                            : () async => onSignIn((repository) => repository.signInWithGoogle()),
-                      ),
-                      const SizedBox(height: 8),
-                      if (showsAppleSignIn) ...[
-                        AppleSignInButton(
-                          onPressed: isProcessing
-                              ? null
-                              : () async => onSignIn((repository) => repository.signInWithApple()),
-                        ),
-                        const SizedBox(height: 8),
-                      ],
-                      OutlinedButton(
-                        onPressed: isProcessing ? null : () async => const EmailSignInRoute().push<void>(context),
-                        style: OutlinedButton.styleFrom(
-                          minimumSize: const Size.fromHeight(signInMethodButtonHeight),
-                          maximumSize: const Size.fromHeight(signInMethodButtonHeight),
-                          padding: EdgeInsets.zero,
-                          shape: const RoundedRectangleBorder(borderRadius: signInMethodButtonBorderRadius),
-                          textStyle: signInMethodButtonLabelStyle,
-                        ),
-                        child: SizedBox.expand(
-                          child: Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              const PositionedDirectional(
-                                start: signInMethodButtonIconInset,
-                                child: Icon(Icons.mail_outline, size: signInMethodButtonIconSize),
-                              ),
-                              Text(t.auth.signIn.withEmail),
-                            ],
-                          ),
-                        ),
-                      ),
-                      if (isProcessing) ...[
-                        const SizedBox(height: 24),
-                        const Center(child: CircularProgressIndicator()),
-                      ],
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
+        child: SignInCard(
+          title: t.auth.signIn.required,
+          description: t.auth.signIn.description,
         ),
       ),
     );
@@ -392,11 +264,7 @@ class _SignedInView extends StatelessWidget {
                         onTap: onComingSoon,
                       ),
                       const Divider(height: 1),
-                      _NavigationTile(
-                        icon: Icons.mic_none_outlined,
-                        title: t.auth.account.lightningTalks,
-                        onTap: onComingSoon,
-                      ),
+                      _SupportLtNavigationTile(uid: user.uid),
                       const Divider(height: 1),
                       _NavigationTile(
                         icon: Icons.qr_code_2_outlined,
@@ -458,6 +326,64 @@ class _SectionHeading extends StatelessWidget {
   );
 }
 
+class _SupportLtNavigationTile extends ConsumerWidget {
+  const _SupportLtNavigationTile({required this.uid});
+
+  final String uid;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final t = Translations.of(context);
+    ref.listen(supportLtRegistrationProvider(uid), (_, next) {
+      // The tile has no room for an error view; the Support LT page offers a
+      // retry. Record the failure so a permission or network problem is visible.
+      if (next case AsyncError(:final error, :final stackTrace)) {
+        ref.read(talkerProvider).handle(error, stackTrace);
+      }
+    });
+    // `value` keeps the last registration through reloads so the badge does
+    // not flicker while the stream resubscribes.
+    final isRegistered = ref.watch(supportLtRegistrationProvider(uid)).value != null;
+    return _NavigationTile(
+      icon: Icons.mic_none_outlined,
+      title: t.auth.account.lightningTalks,
+      badge: isRegistered ? _RegisteredBadge(label: t.supportLt.registeredStatus) : null,
+      onTap: () => const SupportLtRoute().push<void>(context),
+    );
+  }
+}
+
+/// Compact tonal badge marking a completed Support LT registration.
+class _RegisteredBadge extends StatelessWidget {
+  const _RegisteredBadge({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    return DecoratedBox(
+      // プロフィール編集ボタンと同じく、アカウントタブの強調は primary 系で揃える。
+      decoration: BoxDecoration(
+        color: colorScheme.primaryContainer,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Padding(
+        padding: const EdgeInsetsDirectional.fromSTEB(6, 4, 8, 4),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.check_circle, size: 16, color: colorScheme.onPrimaryContainer),
+            const SizedBox(width: 4),
+            Text(label, style: theme.textTheme.labelMedium?.copyWith(color: colorScheme.onPrimaryContainer)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 /// Dense in-app navigation row, matching the link tiles on the event tab.
 class _NavigationTile extends StatelessWidget {
   const _NavigationTile({
@@ -466,6 +392,7 @@ class _NavigationTile extends StatelessWidget {
     required this.onTap,
     this.color,
     this.showsChevron = true,
+    this.badge,
   });
 
   final IconData icon;
@@ -476,6 +403,9 @@ class _NavigationTile extends StatelessWidget {
   final Color? color;
   final bool showsChevron;
 
+  /// Shown before the chevron, e.g. a status badge.
+  final Widget? badge;
+
   @override
   Widget build(BuildContext context) => ListTile(
     dense: true,
@@ -485,7 +415,15 @@ class _NavigationTile extends StatelessWidget {
     textColor: color,
     leading: Icon(icon, size: 22),
     title: Text(title, style: Theme.of(context).textTheme.bodyMedium),
-    trailing: showsChevron ? const Icon(Icons.chevron_right, size: 20) : null,
+    trailing: badge == null && !showsChevron
+        ? null
+        : Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (badge case final badge?) ...[badge, const SizedBox(width: 4)],
+              if (showsChevron) const Icon(Icons.chevron_right, size: 20),
+            ],
+          ),
     onTap: onTap,
   );
 }

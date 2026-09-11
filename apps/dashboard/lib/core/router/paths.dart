@@ -13,4 +13,5 @@ abstract final class AppPaths {
   static const sessionEdit = 'edit';
   static const sponsors = '/sponsors';
   static const sponsorEdit = 'edit';
+  static const supportLt = '/support-lt';
 }
