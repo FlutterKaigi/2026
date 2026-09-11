@@ -1,7 +1,86 @@
 # Cloud Functions
 
 FlutterKaigi 2026 の Cloud Functions。STG → 本番のデータ反映用の
-`syncCollectionsToProd` と、プロフィール交換用の各種関数を提供する。
+`syncCollectionsToProd`、プロフィール交換用の各種関数、応援 LT 参加登録を提供する。
+
+## 応援 LT 参加登録
+
+`src/support_lt.ts` が callable / Auth トリガーを公開し、
+`src/support_lt_service.ts` が認可と Firestore トランザクションを実装する。
+リージョンは `asia-northeast1`、本番の callable は App Check を必須にする。
+
+- `issueSupportLtCode({ rotate?: boolean })` は確認済み `@flutterkaigi.jp` アカウントかつ
+  `admins/{uid}` 登録済みの管理者のみ呼び出せる。先頭のゼロを保持する 6 桁の文字列を
+  発行し、`{ code, issuedAt }` を返す。時刻は **Unix epoch ミリ秒**。
+  コードに有効期限はなく、発行済みのコードがあれば同じコードを返す。`rotate: true` は
+  必ず直前と異なるコードを発行し、旧コードを同じトランザクションで無効にする。
+  コードは参加者ごとに消費せず、何人でも利用できる。管理者判定は
+  `src/admin_auth.ts` の `assertAdmin` を `syncCollectionsToProd` と共有する。
+- `registerSupportLt({ code: string })` は匿名認証以外のサインイン済みユーザーが
+  利用できる。プロフィール作成は不要。現在のコードとの一致を検証し、
+  `supportLtRegistrations/{uid}` を作成して `{ registeredAt, alreadyRegistered }` を返す。
+  `registeredAt` は epoch ミリ秒。複数回・同時の呼び出しでも 1 人 1 件となり、
+  既存の登録日時と名前を保持する。登録済みならコード更新後も成功を返す。
+  表示名は登録時のプロフィール名 → Auth 名 → uid の順で選び、メールは保存しない。
+- 失敗したコード検証は `supportLtRegistrationAttempts/{uid}` に保存し、10 分以内の
+  10 回失敗で以後 10 分間拒否する。加えて全アカウント合計の失敗を
+  `supportLtSettings/attempts` に保存し、10 分以内の 200 回失敗でコード自体を
+  10 分間ロックする（使い捨てアカウントによる総当たり対策）。ロックは
+  `rotate: true` での再発行でも解除される。10 回目・200 回目とロック中は
+  `resource-exhausted`、不一致・未発行は `not-found`、入力形式不正は `invalid-argument`。
+  失敗回数の更新は例外を投げる前にコミットし、並行リクエストでも制限を適用する。
+  プロフィール `users/{uid}` はコード一致後にのみ読み取る。
+- `onSupportLtUserDeleted` は Firebase Auth のアカウント削除時に登録と失敗試行を
+  削除する。プロフィールがないユーザーも対象となる。Auth lifecycle のため
+  第 1 世代 Function を使用し、失敗時の再試行を有効にする。
+
+callable は削除・無効化済みアカウントの古い ID トークンを受け付けない。
+`src/support_lt_auth.ts` で Auth アカウント状態を確認する。登録時は Firestore
+トランザクションで登録ドキュメントを読み取った直後、ロックを保持して Auth を確認する。
+Auth 削除トリガーのバッチはこのロックが解放されるまで待機するため、実行中の
+リクエストと削除が競合しても登録・失敗試行を再作成したままにしない。
+Auth の一時障害時は書き込み前にトランザクションを中止する。削除済みアカウントの
+追加クリーンアップはロックを解放した後に行う。無効化（disable）されたアカウントは
+拒否するが、再有効化に備えて登録は削除しない。コード発行も有効な Auth アカウントを要求する。
+
+この順序保証には Firestore **Standard edition の `PESSIMISTIC` concurrency mode**
+（既定値）が必要。`OPTIMISTIC` へ変更する場合は削除との排他設計を再検討すること。
+根拠: [Firestore のトランザクションとデータ競合](https://firebase.google.com/docs/firestore/transaction-data-contention)。
+
+Firestore では `supportLtSettings/current` を管理者のみ参照可能とし、参加登録は
+本人の `get` または管理者の `get/list` のみ許可する。ダッシュボードは参加者一覧から
+人数を求める。管理者を含むすべてのクライアントの直接書き込み・削除を禁止し、
+失敗試行コレクションは読み取りも禁止する。スキーマは
+`packages/data/firebase/schemas/firestore/support_lt_*.schema.json` を参照。
+
+### 応援 LT のテスト
+
+```bash
+npm --prefix functions ci
+npm --prefix functions test
+npm --prefix functions run test:coverage
+```
+
+単体テストは認可、入力検証、有効期限、再発行、プロフィールなしの登録、再実行、
+試行制限、削除と実行中のアカウント削除の競合を検証する。カバレッジの対象は
+`support_lt_service.js` の業務ロジックと `support_lt_auth.js` のアカウント検証で、
+行・分岐・関数ごとに 80% 以上をチェックする。
+
+Auth / Firestore / Functions Emulator が起動している状態で以下を実行する。
+
+```bash
+npm --prefix functions run test:emulator
+```
+
+既定の接続先は `127.0.0.1:9099` / `8080` / `5001`、プロジェクトは
+`dev-flutterkaigi-2026`。変更時は `FIREBASE_AUTH_EMULATOR_HOST`、
+`FIRESTORE_EMULATOR_HOST`、`FUNCTIONS_EMULATOR_HOST`、
+`SUPPORT_LT_TEST_PROJECT_ID` を指定する。接続先はループバックに限定する。
+テストは実際の認証トークンで callable と Firestore REST API を呼び出し、
+並行発行・並行登録・並行総当たり、ルールの拒否、Auth 削除トリガー、
+削除・無効化後の古い ID トークンの拒否まで検証する。
+専用のテストユーザーを作成・削除し、既存コードを保存・復元するため、
+実行中はダッシュボードからコードを再発行しないこと。
 
 ## プロフィール交換
 

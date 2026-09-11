@@ -4,6 +4,7 @@ import { setGlobalOptions } from "firebase-functions/v2";
 import { HttpsError, onCall } from "firebase-functions/v2/https";
 import { defineString } from "firebase-functions/params";
 import * as logger from "firebase-functions/logger";
+import { assertAdmin } from "./admin_auth";
 import { defaultFirestore } from "./firebase_admin";
 import { FUNCTIONS_REGION, isEmulator } from "./environment";
 
@@ -14,6 +15,12 @@ export {
   onProfileExchangeOwnerDeleted,
   redeemExchangeCode,
 } from "./profile_exchange";
+
+export {
+  issueSupportLtCode,
+  onSupportLtUserDeleted,
+  registerSupportLt,
+} from "./support_lt";
 
 // デプロイ先（= 同期元）と同期先のリージョン・プロジェクト設定。
 // SYNC_TARGET_PROJECT_ID は functions/.env（Git 管理外）で指定する。
@@ -42,8 +49,6 @@ const SYNCABLE_COLLECTIONS = [
 
 type SyncableCollection = (typeof SYNCABLE_COLLECTIONS)[number];
 
-const ADMINS_COLLECTION = "admins";
-const ADMIN_EMAIL_PATTERN = /^[^@]+@flutterkaigi\.jp$/;
 // Firestore のバッチ書き込み上限 (500) に余裕を持たせたチャンクサイズ。
 const BATCH_CHUNK_SIZE = 400;
 
@@ -71,31 +76,6 @@ function targetDb(): Firestore {
   const existing = getApps().find((app: App) => app.name === appName);
   const app = existing ?? initializeApp({ projectId }, appName);
   return getFirestore(app);
-}
-
-/** 呼び出しユーザーが管理者（@flutterkaigi.jp かつ admins コレクション登録済み）か検証する。 */
-async function assertAdmin(auth: {
-  uid: string;
-  token: { email?: string; email_verified?: boolean };
-}): Promise<void> {
-  const email = auth.token.email;
-  if (
-    email === undefined ||
-    auth.token.email_verified !== true ||
-    !ADMIN_EMAIL_PATTERN.test(email)
-  ) {
-    throw new HttpsError(
-      "permission-denied",
-      "flutterkaigi.jp ドメインの確認済みアカウントでサインインしてください。",
-    );
-  }
-  const adminDoc = await sourceDb()
-    .collection(ADMINS_COLLECTION)
-    .doc(auth.uid)
-    .get();
-  if (!adminDoc.exists) {
-    throw new HttpsError("permission-denied", "管理者権限がありません。");
-  }
 }
 
 /** リクエストで指定されたコレクション名を検証し、依存順に並べ直す。 */
@@ -240,7 +220,7 @@ export const syncCollectionsToProd = onCall(
     if (request.auth == null) {
       throw new HttpsError("unauthenticated", "サインインが必要です。");
     }
-    await assertAdmin(request.auth);
+    await assertAdmin(request.auth, sourceDb());
 
     const collections = parseCollections(request.data?.collections);
     const dryRun = request.data?.dryRun === true;

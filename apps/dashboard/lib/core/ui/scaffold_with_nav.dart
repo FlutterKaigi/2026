@@ -13,11 +13,13 @@ class ScaffoldWithNav extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final location = GoRouterState.of(context).matchedLocation;
+    final useDrawer = MediaQuery.sizeOf(context).width < 800;
 
     return Scaffold(
+      drawer: useDrawer ? _NavDrawer(currentLocation: location) : null,
       appBar: AppBar(
         centerTitle: false,
-        title: const Text('FlutterKaigi 2026 管理ダッシュボード'),
+        title: const Text('FlutterKaigi 2026 管理ダッシュボード', overflow: TextOverflow.ellipsis),
         actions: [const _UserMenu()],
         bottom: const PreferredSize(
           preferredSize: Size.fromHeight(1),
@@ -26,8 +28,10 @@ class ScaffoldWithNav extends StatelessWidget {
       ),
       body: Row(
         children: [
-          _SideNav(currentLocation: location),
-          const VerticalDivider(width: 1, thickness: 1),
+          if (!useDrawer) ...[
+            _SideNav(currentLocation: location),
+            const VerticalDivider(width: 1, thickness: 1),
+          ],
           Expanded(child: child),
         ],
       ),
@@ -89,31 +93,48 @@ const _navItems = [
   _NavItem(label: 'タイムライン', icon: Icons.schedule, path: AppPaths.timeline),
   _NavItem(label: 'セッション', icon: Icons.event, path: AppPaths.sessions),
   _NavItem(label: 'スポンサー', icon: Icons.business, path: AppPaths.sponsors),
+  _NavItem(label: '応援LT', icon: Icons.record_voice_over, path: AppPaths.supportLt),
 ];
+
+int _selectedNavIndex(String location) {
+  for (var i = _navItems.length - 1; i >= 0; i--) {
+    final path = _navItems[i].path;
+    if (path == AppPaths.home ? location == path : location.startsWith(path)) return i;
+  }
+  return 0;
+}
+
+class _NavDrawer extends StatelessWidget {
+  const _NavDrawer({required this.currentLocation});
+
+  final String currentLocation;
+
+  @override
+  Widget build(BuildContext context) {
+    return NavigationDrawer(
+      selectedIndex: _selectedNavIndex(currentLocation),
+      onDestinationSelected: (index) {
+        Navigator.of(context).pop();
+        context.go(_navItems[index].path);
+      },
+      children: [
+        const Padding(padding: EdgeInsets.all(24), child: Text('管理メニュー')),
+        for (final item in _navItems) NavigationDrawerDestination(icon: Icon(item.icon), label: Text(item.label)),
+      ],
+    );
+  }
+}
 
 class _SideNav extends StatelessWidget {
   const _SideNav({required this.currentLocation});
 
   final String currentLocation;
 
-  int get _selectedIndex {
-    for (var i = _navItems.length - 1; i >= 0; i--) {
-      final path = _navItems[i].path;
-      if (path == AppPaths.home) {
-        if (currentLocation == AppPaths.home) return i;
-      } else if (currentLocation.startsWith(path)) {
-        return i;
-      }
-    }
-    return 0;
-  }
-
   @override
   Widget build(BuildContext context) {
-    final index = _selectedIndex;
-
     return NavigationRail(
-      selectedIndex: index,
+      scrollable: true,
+      selectedIndex: _selectedNavIndex(currentLocation),
       labelType: NavigationRailLabelType.all,
       onDestinationSelected: (i) => context.go(_navItems[i].path),
       destinations: [

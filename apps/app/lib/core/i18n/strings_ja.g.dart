@@ -57,6 +57,7 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	late final Translations$auth$ja auth = Translations$auth$ja.internal(_root);
 	late final Translations$profile$ja profile = Translations$profile$ja.internal(_root);
 	late final Translations$exchange$ja exchange = Translations$exchange$ja.internal(_root);
+	late final Translations$supportLt$ja supportLt = Translations$supportLt$ja.internal(_root);
 	late final Translations$countryRegion$ja countryRegion = Translations$countryRegion$ja.internal(_root);
 	late final Translations$settings$ja settings = Translations$settings$ja.internal(_root);
 	late final Translations$licenses$ja licenses = Translations$licenses$ja.internal(_root);
@@ -833,6 +834,66 @@ class Translations$exchange$ja {
 	String get redeemRateLimited => '試行回数が多すぎます。しばらくしてからもう一度お試しください';
 }
 
+// Path: supportLt
+class Translations$supportLt$ja {
+	Translations$supportLt$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: '応援LT参加登録'
+	String get title => '応援LT参加登録';
+
+	/// ja: '運営から案内された6桁のコードを入力して、応援LTへの参加を登録してください'
+	String get description => '運営から案内された6桁のコードを入力して、応援LTへの参加を登録してください';
+
+	/// ja: '参加登録コード'
+	String get codeLabel => '参加登録コード';
+
+	/// ja: '参加登録する'
+	String get register => '参加登録する';
+
+	/// ja: '登録中…'
+	String get submitting => '登録中…';
+
+	/// ja: '参加登録が完了しました'
+	String get registeredTitle => '参加登録が完了しました';
+
+	/// ja: '応援LTをお楽しみください'
+	String get registeredBody => '応援LTをお楽しみください';
+
+	/// ja: '参加登録済み'
+	String get registeredStatus => '参加登録済み';
+
+	/// ja: 'アカウントに戻る'
+	String get backToAccount => 'アカウントに戻る';
+
+	/// ja: '応援LTに参加登録するには サインインしてください'
+	String get signInRequired => '応援LTに参加登録するには\nサインインしてください';
+
+	/// ja: '6桁の数字を入力してください'
+	String get invalidFormat => '6桁の数字を入力してください';
+
+	/// ja: 'コードが正しくありません。運営から案内されたコードを確認してください'
+	String get invalidCode => 'コードが正しくありません。運営から案内されたコードを確認してください';
+
+	/// ja: '試行回数が多すぎます。しばらくしてからもう一度お試しください'
+	String get rateLimited => '試行回数が多すぎます。しばらくしてからもう一度お試しください';
+
+	/// ja: '通信に失敗しました。通信状況を確認してもう一度お試しください'
+	String get networkError => '通信に失敗しました。通信状況を確認してもう一度お試しください';
+
+	/// ja: 'サインインの有効期限が切れました。もう一度サインインしてください'
+	String get sessionExpired => 'サインインの有効期限が切れました。もう一度サインインしてください';
+
+	/// ja: '参加登録が許可されていません。運営に確認してください'
+	String get permissionDenied => '参加登録が許可されていません。運営に確認してください';
+
+	/// ja: '参加登録できませんでした。もう一度お試しください'
+	String get registrationFailed => '参加登録できませんでした。もう一度お試しください';
+}
+
 // Path: countryRegion
 class Translations$countryRegion$ja {
 	Translations$countryRegion$ja.internal(this._root);
@@ -1135,8 +1196,8 @@ class Translations$auth$account$ja {
 	/// ja: 'ミッション'
 	String get mission => 'ミッション';
 
-	/// ja: 'LT大会・プロフィール交換・SNS投稿登録の参加状況で判定'
-	String get missionDescription => 'LT大会・プロフィール交換・SNS投稿登録の参加状況で判定';
+	/// ja: '応援LT参加・プロフィール交換・SNS投稿登録の参加状況で判定'
+	String get missionDescription => '応援LT参加・プロフィール交換・SNS投稿登録の参加状況で判定';
 
 	/// ja: 'イベントに参加'
 	String get joinEvent => 'イベントに参加';
@@ -1144,8 +1205,8 @@ class Translations$auth$account$ja {
 	/// ja: 'クイズ大会'
 	String get quiz => 'クイズ大会';
 
-	/// ja: 'LT大会'
-	String get lightningTalks => 'LT大会';
+	/// ja: '応援LT参加'
+	String get lightningTalks => '応援LT参加';
 
 	/// ja: 'プロフィール交換'
 	String get profileExchange => 'プロフィール交換';
@@ -1311,7 +1372,7 @@ extension on Translations {
 			'sessionSearch.promptBody' => 'キーワードを入力するか、日程・種類・言語を選択してください',
 			'sessionSearch.emptyTitle' => 'セッションが見つかりません',
 			'sessionSearch.emptyBody' => 'キーワードや絞り込み条件を変更してみてください',
-			'sessionSearch.resultCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(n, one: '${n}件のセッション', other: '${n}件のセッション', ),
+			'sessionSearch.resultCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(n, one: '${n}件のセッション', other: '${n}件のセッション', ), 
 			'sessionDetails.title' => 'セッション詳細',
 			'sessionDetails.description' => '概要',
 			'sessionDetails.schedule' => '日時・会場',
@@ -1405,10 +1466,10 @@ extension on Translations {
 			'auth.account.deletePasswordTitle' => 'パスワードの確認',
 			'auth.account.deletePasswordBody' => 'アカウントを削除するには、現在のパスワードを入力してください。',
 			'auth.account.mission' => 'ミッション',
-			'auth.account.missionDescription' => 'LT大会・プロフィール交換・SNS投稿登録の参加状況で判定',
+			'auth.account.missionDescription' => '応援LT参加・プロフィール交換・SNS投稿登録の参加状況で判定',
 			'auth.account.joinEvent' => 'イベントに参加',
 			'auth.account.quiz' => 'クイズ大会',
-			'auth.account.lightningTalks' => 'LT大会',
+			'auth.account.lightningTalks' => '応援LT参加',
 			'auth.account.profileExchange' => 'プロフィール交換',
 			'auth.account.snsPost' => 'SNS投稿登録',
 			'auth.account.comingSoon' => 'この機能は準備中です',
@@ -1512,6 +1573,23 @@ extension on Translations {
 			'exchange.redeemInvalid' => 'コードが見つからないか、有効期限が切れています',
 			'exchange.redeemSelf' => '自分のコードは入力できません',
 			'exchange.redeemRateLimited' => '試行回数が多すぎます。しばらくしてからもう一度お試しください',
+			'supportLt.title' => '応援LT参加登録',
+			'supportLt.description' => '運営から案内された6桁のコードを入力して、応援LTへの参加を登録してください',
+			'supportLt.codeLabel' => '参加登録コード',
+			'supportLt.register' => '参加登録する',
+			'supportLt.submitting' => '登録中…',
+			'supportLt.registeredTitle' => '参加登録が完了しました',
+			'supportLt.registeredBody' => '応援LTをお楽しみください',
+			'supportLt.registeredStatus' => '参加登録済み',
+			'supportLt.backToAccount' => 'アカウントに戻る',
+			'supportLt.signInRequired' => '応援LTに参加登録するには\nサインインしてください',
+			'supportLt.invalidFormat' => '6桁の数字を入力してください',
+			'supportLt.invalidCode' => 'コードが正しくありません。運営から案内されたコードを確認してください',
+			'supportLt.rateLimited' => '試行回数が多すぎます。しばらくしてからもう一度お試しください',
+			'supportLt.networkError' => '通信に失敗しました。通信状況を確認してもう一度お試しください',
+			'supportLt.sessionExpired' => 'サインインの有効期限が切れました。もう一度サインインしてください',
+			'supportLt.permissionDenied' => '参加登録が許可されていません。運営に確認してください',
+			'supportLt.registrationFailed' => '参加登録できませんでした。もう一度お試しください',
 			'countryRegion.asia' => 'アジア',
 			'countryRegion.oceania' => 'オセアニア',
 			'countryRegion.americas' => '北米・中南米',
@@ -1532,7 +1610,7 @@ extension on Translations {
 			'licenses.title' => 'ライセンス',
 			'licenses.searchHint' => 'パッケージを検索',
 			'licenses.clearSearch' => '検索をクリア',
-			'licenses.licenseCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(n, one: 'ライセンス: ${n}件', other: 'ライセンス: ${n}件', ),
+			'licenses.licenseCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(n, one: 'ライセンス: ${n}件', other: 'ライセンス: ${n}件', ), 
 			'licenses.notFound' => 'ライセンスが見つかりませんでした',
 			'error.title' => 'データを読み込めませんでした',
 			'error.message' => '通信状況を確認して、もう一度お試しください。',

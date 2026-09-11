@@ -35,7 +35,7 @@ class TranslationsEn extends Translations with BaseTranslations<AppLocale, Trans
 
 	late final TranslationsEn _root = this; // ignore: unused_field
 
-	@override
+	@override 
 	TranslationsEn $copyWith({TranslationMetadata<AppLocale, Translations>? meta}) => TranslationsEn(meta: meta ?? this.$meta);
 
 	// Translations
@@ -56,6 +56,7 @@ class TranslationsEn extends Translations with BaseTranslations<AppLocale, Trans
 	@override late final _Translations$auth$en auth = _Translations$auth$en._(_root);
 	@override late final _Translations$profile$en profile = _Translations$profile$en._(_root);
 	@override late final _Translations$exchange$en exchange = _Translations$exchange$en._(_root);
+	@override late final _Translations$supportLt$en supportLt = _Translations$supportLt$en._(_root);
 	@override late final _Translations$countryRegion$en countryRegion = _Translations$countryRegion$en._(_root);
 	@override late final _Translations$settings$en settings = _Translations$settings$en._(_root);
 	@override late final _Translations$licenses$en licenses = _Translations$licenses$en._(_root);
@@ -428,6 +429,32 @@ class _Translations$exchange$en extends Translations$exchange$ja {
 	@override String get redeemRateLimited => 'Too many attempts. Please try again in a few minutes';
 }
 
+// Path: supportLt
+class _Translations$supportLt$en extends Translations$supportLt$ja {
+	_Translations$supportLt$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Support LT Registration';
+	@override String get description => 'Enter the 6-digit code provided by the organizers to register your participation in Support LT';
+	@override String get codeLabel => 'Registration code';
+	@override String get register => 'Register participation';
+	@override String get submitting => 'Registering…';
+	@override String get registeredTitle => 'Registration complete';
+	@override String get registeredBody => 'Enjoy Support LT';
+	@override String get registeredStatus => 'Registered';
+	@override String get backToAccount => 'Back to account';
+	@override String get signInRequired => 'Sign in to register your participation in Support LT';
+	@override String get invalidFormat => 'Enter a 6-digit code';
+	@override String get invalidCode => 'This code is incorrect. Check the code provided by the organizers';
+	@override String get rateLimited => 'Too many attempts. Please try again in a few minutes';
+	@override String get networkError => 'A network error occurred. Check your connection and try again';
+	@override String get sessionExpired => 'Your sign-in session has expired. Please sign in again';
+	@override String get permissionDenied => 'Registration is not permitted. Please ask the organizers';
+	@override String get registrationFailed => 'Could not register your participation. Please try again';
+}
+
 // Path: countryRegion
 class _Translations$countryRegion$en extends Translations$countryRegion$ja {
 	_Translations$countryRegion$en._(TranslationsEn root) : this._root = root, super.internal(root);
@@ -602,10 +629,10 @@ class _Translations$auth$account$en extends Translations$auth$account$ja {
 	@override String get deletePasswordTitle => 'Confirm your password';
 	@override String get deletePasswordBody => 'Enter your current password to delete your account.';
 	@override String get mission => 'Missions';
-	@override String get missionDescription => 'Judged by your participation in LT, profile exchange and SNS posts';
+	@override String get missionDescription => 'Judged by your participation in Support LT, profile exchange and SNS posts';
 	@override String get joinEvent => 'Join the event';
 	@override String get quiz => 'Quiz';
-	@override String get lightningTalks => 'Lightning Talks';
+	@override String get lightningTalks => 'Join Support LT';
 	@override String get profileExchange => 'Profile exchange';
 	@override String get snsPost => 'Register SNS post';
 	@override String get comingSoon => 'This feature is coming soon';
@@ -725,7 +752,7 @@ extension on TranslationsEn {
 			'sessionSearch.promptBody' => 'Enter a keyword or select a day, session type, or language',
 			'sessionSearch.emptyTitle' => 'No sessions found',
 			'sessionSearch.emptyBody' => 'Try changing the keyword or filters',
-			'sessionSearch.resultCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} session', other: '${n} sessions', ),
+			'sessionSearch.resultCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} session', other: '${n} sessions', ), 
 			'sessionDetails.title' => 'Session Details',
 			'sessionDetails.description' => 'Description',
 			'sessionDetails.schedule' => 'Schedule and Venue',
@@ -819,10 +846,10 @@ extension on TranslationsEn {
 			'auth.account.deletePasswordTitle' => 'Confirm your password',
 			'auth.account.deletePasswordBody' => 'Enter your current password to delete your account.',
 			'auth.account.mission' => 'Missions',
-			'auth.account.missionDescription' => 'Judged by your participation in LT, profile exchange and SNS posts',
+			'auth.account.missionDescription' => 'Judged by your participation in Support LT, profile exchange and SNS posts',
 			'auth.account.joinEvent' => 'Join the event',
 			'auth.account.quiz' => 'Quiz',
-			'auth.account.lightningTalks' => 'Lightning Talks',
+			'auth.account.lightningTalks' => 'Join Support LT',
 			'auth.account.profileExchange' => 'Profile exchange',
 			'auth.account.snsPost' => 'Register SNS post',
 			'auth.account.comingSoon' => 'This feature is coming soon',
@@ -926,6 +953,23 @@ extension on TranslationsEn {
 			'exchange.redeemInvalid' => 'This code wasn\'t found, or it has expired',
 			'exchange.redeemSelf' => 'You can\'t enter your own code',
 			'exchange.redeemRateLimited' => 'Too many attempts. Please try again in a few minutes',
+			'supportLt.title' => 'Support LT Registration',
+			'supportLt.description' => 'Enter the 6-digit code provided by the organizers to register your participation in Support LT',
+			'supportLt.codeLabel' => 'Registration code',
+			'supportLt.register' => 'Register participation',
+			'supportLt.submitting' => 'Registering…',
+			'supportLt.registeredTitle' => 'Registration complete',
+			'supportLt.registeredBody' => 'Enjoy Support LT',
+			'supportLt.registeredStatus' => 'Registered',
+			'supportLt.backToAccount' => 'Back to account',
+			'supportLt.signInRequired' => 'Sign in to register your participation in Support LT',
+			'supportLt.invalidFormat' => 'Enter a 6-digit code',
+			'supportLt.invalidCode' => 'This code is incorrect. Check the code provided by the organizers',
+			'supportLt.rateLimited' => 'Too many attempts. Please try again in a few minutes',
+			'supportLt.networkError' => 'A network error occurred. Check your connection and try again',
+			'supportLt.sessionExpired' => 'Your sign-in session has expired. Please sign in again',
+			'supportLt.permissionDenied' => 'Registration is not permitted. Please ask the organizers',
+			'supportLt.registrationFailed' => 'Could not register your participation. Please try again',
 			'countryRegion.asia' => 'Asia',
 			'countryRegion.oceania' => 'Oceania',
 			'countryRegion.americas' => 'Americas',
@@ -946,7 +990,7 @@ extension on TranslationsEn {
 			'licenses.title' => 'Licenses',
 			'licenses.searchHint' => 'Search packages',
 			'licenses.clearSearch' => 'Clear search',
-			'licenses.licenseCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} license', other: '${n} licenses', ),
+			'licenses.licenseCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} license', other: '${n} licenses', ), 
 			'licenses.notFound' => 'License not found',
 			'error.title' => 'Could not load data',
 			'error.message' => 'Check your connection and try again.',
