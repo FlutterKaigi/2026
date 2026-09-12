@@ -289,10 +289,13 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(codeIssuer.issueCallCount, 1);
+    expect(codeIssuer.lastRotate, isFalse, reason: 'opening the screen must not invalidate the live code');
     expect(find.text('123 456'), findsOneWidget);
     // The own QR card also shows a "有効期限 ... まで" expiry, so this expects
     // two matches (QR + code) rather than asserting on the exact wording.
-    expect(find.textContaining('有効期限'), findsNWidgets(2));
+    // The pattern includes the surrounding words so it can't also match the
+    // section description, which mentions 有効期限 too.
+    expect(find.textContaining(_expiryLabelPattern), findsNWidgets(2));
   });
 
   testWidgets('shows the expired state and reissues the 6-digit code on demand', (tester) async {
@@ -322,7 +325,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(codeIssuer.issueCallCount, 2);
-    expect(find.textContaining('有効期限'), findsNWidgets(2));
+    expect(codeIssuer.lastRotate, isTrue, reason: 'the reissue action must ask for a brand-new code');
+    expect(find.textContaining(_expiryLabelPattern), findsNWidgets(2));
   });
 
   testWidgets('copies the 6-digit code to the clipboard', (tester) async {
@@ -464,6 +468,9 @@ void main() {
   });
 }
 
+/// Matches the "有効期限 <日時> まで" labels the QR and code cards show.
+final _expiryLabelPattern = RegExp('有効期限 .+ まで');
+
 class _StubExchangeTokenIssuer implements ExchangeTokenIssuer {
   int issueCallCount = 0;
 
@@ -488,12 +495,16 @@ class _StubExchangeTokenIssuer implements ExchangeTokenIssuer {
 class _StubExchangeCodeIssuer implements ExchangeCodeIssuer {
   int issueCallCount = 0;
 
+  /// Whether the most recent [issue] asked for a brand-new code.
+  bool lastRotate = false;
+
   /// Overrides the next issued code's expiry; defaults to 5 minutes from now.
   DateTime? nextExpiresAt;
 
   @override
-  Future<ExchangeCode> issue() async {
+  Future<ExchangeCode> issue({bool rotate = false}) async {
     issueCallCount++;
+    lastRotate = rotate;
     return ExchangeCode(
       value: '123456',
       expiresAt: nextExpiresAt ?? DateTime.now().add(const Duration(minutes: 5)),

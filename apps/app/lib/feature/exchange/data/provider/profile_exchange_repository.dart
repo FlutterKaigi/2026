@@ -59,8 +59,10 @@ final class CloudFunctionsExchangeCodeIssuer implements ExchangeCodeIssuer {
   final FirebaseFunctions _functions;
 
   @override
-  Future<ExchangeCode> issue() async {
-    final result = await _functions.httpsCallable('issueExchangeCode').call<Object?>();
+  Future<ExchangeCode> issue({bool rotate = false}) async {
+    final result = await _functions.httpsCallable('issueExchangeCode').call<Object?>(<String, dynamic>{
+      'rotate': rotate,
+    });
     final data = result.data;
     final code = data is Map ? data['code'] : null;
     final expiresAt = data is Map ? data['expiresAt'] : null;

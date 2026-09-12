@@ -5,6 +5,7 @@ links:
   copied: Link copied
 navigation:
   sessions: Sessions
+  venueMap: Venue Map
   sponsors: Sponsors
   info: Event
   account: Account
@@ -94,6 +95,31 @@ bookmarkedSessions:
   emptyTitle: No bookmarked sessions
   emptyBody: Bookmark sessions to find them here.
   openSessions: Open sessions
+venueMap:
+  title: Venue Map
+  floor: Hamamatsucho Convention Hall · 5F
+  loadError: Could not load the venue map
+  loadErrorDescription: Please try again.
+  search: Find a place
+  searchHint: Hall, sponsor, booth number, facility
+  clearSearch: Clear search
+  placesCount: places
+  showOnMap: Show on map
+  all: All
+  halls: Halls
+  booths: Sponsors
+  facilities: Facilities
+  noResults: No matching places
+  clearSelection: Clear selection
+  zoomIn: Zoom in
+  zoomOut: Zoom out
+  fit: Show entire floor
+  rotate: Rotate map
+  twoD: 2D
+  threeD: 3D
+  viewMode: Map view
+  useTwoD: Show in 2D
+  saveFailed: Could not save the view preference
 eventInfo:
   title: Event Overview
   newsTitle: Latest News
@@ -246,7 +272,7 @@ exchange:
   noteCancel: Cancel
   noteSaveFailed: Could not save the note
   codeSectionTitle: Exchange with a code
-  codeSectionDescription: If the camera isn't available, share and enter a 6-digit code instead
+  codeSectionDescription: If the camera isn't available, share and enter a 6-digit code instead. The same code works for everyone until it expires
   myCodeSemanticLabel: Profile exchange 6-digit code
   myCodeExpiresAt: Valid until $date
   myCodeExpired: This code has expired

@@ -198,14 +198,23 @@ export interface IssueExchangeCodeResult {
 }
 
 /**
- * Issues a short-lived 6-digit code for the caller's own uid — the fallback
- * exchange path for camera-denied or otherwise QR-incapable devices.
+ * Returns the caller's live 6-digit code, issuing one when they have none —
+ * the fallback exchange path for camera-denied or otherwise QR-incapable
+ * devices. The code stays redeemable until it expires (see
+ * [redeemExchangeCode]), so re-displaying it is what an attendee showing it
+ * to several people in a row needs.
  *
  * The code itself is too short to be a signed token (a forged 6-digit value
  * is trivially guessable), so unlike [issueExchangeToken] it is looked up
  * server-side: [redeemExchangeCode] reads `exchangeCodes/{code}` to find the
  * issuing uid, then hands back a normal signed exchange token so the create()
  * path stays the same for both QR and code exchanges.
+ *
+ * `rotate: true` (the app's "reissue" action) discards the caller's current
+ * code even while it is still live. A plain call re-displays that code
+ * instead, so re-opening the exchange screen — or restarting the app, which
+ * loses the client-side cache — does not pull a code out from under the
+ * attendees who are still typing it in.
  */
 export const issueExchangeCode = onCall(
   { region: FUNCTIONS_REGION, enforceAppCheck: !isEmulator },
@@ -214,21 +223,39 @@ export const issueExchangeCode = onCall(
       throw new HttpsError("unauthenticated", "サインインが必要です。");
     }
     const uid = request.auth.uid;
+    const rotate = request.data?.rotate === true;
     const db = defaultFirestore();
     const codesRef = db.collection("exchangeCodes");
 
-    // A fresh code invalidates any code this uid issued earlier, so an old
-    // code copied down by mistake can't still be redeemed.
     const previous = await codesRef.where("uid", "==", uid).get();
-    if (!previous.empty) {
+    const nowMillis = Date.now();
+    // Only one live code per uid is expected; sorting makes the pick
+    // deterministic if two issue calls raced and left a duplicate behind.
+    const live = rotate ? [] : previous.docs
+      .filter((doc) => (doc.get("expiresAt") as Timestamp).toMillis() > nowMillis)
+      .sort((a, b) => (b.get("expiresAt") as Timestamp).toMillis() - (a.get("expiresAt") as Timestamp).toMillis());
+    const reusable = live.at(0);
+
+    // Everything not being re-displayed goes: a rotated code has to stop
+    // being redeemable immediately, and an expired one would otherwise sit
+    // there until the TTL policy sweeps it.
+    const removable = previous.docs.filter((doc) => doc.id !== reusable?.id);
+    if (removable.length > 0) {
       const batch = db.batch();
-      for (const doc of previous.docs) {
+      for (const doc of removable) {
         batch.delete(doc.ref);
       }
       await batch.commit();
     }
 
-    const expiresAtMillis = Date.now() + EXCHANGE_CODE_TTL_MILLIS;
+    if (reusable != null) {
+      return {
+        code: reusable.id,
+        expiresAt: Math.floor((reusable.get("expiresAt") as Timestamp).toMillis() / 1000),
+      };
+    }
+
+    const expiresAtMillis = nowMillis + EXCHANGE_CODE_TTL_MILLIS;
     for (let attempt = 0; attempt < EXCHANGE_CODE_ISSUE_ATTEMPTS; attempt++) {
       const code = randomExchangeCode();
       try {
@@ -347,11 +374,10 @@ export const redeemExchangeCode = onCall(
         return { kind: "self" };
       }
 
-      // Consumed: a code is redeemable once, same as a QR scan's exchange
-      // create() failing with ALREADY_EXISTS on a second attempt. Reading
-      // and deleting inside the same transaction closes the window where two
-      // concurrent redeems could both observe the code as existing.
-      tx.delete(codeRef);
+      // The code survives being redeemed and stays valid until it expires,
+      // mirroring a QR code that several attendees can scan in turn from the
+      // same screen. Consuming it here would fail everyone after the first
+      // with "not found" while its owner still has it on display.
       tx.delete(attemptsRef);
       return { kind: "success", otherUid };
     });

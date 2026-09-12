@@ -106,18 +106,18 @@ class MyExchangeTokenNotifier extends AsyncNotifier<ExchangeToken> {
   }
 }
 
-/// In-memory cache of the signed-in user's most recently issued
-/// [ExchangeCode], keyed by uid.
+/// In-memory cache of the signed-in user's live [ExchangeCode], keyed by uid.
 ///
-/// Not persisted to disk: a 5-minute code has nothing worth surviving an app
-/// restart for (see [ExchangeCode]'s doc comment). It still needs to survive
-/// [myExchangeCodeProvider] itself, which is `autoDispose` — without a cache
-/// living outside that provider, leaving and re-entering the exchange screen
-/// would call `issueExchangeCode` on every visit even while the previous
-/// code is still valid. Keyed by uid, and cleared on sign-out / account
-/// deletion, for the same reason [ExchangeTokenCacheRepository] is: a
-/// device-scoped cache must not let one signed-in user's code survive into
-/// another user's session on the same device.
+/// Not persisted to disk: `issueExchangeCode` returns the same live code on a
+/// plain call, so an app restart recovers it (see [ExchangeCode]'s doc
+/// comment). It still needs to survive [myExchangeCodeProvider] itself, which
+/// is `autoDispose` — without a cache living outside that provider, leaving
+/// and re-entering the exchange screen would spend a callable round trip on
+/// every visit just to be handed back the code already on screen. Keyed by
+/// uid, and cleared on sign-out / account deletion, for the same reason
+/// [ExchangeTokenCacheRepository] is: a device-scoped cache must not let one
+/// signed-in user's code survive into another user's session on the same
+/// device.
 abstract interface class ExchangeCodeCacheRepository {
   ExchangeCode? read(String uid);
 
@@ -150,7 +150,7 @@ final exchangeCodeCacheRepositoryProvider = Provider<ExchangeCodeCacheRepository
 /// design, so nothing needs to keep polling it once the exchange screen is
 /// left. The current code is still reused across re-entry as long as it
 /// hasn't expired, via [exchangeCodeCacheRepositoryProvider]; only an
-/// expired or not-yet-issued code triggers a fresh `issueExchangeCode` call.
+/// expired or not-yet-issued code triggers an `issueExchangeCode` call.
 final myExchangeCodeProvider = AsyncNotifierProvider.autoDispose<MyExchangeCodeNotifier, ExchangeCode>(
   MyExchangeCodeNotifier.new,
 );
@@ -175,18 +175,19 @@ class MyExchangeCodeNotifier extends AsyncNotifier<ExchangeCode> {
     return _issueAndCache(uid);
   }
 
-  /// Issues a fresh code even when a cached one is still valid.
+  /// Replaces the current code with a brand-new one, invalidating it
+  /// server-side even when it is still valid.
   Future<void> refresh() async {
     final uid = ref.read(authStateChangesProvider).value?.uid;
     if (uid == null) {
       return;
     }
     state = const AsyncLoading<ExchangeCode>();
-    state = await AsyncValue.guard(() => _issueAndCache(uid));
+    state = await AsyncValue.guard(() => _issueAndCache(uid, rotate: true));
   }
 
-  Future<ExchangeCode> _issueAndCache(String uid) async {
-    final code = await ref.read(exchangeCodeIssuerProvider).issue();
+  Future<ExchangeCode> _issueAndCache(String uid, {bool rotate = false}) async {
+    final code = await ref.read(exchangeCodeIssuerProvider).issue(rotate: rotate);
     ref.read(exchangeCodeCacheRepositoryProvider).write(uid, code);
     return code;
   }

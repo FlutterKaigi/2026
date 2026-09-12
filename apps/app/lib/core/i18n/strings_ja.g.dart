@@ -52,6 +52,7 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	late final Translations$sessionDetails$ja sessionDetails = Translations$sessionDetails$ja.internal(_root);
 	late final Translations$sessionBookmark$ja sessionBookmark = Translations$sessionBookmark$ja.internal(_root);
 	late final Translations$bookmarkedSessions$ja bookmarkedSessions = Translations$bookmarkedSessions$ja.internal(_root);
+	late final Translations$venueMap$ja venueMap = Translations$venueMap$ja.internal(_root);
 	late final Translations$eventInfo$ja eventInfo = Translations$eventInfo$ja.internal(_root);
 	late final Translations$auth$ja auth = Translations$auth$ja.internal(_root);
 	late final Translations$profile$ja profile = Translations$profile$ja.internal(_root);
@@ -100,6 +101,9 @@ class Translations$navigation$ja {
 
 	/// ja: 'セッション'
 	String get sessions => 'セッション';
+
+	/// ja: '会場マップ'
+	String get venueMap => '会場マップ';
 
 	/// ja: 'スポンサー'
 	String get sponsors => 'スポンサー';
@@ -382,6 +386,87 @@ class Translations$bookmarkedSessions$ja {
 
 	/// ja: 'タイムテーブルを開く'
 	String get openSessions => 'タイムテーブルを開く';
+}
+
+// Path: venueMap
+class Translations$venueMap$ja {
+	Translations$venueMap$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: '会場マップ'
+	String get title => '会場マップ';
+
+	/// ja: '浜松町コンベンションホール · 5F'
+	String get floor => '浜松町コンベンションホール · 5F';
+
+	/// ja: '会場マップを読み込めませんでした'
+	String get loadError => '会場マップを読み込めませんでした';
+
+	/// ja: '再試行してください。'
+	String get loadErrorDescription => '再試行してください。';
+
+	/// ja: '場所を探す'
+	String get search => '場所を探す';
+
+	/// ja: 'ホール・スポンサー名・番号・設備'
+	String get searchHint => 'ホール・スポンサー名・番号・設備';
+
+	/// ja: '検索をクリア'
+	String get clearSearch => '検索をクリア';
+
+	/// ja: '件'
+	String get placesCount => '件';
+
+	/// ja: '地図で見る'
+	String get showOnMap => '地図で見る';
+
+	/// ja: 'すべて'
+	String get all => 'すべて';
+
+	/// ja: 'ホール'
+	String get halls => 'ホール';
+
+	/// ja: 'スポンサー'
+	String get booths => 'スポンサー';
+
+	/// ja: '設備'
+	String get facilities => '設備';
+
+	/// ja: '一致する場所がありません'
+	String get noResults => '一致する場所がありません';
+
+	/// ja: '選択を解除'
+	String get clearSelection => '選択を解除';
+
+	/// ja: '拡大'
+	String get zoomIn => '拡大';
+
+	/// ja: '縮小'
+	String get zoomOut => '縮小';
+
+	/// ja: '全体を表示'
+	String get fit => '全体を表示';
+
+	/// ja: '地図の向きを変える'
+	String get rotate => '地図の向きを変える';
+
+	/// ja: '2D'
+	String get twoD => '2D';
+
+	/// ja: '3D'
+	String get threeD => '3D';
+
+	/// ja: '地図の表示方法'
+	String get viewMode => '地図の表示方法';
+
+	/// ja: '2Dで表示'
+	String get useTwoD => '2Dで表示';
+
+	/// ja: '表示方法を保存できませんでした'
+	String get saveFailed => '表示方法を保存できませんでした';
 }
 
 // Path: eventInfo
@@ -705,8 +790,8 @@ class Translations$exchange$ja {
 	/// ja: '6桁コードで交換'
 	String get codeSectionTitle => '6桁コードで交換';
 
-	/// ja: 'カメラが使えないときは、6桁のコードを伝え合って交換できます'
-	String get codeSectionDescription => 'カメラが使えないときは、6桁のコードを伝え合って交換できます';
+	/// ja: 'カメラが使えないときは、6桁のコードを伝え合って交換できます。有効期限内なら、同じコードを何人でも入力できます'
+	String get codeSectionDescription => 'カメラが使えないときは、6桁のコードを伝え合って交換できます。有効期限内なら、同じコードを何人でも入力できます';
 
 	/// ja: 'プロフィール交換用の6桁コード'
 	String get myCodeSemanticLabel => 'プロフィール交換用の6桁コード';
@@ -1201,6 +1286,7 @@ extension on Translations {
 			'links.openError' => 'リンクを開けませんでした',
 			'links.copied' => 'リンクをコピーしました',
 			'navigation.sessions' => 'セッション',
+			'navigation.venueMap' => '会場マップ',
 			'navigation.sponsors' => 'スポンサー',
 			'navigation.info' => 'イベント',
 			'navigation.account' => 'アカウント',
@@ -1274,6 +1360,30 @@ extension on Translations {
 			'bookmarkedSessions.emptyTitle' => 'ブックマークしたセッションはありません',
 			'bookmarkedSessions.emptyBody' => '気になるセッションをブックマークすると、ここからすぐに見つけられます',
 			'bookmarkedSessions.openSessions' => 'タイムテーブルを開く',
+			'venueMap.title' => '会場マップ',
+			'venueMap.floor' => '浜松町コンベンションホール · 5F',
+			'venueMap.loadError' => '会場マップを読み込めませんでした',
+			'venueMap.loadErrorDescription' => '再試行してください。',
+			'venueMap.search' => '場所を探す',
+			'venueMap.searchHint' => 'ホール・スポンサー名・番号・設備',
+			'venueMap.clearSearch' => '検索をクリア',
+			'venueMap.placesCount' => '件',
+			'venueMap.showOnMap' => '地図で見る',
+			'venueMap.all' => 'すべて',
+			'venueMap.halls' => 'ホール',
+			'venueMap.booths' => 'スポンサー',
+			'venueMap.facilities' => '設備',
+			'venueMap.noResults' => '一致する場所がありません',
+			'venueMap.clearSelection' => '選択を解除',
+			'venueMap.zoomIn' => '拡大',
+			'venueMap.zoomOut' => '縮小',
+			'venueMap.fit' => '全体を表示',
+			'venueMap.rotate' => '地図の向きを変える',
+			'venueMap.twoD' => '2D',
+			'venueMap.threeD' => '3D',
+			'venueMap.viewMode' => '地図の表示方法',
+			'venueMap.useTwoD' => '2Dで表示',
+			'venueMap.saveFailed' => '表示方法を保存できませんでした',
 			'eventInfo.title' => 'イベント概要',
 			'eventInfo.newsTitle' => '最新のお知らせ',
 			'eventInfo.newsSubtitle' => 'FlutterKaigi 2026 の最新情報を確認',
@@ -1418,7 +1528,7 @@ extension on Translations {
 			'exchange.noteCancel' => 'キャンセル',
 			'exchange.noteSaveFailed' => 'メモを保存できませんでした',
 			'exchange.codeSectionTitle' => '6桁コードで交換',
-			'exchange.codeSectionDescription' => 'カメラが使えないときは、6桁のコードを伝え合って交換できます',
+			'exchange.codeSectionDescription' => 'カメラが使えないときは、6桁のコードを伝え合って交換できます。有効期限内なら、同じコードを何人でも入力できます',
 			'exchange.myCodeSemanticLabel' => 'プロフィール交換用の6桁コード',
 			'exchange.myCodeExpiresAt' => ({required Object date}) => '有効期限 ${date} まで',
 			'exchange.myCodeExpired' => 'コードの有効期限が切れました',

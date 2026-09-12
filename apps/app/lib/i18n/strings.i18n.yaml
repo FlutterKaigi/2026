@@ -5,6 +5,7 @@ links:
   copied: リンクをコピーしました
 navigation:
   sessions: セッション
+  venueMap: 会場マップ
   sponsors: スポンサー
   info: イベント
   account: アカウント
@@ -94,6 +95,31 @@ bookmarkedSessions:
   emptyTitle: ブックマークしたセッションはありません
   emptyBody: 気になるセッションをブックマークすると、ここからすぐに見つけられます
   openSessions: タイムテーブルを開く
+venueMap:
+  title: 会場マップ
+  floor: 浜松町コンベンションホール · 5F
+  loadError: 会場マップを読み込めませんでした
+  loadErrorDescription: 再試行してください。
+  search: 場所を探す
+  searchHint: ホール・スポンサー名・番号・設備
+  clearSearch: 検索をクリア
+  placesCount: 件
+  showOnMap: 地図で見る
+  all: すべて
+  halls: ホール
+  booths: スポンサー
+  facilities: 設備
+  noResults: 一致する場所がありません
+  clearSelection: 選択を解除
+  zoomIn: 拡大
+  zoomOut: 縮小
+  fit: 全体を表示
+  rotate: 地図の向きを変える
+  twoD: 2D
+  threeD: 3D
+  viewMode: 地図の表示方法
+  useTwoD: 2Dで表示
+  saveFailed: 表示方法を保存できませんでした
 eventInfo:
   title: イベント概要
   newsTitle: 最新のお知らせ
@@ -247,7 +273,7 @@ exchange:
   noteCancel: キャンセル
   noteSaveFailed: メモを保存できませんでした
   codeSectionTitle: 6桁コードで交換
-  codeSectionDescription: カメラが使えないときは、6桁のコードを伝え合って交換できます
+  codeSectionDescription: カメラが使えないときは、6桁のコードを伝え合って交換できます。有効期限内なら、同じコードを何人でも入力できます
   myCodeSemanticLabel: プロフィール交換用の6桁コード
   myCodeExpiresAt: 有効期限 $date まで
   myCodeExpired: コードの有効期限が切れました

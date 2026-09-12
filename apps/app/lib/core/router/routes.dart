@@ -58,6 +58,9 @@ class ShareLinkRoute extends GoRouteData with $ShareLinkRoute {
         ),
       ],
     ),
+    TypedStatefulShellBranch<VenueMapBranch>(
+      routes: [TypedGoRoute<VenueMapRoute>(path: '/venue-map')],
+    ),
     TypedStatefulShellBranch<SponsorBranch>(
       routes: [
         TypedGoRoute<SponsorRoute>(
@@ -108,6 +111,10 @@ class AppShellRoute extends StatefulShellRouteData {
           label: t.navigation.sessions,
         ),
         RootDestination(
+          icon: Icons.map_outlined,
+          label: t.navigation.venueMap,
+        ),
+        RootDestination(
           icon: Icons.business_outlined,
           label: t.navigation.sponsors,
         ),
@@ -130,6 +137,11 @@ class EventInfoBranch extends StatefulShellBranchData {
 /// Branch hosting the session timetable tab.
 class SessionBranch extends StatefulShellBranchData {
   const SessionBranch();
+}
+
+/// Branch hosting the venue map tab.
+class VenueMapBranch extends StatefulShellBranchData {
+  const VenueMapBranch();
 }
 
 /// Branch hosting the sponsors tab.
@@ -253,6 +265,14 @@ class SessionDetailsRoute extends GoRouteData with $SessionDetailsRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) => SessionDetailsPage(sessionId: sessionId);
+}
+
+/// `/venue-map` — the venue map.
+class VenueMapRoute extends GoRouteData with $VenueMapRoute {
+  const VenueMapRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const VenueMapPage();
 }
 
 /// `/sponsors` — the sponsor logo wall.
