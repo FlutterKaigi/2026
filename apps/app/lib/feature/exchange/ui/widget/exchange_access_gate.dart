@@ -15,9 +15,23 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 /// (e.g. a deep link), so each route wraps its body in this gate rather than
 /// relying on `ExchangeHomeRoute` having been visited first.
 class ExchangeAccessGate extends ConsumerWidget {
-  const ExchangeAccessGate({required this.builder, super.key});
+  const ExchangeAccessGate({
+    required this.builder,
+    this.signInTitle,
+    this.profileTitle,
+    super.key,
+  });
 
   final WidgetBuilder builder;
+
+  /// Overrides the generic "sign in to show your QR code" prompt title —
+  /// used by `ExchangeShareLinkPage`, where the visitor opened the gate to
+  /// exchange with someone else's link rather than to show their own QR.
+  final String? signInTitle;
+
+  /// Overrides the generic "create a profile to show your QR code" prompt
+  /// title, for the same reason as [signInTitle].
+  final String? profileTitle;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -25,8 +39,8 @@ class ExchangeAccessGate extends ConsumerWidget {
     final authState = ref.watch(authStateChangesProvider);
 
     return switch (authState) {
-      AsyncData(value: null) => _SignInPrompt(t: t),
-      AsyncData() => _ProfileGate(builder: builder),
+      AsyncData(value: null) => _SignInPrompt(t: t, title: signInTitle ?? t.exchange.signInRequired),
+      AsyncData() => _ProfileGate(builder: builder, title: profileTitle ?? t.exchange.profileRequired),
       AsyncError(:final error) => AppErrorView(
         error: error,
         onRetry: () => ref.invalidate(authStateChangesProvider),
@@ -40,9 +54,10 @@ class ExchangeAccessGate extends ConsumerWidget {
 /// for a uid regardless of whether a profile exists, but scanning or viewing
 /// exchanges without one would join or list nothing meaningful.
 class _ProfileGate extends ConsumerWidget {
-  const _ProfileGate({required this.builder});
+  const _ProfileGate({required this.builder, required this.title});
 
   final WidgetBuilder builder;
+  final String title;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -50,7 +65,7 @@ class _ProfileGate extends ConsumerWidget {
     final profileState = ref.watch(userProfileProvider);
 
     return switch (profileState) {
-      AsyncData(value: null) => _ProfilePrompt(t: t),
+      AsyncData(value: null) => _ProfilePrompt(t: t, title: title),
       AsyncData() => builder(context),
       AsyncError(:final error) => AppErrorView(
         error: error,
@@ -62,28 +77,30 @@ class _ProfileGate extends ConsumerWidget {
 }
 
 class _SignInPrompt extends StatelessWidget {
-  const _SignInPrompt({required this.t});
+  const _SignInPrompt({required this.t, required this.title});
 
   final Translations t;
+  final String title;
 
   @override
   Widget build(BuildContext context) => _MessagePrompt(
     icon: Icons.qr_code_2_outlined,
-    title: t.exchange.signInRequired,
+    title: title,
     actionLabel: t.exchange.signInAction,
     onAction: () => const AccountRoute().go(context),
   );
 }
 
 class _ProfilePrompt extends StatelessWidget {
-  const _ProfilePrompt({required this.t});
+  const _ProfilePrompt({required this.t, required this.title});
 
   final Translations t;
+  final String title;
 
   @override
   Widget build(BuildContext context) => _MessagePrompt(
     icon: Icons.person_add_alt_1_outlined,
-    title: t.exchange.profileRequired,
+    title: title,
     actionLabel: t.exchange.profileRequiredAction,
     onAction: () => const ProfileEditRoute().push<void>(context),
   );

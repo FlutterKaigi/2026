@@ -35,7 +35,7 @@ class TranslationsEn extends Translations with BaseTranslations<AppLocale, Trans
 
 	late final TranslationsEn _root = this; // ignore: unused_field
 
-	@override
+	@override 
 	TranslationsEn $copyWith({TranslationMetadata<AppLocale, Translations>? meta}) => TranslationsEn(meta: meta ?? this.$meta);
 
 	// Translations
@@ -426,6 +426,16 @@ class _Translations$exchange$en extends Translations$exchange$ja {
 	@override String get redeemInvalid => 'This code wasn\'t found, or it has expired';
 	@override String get redeemSelf => 'You can\'t enter your own code';
 	@override String get redeemRateLimited => 'Too many attempts. Please try again in a few minutes';
+	@override String get shareLinkSignInRequired => 'Sign in to exchange profiles with them';
+	@override String get shareLinkProfileRequired => 'Create a profile to exchange profiles with them';
+	@override String get shareLinkInvalidTitle => 'This link isn\'t valid';
+	@override String get shareLinkInvalidBody => 'Make sure it\'s a profile exchange link';
+	@override String get shareLinkExpiredTitle => 'This link has expired';
+	@override String get shareLinkExpiredBody => 'Ask the other attendee to share their QR code or link again';
+	@override String get shareLinkSelfTitle => 'This is your own share link';
+	@override String get shareLinkSelfBody => 'Other attendees who open this link can exchange profiles with you';
+	@override String get shareLinkGoHome => 'Back to home';
+	@override String get shareLinkViewList => 'View exchanged profiles';
 }
 
 // Path: countryRegion
@@ -725,7 +735,7 @@ extension on TranslationsEn {
 			'sessionSearch.promptBody' => 'Enter a keyword or select a day, session type, or language',
 			'sessionSearch.emptyTitle' => 'No sessions found',
 			'sessionSearch.emptyBody' => 'Try changing the keyword or filters',
-			'sessionSearch.resultCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} session', other: '${n} sessions', ),
+			'sessionSearch.resultCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} session', other: '${n} sessions', ), 
 			'sessionDetails.title' => 'Session Details',
 			'sessionDetails.description' => 'Description',
 			'sessionDetails.schedule' => 'Schedule and Venue',
@@ -926,6 +936,16 @@ extension on TranslationsEn {
 			'exchange.redeemInvalid' => 'This code wasn\'t found, or it has expired',
 			'exchange.redeemSelf' => 'You can\'t enter your own code',
 			'exchange.redeemRateLimited' => 'Too many attempts. Please try again in a few minutes',
+			'exchange.shareLinkSignInRequired' => 'Sign in to exchange profiles with them',
+			'exchange.shareLinkProfileRequired' => 'Create a profile to exchange profiles with them',
+			'exchange.shareLinkInvalidTitle' => 'This link isn\'t valid',
+			'exchange.shareLinkInvalidBody' => 'Make sure it\'s a profile exchange link',
+			'exchange.shareLinkExpiredTitle' => 'This link has expired',
+			'exchange.shareLinkExpiredBody' => 'Ask the other attendee to share their QR code or link again',
+			'exchange.shareLinkSelfTitle' => 'This is your own share link',
+			'exchange.shareLinkSelfBody' => 'Other attendees who open this link can exchange profiles with you',
+			'exchange.shareLinkGoHome' => 'Back to home',
+			'exchange.shareLinkViewList' => 'View exchanged profiles',
 			'countryRegion.asia' => 'Asia',
 			'countryRegion.oceania' => 'Oceania',
 			'countryRegion.americas' => 'Americas',
@@ -946,7 +966,7 @@ extension on TranslationsEn {
 			'licenses.title' => 'Licenses',
 			'licenses.searchHint' => 'Search packages',
 			'licenses.clearSearch' => 'Clear search',
-			'licenses.licenseCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} license', other: '${n} licenses', ),
+			'licenses.licenseCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} license', other: '${n} licenses', ), 
 			'licenses.notFound' => 'License not found',
 			'error.title' => 'Could not load data',
 			'error.message' => 'Check your connection and try again.',

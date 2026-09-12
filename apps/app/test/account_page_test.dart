@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/provider/environment.dart';
 import 'package:app/core/provider/shared_preferences.dart';
@@ -7,7 +9,9 @@ import 'package:app/feature/auth/ui/widget/apple_sign_in_button.dart';
 import 'package:app/feature/auth/ui/widget/google_sign_in_button.dart';
 import 'package:app/feature/exchange/data/exchange_code.dart';
 import 'package:app/feature/exchange/data/exchange_token.dart';
+import 'package:app/feature/exchange/data/provider/pending_exchange_token_provider.dart';
 import 'package:app/feature/exchange/data/provider/profile_exchange_provider.dart';
+import 'package:app/feature/exchange/data/provider/profile_exchange_repository.dart';
 import 'package:app/feature/profile/data/provider/user_profile_repository.dart';
 import 'package:app/feature/profile/ui/widget/country_flag_widget.dart';
 import 'package:data/data.dart';
@@ -19,6 +23,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'fake_auth_repository.dart';
+import 'fake_profile_exchange_repository.dart';
 import 'fake_user_profile_repository.dart';
 
 void main() {
@@ -27,8 +32,12 @@ void main() {
     required SharedPreferences preferences,
     FakeUserProfileRepository? profileRepository,
     ExchangeCodeCacheRepository? codeCache,
+    FakeProfileExchangeRepository? exchangeRepository,
+    String? pendingExchangeToken,
+    String? pendingExchangeTokenUid,
     Flavor flavor = Flavor.production,
     bool showsAppleSignIn = false,
+    ValueNotifier<bool>? showsAccountPage,
   }) => TranslationProvider(
     child: ProviderScope(
       overrides: [
@@ -39,6 +48,11 @@ void main() {
         ),
         sharedPreferencesProvider.overrideWithValue(preferences),
         if (codeCache != null) exchangeCodeCacheRepositoryProvider.overrideWithValue(codeCache),
+        if (exchangeRepository != null) profileExchangeRepositoryProvider.overrideWithValue(exchangeRepository),
+        if (pendingExchangeToken != null)
+          pendingExchangeTokenProvider.overrideWith(
+            () => _SeededPendingExchangeTokenNotifier((uid: pendingExchangeTokenUid, token: pendingExchangeToken)),
+          ),
         environmentProvider.overrideWithValue(
           Environment(
             appIdSuffix: '',
@@ -54,7 +68,15 @@ void main() {
         locale: const Locale('ja'),
         supportedLocales: AppLocaleUtils.supportedLocales,
         localizationsDelegates: GlobalMaterialLocalizations.delegates,
-        home: const AccountPage(),
+        // `showsAccountPage` を渡すと、`ProviderScope` を保ったまま
+        // AccountPage だけを外せる（別タブへの移動と同じ状況）。
+        home: switch (showsAccountPage) {
+          null => const AccountPage(),
+          final listenable => ValueListenableBuilder(
+            valueListenable: listenable,
+            builder: (_, shows, _) => shows ? const AccountPage() : const Scaffold(body: Text('別のタブ')),
+          ),
+        },
       ),
     ),
   );
@@ -235,67 +257,104 @@ void main() {
     expect(find.bySemanticsLabel('Google でサインイン'), findsOneWidget);
   });
 
-  testWidgets('signs out from the signed-in view and clears the cached exchange token', (tester) async {
-    final repository = FakeAuthRepository(
-      initialUser: FakeUser(email: 'attendee@example.com'),
-    );
-    addTearDown(repository.dispose);
-    final tokenCache = SharedPreferencesExchangeTokenCacheRepository(preferences);
-    await tokenCache.write(
-      'fake-uid',
-      ExchangeToken(value: 'v1.fake-uid.9999999999.deadbeef', expiresAt: DateTime.now().add(const Duration(hours: 24))),
-    );
-    final codeCache = InMemoryExchangeCodeCacheRepository()
-      ..write('fake-uid', ExchangeCode(value: '123456', expiresAt: DateTime.now().add(const Duration(minutes: 5))));
+  testWidgets(
+    'signs out from the signed-in view and clears the cached exchange token and pending share link',
+    (tester) async {
+      final repository = FakeAuthRepository(
+        initialUser: FakeUser(email: 'attendee@example.com'),
+      );
+      addTearDown(repository.dispose);
+      final tokenCache = SharedPreferencesExchangeTokenCacheRepository(preferences);
+      await tokenCache.write(
+        'fake-uid',
+        ExchangeToken(
+          value: 'v1.fake-uid.9999999999.deadbeef',
+          expiresAt: DateTime.now().add(const Duration(hours: 24)),
+        ),
+      );
+      final codeCache = InMemoryExchangeCodeCacheRepository()
+        ..write('fake-uid', ExchangeCode(value: '123456', expiresAt: DateTime.now().add(const Duration(minutes: 5))));
 
-    await tester.pumpWidget(buildSubject(repository, preferences: preferences, codeCache: codeCache));
-    await tester.pumpAndSettle();
+      await tester.pumpWidget(
+        buildSubject(
+          repository,
+          preferences: preferences,
+          codeCache: codeCache,
+          // 未消化のまま置き土産になっている状態を再現する。
+          pendingExchangeToken: 'v1.other-uid.9999999999.deadbeef',
+          pendingExchangeTokenUid: 'fake-uid',
+        ),
+      );
+      await tester.pumpAndSettle();
 
-    expect(find.text('attendee@example.com'), findsOneWidget);
-    expect(find.text('サインイン中'), findsOneWidget);
+      expect(find.text('attendee@example.com'), findsOneWidget);
+      expect(find.text('サインイン中'), findsOneWidget);
 
-    await tapListItem(tester, 'サインアウト');
+      await tapListItem(tester, 'サインアウト');
 
-    expect(repository.calledMethods, ['signOut']);
-    expect(find.bySemanticsLabel('Google でサインイン'), findsOneWidget);
-    expect(tokenCache.read('fake-uid'), isNull);
-    expect(codeCache.read('fake-uid'), isNull);
-  });
+      expect(repository.calledMethods, ['signOut']);
+      expect(find.bySemanticsLabel('Google でサインイン'), findsOneWidget);
+      expect(tokenCache.read('fake-uid'), isNull);
+      expect(codeCache.read('fake-uid'), isNull);
+      expect(
+        ProviderScope.containerOf(tester.element(find.byType(AccountPage))).read(pendingExchangeTokenProvider),
+        isNull,
+      );
+    },
+  );
 
-  testWidgets('deletes a Google account after confirmation and clears the cached exchange token', (tester) async {
-    final repository = FakeAuthRepository(
-      initialUser: FakeUser(
-        email: 'attendee@example.com',
-        providerIds: const ['google.com'],
-      ),
-    );
-    addTearDown(repository.dispose);
-    final tokenCache = SharedPreferencesExchangeTokenCacheRepository(preferences);
-    await tokenCache.write(
-      'fake-uid',
-      ExchangeToken(value: 'v1.fake-uid.9999999999.deadbeef', expiresAt: DateTime.now().add(const Duration(hours: 24))),
-    );
-    final codeCache = InMemoryExchangeCodeCacheRepository()
-      ..write('fake-uid', ExchangeCode(value: '123456', expiresAt: DateTime.now().add(const Duration(minutes: 5))));
+  testWidgets(
+    'deletes a Google account after confirmation and clears the cached exchange token and pending share link',
+    (tester) async {
+      final repository = FakeAuthRepository(
+        initialUser: FakeUser(
+          email: 'attendee@example.com',
+          providerIds: const ['google.com'],
+        ),
+      );
+      addTearDown(repository.dispose);
+      final tokenCache = SharedPreferencesExchangeTokenCacheRepository(preferences);
+      await tokenCache.write(
+        'fake-uid',
+        ExchangeToken(
+          value: 'v1.fake-uid.9999999999.deadbeef',
+          expiresAt: DateTime.now().add(const Duration(hours: 24)),
+        ),
+      );
+      final codeCache = InMemoryExchangeCodeCacheRepository()
+        ..write('fake-uid', ExchangeCode(value: '123456', expiresAt: DateTime.now().add(const Duration(minutes: 5))));
 
-    await tester.pumpWidget(buildSubject(repository, preferences: preferences, codeCache: codeCache));
-    await tester.pumpAndSettle();
+      await tester.pumpWidget(
+        buildSubject(
+          repository,
+          preferences: preferences,
+          codeCache: codeCache,
+          pendingExchangeToken: 'v1.other-uid.9999999999.deadbeef',
+          pendingExchangeTokenUid: 'fake-uid',
+        ),
+      );
+      await tester.pumpAndSettle();
 
-    await tapListItem(tester, 'アカウントを削除');
+      await tapListItem(tester, 'アカウントを削除');
 
-    expect(find.text('アカウントを削除しますか?'), findsOneWidget);
+      expect(find.text('アカウントを削除しますか?'), findsOneWidget);
 
-    await tester.tap(find.text('削除する'));
-    await tester.pumpAndSettle();
+      await tester.tap(find.text('削除する'));
+      await tester.pumpAndSettle();
 
-    expect(repository.calledMethods, ['deleteAccount']);
-    expect(repository.lastDeletePassword, isNull);
-    expect(repository.beforeDeleteCalled, isTrue);
-    expect(find.text('アカウントを削除しました'), findsOneWidget);
-    expect(find.bySemanticsLabel('Google でサインイン'), findsOneWidget);
-    expect(tokenCache.read('fake-uid'), isNull);
-    expect(codeCache.read('fake-uid'), isNull);
-  });
+      expect(repository.calledMethods, ['deleteAccount']);
+      expect(repository.lastDeletePassword, isNull);
+      expect(repository.beforeDeleteCalled, isTrue);
+      expect(find.text('アカウントを削除しました'), findsOneWidget);
+      expect(find.bySemanticsLabel('Google でサインイン'), findsOneWidget);
+      expect(tokenCache.read('fake-uid'), isNull);
+      expect(codeCache.read('fake-uid'), isNull);
+      expect(
+        ProviderScope.containerOf(tester.element(find.byType(AccountPage))).read(pendingExchangeTokenProvider),
+        isNull,
+      );
+    },
+  );
 
   testWidgets('deletes the profile document together with the account', (tester) async {
     final repository = FakeAuthRepository(
@@ -362,6 +421,126 @@ void main() {
     expect(find.text('プロフィールを登録しましょう'), findsNothing);
   });
 
+  testWidgets(
+    'completes a pending share-link exchange once signed in with a profile, and shows the result',
+    (tester) async {
+      final repository = FakeAuthRepository(
+        initialUser: FakeUser(uid: 'uid-1', email: 'attendee@example.com'),
+      );
+      addTearDown(repository.dispose);
+      final profileRepository = FakeUserProfileRepository(
+        initialProfile: _profile(id: 'uid-1'),
+      );
+      addTearDown(profileRepository.dispose);
+      final exchangeRepository = FakeProfileExchangeRepository();
+      addTearDown(exchangeRepository.dispose);
+      final expSeconds = DateTime.now().add(const Duration(hours: 1)).millisecondsSinceEpoch ~/ 1000;
+
+      await tester.pumpWidget(
+        buildSubject(
+          repository,
+          preferences: preferences,
+          profileRepository: profileRepository,
+          exchangeRepository: exchangeRepository,
+          pendingExchangeToken: 'v1.other-uid.$expSeconds.deadbeef',
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(exchangeRepository.createCalls, [
+        (uid: 'uid-1', otherUid: 'other-uid', token: 'v1.other-uid.$expSeconds.deadbeef'),
+      ]);
+      expect(find.text('プロフィールを交換しました'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'clears the pending share-link token even when the tab is left before the exchange lands',
+    (tester) async {
+      final repository = FakeAuthRepository(
+        initialUser: FakeUser(uid: 'uid-1', email: 'attendee@example.com'),
+      );
+      addTearDown(repository.dispose);
+      final profileRepository = FakeUserProfileRepository(
+        initialProfile: _profile(id: 'uid-1'),
+      );
+      addTearDown(profileRepository.dispose);
+      final exchangeRepository = FakeProfileExchangeRepository();
+      addTearDown(exchangeRepository.dispose);
+      final gate = Completer<void>();
+      exchangeRepository.createGate = gate;
+      final showsAccountPage = ValueNotifier(true);
+      addTearDown(showsAccountPage.dispose);
+      final expSeconds = DateTime.now().add(const Duration(hours: 1)).millisecondsSinceEpoch ~/ 1000;
+
+      await tester.pumpWidget(
+        buildSubject(
+          repository,
+          preferences: preferences,
+          profileRepository: profileRepository,
+          exchangeRepository: exchangeRepository,
+          pendingExchangeToken: 'v1.other-uid.$expSeconds.deadbeef',
+          showsAccountPage: showsAccountPage,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(exchangeRepository.createCalls, hasLength(1));
+
+      showsAccountPage.value = false;
+      await tester.pumpAndSettle();
+
+      gate.complete();
+      await tester.pumpAndSettle();
+
+      // 破棄済みの WidgetRef を触って例外になると、交換は成立しているのに
+      // 保留トークンが残り、次にこのタブへ戻ったときに再処理される。
+      expect(tester.takeException(), isNull);
+      expect(
+        ProviderScope.containerOf(tester.element(find.byType(MaterialApp))).read(pendingExchangeTokenProvider),
+        isNull,
+      );
+    },
+  );
+
+  testWidgets(
+    'discards a pending share-link token left behind by a different uid instead of resolving it',
+    (tester) async {
+      final repository = FakeAuthRepository(
+        initialUser: FakeUser(uid: 'uid-1', email: 'attendee@example.com'),
+      );
+      addTearDown(repository.dispose);
+      final profileRepository = FakeUserProfileRepository(
+        initialProfile: _profile(id: 'uid-1'),
+      );
+      addTearDown(profileRepository.dispose);
+      final exchangeRepository = FakeProfileExchangeRepository();
+      addTearDown(exchangeRepository.dispose);
+      final expSeconds = DateTime.now().add(const Duration(hours: 1)).millisecondsSinceEpoch ~/ 1000;
+
+      await tester.pumpWidget(
+        buildSubject(
+          repository,
+          preferences: preferences,
+          profileRepository: profileRepository,
+          exchangeRepository: exchangeRepository,
+          // uid-1 のこの端末で、以前サインインしていた別ユーザーが
+          // プロフィール未作成のまま残していった置き土産。
+          pendingExchangeToken: 'v1.other-uid.$expSeconds.deadbeef',
+          pendingExchangeTokenUid: 'a-different-uid',
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(exchangeRepository.createCalls, isEmpty);
+      expect(find.text('プロフィールを交換しました'), findsNothing);
+      expect(
+        ProviderScope.containerOf(tester.element(find.byType(AccountPage))).read(pendingExchangeTokenProvider),
+        isNull,
+      );
+    },
+  );
+
   testWidgets('asks for the current password before deleting an email account', (tester) async {
     final repository = FakeAuthRepository(
       initialUser: FakeUser(
@@ -427,3 +606,14 @@ UserProfile _profile({
   createdAt: DateTime.utc(2026, 8),
   updatedAt: DateTime.utc(2026, 8),
 );
+
+/// Seeds `pendingExchangeTokenProvider` with [_initial] for a test, instead
+/// of the real notifier's `build() => null`.
+class _SeededPendingExchangeTokenNotifier extends PendingExchangeTokenNotifier {
+  _SeededPendingExchangeTokenNotifier(this._initial);
+
+  final PendingExchangeToken _initial;
+
+  @override
+  PendingExchangeToken? build() => _initial;
+}

@@ -11,7 +11,8 @@ import 'sponsors.dart' show LocalizedText;
 /// 開催日。タブ切替の単位。
 enum TimetableDay {
   day1(label: 'Day 1', date: '10.29', weekday: 'THU'),
-  day2(label: 'Day 2', date: '10.30', weekday: 'FRI');
+  day2(label: 'Day 2', date: '10.30', weekday: 'FRI')
+  ;
 
   const TimetableDay({
     required this.label,

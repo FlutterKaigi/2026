@@ -8,6 +8,7 @@ import 'package:app/feature/event/ui/page/event_info_page.dart';
 import 'package:app/feature/exchange/ui/page/exchange_home_page.dart';
 import 'package:app/feature/exchange/ui/page/exchange_list_page.dart';
 import 'package:app/feature/exchange/ui/page/exchange_scan_page.dart';
+import 'package:app/feature/exchange/ui/page/exchange_share_link_page.dart';
 import 'package:app/feature/license/ui/page/license_detail_page.dart';
 import 'package:app/feature/license/ui/page/license_page.dart';
 import 'package:app/feature/news/ui/page/news_list_page.dart';

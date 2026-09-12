@@ -1,0 +1,363 @@
+import 'dart:async';
+
+import 'package:app/core/i18n/strings.g.dart';
+import 'package:app/feature/auth/data/provider/auth_repository.dart';
+import 'package:app/feature/exchange/data/provider/pending_exchange_token_provider.dart';
+import 'package:app/feature/exchange/data/provider/profile_exchange_repository.dart';
+import 'package:app/feature/exchange/ui/page/exchange_share_link_page.dart';
+import 'package:app/feature/profile/data/provider/user_profile_repository.dart';
+import 'package:data/data.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+
+import 'fake_auth_repository.dart';
+import 'fake_profile_exchange_repository.dart';
+import 'fake_user_profile_repository.dart';
+
+void main() {
+  late GoRouter router;
+
+  Widget buildSubject({
+    required String token,
+    required FakeAuthRepository authRepository,
+    required FakeUserProfileRepository profileRepository,
+    required FakeProfileExchangeRepository exchangeRepository,
+  }) {
+    router = GoRouter(
+      initialLocation: '/x/$token',
+      routes: [
+        GoRoute(
+          path: '/x/:token',
+          builder: (context, state) => ExchangeShareLinkPage(token: state.pathParameters['token']!),
+        ),
+        GoRoute(
+          path: '/account',
+          builder: (_, _) => const Scaffold(body: Text('account destination')),
+        ),
+        GoRoute(
+          path: '/account/exchange/list',
+          builder: (_, _) => const Scaffold(body: Text('list destination')),
+        ),
+        GoRoute(
+          path: '/info',
+          builder: (_, _) => const Scaffold(body: Text('home destination')),
+        ),
+      ],
+    );
+
+    return TranslationProvider(
+      child: ProviderScope(
+        overrides: [
+          authRepositoryProvider.overrideWithValue(authRepository),
+          userProfileRepositoryProvider.overrideWithValue(profileRepository),
+          profileExchangeRepositoryProvider.overrideWithValue(exchangeRepository),
+        ],
+        child: MaterialApp.router(
+          routerConfig: router,
+          locale: const Locale('ja'),
+          supportedLocales: AppLocaleUtils.supportedLocales,
+          localizationsDelegates: GlobalMaterialLocalizations.delegates,
+        ),
+      ),
+    );
+  }
+
+  String futureToken(String uid) {
+    final expSeconds = DateTime.now().add(const Duration(hours: 1)).millisecondsSinceEpoch ~/ 1000;
+    return 'v1.$uid.$expSeconds.deadbeef';
+  }
+
+  UserProfile ownProfile() => UserProfile(
+    id: 'uid-1',
+    displayName: 'Me',
+    countryOrRegion: 'JP',
+    createdAt: DateTime.utc(2026, 8),
+    updatedAt: DateTime.utc(2026, 8),
+  );
+
+  // `MaterialApp` rather than `ExchangeShareLinkPage`, so the pending token is
+  // still readable in the tests that navigate away from the share link.
+  PendingExchangeToken? readPendingToken(WidgetTester tester) =>
+      ProviderScope.containerOf(tester.element(find.byType(MaterialApp))).read(pendingExchangeTokenProvider);
+
+  setUp(() => LocaleSettings.setLocaleSync(AppLocale.ja));
+
+  testWidgets('rejects a malformed token before requiring sign-in', (tester) async {
+    final authRepository = FakeAuthRepository();
+    addTearDown(authRepository.dispose);
+    final exchangeRepository = FakeProfileExchangeRepository();
+    addTearDown(exchangeRepository.dispose);
+
+    await tester.pumpWidget(
+      buildSubject(
+        token: 'not-a-token',
+        authRepository: authRepository,
+        profileRepository: FakeUserProfileRepository(),
+        exchangeRepository: exchangeRepository,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('このリンクは無効です'), findsOneWidget);
+    expect(find.text('サインインする'), findsNothing);
+  });
+
+  testWidgets('rejects an already-expired token before requiring sign-in', (tester) async {
+    final authRepository = FakeAuthRepository();
+    addTearDown(authRepository.dispose);
+    final exchangeRepository = FakeProfileExchangeRepository();
+    addTearDown(exchangeRepository.dispose);
+    final pastSeconds = DateTime.now().subtract(const Duration(hours: 1)).millisecondsSinceEpoch ~/ 1000;
+
+    await tester.pumpWidget(
+      buildSubject(
+        token: 'v1.other-uid.$pastSeconds.deadbeef',
+        authRepository: authRepository,
+        profileRepository: FakeUserProfileRepository(),
+        exchangeRepository: exchangeRepository,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('このリンクの有効期限が切れています'), findsOneWidget);
+  });
+
+  testWidgets('shows a share-link-specific sign-in prompt for a well-formed token when signed out', (tester) async {
+    final authRepository = FakeAuthRepository();
+    addTearDown(authRepository.dispose);
+    final exchangeRepository = FakeProfileExchangeRepository();
+    addTearDown(exchangeRepository.dispose);
+
+    await tester.pumpWidget(
+      buildSubject(
+        token: futureToken('other-uid'),
+        authRepository: authRepository,
+        profileRepository: FakeUserProfileRepository(),
+        exchangeRepository: exchangeRepository,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // ExchangeHomePage 等の一般的な文言（自分のQRコードを表示できます）
+    // ではなく、共有リンクの文脈に合わせた文言が出る。
+    expect(find.text('サインインすると相手とプロフィールを交換できます'), findsOneWidget);
+    expect(find.text('サインインすると自分のQRコードを表示できます'), findsNothing);
+    await tester.tap(find.text('サインインする'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('account destination'), findsOneWidget);
+  });
+
+  testWidgets(
+    'shows a share-link-specific profile prompt for a signed-in user without a profile',
+    (tester) async {
+      final authRepository = FakeAuthRepository(initialUser: FakeUser(uid: 'uid-1'));
+      addTearDown(authRepository.dispose);
+      final exchangeRepository = FakeProfileExchangeRepository();
+      addTearDown(exchangeRepository.dispose);
+
+      await tester.pumpWidget(
+        buildSubject(
+          token: futureToken('other-uid'),
+          authRepository: authRepository,
+          profileRepository: FakeUserProfileRepository(),
+          exchangeRepository: exchangeRepository,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('プロフィールを作成すると相手とプロフィールを交換できます'), findsOneWidget);
+      expect(find.text('プロフィールを作成すると自分のQRコードを表示できます'), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'queues the token under the signed-in uid, not under the uid the auth stream had yet to emit',
+    (tester) async {
+      final authRepository = FakeAuthRepository(initialUser: FakeUser(uid: 'uid-1'));
+      addTearDown(authRepository.dispose);
+      final exchangeRepository = FakeProfileExchangeRepository();
+      addTearDown(exchangeRepository.dispose);
+      final token = futureToken('other-uid');
+
+      await tester.pumpWidget(
+        buildSubject(
+          token: token,
+          authRepository: authRepository,
+          // プロフィール未作成なので、トークンは消化されず保留されたままになる。
+          profileRepository: FakeUserProfileRepository(),
+          exchangeRepository: exchangeRepository,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // 認証ストリームが最初のフレームでまだ値を出していない
+      // （リンクからのコールドスタートと同じ）状態でも、uid を null で
+      // 記録しない。null の記録は次にサインインした別アカウントでも
+      // 消化できてしまう。
+      expect(readPendingToken(tester), (uid: 'uid-1', token: token));
+    },
+  );
+
+  testWidgets('clears the queued token once it has resolved the exchange itself', (tester) async {
+    final authRepository = FakeAuthRepository(initialUser: FakeUser(uid: 'uid-1'));
+    addTearDown(authRepository.dispose);
+    final exchangeRepository = FakeProfileExchangeRepository();
+    addTearDown(exchangeRepository.dispose);
+
+    await tester.pumpWidget(
+      buildSubject(
+        token: futureToken('other-uid'),
+        authRepository: authRepository,
+        profileRepository: FakeUserProfileRepository(initialProfile: ownProfile()),
+        exchangeRepository: exchangeRepository,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(exchangeRepository.createCalls, hasLength(1));
+    // 保留が残っていると、アカウントタブに移動した時点で
+    // `AccountPage` が同じトークンをもう一度処理してしまう。
+    expect(readPendingToken(tester), isNull);
+  });
+
+  testWidgets("shows a dedicated message for the holder's own link", (tester) async {
+    final authRepository = FakeAuthRepository(initialUser: FakeUser(uid: 'uid-1'));
+    addTearDown(authRepository.dispose);
+    final exchangeRepository = FakeProfileExchangeRepository();
+    addTearDown(exchangeRepository.dispose);
+
+    await tester.pumpWidget(
+      buildSubject(
+        token: futureToken('uid-1'),
+        authRepository: authRepository,
+        profileRepository: FakeUserProfileRepository(initialProfile: ownProfile()),
+        exchangeRepository: exchangeRepository,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('これは自分の共有リンクです'), findsOneWidget);
+    expect(exchangeRepository.createCalls, isEmpty);
+  });
+
+  testWidgets('creates the exchange for another attendee and offers to view the list', (tester) async {
+    final authRepository = FakeAuthRepository(initialUser: FakeUser(uid: 'uid-1'));
+    addTearDown(authRepository.dispose);
+    final exchangeRepository = FakeProfileExchangeRepository();
+    addTearDown(exchangeRepository.dispose);
+    final token = futureToken('other-uid');
+
+    await tester.pumpWidget(
+      buildSubject(
+        token: token,
+        authRepository: authRepository,
+        profileRepository: FakeUserProfileRepository(initialProfile: ownProfile()),
+        exchangeRepository: exchangeRepository,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(exchangeRepository.createCalls, [(uid: 'uid-1', otherUid: 'other-uid', token: token)]);
+    expect(find.text('プロフィールを交換しました'), findsOneWidget);
+
+    await tester.tap(find.text('交換した人を見る'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('list destination'), findsOneWidget);
+  });
+
+  testWidgets('resolves a second share link opened while the first result is on screen', (tester) async {
+    final authRepository = FakeAuthRepository(initialUser: FakeUser(uid: 'uid-1'));
+    addTearDown(authRepository.dispose);
+    final exchangeRepository = FakeProfileExchangeRepository();
+    addTearDown(exchangeRepository.dispose);
+    final firstToken = futureToken('other-uid');
+    final secondToken = futureToken('another-uid');
+
+    await tester.pumpWidget(
+      buildSubject(
+        token: firstToken,
+        authRepository: authRepository,
+        profileRepository: FakeUserProfileRepository(initialProfile: ownProfile()),
+        exchangeRepository: exchangeRepository,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(exchangeRepository.createCalls, hasLength(1));
+
+    // 同じ `/x/:token` ルートなので Widget の状態が引き継がれ、
+    // 1 人目の結果を表示したままだと 2 人目の交換が走らなかった。
+    router.go('/x/$secondToken');
+    await tester.pumpAndSettle();
+
+    expect(exchangeRepository.createCalls.map((call) => call.otherUid), ['other-uid', 'another-uid']);
+    expect(readPendingToken(tester), isNull);
+  });
+
+  testWidgets('clears the queued token when the visitor leaves before the exchange lands', (tester) async {
+    final authRepository = FakeAuthRepository(initialUser: FakeUser(uid: 'uid-1'));
+    addTearDown(authRepository.dispose);
+    final exchangeRepository = FakeProfileExchangeRepository();
+    addTearDown(exchangeRepository.dispose);
+    final gate = Completer<void>();
+    exchangeRepository.createGate = gate;
+
+    await tester.pumpWidget(
+      buildSubject(
+        token: futureToken('other-uid'),
+        authRepository: authRepository,
+        profileRepository: FakeUserProfileRepository(initialProfile: ownProfile()),
+        exchangeRepository: exchangeRepository,
+      ),
+    );
+    // ゲートで交換を止めている間はローディングインジケータが回り続けるため、
+    // `pumpAndSettle` ではなく `pump` で進める。
+    await tester.pump();
+    await tester.pump();
+
+    expect(exchangeRepository.createCalls, hasLength(1));
+
+    router.go('/info');
+    await tester.pumpAndSettle();
+    expect(find.text('home destination'), findsOneWidget);
+
+    gate.complete();
+    await tester.pumpAndSettle();
+
+    // 破棄済みの WidgetRef を触って例外になると、交換は成立しているのに
+    // 保留トークンが残り、アカウント画面で再処理されてしまう。
+    expect(tester.takeException(), isNull);
+    expect(readPendingToken(tester), isNull);
+  });
+
+  testWidgets('reports an already-existing exchange without erroring', (tester) async {
+    final authRepository = FakeAuthRepository(initialUser: FakeUser(uid: 'uid-1'));
+    addTearDown(authRepository.dispose);
+    final exchangeRepository = FakeProfileExchangeRepository(
+      initialExchangesByUid: {
+        'uid-1': [
+          ProfileExchange(id: 'other-uid', createdAt: DateTime.utc(2026, 8, 2), origin: ProfileExchangeOrigin.scan),
+        ],
+      },
+    );
+    addTearDown(exchangeRepository.dispose);
+    exchangeRepository.nextError = const ProfileExchangeAlreadyExistsException();
+
+    await tester.pumpWidget(
+      buildSubject(
+        token: futureToken('other-uid'),
+        authRepository: authRepository,
+        profileRepository: FakeUserProfileRepository(initialProfile: ownProfile()),
+        exchangeRepository: exchangeRepository,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('すでに交換済みです'), findsOneWidget);
+  });
+}

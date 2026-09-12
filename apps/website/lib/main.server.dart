@@ -40,20 +40,9 @@ void main() {
         // tags. Only the locale-agnostic Twitter hints remain here.
         meta(name: 'twitter:card', content: 'summary_large_image'),
         meta(name: 'twitter:site', content: '@FlutterKaigi'),
-        script(
-          src: 'https://www.googletagmanager.com/gtag/js?id=G-0FZ58E7XNG',
-          async: true,
-        ),
-        script(
-          content: '''
-window.dataLayer = window.dataLayer || [];
-function gtag() {
-  dataLayer.push(arguments);
-}
-gtag('js', new Date());
-gtag('config', 'G-0FZ58E7XNG');
-''',
-        ),
+        // Google Analytics is mounted per-route (see `Analytics`), not here,
+        // so `/x/<token>` can opt out of it — see that component's doc
+        // comment.
       ],
       styles: [
         css.import(

@@ -28,6 +28,18 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+            <!-- プロフィール交換の共有リンク（App Links）。website の
+                 /.well-known/assetlinks.json での検証に合わせて autoVerify
+                 を付ける。go_router がこの URL を標準の仕組みで受け取る。 -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data
+                    android:scheme="https"
+                    android:host="2026.flutterkaigi.jp"
+                    android:pathPrefix="/x/"/>
+            </intent-filter>
         </activity>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
