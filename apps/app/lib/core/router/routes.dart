@@ -76,6 +76,7 @@ class ShareLinkRoute extends GoRouteData with $ShareLinkRoute {
           routes: [
             TypedGoRoute<EmailSignInRoute>(path: 'email'),
             TypedGoRoute<ProfileEditRoute>(path: 'profile'),
+            TypedGoRoute<SupportLtRoute>(path: 'support-lt'),
             TypedGoRoute<ExchangeHomeRoute>(
               path: 'exchange',
               routes: [
@@ -177,6 +178,14 @@ class ProfileEditRoute extends GoRouteData with $ProfileEditRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) => const ProfileEditPage();
+}
+
+/// `/account/support-lt` — register attendance with an organizer-issued code.
+class SupportLtRoute extends GoRouteData with $SupportLtRoute {
+  const SupportLtRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const SupportLtPage();
 }
 
 /// `/account/exchange` — the signed-in user's own QR code and the entry

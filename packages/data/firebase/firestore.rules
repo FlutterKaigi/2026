@@ -133,6 +133,27 @@ service cloud.firestore {
       allow write: if hasAdminAccess();
     }
 
+    // 応援 LT の共通認証コード（current）と全体の失敗回数（attempts）。
+    // 管理者も callable 経由で発行・再発行する。
+    // 参加者に read を許可するとコードによる参加確認が成立しなくなる。
+    match /supportLtSettings/{settingId} {
+      allow read: if hasAdminAccess();
+      allow write: if false;
+    }
+
+    // 本人は登録済み状態を get できる。参加者一覧・人数の取得は管理者のみ。
+    // 登録・削除は認証コード検証と Auth 削除トリガーが Admin SDK で行う。
+    match /supportLtRegistrations/{uid} {
+      allow get: if isOwner(uid) || hasAdminAccess();
+      allow list: if hasAdminAccess();
+      allow write: if false;
+    }
+
+    // registerSupportLt の総当たり対策。本人・管理者とも直接変更できない。
+    match /supportLtRegistrationAttempts/{uid} {
+      allow read, write: if false;
+    }
+
     // 6桁コードのフォールバック交換で使う短命ドキュメント。issueExchangeCode /
     // redeemExchangeCode コールが Admin SDK 経由で読み書きする。read を許すと
     // 総当たりでコードを引き当てられるため、クライアントからは read/write とも

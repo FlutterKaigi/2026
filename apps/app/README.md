@@ -60,6 +60,19 @@ iOSのGoogleサインインはブラウザ経由(`signInWithProvider`)で行わ�
 
 プロフィール画像はサインインプロバイダの`photoURL`を初回作成時に保存し、アプリ内でのアップロードには未対応です。アカウント削除では、再認証後・ユーザー削除前に`users/{uid}`も削除します。参加者種別と初参加フラグはネームプレートで把握する運用のため、プロフィールには持ちません。
 
+## 応援LT参加登録
+
+サインイン後、アカウントタブの「応援LT参加」(`/account/support-lt`)から、運営がダッシュボードで発行した6桁のコードを入力します。プロフィールは未作成でも登録できます。登録が完了すると画面とアカウントタブに登録状況が表示され、再起動後もFirestoreから復元されます。
+
+参加登録にはFunctions Emulator(port 5001)も必要です。通常の`firebase:start`の代わりに、Repositoryルートで次を実行します。
+
+```bash
+fvm dart run melos run functions:install
+fvm dart run melos run firebase:start:functions
+```
+
+別のTerminalから、上記の`fvm flutter run`でdevフレーバーのアプリを起動します。同じEmulatorへ接続したダッシュボードの「応援LT」でコードを発行し、アプリに入力すると、ダッシュボードの参加者一覧と参加人数に反映されます。発行したコードに有効期限はなく、複数の参加者が利用できます。再発行すると旧コードは利用できなくなります。
+
 ## 配布
 
 GitHub Actionsによる配布先、Repository Variables／Secretsの設定は[App delivery setup](../../.github/APP_DELIVERY.md)を参照してください。

@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/FlutterKaigi/2026/packages/data/firebase/schemas/firestore/support_lt_shared_attempts.schema.json",
+  "title": "SupportLtSharedAttempts",
+  "description": "Server-only failure counts across all accounts at supportLtSettings/attempts. Keys of `counts` are ten-minute buckets (Math.floor(epochMillis / 600000) as a string); 200 failures within one bucket block registration for the rest of that bucket. registerSupportLt increments the current bucket atomically after each failed check and issueSupportLtCode deletes the document on rotation.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "counts": {
+      "type": "object",
+      "propertyNames": {
+        "pattern": "^[0-9]+$"
+      },
+      "additionalProperties": {
+        "type": "integer",
+        "minimum": 1
+      }
+    }
+  }
+}

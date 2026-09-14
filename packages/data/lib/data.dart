@@ -9,6 +9,7 @@ export 'src/model/speaker.dart' show Speaker;
 export 'src/model/staff_member.dart' show StaffMember;
 export 'src/model/session.dart' show Session;
 export 'src/model/sponsor.dart' show Sponsor, SponsorTier;
+export 'src/model/support_lt.dart' show SupportLtCode, SupportLtRegistration;
 export 'src/model/timeline_event.dart' show TimelineEvent;
 export 'src/model/user_profile.dart' show UserProfile;
 export 'src/model/venue.dart' show Venue;
@@ -20,6 +21,7 @@ export 'src/repository/speaker_repository.dart' show FirestoreSpeakerRepository,
 export 'src/repository/staff_member_repository.dart' show FirestoreStaffMemberRepository, StaffMemberRepository;
 export 'src/repository/session_repository.dart' show FirestoreSessionRepository, SessionRepository;
 export 'src/repository/sponsor_repository.dart' show FirestoreSponsorRepository, SponsorRepository;
+export 'src/repository/support_lt_repository.dart' show FirebaseSupportLtRepository, SupportLtRepository;
 export 'src/repository/timeline_event_repository.dart' show FirestoreTimelineEventRepository, TimelineEventRepository;
 export 'src/repository/user_profile_repository.dart' show FirestoreUserProfileRepository, UserProfileRepository;
 export 'src/repository/venue_repository.dart' show FirestoreVenueRepository, VenueRepository;

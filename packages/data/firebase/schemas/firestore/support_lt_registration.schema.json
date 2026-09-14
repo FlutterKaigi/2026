@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/FlutterKaigi/2026/packages/data/firebase/schemas/firestore/support_lt_registration.schema.json",
+  "title": "SupportLtRegistration",
+  "description": "Server-written entry at supportLtRegistrations/{uid}. The document id is the attendee's Auth uid. The participant can get their own entry; only admins can list entries. Auth account deletion removes the entry even if no users/{uid} profile exists.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["displayName", "registeredAt", "codeVersion"],
+  "properties": {
+    "displayName": {
+      "description": "Registration-time snapshot: nonempty profile displayName, then Auth name, then uid. Email is never copied.",
+      "type": "string",
+      "minLength": 1
+    },
+    "registeredAt": { "type": "string", "format": "date-time" },
+    "codeVersion": { "type": "integer", "minimum": 1 }
+  }
+}

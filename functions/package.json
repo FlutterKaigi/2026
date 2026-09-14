@@ -9,7 +9,10 @@
   "scripts": {
     "build": "tsc",
     "build:watch": "tsc --watch",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "test": "npm run build && node --test test/support_lt.test.cjs test/support_lt_auth.test.cjs",
+    "test:coverage": "npm run build && node --test --experimental-test-coverage --test-coverage-include='lib/support_lt_*.js' --test-coverage-lines=80 --test-coverage-branches=80 --test-coverage-functions=80 test/support_lt.test.cjs test/support_lt_auth.test.cjs",
+    "test:emulator": "node --test test/*.emulator.test.cjs"
   },
   "dependencies": {
     "firebase-admin": "^13.4.0",
