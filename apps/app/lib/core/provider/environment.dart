@@ -79,8 +79,7 @@ abstract class Environment with _$Environment {
 enum Flavor {
   production('prod'),
   staging('stg'),
-  develop('dev')
-  ;
+  develop('dev');
 
   const Flavor(this.shortName);
 
