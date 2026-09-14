@@ -1,24 +1,32 @@
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/provider/environment.dart';
 import 'package:app/core/provider/shared_preferences.dart';
+import 'package:app/core/router/router.dart' as app_router;
 import 'package:app/feature/auth/data/provider/auth_repository.dart';
 import 'package:app/feature/auth/ui/page/account_page.dart';
 import 'package:app/feature/auth/ui/widget/apple_sign_in_button.dart';
 import 'package:app/feature/auth/ui/widget/google_sign_in_button.dart';
+import 'package:app/feature/auth/ui/widget/sign_in_card.dart';
 import 'package:app/feature/exchange/data/exchange_code.dart';
 import 'package:app/feature/exchange/data/exchange_token.dart';
 import 'package:app/feature/exchange/data/provider/profile_exchange_provider.dart';
 import 'package:app/feature/profile/data/provider/user_profile_repository.dart';
 import 'package:app/feature/profile/ui/widget/country_flag_widget.dart';
+import 'package:app/feature/quiz/data/provider/quiz_repositories.dart';
+import 'package:app/feature/quiz/ui/component/quiz_sign_in_required_view.dart';
+import 'package:app/feature/quiz/ui/page/quiz_event_list_page.dart';
+import 'package:app/feature/support_lt/data/provider/support_lt_provider.dart';
 import 'package:data/data.dart';
 import 'package:data/user.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'fake_auth_repository.dart';
+import 'fake_support_lt_repository.dart';
 import 'fake_user_profile_repository.dart';
 
 void main() {
@@ -26,6 +34,9 @@ void main() {
     FakeAuthRepository repository, {
     required SharedPreferences preferences,
     FakeUserProfileRepository? profileRepository,
+    FakeSupportLtRepository? supportLtRepository,
+    QuizEventRepository? quizRepository,
+    GoRouter? router,
     ExchangeCodeCacheRepository? codeCache,
     Flavor flavor = Flavor.production,
     bool showsAppleSignIn = false,
@@ -33,7 +44,15 @@ void main() {
     child: ProviderScope(
       overrides: [
         authRepositoryProvider.overrideWithValue(repository),
+        if (quizRepository != null) quizEventRepositoryProvider.overrideWithValue(quizRepository),
         userProfileRepositoryProvider.overrideWithValue(profileRepository ?? FakeUserProfileRepository()),
+        supportLtRepositoryProvider.overrideWith((ref) {
+          final repository = supportLtRepository ?? FakeSupportLtRepository();
+          if (supportLtRepository == null) {
+            ref.onDispose(repository.dispose);
+          }
+          return repository;
+        }),
         appleSignInAvailabilityProvider.overrideWithValue(
           showsAppleSignIn,
         ),
@@ -50,12 +69,19 @@ void main() {
           ),
         ),
       ],
-      child: MaterialApp(
-        locale: const Locale('ja'),
-        supportedLocales: AppLocaleUtils.supportedLocales,
-        localizationsDelegates: GlobalMaterialLocalizations.delegates,
-        home: const AccountPage(),
-      ),
+      child: router == null
+          ? MaterialApp(
+              locale: const Locale('ja'),
+              supportedLocales: AppLocaleUtils.supportedLocales,
+              localizationsDelegates: GlobalMaterialLocalizations.delegates,
+              home: const AccountPage(),
+            )
+          : MaterialApp.router(
+              routerConfig: router,
+              locale: const Locale('ja'),
+              supportedLocales: AppLocaleUtils.supportedLocales,
+              localizationsDelegates: GlobalMaterialLocalizations.delegates,
+            ),
     ),
   );
 
@@ -331,6 +357,105 @@ void main() {
     expect(find.text('プロフィールを編集'), findsNothing);
   });
 
+  testWidgets('opens the quiz list from the signed-in account and returns to the account', (tester) async {
+    final repository = FakeAuthRepository(initialUser: FakeUser(uid: 'uid-1'));
+    final quizzes = _QuizEventRepository();
+    final router = GoRouter(initialLocation: '/account', routes: app_router.$appRoutes);
+    addTearDown(repository.dispose);
+    addTearDown(router.dispose);
+    await tester.pumpWidget(
+      buildSubject(repository, preferences: preferences, router: router, quizRepository: quizzes),
+    );
+    await tester.pumpAndSettle();
+
+    await tapListItem(tester, t.auth.account.quiz);
+
+    expect(find.byType(QuizEventListPage), findsOneWidget);
+    expect(find.text(t.quiz.list.empty), findsOneWidget);
+    expect(quizzes.publishedSubscriptions, 1);
+    expect(tester.takeException(), isNull);
+
+    router.pop();
+    await tester.pumpAndSettle();
+    expect(find.byType(AccountPage), findsOneWidget);
+  });
+
+  testWidgets('requires account sign-in before opening the quiz list', (tester) async {
+    final repository = FakeAuthRepository();
+    final quizzes = _QuizEventRepository();
+    final router = GoRouter(initialLocation: '/account', routes: app_router.$appRoutes);
+    addTearDown(repository.dispose);
+    addTearDown(router.dispose);
+    await tester.pumpWidget(
+      buildSubject(repository, preferences: preferences, router: router, quizRepository: quizzes),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text(t.auth.account.quiz), findsNothing);
+
+    router.go('/account/quiz');
+    await tester.pumpAndSettle();
+
+    expect(find.byType(QuizSignInRequiredView), findsOneWidget);
+    expect(quizzes.publishedSubscriptions, 0);
+    await tester.tap(find.text(t.quiz.signInRequired.button));
+    await tester.pumpAndSettle();
+    expect(find.byType(AccountPage), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('opens support LT registration from the account event tile', (tester) async {
+    final repository = FakeAuthRepository(initialUser: FakeUser(uid: 'uid-1'));
+    addTearDown(repository.dispose);
+    final router = GoRouter(
+      initialLocation: '/account',
+      routes: [
+        GoRoute(
+          path: '/account',
+          builder: (_, _) => const AccountPage(),
+          routes: [
+            GoRoute(
+              path: 'support-lt',
+              builder: (_, _) => const Scaffold(body: Text('support LT destination')),
+            ),
+          ],
+        ),
+      ],
+    );
+    addTearDown(router.dispose);
+    await tester.pumpWidget(buildSubject(repository, preferences: preferences, router: router));
+    await tester.pumpAndSettle();
+
+    await tapListItem(tester, '応援LT参加');
+
+    expect(find.text('support LT destination'), findsOneWidget);
+    expect(find.byType(SnackBar), findsNothing);
+  });
+
+  testWidgets('reflects the signed-in attendee registration without completing other missions', (tester) async {
+    final repository = FakeAuthRepository(initialUser: FakeUser(uid: 'uid-1'));
+    final supportLt = FakeSupportLtRepository();
+    addTearDown(repository.dispose);
+    addTearDown(supportLt.dispose);
+    await tester.pumpWidget(
+      buildSubject(repository, preferences: preferences, supportLtRepository: supportLt),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('参加登録済み'), findsNothing);
+
+    supportLt.setRegistration(
+      SupportLtRegistration(uid: 'uid-1', displayName: 'Attendee', registeredAt: DateTime.utc(2026, 11, 13)),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('参加登録済み'), findsOneWidget);
+    expect(find.text('応援LT参加・プロフィール交換・SNS投稿登録の参加状況で判定'), findsOneWidget);
+
+    await repository.signOut();
+    await tester.pumpAndSettle();
+    await repository.signInWithGoogle();
+    await tester.pumpAndSettle();
+    expect(find.text('参加登録済み'), findsNothing);
+  });
+
   testWidgets('shows the saved profile with country, links and bio', (tester) async {
     final repository = FakeAuthRepository(
       initialUser: FakeUser(uid: 'uid-1', email: 'attendee@example.com', displayName: 'Auth Name'),
@@ -410,6 +535,16 @@ void main() {
     expect(repository.calledMethods, isEmpty);
     expect(find.text('attendee@example.com'), findsOneWidget);
   });
+}
+
+class _QuizEventRepository extends Fake implements QuizEventRepository {
+  int publishedSubscriptions = 0;
+
+  @override
+  Stream<List<QuizEvent>> watchPublished() {
+    publishedSubscriptions++;
+    return Stream.value(const []);
+  }
 }
 
 UserProfile _profile({

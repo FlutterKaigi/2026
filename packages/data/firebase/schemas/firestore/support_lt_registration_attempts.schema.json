@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/FlutterKaigi/2026/packages/data/firebase/schemas/firestore/support_lt_registration_attempts.schema.json",
+  "title": "SupportLtRegistrationAttempts",
+  "description": "Server-only rate-limit state at supportLtRegistrationAttempts/{uid}: ten failed code checks within a ten-minute window block that account for ten minutes. Successful registration or Auth account deletion removes the document. Failures across all accounts are counted separately in supportLtSettings/attempts (see support_lt_shared_attempts.schema.json).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "failCount",
+    "windowStartedAt"
+  ],
+  "properties": {
+    "failCount": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 10
+    },
+    "windowStartedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "blockedUntil": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

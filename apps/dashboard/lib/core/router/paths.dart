@@ -16,4 +16,5 @@ abstract final class AppPaths {
   static const quiz = '/quiz';
   static const quizConsole = ':eventId';
   static const quizQuestionEdit = 'questions/edit';
+  static const supportLt = '/support-lt';
 }

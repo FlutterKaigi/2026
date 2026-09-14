@@ -26,6 +26,7 @@ import 'package:dashboard/feature/timeline_event/ui/page/timeline_event_edit_pag
 import 'package:dashboard/feature/timeline_event/ui/page/timeline_event_list_page.dart';
 import 'package:data/timeline_event.dart';
 import 'package:dashboard/feature/venue/ui/page/venue_list_page.dart';
+import 'package:dashboard/feature/support_lt/ui/page/support_lt_page.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -42,6 +43,7 @@ part 'timeline_event.dart';
 part 'session.dart';
 part 'sponsor.dart';
 part 'quiz.dart';
+part 'support_lt.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final initial = ref.read(authStateProvider);

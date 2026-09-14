@@ -65,6 +65,7 @@ class SettingsRoute extends GoRouteData with $SettingsRoute {
               path: 'quiz',
               routes: [TypedGoRoute<QuizRoute>(path: ':eventId')],
             ),
+            TypedGoRoute<SupportLtRoute>(path: 'support-lt'),
             TypedGoRoute<ExchangeHomeRoute>(
               path: 'exchange',
               routes: [
@@ -187,6 +188,14 @@ class QuizRoute extends GoRouteData with $QuizRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) => QuizPage(eventId: eventId);
+}
+
+/// `/account/support-lt` — register attendance with an organizer-issued code.
+class SupportLtRoute extends GoRouteData with $SupportLtRoute {
+  const SupportLtRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const SupportLtPage();
 }
 
 /// `/account/exchange` — the signed-in user's own QR code and the entry
