@@ -85,6 +85,16 @@ npm --prefix functions run test:emulator
 専用のテストユーザーを作成・削除し、既存コードを保存・復元するため、
 実行中はダッシュボードからコードを再発行しないこと。
 
+## SNS投稿登録
+
+`onSnsPostUserDeleted`（`functions/src/sns_post.ts`）はAuthアカウント削除時に
+`snsPostRegistrations/{uid}`を削除する。SNS投稿登録はプロフィールを必要としないため、
+`users/{uid}`の削除トリガーには依存しない。登録・更新自体はアプリがFirestoreへ直接保存し、
+ルールで本人の所有権、URL、5種類のうち1つのタグ、サーバー時刻を検証する。
+
+`test/sns_post.emulator.test.cjs`で所有権、入力検証、更新、プロフィール未作成アカウントの
+削除トリガーを検証する。既存の`npm run test:emulator`に含まれる。
+
 ## プロフィール交換
 
 `functions/src/profile_exchange.ts` に実装がある（`index.ts` から re-export）。

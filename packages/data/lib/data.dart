@@ -5,6 +5,7 @@ export 'src/model/locale_map.dart' show LocaleMap;
 export 'src/model/news.dart' show News;
 export 'src/model/profile_exchange.dart' show ProfileExchange, ProfileExchangeOrigin;
 export 'src/model/sns_link.dart' show SnsLink;
+export 'src/model/sns_post.dart' show SnsPostCompanion, SnsPostRegistration;
 export 'src/model/speaker.dart' show Speaker;
 export 'src/model/staff_member.dart' show StaffMember;
 export 'src/model/session.dart' show Session;
@@ -17,6 +18,7 @@ export 'src/repository/auth_repository.dart' show FirebaseAuthRepository, AuthRe
 export 'src/repository/news_repository.dart' show FirestoreNewsRepository, NewsRepository;
 export 'src/repository/profile_exchange_repository.dart'
     show FirestoreProfileExchangeRepository, ProfileExchangeAlreadyExistsException, ProfileExchangeRepository;
+export 'src/repository/sns_post_repository.dart' show FirestoreSnsPostRepository, SnsPostRepository;
 export 'src/repository/speaker_repository.dart' show FirestoreSpeakerRepository, SpeakerRepository;
 export 'src/repository/staff_member_repository.dart' show FirestoreStaffMemberRepository, StaffMemberRepository;
 export 'src/repository/session_repository.dart' show FirestoreSessionRepository, SessionRepository;

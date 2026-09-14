@@ -8,6 +8,8 @@ import { assertAdmin } from "./admin_auth";
 import { defaultFirestore } from "./firebase_admin";
 import { FUNCTIONS_REGION, isEmulator } from "./environment";
 
+export { onSnsPostUserDeleted } from "./sns_post";
+
 export {
   issueExchangeCode,
   issueExchangeToken,

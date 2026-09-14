@@ -12,6 +12,7 @@ Schemas committed so far, including server-managed collections:
 - `firestore/news.schema.json` (`news`)
 - `firestore/profile_exchange.schema.json` (`users/{uid}/exchanges`, written by the app, not the dashboard)
 - `firestore/session.schema.json` (`sessions`)
+- `firestore/sns_post_registration.schema.json` (`snsPostRegistrations/{uid}`, one owner-only photo post URL and companion category)
 - `firestore/speaker.schema.json` (`speakers`)
 - `firestore/sponsor.schema.json` (`sponsors`)
 - `firestore/staff_member.schema.json` (`staffMembers`)

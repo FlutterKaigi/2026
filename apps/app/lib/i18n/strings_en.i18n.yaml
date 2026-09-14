@@ -292,6 +292,58 @@ profile:
   discardBody: Unsaved changes will be lost.
   discardAction: Discard
   keepEditing: Keep editing
+snsPost:
+  title: Register SNS post
+  signInRequired: Sign in to register your SNS post
+  heading: Register your photo post
+  description: Post a photo with an eligible attendee on SNS,\nthen register the URL of that post.
+  companionLabel: Who is in your photo?
+  companionHint: Choose one category for the person in the photo
+  companionRequired: Choose one companion category
+  companions:
+    staff: Staff
+    speaker: Speaker
+    sponsor: Sponsor
+    firstTime: First-time attendee
+    differentCountry: Different country or region
+  urlLabel: SNS post URL
+  urlHint: Link to the photo post, not your profile page
+  invalidUrl: Enter a valid post URL (https://…)
+  register: Register post
+  update: Update registration
+  saving: Saving…
+  cancel: Cancel
+  saveFailed: Could not save. Check your connection and try again.
+  registeredTitle: SNS post registered
+  registeredBody: Your SNS post mission is complete.
+  updatedAt: "Updated: $date"
+  openPost: Open post
+  openFailed: Could not open the post
+  viewMissions: View mission progress
+  edit: Edit URL or category
+
+mission:
+  title: Missions
+  signInRequired: Sign in to view your mission progress
+  complete: Complete
+  incomplete: Incomplete
+  loading: Checking
+  loadFailed: Unavailable
+  allComplete: All missions complete!
+  inProgress: Mission progress
+  checkFailed: Some results are unavailable
+  progress: $n of 3 missions complete
+  ltTitle: Join Support LT
+  ltDescription: Supporters and speakers register with the code at the venue
+  exchangeTitle: Exchange profiles
+  exchangeDescription: Meet at least 3 people, including someone from a different country or region
+  exchangeCount: "$n / 3 people met"
+  differentCountry: Met someone from a different country or region
+  profileRequired: Add your country or region to your profile
+  snsTitle: Share a photo on SNS
+  snsDescription: Post a photo with an eligible attendee and register its URL and category
+  presentationHint: Show this screen to the staff\nwhen joining the final event.
+
 exchange:
   title: Profile Exchange
   qrDescription: Show this QR code to another attendee and have them scan it to exchange profiles

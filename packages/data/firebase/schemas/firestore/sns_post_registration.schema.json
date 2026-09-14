@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/FlutterKaigi/2026/packages/data/firebase/schemas/firestore/sns_post_registration.schema.json",
+  "title": "SnsPostRegistration",
+  "description": "One SNS photo post at snsPostRegistrations/{uid}. Only the owner can read or write it. The companion category is self-reported. Auth account deletion removes the document.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["url", "companion", "updatedAt"],
+  "properties": {
+    "url": {
+      "type": "string",
+      "maxLength": 2048,
+      "pattern": "^https?://[^/?#\\s@]+[.][^/?#\\s@]+/[^\\s]+$"
+    },
+    "companion": {
+      "type": "string",
+      "enum": ["staff", "speaker", "sponsor", "firstTime", "differentCountry"]
+    },
+    "updatedAt": { "type": "string", "format": "date-time" }
+  }
+}

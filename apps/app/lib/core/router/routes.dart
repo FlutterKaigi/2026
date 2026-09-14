@@ -62,6 +62,8 @@ class SettingsRoute extends GoRouteData with $SettingsRoute {
             TypedGoRoute<EmailSignInRoute>(path: 'email'),
             TypedGoRoute<ProfileEditRoute>(path: 'profile'),
             TypedGoRoute<SupportLtRoute>(path: 'support-lt'),
+            TypedGoRoute<MissionRoute>(path: 'missions'),
+            TypedGoRoute<SnsPostRoute>(path: 'sns-post'),
             TypedGoRoute<ExchangeHomeRoute>(
               path: 'exchange',
               routes: [
@@ -171,6 +173,22 @@ class SupportLtRoute extends GoRouteData with $SupportLtRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) => const SupportLtPage();
+}
+
+/// `/account/missions` — at-a-glance event eligibility and mission progress.
+class MissionRoute extends GoRouteData with $MissionRoute {
+  const MissionRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const MissionPage();
+}
+
+/// `/account/sns-post` — register a photo post URL and one companion category.
+class SnsPostRoute extends GoRouteData with $SnsPostRoute {
+  const SnsPostRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const SnsPostPage();
 }
 
 /// `/account/exchange` — the signed-in user's own QR code and the entry
