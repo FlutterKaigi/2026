@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/FlutterKaigi/2026/packages/data/firebase/schemas/firestore/quiz_event.schema.json",
+  "title": "QuizEvent",
+  "description": "Firestore document schema for the `quizEvents` collection.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["title", "status", "createdAt", "updatedAt"],
+  "properties": {
+    "title": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ja", "en"],
+      "properties": {
+        "ja": { "type": "string" },
+        "en": { "type": "string" }
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": ["draft", "published", "registration", "entryClosed", "inProgress", "finished"]
+    },
+    "isPublic": {
+      "type": "boolean"
+    },
+    "currentQuestionId": {
+      "type": ["string", "null"]
+    },
+    "capacity": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "sponsorIds": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "teamNamePool": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1, "maxLength": 30 }
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

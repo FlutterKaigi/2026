@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/FlutterKaigi/2026/packages/data/firebase/schemas/firestore/quiz_participant.schema.json",
+  "title": "QuizParticipant",
+  "description": "Firestore document schema for the `quizEvents/{eventId}/participants` subcollection. Document ID is the Firebase Auth uid.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["displayName", "registeredAt"],
+  "properties": {
+    "displayName": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 20
+    },
+    "registeredAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "teamId": {
+      "type": ["string", "null"]
+    }
+  }
+}

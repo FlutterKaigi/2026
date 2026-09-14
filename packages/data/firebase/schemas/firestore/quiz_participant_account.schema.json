@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/FlutterKaigi/2026/packages/data/firebase/schemas/firestore/quiz_participant_account.schema.json",
+  "title": "QuizParticipantAccount",
+  "description": "Firestore document schema for the `quizEvents/{eventId}/participantAccounts` subcollection. Document ID is the Firebase Auth uid. Links a quiz participant to the account they signed in with; readable only by that account and by staff.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["uid", "signInProvider", "linkedAt"],
+  "properties": {
+    "uid": {
+      "type": "string",
+      "minLength": 1
+    },
+    "email": {
+      "type": ["string", "null"]
+    },
+    "accountName": {
+      "type": ["string", "null"]
+    },
+    "photoUrl": {
+      "type": ["string", "null"]
+    },
+    "signInProvider": {
+      "type": "string",
+      "minLength": 1
+    },
+    "linkedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}
