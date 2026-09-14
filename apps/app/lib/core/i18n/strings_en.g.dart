@@ -52,6 +52,7 @@ class TranslationsEn extends Translations with BaseTranslations<AppLocale, Trans
 	@override late final _Translations$sessionBookmark$en sessionBookmark = _Translations$sessionBookmark$en._(_root);
 	@override late final _Translations$bookmarkedSessions$en bookmarkedSessions = _Translations$bookmarkedSessions$en._(_root);
 	@override late final _Translations$venueMap$en venueMap = _Translations$venueMap$en._(_root);
+	@override late final _Translations$venueWalk$en venueWalk = _Translations$venueWalk$en._(_root);
 	@override late final _Translations$eventInfo$en eventInfo = _Translations$eventInfo$en._(_root);
 	@override late final _Translations$auth$en auth = _Translations$auth$en._(_root);
 	@override late final _Translations$profile$en profile = _Translations$profile$en._(_root);
@@ -278,6 +279,44 @@ class _Translations$venueMap$en extends Translations$venueMap$ja {
 	@override String get viewMode => 'Map view';
 	@override String get useTwoD => 'Show in 2D';
 	@override String get saveFailed => 'Could not save the view preference';
+}
+
+// Path: venueWalk
+class _Translations$venueWalk$en extends Translations$venueWalk$ja {
+	_Translations$venueWalk$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get sceneLabel => 'Explore the venue with Dashumaru. Walk using the stick, a tap on the floor, or the arrow keys.';
+	@override String get currentLocation => 'You are at';
+	@override String get entrance => 'Entrance';
+	@override String get entranceSign => 'Entrance';
+	@override String get selectedPoint => 'Selected spot';
+	@override String headingTo({required Object place}) => 'Walking to ${place}';
+	@override String arrivedAt({required Object place}) => 'Arrived at ${place}';
+	@override String get unreachable => 'Cannot walk to that spot';
+	@override String get photoMode => 'Photo mode';
+	@override String get walkToPhotoSpot => 'Walk to the photo spot';
+	@override String get followTooltip => 'Follow Dashumaru';
+	@override String get overviewTooltip => 'View the entire floor';
+	@override String get follow => 'Follow';
+	@override String get overview => 'Overview';
+	@override String get help => 'How to play';
+	@override String get stickHint => 'Use the stick to walk';
+	@override String get stickLabel => 'Stick to move Dashumaru';
+	@override String get stopTooltip => 'Stop walking';
+	@override String get stop => 'Stop here';
+	@override String get reset => 'Return to the entrance';
+	@override String get wave => 'Wave';
+	@override String get backToWalk => 'Back to walking';
+	@override String get run => 'Run';
+	@override String get runningSpeed => 'Running';
+	@override String get walkingSpeed => 'Walking';
+	@override String get runHint => 'Hold to run. Release to walk. On a keyboard, hold Shift.';
+	@override String get close => 'Close';
+	@override late final _Translations$venueWalk$instructions$en instructions = _Translations$venueWalk$instructions$en._(_root);
+	@override late final _Translations$venueWalk$photo$en photo = _Translations$venueWalk$photo$en._(_root);
 }
 
 // Path: eventInfo
@@ -547,6 +586,48 @@ class _Translations$sessionTimetable$type$en extends Translations$sessionTimetab
 	@override String get event => 'Event';
 }
 
+// Path: venueWalk.instructions
+class _Translations$venueWalk$instructions$en extends Translations$venueWalk$instructions$ja {
+	_Translations$venueWalk$instructions$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Exploring the venue';
+	@override String get movement => 'Use the stick at the bottom left to walk. Hold the run icon at the bottom right to run, and release it to walk again.';
+	@override String get camera => 'Drag the background to look around and pinch to zoom. Tap the floor to walk to that spot automatically.';
+	@override String get places => 'Use “Find a place” to choose a destination and explore the four halls. Tap the map icon for a view of the entire floor.';
+	@override String get photos => 'Tap the camera to take a photo. The picture icon beside it takes you to the creative board. Choose a pose and frame for your photo.';
+	@override String get keyboard => 'On a computer, use W A S D or the arrow keys to move. Hold Shift to run and press Esc to stop.';
+	@override String get scope => 'Explore the venue on the fifth floor. This does not show your real location, and you cannot use the escalators to change floors.';
+	@override String get credits => '3D model: yakitama5 / flutter_deck_slides\nDashumaru: FlutterKaigi';
+}
+
+// Path: venueWalk.photo
+class _Translations$venueWalk$photo$en extends Translations$venueWalk$photo$ja {
+	_Translations$venueWalk$photo$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'A photo with Dashumaru';
+	@override String get resultTitle => 'Your photo';
+	@override String get imageLabel => 'A souvenir photo of Dashumaru';
+	@override String get downloadStarted => 'Your photo download has started';
+	@override String get saveFailed => 'Could not save the photo. Please try again.';
+	@override String get savePng => 'Save PNG';
+	@override String get captureFailed => 'Could not take the photo. Please try again.';
+	@override String get caption => 'Exploring the venue with Dashumaru.';
+	@override String captionAt({required Object place}) => 'With Dashumaru at ${place}.';
+	@override String get shutter => 'Take a photo';
+	@override String get capturing => 'Taking photo';
+	@override String get hideUi => 'Hide controls. Tap the screen to bring them back';
+	@override String get faceCamera => 'Face the camera';
+	@override String get removeFrame => 'Remove frame';
+	@override String get addFrame => 'Add frame';
+	@override late final _Translations$venueWalk$photo$poses$en poses = _Translations$venueWalk$photo$poses$en._(_root);
+}
+
 // Path: auth.signIn
 class _Translations$auth$signIn$en extends Translations$auth$signIn$ja {
 	_Translations$auth$signIn$en._(TranslationsEn root) : this._root = root, super.internal(root);
@@ -656,6 +737,19 @@ class _Translations$settings$language$en extends Translations$settings$language$
 	@override String get title => 'Language';
 	@override String get japanese => '日本語';
 	@override String get english => 'English';
+}
+
+// Path: venueWalk.photo.poses
+class _Translations$venueWalk$photo$poses$en extends Translations$venueWalk$photo$poses$ja {
+	_Translations$venueWalk$photo$poses$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get standing => 'Stand';
+	@override String get wave => 'Wave';
+	@override String get sitting => 'Sit';
+	@override String get jumping => 'Jump';
 }
 
 /// The flat map containing all translations for locale <en>.
@@ -768,6 +862,60 @@ extension on TranslationsEn {
 			'venueMap.viewMode' => 'Map view',
 			'venueMap.useTwoD' => 'Show in 2D',
 			'venueMap.saveFailed' => 'Could not save the view preference',
+			'venueWalk.sceneLabel' => 'Explore the venue with Dashumaru. Walk using the stick, a tap on the floor, or the arrow keys.',
+			'venueWalk.currentLocation' => 'You are at',
+			'venueWalk.entrance' => 'Entrance',
+			'venueWalk.entranceSign' => 'Entrance',
+			'venueWalk.selectedPoint' => 'Selected spot',
+			'venueWalk.headingTo' => ({required Object place}) => 'Walking to ${place}',
+			'venueWalk.arrivedAt' => ({required Object place}) => 'Arrived at ${place}',
+			'venueWalk.unreachable' => 'Cannot walk to that spot',
+			'venueWalk.photoMode' => 'Photo mode',
+			'venueWalk.walkToPhotoSpot' => 'Walk to the photo spot',
+			'venueWalk.followTooltip' => 'Follow Dashumaru',
+			'venueWalk.overviewTooltip' => 'View the entire floor',
+			'venueWalk.follow' => 'Follow',
+			'venueWalk.overview' => 'Overview',
+			'venueWalk.help' => 'How to play',
+			'venueWalk.stickHint' => 'Use the stick to walk',
+			'venueWalk.stickLabel' => 'Stick to move Dashumaru',
+			'venueWalk.stopTooltip' => 'Stop walking',
+			'venueWalk.stop' => 'Stop here',
+			'venueWalk.reset' => 'Return to the entrance',
+			'venueWalk.wave' => 'Wave',
+			'venueWalk.backToWalk' => 'Back to walking',
+			'venueWalk.run' => 'Run',
+			'venueWalk.runningSpeed' => 'Running',
+			'venueWalk.walkingSpeed' => 'Walking',
+			'venueWalk.runHint' => 'Hold to run. Release to walk. On a keyboard, hold Shift.',
+			'venueWalk.close' => 'Close',
+			'venueWalk.instructions.title' => 'Exploring the venue',
+			'venueWalk.instructions.movement' => 'Use the stick at the bottom left to walk. Hold the run icon at the bottom right to run, and release it to walk again.',
+			'venueWalk.instructions.camera' => 'Drag the background to look around and pinch to zoom. Tap the floor to walk to that spot automatically.',
+			'venueWalk.instructions.places' => 'Use “Find a place” to choose a destination and explore the four halls. Tap the map icon for a view of the entire floor.',
+			'venueWalk.instructions.photos' => 'Tap the camera to take a photo. The picture icon beside it takes you to the creative board. Choose a pose and frame for your photo.',
+			'venueWalk.instructions.keyboard' => 'On a computer, use W A S D or the arrow keys to move. Hold Shift to run and press Esc to stop.',
+			'venueWalk.instructions.scope' => 'Explore the venue on the fifth floor. This does not show your real location, and you cannot use the escalators to change floors.',
+			'venueWalk.instructions.credits' => '3D model: yakitama5 / flutter_deck_slides\nDashumaru: FlutterKaigi',
+			'venueWalk.photo.title' => 'A photo with Dashumaru',
+			'venueWalk.photo.resultTitle' => 'Your photo',
+			'venueWalk.photo.imageLabel' => 'A souvenir photo of Dashumaru',
+			'venueWalk.photo.downloadStarted' => 'Your photo download has started',
+			'venueWalk.photo.saveFailed' => 'Could not save the photo. Please try again.',
+			'venueWalk.photo.savePng' => 'Save PNG',
+			'venueWalk.photo.captureFailed' => 'Could not take the photo. Please try again.',
+			'venueWalk.photo.caption' => 'Exploring the venue with Dashumaru.',
+			'venueWalk.photo.captionAt' => ({required Object place}) => 'With Dashumaru at ${place}.',
+			'venueWalk.photo.shutter' => 'Take a photo',
+			'venueWalk.photo.capturing' => 'Taking photo',
+			'venueWalk.photo.hideUi' => 'Hide controls. Tap the screen to bring them back',
+			'venueWalk.photo.faceCamera' => 'Face the camera',
+			'venueWalk.photo.removeFrame' => 'Remove frame',
+			'venueWalk.photo.addFrame' => 'Add frame',
+			'venueWalk.photo.poses.standing' => 'Stand',
+			'venueWalk.photo.poses.wave' => 'Wave',
+			'venueWalk.photo.poses.sitting' => 'Sit',
+			'venueWalk.photo.poses.jumping' => 'Jump',
 			'eventInfo.title' => 'Event Overview',
 			'eventInfo.newsTitle' => 'Latest News',
 			'eventInfo.newsSubtitle' => 'See the latest FlutterKaigi 2026 updates',

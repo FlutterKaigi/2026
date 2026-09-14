@@ -14,14 +14,21 @@ MapPoint readPoint(Object? value) {
 class MapPlace {
   MapPlace(Map<String, Object?> json)
     : id = json['id']! as String,
-      name = (json['name']! as Map)['ja']! as String,
+      names = Map<String, String>.from(json['name']! as Map),
       type = json['type']! as String,
       number = json['boothNumber'] as int?,
       anchor = readPoint(json['anchor']),
       polygon = (json['polygon']! as List).map(readPoint).toList();
 
   final String id;
-  final String name;
+  final Map<String, String> names;
+  String get name => nameFor('ja');
+
+  String nameFor(String languageCode) {
+    final value = names[languageCode];
+    return value != null && value.trim().isNotEmpty ? value : names['ja']!;
+  }
+
   final String type;
   final int? number;
   final MapPoint anchor;

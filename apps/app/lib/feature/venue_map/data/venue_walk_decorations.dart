@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:app/feature/venue_map/data/venue_creative_board_layout.dart';
+import 'package:app/feature/venue_map/data/venue_localized_signs.dart';
 import 'package:app/feature/venue_map/data/venue_walk_navigation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_scene/scene.dart' as fs;
@@ -9,9 +10,10 @@ import 'package:vector_math/vector_math.dart' as vm;
 
 /// Sample exhibition furniture. The reviewed floor plan itself is unchanged.
 class VenueWalkDecorations {
-  VenueWalkDecorations({required this.navigation, required this.world});
+  VenueWalkDecorations({required this.navigation, required this.world, required this.localizedSigns});
 
   final VenueNavigation navigation;
+  final VenueLocalizedSigns localizedSigns;
   final vm.Vector3 Function(MapPoint, double) world;
   final root = fs.Node(name: 'Demo exhibition decorations');
   late final layout = VenueCreativeBoardLayout(navigation);
@@ -29,14 +31,16 @@ class VenueWalkDecorations {
       final p = MapPoint(hall.anchor.x, north + 23);
       _box(p, width: 7.6, height: .18, depth: 1.4, elevation: .10, color: colors[i]);
       _obstacle(p, 7.6 / _unit, 1.4 / _unit);
-      final texture = await _label(
-        title: hall.name,
-        eyebrow: 'FlutterKaigi 2026',
-        width: 7.3 - .04,
-        height: 1.75 - .04,
-        color: colors[i],
+      final material = await localizedSigns.create(
+        (language) => _label(
+          title: hall.nameFor(language),
+          eyebrow: 'FlutterKaigi 2026',
+          width: 7.3 - .04,
+          height: 1.75 - .04,
+          color: colors[i],
+        ),
       );
-      _placard(MapPoint(p.x, p.y - 8), width: 7.3, height: 1.75, elevation: 1.9, texture: texture, color: colors[i]);
+      _placard(MapPoint(p.x, p.y - 8), width: 7.3, height: 1.75, elevation: 1.9, material: material, color: colors[i]);
       for (final dx in [-3.2, 3.2]) {
         _box(
           MapPoint(p.x + dx / _unit, p.y - 8),
@@ -60,17 +64,19 @@ class VenueWalkDecorations {
       _box(p, width: width, height: .06, depth: depth, elevation: .58, color: const Color(0xffd4bf97), yaw: yaw);
       final signWidth = width * .94;
       final double signHeight = math.min(1, width * .51);
-      final texture = await _sponsorLabel(
-        place,
-        width: signWidth - .04,
-        height: signHeight - .04,
+      final material = await localizedSigns.create(
+        (language) => _sponsorLabel(
+          place.nameFor(language),
+          width: signWidth - .04,
+          height: signHeight - .04,
+        ),
       );
       _placard(
         p,
         width: signWidth,
         height: signHeight,
         elevation: 1.23,
-        texture: texture,
+        material: material,
         color: _green,
         yaw: yaw,
       );
@@ -94,7 +100,7 @@ class VenueWalkDecorations {
       height: boardHeight,
       depth: layout.board.height * _unit,
       elevation: boardHeight / 2 + .04,
-      texture: await _backdrop(),
+      material: _textured(await _backdrop()),
       color: _charcoal,
       bothSides: false,
     );
@@ -105,7 +111,7 @@ class VenueWalkDecorations {
       height: podiumHeight,
       depth: layout.podium.height * _unit,
       elevation: podiumHeight / 2 + .04,
-      texture: await _podiumTexture(),
+      material: _textured(await _podiumTexture()),
       color: _charcoal,
       bothSides: false,
     );
@@ -161,14 +167,14 @@ class VenueWalkDecorations {
     required double width,
     required double height,
     required double elevation,
-    required fs.Texture2D texture,
+    required fs.Material material,
     required Color color,
     double yaw = 0,
     double depth = .09,
     bool bothSides = true,
   }) {
     final board = _box(p, width: width, height: height, depth: depth, elevation: elevation, color: color, yaw: yaw);
-    final mesh = fs.Mesh(fs.PlaneGeometry(width: width - .04, depth: height - .04), _textured(texture));
+    final mesh = fs.Mesh(fs.PlaneGeometry(width: width - .04, depth: height - .04), material);
     final upright = vm.Quaternion.axisAngle(vm.Vector3(1, 0, 0), -math.pi / 2);
     board.add(
       fs.Node(mesh: mesh)
@@ -239,7 +245,7 @@ class VenueWalkDecorations {
     return _finish(recorder, w, h);
   }
 
-  Future<fs.Texture2D> _sponsorLabel(MapPlace place, {required double width, required double height}) async {
+  Future<fs.Texture2D> _sponsorLabel(String name, {required double width, required double height}) async {
     // Match the visible face, so narrow and wide booths preserve glyph shapes.
     const pixelsWide = 768;
     final pixelsHigh = (pixelsWide * height / width).round();
@@ -248,7 +254,7 @@ class VenueWalkDecorations {
 
     // Break only at legal prefixes/suffixes or a complete parenthetical note.
     // The brand itself stays on one line, including long Japanese names.
-    var brand = place.name;
+    var brand = name;
     final prefix = RegExp(r'^(株式会社|\(株\)|（株）)').firstMatch(brand)?.group(0);
     if (prefix != null) {
       brand = brand.substring(prefix.length);

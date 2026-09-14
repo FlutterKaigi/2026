@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:math' as math;
 
 import 'package:app/feature/venue_map/data/venue_escalator_layout.dart';
+import 'package:app/feature/venue_map/data/venue_localized_signs.dart';
 import 'package:app/feature/venue_map/data/venue_walk_architecture.dart';
 import 'package:app/feature/venue_map/data/venue_walk_decorations.dart';
 import 'package:app/feature/venue_map/data/venue_walk_navigation.dart';
@@ -12,24 +13,27 @@ import 'package:vector_math/vector_math.dart' as vm;
 
 typedef WalkStatus = ({
   String? location,
-  String motion,
   String? destination,
-  String? notice,
+  WalkNotice? notice,
+  String? arrivedAt,
   int visited,
   bool running,
   bool overview,
 });
 
-enum VenuePhotoPose {
-  standing('立つ', 'Idle'),
-  wave('手をふる', 'Wave'),
-  sitting('座る', 'Sit', 3.2),
-  jumping('ジャンプ', 'Jump', 1);
+enum WalkNotice { unreachable, arrived }
 
-  const VenuePhotoPose(this.label, this.clip, [this.holdAt]);
-  final String label;
+enum VenuePhotoPose {
+  standing('Idle'),
+  wave('Wave'),
+  sitting('Sit', holdAt: 3.2, focusHeight: .58, turn: .22),
+  jumping('Jump', holdAt: 1.15, focusHeight: 1.02);
+
+  const VenuePhotoPose(this.clip, {this.holdAt, this.focusHeight = .8, this.turn = 0});
   final String clip;
   final double? holdAt;
+  final double focusHeight;
+  final double turn;
 }
 
 /// Owns the retained scene graph and simulation; the page owns input and layout.
@@ -39,13 +43,15 @@ class VenueWalkScene extends ChangeNotifier {
   final bool showcase;
   late final scene = fs.Scene();
   final _resources = fs.ResourceGroup();
+  final _localizedSigns = VenueLocalizedSigns('ja');
+  String _languageCode = 'ja';
   late final VenueNavigation navigation;
   final camera = fs.PerspectiveCamera(position: vm.Vector3(0, 12, -16), target: vm.Vector3.zero());
   final status = ValueNotifier<WalkStatus>((
     location: null,
-    motion: '待機',
     destination: null,
     notice: null,
+    arrivedAt: null,
     visited: 0,
     running: false,
     overview: false,
@@ -57,6 +63,9 @@ class VenueWalkScene extends ChangeNotifier {
   final _routeRoot = fs.Node(name: 'Walking route');
   late fs.Node _target;
   late fs.Node _footRing;
+  late fs.Node _faceNormal;
+  late fs.Node _faceSmile;
+  final _photoShadow = fs.Node(name: 'Photo ground contact')..visible = false;
   VenueWalkArchitecture? architecture;
   VenueWalkDecorations? decorations;
   bool photoMode = false;
@@ -77,7 +86,8 @@ class VenueWalkScene extends ChangeNotifier {
   double _waveTime = 0;
   double _statusTime = 0;
   String? _destination;
-  String? _notice;
+  WalkNotice? _notice;
+  String? _arrivedAt;
   double _noticeTime = 0;
   bool _sprintHeld = false;
   bool overview = false;
@@ -201,13 +211,18 @@ class VenueWalkScene extends ChangeNotifier {
       );
     }
     if (showcase) {
-      architecture = VenueWalkArchitecture(navigation: navigation, world: world, escalators: escalators);
+      architecture = VenueWalkArchitecture(
+        navigation: navigation,
+        world: world,
+        escalators: escalators,
+        localizedSigns: _localizedSigns,
+      );
       await architecture!.build();
       if (_disposed) {
         return;
       }
       scene.add(architecture!.root);
-      decorations = VenueWalkDecorations(navigation: navigation, world: world);
+      decorations = VenueWalkDecorations(navigation: navigation, world: world, localizedSigns: _localizedSigns);
       await decorations!.build();
       if (_disposed) {
         return;
@@ -216,6 +231,11 @@ class VenueWalkScene extends ChangeNotifier {
     }
     // Use a parent for translation so authored bone animation never overrides it.
     model.scale = vm.Vector3.all(.52);
+    _faceNormal = model.getChildByName('FaceNormal')!;
+    _faceSmile = model.getChildByName('FaceSmile')!
+      ..scale = vm.Vector3.all(1)
+      ..visible = false;
+    _bindPhotoRotations(model);
     _actor.add(model);
     _actor.position = world(position, .025);
     scene.add(_actor);
@@ -231,6 +251,19 @@ class VenueWalkScene extends ChangeNotifier {
     }
     _footRing = fs.Node(mesh: fs.Mesh(fs.RingGeometry(innerRadius: .54, outerRadius: .60), _unlit(0x1f937d)));
     _actor.add(_footRing..position = vm.Vector3(0, .014, 0));
+    for (var i = 0; i < 12; i++) {
+      _photoShadow.add(
+        fs.Node(
+          mesh: fs.Mesh(
+            fs.DiscGeometry(radius: .52 - i * .026, segments: 48),
+            fs.UnlitMaterial()
+              ..alphaMode = fs.AlphaMode.blend
+              ..baseColorFactor = vm.Vector4(0, 0, 0, .035),
+          ),
+        )..position = vm.Vector3(0, .012 + i * .0003, 0),
+      );
+    }
+    _actor.add(_photoShadow);
     _target = fs.Node(mesh: fs.Mesh(fs.RingGeometry(innerRadius: .24, outerRadius: .34), _unlit(0x1f937d)))
       ..visible = false;
     scene.add(_routeRoot);
@@ -239,9 +272,38 @@ class VenueWalkScene extends ChangeNotifier {
     _applyAppearance!();
   }
 
+  Future<void> setLanguage(String languageCode) async {
+    if (_languageCode == languageCode || _disposed) {
+      return;
+    }
+    _languageCode = languageCode;
+    await _localizedSigns.setLanguage(languageCode);
+  }
+
   void setDarkMode({required bool dark}) {
     _dark = dark;
     _applyAppearance?.call();
+  }
+
+  void _bindPhotoRotations(fs.Node model) {
+    final rotations = {
+      VenuePhotoPose.sitting: {
+        'Head': vm.Quaternion.axisAngle(vm.Vector3(0, 1, 0), -.16) * vm.Quaternion.axisAngle(vm.Vector3(0, 0, 1), .10),
+      },
+      VenuePhotoPose.jumping: {
+        'LeftWing': vm.Quaternion.axisAngle(vm.Vector3(0, 0, 1), -2.15),
+        'RightWing': vm.Quaternion.axisAngle(vm.Vector3(0, 0, 1), 2.15),
+        'LeftWingBend': vm.Quaternion.axisAngle(vm.Vector3(0, 0, 1), .25),
+        'RightWingBend': vm.Quaternion.axisAngle(vm.Vector3(0, 0, 1), -.25),
+        'LeftWingTip': vm.Quaternion.axisAngle(vm.Vector3(0, 0, 1), .10),
+        'RightWingTip': vm.Quaternion.axisAngle(vm.Vector3(0, 0, 1), -.10),
+      },
+    };
+    for (final pose in rotations.entries) {
+      for (final bone in pose.value.entries) {
+        model.getChildByName(bone.key)!.addComponent(_PhotoRotation(this, pose.key, bone.value));
+      }
+    }
   }
 
   void _addFloor(Iterable<Rect> patches, fs.Material material) {
@@ -299,7 +361,7 @@ class VenueWalkScene extends ChangeNotifier {
     keys.clear();
     stick = Offset.zero;
     _sprintHeld = false;
-    _publish(false);
+    _publish();
   }
 
   void stop() {
@@ -307,7 +369,7 @@ class VenueWalkScene extends ChangeNotifier {
     _waveTime = 0;
     _notice = null;
     _clearPath();
-    _publish(false);
+    _publish();
   }
 
   void reset() {
@@ -323,19 +385,19 @@ class VenueWalkScene extends ChangeNotifier {
     _actor.rotation = vm.Quaternion.identity();
     _notice = null;
     _updateCamera(1, snap: true);
-    _publish(false);
+    _publish();
     notifyListeners();
   }
 
   void setSprintHeld({required bool pressed}) {
     _sprintHeld = pressed;
-    _publish(false);
+    _publish();
   }
 
   void toggleOverview() {
     stop();
     overview = !overview;
-    _publish(false);
+    _publish();
   }
 
   void orbit(Offset delta) {
@@ -380,16 +442,22 @@ class VenueWalkScene extends ChangeNotifier {
     yaw = cameraFacingHeading;
     overview = false;
     elevation = .24;
-    distance = 7;
+    distance = 5;
     photoMode = true;
     _footRing.visible = false;
+    _photoShadow.visible = true;
     _updateCamera(1, snap: true);
     selectPhotoPose(VenuePhotoPose.wave);
   }
 
   void selectPhotoPose(VenuePhotoPose pose) {
     photoPose = pose;
-    _heading = cameraFacingHeading;
+    _heading = cameraFacingHeading + pose.turn;
+    final smiling = pose != VenuePhotoPose.standing;
+    _faceNormal.visible = !smiling;
+    _faceSmile.visible = smiling;
+    final shadowScale = pose == VenuePhotoPose.jumping ? .75 : 1.0;
+    _photoShadow.scale = vm.Vector3(shadowScale, 1, shadowScale * .72);
     final clip = _clips[pose.clip]!;
     final time = pose.holdAt;
     if (time == null) {
@@ -414,6 +482,9 @@ class VenueWalkScene extends ChangeNotifier {
     stop();
     photoMode = false;
     _footRing.visible = true;
+    _photoShadow.visible = false;
+    _faceNormal.visible = true;
+    _faceSmile.visible = false;
     _clips['Wave']!.loop = false;
     yaw = previous.yaw;
     elevation = previous.elevation;
@@ -422,34 +493,34 @@ class VenueWalkScene extends ChangeNotifier {
     _heading = previous.heading;
     _beforePhoto = null;
     _updateCamera(1, snap: true);
-    _publish(false);
+    _publish();
   }
 
   void goToPlace(String id) {
     for (final place in navigation.places) {
       if (place.id == id) {
         final target = navigation.approach(position, place);
-        goTo(target ?? place.anchor, name: place.name);
+        goTo(target ?? place.anchor, placeId: place.id);
         return;
       }
     }
   }
 
-  void goTo(MapPoint target, {String? name}) {
+  void goTo(MapPoint target, {String? placeId}) {
     _clearPath();
     keys.clear();
     stick = Offset.zero;
     _waveTime = 0;
     final route = navigation.route(position, target);
     if (route.isEmpty) {
-      _notice = 'そこへは移動できません';
+      _notice = WalkNotice.unreachable;
       _noticeTime = 2.5;
-      _publish(false);
+      _publish();
       return;
     }
     overview = false;
     path = route;
-    _destination = name ?? '選んだ場所';
+    _destination = placeId ?? 'selected_point';
     _notice = null;
     var from = position;
     for (final to in route) {
@@ -466,7 +537,7 @@ class VenueWalkScene extends ChangeNotifier {
     _target
       ..visible = true
       ..position = world(target, .04);
-    _publish(false);
+    _publish();
   }
 
   void tapFloor(Offset local, Size size) {
@@ -549,7 +620,8 @@ class VenueWalkScene extends ChangeNotifier {
         }
       }
       if (path.isEmpty) {
-        _notice = '${_destination ?? '目的地'}に到着';
+        _notice = WalkNotice.arrived;
+        _arrivedAt = _destination;
         _noticeTime = 4;
         _clearPath();
       }
@@ -586,7 +658,7 @@ class VenueWalkScene extends ChangeNotifier {
     _statusTime += dt;
     if (_statusTime >= .12) {
       _statusTime = 0;
-      _publish(moved);
+      _publish();
     }
     notifyListeners();
   }
@@ -594,7 +666,9 @@ class VenueWalkScene extends ChangeNotifier {
   void _updateCamera(double dt, {bool snap = false}) {
     final cameraYaw = _cameraYaw;
     final closeFollow = compactView && !overview && !photoMode;
-    final focus = overview ? vm.Vector3(0, 0, 0) : world(position, closeFollow ? 1.1 : .8);
+    final focus = overview
+        ? vm.Vector3(0, 0, 0)
+        : world(position, photoMode ? photoPose.focusHeight : (closeFollow ? 1.1 : .8));
     if (closeFollow) {
       // Leave room ahead of the character, without rotating with its heading.
       focus.add(vm.Vector3(math.sin(cameraYaw), 0, math.cos(cameraYaw)) * .8);
@@ -622,19 +696,13 @@ class VenueWalkScene extends ChangeNotifier {
     architecture?.updateView(camera, focus: focus, dt: dt, overview: overview, snap: snap);
   }
 
-  void _publish(bool moved) {
+  void _publish() {
     final hall = navigation.hallAt(position);
     status.value = (
-      location: hall?.name ?? (position.y > 587 ? 'エントランス' : null),
-      motion:
-          _notice ??
-          (_waveTime > 0
-              ? '手をふる'
-              : moved
-              ? '移動中'
-              : '待機'),
+      location: hall?.id ?? (position.y > 587 ? 'entrance' : null),
       destination: _destination,
       notice: _notice,
+      arrivedAt: _notice == WalkNotice.arrived ? _arrivedAt : null,
       visited: visited.length,
       running: _sprinting,
       overview: overview,
@@ -647,7 +715,25 @@ class VenueWalkScene extends ChangeNotifier {
     keys.clear();
     stickInput.dispose();
     _resources.dispose();
+    _localizedSigns.dispose();
     status.dispose();
     super.dispose();
+  }
+}
+
+/// The root animation runs before child components. Adjust only photo bones
+/// after that animation, retaining the authored legs and body motion.
+class _PhotoRotation extends fs.Component {
+  _PhotoRotation(this.game, this.pose, this.rotation);
+
+  final VenueWalkScene game;
+  final VenuePhotoPose pose;
+  final vm.Quaternion rotation;
+
+  @override
+  void update(double deltaSeconds) {
+    if (game.photoMode && game.photoPose == pose) {
+      node.rotation = rotation;
+    }
   }
 }

@@ -1,3 +1,4 @@
+import 'package:app/core/i18n/strings.g.dart';
 import 'package:flutter/material.dart';
 
 class VenueWalkRunButton extends StatefulWidget {
@@ -35,9 +36,9 @@ class _VenueWalkRunButtonState extends State<VenueWalkRunButton> {
     return Semantics(
       container: true,
       button: true,
-      label: '走る',
-      value: widget.pressed ? '走る速度' : '歩く速度',
-      hint: '押している間だけ走ります。離すと歩きます。キーボードではShiftキーを使います。',
+      label: context.t.venueWalk.run,
+      value: widget.pressed ? context.t.venueWalk.runningSpeed : context.t.venueWalk.walkingSpeed,
+      hint: context.t.venueWalk.runHint,
       child: ExcludeSemantics(
         child: Listener(
           behavior: HitTestBehavior.opaque,

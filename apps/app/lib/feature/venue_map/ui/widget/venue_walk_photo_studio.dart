@@ -2,9 +2,11 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
+import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/feature/venue_map/data/venue_walk_photo_save.dart';
 import 'package:app/feature/venue_map/data/venue_walk_scene.dart';
 import 'package:app/feature/venue_map/ui/widget/venue_scene_viewport.dart';
+import 'package:app/feature/venue_map/ui/widget/venue_walk_localizations.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -48,7 +50,7 @@ class _VenueWalkPhotoStudioState extends State<VenueWalkPhotoStudio> {
       await showDialog<void>(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text('記念写真'),
+          title: Text(context.t.venueWalk.photo.resultTitle),
           content: ConstrainedBox(
             constraints: BoxConstraints(
               maxWidth: 700,
@@ -57,10 +59,10 @@ class _VenueWalkPhotoStudioState extends State<VenueWalkPhotoStudio> {
                 math.min(MediaQuery.sizeOf(context).height * .60, MediaQuery.sizeOf(context).height - 220),
               ),
             ),
-            child: Image.memory(bytes, fit: BoxFit.contain, semanticLabel: '撮影しただしゅまるの記念写真'),
+            child: Image.memory(bytes, fit: BoxFit.contain, semanticLabel: context.t.venueWalk.photo.imageLabel),
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(context), child: const Text('閉じる')),
+            TextButton(onPressed: () => Navigator.pop(context), child: Text(context.t.venueWalk.close)),
             if (supportsVenuePhotoDownload)
               FilledButton.icon(
                 onPressed: () async {
@@ -69,19 +71,19 @@ class _VenueWalkPhotoStudioState extends State<VenueWalkPhotoStudio> {
                     if (mounted) {
                       ScaffoldMessenger.of(
                         this.context,
-                      ).showSnackBar(const SnackBar(content: Text('写真のダウンロードを開始しました')));
+                      ).showSnackBar(SnackBar(content: Text(this.context.t.venueWalk.photo.downloadStarted)));
                     }
                   } on Object catch (error) {
                     debugPrint('Venue photo download failed: $error');
                     if (mounted) {
                       ScaffoldMessenger.of(
                         this.context,
-                      ).showSnackBar(const SnackBar(content: Text('写真を保存できませんでした。もう一度お試しください。')));
+                      ).showSnackBar(SnackBar(content: Text(this.context.t.venueWalk.photo.saveFailed)));
                     }
                   }
                 },
                 icon: const Icon(Icons.download_rounded),
-                label: const Text('PNGを保存'),
+                label: Text(context.t.venueWalk.photo.savePng),
               ),
           ],
         ),
@@ -89,7 +91,7 @@ class _VenueWalkPhotoStudioState extends State<VenueWalkPhotoStudio> {
     } on Object catch (error, stack) {
       debugPrint('Venue photo failed: $error\n$stack');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('撮影できませんでした。もう一度お試しください。')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.t.venueWalk.photo.captureFailed)));
       }
     } finally {
       image?.dispose();
@@ -178,8 +180,14 @@ class _VenueWalkPhotoStudioState extends State<VenueWalkPhotoStudio> {
                             const SizedBox(height: 3),
                             Text(
                               game.status.value.location == null
-                                  ? 'だしゅまると、会場さんぽ。'
-                                  : 'だしゅまると、${game.status.value.location}で。',
+                                  ? context.t.venueWalk.photo.caption
+                                  : context.t.venueWalk.photo.captionAt(
+                                      place: venueWalkPlaceName(
+                                        context.t,
+                                        game.navigation,
+                                        game.status.value.location!,
+                                      ),
+                                    ),
                               style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 11),
                             ),
                           ],
@@ -204,7 +212,7 @@ class _VenueWalkPhotoStudioState extends State<VenueWalkPhotoStudio> {
         Padding(
           padding: EdgeInsets.only(right: vertical ? 0 : 7, bottom: vertical ? 4 : 0),
           child: ChoiceChip(
-            label: Text(pose.label, style: const TextStyle(fontSize: 12)),
+            label: Text(pose.label(context.t), style: const TextStyle(fontSize: 12)),
             selected: widget.game.photoPose == pose,
             onSelected: (_) => setState(() => widget.game.selectPhotoPose(pose)),
           ),
@@ -213,29 +221,29 @@ class _VenueWalkPhotoStudioState extends State<VenueWalkPhotoStudio> {
   );
 
   Widget _shutter() => Tooltip(
-    message: '写真を撮る',
+    message: context.t.venueWalk.photo.shutter,
     excludeFromSemantics: true,
     child: FilledButton(
       onPressed: _capturing ? null : () => unawaited(_capture()),
       style: FilledButton.styleFrom(shape: const CircleBorder(), padding: const EdgeInsets.all(19)),
       child: _capturing
-          ? const SizedBox(
+          ? SizedBox(
               width: 28,
               height: 28,
-              child: CircularProgressIndicator(strokeWidth: 2, semanticsLabel: '撮影中'),
+              child: CircularProgressIndicator(strokeWidth: 2, semanticsLabel: context.t.venueWalk.photo.capturing),
             )
-          : const Icon(Icons.camera_alt_rounded, size: 28, semanticLabel: '写真を撮る'),
+          : Icon(Icons.camera_alt_rounded, size: 28, semanticLabel: context.t.venueWalk.photo.shutter),
     ),
   );
 
   Widget _hideUi() => IconButton(
-    tooltip: 'UIを隠す。画面をタップすると戻ります',
+    tooltip: context.t.venueWalk.photo.hideUi,
     onPressed: () => setState(() => _clean = true),
     icon: const Icon(Icons.visibility_off_outlined),
   );
 
   Widget _faceCamera() => IconButton(
-    tooltip: 'こちらを向く',
+    tooltip: context.t.venueWalk.photo.faceCamera,
     onPressed: () => setState(() => widget.game.selectPhotoPose(widget.game.photoPose)),
     icon: const Icon(Icons.face_retouching_natural),
   );
@@ -257,12 +265,19 @@ class _VenueWalkPhotoStudioState extends State<VenueWalkPhotoStudio> {
                 padding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
                 child: Row(
                   children: [
-                    IconButton(tooltip: 'さんぽに戻る', onPressed: widget.onClose, icon: const Icon(Icons.close_rounded)),
-                    const Expanded(
-                      child: Text('だしゅまると記念撮影', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+                    IconButton(
+                      tooltip: context.t.venueWalk.backToWalk,
+                      onPressed: widget.onClose,
+                      icon: const Icon(Icons.close_rounded),
+                    ),
+                    Expanded(
+                      child: Text(
+                        context.t.venueWalk.photo.title,
+                        style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
+                      ),
                     ),
                     IconButton(
-                      tooltip: _frame ? 'フレームを外す' : 'フレームを付ける',
+                      tooltip: _frame ? context.t.venueWalk.photo.removeFrame : context.t.venueWalk.photo.addFrame,
                       isSelected: _frame,
                       onPressed: () => setState(() => _frame = !_frame),
                       icon: const Icon(Icons.crop_free_rounded),

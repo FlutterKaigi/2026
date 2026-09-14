@@ -120,6 +120,64 @@ venueMap:
   viewMode: Map view
   useTwoD: Show in 2D
   saveFailed: Could not save the view preference
+venueWalk:
+  sceneLabel: Explore the venue with Dashumaru. Walk using the stick, a tap on the floor, or the arrow keys.
+  currentLocation: You are at
+  entrance: Entrance
+  entranceSign: Entrance
+  selectedPoint: Selected spot
+  headingTo: Walking to $place
+  arrivedAt: Arrived at $place
+  unreachable: Cannot walk to that spot
+  photoMode: Photo mode
+  walkToPhotoSpot: Walk to the photo spot
+  followTooltip: Follow Dashumaru
+  overviewTooltip: View the entire floor
+  follow: Follow
+  overview: Overview
+  help: How to play
+  stickHint: Use the stick to walk
+  stickLabel: Stick to move Dashumaru
+  stopTooltip: Stop walking
+  stop: Stop here
+  reset: Return to the entrance
+  wave: Wave
+  backToWalk: Back to walking
+  run: Run
+  runningSpeed: Running
+  walkingSpeed: Walking
+  runHint: Hold to run. Release to walk. On a keyboard, hold Shift.
+  close: Close
+  instructions:
+    title: Exploring the venue
+    movement: Use the stick at the bottom left to walk. Hold the run icon at the bottom right to run, and release it to walk again.
+    camera: Drag the background to look around and pinch to zoom. Tap the floor to walk to that spot automatically.
+    places: Use “Find a place” to choose a destination and explore the four halls. Tap the map icon for a view of the entire floor.
+    photos: Tap the camera to take a photo. The picture icon beside it takes you to the creative board. Choose a pose and frame for your photo.
+    keyboard: On a computer, use W A S D or the arrow keys to move. Hold Shift to run and press Esc to stop.
+    scope: Explore the venue on the fifth floor. This does not show your real location, and you cannot use the escalators to change floors.
+    credits: "3D model: yakitama5 / flutter_deck_slides\nDashumaru: FlutterKaigi"
+  photo:
+    title: A photo with Dashumaru
+    resultTitle: Your photo
+    imageLabel: A souvenir photo of Dashumaru
+    downloadStarted: Your photo download has started
+    saveFailed: Could not save the photo. Please try again.
+    savePng: Save PNG
+    captureFailed: Could not take the photo. Please try again.
+    caption: Exploring the venue with Dashumaru.
+    captionAt: With Dashumaru at $place.
+    shutter: Take a photo
+    capturing: Taking photo
+    hideUi: Hide controls. Tap the screen to bring them back
+    faceCamera: Face the camera
+    removeFrame: Remove frame
+    addFrame: Add frame
+    poses:
+      standing: Stand
+      wave: Wave
+      sitting: Sit
+      jumping: Jump
 eventInfo:
   title: Event Overview
   newsTitle: Latest News

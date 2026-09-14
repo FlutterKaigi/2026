@@ -7,6 +7,7 @@ import 'package:app/feature/venue_map/data/venue_walk_scene.dart';
 import 'package:app/feature/venue_map/provider/venue_walk_scene_factory.dart';
 import 'package:app/feature/venue_map/ui/widget/venue_scene_viewport.dart';
 import 'package:app/feature/venue_map/ui/widget/venue_walk_controller.dart';
+import 'package:app/feature/venue_map/ui/widget/venue_walk_localizations.dart';
 import 'package:app/feature/venue_map/ui/widget/venue_walk_photo_studio.dart';
 import 'package:app/feature/venue_map/ui/widget/venue_walk_run_button.dart';
 import 'package:flutter/gestures.dart';
@@ -67,8 +68,17 @@ class _VenueWalkViewState extends ConsumerState<VenueWalkView> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _tickerEnabled = TickerMode.valuesOf(context).enabled;
+    unawaited(_updateSignLanguage());
     game?.setDarkMode(dark: Theme.of(context).brightness == Brightness.dark);
     _syncActivity();
+  }
+
+  Future<void> _updateSignLanguage() async {
+    try {
+      await game?.setLanguage(context.t.$meta.locale.languageCode);
+    } on Object catch (error) {
+      debugPrint('Venue sign language update failed: $error');
+    }
   }
 
   @override
@@ -101,6 +111,10 @@ class _VenueWalkViewState extends ConsumerState<VenueWalkView> {
     game = next;
     try {
       await next.load().timeout(const Duration(seconds: 30));
+      if (!mounted || game != next) {
+        return;
+      }
+      await _updateSignLanguage();
       if (!mounted || game != next) {
         return;
       }
@@ -260,7 +274,7 @@ class _VenueWalkViewState extends ConsumerState<VenueWalkView> {
               fit: StackFit.expand,
               children: [
                 Semantics(
-                  label: 'だしゅまると会場さんぽ。スティック、床のタップ、または矢印キーで歩けます。',
+                  label: context.t.venueWalk.sceneLabel,
                   child: Listener(
                     onPointerDown: (_) => focus.requestFocus(),
                     onPointerSignal: (event) {
@@ -350,7 +364,7 @@ class _VenueWalkViewState extends ConsumerState<VenueWalkView> {
                                   ),
                                   const SizedBox(width: 6),
                                   Text(
-                                    'ただいま',
+                                    context.t.venueWalk.currentLocation,
                                     style: TextStyle(
                                       fontSize: 10,
                                       color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -359,19 +373,24 @@ class _VenueWalkViewState extends ConsumerState<VenueWalkView> {
                                 ],
                               ),
                               const SizedBox(height: 3),
-                              Text(s.location!, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
+                              Text(
+                                venueWalkPlaceName(context.t, g.navigation, s.location!),
+                                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+                              ),
                             ],
                             if (s.destination != null)
                               Text(
-                                '${s.destination}へ移動中',
+                                context.t.venueWalk.headingTo(
+                                  place: venueWalkPlaceName(context.t, g.navigation, s.destination!),
+                                ),
                                 style: TextStyle(fontSize: 10, color: Theme.of(context).colorScheme.primary),
                               ),
                             if (s.notice != null)
                               Text(
-                                s.notice!,
+                                venueWalkNotice(context.t, g.navigation, s),
                                 style: TextStyle(
                                   fontSize: 11,
-                                  color: s.motion == 'そこへは移動できません'
+                                  color: s.notice == WalkNotice.unreachable
                                       ? Theme.of(context).colorScheme.error
                                       : Theme.of(context).colorScheme.primary,
                                 ),
@@ -406,12 +425,17 @@ class _VenueWalkViewState extends ConsumerState<VenueWalkView> {
                       game: g,
                       child: Row(
                         children: [
-                          _SurfaceButton(tooltip: '撮影モード', icon: Icons.photo_camera_outlined, onPressed: openPhoto),
+                          _SurfaceButton(
+                            tooltip: context.t.venueWalk.photoMode,
+                            icon: Icons.photo_camera_outlined,
+                            onPressed: openPhoto,
+                          ),
                           const SizedBox(width: 8),
                           _SurfaceButton(
-                            tooltip: 'フォトスポットへ歩く',
+                            tooltip: context.t.venueWalk.walkToPhotoSpot,
                             icon: Icons.add_photo_alternate_outlined,
-                            onPressed: () => action(() => g.goTo(g.decorations!.layout.photoSpot, name: 'クリエイティブボード')),
+                            onPressed: () =>
+                                action(() => g.goTo(g.decorations!.layout.photoSpot, placeId: 'creative_board')),
                           ),
                         ],
                       ),
@@ -436,35 +460,35 @@ class _VenueWalkViewState extends ConsumerState<VenueWalkView> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 _SurfaceButton(
-                                  tooltip: '撮影モード',
+                                  tooltip: context.t.venueWalk.photoMode,
                                   icon: Icons.photo_camera_outlined,
                                   onPressed: openPhoto,
                                 ),
                                 const SizedBox(width: 8),
                                 _SurfaceButton(
-                                  tooltip: 'フォトスポットへ歩く',
+                                  tooltip: context.t.venueWalk.walkToPhotoSpot,
                                   icon: Icons.add_photo_alternate_outlined,
                                   onPressed: () =>
-                                      action(() => g.goTo(g.decorations!.layout.photoSpot, name: 'クリエイティブボード')),
+                                      action(() => g.goTo(g.decorations!.layout.photoSpot, placeId: 'creative_board')),
                                 ),
                                 const SizedBox(width: 8),
                               ],
                             ),
                           ),
                         _SurfaceButton(
-                          tooltip: s.overview ? 'だしゅまるを追う' : 'フロア全体を見る',
+                          tooltip: s.overview ? context.t.venueWalk.followTooltip : context.t.venueWalk.overviewTooltip,
                           icon: s.overview ? Icons.person_pin_circle_outlined : Icons.map_outlined,
                           label: compact
                               ? null
                               : s.overview
-                              ? '追いかける'
-                              : '全体を見る',
+                              ? context.t.venueWalk.follow
+                              : context.t.venueWalk.overview,
                           onPressed: () => action(g.toggleOverview),
                         ),
                         if (landscape) ...[
                           const SizedBox(width: 8),
                           _SurfaceButton(
-                            tooltip: '遊び方',
+                            tooltip: context.t.venueWalk.help,
                             icon: Icons.help_outline,
                             onPressed: () => showAbout(context),
                           ),
@@ -478,7 +502,7 @@ class _VenueWalkViewState extends ConsumerState<VenueWalkView> {
                     right: 16,
                     top: compact ? 68 : (wide ? 169 : 141),
                     child: _SurfaceButton(
-                      tooltip: '遊び方',
+                      tooltip: context.t.venueWalk.help,
                       icon: Icons.help_outline,
                       onPressed: () => showAbout(context),
                     ),
@@ -503,7 +527,7 @@ class _VenueWalkViewState extends ConsumerState<VenueWalkView> {
                         if (!landscape) ...[
                           const SizedBox(height: 5),
                           Text(
-                            'スティックで歩く',
+                            context.t.venueWalk.stickHint,
                             style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 10),
                           ),
                         ],
@@ -525,23 +549,23 @@ class _VenueWalkViewState extends ConsumerState<VenueWalkView> {
                             children: [
                               if (s.destination != null) ...[
                                 _SurfaceButton(
-                                  tooltip: '移動を止める',
+                                  tooltip: context.t.venueWalk.stopTooltip,
                                   icon: Icons.stop_rounded,
-                                  label: compact ? null : 'ここで止まる',
+                                  label: compact ? null : context.t.venueWalk.stop,
                                   onPressed: () => action(g.stop),
                                 ),
                                 SizedBox(width: landscape ? 8 : 0, height: landscape ? 0 : 8),
                               ],
                               _SurfaceButton(
-                                tooltip: '入口に戻る',
+                                tooltip: context.t.venueWalk.reset,
                                 icon: Icons.restart_alt,
                                 onPressed: () => action(g.reset),
                               ),
                               SizedBox(width: landscape ? 8 : 0, height: landscape ? 0 : 8),
                               _SurfaceButton(
-                                tooltip: '手をふる',
+                                tooltip: context.t.venueWalk.wave,
                                 icon: Icons.waving_hand_outlined,
-                                label: compact ? null : '手をふる',
+                                label: compact ? null : context.t.venueWalk.wave,
                                 onPressed: () => action(g.wave),
                               ),
                               SizedBox(width: landscape ? 10 : 0, height: landscape ? 0 : 10),
@@ -562,8 +586,8 @@ class _VenueWalkViewState extends ConsumerState<VenueWalkView> {
                     builder: (context, s, _) => s.overview
                         ? Center(
                             child: _SurfaceButton(
-                              tooltip: 'さんぽに戻る',
-                              label: 'さんぽに戻る',
+                              tooltip: context.t.venueWalk.backToWalk,
+                              label: context.t.venueWalk.backToWalk,
                               icon: Icons.pets_outlined,
                               onPressed: () => action(g.toggleOverview),
                             ),
@@ -585,19 +609,21 @@ class _VenueWalkViewState extends ConsumerState<VenueWalkView> {
     await showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('会場さんぽの遊び方'),
+        title: Text(context.t.venueWalk.instructions.title),
         scrollable: true,
         content: Text(
-          '左下のスティックで歩きます。右下の走るアイコンを押している間は走り、離すと歩く速さに戻ります。\n\n'
-          '背景をドラッグして見回し、ピンチで近づいたり離れたりできます。床をタップすると、その場所まで自動で歩きます。\n\n'
-          '「場所を探す」で行き先を選んで、4つのホールを巡ってみましょう。地図アイコンで会場全体を見渡せます。\n\n'
-          '${widget.showcase ? 'カメラで記念撮影。隣の写真アイコンを押すと、クリエイティブボードの前まで歩きます。ポーズやフレームを選んで撮影できます。\n\n' : ''}'
-          'パソコンでは W A S D または矢印キーで移動、Shiftを押している間は走り、Escで止まります。\n\n'
-          '5階の会場を散歩できます。実際の現在地を示すものではなく、エスカレーターでの階移動はできません。\n\n'
-          '3Dモデル: yakitama5 / flutter_deck_slides\nだしゅまる: FlutterKaigi',
+          [
+            context.t.venueWalk.instructions.movement,
+            context.t.venueWalk.instructions.camera,
+            context.t.venueWalk.instructions.places,
+            if (widget.showcase) context.t.venueWalk.instructions.photos,
+            context.t.venueWalk.instructions.keyboard,
+            context.t.venueWalk.instructions.scope,
+            context.t.venueWalk.instructions.credits,
+          ].join('\n\n'),
           style: const TextStyle(fontSize: 13, height: 1.8),
         ),
-        actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('閉じる'))],
+        actions: [TextButton(onPressed: () => Navigator.pop(context), child: Text(context.t.venueWalk.close))],
       ),
     );
     if (!mounted) {
@@ -702,7 +728,7 @@ class _JoystickState extends State<Joystick> {
 
   @override
   Widget build(BuildContext context) => Semantics(
-    label: 'だしゅまるを動かすスティック',
+    label: context.t.venueWalk.stickLabel,
     child: Listener(
       onPointerDown: (e) {
         if (pointer == null) {

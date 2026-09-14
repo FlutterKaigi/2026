@@ -1,7 +1,9 @@
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
+import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/feature/venue_map/data/venue_escalator_layout.dart';
+import 'package:app/feature/venue_map/data/venue_localized_signs.dart';
 import 'package:app/feature/venue_map/data/venue_walk_navigation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_scene/scene.dart' as fs;
@@ -9,9 +11,15 @@ import 'package:vector_math/vector_math.dart' as vm;
 
 /// Architectural details for the demo, located using the shared map data.
 class VenueWalkArchitecture {
-  VenueWalkArchitecture({required this.navigation, required this.world, required this.escalators});
+  VenueWalkArchitecture({
+    required this.navigation,
+    required this.world,
+    required this.escalators,
+    required this.localizedSigns,
+  });
 
   final VenueNavigation navigation;
+  final VenueLocalizedSigns localizedSigns;
   final List<VenueEscalatorLayout> escalators;
   final vm.Vector3 Function(MapPoint, double) world;
   final root = fs.Node(name: 'Venue entrances and escalators');
@@ -41,16 +49,18 @@ class VenueWalkArchitecture {
     }
     await _hallEntrances();
     await _mainEntrance();
-    for (final (id, title, caption, color) in [
-      ('mens_wc', 'WC', '男性用トイレ', const Color(0xff446c88)),
-      ('womens_wc', 'WC', '女性用トイレ', const Color(0xff9b5c76)),
-      ('accessible_wc', 'WC', '多目的トイレ', const Color(0xff397b6d)),
+    for (final (id, color) in [
+      ('mens_wc', const Color(0xff446c88)),
+      ('womens_wc', const Color(0xff9b5c76)),
+      ('accessible_wc', const Color(0xff397b6d)),
     ]) {
       final place = navigation.places.firstWhere((p) => p.id == id);
       final north = place.polygon.map((p) => p.y).reduce(math.min);
       final width = id == 'accessible_wc' ? 1.42 : 2.1;
       final sign = _sign(
-        await _signTexture(title, caption, color, width: width, height: .56),
+        await localizedSigns.create(
+          (language) => _signTexture('WC', place.nameFor(language), color, width: width, height: .56),
+        ),
         width: width,
         height: .56,
       )..position = world(MapPoint(place.anchor.x, north), 1.25);
@@ -193,7 +203,7 @@ class VenueWalkArchitecture {
   }
 
   Future<void> _hallEntrances() async {
-    final signs = <(String, double), fs.Texture2D>{};
+    final signs = <(String, double), fs.UnlitMaterial>{};
     for (final raw in (navigation.data['publicEntrances']! as List).cast<Map<String, Object?>>()) {
       final hall = navigation.places.firstWhere((p) => p.id == raw['placeId']);
       final polygon = (raw['polygon']! as List).map(readPoint).toList();
@@ -218,14 +228,16 @@ class VenueWalkArchitecture {
       parts.box(vm.Vector3(0, .012, 0), vm.Vector3(.35, .024, width - .13), _darkMetal);
       parts.finish();
       root.add(parts.root);
-      final texture = signs[(hall.id, width)] ??= await _signTexture(
-        hall.name,
-        '入口',
-        const Color(0xff205c50),
-        width: width,
-        height: .36,
+      final material = signs[(hall.id, width)] ??= await localizedSigns.create(
+        (language) async => _signTexture(
+          hall.nameFor(language),
+          (await (language == 'ja' ? AppLocale.ja : AppLocale.en).build()).venueWalk.entranceSign,
+          const Color(0xff205c50),
+          width: width,
+          height: .36,
+        ),
       );
-      final sign = _sign(texture, width: width, height: .36)
+      final sign = _sign(material, width: width, height: .36)
         ..position = world(center, 2.14)
         ..rotation = vm.Quaternion.axisAngle(vm.Vector3(0, 1, 0), math.pi / 2);
       root.add(sign);
@@ -264,12 +276,14 @@ class VenueWalkArchitecture {
     _entranceHeader = frame.root;
     _entranceHeader.add(
       _sign(
-        await _signTexture(
-          'FlutterKaigi 2026',
-          '5F  /  WELCOME',
-          const Color(0xff205c50),
-          width: width - .22,
-          height: .54,
+        await localizedSigns.create(
+          (_) => _signTexture(
+            'FlutterKaigi 2026',
+            '5F  /  WELCOME',
+            const Color(0xff205c50),
+            width: width - .22,
+            height: .54,
+          ),
         ),
         width: width - .22,
         height: .54,
@@ -312,15 +326,13 @@ class VenueWalkArchitecture {
   }
 
   fs.Node _sign(
-    fs.Texture2D texture, {
+    fs.UnlitMaterial material, {
     required double width,
     required double height,
     List<fs.Material>? fadingMaterials,
   }) {
     final frame = fadingMaterials == null ? _green : _material(const Color(0xff205c50), roughness: .76);
     final sign = fs.Node(mesh: fs.Mesh(fs.CuboidGeometry(vm.Vector3(width, height, .065)), frame));
-    final material = fs.UnlitMaterial(colorTexture: texture)
-      ..baseColorTextureTransform = fs.TextureTransform(offset: vm.Vector2(0, 1), scale: vm.Vector2(1, -1));
     fadingMaterials?.addAll([frame, material]);
     final mesh = fs.Mesh(fs.PlaneGeometry(width: width - .025, depth: height - .025), material);
     for (final side in [-1, 1]) {

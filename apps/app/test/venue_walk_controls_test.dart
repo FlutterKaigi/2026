@@ -1,3 +1,4 @@
+import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/feature/venue_map/ui/widget/venue_walk_controller.dart';
 import 'package:app/feature/venue_map/ui/widget/venue_walk_run_button.dart';
 import 'package:app/feature/venue_map/ui/widget/venue_walk_view.dart';
@@ -24,17 +25,19 @@ void main() {
     var sprint = false;
     var stick = Offset.zero;
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: StatefulBuilder(
-            builder: (context, setState) => Row(
-              children: [
-                Joystick(value: stick, onChanged: (value) => setState(() => stick = value)),
-                VenueWalkRunButton(
-                  pressed: sprint,
-                  onChanged: (value) => setState(() => sprint = value),
-                ),
-              ],
+      TranslationProvider(
+        child: MaterialApp(
+          home: Scaffold(
+            body: StatefulBuilder(
+              builder: (context, setState) => Row(
+                children: [
+                  Joystick(value: stick, onChanged: (value) => setState(() => stick = value)),
+                  VenueWalkRunButton(
+                    pressed: sprint,
+                    onChanged: (value) => setState(() => sprint = value),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -69,17 +72,19 @@ void main() {
     var sprint = false;
     var stick = Offset.zero;
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: StatefulBuilder(
-            builder: (context, setState) => Row(
-              children: [
-                Joystick(value: stick, onChanged: (value) => setState(() => stick = value)),
-                VenueWalkRunButton(
-                  pressed: sprint,
-                  onChanged: (value) => setState(() => sprint = value),
-                ),
-              ],
+      TranslationProvider(
+        child: MaterialApp(
+          home: Scaffold(
+            body: StatefulBuilder(
+              builder: (context, setState) => Row(
+                children: [
+                  Joystick(value: stick, onChanged: (value) => setState(() => stick = value)),
+                  VenueWalkRunButton(
+                    pressed: sprint,
+                    onChanged: (value) => setState(() => sprint = value),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -108,14 +113,16 @@ void main() {
   testWidgets('reset clears a held stick and ignores that finger until a new touch starts', (tester) async {
     var stick = Offset.zero;
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: StatefulBuilder(
-            builder: (context, setState) => Column(
-              children: [
-                Joystick(value: stick, onChanged: (value) => setState(() => stick = value)),
-                TextButton(onPressed: () => setState(() => stick = Offset.zero), child: const Text('Reset')),
-              ],
+      TranslationProvider(
+        child: MaterialApp(
+          home: Scaffold(
+            body: StatefulBuilder(
+              builder: (context, setState) => Column(
+                children: [
+                  Joystick(value: stick, onChanged: (value) => setState(() => stick = value)),
+                  TextButton(onPressed: () => setState(() => stick = Offset.zero), child: const Text('Reset')),
+                ],
+              ),
             ),
           ),
         ),
