@@ -4,12 +4,15 @@ import 'package:app/core/designsystem/theme/app_theme.dart';
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/provider/shared_preferences.dart';
 import 'package:app/feature/venue_map/data/venue_floor_plan.dart';
+import 'package:app/feature/venue_map/data/venue_walk_scene.dart';
 import 'package:app/feature/venue_map/provider/venue_map_view_mode.dart';
+import 'package:app/feature/venue_map/provider/venue_walk_scene_factory.dart';
 import 'package:app/feature/venue_map/ui/page/venue_map_page.dart';
 import 'package:app/feature/venue_map/ui/widget/venue_map_2d_controller.dart';
 import 'package:app/feature/venue_map/ui/widget/venue_map_2d_view.dart';
 import 'package:app/feature/venue_map/ui/widget/venue_map_3d_view.dart';
 import 'package:app/feature/venue_map/ui/widget/venue_place_search.dart';
+import 'package:app/feature/venue_map/ui/widget/venue_walk_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -354,8 +357,10 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('3D failure offers a working 2D fallback', (tester) async {
-    SharedPreferences.setMockInitialValues({VenueMapViewModeNotifier.preferencesKey: 'threeD'});
+  testWidgets('3D stays in the map tab, inherits dark mode, and offers a working 2D fallback', (tester) async {
+    final navigatorKey = GlobalKey<NavigatorState>();
+    const tabsKey = Key('app navigation');
+    SharedPreferences.setMockInitialValues({VenueMapViewModeNotifier.preferencesKey: 'twoD'});
     final prefs = await SharedPreferences.getInstance();
     LocaleSettings.setLocaleSync(AppLocale.ja);
     await tester.pumpWidget(
@@ -363,18 +368,38 @@ void main() {
         overrides: [
           sharedPreferencesProvider.overrideWithValue(prefs),
           venueFloorPlanProvider.overrideWith((ref) => plan),
+          venueWalkSceneFactoryProvider.overrideWithValue(({required showcase}) => _FailedScene()),
         ],
         child: TranslationProvider(
           child: MaterialApp(
             locale: const Locale('ja'),
             supportedLocales: AppLocaleUtils.supportedLocales,
             localizationsDelegates: GlobalMaterialLocalizations.delegates,
-            home: const VenueMapPage(),
+            navigatorKey: navigatorKey,
+            theme: darkTheme(),
+            home: Scaffold(
+              body: const VenueMapPage(),
+              bottomNavigationBar: NavigationBar(
+                key: tabsKey,
+                selectedIndex: 1,
+                destinations: const [
+                  NavigationDestination(icon: Icon(Icons.event), label: 'イベント'),
+                  NavigationDestination(icon: Icon(Icons.map), label: '会場マップ'),
+                ],
+              ),
+            ),
           ),
         ),
       ),
     );
     await tester.pumpAndSettle();
+    await tester.tap(find.text('3D'));
+    await tester.pumpAndSettle();
+    expect(find.byType(VenueWalkView), findsOneWidget);
+    expect(navigatorKey.currentState!.canPop(), isFalse);
+    expect(find.byKey(tabsKey).hitTestable(), findsOneWidget);
+    final walkContext = tester.element(find.byType(VenueWalkView));
+    expect(Theme.of(walkContext).brightness, Brightness.dark);
     expect(find.text('会場マップを読み込めませんでした'), findsOneWidget);
     await tester.tap(find.text('2Dで表示'));
     await tester.pumpAndSettle();
@@ -382,4 +407,9 @@ void main() {
     expect(prefs.getString(VenueMapViewModeNotifier.preferencesKey), 'twoD');
     expect(tester.takeException(), isNull);
   }, variant: TargetPlatformVariant.only(TargetPlatform.macOS));
+}
+
+class _FailedScene extends VenueWalkScene {
+  @override
+  Future<void> load() async => throw StateError('GPU unavailable');
 }

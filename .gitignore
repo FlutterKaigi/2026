@@ -48,3 +48,7 @@ apps/website/lib/constants/generated_sessions.dart
 # Variables (APPLE_TEAM_ID / ANDROID_SHA256_FINGERPRINTS) at deploy time —
 # see tool/generate_well_known.dart — and never committed.
 apps/website/web/.well-known/
+
+# Local venue-map reference assets
+apps/app/prototypes/venue-map/
+apps/app/**/reference-plan.png

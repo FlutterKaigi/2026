@@ -5,10 +5,13 @@ version: 1.0.0+1
 resolution: workspace
 
 environment:
-  sdk: ">=3.11.0 <4.0.0"
-  flutter: ">=3.41.0"
+  sdk: ">=3.13.0 <4.0.0"
+  flutter: ">=3.47.0"
 
 dependencies:
+  flutter_scene: 0.23.0
+  hooks: ^2.0.0
+  vector_math: ^2.2.0
   data:
     path: ../../packages/data
   firebase_app_check: ^0.4.5
@@ -58,6 +61,7 @@ flutter:
   uses-material-design: true
 
   assets:
+    - flutter_scene_generated/
     - assets/html/venue_floor_plan_webview.html
     - assets/venue_map/floor_plan.json
     - assets/venue_map/floor_map_base.png

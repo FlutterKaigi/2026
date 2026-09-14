@@ -48,13 +48,8 @@ import 'package:website/app.dart' as _app;
 /// ```
 ServerOptions get defaultServerOptions => ServerOptions(
   clientId: 'main.client.dart.js',
-
   styles: () => [
-    ..._event_info_card.EventInfoCard.styles,
-    ..._news_card.NewsCard.styles,
-    ..._roadmap_card.RoadmapCard.styles,
-    ..._social_link_card.SocialLinkCard.styles,
-    ..._staff_card.StaffCard.styles,
+    ..._app.App.styles,
     ..._app_dialog.AppDialog.styles,
     ..._event_section.EventSection.styles,
     ..._exchange_counter_section.ExchangeCounterSection.styles,
@@ -64,9 +59,13 @@ ServerOptions get defaultServerOptions => ServerOptions(
     ..._sponsors_section.SponsorsSection.styles,
     ..._staff_section.StaffSection.styles,
     ..._timetable_section.TimetableSection.styles,
+    ..._event_info_card.EventInfoCard.styles,
+    ..._news_card.NewsCard.styles,
+    ..._roadmap_card.RoadmapCard.styles,
+    ..._social_link_card.SocialLinkCard.styles,
+    ..._staff_card.StaffCard.styles,
     ..._home.Home.styles,
     ..._share_link_fallback.ShareLinkFallbackPage.styles,
     ..._sponsor_detail.SponsorDetailPage.styles,
-    ..._app.App.styles,
   ],
 );

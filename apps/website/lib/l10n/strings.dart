@@ -4,8 +4,7 @@ import '../constants/build_config.dart';
 
 enum AppLocale {
   ja(code: 'ja', homePath: '/', relativeHref: ''),
-  en(code: 'en', homePath: '/en', relativeHref: 'en/')
-  ;
+  en(code: 'en', homePath: '/en', relativeHref: 'en/');
 
   const AppLocale({
     required this.code,
