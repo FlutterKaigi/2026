@@ -19,6 +19,15 @@ include: package:lints/recommended.yaml
 formatter:
   page_width: 120
   trailing_commas: preserve
+analyzer:
+  exclude:
+    - build/**
+    - android/**
+    - ios/**
+    - web/**
+    - windows/**
+    - macos/**
+    - linux/**
 
 # For additional information about configuring this file, see
 # https://dart.dev/guides/language/analysis-options

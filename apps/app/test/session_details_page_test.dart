@@ -567,8 +567,7 @@ final _responsiveSpeakers = [
   Speaker(
     id: 'responsive-speaker-a',
     name: 'A speaker with a deliberately long name that must wrap without truncation',
-    bio:
-        'This deliberately long biography verifies that the first speaker uses the remaining width, wraps naturally, and stays readable without overlapping the avatar or another speaker.',
+    bio: 'This deliberately long biography verifies that the first speaker uses the remaining width, wraps naturally, and stays readable without overlapping the avatar or another speaker.',
     xId: 'responsive_speaker_a',
     createdAt: DateTime.utc(2026),
     updatedAt: DateTime.utc(2026),
@@ -576,8 +575,7 @@ final _responsiveSpeakers = [
   Speaker(
     id: 'responsive-speaker-b',
     name: 'Second speaker whose complete name must also remain visible on narrow screens',
-    bio:
-        'A second long biography verifies that every speaker is listed vertically and that adjacent speaker rows never overlap at any supported viewport width.',
+    bio: 'A second long biography verifies that every speaker is listed vertically and that adjacent speaker rows never overlap at any supported viewport width.',
     createdAt: DateTime.utc(2026),
     updatedAt: DateTime.utc(2026),
   ),

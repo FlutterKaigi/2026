@@ -53,6 +53,7 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	late final Translations$sessionBookmark$ja sessionBookmark = Translations$sessionBookmark$ja.internal(_root);
 	late final Translations$bookmarkedSessions$ja bookmarkedSessions = Translations$bookmarkedSessions$ja.internal(_root);
 	late final Translations$venueMap$ja venueMap = Translations$venueMap$ja.internal(_root);
+	late final Translations$venueWalk$ja venueWalk = Translations$venueWalk$ja.internal(_root);
 	late final Translations$eventInfo$ja eventInfo = Translations$eventInfo$ja.internal(_root);
 	late final Translations$auth$ja auth = Translations$auth$ja.internal(_root);
 	late final Translations$profile$ja profile = Translations$profile$ja.internal(_root);
@@ -468,6 +469,99 @@ class Translations$venueMap$ja {
 
 	/// ja: '表示方法を保存できませんでした'
 	String get saveFailed => '表示方法を保存できませんでした';
+}
+
+// Path: venueWalk
+class Translations$venueWalk$ja {
+	Translations$venueWalk$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'だしゅまると会場さんぽ。スティック、床のタップ、または矢印キーで歩けます。'
+	String get sceneLabel => 'だしゅまると会場さんぽ。スティック、床のタップ、または矢印キーで歩けます。';
+
+	/// ja: 'ただいま'
+	String get currentLocation => 'ただいま';
+
+	/// ja: 'エントランス'
+	String get entrance => 'エントランス';
+
+	/// ja: '入口'
+	String get entranceSign => '入口';
+
+	/// ja: '選んだ場所'
+	String get selectedPoint => '選んだ場所';
+
+	/// ja: '$placeへ移動中'
+	String headingTo({required Object place}) => '${place}へ移動中';
+
+	/// ja: '$placeに到着'
+	String arrivedAt({required Object place}) => '${place}に到着';
+
+	/// ja: 'そこへは移動できません'
+	String get unreachable => 'そこへは移動できません';
+
+	/// ja: '撮影モード'
+	String get photoMode => '撮影モード';
+
+	/// ja: 'フォトスポットへ歩く'
+	String get walkToPhotoSpot => 'フォトスポットへ歩く';
+
+	/// ja: 'だしゅまるを追う'
+	String get followTooltip => 'だしゅまるを追う';
+
+	/// ja: 'フロア全体を見る'
+	String get overviewTooltip => 'フロア全体を見る';
+
+	/// ja: '追いかける'
+	String get follow => '追いかける';
+
+	/// ja: '全体を見る'
+	String get overview => '全体を見る';
+
+	/// ja: '遊び方'
+	String get help => '遊び方';
+
+	/// ja: 'スティックで歩く'
+	String get stickHint => 'スティックで歩く';
+
+	/// ja: 'だしゅまるを動かすスティック'
+	String get stickLabel => 'だしゅまるを動かすスティック';
+
+	/// ja: '移動を止める'
+	String get stopTooltip => '移動を止める';
+
+	/// ja: 'ここで止まる'
+	String get stop => 'ここで止まる';
+
+	/// ja: '入口に戻る'
+	String get reset => '入口に戻る';
+
+	/// ja: '手をふる'
+	String get wave => '手をふる';
+
+	/// ja: 'さんぽに戻る'
+	String get backToWalk => 'さんぽに戻る';
+
+	/// ja: '走る'
+	String get run => '走る';
+
+	/// ja: '走る速度'
+	String get runningSpeed => '走る速度';
+
+	/// ja: '歩く速度'
+	String get walkingSpeed => '歩く速度';
+
+	/// ja: '押している間だけ走ります。離すと歩きます。キーボードではShiftキーを使います。'
+	String get runHint => '押している間だけ走ります。離すと歩きます。キーボードではShiftキーを使います。';
+
+	/// ja: '閉じる'
+	String get close => '閉じる';
+
+	late final Translations$venueWalk$instructions$ja instructions = Translations$venueWalk$instructions$ja.internal(_root);
+	late final Translations$venueWalk$photo$ja photo = Translations$venueWalk$photo$ja.internal(_root);
 }
 
 // Path: eventInfo
@@ -1080,6 +1174,95 @@ class Translations$sessionTimetable$type$ja {
 	String get event => 'イベント';
 }
 
+// Path: venueWalk.instructions
+class Translations$venueWalk$instructions$ja {
+	Translations$venueWalk$instructions$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: '会場さんぽの遊び方'
+	String get title => '会場さんぽの遊び方';
+
+	/// ja: '左下のスティックで歩きます。右下の走るアイコンを押している間は走り、離すと歩く速さに戻ります。'
+	String get movement => '左下のスティックで歩きます。右下の走るアイコンを押している間は走り、離すと歩く速さに戻ります。';
+
+	/// ja: '背景をドラッグして見回し、ピンチで近づいたり離れたりできます。床をタップすると、その場所まで自動で歩きます。'
+	String get camera => '背景をドラッグして見回し、ピンチで近づいたり離れたりできます。床をタップすると、その場所まで自動で歩きます。';
+
+	/// ja: '「場所を探す」で行き先を選んで、4つのホールを巡ってみましょう。地図アイコンで会場全体を見渡せます。'
+	String get places => '「場所を探す」で行き先を選んで、4つのホールを巡ってみましょう。地図アイコンで会場全体を見渡せます。';
+
+	/// ja: 'カメラで記念撮影。隣の写真アイコンを押すと、クリエイティブボードの前まで歩きます。ポーズやフレームを選んで撮影できます。'
+	String get photos => 'カメラで記念撮影。隣の写真アイコンを押すと、クリエイティブボードの前まで歩きます。ポーズやフレームを選んで撮影できます。';
+
+	/// ja: 'パソコンでは W A S D または矢印キーで移動、Shiftを押している間は走り、Escで止まります。'
+	String get keyboard => 'パソコンでは W A S D または矢印キーで移動、Shiftを押している間は走り、Escで止まります。';
+
+	/// ja: '5階の会場を散歩できます。実際の現在地を示すものではなく、エスカレーターでの階移動はできません。'
+	String get scope => '5階の会場を散歩できます。実際の現在地を示すものではなく、エスカレーターでの階移動はできません。';
+
+	/// ja: '3Dモデル: yakitama5 / flutter_deck_slides だしゅまる: FlutterKaigi'
+	String get credits => '3Dモデル: yakitama5 / flutter_deck_slides\nだしゅまる: FlutterKaigi';
+}
+
+// Path: venueWalk.photo
+class Translations$venueWalk$photo$ja {
+	Translations$venueWalk$photo$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'だしゅまると記念撮影'
+	String get title => 'だしゅまると記念撮影';
+
+	/// ja: '記念写真'
+	String get resultTitle => '記念写真';
+
+	/// ja: '撮影しただしゅまるの記念写真'
+	String get imageLabel => '撮影しただしゅまるの記念写真';
+
+	/// ja: '写真のダウンロードを開始しました'
+	String get downloadStarted => '写真のダウンロードを開始しました';
+
+	/// ja: '写真を保存できませんでした。もう一度お試しください。'
+	String get saveFailed => '写真を保存できませんでした。もう一度お試しください。';
+
+	/// ja: 'PNGを保存'
+	String get savePng => 'PNGを保存';
+
+	/// ja: '撮影できませんでした。もう一度お試しください。'
+	String get captureFailed => '撮影できませんでした。もう一度お試しください。';
+
+	/// ja: 'だしゅまると、会場さんぽ。'
+	String get caption => 'だしゅまると、会場さんぽ。';
+
+	/// ja: 'だしゅまると、$placeで。'
+	String captionAt({required Object place}) => 'だしゅまると、${place}で。';
+
+	/// ja: '写真を撮る'
+	String get shutter => '写真を撮る';
+
+	/// ja: '撮影中'
+	String get capturing => '撮影中';
+
+	/// ja: 'UIを隠す。画面をタップすると戻ります'
+	String get hideUi => 'UIを隠す。画面をタップすると戻ります';
+
+	/// ja: 'こちらを向く'
+	String get faceCamera => 'こちらを向く';
+
+	/// ja: 'フレームを外す'
+	String get removeFrame => 'フレームを外す';
+
+	/// ja: 'フレームを付ける'
+	String get addFrame => 'フレームを付ける';
+
+	late final Translations$venueWalk$photo$poses$ja poses = Translations$venueWalk$photo$poses$ja.internal(_root);
+}
+
 // Path: auth.signIn
 class Translations$auth$signIn$ja {
 	Translations$auth$signIn$ja.internal(this._root);
@@ -1305,6 +1488,27 @@ class Translations$settings$language$ja {
 	String get english => 'English';
 }
 
+// Path: venueWalk.photo.poses
+class Translations$venueWalk$photo$poses$ja {
+	Translations$venueWalk$photo$poses$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: '立つ'
+	String get standing => '立つ';
+
+	/// ja: '手をふる'
+	String get wave => '手をふる';
+
+	/// ja: '座る'
+	String get sitting => '座る';
+
+	/// ja: 'ジャンプ'
+	String get jumping => 'ジャンプ';
+}
+
 /// The flat map containing all translations for locale <ja>.
 /// Only for edge cases! For simple maps, use the map function of this library.
 ///
@@ -1415,6 +1619,60 @@ extension on Translations {
 			'venueMap.viewMode' => '地図の表示方法',
 			'venueMap.useTwoD' => '2Dで表示',
 			'venueMap.saveFailed' => '表示方法を保存できませんでした',
+			'venueWalk.sceneLabel' => 'だしゅまると会場さんぽ。スティック、床のタップ、または矢印キーで歩けます。',
+			'venueWalk.currentLocation' => 'ただいま',
+			'venueWalk.entrance' => 'エントランス',
+			'venueWalk.entranceSign' => '入口',
+			'venueWalk.selectedPoint' => '選んだ場所',
+			'venueWalk.headingTo' => ({required Object place}) => '${place}へ移動中',
+			'venueWalk.arrivedAt' => ({required Object place}) => '${place}に到着',
+			'venueWalk.unreachable' => 'そこへは移動できません',
+			'venueWalk.photoMode' => '撮影モード',
+			'venueWalk.walkToPhotoSpot' => 'フォトスポットへ歩く',
+			'venueWalk.followTooltip' => 'だしゅまるを追う',
+			'venueWalk.overviewTooltip' => 'フロア全体を見る',
+			'venueWalk.follow' => '追いかける',
+			'venueWalk.overview' => '全体を見る',
+			'venueWalk.help' => '遊び方',
+			'venueWalk.stickHint' => 'スティックで歩く',
+			'venueWalk.stickLabel' => 'だしゅまるを動かすスティック',
+			'venueWalk.stopTooltip' => '移動を止める',
+			'venueWalk.stop' => 'ここで止まる',
+			'venueWalk.reset' => '入口に戻る',
+			'venueWalk.wave' => '手をふる',
+			'venueWalk.backToWalk' => 'さんぽに戻る',
+			'venueWalk.run' => '走る',
+			'venueWalk.runningSpeed' => '走る速度',
+			'venueWalk.walkingSpeed' => '歩く速度',
+			'venueWalk.runHint' => '押している間だけ走ります。離すと歩きます。キーボードではShiftキーを使います。',
+			'venueWalk.close' => '閉じる',
+			'venueWalk.instructions.title' => '会場さんぽの遊び方',
+			'venueWalk.instructions.movement' => '左下のスティックで歩きます。右下の走るアイコンを押している間は走り、離すと歩く速さに戻ります。',
+			'venueWalk.instructions.camera' => '背景をドラッグして見回し、ピンチで近づいたり離れたりできます。床をタップすると、その場所まで自動で歩きます。',
+			'venueWalk.instructions.places' => '「場所を探す」で行き先を選んで、4つのホールを巡ってみましょう。地図アイコンで会場全体を見渡せます。',
+			'venueWalk.instructions.photos' => 'カメラで記念撮影。隣の写真アイコンを押すと、クリエイティブボードの前まで歩きます。ポーズやフレームを選んで撮影できます。',
+			'venueWalk.instructions.keyboard' => 'パソコンでは W A S D または矢印キーで移動、Shiftを押している間は走り、Escで止まります。',
+			'venueWalk.instructions.scope' => '5階の会場を散歩できます。実際の現在地を示すものではなく、エスカレーターでの階移動はできません。',
+			'venueWalk.instructions.credits' => '3Dモデル: yakitama5 / flutter_deck_slides\nだしゅまる: FlutterKaigi',
+			'venueWalk.photo.title' => 'だしゅまると記念撮影',
+			'venueWalk.photo.resultTitle' => '記念写真',
+			'venueWalk.photo.imageLabel' => '撮影しただしゅまるの記念写真',
+			'venueWalk.photo.downloadStarted' => '写真のダウンロードを開始しました',
+			'venueWalk.photo.saveFailed' => '写真を保存できませんでした。もう一度お試しください。',
+			'venueWalk.photo.savePng' => 'PNGを保存',
+			'venueWalk.photo.captureFailed' => '撮影できませんでした。もう一度お試しください。',
+			'venueWalk.photo.caption' => 'だしゅまると、会場さんぽ。',
+			'venueWalk.photo.captionAt' => ({required Object place}) => 'だしゅまると、${place}で。',
+			'venueWalk.photo.shutter' => '写真を撮る',
+			'venueWalk.photo.capturing' => '撮影中',
+			'venueWalk.photo.hideUi' => 'UIを隠す。画面をタップすると戻ります',
+			'venueWalk.photo.faceCamera' => 'こちらを向く',
+			'venueWalk.photo.removeFrame' => 'フレームを外す',
+			'venueWalk.photo.addFrame' => 'フレームを付ける',
+			'venueWalk.photo.poses.standing' => '立つ',
+			'venueWalk.photo.poses.wave' => '手をふる',
+			'venueWalk.photo.poses.sitting' => '座る',
+			'venueWalk.photo.poses.jumping' => 'ジャンプ',
 			'eventInfo.title' => 'イベント概要',
 			'eventInfo.newsTitle' => '最新のお知らせ',
 			'eventInfo.newsSubtitle' => 'FlutterKaigi 2026 の最新情報を確認',
