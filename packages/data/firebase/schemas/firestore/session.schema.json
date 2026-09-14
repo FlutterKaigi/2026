@@ -65,6 +65,10 @@
       "type": ["string", "null"],
       "format": "uri"
     },
+    "feedbackUrl": {
+      "type": ["string", "null"],
+      "format": "uri"
+    },
     "createdAt": {
       "type": "string",
       "format": "date-time"

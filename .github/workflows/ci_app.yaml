@@ -88,6 +88,10 @@ jobs:
         working-directory: apps/app
         run: flutter test
 
+      - name: Test venue map labels
+        working-directory: apps/app
+        run: node --test tool/venue_map/label-layout.test.cjs
+
       - name: Test data package
         working-directory: packages/data
         run: flutter test

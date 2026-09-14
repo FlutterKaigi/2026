@@ -1,7 +1,63 @@
 # Cloud Functions
 
-FlutterKaigi 2026 の Cloud Functions。現在は STG → 本番のデータ反映用に
-`syncCollectionsToProd` を提供する。
+FlutterKaigi 2026 の Cloud Functions。STG → 本番のデータ反映用の
+`syncCollectionsToProd` と、プロフィール交換用の各種関数を提供する。
+
+## プロフィール交換
+
+`functions/src/profile_exchange.ts` に実装がある（`index.ts` から re-export）。
+
+- `issueExchangeToken`（onCall）: サインイン済みユーザー自身の uid について、
+  署名付きトークン `v1.<uid>.<exp>.<sig>`（HMAC-SHA256、有効期限 24 時間）を発行する。
+  アプリはこのトークンを QR コードの中身として使う。
+- `onProfileExchangeCreated`（Firestore トリガー、`users/{uid}/exchanges/{otherUid}`
+  の作成時）: `origin: 'scan'` のドキュメントについてトークンを検証し、
+  相手側 `users/{otherUid}/exchanges/{uid}` を `origin: 'mirror'` で作成し、
+  `counters/profileExchanges.count` を 1 増やしたうえで、自分側の `token` を
+  null 化する。トークンが不正・期限切れ・uid 不一致の場合は作成された
+  ドキュメントを削除する。`origin: 'mirror'` のドキュメントには反応しない
+  （自分自身のミラー書き込みを再度ミラーする無限ループを防ぐため）。ミラー作成と
+  カウンタ更新は 1 つのトランザクションにまとめてあり、ミラーが既に存在する
+  場合（再実行や、相手側が同時に検証中の場合）はどちらも実行しない。
+- `issueExchangeCode`（onCall）: サインイン済みユーザー自身の uid について、
+  `exchangeCodes/{code}` に `{ uid, expiresAt }`（有効期限 5 分）で保存された
+  6 桁コードを返す。有効なコードが残っていればそれをそのまま返し、無い場合だけ
+  暗号論的乱数で新しいコードを発行する（アプリを再起動しても同じコードが返る）。
+  `rotate: true` を渡すと現在のコードを削除して必ず発行し直す（アプリの
+  「コードを再発行」）。期限切れおよび発行し直しで不要になったコードは、この
+  呼び出しで削除する。カメラ権限が使えない端末向けの QR のフォールバック。
+- `redeemExchangeCode`（onCall）: 6 桁コードを検証し、有効なら
+  `issueExchangeToken` と同じ形式の署名付きトークンを返す。クライアントは
+  この後 QR スキャンと同じ `users/{me}/exchanges/{otherUid}` の create() に
+  載せる（交換の作成経路は 1 つだけ）。コードは redeem されても有効期限まで
+  残り、何人でも入力できる（1 つの QR を複数人が順に読み取るのと同じ扱い）。
+  期限切れのコードは削除する。
+  呼び出し元 uid ごとに失敗試行回数を `exchangeCodeAttempts/{uid}` で数え、
+  10 回失敗すると 10 分間拒否する（自分自身のコードを入力した場合は
+  総当たりの兆候ではないため失敗回数に数えない）。
+- `onProfileExchangeOwnerDeleted`（Firestore トリガー、`users/{uid}` の削除時）:
+  本人の `exchanges` サブコレクション全件と、相手側に残ったミラー
+  `users/{otherUid}/exchanges/{uid}` を削除する。`AuthRepository.deleteAccount`
+  の `beforeDelete` が `users/{uid}` を削除する運用と組み合わせて動く。
+  400 件ずつのバッチ削除で、削除対象がなければ何もしない（re-run しても安全）。
+
+`exchangeCodes` と `exchangeCodeAttempts` は Firestore ルールでクライアントからの
+read/write を一切禁止しており、これらの関数のみが Admin SDK 経由で読み書きする。
+
+トークンの署名に使う関数（`issueExchangeToken` / `onProfileExchangeCreated` /
+`redeemExchangeCode`）は、署名鍵を Firebase Functions のシークレット
+`EXCHANGE_TOKEN_SECRET` から読む。
+
+```bash
+firebase functions:secrets:set EXCHANGE_TOKEN_SECRET --project flutterkaigi-2026-stg
+```
+
+エミュレータでは `functions/.secret.local`（Git 管理外）に
+`EXCHANGE_TOKEN_SECRET=<任意の値>` を書いて実行する。
+
+`functions/.env`（Git 管理外、後述の「セットアップ」参照）も必須。
+`SYNC_TARGET_PROJECT_ID` が未設定だとエミュレータ起動時に対話プロンプトで
+停止し、関数が 1 つも登録されない。
 
 ## syncCollectionsToProd
 

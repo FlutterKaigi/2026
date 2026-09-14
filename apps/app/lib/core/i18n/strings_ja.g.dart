@@ -45,15 +45,19 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	late final Translations$navigation$ja navigation = Translations$navigation$ja.internal(_root);
 	late final Translations$news$ja news = Translations$news$ja.internal(_root);
 	late final Translations$sponsors$ja sponsors = Translations$sponsors$ja.internal(_root);
+	late final Translations$staffMembers$ja staffMembers = Translations$staffMembers$ja.internal(_root);
 	late final Translations$trademarks$ja trademarks = Translations$trademarks$ja.internal(_root);
 	late final Translations$sessionTimetable$ja sessionTimetable = Translations$sessionTimetable$ja.internal(_root);
 	late final Translations$sessionSearch$ja sessionSearch = Translations$sessionSearch$ja.internal(_root);
 	late final Translations$sessionDetails$ja sessionDetails = Translations$sessionDetails$ja.internal(_root);
 	late final Translations$sessionBookmark$ja sessionBookmark = Translations$sessionBookmark$ja.internal(_root);
 	late final Translations$bookmarkedSessions$ja bookmarkedSessions = Translations$bookmarkedSessions$ja.internal(_root);
+	late final Translations$venueMap$ja venueMap = Translations$venueMap$ja.internal(_root);
+	late final Translations$venueWalk$ja venueWalk = Translations$venueWalk$ja.internal(_root);
 	late final Translations$eventInfo$ja eventInfo = Translations$eventInfo$ja.internal(_root);
 	late final Translations$auth$ja auth = Translations$auth$ja.internal(_root);
 	late final Translations$profile$ja profile = Translations$profile$ja.internal(_root);
+	late final Translations$exchange$ja exchange = Translations$exchange$ja.internal(_root);
 	late final Translations$countryRegion$ja countryRegion = Translations$countryRegion$ja.internal(_root);
 	late final Translations$settings$ja settings = Translations$settings$ja.internal(_root);
 	late final Translations$licenses$ja licenses = Translations$licenses$ja.internal(_root);
@@ -85,6 +89,9 @@ class Translations$links$ja {
 
 	/// ja: 'リンクを開けませんでした'
 	String get openError => 'リンクを開けませんでした';
+
+	/// ja: 'リンクをコピーしました'
+	String get copied => 'リンクをコピーしました';
 }
 
 // Path: navigation
@@ -97,6 +104,9 @@ class Translations$navigation$ja {
 
 	/// ja: 'セッション'
 	String get sessions => 'セッション';
+
+	/// ja: '会場マップ'
+	String get venueMap => '会場マップ';
 
 	/// ja: 'スポンサー'
 	String get sponsors => 'スポンサー';
@@ -172,6 +182,24 @@ class Translations$sponsors$ja {
 
 	/// ja: 'Connect'
 	String get connect => 'Connect';
+}
+
+// Path: staffMembers
+class Translations$staffMembers$ja {
+	Translations$staffMembers$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'スタッフ'
+	String get title => 'スタッフ';
+
+	/// ja: 'スタッフはまだ公開されていません'
+	String get empty => 'スタッフはまだ公開されていません';
+
+	/// ja: 'スタッフ情報を取得できませんでした'
+	String get error => 'スタッフ情報を取得できませんでした';
 }
 
 // Path: trademarks
@@ -308,6 +336,12 @@ class Translations$sessionDetails$ja {
 	/// ja: 'Sessionize'
 	String get sessionize => 'Sessionize';
 
+	/// ja: 'セッションのフィードバックを送る'
+	String get feedback => 'セッションのフィードバックを送る';
+
+	/// ja: 'このセッションの感想をお聞かせください'
+	String get feedbackDescription => 'このセッションの感想をお聞かせください';
+
 	/// ja: '共有'
 	String get share => '共有';
 
@@ -355,6 +389,180 @@ class Translations$bookmarkedSessions$ja {
 
 	/// ja: 'タイムテーブルを開く'
 	String get openSessions => 'タイムテーブルを開く';
+}
+
+// Path: venueMap
+class Translations$venueMap$ja {
+	Translations$venueMap$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: '会場マップ'
+	String get title => '会場マップ';
+
+	/// ja: '浜松町コンベンションホール · 5F'
+	String get floor => '浜松町コンベンションホール · 5F';
+
+	/// ja: '会場マップを読み込めませんでした'
+	String get loadError => '会場マップを読み込めませんでした';
+
+	/// ja: '再試行してください。'
+	String get loadErrorDescription => '再試行してください。';
+
+	/// ja: '場所を探す'
+	String get search => '場所を探す';
+
+	/// ja: 'ホール・スポンサー名・番号・設備'
+	String get searchHint => 'ホール・スポンサー名・番号・設備';
+
+	/// ja: '検索をクリア'
+	String get clearSearch => '検索をクリア';
+
+	/// ja: '件'
+	String get placesCount => '件';
+
+	/// ja: '地図で見る'
+	String get showOnMap => '地図で見る';
+
+	/// ja: 'すべて'
+	String get all => 'すべて';
+
+	/// ja: 'ホール'
+	String get halls => 'ホール';
+
+	/// ja: 'スポンサー'
+	String get booths => 'スポンサー';
+
+	/// ja: '設備'
+	String get facilities => '設備';
+
+	/// ja: '一致する場所がありません'
+	String get noResults => '一致する場所がありません';
+
+	/// ja: '選択を解除'
+	String get clearSelection => '選択を解除';
+
+	/// ja: '拡大'
+	String get zoomIn => '拡大';
+
+	/// ja: '縮小'
+	String get zoomOut => '縮小';
+
+	/// ja: '全体を表示'
+	String get fit => '全体を表示';
+
+	/// ja: '地図の向きを変える'
+	String get rotate => '地図の向きを変える';
+
+	/// ja: '2D'
+	String get twoD => '2D';
+
+	/// ja: '3D'
+	String get threeD => '3D';
+
+	/// ja: '地図の表示方法'
+	String get viewMode => '地図の表示方法';
+
+	/// ja: '2Dで表示'
+	String get useTwoD => '2Dで表示';
+
+	/// ja: '表示方法を保存できませんでした'
+	String get saveFailed => '表示方法を保存できませんでした';
+}
+
+// Path: venueWalk
+class Translations$venueWalk$ja {
+	Translations$venueWalk$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'だしゅまると会場さんぽ。スティック、床のタップ、または矢印キーで歩けます。'
+	String get sceneLabel => 'だしゅまると会場さんぽ。スティック、床のタップ、または矢印キーで歩けます。';
+
+	/// ja: 'ただいま'
+	String get currentLocation => 'ただいま';
+
+	/// ja: 'エントランス'
+	String get entrance => 'エントランス';
+
+	/// ja: '入口'
+	String get entranceSign => '入口';
+
+	/// ja: '選んだ場所'
+	String get selectedPoint => '選んだ場所';
+
+	/// ja: '$placeへ移動中'
+	String headingTo({required Object place}) => '${place}へ移動中';
+
+	/// ja: '$placeに到着'
+	String arrivedAt({required Object place}) => '${place}に到着';
+
+	/// ja: 'そこへは移動できません'
+	String get unreachable => 'そこへは移動できません';
+
+	/// ja: '撮影モード'
+	String get photoMode => '撮影モード';
+
+	/// ja: 'フォトスポットへ歩く'
+	String get walkToPhotoSpot => 'フォトスポットへ歩く';
+
+	/// ja: 'だしゅまるを追う'
+	String get followTooltip => 'だしゅまるを追う';
+
+	/// ja: 'フロア全体を見る'
+	String get overviewTooltip => 'フロア全体を見る';
+
+	/// ja: '追いかける'
+	String get follow => '追いかける';
+
+	/// ja: '全体を見る'
+	String get overview => '全体を見る';
+
+	/// ja: '遊び方'
+	String get help => '遊び方';
+
+	/// ja: 'スティックで歩く'
+	String get stickHint => 'スティックで歩く';
+
+	/// ja: 'だしゅまるを動かすスティック'
+	String get stickLabel => 'だしゅまるを動かすスティック';
+
+	/// ja: '移動を止める'
+	String get stopTooltip => '移動を止める';
+
+	/// ja: 'ここで止まる'
+	String get stop => 'ここで止まる';
+
+	/// ja: '入口に戻る'
+	String get reset => '入口に戻る';
+
+	/// ja: '手をふる'
+	String get wave => '手をふる';
+
+	/// ja: 'さんぽに戻る'
+	String get backToWalk => 'さんぽに戻る';
+
+	/// ja: '走る'
+	String get run => '走る';
+
+	/// ja: '走る速度'
+	String get runningSpeed => '走る速度';
+
+	/// ja: '歩く速度'
+	String get walkingSpeed => '歩く速度';
+
+	/// ja: '押している間だけ走ります。離すと歩きます。キーボードではShiftキーを使います。'
+	String get runHint => '押している間だけ走ります。離すと歩きます。キーボードではShiftキーを使います。';
+
+	/// ja: '閉じる'
+	String get close => '閉じる';
+
+	late final Translations$venueWalk$instructions$ja instructions = Translations$venueWalk$instructions$ja.internal(_root);
+	late final Translations$venueWalk$photo$ja photo = Translations$venueWalk$photo$ja.internal(_root);
 }
 
 // Path: eventInfo
@@ -421,6 +629,9 @@ class Translations$eventInfo$ja {
 
 	/// ja: 'ソースコードを見る'
 	String get sourceCode => 'ソースコードを見る';
+
+	/// ja: 'スタッフ'
+	String get staffMembers => 'スタッフ';
 
 	/// ja: 'OSSライセンス'
 	String get ossLicenses => 'OSSライセンス';
@@ -554,6 +765,168 @@ class Translations$profile$ja {
 
 	/// ja: '編集を続ける'
 	String get keepEditing => '編集を続ける';
+}
+
+// Path: exchange
+class Translations$exchange$ja {
+	Translations$exchange$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'プロフィール交換'
+	String get title => 'プロフィール交換';
+
+	/// ja: 'このQRコードを相手に見せて読み取ってもらうと、お互いのプロフィールを交換できます'
+	String get qrDescription => 'このQRコードを相手に見せて読み取ってもらうと、お互いのプロフィールを交換できます';
+
+	/// ja: 'プロフィール交換用のQRコード'
+	String get qrSemanticLabel => 'プロフィール交換用のQRコード';
+
+	/// ja: '有効期限 $date まで'
+	String qrExpiresAt({required Object date}) => '有効期限 ${date} まで';
+
+	/// ja: 'QRコードを読み取る'
+	String get scanButton => 'QRコードを読み取る';
+
+	/// ja: '交換した人を見る'
+	String get listButton => '交換した人を見る';
+
+	/// ja: 'サインインすると自分のQRコードを表示できます'
+	String get signInRequired => 'サインインすると自分のQRコードを表示できます';
+
+	/// ja: 'サインインする'
+	String get signInAction => 'サインインする';
+
+	/// ja: 'プロフィールを作成すると自分のQRコードを表示できます'
+	String get profileRequired => 'プロフィールを作成すると自分のQRコードを表示できます';
+
+	/// ja: 'プロフィールを作成する'
+	String get profileRequiredAction => 'プロフィールを作成する';
+
+	/// ja: 'QRコードを読み取る'
+	String get scanTitle => 'QRコードを読み取る';
+
+	/// ja: '相手の画面に表示されたQRコードを枠内に収めてください'
+	String get scanHint => '相手の画面に表示されたQRコードを枠内に収めてください';
+
+	/// ja: 'カメラを利用できません。設定でカメラへのアクセスを許可してください'
+	String get scanCameraError => 'カメラを利用できません。設定でカメラへのアクセスを許可してください';
+
+	/// ja: '読み取れませんでした。プロフィール交換用のQRコードか確認してください'
+	String get scanInvalid => '読み取れませんでした。プロフィール交換用のQRコードか確認してください';
+
+	/// ja: '自分のQRコードは読み取れません'
+	String get scanSelf => '自分のQRコードは読み取れません';
+
+	/// ja: 'プロフィールを交換しました'
+	String get scanSucceeded => 'プロフィールを交換しました';
+
+	/// ja: 'すでに交換済みです'
+	String get scanAlreadyExists => 'すでに交換済みです';
+
+	/// ja: 'プロフィールを交換できませんでした'
+	String get scanFailed => 'プロフィールを交換できませんでした';
+
+	/// ja: '交換した人'
+	String get listTitle => '交換した人';
+
+	/// ja: 'まだ誰とも交換していません'
+	String get listEmpty => 'まだ誰とも交換していません';
+
+	/// ja: 'QRコードを読み取って、参加者とプロフィールを交換しましょう'
+	String get listEmptyBody => 'QRコードを読み取って、参加者とプロフィールを交換しましょう';
+
+	/// ja: 'このプロフィールは表示できません'
+	String get profileUnavailable => 'このプロフィールは表示できません';
+
+	/// ja: '削除'
+	String get deleteTooltip => '削除';
+
+	/// ja: '交換を削除しますか?'
+	String get deleteConfirmTitle => '交換を削除しますか?';
+
+	/// ja: '自分の一覧からのみ削除されます。相手の一覧はそのまま残ります。'
+	String get deleteConfirmBody => '自分の一覧からのみ削除されます。相手の一覧はそのまま残ります。';
+
+	/// ja: '削除する'
+	String get deleteConfirmAction => '削除する';
+
+	/// ja: 'キャンセル'
+	String get deleteCancel => 'キャンセル';
+
+	/// ja: '削除できませんでした'
+	String get deleteFailed => '削除できませんでした';
+
+	/// ja: 'メモを追加'
+	String get noteAddTooltip => 'メモを追加';
+
+	/// ja: 'メモを編集'
+	String get noteEditTooltip => 'メモを編集';
+
+	/// ja: 'メモ'
+	String get noteEditTitle => 'メモ';
+
+	/// ja: '自分だけに見えるメモです'
+	String get noteEditHint => '自分だけに見えるメモです';
+
+	/// ja: 'メモ'
+	String get noteLabel => 'メモ';
+
+	/// ja: '保存'
+	String get noteSave => '保存';
+
+	/// ja: 'キャンセル'
+	String get noteCancel => 'キャンセル';
+
+	/// ja: 'メモを保存できませんでした'
+	String get noteSaveFailed => 'メモを保存できませんでした';
+
+	/// ja: '6桁コードで交換'
+	String get codeSectionTitle => '6桁コードで交換';
+
+	/// ja: 'カメラが使えないときは、6桁のコードを伝え合って交換できます。有効期限内なら、同じコードを何人でも入力できます'
+	String get codeSectionDescription => 'カメラが使えないときは、6桁のコードを伝え合って交換できます。有効期限内なら、同じコードを何人でも入力できます';
+
+	/// ja: 'プロフィール交換用の6桁コード'
+	String get myCodeSemanticLabel => 'プロフィール交換用の6桁コード';
+
+	/// ja: '有効期限 $date まで'
+	String myCodeExpiresAt({required Object date}) => '有効期限 ${date} まで';
+
+	/// ja: 'コードの有効期限が切れました'
+	String get myCodeExpired => 'コードの有効期限が切れました';
+
+	/// ja: 'コードを再発行'
+	String get myCodeRefresh => 'コードを再発行';
+
+	/// ja: 'コードをコピー'
+	String get myCodeCopy => 'コードをコピー';
+
+	/// ja: 'コードをコピーしました'
+	String get myCodeCopied => 'コードをコピーしました';
+
+	/// ja: '相手のコードを入力'
+	String get enterCodeLabel => '相手のコードを入力';
+
+	/// ja: '123456'
+	String get enterCodeHint => '123456';
+
+	/// ja: '交換する'
+	String get enterCodeButton => '交換する';
+
+	/// ja: '6桁の数字を入力してください'
+	String get enterCodeInvalidFormat => '6桁の数字を入力してください';
+
+	/// ja: 'コードが見つからないか、有効期限が切れています'
+	String get redeemInvalid => 'コードが見つからないか、有効期限が切れています';
+
+	/// ja: '自分のコードは入力できません'
+	String get redeemSelf => '自分のコードは入力できません';
+
+	/// ja: '試行回数が多すぎます。しばらくしてからもう一度お試しください'
+	String get redeemRateLimited => '試行回数が多すぎます。しばらくしてからもう一度お試しください';
 }
 
 // Path: countryRegion
@@ -780,6 +1153,95 @@ class Translations$sessionTimetable$type$ja {
 
 	/// ja: 'イベント'
 	String get event => 'イベント';
+}
+
+// Path: venueWalk.instructions
+class Translations$venueWalk$instructions$ja {
+	Translations$venueWalk$instructions$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: '会場さんぽの遊び方'
+	String get title => '会場さんぽの遊び方';
+
+	/// ja: '左下のスティックで歩きます。右下の走るアイコンを押している間は走り、離すと歩く速さに戻ります。'
+	String get movement => '左下のスティックで歩きます。右下の走るアイコンを押している間は走り、離すと歩く速さに戻ります。';
+
+	/// ja: '背景をドラッグして見回し、ピンチで近づいたり離れたりできます。床をタップすると、その場所まで自動で歩きます。'
+	String get camera => '背景をドラッグして見回し、ピンチで近づいたり離れたりできます。床をタップすると、その場所まで自動で歩きます。';
+
+	/// ja: '「場所を探す」で行き先を選んで、4つのホールを巡ってみましょう。地図アイコンで会場全体を見渡せます。'
+	String get places => '「場所を探す」で行き先を選んで、4つのホールを巡ってみましょう。地図アイコンで会場全体を見渡せます。';
+
+	/// ja: 'カメラで記念撮影。隣の写真アイコンを押すと、クリエイティブボードの前まで歩きます。ポーズやフレームを選んで撮影できます。'
+	String get photos => 'カメラで記念撮影。隣の写真アイコンを押すと、クリエイティブボードの前まで歩きます。ポーズやフレームを選んで撮影できます。';
+
+	/// ja: 'パソコンでは W A S D または矢印キーで移動、Shiftを押している間は走り、Escで止まります。'
+	String get keyboard => 'パソコンでは W A S D または矢印キーで移動、Shiftを押している間は走り、Escで止まります。';
+
+	/// ja: '5階の会場を散歩できます。実際の現在地を示すものではなく、エスカレーターでの階移動はできません。'
+	String get scope => '5階の会場を散歩できます。実際の現在地を示すものではなく、エスカレーターでの階移動はできません。';
+
+	/// ja: '3Dモデル: yakitama5 / flutter_deck_slides だしゅまる: FlutterKaigi'
+	String get credits => '3Dモデル: yakitama5 / flutter_deck_slides\nだしゅまる: FlutterKaigi';
+}
+
+// Path: venueWalk.photo
+class Translations$venueWalk$photo$ja {
+	Translations$venueWalk$photo$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'だしゅまると記念撮影'
+	String get title => 'だしゅまると記念撮影';
+
+	/// ja: '記念写真'
+	String get resultTitle => '記念写真';
+
+	/// ja: '撮影しただしゅまるの記念写真'
+	String get imageLabel => '撮影しただしゅまるの記念写真';
+
+	/// ja: '写真のダウンロードを開始しました'
+	String get downloadStarted => '写真のダウンロードを開始しました';
+
+	/// ja: '写真を保存できませんでした。もう一度お試しください。'
+	String get saveFailed => '写真を保存できませんでした。もう一度お試しください。';
+
+	/// ja: 'PNGを保存'
+	String get savePng => 'PNGを保存';
+
+	/// ja: '撮影できませんでした。もう一度お試しください。'
+	String get captureFailed => '撮影できませんでした。もう一度お試しください。';
+
+	/// ja: 'だしゅまると、会場さんぽ。'
+	String get caption => 'だしゅまると、会場さんぽ。';
+
+	/// ja: 'だしゅまると、$placeで。'
+	String captionAt({required Object place}) => 'だしゅまると、${place}で。';
+
+	/// ja: '写真を撮る'
+	String get shutter => '写真を撮る';
+
+	/// ja: '撮影中'
+	String get capturing => '撮影中';
+
+	/// ja: 'UIを隠す。画面をタップすると戻ります'
+	String get hideUi => 'UIを隠す。画面をタップすると戻ります';
+
+	/// ja: 'こちらを向く'
+	String get faceCamera => 'こちらを向く';
+
+	/// ja: 'フレームを外す'
+	String get removeFrame => 'フレームを外す';
+
+	/// ja: 'フレームを付ける'
+	String get addFrame => 'フレームを付ける';
+
+	late final Translations$venueWalk$photo$poses$ja poses = Translations$venueWalk$photo$poses$ja.internal(_root);
 }
 
 // Path: auth.signIn
@@ -1273,6 +1735,27 @@ class Translations$quiz$result$ja {
 	String get error => '結果の取得に失敗しました';
 }
 
+// Path: venueWalk.photo.poses
+class Translations$venueWalk$photo$poses$ja {
+	Translations$venueWalk$photo$poses$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: '立つ'
+	String get standing => '立つ';
+
+	/// ja: '手をふる'
+	String get wave => '手をふる';
+
+	/// ja: '座る'
+	String get sitting => '座る';
+
+	/// ja: 'ジャンプ'
+	String get jumping => 'ジャンプ';
+}
+
 // Path: quiz.list.status
 class Translations$quiz$list$status$ja {
 	Translations$quiz$list$status$ja.internal(this._root);
@@ -1307,7 +1790,9 @@ extension on Translations {
 		return switch (path) {
 			'app.title' => 'FlutterKaigi 2026',
 			'links.openError' => 'リンクを開けませんでした',
+			'links.copied' => 'リンクをコピーしました',
 			'navigation.sessions' => 'セッション',
+			'navigation.venueMap' => '会場マップ',
 			'navigation.sponsors' => 'スポンサー',
 			'navigation.info' => 'イベント',
 			'navigation.account' => 'アカウント',
@@ -1327,6 +1812,9 @@ extension on Translations {
 			'sponsors.jobBoardCta' => '採用情報',
 			'sponsors.recruitCta' => '採用サイト',
 			'sponsors.connect' => 'Connect',
+			'staffMembers.title' => 'スタッフ',
+			'staffMembers.empty' => 'スタッフはまだ公開されていません',
+			'staffMembers.error' => 'スタッフ情報を取得できませんでした',
 			'trademarks.flutterAffiliation' => 'Flutter および関連するロゴは Google LLC の商標です。FlutterKaigi は Google LLC の承認または提携を受けておりません。',
 			'trademarks.flutterNameAndLogo' => 'Flutter の名称およびロゴは Google LLC の商標です。',
 			'trademarks.revComm' => 'RevCommは、株式会社 RevComm の登録商標または商標です。',
@@ -1359,13 +1847,15 @@ extension on Translations {
 			'sessionSearch.promptBody' => 'キーワードを入力するか、日程・種類・言語を選択してください',
 			'sessionSearch.emptyTitle' => 'セッションが見つかりません',
 			'sessionSearch.emptyBody' => 'キーワードや絞り込み条件を変更してみてください',
-			'sessionSearch.resultCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(n, one: '${n}件のセッション', other: '${n}件のセッション', ), 
+			'sessionSearch.resultCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(n, one: '${n}件のセッション', other: '${n}件のセッション', ),
 			'sessionDetails.title' => 'セッション詳細',
 			'sessionDetails.description' => '概要',
 			'sessionDetails.schedule' => '日時・会場',
 			'sessionDetails.speakers' => '登壇者',
 			'sessionDetails.links' => 'リンク',
 			'sessionDetails.sessionize' => 'Sessionize',
+			'sessionDetails.feedback' => 'セッションのフィードバックを送る',
+			'sessionDetails.feedbackDescription' => 'このセッションの感想をお聞かせください',
 			'sessionDetails.share' => '共有',
 			'sessionDetails.notFound' => 'セッションが見つかりませんでした',
 			'sessionBookmark.openBookmarked' => 'ブックマークしたセッション',
@@ -1376,6 +1866,84 @@ extension on Translations {
 			'bookmarkedSessions.emptyTitle' => 'ブックマークしたセッションはありません',
 			'bookmarkedSessions.emptyBody' => '気になるセッションをブックマークすると、ここからすぐに見つけられます',
 			'bookmarkedSessions.openSessions' => 'タイムテーブルを開く',
+			'venueMap.title' => '会場マップ',
+			'venueMap.floor' => '浜松町コンベンションホール · 5F',
+			'venueMap.loadError' => '会場マップを読み込めませんでした',
+			'venueMap.loadErrorDescription' => '再試行してください。',
+			'venueMap.search' => '場所を探す',
+			'venueMap.searchHint' => 'ホール・スポンサー名・番号・設備',
+			'venueMap.clearSearch' => '検索をクリア',
+			'venueMap.placesCount' => '件',
+			'venueMap.showOnMap' => '地図で見る',
+			'venueMap.all' => 'すべて',
+			'venueMap.halls' => 'ホール',
+			'venueMap.booths' => 'スポンサー',
+			'venueMap.facilities' => '設備',
+			'venueMap.noResults' => '一致する場所がありません',
+			'venueMap.clearSelection' => '選択を解除',
+			'venueMap.zoomIn' => '拡大',
+			'venueMap.zoomOut' => '縮小',
+			'venueMap.fit' => '全体を表示',
+			'venueMap.rotate' => '地図の向きを変える',
+			'venueMap.twoD' => '2D',
+			'venueMap.threeD' => '3D',
+			'venueMap.viewMode' => '地図の表示方法',
+			'venueMap.useTwoD' => '2Dで表示',
+			'venueMap.saveFailed' => '表示方法を保存できませんでした',
+			'venueWalk.sceneLabel' => 'だしゅまると会場さんぽ。スティック、床のタップ、または矢印キーで歩けます。',
+			'venueWalk.currentLocation' => 'ただいま',
+			'venueWalk.entrance' => 'エントランス',
+			'venueWalk.entranceSign' => '入口',
+			'venueWalk.selectedPoint' => '選んだ場所',
+			'venueWalk.headingTo' => ({required Object place}) => '${place}へ移動中',
+			'venueWalk.arrivedAt' => ({required Object place}) => '${place}に到着',
+			'venueWalk.unreachable' => 'そこへは移動できません',
+			'venueWalk.photoMode' => '撮影モード',
+			'venueWalk.walkToPhotoSpot' => 'フォトスポットへ歩く',
+			'venueWalk.followTooltip' => 'だしゅまるを追う',
+			'venueWalk.overviewTooltip' => 'フロア全体を見る',
+			'venueWalk.follow' => '追いかける',
+			'venueWalk.overview' => '全体を見る',
+			'venueWalk.help' => '遊び方',
+			'venueWalk.stickHint' => 'スティックで歩く',
+			'venueWalk.stickLabel' => 'だしゅまるを動かすスティック',
+			'venueWalk.stopTooltip' => '移動を止める',
+			'venueWalk.stop' => 'ここで止まる',
+			'venueWalk.reset' => '入口に戻る',
+			'venueWalk.wave' => '手をふる',
+			'venueWalk.backToWalk' => 'さんぽに戻る',
+			'venueWalk.run' => '走る',
+			'venueWalk.runningSpeed' => '走る速度',
+			'venueWalk.walkingSpeed' => '歩く速度',
+			'venueWalk.runHint' => '押している間だけ走ります。離すと歩きます。キーボードではShiftキーを使います。',
+			'venueWalk.close' => '閉じる',
+			'venueWalk.instructions.title' => '会場さんぽの遊び方',
+			'venueWalk.instructions.movement' => '左下のスティックで歩きます。右下の走るアイコンを押している間は走り、離すと歩く速さに戻ります。',
+			'venueWalk.instructions.camera' => '背景をドラッグして見回し、ピンチで近づいたり離れたりできます。床をタップすると、その場所まで自動で歩きます。',
+			'venueWalk.instructions.places' => '「場所を探す」で行き先を選んで、4つのホールを巡ってみましょう。地図アイコンで会場全体を見渡せます。',
+			'venueWalk.instructions.photos' => 'カメラで記念撮影。隣の写真アイコンを押すと、クリエイティブボードの前まで歩きます。ポーズやフレームを選んで撮影できます。',
+			'venueWalk.instructions.keyboard' => 'パソコンでは W A S D または矢印キーで移動、Shiftを押している間は走り、Escで止まります。',
+			'venueWalk.instructions.scope' => '5階の会場を散歩できます。実際の現在地を示すものではなく、エスカレーターでの階移動はできません。',
+			'venueWalk.instructions.credits' => '3Dモデル: yakitama5 / flutter_deck_slides\nだしゅまる: FlutterKaigi',
+			'venueWalk.photo.title' => 'だしゅまると記念撮影',
+			'venueWalk.photo.resultTitle' => '記念写真',
+			'venueWalk.photo.imageLabel' => '撮影しただしゅまるの記念写真',
+			'venueWalk.photo.downloadStarted' => '写真のダウンロードを開始しました',
+			'venueWalk.photo.saveFailed' => '写真を保存できませんでした。もう一度お試しください。',
+			'venueWalk.photo.savePng' => 'PNGを保存',
+			'venueWalk.photo.captureFailed' => '撮影できませんでした。もう一度お試しください。',
+			'venueWalk.photo.caption' => 'だしゅまると、会場さんぽ。',
+			'venueWalk.photo.captionAt' => ({required Object place}) => 'だしゅまると、${place}で。',
+			'venueWalk.photo.shutter' => '写真を撮る',
+			'venueWalk.photo.capturing' => '撮影中',
+			'venueWalk.photo.hideUi' => 'UIを隠す。画面をタップすると戻ります',
+			'venueWalk.photo.faceCamera' => 'こちらを向く',
+			'venueWalk.photo.removeFrame' => 'フレームを外す',
+			'venueWalk.photo.addFrame' => 'フレームを付ける',
+			'venueWalk.photo.poses.standing' => '立つ',
+			'venueWalk.photo.poses.wave' => '手をふる',
+			'venueWalk.photo.poses.sitting' => '座る',
+			'venueWalk.photo.poses.jumping' => 'ジャンプ',
 			'eventInfo.title' => 'イベント概要',
 			'eventInfo.newsTitle' => '最新のお知らせ',
 			'eventInfo.newsSubtitle' => 'FlutterKaigi 2026 の最新情報を確認',
@@ -1395,6 +1963,7 @@ extension on Translations {
 			'eventInfo.exclusionPolicy' => '反社会的勢力排除に関する基本方針',
 			'eventInfo.contact' => 'お問い合わせ',
 			'eventInfo.sourceCode' => 'ソースコードを見る',
+			'eventInfo.staffMembers' => 'スタッフ',
 			'eventInfo.ossLicenses' => 'OSSライセンス',
 			'auth.signIn.required' => 'サインインが必要です',
 			'auth.signIn.description' => 'FlutterKaigi 2026 アプリで利用するサインイン方法を選択してください',
@@ -1483,6 +2052,57 @@ extension on Translations {
 			'profile.discardBody' => '保存していない変更は失われます。',
 			'profile.discardAction' => '破棄する',
 			'profile.keepEditing' => '編集を続ける',
+			'exchange.title' => 'プロフィール交換',
+			'exchange.qrDescription' => 'このQRコードを相手に見せて読み取ってもらうと、お互いのプロフィールを交換できます',
+			'exchange.qrSemanticLabel' => 'プロフィール交換用のQRコード',
+			'exchange.qrExpiresAt' => ({required Object date}) => '有効期限 ${date} まで',
+			'exchange.scanButton' => 'QRコードを読み取る',
+			'exchange.listButton' => '交換した人を見る',
+			'exchange.signInRequired' => 'サインインすると自分のQRコードを表示できます',
+			'exchange.signInAction' => 'サインインする',
+			'exchange.profileRequired' => 'プロフィールを作成すると自分のQRコードを表示できます',
+			'exchange.profileRequiredAction' => 'プロフィールを作成する',
+			'exchange.scanTitle' => 'QRコードを読み取る',
+			'exchange.scanHint' => '相手の画面に表示されたQRコードを枠内に収めてください',
+			'exchange.scanCameraError' => 'カメラを利用できません。設定でカメラへのアクセスを許可してください',
+			'exchange.scanInvalid' => '読み取れませんでした。プロフィール交換用のQRコードか確認してください',
+			'exchange.scanSelf' => '自分のQRコードは読み取れません',
+			'exchange.scanSucceeded' => 'プロフィールを交換しました',
+			'exchange.scanAlreadyExists' => 'すでに交換済みです',
+			'exchange.scanFailed' => 'プロフィールを交換できませんでした',
+			'exchange.listTitle' => '交換した人',
+			'exchange.listEmpty' => 'まだ誰とも交換していません',
+			'exchange.listEmptyBody' => 'QRコードを読み取って、参加者とプロフィールを交換しましょう',
+			'exchange.profileUnavailable' => 'このプロフィールは表示できません',
+			'exchange.deleteTooltip' => '削除',
+			'exchange.deleteConfirmTitle' => '交換を削除しますか?',
+			'exchange.deleteConfirmBody' => '自分の一覧からのみ削除されます。相手の一覧はそのまま残ります。',
+			'exchange.deleteConfirmAction' => '削除する',
+			'exchange.deleteCancel' => 'キャンセル',
+			'exchange.deleteFailed' => '削除できませんでした',
+			'exchange.noteAddTooltip' => 'メモを追加',
+			'exchange.noteEditTooltip' => 'メモを編集',
+			'exchange.noteEditTitle' => 'メモ',
+			'exchange.noteEditHint' => '自分だけに見えるメモです',
+			'exchange.noteLabel' => 'メモ',
+			'exchange.noteSave' => '保存',
+			'exchange.noteCancel' => 'キャンセル',
+			'exchange.noteSaveFailed' => 'メモを保存できませんでした',
+			'exchange.codeSectionTitle' => '6桁コードで交換',
+			'exchange.codeSectionDescription' => 'カメラが使えないときは、6桁のコードを伝え合って交換できます。有効期限内なら、同じコードを何人でも入力できます',
+			'exchange.myCodeSemanticLabel' => 'プロフィール交換用の6桁コード',
+			'exchange.myCodeExpiresAt' => ({required Object date}) => '有効期限 ${date} まで',
+			'exchange.myCodeExpired' => 'コードの有効期限が切れました',
+			'exchange.myCodeRefresh' => 'コードを再発行',
+			'exchange.myCodeCopy' => 'コードをコピー',
+			'exchange.myCodeCopied' => 'コードをコピーしました',
+			'exchange.enterCodeLabel' => '相手のコードを入力',
+			'exchange.enterCodeHint' => '123456',
+			'exchange.enterCodeButton' => '交換する',
+			'exchange.enterCodeInvalidFormat' => '6桁の数字を入力してください',
+			'exchange.redeemInvalid' => 'コードが見つからないか、有効期限が切れています',
+			'exchange.redeemSelf' => '自分のコードは入力できません',
+			'exchange.redeemRateLimited' => '試行回数が多すぎます。しばらくしてからもう一度お試しください',
 			'countryRegion.asia' => 'アジア',
 			'countryRegion.oceania' => 'オセアニア',
 			'countryRegion.americas' => '北米・中南米',
@@ -1503,7 +2123,7 @@ extension on Translations {
 			'licenses.title' => 'ライセンス',
 			'licenses.searchHint' => 'パッケージを検索',
 			'licenses.clearSearch' => '検索をクリア',
-			'licenses.licenseCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(n, one: 'ライセンス: ${n}件', other: 'ライセンス: ${n}件', ), 
+			'licenses.licenseCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(n, one: 'ライセンス: ${n}件', other: 'ライセンス: ${n}件', ),
 			'licenses.notFound' => 'ライセンスが見つかりませんでした',
 			'error.title' => 'データを読み込めませんでした',
 			'error.message' => '通信状況を確認して、もう一度お試しください。',

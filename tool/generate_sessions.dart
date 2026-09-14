@@ -245,15 +245,33 @@ typedef _Cell = ({
 /// ([column] / [cell]), a full-width timeline event ([eventLabel] only), or a
 /// room-bound timeline event ([eventLabel] + [column] — e.g. the lunch stage).
 class _Entry {
-  _Entry.session(this.start, this.end, int this.column, _Cell this.cell) : eventLabel = null;
+  _Entry.session(this.start, this.end, int this.column, _Cell this.cell) : eventLabel = null, eventDescription = null;
 
-  _Entry.event(this.start, this.end, this.eventLabel, {this.column}) : cell = null;
+  _Entry.event(this.start, this.end, this.eventLabel, {this.column, this.eventDescription}) : cell = null;
 
   final DateTime start;
   final DateTime end;
   final int? column;
   final _Cell? cell;
   final _Text? eventLabel;
+
+  /// Only room-bound events carry one: a full-width bar has no dialog to show
+  /// it in.
+  final _Text? eventDescription;
+
+  /// Where the entry stops on the grid when that differs from [end]; see
+  /// [_clampBarsToOverlappingEntries]. Only a full-width bar ever sets one.
+  DateTime? _layoutEndOverride;
+
+  set layoutEndOverride(DateTime? value) {
+    assert(
+      eventLabel != null && column == null,
+      'only a full-width bar is clamped; sessions and venue-bound events keep their own end',
+    );
+    _layoutEndOverride = value;
+  }
+
+  DateTime get layoutEnd => _layoutEndOverride ?? end;
 }
 
 /// Venues as timetable columns, ordered by `order` (unset last) then id so the
@@ -368,8 +386,20 @@ Map<String, _Day> _buildDays(_Data data, List<_Room> rooms) {
         continue;
       }
     }
-    byDay[dayRef]!.add(_Entry.event(e.startsAt, end, _text(e.title), column: column));
+    byDay[dayRef]!.add(
+      _Entry.event(
+        e.startsAt,
+        end,
+        _text(e.title),
+        column: column,
+        // A full-width bar is a plain label with no dialog, so a description
+        // on one has nowhere to go.
+        eventDescription: column == null ? null : _optionalText(e.description),
+      ),
+    );
   }
+
+  _clampBarsToOverlappingEntries(byDay);
 
   return byDay.map((dayRef, entries) {
     entries.sort((a, b) {
@@ -386,10 +416,61 @@ Map<String, _Day> _buildDays(_Data data, List<_Room> rooms) {
     // Every start and end is a row boundary: an entry spans from its own start
     // tick to its own end tick, so entries never have to share a row.
     final ticks = <DateTime>{
-      for (final e in entries) ...[e.start, e.end],
+      for (final e in entries) ...[e.start, e.layoutEnd, e.end],
     }.toList()..sort();
     return MapEntry(dayRef, (ticks: ticks, entries: entries));
   });
+}
+
+/// Pulls a full-width bar's grid end up to where the first entry that overlaps
+/// it starts.
+///
+/// The overlap is real, not a data error: the lunch stage opens a few minutes
+/// before the lunch break ends. Left alone the two would be drawn on top of
+/// each other in the same grid cells, so only the bar's *layout* end moves —
+/// [_Entry.end] keeps the real time the bar shows on the stacked layout.
+///
+/// A bar is one grid block, so it can only be shortened, never split. The two
+/// shapes that cannot be drawn correctly are reported rather than silently
+/// accepted: a bar overlapped from its very start has nowhere to shrink to, and
+/// a bar whose overlap ends before it does loses the rest of its length.
+void _clampBarsToOverlappingEntries(Map<String, List<_Entry>> byDay) {
+  for (final entries in byDay.values) {
+    for (final bar in entries) {
+      if (bar.eventLabel == null || bar.column != null) continue;
+
+      final overlapping = [
+        for (final other in entries)
+          if (other.column != null && other.start.isBefore(bar.end) && bar.start.isBefore(other.end)) other,
+      ];
+      if (overlapping.isEmpty) continue;
+
+      final label = bar.eventLabel!.ja;
+      final clampable = [
+        for (final other in overlapping)
+          if (other.start.isAfter(bar.start)) other.start,
+      ];
+      if (clampable.isEmpty) {
+        stderr.writeln(
+          'warning: full-width event \'$label\' at ${_hhmm(bar.start)} is overlapped from its '
+          'start; drawing it under the overlapping entries.',
+        );
+        continue;
+      }
+
+      final firstOverlap = clampable.reduce((a, b) => a.isBefore(b) ? a : b);
+      bar.layoutEndOverride = firstOverlap;
+
+      final lastOverlapEnd = overlapping.map((e) => e.end).reduce((a, b) => a.isAfter(b) ? a : b);
+      if (lastOverlapEnd.isBefore(bar.end)) {
+        stderr.writeln(
+          'warning: full-width event \'$label\' is drawn only up to ${_hhmm(firstOverlap)}; '
+          'the overlap ends at ${_hhmm(lastOverlapEnd)} but the bar cannot be split, so '
+          '${_hhmm(lastOverlapEnd)}–${_hhmm(bar.end)} is not shown.',
+        );
+      }
+    }
+  }
 }
 
 _Cell _buildCell(Session s, Map<String, Speaker> speakersById) {
@@ -424,6 +505,15 @@ _Cell _buildCell(Session s, Map<String, Speaker> speakersById) {
       if (s.primaryLocale == 'en') '_tagEn' else '_tagJa',
     ],
   );
+}
+
+/// [_text] for a field that may be absent: an unset value and one that is
+/// blank in both locales both collapse to null, so callers have a single
+/// "nothing to show" case.
+_Text? _optionalText(LocaleMap? value) {
+  if (value == null) return null;
+  final text = _text(value);
+  return text.ja.isEmpty && text.en.isEmpty ? null : text;
 }
 
 /// Falls each locale back to the other so a single-language entry still renders
@@ -499,18 +589,24 @@ void _writeDart({required List<_Room> rooms, required Map<String, _Day> days}) {
       ..writeln('    entries: [');
     for (final entry in day.entries) {
       final startTick = tickIndex[entry.start]!;
-      final endTick = tickIndex[entry.end]!;
+      final endTick = tickIndex[entry.layoutEnd]!;
+      final labelEndTick = tickIndex[entry.end]!;
       if (entry.eventLabel case final label?) {
         out
           ..writeln('      TimetableEntry.event(')
           ..writeln('        startTick: $startTick,')
           ..writeln('        endTick: $endTick,');
+        if (labelEndTick != endTick) {
+          out.writeln('        labelEndTick: $labelEndTick,');
+        }
         if (entry.column case final column?) {
           out.writeln('        roomIndex: $column,');
         }
-        out
-          ..writeln('        eventLabel: ${_localizedText(label)},')
-          ..writeln('      ),');
+        out.writeln('        eventLabel: ${_localizedText(label)},');
+        if (entry.eventDescription case final description?) {
+          out.writeln('        eventDescription: ${_localizedText(description)},');
+        }
+        out.writeln('      ),');
         continue;
       }
       final cell = entry.cell!;

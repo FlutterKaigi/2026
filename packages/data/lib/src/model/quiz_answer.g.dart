@@ -18,15 +18,14 @@ _QuizAnswer _$QuizAnswerFromJson(Map<String, dynamic> json) => _QuizAnswer(
   isCorrect: json['isCorrect'] as bool?,
 );
 
-Map<String, dynamic> _$QuizAnswerToJson(_QuizAnswer instance) =>
-    <String, dynamic>{
-      'id': instance.id,
-      'questionId': instance.questionId,
-      'teamId': instance.teamId,
-      'selectedOptionIndex': instance.selectedOptionIndex,
-      'answeredBy': instance.answeredBy,
-      'submittedAt': const FirestoreNullableDateTimeConverter().toJson(
-        instance.submittedAt,
-      ),
-      'isCorrect': instance.isCorrect,
-    };
+Map<String, dynamic> _$QuizAnswerToJson(_QuizAnswer instance) => <String, dynamic>{
+  'id': instance.id,
+  'questionId': instance.questionId,
+  'teamId': instance.teamId,
+  'selectedOptionIndex': instance.selectedOptionIndex,
+  'answeredBy': instance.answeredBy,
+  'submittedAt': const FirestoreNullableDateTimeConverter().toJson(
+    instance.submittedAt,
+  ),
+  'isCorrect': instance.isCorrect,
+};

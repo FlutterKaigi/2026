@@ -2,8 +2,10 @@ app:
   title: FlutterKaigi 2026
 links:
   openError: Could not open the link
+  copied: Link copied
 navigation:
   sessions: Sessions
+  venueMap: Venue Map
   sponsors: Sponsors
   info: Event
   account: Account
@@ -25,6 +27,10 @@ sponsors:
   jobBoardCta: Hiring information
   recruitCta: Careers
   connect: Connect
+staffMembers:
+  title: Staff
+  empty: Staff profiles have not been published yet
+  error: Failed to load staff profiles
 # NOTE: Keep these notices in sync with footerTrademark in apps/website/lib/l10n/strings.dart
 trademarks:
   flutterAffiliation: Flutter and the related logo are trademarks of Google LLC. FlutterKaigi is not affiliated with or otherwise sponsored by Google LLC.
@@ -75,6 +81,8 @@ sessionDetails:
   speakers: Speakers
   links: Links
   sessionize: Sessionize
+  feedback: Send session feedback
+  feedbackDescription: Let us know what you thought of this session
   share: Share
   notFound: Session not found
 sessionBookmark:
@@ -87,6 +95,89 @@ bookmarkedSessions:
   emptyTitle: No bookmarked sessions
   emptyBody: Bookmark sessions to find them here.
   openSessions: Open sessions
+venueMap:
+  title: Venue Map
+  floor: Hamamatsucho Convention Hall · 5F
+  loadError: Could not load the venue map
+  loadErrorDescription: Please try again.
+  search: Find a place
+  searchHint: Hall, sponsor, booth number, facility
+  clearSearch: Clear search
+  placesCount: places
+  showOnMap: Show on map
+  all: All
+  halls: Halls
+  booths: Sponsors
+  facilities: Facilities
+  noResults: No matching places
+  clearSelection: Clear selection
+  zoomIn: Zoom in
+  zoomOut: Zoom out
+  fit: Show entire floor
+  rotate: Rotate map
+  twoD: 2D
+  threeD: 3D
+  viewMode: Map view
+  useTwoD: Show in 2D
+  saveFailed: Could not save the view preference
+venueWalk:
+  sceneLabel: Explore the venue with Dashumaru. Walk using the stick, a tap on the floor, or the arrow keys.
+  currentLocation: You are at
+  entrance: Entrance
+  entranceSign: Entrance
+  selectedPoint: Selected spot
+  headingTo: Walking to $place
+  arrivedAt: Arrived at $place
+  unreachable: Cannot walk to that spot
+  photoMode: Photo mode
+  walkToPhotoSpot: Walk to the photo spot
+  followTooltip: Follow Dashumaru
+  overviewTooltip: View the entire floor
+  follow: Follow
+  overview: Overview
+  help: How to play
+  stickHint: Use the stick to walk
+  stickLabel: Stick to move Dashumaru
+  stopTooltip: Stop walking
+  stop: Stop here
+  reset: Return to the entrance
+  wave: Wave
+  backToWalk: Back to walking
+  run: Run
+  runningSpeed: Running
+  walkingSpeed: Walking
+  runHint: Hold to run. Release to walk. On a keyboard, hold Shift.
+  close: Close
+  instructions:
+    title: Exploring the venue
+    movement: Use the stick at the bottom left to walk. Hold the run icon at the bottom right to run, and release it to walk again.
+    camera: Drag the background to look around and pinch to zoom. Tap the floor to walk to that spot automatically.
+    places: Use “Find a place” to choose a destination and explore the four halls. Tap the map icon for a view of the entire floor.
+    photos: Tap the camera to take a photo. The picture icon beside it takes you to the creative board. Choose a pose and frame for your photo.
+    keyboard: On a computer, use W A S D or the arrow keys to move. Hold Shift to run and press Esc to stop.
+    scope: Explore the venue on the fifth floor. This does not show your real location, and you cannot use the escalators to change floors.
+    credits: "3D model: yakitama5 / flutter_deck_slides\nDashumaru: FlutterKaigi"
+  photo:
+    title: A photo with Dashumaru
+    resultTitle: Your photo
+    imageLabel: A souvenir photo of Dashumaru
+    downloadStarted: Your photo download has started
+    saveFailed: Could not save the photo. Please try again.
+    savePng: Save PNG
+    captureFailed: Could not take the photo. Please try again.
+    caption: Exploring the venue with Dashumaru.
+    captionAt: With Dashumaru at $place.
+    shutter: Take a photo
+    capturing: Taking photo
+    hideUi: Hide controls. Tap the screen to bring them back
+    faceCamera: Face the camera
+    removeFrame: Remove frame
+    addFrame: Add frame
+    poses:
+      standing: Stand
+      wave: Wave
+      sitting: Sit
+      jumping: Jump
 eventInfo:
   title: Event Overview
   newsTitle: Latest News
@@ -107,6 +198,7 @@ eventInfo:
   exclusionPolicy: Exclusion of Anti-Social Forces
   contact: Contact
   sourceCode: View Source Code
+  staffMembers: Staff
   ossLicenses: OSS Licenses
 auth:
   signIn:
@@ -201,6 +293,58 @@ profile:
   discardBody: Unsaved changes will be lost.
   discardAction: Discard
   keepEditing: Keep editing
+exchange:
+  title: Profile Exchange
+  qrDescription: Show this QR code to another attendee and have them scan it to exchange profiles
+  qrSemanticLabel: Profile exchange QR code
+  qrExpiresAt: Valid until $date
+  scanButton: Scan a QR code
+  listButton: View exchanged profiles
+  signInRequired: Sign in to show your QR code
+  signInAction: Sign in
+  profileRequired: Create a profile to show your QR code
+  profileRequiredAction: Create profile
+  scanTitle: Scan a QR code
+  scanHint: Line up the other attendee's QR code within the frame
+  scanCameraError: Camera unavailable. Please allow camera access in Settings
+  scanInvalid: Could not read this code. Make sure it's a profile exchange QR code
+  scanSelf: You can't scan your own QR code
+  scanSucceeded: Profile exchanged
+  scanAlreadyExists: Already exchanged
+  scanFailed: Could not exchange profiles
+  listTitle: Exchanged Profiles
+  listEmpty: No exchanges yet
+  listEmptyBody: Scan a QR code to exchange profiles with other attendees
+  profileUnavailable: This profile is no longer available
+  deleteTooltip: Delete
+  deleteConfirmTitle: Delete this exchange?
+  deleteConfirmBody: This only removes it from your own list. The other attendee's list is unaffected.
+  deleteConfirmAction: Delete
+  deleteCancel: Cancel
+  deleteFailed: Could not delete the exchange
+  noteAddTooltip: Add a note
+  noteEditTooltip: Edit note
+  noteEditTitle: Note
+  noteEditHint: Visible only to you
+  noteLabel: Note
+  noteSave: Save
+  noteCancel: Cancel
+  noteSaveFailed: Could not save the note
+  codeSectionTitle: Exchange with a code
+  codeSectionDescription: If the camera isn't available, share and enter a 6-digit code instead. The same code works for everyone until it expires
+  myCodeSemanticLabel: Profile exchange 6-digit code
+  myCodeExpiresAt: Valid until $date
+  myCodeExpired: This code has expired
+  myCodeRefresh: Get a new code
+  myCodeCopy: Copy code
+  myCodeCopied: Code copied
+  enterCodeLabel: Enter the other attendee's code
+  enterCodeHint: "123456"
+  enterCodeButton: Exchange
+  enterCodeInvalidFormat: Enter a 6-digit code
+  redeemInvalid: This code wasn't found, or it has expired
+  redeemSelf: You can't enter your own code
+  redeemRateLimited: Too many attempts. Please try again in a few minutes
 countryRegion:
   asia: Asia
   oceania: Oceania

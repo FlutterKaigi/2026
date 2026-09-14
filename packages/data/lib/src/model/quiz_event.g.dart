@@ -12,17 +12,9 @@ _QuizEvent _$QuizEventFromJson(Map<String, dynamic> json) => _QuizEvent(
   status: $enumDecode(_$QuizEventStatusEnumMap, json['status']),
   isPublic: json['isPublic'] as bool? ?? false,
   currentQuestionId: json['currentQuestionId'] as String?,
-  sponsorIds:
-      (json['sponsorIds'] as List<dynamic>?)
-          ?.map((e) => e as String)
-          .toList() ??
-      const [],
+  sponsorIds: (json['sponsorIds'] as List<dynamic>?)?.map((e) => e as String).toList() ?? const [],
   capacity: (json['capacity'] as num?)?.toInt() ?? 80,
-  teamNamePool:
-      (json['teamNamePool'] as List<dynamic>?)
-          ?.map((e) => e as String)
-          .toList() ??
-      const [],
+  teamNamePool: (json['teamNamePool'] as List<dynamic>?)?.map((e) => e as String).toList() ?? const [],
   createdAt: const FirestoreDateTimeConverter().fromJson(json['createdAt']),
   updatedAt: const FirestoreDateTimeConverter().fromJson(json['updatedAt']),
 );

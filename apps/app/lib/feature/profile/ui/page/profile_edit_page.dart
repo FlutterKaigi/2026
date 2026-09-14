@@ -273,7 +273,8 @@ class _ProfileForm extends HookConsumerWidget {
                       },
                       onChanged: (updated) {
                         snsLinks.value = [
-                          for (final draft in snsLinks.value) draft.id == updated.id ? updated : draft,
+                          for (final draft in snsLinks.value)
+                            if (draft.id == updated.id) updated else draft,
                         ];
                         isDirty.value = true;
                       },

@@ -30,6 +30,7 @@ class SessionEditPage extends HookConsumerWidget {
     final descJaController = useTextEditingController(text: session?.description.ja ?? '');
     final descEnController = useTextEditingController(text: session?.description.en ?? '');
     final sessionizeUrlController = useTextEditingController(text: session?.sessionizeUrl ?? '');
+    final feedbackUrlController = useTextEditingController(text: session?.feedbackUrl ?? '');
     final primaryLocale = useState(session?.primaryLocale ?? 'ja');
     final startsAt = useState<DateTime>(session?.startsAt ?? DateTime.now());
     final endsAt = useState<DateTime>(session?.endsAt ?? DateTime.now().add(const Duration(minutes: 40)));
@@ -71,6 +72,7 @@ class SessionEditPage extends HookConsumerWidget {
           isLightningTalk: isLightningTalk.value,
           isBeginnersLightningTalk: isBeginnersLightningTalk.value,
           sessionizeUrl: sessionizeUrlController.text.trim().isEmpty ? null : sessionizeUrlController.text.trim(),
+          feedbackUrl: feedbackUrlController.text.trim().isEmpty ? null : feedbackUrlController.text.trim(),
           createdAt: session?.createdAt ?? DateTime.now(),
           updatedAt: DateTime.now(),
         );
@@ -207,6 +209,13 @@ class SessionEditPage extends HookConsumerWidget {
                       controller: sessionizeUrlController,
                       labelText: 'Sessionize URL',
                       hintText: 'https://sessionize.com/...',
+                    ),
+                    const SizedBox(height: 16),
+                    OutlinedTextFormField(
+                      controller: feedbackUrlController,
+                      labelText: 'フィードバック URL',
+                      hintText: 'https://sfeedback.com/...',
+                      helperText: 'セッション終了後にアプリの詳細画面から開けるようになります',
                     ),
                   ],
                 ),

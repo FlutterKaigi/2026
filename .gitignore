@@ -42,3 +42,7 @@ apps/website/lib/constants/generated_staff.dart
 # The programme is fetched at build time; it must not enter this public repo's
 # git history before it is announced.
 apps/website/lib/constants/generated_sessions.dart
+
+# Local venue-map reference assets
+apps/app/prototypes/venue-map/
+apps/app/**/reference-plan.png

@@ -145,6 +145,13 @@ class EventInfoPage extends ConsumerWidget {
                             ),
                             const Divider(height: 1),
                             _ExternalLinkTile(
+                              icon: Icons.groups_outlined,
+                              title: t.eventInfo.staffMembers,
+                              external: false,
+                              onTap: () => const StaffMemberListRoute().push<void>(context),
+                            ),
+                            const Divider(height: 1),
+                            _ExternalLinkTile(
                               icon: Icons.article_outlined,
                               title: t.eventInfo.ossLicenses,
                               external: false,

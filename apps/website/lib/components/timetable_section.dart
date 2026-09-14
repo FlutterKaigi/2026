@@ -534,14 +534,10 @@ const _avatarPlaceholderSrc = 'images/icons/avatar_placeholder.svg';
 Component _speakerRow(String classes, List<String?> avatarUrls, String name) {
   return span(classes: classes, [
     span(classes: 'timetable-avatars', [
-      // ignore: unused_local_variable
       for (final avatarUrl in avatarUrls.isEmpty ? const <String?>[null] : avatarUrls)
         img(
           classes: 'timetable-avatar',
-          // 写真を出せるようになったら `src: avatarUrl ?? _avatarPlaceholderSrc` に変更する
-          // ignore: unused_local_variable も削除する
-          // src: avatarUrl ?? _avatarPlaceholderSrc,
-          src: _avatarPlaceholderSrc,
+          src: avatarUrl ?? _avatarPlaceholderSrc,
           alt: '',
           attributes: const {'aria-hidden': 'true', 'loading': 'lazy'},
         ),
@@ -613,8 +609,8 @@ class _DayGrid extends StatelessComponent {
             ),
           ] else if ((entry.eventLabel, entry.roomIndex) case (final label?, final roomIndex?)) ...[
             // roomIndex を持つイベント（応援LT・ランチステージなど）は
-            // セッションと同じカード + ダイアログで表示する。概要や
-            // スピーカーを持たないだけなので、表示モデルごと流用できる。
+            // セッションと同じカード + ダイアログで表示する。スピーカーを
+            // 持たないだけなので、表示モデルごと流用できる。
             _SessionCard(
               session: TimetableSession(title: label),
               room: generatedTimetableRooms[roomIndex],
@@ -626,7 +622,7 @@ class _DayGrid extends StatelessComponent {
             ),
             _SessionDialog(
               id: _dialogId(i),
-              session: TimetableSession(title: label),
+              session: TimetableSession(title: label, description: entry.eventDescription),
               room: generatedTimetableRooms[roomIndex],
               day: day,
               start: ticks[entry.startTick],
@@ -640,7 +636,7 @@ class _DayGrid extends StatelessComponent {
               [
                 // 時刻列が消える縦積み時のための時刻。desktop では非表示。
                 span(classes: 'timetable-event__time', [
-                  .text('${ticks[entry.startTick]} – ${ticks[entry.endTick]}'),
+                  .text('${ticks[entry.startTick]} – ${ticks[entry.labelEndTick ?? entry.endTick]}'),
                 ]),
                 span([.text(label.resolve(strings.locale))]),
               ],

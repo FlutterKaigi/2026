@@ -18,7 +18,10 @@ class SettingsRoute extends GoRouteData with $SettingsRoute {
   branches: [
     TypedStatefulShellBranch<EventInfoBranch>(
       routes: [
-        TypedGoRoute<EventInfoRoute>(path: '/info'),
+        TypedGoRoute<EventInfoRoute>(
+          path: '/info',
+          routes: [TypedGoRoute<StaffMemberListRoute>(path: 'staff')],
+        ),
         TypedGoRoute<NewsRoute>(path: '/news'),
         TypedGoRoute<LicenseRoute>(
           path: '/licenses',
@@ -40,6 +43,9 @@ class SettingsRoute extends GoRouteData with $SettingsRoute {
         ),
       ],
     ),
+    TypedStatefulShellBranch<VenueMapBranch>(
+      routes: [TypedGoRoute<VenueMapRoute>(path: '/venue-map')],
+    ),
     TypedStatefulShellBranch<SponsorBranch>(
       routes: [
         TypedGoRoute<SponsorRoute>(
@@ -58,6 +64,13 @@ class SettingsRoute extends GoRouteData with $SettingsRoute {
             TypedGoRoute<QuizListRoute>(
               path: 'quiz',
               routes: [TypedGoRoute<QuizRoute>(path: ':eventId')],
+            ),
+            TypedGoRoute<ExchangeHomeRoute>(
+              path: 'exchange',
+              routes: [
+                TypedGoRoute<ExchangeScanRoute>(path: 'scan'),
+                TypedGoRoute<ExchangeListRoute>(path: 'list'),
+              ],
             ),
           ],
         ),
@@ -87,6 +100,10 @@ class AppShellRoute extends StatefulShellRouteData {
           label: t.navigation.sessions,
         ),
         RootDestination(
+          icon: Icons.map_outlined,
+          label: t.navigation.venueMap,
+        ),
+        RootDestination(
           icon: Icons.business_outlined,
           label: t.navigation.sponsors,
         ),
@@ -109,6 +126,11 @@ class EventInfoBranch extends StatefulShellBranchData {
 /// Branch hosting the session timetable tab.
 class SessionBranch extends StatefulShellBranchData {
   const SessionBranch();
+}
+
+/// Branch hosting the venue map tab.
+class VenueMapBranch extends StatefulShellBranchData {
+  const VenueMapBranch();
 }
 
 /// Branch hosting the sponsors tab.
@@ -165,6 +187,32 @@ class QuizRoute extends GoRouteData with $QuizRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) => QuizPage(eventId: eventId);
+}
+
+/// `/account/exchange` — the signed-in user's own QR code and the entry
+/// points to scan another attendee or view exchanged profiles.
+class ExchangeHomeRoute extends GoRouteData with $ExchangeHomeRoute {
+  const ExchangeHomeRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const ExchangeHomePage();
+}
+
+/// `/account/exchange/scan` — scans another attendee's profile-exchange QR
+/// code.
+class ExchangeScanRoute extends GoRouteData with $ExchangeScanRoute {
+  const ExchangeScanRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const ExchangeScanPage();
+}
+
+/// `/account/exchange/list` — the signed-in user's exchanged profiles.
+class ExchangeListRoute extends GoRouteData with $ExchangeListRoute {
+  const ExchangeListRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const ExchangeListPage();
 }
 
 /// `/news` — the news list opened from the event overview.
@@ -229,6 +277,14 @@ class SessionDetailsRoute extends GoRouteData with $SessionDetailsRoute {
   Widget build(BuildContext context, GoRouterState state) => SessionDetailsPage(sessionId: sessionId);
 }
 
+/// `/venue-map` — the venue map.
+class VenueMapRoute extends GoRouteData with $VenueMapRoute {
+  const VenueMapRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const VenueMapPage();
+}
+
 /// `/sponsors` — the sponsor logo wall.
 class SponsorRoute extends GoRouteData with $SponsorRoute {
   const SponsorRoute();
@@ -255,4 +311,12 @@ class EventInfoRoute extends GoRouteData with $EventInfoRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) => const EventInfoPage();
+}
+
+/// `/info/staff` — the staff profile list.
+class StaffMemberListRoute extends GoRouteData with $StaffMemberListRoute {
+  const StaffMemberListRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const StaffMemberListPage();
 }

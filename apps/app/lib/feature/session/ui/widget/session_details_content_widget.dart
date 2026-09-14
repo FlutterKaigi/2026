@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:app/core/extension/locale_map_extension.dart';
 import 'package:app/core/i18n/strings.g.dart';
+import 'package:app/core/provider/clock.dart';
 import 'package:app/core/ui/launch_external_url.dart';
 import 'package:app/core/ui/widget/app_scrollbar.dart';
 import 'package:app/feature/session/data/provider/session_detail_provider.dart';
@@ -11,6 +12,7 @@ import 'package:app/feature/session/util/event_time.dart';
 import 'package:app/feature/session/util/session_language.dart';
 import 'package:data/data.dart';
 import 'package:flutter/material.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 
 const _sessionOrigin = 'https://2026.flutterkaigi.jp';
@@ -18,7 +20,7 @@ const _largeAppBarTitleBottomPadding = 32.0;
 const _largeAppBarMaxTitleScaleFactor = 1.34;
 const _largeAppBarTitleHorizontalPadding = 32.0;
 
-class SessionDetailsContentWidget extends StatelessWidget {
+class SessionDetailsContentWidget extends ConsumerWidget {
   const SessionDetailsContentWidget({
     required this.data,
     super.key,
@@ -27,7 +29,7 @@ class SessionDetailsContentWidget extends StatelessWidget {
   final SessionDetailData data;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final t = Translations.of(context);
     final locale = Localizations.localeOf(context);
     final session = data.session;
@@ -36,6 +38,9 @@ class SessionDetailsContentWidget extends StatelessWidget {
     final languageLabel = sessionLanguageLabel(session.primaryLocale);
     const timeFormat = EventTimeFormat.twentyFourHour;
     final sessionizeUri = _externalUri(session.sessionizeUrl);
+    final feedbackUri = _externalUri(session.feedbackUrl);
+    final now = ref.watch(clockProvider)();
+    final showFeedback = feedbackUri != null && hasSessionEnded(endsAt: session.endsAt, now: now);
 
     return Scaffold(
       body: AppScrollbar(
@@ -111,6 +116,22 @@ class SessionDetailsContentWidget extends StatelessWidget {
                       ],
                     ),
                   ),
+                  if (showFeedback)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
+                      child: _FeedbackCard(
+                        key: const ValueKey('session-feedback-card'),
+                        title: t.sessionDetails.feedback,
+                        description: t.sessionDetails.feedbackDescription,
+                        onTap: () => unawaited(
+                          launchExternalUrl(
+                            context,
+                            uri: feedbackUri,
+                            failureMessage: t.links.openError,
+                          ),
+                        ),
+                      ),
+                    ),
                   if (data.speakers.isNotEmpty) ...[
                     _SectionHeader(title: t.sessionDetails.speakers),
                     Padding(
@@ -262,6 +283,63 @@ class _SpeakerDetailsWidget extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _FeedbackCard extends StatelessWidget {
+  const _FeedbackCard({
+    required this.title,
+    required this.description,
+    required this.onTap,
+    super.key,
+  });
+
+  final String title;
+  final String description;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    return Card.filled(
+      margin: EdgeInsets.zero,
+      color: colorScheme.primaryContainer,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Icon(Icons.rate_review_outlined, color: colorScheme.onPrimaryContainer),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: textTheme.titleMedium?.copyWith(
+                        color: colorScheme.onPrimaryContainer,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      description,
+                      style: textTheme.bodyMedium?.copyWith(color: colorScheme.onPrimaryContainer),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Icon(Icons.open_in_new, color: colorScheme.onPrimaryContainer),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

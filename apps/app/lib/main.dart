@@ -22,6 +22,13 @@ Future<void> main() async {
     );
   });
 
+  LicenseRegistry.addLicense(() async* {
+    yield LicenseEntryWithLineBreaks(
+      const ['Three.js / OrbitControls'],
+      await rootBundle.loadString('assets/venue_map/THREE_LICENSE.txt'),
+    );
+  });
+
   final environment = Environment.fromEnvironment();
   final sharedPreferences = await SharedPreferences.getInstance();
   await initializeAppLocale(sharedPreferences);

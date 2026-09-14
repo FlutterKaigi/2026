@@ -1,0 +1,406 @@
+{
+  "description": "ユーザー指定のスポンサー序列に基づく番号。Flutterを1に固定し、紫（プラチナ）→オレンジ（ゴールド）→ピンク→青の順。同じ色の中は前版の配置順を維持。机の座標は生成時の目安で、実測寸法ではない。",
+  "canvas": {
+    "width": 1774,
+    "height": 887
+  },
+  "mapStatus": "番号更新版。トイレ入口形状の照合・修正は未完了。",
+  "sponsors": [
+    {
+      "no": 1,
+      "displayNo": "①",
+      "name": "Flutter",
+      "tier": "Platinum",
+      "tierLabel": "プラチナ",
+      "color": "purple",
+      "rank": 0,
+      "foyer": 1,
+      "position": "左側・縦向き",
+      "previousNo": "05",
+      "table": [
+        451,
+        416,
+        10,
+        71
+      ]
+    },
+    {
+      "no": 2,
+      "displayNo": "②",
+      "name": "日本トレカセンター",
+      "tier": "Platinum",
+      "tierLabel": "プラチナ",
+      "color": "purple",
+      "rank": 1,
+      "foyer": 1,
+      "position": "上段・左",
+      "previousNo": "01",
+      "table": [
+        549,
+        382,
+        71,
+        10
+      ]
+    },
+    {
+      "no": 3,
+      "displayNo": "③",
+      "name": "UPSIDER",
+      "tier": "Platinum",
+      "tierLabel": "プラチナ",
+      "color": "purple",
+      "rank": 1,
+      "foyer": 1,
+      "position": "下段・左",
+      "previousNo": "06",
+      "table": [
+        577,
+        543,
+        72,
+        10
+      ]
+    },
+    {
+      "no": 4,
+      "displayNo": "④",
+      "name": "ゆめみ（アクセンチュア）",
+      "tier": "Platinum",
+      "tierLabel": "プラチナ",
+      "color": "purple",
+      "rank": 1,
+      "foyer": 2,
+      "position": "上段・左から1",
+      "previousNo": "10",
+      "table": [
+        962,
+        382,
+        73,
+        10
+      ]
+    },
+    {
+      "no": 5,
+      "displayNo": "⑤",
+      "name": "ビットキー",
+      "tier": "Platinum",
+      "tierLabel": "プラチナ",
+      "color": "purple",
+      "rank": 1,
+      "foyer": 2,
+      "position": "上段・左から4",
+      "previousNo": "13",
+      "table": [
+        1122,
+        382,
+        71,
+        10
+      ]
+    },
+    {
+      "no": 6,
+      "displayNo": "⑥",
+      "name": "hacomono",
+      "tier": "Platinum",
+      "tierLabel": "プラチナ",
+      "color": "purple",
+      "rank": 1,
+      "foyer": 2,
+      "position": "上段・左から7",
+      "previousNo": "16",
+      "table": [
+        1280,
+        382,
+        71,
+        10
+      ]
+    },
+    {
+      "no": 7,
+      "displayNo": "⑦",
+      "name": "アサイン",
+      "tier": "Platinum",
+      "tierLabel": "プラチナ",
+      "color": "purple",
+      "rank": 1,
+      "foyer": 2,
+      "position": "下段・左から1",
+      "previousNo": "17",
+      "table": [
+        1022,
+        543,
+        69,
+        10
+      ]
+    },
+    {
+      "no": 8,
+      "displayNo": "⑧",
+      "name": "RevenueCat",
+      "tier": "Platinum",
+      "tierLabel": "プラチナ",
+      "color": "purple",
+      "rank": 1,
+      "foyer": 2,
+      "position": "下段・左から6",
+      "previousNo": "22",
+      "table": [
+        1258,
+        543,
+        67,
+        10
+      ]
+    },
+    {
+      "no": 9,
+      "displayNo": "⑨",
+      "name": "CodeRabbit",
+      "tier": "Gold",
+      "tierLabel": "ゴールド",
+      "color": "gold",
+      "rank": 2,
+      "foyer": 1,
+      "position": "上段・中央左",
+      "previousNo": "02",
+      "table": [
+        674,
+        382,
+        35,
+        10
+      ]
+    },
+    {
+      "no": 10,
+      "displayNo": "⑩",
+      "name": "サイバーエージェント",
+      "tier": "Gold",
+      "tierLabel": "ゴールド",
+      "color": "gold",
+      "rank": 2,
+      "foyer": 1,
+      "position": "上段・中央",
+      "previousNo": "03",
+      "table": [
+        712,
+        382,
+        38,
+        10
+      ]
+    },
+    {
+      "no": 11,
+      "displayNo": "⑪",
+      "name": "RevComm",
+      "tier": "Gold",
+      "tierLabel": "ゴールド",
+      "color": "gold",
+      "rank": 2,
+      "foyer": 1,
+      "position": "上段・中央右",
+      "previousNo": "04",
+      "table": [
+        754,
+        382,
+        35,
+        10
+      ]
+    },
+    {
+      "no": 12,
+      "displayNo": "⑫",
+      "name": "GMOコネクト",
+      "tier": "Gold",
+      "tierLabel": "ゴールド",
+      "color": "gold",
+      "rank": 2,
+      "foyer": 1,
+      "position": "下段・左から2",
+      "previousNo": "07",
+      "table": [
+        657,
+        543,
+        31,
+        10
+      ]
+    },
+    {
+      "no": 13,
+      "displayNo": "⑬",
+      "name": "助太刀",
+      "tier": "Gold",
+      "tierLabel": "ゴールド",
+      "color": "gold",
+      "rank": 2,
+      "foyer": 1,
+      "position": "下段・左から3",
+      "previousNo": "08",
+      "table": [
+        695,
+        543,
+        35,
+        10
+      ]
+    },
+    {
+      "no": 14,
+      "displayNo": "⑭",
+      "name": "Edencrew",
+      "tier": "Gold",
+      "tierLabel": "ゴールド",
+      "color": "gold",
+      "rank": 2,
+      "foyer": 1,
+      "position": "下段・左から4",
+      "previousNo": "09",
+      "table": [
+        733,
+        543,
+        35,
+        10
+      ]
+    },
+    {
+      "no": 15,
+      "displayNo": "⑮",
+      "name": "GENDA",
+      "tier": null,
+      "tierLabel": "ピンク",
+      "color": "pink",
+      "rank": 3,
+      "foyer": 2,
+      "position": "上段・左から6",
+      "previousNo": "15",
+      "table": [
+        1239,
+        382,
+        35,
+        10
+      ]
+    },
+    {
+      "no": 16,
+      "displayNo": "⑯",
+      "name": "TRUSTDOCK",
+      "tier": null,
+      "tierLabel": "青",
+      "color": "blue",
+      "rank": 4,
+      "foyer": 2,
+      "position": "上段・左から2",
+      "previousNo": "11",
+      "table": [
+        1040,
+        382,
+        37,
+        10
+      ]
+    },
+    {
+      "no": 17,
+      "displayNo": "⑰",
+      "name": "SODA",
+      "tier": null,
+      "tierLabel": "青",
+      "color": "blue",
+      "rank": 4,
+      "foyer": 2,
+      "position": "上段・左から3",
+      "previousNo": "12",
+      "table": [
+        1081,
+        382,
+        35,
+        10
+      ]
+    },
+    {
+      "no": 18,
+      "displayNo": "⑱",
+      "name": "ハイヤールー",
+      "tier": null,
+      "tierLabel": "青",
+      "color": "blue",
+      "rank": 4,
+      "foyer": 2,
+      "position": "上段・左から5",
+      "previousNo": "14",
+      "table": [
+        1198,
+        382,
+        36,
+        10
+      ]
+    },
+    {
+      "no": 19,
+      "displayNo": "⑲",
+      "name": "Linc'well",
+      "tier": null,
+      "tierLabel": "青",
+      "color": "blue",
+      "rank": 4,
+      "foyer": 2,
+      "position": "下段・左から2",
+      "previousNo": "18",
+      "table": [
+        1101,
+        543,
+        30,
+        10
+      ]
+    },
+    {
+      "no": 20,
+      "displayNo": "⑳",
+      "name": "エクストーン",
+      "tier": null,
+      "tierLabel": "青",
+      "color": "blue",
+      "rank": 4,
+      "foyer": 2,
+      "position": "下段・左から3",
+      "previousNo": "19",
+      "table": [
+        1140,
+        543,
+        32,
+        10
+      ]
+    },
+    {
+      "no": 21,
+      "displayNo": "㉑",
+      "name": "アンドパッド",
+      "tier": null,
+      "tierLabel": "青",
+      "color": "blue",
+      "rank": 4,
+      "foyer": 2,
+      "position": "下段・左から4",
+      "previousNo": "20",
+      "table": [
+        1179,
+        543,
+        32,
+        10
+      ]
+    },
+    {
+      "no": 22,
+      "displayNo": "㉒",
+      "name": "クラスメソッド",
+      "tier": null,
+      "tierLabel": "青",
+      "color": "blue",
+      "rank": 4,
+      "foyer": 2,
+      "position": "下段・左から5",
+      "previousNo": "21",
+      "table": [
+        1218,
+        543,
+        31,
+        10
+      ]
+    }
+  ]
+}

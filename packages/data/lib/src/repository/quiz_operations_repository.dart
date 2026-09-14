@@ -118,7 +118,8 @@ final class FirestoreQuizOperationsRepository implements QuizOperationsRepositor
 
   DocumentReference<Map<String, dynamic>> _eventRef(String eventId) => _firestore.collection('quizEvents').doc(eventId);
 
-  CollectionReference<Map<String, dynamic>> _participants(String eventId) => _eventRef(eventId).collection('participants');
+  CollectionReference<Map<String, dynamic>> _participants(String eventId) =>
+      _eventRef(eventId).collection('participants');
 
   CollectionReference<Map<String, dynamic>> _teams(String eventId) => _eventRef(eventId).collection('teams');
 
@@ -184,12 +185,11 @@ final class FirestoreQuizOperationsRepository implements QuizOperationsRepositor
     }
 
     // イベントに設定されたチーム名プール（未設定なら既定の Widget 名を使う）。
-    final namePool =
-        ((eventSnapshot.data()?['teamNamePool'] as List<dynamic>?) ?? const [])
-            .whereType<String>()
-            .where((name) => name.trim().isNotEmpty)
-            .map((name) => name.trim())
-            .toList();
+    final namePool = ((eventSnapshot.data()?['teamNamePool'] as List<dynamic>?) ?? const [])
+        .whereType<String>()
+        .where((name) => name.trim().isNotEmpty)
+        .map((name) => name.trim())
+        .toList();
 
     final snapshot = await _participants(eventId).get();
     final participants = snapshot.docs.toList()..shuffle(_random);

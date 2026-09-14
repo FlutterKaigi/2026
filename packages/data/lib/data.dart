@@ -3,6 +3,7 @@ export 'src/country/generated_countries.dart' show countries;
 export 'src/firebase/firebase_initializer.dart' show FirebaseInitializer;
 export 'src/model/locale_map.dart' show LocaleMap;
 export 'src/model/news.dart' show News;
+export 'src/model/profile_exchange.dart' show ProfileExchange, ProfileExchangeOrigin;
 export 'src/model/quiz_answer.dart' show QuizAnswer;
 export 'src/model/quiz_event.dart' show QuizEvent, QuizEventStatus;
 export 'src/model/quiz_participant.dart' show QuizParticipant;
@@ -20,6 +21,8 @@ export 'src/model/user_profile.dart' show UserProfile;
 export 'src/model/venue.dart' show Venue;
 export 'src/repository/auth_repository.dart' show FirebaseAuthRepository, AuthRepository;
 export 'src/repository/news_repository.dart' show FirestoreNewsRepository, NewsRepository;
+export 'src/repository/profile_exchange_repository.dart'
+    show FirestoreProfileExchangeRepository, ProfileExchangeAlreadyExistsException, ProfileExchangeRepository;
 export 'src/repository/quiz_answer_repository.dart' show FirestoreQuizAnswerRepository, QuizAnswerRepository;
 export 'src/repository/quiz_event_repository.dart' show FirestoreQuizEventRepository, QuizEventRepository;
 export 'src/repository/quiz_operations_repository.dart'

@@ -22,6 +22,10 @@ abstract class Session with _$Session {
     @Default(false) bool isLightningTalk,
     @Default(false) bool isBeginnersLightningTalk,
     String? sessionizeUrl,
+
+    /// Attendee feedback form (Sessionize). Owned by the dashboard, never
+    /// written by the Sessionize import.
+    String? feedbackUrl,
     @FirestoreDateTimeConverter() required DateTime createdAt,
     @FirestoreDateTimeConverter() required DateTime updatedAt,
   }) = _Session;

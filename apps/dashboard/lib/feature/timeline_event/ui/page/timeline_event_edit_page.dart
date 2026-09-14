@@ -23,6 +23,8 @@ class TimelineEventEditPage extends HookConsumerWidget {
     final formKey = useMemoized(GlobalKey<FormState>.new);
     final titleJaController = useTextEditingController(text: timelineEvent?.title.ja ?? '');
     final titleEnController = useTextEditingController(text: timelineEvent?.title.en ?? '');
+    final descJaController = useTextEditingController(text: timelineEvent?.description?.ja ?? '');
+    final descEnController = useTextEditingController(text: timelineEvent?.description?.en ?? '');
     final startsAt = useState<DateTime>(timelineEvent?.startsAt ?? DateTime.now());
     final endsAt = useState<DateTime?>(timelineEvent?.endsAt);
     final venueId = useState<String?>(timelineEvent?.venueId);
@@ -44,9 +46,14 @@ class TimelineEventEditPage extends HookConsumerWidget {
       if (!formKey.currentState!.validate()) return;
       isSaving.value = true;
       try {
+        // 概要は任意。両方空なら null に落として、概要を持たない
+        // （Sessionize から取り込んだ）イベントと同じ形に揃える。
+        final descJa = descJaController.text.trim();
+        final descEn = descEnController.text.trim();
         final eventToSave = TimelineEvent(
           id: timelineEvent?.id ?? '',
           title: LocaleMap(ja: titleJaController.text.trim(), en: titleEnController.text.trim()),
+          description: descJa.isEmpty && descEn.isEmpty ? null : LocaleMap(ja: descJa, en: descEn),
           startsAt: startsAt.value,
           endsAt: endsAt.value,
           venueId: venueId.value,
@@ -96,6 +103,20 @@ class TimelineEventEditPage extends HookConsumerWidget {
                       enController: titleEnController,
                       jaValidator: (v) => (v == null || v.trim().isEmpty) ? '日本語タイトルを入力してください' : null,
                       enValidator: (v) => (v == null || v.trim().isEmpty) ? 'English title is required' : null,
+                    ),
+                    const SizedBox(height: 24),
+                    Text('説明', style: Theme.of(context).textTheme.labelLarge),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: descJaController,
+                      decoration: const InputDecoration(labelText: '日本語', border: OutlineInputBorder()),
+                      maxLines: 4,
+                    ),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: descEnController,
+                      decoration: const InputDecoration(labelText: 'English', border: OutlineInputBorder()),
+                      maxLines: 4,
                     ),
                     const SizedBox(height: 24),
                     DateTimeField(label: '開始日時 *', value: startsAt.value, onTap: pickStartsAt),

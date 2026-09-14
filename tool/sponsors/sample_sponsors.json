@@ -80,6 +80,21 @@
       "updatedAt": "2026-03-01T00:00:00Z"
     },
     {
+      "id": "sample-lumen-arcade",
+      "name": { "ja": "Lumen Arcade", "en": "Lumen Arcade" },
+      "nameKana": "ルーメンアーケード",
+      "description": {
+        "ja": "Lumen Arcade はゲームとエンターテインメントの体験をつくる架空のスポンサーです。",
+        "en": "Lumen Arcade is a fictional sponsor creating games and entertainment experiences."
+      },
+      "primaryLogoUrl": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAABwklEQVR4nO3bQU7DMBBAUS96HjgQbLgYbLgQJwKxGCmKKiHReP6M/f++TTUvtqo2vj29v3wPw7rRH2D3BIATAE4AOAHgBIATAE4AOAHgBIATAE4AOAHgBIATAE4AOAHgBIATAE4AOAHgBIBrAfD19vnv1z5/vF76Wa6uNMAjgz+/R1WIcgBXDP2v962EUQpg1vDvXacKQgmArMHfuyYNgQMQwz9fn0RAAejhRyQCBlBl+BGFgABUG35EIKQDVB1+lI2QClB9+FEmAv4taPfSALrc/VHWKkgB6Db8KAPBLQhOALjpAF23n2j2NuQKgJsK0P3uj2auAlcAnABwAsAJACcAnABwAsAJACcAnABwAsAJACcAnABwUwF+f8Jd4Sdp/5BZuOkA3VeBT0UsngBwKQBdt6FlnowbDRF8OHeTUgG6rIJlzweMBgjLn5AZhRG2OSM2CiJsd0pyFELY9pzwKICw/Un5cRhCJgQ9+KgEQJS1GqoMf1QDGKfhXIlRaejHygEcu2Jrqjr4qDRAVH2Ij9QCYOUEgBMATgA4AeAEgBMATgA4AeAEgBMATgA4AeAEgBMATgA4AeAEgBMATgA4AeB+AFA0hdF2gxWLAAAAAElFTkSuQmCC",
+      "tier": "entertainment",
+      "slug": "lumen-arcade",
+      "websiteUrl": "https://example.com/lumen-arcade",
+      "createdAt": "2026-03-05T00:00:00Z",
+      "updatedAt": "2026-03-05T00:00:00Z"
+    },
+    {
       "id": "sample-rive",
       "name": { "ja": "Rivulet 開発者コミュニティ", "en": "Rivulet Developer Community" },
       "nameKana": "リブレットデベロッパーコミュニティ",

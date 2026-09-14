@@ -16,6 +16,15 @@
         "en": { "type": "string", "minLength": 1 }
       }
     },
+    "description": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["ja", "en"],
+      "properties": {
+        "ja": { "type": "string" },
+        "en": { "type": "string" }
+      }
+    },
     "startsAt": {
       "type": "string",
       "format": "date-time"

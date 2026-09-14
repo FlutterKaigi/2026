@@ -35,7 +35,7 @@ class TranslationsEn extends Translations with BaseTranslations<AppLocale, Trans
 
 	late final TranslationsEn _root = this; // ignore: unused_field
 
-	@override 
+	@override
 	TranslationsEn $copyWith({TranslationMetadata<AppLocale, Translations>? meta}) => TranslationsEn(meta: meta ?? this.$meta);
 
 	// Translations
@@ -44,15 +44,19 @@ class TranslationsEn extends Translations with BaseTranslations<AppLocale, Trans
 	@override late final _Translations$navigation$en navigation = _Translations$navigation$en._(_root);
 	@override late final _Translations$news$en news = _Translations$news$en._(_root);
 	@override late final _Translations$sponsors$en sponsors = _Translations$sponsors$en._(_root);
+	@override late final _Translations$staffMembers$en staffMembers = _Translations$staffMembers$en._(_root);
 	@override late final _Translations$trademarks$en trademarks = _Translations$trademarks$en._(_root);
 	@override late final _Translations$sessionTimetable$en sessionTimetable = _Translations$sessionTimetable$en._(_root);
 	@override late final _Translations$sessionSearch$en sessionSearch = _Translations$sessionSearch$en._(_root);
 	@override late final _Translations$sessionDetails$en sessionDetails = _Translations$sessionDetails$en._(_root);
 	@override late final _Translations$sessionBookmark$en sessionBookmark = _Translations$sessionBookmark$en._(_root);
 	@override late final _Translations$bookmarkedSessions$en bookmarkedSessions = _Translations$bookmarkedSessions$en._(_root);
+	@override late final _Translations$venueMap$en venueMap = _Translations$venueMap$en._(_root);
+	@override late final _Translations$venueWalk$en venueWalk = _Translations$venueWalk$en._(_root);
 	@override late final _Translations$eventInfo$en eventInfo = _Translations$eventInfo$en._(_root);
 	@override late final _Translations$auth$en auth = _Translations$auth$en._(_root);
 	@override late final _Translations$profile$en profile = _Translations$profile$en._(_root);
+	@override late final _Translations$exchange$en exchange = _Translations$exchange$en._(_root);
 	@override late final _Translations$countryRegion$en countryRegion = _Translations$countryRegion$en._(_root);
 	@override late final _Translations$settings$en settings = _Translations$settings$en._(_root);
 	@override late final _Translations$licenses$en licenses = _Translations$licenses$en._(_root);
@@ -80,6 +84,7 @@ class _Translations$links$en extends Translations$links$ja {
 
 	// Translations
 	@override String get openError => 'Could not open the link';
+	@override String get copied => 'Link copied';
 }
 
 // Path: navigation
@@ -90,6 +95,7 @@ class _Translations$navigation$en extends Translations$navigation$ja {
 
 	// Translations
 	@override String get sessions => 'Sessions';
+	@override String get venueMap => 'Venue Map';
 	@override String get sponsors => 'Sponsors';
 	@override String get info => 'Event';
 	@override String get account => 'Account';
@@ -127,6 +133,18 @@ class _Translations$sponsors$en extends Translations$sponsors$ja {
 	@override String get jobBoardCta => 'Hiring information';
 	@override String get recruitCta => 'Careers';
 	@override String get connect => 'Connect';
+}
+
+// Path: staffMembers
+class _Translations$staffMembers$en extends Translations$staffMembers$ja {
+	_Translations$staffMembers$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Staff';
+	@override String get empty => 'Staff profiles have not been published yet';
+	@override String get error => 'Failed to load staff profiles';
 }
 
 // Path: trademarks
@@ -200,6 +218,8 @@ class _Translations$sessionDetails$en extends Translations$sessionDetails$ja {
 	@override String get speakers => 'Speakers';
 	@override String get links => 'Links';
 	@override String get sessionize => 'Sessionize';
+	@override String get feedback => 'Send session feedback';
+	@override String get feedbackDescription => 'Let us know what you thought of this session';
 	@override String get share => 'Share';
 	@override String get notFound => 'Session not found';
 }
@@ -230,6 +250,77 @@ class _Translations$bookmarkedSessions$en extends Translations$bookmarkedSession
 	@override String get openSessions => 'Open sessions';
 }
 
+// Path: venueMap
+class _Translations$venueMap$en extends Translations$venueMap$ja {
+	_Translations$venueMap$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Venue Map';
+	@override String get floor => 'Hamamatsucho Convention Hall · 5F';
+	@override String get loadError => 'Could not load the venue map';
+	@override String get loadErrorDescription => 'Please try again.';
+	@override String get search => 'Find a place';
+	@override String get searchHint => 'Hall, sponsor, booth number, facility';
+	@override String get clearSearch => 'Clear search';
+	@override String get placesCount => 'places';
+	@override String get showOnMap => 'Show on map';
+	@override String get all => 'All';
+	@override String get halls => 'Halls';
+	@override String get booths => 'Sponsors';
+	@override String get facilities => 'Facilities';
+	@override String get noResults => 'No matching places';
+	@override String get clearSelection => 'Clear selection';
+	@override String get zoomIn => 'Zoom in';
+	@override String get zoomOut => 'Zoom out';
+	@override String get fit => 'Show entire floor';
+	@override String get rotate => 'Rotate map';
+	@override String get twoD => '2D';
+	@override String get threeD => '3D';
+	@override String get viewMode => 'Map view';
+	@override String get useTwoD => 'Show in 2D';
+	@override String get saveFailed => 'Could not save the view preference';
+}
+
+// Path: venueWalk
+class _Translations$venueWalk$en extends Translations$venueWalk$ja {
+	_Translations$venueWalk$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get sceneLabel => 'Explore the venue with Dashumaru. Walk using the stick, a tap on the floor, or the arrow keys.';
+	@override String get currentLocation => 'You are at';
+	@override String get entrance => 'Entrance';
+	@override String get entranceSign => 'Entrance';
+	@override String get selectedPoint => 'Selected spot';
+	@override String headingTo({required Object place}) => 'Walking to ${place}';
+	@override String arrivedAt({required Object place}) => 'Arrived at ${place}';
+	@override String get unreachable => 'Cannot walk to that spot';
+	@override String get photoMode => 'Photo mode';
+	@override String get walkToPhotoSpot => 'Walk to the photo spot';
+	@override String get followTooltip => 'Follow Dashumaru';
+	@override String get overviewTooltip => 'View the entire floor';
+	@override String get follow => 'Follow';
+	@override String get overview => 'Overview';
+	@override String get help => 'How to play';
+	@override String get stickHint => 'Use the stick to walk';
+	@override String get stickLabel => 'Stick to move Dashumaru';
+	@override String get stopTooltip => 'Stop walking';
+	@override String get stop => 'Stop here';
+	@override String get reset => 'Return to the entrance';
+	@override String get wave => 'Wave';
+	@override String get backToWalk => 'Back to walking';
+	@override String get run => 'Run';
+	@override String get runningSpeed => 'Running';
+	@override String get walkingSpeed => 'Walking';
+	@override String get runHint => 'Hold to run. Release to walk. On a keyboard, hold Shift.';
+	@override String get close => 'Close';
+	@override late final _Translations$venueWalk$instructions$en instructions = _Translations$venueWalk$instructions$en._(_root);
+	@override late final _Translations$venueWalk$photo$en photo = _Translations$venueWalk$photo$en._(_root);
+}
+
 // Path: eventInfo
 class _Translations$eventInfo$en extends Translations$eventInfo$ja {
 	_Translations$eventInfo$en._(TranslationsEn root) : this._root = root, super.internal(root);
@@ -256,6 +347,7 @@ class _Translations$eventInfo$en extends Translations$eventInfo$ja {
 	@override String get exclusionPolicy => 'Exclusion of Anti-Social Forces';
 	@override String get contact => 'Contact';
 	@override String get sourceCode => 'View Source Code';
+	@override String get staffMembers => 'Staff';
 	@override String get ossLicenses => 'OSS Licenses';
 }
 
@@ -315,6 +407,66 @@ class _Translations$profile$en extends Translations$profile$ja {
 	@override String get discardBody => 'Unsaved changes will be lost.';
 	@override String get discardAction => 'Discard';
 	@override String get keepEditing => 'Keep editing';
+}
+
+// Path: exchange
+class _Translations$exchange$en extends Translations$exchange$ja {
+	_Translations$exchange$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Profile Exchange';
+	@override String get qrDescription => 'Show this QR code to another attendee and have them scan it to exchange profiles';
+	@override String get qrSemanticLabel => 'Profile exchange QR code';
+	@override String qrExpiresAt({required Object date}) => 'Valid until ${date}';
+	@override String get scanButton => 'Scan a QR code';
+	@override String get listButton => 'View exchanged profiles';
+	@override String get signInRequired => 'Sign in to show your QR code';
+	@override String get signInAction => 'Sign in';
+	@override String get profileRequired => 'Create a profile to show your QR code';
+	@override String get profileRequiredAction => 'Create profile';
+	@override String get scanTitle => 'Scan a QR code';
+	@override String get scanHint => 'Line up the other attendee\'s QR code within the frame';
+	@override String get scanCameraError => 'Camera unavailable. Please allow camera access in Settings';
+	@override String get scanInvalid => 'Could not read this code. Make sure it\'s a profile exchange QR code';
+	@override String get scanSelf => 'You can\'t scan your own QR code';
+	@override String get scanSucceeded => 'Profile exchanged';
+	@override String get scanAlreadyExists => 'Already exchanged';
+	@override String get scanFailed => 'Could not exchange profiles';
+	@override String get listTitle => 'Exchanged Profiles';
+	@override String get listEmpty => 'No exchanges yet';
+	@override String get listEmptyBody => 'Scan a QR code to exchange profiles with other attendees';
+	@override String get profileUnavailable => 'This profile is no longer available';
+	@override String get deleteTooltip => 'Delete';
+	@override String get deleteConfirmTitle => 'Delete this exchange?';
+	@override String get deleteConfirmBody => 'This only removes it from your own list. The other attendee\'s list is unaffected.';
+	@override String get deleteConfirmAction => 'Delete';
+	@override String get deleteCancel => 'Cancel';
+	@override String get deleteFailed => 'Could not delete the exchange';
+	@override String get noteAddTooltip => 'Add a note';
+	@override String get noteEditTooltip => 'Edit note';
+	@override String get noteEditTitle => 'Note';
+	@override String get noteEditHint => 'Visible only to you';
+	@override String get noteLabel => 'Note';
+	@override String get noteSave => 'Save';
+	@override String get noteCancel => 'Cancel';
+	@override String get noteSaveFailed => 'Could not save the note';
+	@override String get codeSectionTitle => 'Exchange with a code';
+	@override String get codeSectionDescription => 'If the camera isn\'t available, share and enter a 6-digit code instead. The same code works for everyone until it expires';
+	@override String get myCodeSemanticLabel => 'Profile exchange 6-digit code';
+	@override String myCodeExpiresAt({required Object date}) => 'Valid until ${date}';
+	@override String get myCodeExpired => 'This code has expired';
+	@override String get myCodeRefresh => 'Get a new code';
+	@override String get myCodeCopy => 'Copy code';
+	@override String get myCodeCopied => 'Code copied';
+	@override String get enterCodeLabel => 'Enter the other attendee\'s code';
+	@override String get enterCodeHint => '123456';
+	@override String get enterCodeButton => 'Exchange';
+	@override String get enterCodeInvalidFormat => 'Enter a 6-digit code';
+	@override String get redeemInvalid => 'This code wasn\'t found, or it has expired';
+	@override String get redeemSelf => 'You can\'t enter your own code';
+	@override String get redeemRateLimited => 'Too many attempts. Please try again in a few minutes';
 }
 
 // Path: countryRegion
@@ -467,6 +619,48 @@ class _Translations$sessionTimetable$type$en extends Translations$sessionTimetab
 	@override String get lightningTalk => 'Lightning Talk';
 	@override String get beginnersLightningTalk => 'Beginners LT';
 	@override String get event => 'Event';
+}
+
+// Path: venueWalk.instructions
+class _Translations$venueWalk$instructions$en extends Translations$venueWalk$instructions$ja {
+	_Translations$venueWalk$instructions$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Exploring the venue';
+	@override String get movement => 'Use the stick at the bottom left to walk. Hold the run icon at the bottom right to run, and release it to walk again.';
+	@override String get camera => 'Drag the background to look around and pinch to zoom. Tap the floor to walk to that spot automatically.';
+	@override String get places => 'Use “Find a place” to choose a destination and explore the four halls. Tap the map icon for a view of the entire floor.';
+	@override String get photos => 'Tap the camera to take a photo. The picture icon beside it takes you to the creative board. Choose a pose and frame for your photo.';
+	@override String get keyboard => 'On a computer, use W A S D or the arrow keys to move. Hold Shift to run and press Esc to stop.';
+	@override String get scope => 'Explore the venue on the fifth floor. This does not show your real location, and you cannot use the escalators to change floors.';
+	@override String get credits => '3D model: yakitama5 / flutter_deck_slides\nDashumaru: FlutterKaigi';
+}
+
+// Path: venueWalk.photo
+class _Translations$venueWalk$photo$en extends Translations$venueWalk$photo$ja {
+	_Translations$venueWalk$photo$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'A photo with Dashumaru';
+	@override String get resultTitle => 'Your photo';
+	@override String get imageLabel => 'A souvenir photo of Dashumaru';
+	@override String get downloadStarted => 'Your photo download has started';
+	@override String get saveFailed => 'Could not save the photo. Please try again.';
+	@override String get savePng => 'Save PNG';
+	@override String get captureFailed => 'Could not take the photo. Please try again.';
+	@override String get caption => 'Exploring the venue with Dashumaru.';
+	@override String captionAt({required Object place}) => 'With Dashumaru at ${place}.';
+	@override String get shutter => 'Take a photo';
+	@override String get capturing => 'Taking photo';
+	@override String get hideUi => 'Hide controls. Tap the screen to bring them back';
+	@override String get faceCamera => 'Face the camera';
+	@override String get removeFrame => 'Remove frame';
+	@override String get addFrame => 'Add frame';
+	@override late final _Translations$venueWalk$photo$poses$en poses = _Translations$venueWalk$photo$poses$en._(_root);
 }
 
 // Path: auth.signIn
@@ -741,6 +935,19 @@ class _Translations$quiz$result$en extends Translations$quiz$result$ja {
 	@override String get error => 'Failed to load results';
 }
 
+// Path: venueWalk.photo.poses
+class _Translations$venueWalk$photo$poses$en extends Translations$venueWalk$photo$poses$ja {
+	_Translations$venueWalk$photo$poses$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get standing => 'Stand';
+	@override String get wave => 'Wave';
+	@override String get sitting => 'Sit';
+	@override String get jumping => 'Jump';
+}
+
 // Path: quiz.list.status
 class _Translations$quiz$list$status$en extends Translations$quiz$list$status$ja {
 	_Translations$quiz$list$status$en._(TranslationsEn root) : this._root = root, super.internal(root);
@@ -765,7 +972,9 @@ extension on TranslationsEn {
 		return switch (path) {
 			'app.title' => 'FlutterKaigi 2026',
 			'links.openError' => 'Could not open the link',
+			'links.copied' => 'Link copied',
 			'navigation.sessions' => 'Sessions',
+			'navigation.venueMap' => 'Venue Map',
 			'navigation.sponsors' => 'Sponsors',
 			'navigation.info' => 'Event',
 			'navigation.account' => 'Account',
@@ -785,6 +994,9 @@ extension on TranslationsEn {
 			'sponsors.jobBoardCta' => 'Hiring information',
 			'sponsors.recruitCta' => 'Careers',
 			'sponsors.connect' => 'Connect',
+			'staffMembers.title' => 'Staff',
+			'staffMembers.empty' => 'Staff profiles have not been published yet',
+			'staffMembers.error' => 'Failed to load staff profiles',
 			'trademarks.flutterAffiliation' => 'Flutter and the related logo are trademarks of Google LLC. FlutterKaigi is not affiliated with or otherwise sponsored by Google LLC.',
 			'trademarks.flutterNameAndLogo' => 'The Flutter name and the Flutter logo are trademarks of Google LLC.',
 			'trademarks.revComm' => 'RevComm is a registered trademark or trademark of RevComm Inc.',
@@ -817,13 +1029,15 @@ extension on TranslationsEn {
 			'sessionSearch.promptBody' => 'Enter a keyword or select a day, session type, or language',
 			'sessionSearch.emptyTitle' => 'No sessions found',
 			'sessionSearch.emptyBody' => 'Try changing the keyword or filters',
-			'sessionSearch.resultCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} session', other: '${n} sessions', ), 
+			'sessionSearch.resultCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} session', other: '${n} sessions', ),
 			'sessionDetails.title' => 'Session Details',
 			'sessionDetails.description' => 'Description',
 			'sessionDetails.schedule' => 'Schedule and Venue',
 			'sessionDetails.speakers' => 'Speakers',
 			'sessionDetails.links' => 'Links',
 			'sessionDetails.sessionize' => 'Sessionize',
+			'sessionDetails.feedback' => 'Send session feedback',
+			'sessionDetails.feedbackDescription' => 'Let us know what you thought of this session',
 			'sessionDetails.share' => 'Share',
 			'sessionDetails.notFound' => 'Session not found',
 			'sessionBookmark.openBookmarked' => 'Bookmarked sessions',
@@ -834,6 +1048,84 @@ extension on TranslationsEn {
 			'bookmarkedSessions.emptyTitle' => 'No bookmarked sessions',
 			'bookmarkedSessions.emptyBody' => 'Bookmark sessions to find them here.',
 			'bookmarkedSessions.openSessions' => 'Open sessions',
+			'venueMap.title' => 'Venue Map',
+			'venueMap.floor' => 'Hamamatsucho Convention Hall · 5F',
+			'venueMap.loadError' => 'Could not load the venue map',
+			'venueMap.loadErrorDescription' => 'Please try again.',
+			'venueMap.search' => 'Find a place',
+			'venueMap.searchHint' => 'Hall, sponsor, booth number, facility',
+			'venueMap.clearSearch' => 'Clear search',
+			'venueMap.placesCount' => 'places',
+			'venueMap.showOnMap' => 'Show on map',
+			'venueMap.all' => 'All',
+			'venueMap.halls' => 'Halls',
+			'venueMap.booths' => 'Sponsors',
+			'venueMap.facilities' => 'Facilities',
+			'venueMap.noResults' => 'No matching places',
+			'venueMap.clearSelection' => 'Clear selection',
+			'venueMap.zoomIn' => 'Zoom in',
+			'venueMap.zoomOut' => 'Zoom out',
+			'venueMap.fit' => 'Show entire floor',
+			'venueMap.rotate' => 'Rotate map',
+			'venueMap.twoD' => '2D',
+			'venueMap.threeD' => '3D',
+			'venueMap.viewMode' => 'Map view',
+			'venueMap.useTwoD' => 'Show in 2D',
+			'venueMap.saveFailed' => 'Could not save the view preference',
+			'venueWalk.sceneLabel' => 'Explore the venue with Dashumaru. Walk using the stick, a tap on the floor, or the arrow keys.',
+			'venueWalk.currentLocation' => 'You are at',
+			'venueWalk.entrance' => 'Entrance',
+			'venueWalk.entranceSign' => 'Entrance',
+			'venueWalk.selectedPoint' => 'Selected spot',
+			'venueWalk.headingTo' => ({required Object place}) => 'Walking to ${place}',
+			'venueWalk.arrivedAt' => ({required Object place}) => 'Arrived at ${place}',
+			'venueWalk.unreachable' => 'Cannot walk to that spot',
+			'venueWalk.photoMode' => 'Photo mode',
+			'venueWalk.walkToPhotoSpot' => 'Walk to the photo spot',
+			'venueWalk.followTooltip' => 'Follow Dashumaru',
+			'venueWalk.overviewTooltip' => 'View the entire floor',
+			'venueWalk.follow' => 'Follow',
+			'venueWalk.overview' => 'Overview',
+			'venueWalk.help' => 'How to play',
+			'venueWalk.stickHint' => 'Use the stick to walk',
+			'venueWalk.stickLabel' => 'Stick to move Dashumaru',
+			'venueWalk.stopTooltip' => 'Stop walking',
+			'venueWalk.stop' => 'Stop here',
+			'venueWalk.reset' => 'Return to the entrance',
+			'venueWalk.wave' => 'Wave',
+			'venueWalk.backToWalk' => 'Back to walking',
+			'venueWalk.run' => 'Run',
+			'venueWalk.runningSpeed' => 'Running',
+			'venueWalk.walkingSpeed' => 'Walking',
+			'venueWalk.runHint' => 'Hold to run. Release to walk. On a keyboard, hold Shift.',
+			'venueWalk.close' => 'Close',
+			'venueWalk.instructions.title' => 'Exploring the venue',
+			'venueWalk.instructions.movement' => 'Use the stick at the bottom left to walk. Hold the run icon at the bottom right to run, and release it to walk again.',
+			'venueWalk.instructions.camera' => 'Drag the background to look around and pinch to zoom. Tap the floor to walk to that spot automatically.',
+			'venueWalk.instructions.places' => 'Use “Find a place” to choose a destination and explore the four halls. Tap the map icon for a view of the entire floor.',
+			'venueWalk.instructions.photos' => 'Tap the camera to take a photo. The picture icon beside it takes you to the creative board. Choose a pose and frame for your photo.',
+			'venueWalk.instructions.keyboard' => 'On a computer, use W A S D or the arrow keys to move. Hold Shift to run and press Esc to stop.',
+			'venueWalk.instructions.scope' => 'Explore the venue on the fifth floor. This does not show your real location, and you cannot use the escalators to change floors.',
+			'venueWalk.instructions.credits' => '3D model: yakitama5 / flutter_deck_slides\nDashumaru: FlutterKaigi',
+			'venueWalk.photo.title' => 'A photo with Dashumaru',
+			'venueWalk.photo.resultTitle' => 'Your photo',
+			'venueWalk.photo.imageLabel' => 'A souvenir photo of Dashumaru',
+			'venueWalk.photo.downloadStarted' => 'Your photo download has started',
+			'venueWalk.photo.saveFailed' => 'Could not save the photo. Please try again.',
+			'venueWalk.photo.savePng' => 'Save PNG',
+			'venueWalk.photo.captureFailed' => 'Could not take the photo. Please try again.',
+			'venueWalk.photo.caption' => 'Exploring the venue with Dashumaru.',
+			'venueWalk.photo.captionAt' => ({required Object place}) => 'With Dashumaru at ${place}.',
+			'venueWalk.photo.shutter' => 'Take a photo',
+			'venueWalk.photo.capturing' => 'Taking photo',
+			'venueWalk.photo.hideUi' => 'Hide controls. Tap the screen to bring them back',
+			'venueWalk.photo.faceCamera' => 'Face the camera',
+			'venueWalk.photo.removeFrame' => 'Remove frame',
+			'venueWalk.photo.addFrame' => 'Add frame',
+			'venueWalk.photo.poses.standing' => 'Stand',
+			'venueWalk.photo.poses.wave' => 'Wave',
+			'venueWalk.photo.poses.sitting' => 'Sit',
+			'venueWalk.photo.poses.jumping' => 'Jump',
 			'eventInfo.title' => 'Event Overview',
 			'eventInfo.newsTitle' => 'Latest News',
 			'eventInfo.newsSubtitle' => 'See the latest FlutterKaigi 2026 updates',
@@ -853,6 +1145,7 @@ extension on TranslationsEn {
 			'eventInfo.exclusionPolicy' => 'Exclusion of Anti-Social Forces',
 			'eventInfo.contact' => 'Contact',
 			'eventInfo.sourceCode' => 'View Source Code',
+			'eventInfo.staffMembers' => 'Staff',
 			'eventInfo.ossLicenses' => 'OSS Licenses',
 			'auth.signIn.required' => 'Sign in required',
 			'auth.signIn.description' => 'Choose how you want to sign in to the FlutterKaigi 2026 app',
@@ -941,6 +1234,57 @@ extension on TranslationsEn {
 			'profile.discardBody' => 'Unsaved changes will be lost.',
 			'profile.discardAction' => 'Discard',
 			'profile.keepEditing' => 'Keep editing',
+			'exchange.title' => 'Profile Exchange',
+			'exchange.qrDescription' => 'Show this QR code to another attendee and have them scan it to exchange profiles',
+			'exchange.qrSemanticLabel' => 'Profile exchange QR code',
+			'exchange.qrExpiresAt' => ({required Object date}) => 'Valid until ${date}',
+			'exchange.scanButton' => 'Scan a QR code',
+			'exchange.listButton' => 'View exchanged profiles',
+			'exchange.signInRequired' => 'Sign in to show your QR code',
+			'exchange.signInAction' => 'Sign in',
+			'exchange.profileRequired' => 'Create a profile to show your QR code',
+			'exchange.profileRequiredAction' => 'Create profile',
+			'exchange.scanTitle' => 'Scan a QR code',
+			'exchange.scanHint' => 'Line up the other attendee\'s QR code within the frame',
+			'exchange.scanCameraError' => 'Camera unavailable. Please allow camera access in Settings',
+			'exchange.scanInvalid' => 'Could not read this code. Make sure it\'s a profile exchange QR code',
+			'exchange.scanSelf' => 'You can\'t scan your own QR code',
+			'exchange.scanSucceeded' => 'Profile exchanged',
+			'exchange.scanAlreadyExists' => 'Already exchanged',
+			'exchange.scanFailed' => 'Could not exchange profiles',
+			'exchange.listTitle' => 'Exchanged Profiles',
+			'exchange.listEmpty' => 'No exchanges yet',
+			'exchange.listEmptyBody' => 'Scan a QR code to exchange profiles with other attendees',
+			'exchange.profileUnavailable' => 'This profile is no longer available',
+			'exchange.deleteTooltip' => 'Delete',
+			'exchange.deleteConfirmTitle' => 'Delete this exchange?',
+			'exchange.deleteConfirmBody' => 'This only removes it from your own list. The other attendee\'s list is unaffected.',
+			'exchange.deleteConfirmAction' => 'Delete',
+			'exchange.deleteCancel' => 'Cancel',
+			'exchange.deleteFailed' => 'Could not delete the exchange',
+			'exchange.noteAddTooltip' => 'Add a note',
+			'exchange.noteEditTooltip' => 'Edit note',
+			'exchange.noteEditTitle' => 'Note',
+			'exchange.noteEditHint' => 'Visible only to you',
+			'exchange.noteLabel' => 'Note',
+			'exchange.noteSave' => 'Save',
+			'exchange.noteCancel' => 'Cancel',
+			'exchange.noteSaveFailed' => 'Could not save the note',
+			'exchange.codeSectionTitle' => 'Exchange with a code',
+			'exchange.codeSectionDescription' => 'If the camera isn\'t available, share and enter a 6-digit code instead. The same code works for everyone until it expires',
+			'exchange.myCodeSemanticLabel' => 'Profile exchange 6-digit code',
+			'exchange.myCodeExpiresAt' => ({required Object date}) => 'Valid until ${date}',
+			'exchange.myCodeExpired' => 'This code has expired',
+			'exchange.myCodeRefresh' => 'Get a new code',
+			'exchange.myCodeCopy' => 'Copy code',
+			'exchange.myCodeCopied' => 'Code copied',
+			'exchange.enterCodeLabel' => 'Enter the other attendee\'s code',
+			'exchange.enterCodeHint' => '123456',
+			'exchange.enterCodeButton' => 'Exchange',
+			'exchange.enterCodeInvalidFormat' => 'Enter a 6-digit code',
+			'exchange.redeemInvalid' => 'This code wasn\'t found, or it has expired',
+			'exchange.redeemSelf' => 'You can\'t enter your own code',
+			'exchange.redeemRateLimited' => 'Too many attempts. Please try again in a few minutes',
 			'countryRegion.asia' => 'Asia',
 			'countryRegion.oceania' => 'Oceania',
 			'countryRegion.americas' => 'Americas',
@@ -961,7 +1305,7 @@ extension on TranslationsEn {
 			'licenses.title' => 'Licenses',
 			'licenses.searchHint' => 'Search packages',
 			'licenses.clearSearch' => 'Clear search',
-			'licenses.licenseCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} license', other: '${n} licenses', ), 
+			'licenses.licenseCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} license', other: '${n} licenses', ),
 			'licenses.notFound' => 'License not found',
 			'error.title' => 'Could not load data',
 			'error.message' => 'Check your connection and try again.',
