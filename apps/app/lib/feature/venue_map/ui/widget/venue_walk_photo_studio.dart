@@ -4,10 +4,10 @@ import 'dart:ui' as ui;
 
 import 'package:app/feature/venue_map/data/venue_walk_photo_save.dart';
 import 'package:app/feature/venue_map/data/venue_walk_scene.dart';
+import 'package:app/feature/venue_map/ui/widget/venue_scene_viewport.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter_scene/scene.dart' as fs;
 
 class VenueWalkPhotoStudio extends StatefulWidget {
   const VenueWalkPhotoStudio({required this.game, required this.onClose, super.key});
@@ -67,14 +67,16 @@ class _VenueWalkPhotoStudioState extends State<VenueWalkPhotoStudio> {
                   try {
                     await saveVenuePhoto(bytes, filename);
                     if (mounted) {
-                      ScaffoldMessenger.of(this.context)
-                          .showSnackBar(const SnackBar(content: Text('写真のダウンロードを開始しました')));
+                      ScaffoldMessenger.of(
+                        this.context,
+                      ).showSnackBar(const SnackBar(content: Text('写真のダウンロードを開始しました')));
                     }
                   } on Object catch (error) {
                     debugPrint('Venue photo download failed: $error');
                     if (mounted) {
-                      ScaffoldMessenger.of(this.context)
-                          .showSnackBar(const SnackBar(content: Text('写真を保存できませんでした。もう一度お試しください。')));
+                      ScaffoldMessenger.of(
+                        this.context,
+                      ).showSnackBar(const SnackBar(content: Text('写真を保存できませんでした。もう一度お試しください。')));
                     }
                   }
                 },
@@ -102,7 +104,7 @@ class _VenueWalkPhotoStudioState extends State<VenueWalkPhotoStudio> {
     return RepaintBoundary(
       key: _pictureKey,
       child: ColoredBox(
-        color: const Color(0xffe5eee6),
+        color: Theme.of(context).colorScheme.surfaceContainerLowest,
         child: LayoutBuilder(
           builder: (context, constraints) {
             game.viewAspect = constraints.maxWidth / constraints.maxHeight;
@@ -130,11 +132,8 @@ class _VenueWalkPhotoStudioState extends State<VenueWalkPhotoStudio> {
                         game.orbit(details.focalPointDelta);
                       }
                     },
-                    child: fs.SceneView(
-                      game.scene,
-                      cameraBuilder: (_) => game.camera,
-                      onTick: game.tick,
-                      autoTick: !game.paused,
+                    child: VenueSceneViewport(
+                      game: game,
                       pixelRatio: math.min(MediaQuery.devicePixelRatioOf(context), 2),
                     ),
                   ),
@@ -142,7 +141,9 @@ class _VenueWalkPhotoStudioState extends State<VenueWalkPhotoStudio> {
                 if (_frame) ...[
                   IgnorePointer(
                     child: DecoratedBox(
-                      decoration: BoxDecoration(border: Border.all(color: const Color(0xfffaf7ed), width: 10)),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Theme.of(context).colorScheme.surfaceContainerHigh, width: 10),
+                      ),
                     ),
                   ),
                   Positioned(
@@ -152,20 +153,23 @@ class _VenueWalkPhotoStudioState extends State<VenueWalkPhotoStudio> {
                     child: IgnorePointer(
                       child: Container(
                         padding: const EdgeInsets.fromLTRB(16, 30, 16, 16),
-                        decoration: const BoxDecoration(
+                        decoration: BoxDecoration(
                           gradient: LinearGradient(
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
-                            colors: [Color(0x00faf7ed), Color(0xfffaf7ed)],
+                            colors: [
+                              Theme.of(context).colorScheme.surfaceContainerHigh.withValues(alpha: 0),
+                              Theme.of(context).colorScheme.surfaceContainerHigh,
+                            ],
                           ),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
+                            Text(
                               'FlutterKaigi 2026',
                               style: TextStyle(
-                                color: Color(0xff205c50),
+                                color: Theme.of(context).colorScheme.onSurface,
                                 fontSize: 19,
                                 fontWeight: FontWeight.w800,
                                 letterSpacing: .8,
@@ -176,7 +180,7 @@ class _VenueWalkPhotoStudioState extends State<VenueWalkPhotoStudio> {
                               game.status.value.location == null
                                   ? 'だしゅまると、会場さんぽ。'
                                   : 'だしゅまると、${game.status.value.location}で。',
-                              style: const TextStyle(color: Color(0xff205c50), fontSize: 11),
+                              style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 11),
                             ),
                           ],
                         ),
@@ -238,7 +242,7 @@ class _VenueWalkPhotoStudioState extends State<VenueWalkPhotoStudio> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    backgroundColor: const Color(0xfff4f7f3),
+    backgroundColor: Theme.of(context).colorScheme.surface,
     body: SafeArea(
       child: LayoutBuilder(
         builder: (context, constraints) {

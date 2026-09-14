@@ -1,48 +1,92 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/feature/venue_map/data/venue_walk_navigation.dart';
 import 'package:app/feature/venue_map/data/venue_walk_scene.dart';
+import 'package:app/feature/venue_map/provider/venue_walk_scene_factory.dart';
+import 'package:app/feature/venue_map/ui/widget/venue_scene_viewport.dart';
+import 'package:app/feature/venue_map/ui/widget/venue_walk_controller.dart';
 import 'package:app/feature/venue_map/ui/widget/venue_walk_photo_studio.dart';
 import 'package:app/feature/venue_map/ui/widget/venue_walk_run_button.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_scene/scene.dart' as fs;
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-const ink = Color(0xff163c35);
-const green = Color(0xff257c67);
-const muted = Color(0xff71827e);
-const canvas = Color(0xfff4f7f3);
-
-class VenueWalkPage extends StatefulWidget {
-  const VenueWalkPage({this.showcase = false, super.key});
+class VenueWalkView extends ConsumerStatefulWidget {
+  const VenueWalkView({
+    required this.controller,
+    required this.active,
+    required this.onUseTwoD,
+    this.showcase = true,
+    super.key,
+  });
+  final VenueWalkController controller;
+  final bool active;
+  final VoidCallback onUseTwoD;
   final bool showcase;
   @override
-  State<VenueWalkPage> createState() => _VenueWalkPageState();
+  ConsumerState<VenueWalkView> createState() => _VenueWalkViewState();
 }
 
-class _VenueWalkPageState extends State<VenueWalkPage> {
+class _VenueWalkViewState extends ConsumerState<VenueWalkView> {
   VenueWalkScene? game;
   Object? error;
   final focus = FocusNode(debugLabel: 'Venue walking controls');
   late final AppLifecycleListener lifecycle;
   bool ready = false;
   double lastScale = 1;
+  bool _foreground = true;
+  bool _tickerEnabled = true;
+  bool _helpOpen = false;
+
+  ColorScheme get colors => Theme.of(context).colorScheme;
+  bool get _active => widget.active && _foreground && _tickerEnabled && !_helpOpen;
+
+  void _syncActivity() {
+    final g = game;
+    if (g == null) {
+      return;
+    }
+    if (!_active) {
+      widget.controller.disconnect();
+      if (!g.paused && ready) {
+        g.stop();
+      }
+    }
+    g.paused = !_active;
+    if (!_active) {
+      focus.unfocus();
+    } else if (ready) {
+      widget.controller.connect(g.goToPlace);
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _tickerEnabled = TickerMode.valuesOf(context).enabled;
+    game?.setDarkMode(dark: Theme.of(context).brightness == Brightness.dark);
+    _syncActivity();
+  }
+
+  @override
+  void didUpdateWidget(VenueWalkView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.controller != widget.controller) {
+      oldWidget.controller.disconnect();
+    }
+    _syncActivity();
+  }
 
   @override
   void initState() {
     super.initState();
     lifecycle = AppLifecycleListener(
       onStateChange: (state) {
-        if (!ready) {
-          return;
-        }
-        final paused = state != AppLifecycleState.resumed;
-        if (paused) {
-          game!.stop();
-        }
-        game!.paused = paused;
+        _foreground = state == AppLifecycleState.resumed;
+        _syncActivity();
         if (mounted) {
           setState(() {});
         }
@@ -52,28 +96,38 @@ class _VenueWalkPageState extends State<VenueWalkPage> {
   }
 
   Future<void> load() async {
-    final next = VenueWalkScene(showcase: widget.showcase);
+    final next = ref.read(venueWalkSceneFactoryProvider)(showcase: widget.showcase);
+    game?.dispose();
     game = next;
     try {
-      await next.load();
-      if (!mounted) {
+      await next.load().timeout(const Duration(seconds: 30));
+      if (!mounted || game != next) {
         return;
       }
+      next.setDarkMode(dark: Theme.of(context).brightness == Brightness.dark);
       setState(() {
         ready = true;
         error = null;
       });
-      focus.requestFocus();
+      _syncActivity();
     } on Object catch (e, stack) {
       debugPrint('Venue walk failed: $e\n$stack');
+      if (game == next) {
+        game = null;
+        next.dispose();
+      }
       if (mounted) {
-        setState(() => error = e);
+        setState(() {
+          ready = false;
+          error = e;
+        });
       }
     }
   }
 
   @override
   void dispose() {
+    widget.controller.disconnect();
     lifecycle.dispose();
     focus.dispose();
     game?.dispose();
@@ -81,7 +135,7 @@ class _VenueWalkPageState extends State<VenueWalkPage> {
   }
 
   KeyEventResult onKey(FocusNode node, KeyEvent event) {
-    if (!ready) {
+    if (!ready || !_active) {
       return KeyEventResult.ignored;
     }
     final g = game!;
@@ -139,334 +193,56 @@ class _VenueWalkPageState extends State<VenueWalkPage> {
     focus.requestFocus();
   }
 
-  Future<void> chooseDestination(BuildContext context) async {
-    final g = game!;
-    g.stop();
-    final place = await showModalBottomSheet<MapPlace>(
-      context: context,
-      useSafeArea: true,
-      showDragHandle: true,
-      builder: (context) => SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('どこまで歩こう？', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
-                    const SizedBox(height: 6),
-                    Text('訪れたホール ${g.visited.length} / 4', style: const TextStyle(color: green, fontSize: 12)),
-                  ],
-                ),
-              ),
-              for (final place in g.navigation.places.where((p) => p.type == 'hall'))
-                ListTile(
-                  leading: const Icon(Icons.directions_walk_rounded),
-                  title: Text(place.name),
-                  subtitle: g.visited.contains(place.id) ? const Text('訪問済み') : null,
-                  trailing: Icon(g.visited.contains(place.id) ? Icons.check_circle_outline : Icons.chevron_right),
-                  onTap: () => Navigator.pop(context, place),
-                ),
-            ],
-          ),
-        ),
-      ),
-    );
-    if (!mounted) {
-      return;
-    }
-    if (place != null) {
-      g.goTo(place.anchor, name: place.name);
-    }
-    focus.requestFocus();
-  }
-
   @override
-  Widget build(BuildContext context) => Theme(
-    data: ThemeData(
-      colorScheme: ColorScheme.fromSeed(seedColor: green),
-      scaffoldBackgroundColor: canvas,
-      fontFamily: 'Noto Sans JP',
-      useMaterial3: true,
-    ),
-    child: Focus(
-      focusNode: focus,
-      autofocus: true,
-      onKeyEvent: onKey,
-      onFocusChange: (value) {
-        if (!value && ready) {
-          game!.stop();
-        }
-      },
-      child: ready && game!.photoMode
-          ? VenueWalkPhotoStudio(game: game!, onClose: closePhoto)
-          : Scaffold(
-              body: SafeArea(
-                child: LayoutBuilder(
-                  builder: (context, box) {
-                    final landscape = box.maxHeight < 500 && box.maxWidth > box.maxHeight;
-                    final wide = box.maxWidth >= 900 && !landscape;
-                    final compact = box.maxWidth < 600 || landscape;
-                    return Padding(
-                      padding: EdgeInsets.all(
-                        landscape
-                            ? 8
-                            : wide
-                            ? 24
-                            : 12,
-                      ),
+  Widget build(BuildContext context) => Focus(
+    focusNode: focus,
+    canRequestFocus: _active,
+    onKeyEvent: onKey,
+    onFocusChange: (focused) {
+      if (!focused && ready) {
+        // A closing search sheet can transfer focus after its destination was
+        // selected. Release held controls without cancelling that new route.
+        game!.releaseInput();
+      }
+    },
+    child: IgnorePointer(
+      ignoring: !_active,
+      child: !ready
+          ? Center(
+              child: error == null
+                  ? const CircularProgressIndicator.adaptive()
+                  : Padding(
+                      padding: const EdgeInsets.all(16),
                       child: Column(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          Row(
-                            children: [
-                              if (Navigator.of(context).canPop()) ...[
-                                const BackButton(),
-                                const SizedBox(width: 4),
-                              ],
-                              Container(
-                                width: 42,
-                                height: 42,
-                                decoration: BoxDecoration(color: ink, borderRadius: BorderRadius.circular(14)),
-                                child: const Icon(Icons.explore_outlined, color: Color(0xffd4efc1)),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Text(
-                                      'FlutterKaigi 2026  /  5F',
-                                      style: TextStyle(
-                                        fontSize: 10,
-                                        letterSpacing: 1.4,
-                                        color: muted,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                    FittedBox(
-                                      fit: BoxFit.scaleDown,
-                                      alignment: Alignment.centerLeft,
-                                      child: Text(
-                                        'だしゅまると、会場さんぽ。',
-                                        maxLines: 1,
-                                        style: TextStyle(
-                                          fontSize: wide
-                                              ? 25
-                                              : compact
-                                              ? 16
-                                              : 18,
-                                          fontWeight: FontWeight.w700,
-                                          color: ink,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              if (wide) const _Tag('3D DEMO'),
-                              const SizedBox(width: 6),
-                              IconButton(
-                                tooltip: '遊び方とこのデモについて',
-                                onPressed: () => showAbout(context),
-                                icon: const Icon(Icons.info_outline, size: 21),
-                              ),
-                            ],
+                          Text(context.t.venueMap.loadError),
+                          const SizedBox(height: 12),
+                          FilledButton.tonal(onPressed: widget.onUseTwoD, child: Text(context.t.venueMap.useTwoD)),
+                          TextButton(
+                            onPressed: () {
+                              setState(() => error = null);
+                              unawaited(load());
+                            },
+                            child: Text(context.t.error.retry),
                           ),
-                          SizedBox(
-                            height: landscape
-                                ? 8
-                                : wide
-                                ? 22
-                                : 14,
-                          ),
-                          Expanded(
-                            child: !ready
-                                ? loading()
-                                : Row(
-                                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                                    children: [
-                                      if (wide) ...[SizedBox(width: 246, child: sidebar()), const SizedBox(width: 22)],
-                                      Expanded(
-                                        child: viewport(wide: wide, compact: compact, landscape: landscape),
-                                      ),
-                                    ],
-                                  ),
-                          ),
-                          if (ready && !wide && !compact)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 10),
-                              child: SizedBox(
-                                height: 44,
-                                child: ListView(
-                                  scrollDirection: Axis.horizontal,
-                                  children: [
-                                    for (final place in game!.navigation.places.where((p) => p.type == 'hall'))
-                                      Padding(
-                                        padding: const EdgeInsets.only(right: 6),
-                                        child: OutlinedButton(
-                                          onPressed: () => action(() => game!.goTo(place.anchor, name: place.name)),
-                                          child: Text(place.name, style: const TextStyle(fontSize: 11)),
-                                        ),
-                                      ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          if (!landscape) ...[
-                            SizedBox(height: wide ? 14 : 9),
-                            Text(
-                              wide
-                                  ? '床をクリックして移動  ·  ドラッグで視点を回転  ·  ホイールで拡大・縮小'
-                                  : compact
-                                  ? 'ドラッグで見回す  ·  ピンチで近づく'
-                                  : '床をタップして移動  ·  ドラッグで視点を回転',
-                              style: TextStyle(color: muted, fontSize: wide ? 11 : 10),
-                            ),
-                          ],
                         ],
                       ),
-                    );
-                  },
-                ),
-              ),
+                    ),
+            )
+          : game!.photoMode
+          ? VenueWalkPhotoStudio(game: game!, onClose: closePhoto)
+          : LayoutBuilder(
+              builder: (context, box) {
+                final landscape = box.maxHeight < 360 && box.maxWidth > box.maxHeight;
+                return viewport(
+                  wide: box.maxWidth >= 900,
+                  compact: box.maxWidth < 600 || landscape,
+                  landscape: landscape,
+                );
+              },
             ),
     ),
-  );
-
-  Widget loading() => Center(
-    child: error == null
-        ? const Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              CircularProgressIndicator(color: green),
-              SizedBox(height: 24),
-              Text('会場とだしゅまるを準備しています', style: TextStyle(fontSize: 14)),
-              SizedBox(height: 8),
-              Text('はじめての読み込みには少し時間がかかります', style: TextStyle(color: muted, fontSize: 11)),
-            ],
-          )
-        : Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.view_in_ar_outlined, size: 40),
-              const SizedBox(height: 16),
-              const Text('会場さんぽを読み込めませんでした'),
-              const SizedBox(height: 8),
-              const Text('画面を再読み込みして、もう一度お試しください。', style: TextStyle(fontSize: 12)),
-              const SizedBox(height: 16),
-              FilledButton(
-                onPressed: () {
-                  game?.dispose();
-                  setState(() => error = null);
-                  unawaited(load());
-                },
-                child: const Text('再試行'),
-              ),
-            ],
-          ),
-  );
-
-  Widget sidebar() => ValueListenableBuilder<WalkStatus>(
-    valueListenable: game!.status,
-    builder: (context, state, _) {
-      final g = game!;
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'だしゅまると歩いてみよう',
-            style: TextStyle(color: ink, fontSize: 16, fontWeight: FontWeight.w700),
-          ),
-          const SizedBox(height: 10),
-          const Text('会場をぐるっと、ひと足先に。\n気になるホールまで歩いてみましょう。', style: TextStyle(color: muted, fontSize: 12, height: 1.9)),
-          const SizedBox(height: 24),
-          Row(
-            children: [
-              const Text('ホールへ歩く', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12)),
-              const Spacer(),
-              Text('${state.visited} / 4', style: const TextStyle(color: green, fontSize: 12)),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Expanded(
-            child: ListView(
-              children: [
-                for (final (index, place) in g.navigation.places.where((p) => p.type == 'hall').indexed)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 9),
-                    child: Material(
-                      color: state.destination == place.name ? const Color(0xffe0eee5) : Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                        side: const BorderSide(color: Color(0xffe2e9e3)),
-                      ),
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(14),
-                        onTap: () => action(() => g.goTo(place.anchor, name: place.name)),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 18),
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 8,
-                                height: 24,
-                                decoration: BoxDecoration(
-                                  color: [
-                                    const Color(0xff8061bd),
-                                    const Color(0xff408fc3),
-                                    const Color(0xff945838),
-                                    const Color(0xff326e58),
-                                  ][index],
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Text(
-                                  place.name,
-                                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
-                                ),
-                              ),
-                              Icon(
-                                g.visited.contains(place.id) ? Icons.check_circle_outline : Icons.arrow_forward,
-                                size: 18,
-                                color: green,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(color: const Color(0xffe9eee7), borderRadius: BorderRadius.circular(16)),
-            child: const Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('自由に歩く', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
-                SizedBox(height: 12),
-                _KeyHint('W A S D / ↑ ↓ ← →', '移動'),
-                SizedBox(height: 9),
-                _KeyHint('Shift', '走る'),
-                SizedBox(height: 9),
-                _KeyHint('Esc', '止まる'),
-                SizedBox(height: 14),
-                Text('画面のスティックでも操作できます。', style: TextStyle(color: muted, fontSize: 10)),
-              ],
-            ),
-          ),
-        ],
-      );
-    },
   );
 
   Widget viewport({required bool wide, required bool compact, required bool landscape}) {
@@ -474,7 +250,7 @@ class _VenueWalkPageState extends State<VenueWalkPage> {
     return ClipRRect(
       borderRadius: BorderRadius.circular(wide ? 24 : 20),
       child: ColoredBox(
-        color: const Color(0xffe8f0e9),
+        color: Theme.of(context).colorScheme.surfaceContainerLowest,
         child: LayoutBuilder(
           builder: (context, box) {
             final size = box.biggest;
@@ -507,11 +283,8 @@ class _VenueWalkPageState extends State<VenueWalkPage> {
                           g.orbit(details.focalPointDelta);
                         }
                       },
-                      child: fs.SceneView(
-                        g.scene,
-                        cameraBuilder: (_) => g.camera,
-                        onTick: g.tick,
-                        autoTick: !g.paused,
+                      child: VenueSceneViewport(
+                        game: g,
                         pixelRatio: math.min(MediaQuery.devicePixelRatioOf(context), 1.5),
                       ),
                     ),
@@ -521,6 +294,7 @@ class _VenueWalkPageState extends State<VenueWalkPage> {
                   child: CustomPaint(
                     painter: HallLabels(
                       g,
+                      colors: Theme.of(context).colorScheme,
                       overviewTopInset: landscape
                           ? 80
                           : compact
@@ -554,9 +328,9 @@ class _VenueWalkPageState extends State<VenueWalkPage> {
                         ),
                         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: .94),
+                          color: Theme.of(context).colorScheme.surfaceContainerHigh.withValues(alpha: .94),
                           borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: const Color(0xffdee7df)),
+                          border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -569,23 +343,37 @@ class _VenueWalkPageState extends State<VenueWalkPage> {
                                   Container(
                                     width: 6,
                                     height: 6,
-                                    decoration: const BoxDecoration(color: green, shape: BoxShape.circle),
+                                    decoration: BoxDecoration(
+                                      color: Theme.of(context).colorScheme.primary,
+                                      shape: BoxShape.circle,
+                                    ),
                                   ),
                                   const SizedBox(width: 6),
-                                  const Text('ただいま', style: TextStyle(fontSize: 10, color: muted)),
+                                  Text(
+                                    'ただいま',
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                    ),
+                                  ),
                                 ],
                               ),
                               const SizedBox(height: 3),
                               Text(s.location!, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
                             ],
                             if (s.destination != null)
-                              Text('${s.destination}へ移動中', style: const TextStyle(fontSize: 10, color: green)),
+                              Text(
+                                '${s.destination}へ移動中',
+                                style: TextStyle(fontSize: 10, color: Theme.of(context).colorScheme.primary),
+                              ),
                             if (s.notice != null)
                               Text(
                                 s.notice!,
                                 style: TextStyle(
                                   fontSize: 11,
-                                  color: s.motion == 'そこへは移動できません' ? const Color(0xffa45138) : green,
+                                  color: s.motion == 'そこへは移動できません'
+                                      ? Theme.of(context).colorScheme.error
+                                      : Theme.of(context).colorScheme.primary,
                                 ),
                               ),
                           ],
@@ -603,11 +391,11 @@ class _VenueWalkPageState extends State<VenueWalkPage> {
                       height: wide ? 91 : 63,
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: .94),
+                        color: Theme.of(context).colorScheme.surfaceContainerHigh.withValues(alpha: .94),
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: const Color(0xffdee7df)),
+                        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
                       ),
-                      child: CustomPaint(painter: MiniMap(g)),
+                      child: CustomPaint(painter: MiniMap(g, Theme.of(context).colorScheme)),
                     ),
                   ),
                 if (widget.showcase && !landscape)
@@ -676,23 +464,23 @@ class _VenueWalkPageState extends State<VenueWalkPage> {
                         if (landscape) ...[
                           const SizedBox(width: 8),
                           _SurfaceButton(
-                            tooltip: '行き先を選ぶ',
-                            icon: Icons.signpost_outlined,
-                            onPressed: () => chooseDestination(context),
+                            tooltip: '遊び方',
+                            icon: Icons.help_outline,
+                            onPressed: () => showAbout(context),
                           ),
                         ],
                       ],
                     ),
                   ),
                 ),
-                if (compact && !landscape)
+                if (!landscape)
                   Positioned(
                     right: 16,
-                    top: 68,
+                    top: compact ? 68 : (wide ? 169 : 141),
                     child: _SurfaceButton(
-                      tooltip: '行き先を選ぶ',
-                      icon: Icons.signpost_outlined,
-                      onPressed: () => chooseDestination(context),
+                      tooltip: '遊び方',
+                      icon: Icons.help_outline,
+                      onPressed: () => showAbout(context),
                     ),
                   ),
                 Positioned(
@@ -714,7 +502,10 @@ class _VenueWalkPageState extends State<VenueWalkPage> {
                         ),
                         if (!landscape) ...[
                           const SizedBox(height: 5),
-                          const Text('スティックで歩く', style: TextStyle(color: muted, fontSize: 10)),
+                          Text(
+                            'スティックで歩く',
+                            style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 10),
+                          ),
                         ],
                       ],
                     ),
@@ -788,24 +579,33 @@ class _VenueWalkPageState extends State<VenueWalkPage> {
     );
   }
 
-  void showAbout(BuildContext context) => showDialog<void>(
-    context: context,
-    builder: (context) => AlertDialog(
-      title: const Text('会場さんぽの遊び方'),
-      scrollable: true,
-      content: Text(
-        '左下のスティックで歩きます。右下の走るアイコンを押している間は走り、離すと歩く速さに戻ります。\n\n'
-        '背景をドラッグして見回し、ピンチで近づいたり離れたりできます。床をタップすると、その場所まで自動で歩きます。\n\n'
-        '道しるべから行き先を選んで、4つのホールを巡ってみましょう。地図アイコンで会場全体を見渡せます。\n\n'
-        '${widget.showcase ? 'カメラで記念撮影。隣の写真アイコンを押すと、クリエイティブボードの前まで歩きます。ポーズやフレームを選んで撮影できます。\n\n' : ''}'
-        'パソコンでは W A S D または矢印キーで移動、Shiftを押している間は走り、Escで止まります。\n\n'
-        'このデモは5階の会場を散歩するサンプルです。実際の現在地や設営を示すものではなく、エスカレーターでの階移動はできません。\n\n'
-        '3Dモデル: yakitama5 / flutter_deck_slides\nだしゅまる: FlutterKaigi',
-        style: const TextStyle(fontSize: 13, height: 1.8),
+  Future<void> showAbout(BuildContext context) async {
+    setState(() => _helpOpen = true);
+    _syncActivity();
+    await showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('会場さんぽの遊び方'),
+        scrollable: true,
+        content: Text(
+          '左下のスティックで歩きます。右下の走るアイコンを押している間は走り、離すと歩く速さに戻ります。\n\n'
+          '背景をドラッグして見回し、ピンチで近づいたり離れたりできます。床をタップすると、その場所まで自動で歩きます。\n\n'
+          '「場所を探す」で行き先を選んで、4つのホールを巡ってみましょう。地図アイコンで会場全体を見渡せます。\n\n'
+          '${widget.showcase ? 'カメラで記念撮影。隣の写真アイコンを押すと、クリエイティブボードの前まで歩きます。ポーズやフレームを選んで撮影できます。\n\n' : ''}'
+          'パソコンでは W A S D または矢印キーで移動、Shiftを押している間は走り、Escで止まります。\n\n'
+          '5階の会場を散歩できます。実際の現在地を示すものではなく、エスカレーターでの階移動はできません。\n\n'
+          '3Dモデル: yakitama5 / flutter_deck_slides\nだしゅまる: FlutterKaigi',
+          style: const TextStyle(fontSize: 13, height: 1.8),
+        ),
+        actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('閉じる'))],
       ),
-      actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('閉じる'))],
-    ),
-  );
+    );
+    if (!mounted) {
+      return;
+    }
+    setState(() => _helpOpen = false);
+    _syncActivity();
+  }
 }
 
 class _WalkOnly extends StatelessWidget {
@@ -817,38 +617,6 @@ class _WalkOnly extends StatelessWidget {
     valueListenable: game.status,
     child: child,
     builder: (context, state, child) => state.overview ? const SizedBox.shrink() : child!,
-  );
-}
-
-class _Tag extends StatelessWidget {
-  const _Tag(this.text);
-  final String text;
-  @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-    decoration: BoxDecoration(
-      border: Border.all(color: const Color(0xffb7c9bc)),
-      borderRadius: BorderRadius.circular(8),
-    ),
-    child: Text(
-      text,
-      style: const TextStyle(color: green, fontSize: 10, letterSpacing: 1.2, fontWeight: FontWeight.w600),
-    ),
-  );
-}
-
-class _KeyHint extends StatelessWidget {
-  const _KeyHint(this.keys, this.label);
-  final String keys;
-  final String label;
-  @override
-  Widget build(BuildContext context) => Row(
-    children: [
-      Expanded(
-        child: Text(keys, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w600)),
-      ),
-      Text(label, style: const TextStyle(color: muted, fontSize: 10)),
-    ],
   );
 }
 
@@ -867,7 +635,7 @@ class _SurfaceButton extends StatelessWidget {
   Widget build(BuildContext context) => Tooltip(
     message: tooltip,
     child: Material(
-      color: Colors.white.withValues(alpha: .95),
+      color: Theme.of(context).colorScheme.surfaceContainerHigh.withValues(alpha: .95),
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         onTap: onPressed,
@@ -879,12 +647,16 @@ class _SurfaceButton extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(icon, size: 20, color: ink),
+                Icon(icon, size: 20, color: Theme.of(context).colorScheme.onSurface),
                 if (label != null) ...[
                   const SizedBox(width: 7),
                   Text(
                     label!,
-                    style: const TextStyle(fontSize: 11, color: ink, fontWeight: FontWeight.w600),
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: Theme.of(context).colorScheme.onSurface,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ],
               ],
@@ -957,30 +729,46 @@ class _JoystickState extends State<Joystick> {
         width: 104,
         height: 104,
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: .78),
+          color: Theme.of(context).colorScheme.surfaceContainerHigh.withValues(alpha: .78),
           shape: BoxShape.circle,
-          border: Border.all(color: const Color(0xffbacfc0)),
+          border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
         ),
         child: Stack(
           alignment: Alignment.center,
           children: [
-            const Positioned(top: 5, child: Icon(Icons.keyboard_arrow_up, size: 19, color: muted)),
-            const Positioned(bottom: 5, child: Icon(Icons.keyboard_arrow_down, size: 19, color: muted)),
-            const Positioned(left: 5, child: Icon(Icons.keyboard_arrow_left, size: 19, color: muted)),
-            const Positioned(right: 5, child: Icon(Icons.keyboard_arrow_right, size: 19, color: muted)),
+            Positioned(
+              top: 5,
+              child: Icon(Icons.keyboard_arrow_up, size: 19, color: Theme.of(context).colorScheme.onSurfaceVariant),
+            ),
+            Positioned(
+              bottom: 5,
+              child: Icon(Icons.keyboard_arrow_down, size: 19, color: Theme.of(context).colorScheme.onSurfaceVariant),
+            ),
+            Positioned(
+              left: 5,
+              child: Icon(Icons.keyboard_arrow_left, size: 19, color: Theme.of(context).colorScheme.onSurfaceVariant),
+            ),
+            Positioned(
+              right: 5,
+              child: Icon(Icons.keyboard_arrow_right, size: 19, color: Theme.of(context).colorScheme.onSurfaceVariant),
+            ),
             Transform.translate(
               offset: widget.value * 34,
               child: Container(
                 width: 43,
                 height: 43,
                 decoration: BoxDecoration(
-                  color: green,
+                  color: Theme.of(context).colorScheme.primary,
                   shape: BoxShape.circle,
                   boxShadow: [
-                    BoxShadow(color: green.withValues(alpha: .18), blurRadius: 10, offset: const Offset(0, 3)),
+                    BoxShadow(
+                      color: Theme.of(context).colorScheme.primary.withValues(alpha: .18),
+                      blurRadius: 10,
+                      offset: const Offset(0, 3),
+                    ),
                   ],
                 ),
-                child: const Icon(Icons.pets_outlined, color: Colors.white, size: 20),
+                child: Icon(Icons.pets_outlined, color: Theme.of(context).colorScheme.onPrimary, size: 20),
               ),
             ),
           ],
@@ -991,9 +779,10 @@ class _JoystickState extends State<Joystick> {
 }
 
 class HallLabels extends CustomPainter {
-  HallLabels(this.game, {required this.overviewTopInset}) : super(repaint: game);
+  HallLabels(this.game, {required this.colors, required this.overviewTopInset}) : super(repaint: game);
   final VenueWalkScene game;
   final double overviewTopInset;
+  final ColorScheme colors;
   @override
   void paint(Canvas canvas, Size size) {
     if (game.showcase && !game.overview) {
@@ -1020,7 +809,7 @@ class HallLabels extends CustomPainter {
           style: TextStyle(
             fontFamily: 'Noto Sans JP',
             fontSize: p.number != null ? 10 : 12,
-            color: ink,
+            color: colors.onSurface,
             fontWeight: FontWeight.w700,
           ),
         ),
@@ -1063,13 +852,13 @@ class HallLabels extends CustomPainter {
           offset,
           r.center,
           Paint()
-            ..color = green.withValues(alpha: .5)
+            ..color = colors.primary.withValues(alpha: .5)
             ..strokeWidth = 1,
         );
       }
       canvas.drawRRect(
         RRect.fromRectAndRadius(r, const Radius.circular(8)),
-        Paint()..color = Colors.white.withValues(alpha: .93),
+        Paint()..color = colors.surfaceContainerHigh.withValues(alpha: .93),
       );
       tp.paint(canvas, Offset(r.left + 9, r.top + 6));
       tp.dispose();
@@ -1078,12 +867,13 @@ class HallLabels extends CustomPainter {
 
   @override
   bool shouldRepaint(HallLabels oldDelegate) =>
-      oldDelegate.game != game || oldDelegate.overviewTopInset != overviewTopInset;
+      oldDelegate.colors != colors || oldDelegate.game != game || oldDelegate.overviewTopInset != overviewTopInset;
 }
 
 class MiniMap extends CustomPainter {
-  MiniMap(this.game) : super(repaint: game);
+  MiniMap(this.game, this.colors) : super(repaint: game);
   final VenueWalkScene game;
+  final ColorScheme colors;
   @override
   void paint(Canvas canvas, Size size) {
     final scale = math.min(size.width / 1774, size.height / 810);
@@ -1092,7 +882,7 @@ class MiniMap extends CustomPainter {
     for (final hall in game.navigation.places.where((p) => p.type == 'hall')) {
       canvas.drawPath(
         Path()..addPolygon(hall.polygon.map(project).toList(), true),
-        Paint()..color = const Color(0xffe1e9df),
+        Paint()..color = colors.secondaryContainer,
       );
     }
     for (final (a, b) in game.navigation.walls) {
@@ -1100,7 +890,7 @@ class MiniMap extends CustomPainter {
         project(a),
         project(b),
         Paint()
-          ..color = const Color(0xff9cb1a2)
+          ..color = colors.outline
           ..strokeWidth = .7,
       );
     }
@@ -1109,17 +899,17 @@ class MiniMap extends CustomPainter {
       canvas.drawPath(
         path,
         Paint()
-          ..color = green.withValues(alpha: .5)
+          ..color = colors.primary.withValues(alpha: .5)
           ..strokeWidth = 1.2
           ..style = PaintingStyle.stroke,
       );
     }
     final at = project(game.position);
-    canvas.drawCircle(at, 6, Paint()..color = green.withValues(alpha: .15));
-    canvas.drawCircle(at, 3, Paint()..color = green);
-    canvas.drawCircle(at, 1.2, Paint()..color = Colors.white);
+    canvas.drawCircle(at, 6, Paint()..color = colors.primary.withValues(alpha: .15));
+    canvas.drawCircle(at, 3, Paint()..color = colors.primary);
+    canvas.drawCircle(at, 1.2, Paint()..color = colors.onPrimary);
   }
 
   @override
-  bool shouldRepaint(MiniMap oldDelegate) => oldDelegate.game != game;
+  bool shouldRepaint(MiniMap oldDelegate) => oldDelegate.colors != colors || oldDelegate.game != game;
 }

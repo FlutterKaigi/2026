@@ -83,6 +83,9 @@ class VenueWalkScene extends ChangeNotifier {
   bool overview = false;
   bool paused = false;
   bool _disposed = false;
+  bool _dark = false;
+  void Function()? _applyAppearance;
+  final _surfaceColors = <(fs.PhysicallyBasedMaterial, int, int)>[];
   static const unit = .04;
   static const _compactElevationOffset = .43;
 
@@ -119,6 +122,10 @@ class VenueWalkScene extends ChangeNotifier {
       fs.loadTexture('assets/venue_map/floor_map_base.png'),
       release: () => fs.releaseTexture('assets/venue_map/floor_map_base.png'),
     );
+    final darkTexture = await _resources.track(
+      fs.loadTexture('assets/venue_map/floor_map_base_dark.png'),
+      release: () => fs.releaseTexture('assets/venue_map/floor_map_base_dark.png'),
+    );
     if (_disposed) {
       return;
     }
@@ -134,6 +141,14 @@ class VenueWalkScene extends ChangeNotifier {
     scene.antiAliasingMode = fs.AntiAliasingMode.fxaa;
     final floorMaterial = fs.UnlitMaterial(colorTexture: texture)
       ..baseColorTextureTransform = fs.TextureTransform(offset: vm.Vector2(0, 1), scale: vm.Vector2(1, -1));
+    final cleanFloor = _unlit(0xfcfdfe);
+    _applyAppearance = () {
+      floorMaterial.baseColorTexture = _dark ? darkTexture : texture;
+      cleanFloor.baseColorFactor = _color(_dark ? 0x18232e : 0xfcfdfe);
+      for (final (material, light, dark) in _surfaceColors) {
+        material.baseColorFactor = _color(_dark ? dark : light);
+      }
+    };
     final openings = showcase ? escalators.map((layout) => layout.floorOpening).whereType<Rect>().toList() : <Rect>[];
     final artwork = showcase ? escalators.map((layout) => layout.floorArtworkBounds).toList() : <Rect>[];
     _addFloor(
@@ -141,13 +156,11 @@ class VenueWalkScene extends ChangeNotifier {
       floorMaterial,
     );
     if (artwork.isNotEmpty) {
-      final colors = data['colors']! as Map<String, Object?>;
-      final floorColor = int.parse((colors['foyer']! as String).substring(1), radix: 16);
       // Replace the flat escalator artwork with clean floor. Descending shafts
       // remain open, and the shared 2D map texture stays intact for map views.
       _addFloor(
         artwork.expand((bounds) => venueFloorPatches(bounds, openings)),
-        _unlit(floorColor),
+        cleanFloor,
       );
     }
     for (final patch in venueFloorPatches(const Rect.fromLTWH(26, 77, 1718, 686), openings)) {
@@ -157,6 +170,7 @@ class VenueWalkScene extends ChangeNotifier {
         .32,
         patch.height * unit,
         0xdce7e5,
+        darkColor: 0x17232c,
         height: -.17,
       );
     }
@@ -169,6 +183,7 @@ class VenueWalkScene extends ChangeNotifier {
         .85,
         .10,
         0xd6e3df,
+        darkColor: 0x536574,
         height: .44,
       );
       node.rotation = vm.Quaternion.axisAngle(vm.Vector3(0, 1, 0), -math.atan2(dz, dx));
@@ -181,6 +196,7 @@ class VenueWalkScene extends ChangeNotifier {
         .52,
         r[3] * unit,
         0x54788a,
+        darkColor: 0x3b5968,
         height: .28,
       );
     }
@@ -220,6 +236,12 @@ class VenueWalkScene extends ChangeNotifier {
     scene.add(_routeRoot);
     scene.add(_target);
     _updateCamera(1, snap: true);
+    _applyAppearance!();
+  }
+
+  void setDarkMode({required bool dark}) {
+    _dark = dark;
+    _applyAppearance?.call();
   }
 
   void _addFloor(Iterable<Rect> patches, fs.Material material) {
@@ -249,13 +271,17 @@ class VenueWalkScene extends ChangeNotifier {
 
   fs.UnlitMaterial _unlit(int color) => fs.UnlitMaterial()..baseColorFactor = _color(color);
 
-  fs.Node _box(MapPoint p, double w, double h, double d, int color, {required double height}) {
+  fs.Node _box(MapPoint p, double w, double h, double d, int color, {required double height, int? darkColor}) {
+    final material = fs.PhysicallyBasedMaterial()
+      ..baseColorFactor = _color(color)
+      ..roughnessFactor = .86;
+    if (darkColor != null) {
+      _surfaceColors.add((material, color, darkColor));
+    }
     final node = fs.Node(
       mesh: fs.Mesh(
         fs.CuboidGeometry(vm.Vector3(w, h, d)),
-        fs.PhysicallyBasedMaterial()
-          ..baseColorFactor = _color(color)
-          ..roughnessFactor = .86,
+        material,
       ),
     )..position = world(p, height);
     scene.add(node);
@@ -269,10 +295,15 @@ class VenueWalkScene extends ChangeNotifier {
     _target.visible = false;
   }
 
-  void stop() {
+  void releaseInput() {
     keys.clear();
     stick = Offset.zero;
     _sprintHeld = false;
+    _publish(false);
+  }
+
+  void stop() {
+    releaseInput();
     _waveTime = 0;
     _notice = null;
     _clearPath();
@@ -394,6 +425,16 @@ class VenueWalkScene extends ChangeNotifier {
     _publish(false);
   }
 
+  void goToPlace(String id) {
+    for (final place in navigation.places) {
+      if (place.id == id) {
+        final target = navigation.approach(position, place);
+        goTo(target ?? place.anchor, name: place.name);
+        return;
+      }
+    }
+  }
+
   void goTo(MapPoint target, {String? name}) {
     _clearPath();
     keys.clear();
@@ -444,7 +485,7 @@ class VenueWalkScene extends ChangeNotifier {
   MapPoint movementFor(Offset input) {
     // Use the camera that is actually rendered, including easing and resize.
     // The actor's facing direction never changes the meaning of the stick.
-    final forward = camera.forward.clone()..y = 0;
+    final forward = (camera.target - camera.position)..y = 0;
     if (forward.length2 < .000001) {
       return const MapPoint(0, 0);
     }

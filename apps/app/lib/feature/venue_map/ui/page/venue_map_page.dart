@@ -4,11 +4,11 @@ import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/ui/widget/settings_icon_button.dart';
 import 'package:app/feature/venue_map/data/venue_floor_plan.dart';
 import 'package:app/feature/venue_map/provider/venue_map_view_mode.dart';
-import 'package:app/feature/venue_map/ui/page/venue_walk_page.dart';
 import 'package:app/feature/venue_map/ui/widget/venue_map_2d_controller.dart';
 import 'package:app/feature/venue_map/ui/widget/venue_map_2d_view.dart';
-import 'package:app/feature/venue_map/ui/widget/venue_map_3d_view.dart';
 import 'package:app/feature/venue_map/ui/widget/venue_place_search.dart';
+import 'package:app/feature/venue_map/ui/widget/venue_walk_controller.dart';
+import 'package:app/feature/venue_map/ui/widget/venue_walk_view.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -21,7 +21,7 @@ class VenueMapPage extends ConsumerStatefulWidget {
 class _VenueMapPageState extends ConsumerState<VenueMapPage> {
   final _mapKey = GlobalKey();
   final _twoD = VenueMap2DController();
-  final _threeD = VenueMap3DController();
+  final _threeD = VenueWalkController();
   VenuePlace? _selected;
   bool _hasOpenedThreeD = false;
   bool _searchOpen = false;
@@ -48,8 +48,6 @@ class _VenueMapPageState extends ConsumerState<VenueMapPage> {
           }
           if (mode == VenueMapViewMode.twoD) {
             _twoD.focus(selected);
-          } else {
-            _threeD.focus(selected.id);
           }
         });
       }
@@ -75,7 +73,7 @@ class _VenueMapPageState extends ConsumerState<VenueMapPage> {
         case VenueMapViewMode.twoD:
           _twoD.focus(place);
         case VenueMapViewMode.threeD:
-          _threeD.focus(place.id);
+          _threeD.goTo(place.id);
       }
     });
   }
@@ -135,16 +133,7 @@ class _VenueMapPageState extends ConsumerState<VenueMapPage> {
       appBar: AppBar(
         toolbarHeight: 52,
         title: Text(t.title, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
-        actions: [
-          TextButton.icon(
-            onPressed: () => Navigator.of(context, rootNavigator: true).push<void>(
-              MaterialPageRoute(builder: (_) => const VenueWalkPage()),
-            ),
-            icon: const Icon(Icons.directions_walk),
-            label: Text(Localizations.localeOf(context).languageCode == 'ja' ? 'さんぽ' : 'Explore'),
-          ),
-          const SettingsIconButton(),
-        ],
+        actions: const [SettingsIconButton()],
       ),
       body: SafeArea(
         top: false,
@@ -192,58 +181,50 @@ class _VenueMapPageState extends ConsumerState<VenueMapPage> {
                                 if (_hasOpenedThreeD)
                                   Offstage(
                                     offstage: mode != VenueMapViewMode.threeD,
-                                    child: VenueMap3DView(
+                                    child: VenueWalkView(
                                       controller: _threeD,
                                       active:
                                           mode == VenueMapViewMode.threeD &&
                                           !_searchOpen &&
                                           TickerMode.valuesOf(context).enabled,
-                                      selected: _selected,
-                                      onSelected: (id) {
-                                        final place = plan.find(id);
-                                        if (place != null) {
-                                          _select(place);
-                                        }
-                                      },
                                       onUseTwoD: () => unawaited(_setMode(VenueMapViewMode.twoD)),
                                     ),
                                   ),
                               ],
                             ),
                           ),
-                          Material(
-                            color: theme.colorScheme.surfaceContainerLow,
-                            child: Row(
-                              children: [
-                                const SizedBox(width: 16),
-                                Text('5F', style: theme.textTheme.titleMedium),
-                                const Spacer(),
-                                IconButton(
-                                  tooltip: t.rotate,
-                                  onPressed: mode == VenueMapViewMode.twoD ? _twoD.rotate : _threeD.rotate,
-                                  icon: const Icon(Icons.screen_rotation_alt),
-                                ),
-                                IconButton(
-                                  tooltip: t.zoomOut,
-                                  onPressed: () =>
-                                      mode == VenueMapViewMode.twoD ? _twoD.zoom(1 / 1.25) : _threeD.zoom(1 / 1.25),
-                                  icon: const Icon(Icons.remove),
-                                ),
-                                IconButton(
-                                  tooltip: t.zoomIn,
-                                  onPressed: () =>
-                                      mode == VenueMapViewMode.twoD ? _twoD.zoom(1.25) : _threeD.zoom(1.25),
-                                  icon: const Icon(Icons.add),
-                                ),
-                                IconButton(
-                                  tooltip: t.fit,
-                                  onPressed: mode == VenueMapViewMode.twoD ? _twoD.fit : _threeD.fit,
-                                  icon: const Icon(Icons.fit_screen),
-                                ),
-                                const SizedBox(width: 8),
-                              ],
+                          if (mode == VenueMapViewMode.twoD)
+                            Material(
+                              color: theme.colorScheme.surfaceContainerLow,
+                              child: Row(
+                                children: [
+                                  const SizedBox(width: 16),
+                                  Text('5F', style: theme.textTheme.titleMedium),
+                                  const Spacer(),
+                                  IconButton(
+                                    tooltip: t.rotate,
+                                    onPressed: _twoD.rotate,
+                                    icon: const Icon(Icons.screen_rotation_alt),
+                                  ),
+                                  IconButton(
+                                    tooltip: t.zoomOut,
+                                    onPressed: () => _twoD.zoom(1 / 1.25),
+                                    icon: const Icon(Icons.remove),
+                                  ),
+                                  IconButton(
+                                    tooltip: t.zoomIn,
+                                    onPressed: () => _twoD.zoom(1.25),
+                                    icon: const Icon(Icons.add),
+                                  ),
+                                  IconButton(
+                                    tooltip: t.fit,
+                                    onPressed: _twoD.fit,
+                                    icon: const Icon(Icons.fit_screen),
+                                  ),
+                                  const SizedBox(width: 8),
+                                ],
+                              ),
                             ),
-                          ),
                         ],
                       ),
                     );

@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:app/feature/venue_map/data/venue_walk_navigation.dart';
+import 'package:app/feature/venue_map/data/venue_walk_scene.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -39,9 +41,43 @@ void main() {
     expect(path.last, VenueNavigation.spawn);
   });
 
+  test('every sponsor search result leads to a reachable position outside its booth', () {
+    for (final place in nav.places.where((p) => p.type == 'sponsor')) {
+      final target = nav.approach(VenueNavigation.spawn, place);
+      expect(target, isNotNull, reason: place.name);
+      expect(nav.canStand(target!), isTrue, reason: place.name);
+      expect(target.distanceTo(place.anchor), lessThanOrEqualTo(72), reason: place.name);
+      var previous = VenueNavigation.spawn;
+      for (final next in nav.route(previous, target)) {
+        expect(nav.canTravel(previous, next), isTrue, reason: place.name);
+        previous = next;
+      }
+    }
+  });
+
   test('clicking a restricted area does not produce a route', () {
     expect(nav.route(VenueNavigation.spawn, const MapPoint(900, 200)), isEmpty);
     expect(nav.route(VenueNavigation.spawn, const MapPoint(2000, 800)), isEmpty);
+  });
+
+  test('losing input focus releases held controls without cancelling a selected walking route', () {
+    final game = VenueWalkScene()..navigation = nav;
+    addTearDown(game.dispose);
+    final hall = nav.places.firstWhere((p) => p.id == 'grand_hall_a');
+    final route = nav.route(VenueNavigation.spawn, hall.anchor);
+    game
+      ..path = route
+      ..stick = const Offset(0, -1)
+      ..keys.add(LogicalKeyboardKey.keyW)
+      ..setSprintHeld(pressed: true);
+
+    game.releaseInput();
+
+    expect(game.path, route);
+    expect(game.path, isNotEmpty);
+    expect(game.keys, isEmpty);
+    expect(game.stick, Offset.zero);
+    expect(game.status.value.running, isFalse);
   });
 
   test('large manual steps cannot tunnel through a hall wall', () {

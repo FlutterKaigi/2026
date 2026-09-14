@@ -1,9 +1,25 @@
-import 'package:app/feature/venue_map/ui/page/venue_walk_page.dart';
+import 'package:app/feature/venue_map/ui/widget/venue_walk_controller.dart';
 import 'package:app/feature/venue_map/ui/widget/venue_walk_run_button.dart';
+import 'package:app/feature/venue_map/ui/widget/venue_walk_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('a destination selected while the scene is paused is delivered once on resume', () {
+    final controller = VenueWalkController();
+    final destinations = <String>[];
+    controller
+      ..connect(destinations.add)
+      ..disconnect()
+      ..goTo('main_hall_a')
+      ..goTo('grand_hall_a');
+    expect(destinations, isEmpty);
+    controller
+      ..connect(destinations.add)
+      ..connect(destinations.add);
+    expect(destinations, ['grand_hall_a']);
+  });
+
   testWidgets('two thumbs can steer and hold sprint independently, with immediate release', (tester) async {
     var sprint = false;
     var stick = Offset.zero;

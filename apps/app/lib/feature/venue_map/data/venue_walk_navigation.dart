@@ -148,6 +148,23 @@ class VenueNavigation {
   }
 
   MapPoint _point((int, int) c) => MapPoint(c.$1 * grid, c.$2 * grid);
+
+  /// Search results can point inside a booth. Stop at its reachable edge.
+  MapPoint? approach(MapPoint from, MapPlace place) {
+    final candidates = [
+      place.anchor,
+      for (var distance = 12.0; distance <= 72; distance += 12)
+        for (var i = 0; i < 16; i++)
+          place.anchor + MapPoint(math.cos(i * math.pi / 8) * distance, math.sin(i * math.pi / 8) * distance),
+    ];
+    for (final candidate in candidates) {
+      if (canStand(candidate) && route(from, candidate).isNotEmpty) {
+        return candidate;
+      }
+    }
+    return null;
+  }
+
   bool _cellFree((int, int) c) => _walkableCells.putIfAbsent(c, () => canStand(_point(c)));
 
   (int, int)? _nearCell(MapPoint p) {

@@ -12,7 +12,7 @@ void main(List<String> args) async {
     buildTextures(
       buildInput: input,
       buildOutput: output,
-      textures: const ['assets/venue_map/floor_map_base.png'],
+      textures: const ['assets/venue_map/floor_map_base.png', 'assets/venue_map/floor_map_base_dark.png'],
     );
   });
 }
