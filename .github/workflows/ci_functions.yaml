@@ -4,12 +4,16 @@ on:
   pull_request:
     paths:
       - functions/**
+      - packages/data/firebase/**
+      - firebase.json
       - .github/workflows/ci_functions.yaml
   push:
     branches:
       - main
     paths:
       - functions/**
+      - packages/data/firebase/**
+      - firebase.json
       - .github/workflows/ci_functions.yaml
   workflow_dispatch:
 
@@ -46,6 +50,26 @@ jobs:
         working-directory: functions
         run: npm run lint
 
-      - name: Build
+      - name: Unit tests with coverage
         working-directory: functions
-        run: npm run build
+        run: npm run test:coverage
+
+      - uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Firebase Emulator integration tests
+        env:
+          SUPPORT_LT_TEST_PROJECT_ID: demo-flutterkaigi-601
+        run: |
+          node <<'JS'
+          const fs = require('node:fs');
+          const { randomBytes } = require('node:crypto');
+          fs.writeFileSync('functions/.env', 'SYNC_TARGET_PROJECT_ID=demo-flutterkaigi-601-sync\n');
+          fs.writeFileSync('functions/.secret.local', `EXCHANGE_TOKEN_SECRET=${randomBytes(32).toString('hex')}\n`);
+          JS
+          npx -y firebase-tools@13.35.1 emulators:exec \
+            --project "$SUPPORT_LT_TEST_PROJECT_ID" \
+            --only auth,firestore,functions \
+            "npm --prefix functions run test:emulator"

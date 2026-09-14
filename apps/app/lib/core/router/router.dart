@@ -20,6 +20,7 @@ import 'package:app/feature/settings/ui/page/settings_page.dart';
 import 'package:app/feature/sponsor/ui/page/sponsor_details_page.dart';
 import 'package:app/feature/sponsor/ui/page/sponsor_list_page.dart';
 import 'package:app/feature/staff/ui/page/staff_member_list_page.dart';
+import 'package:app/feature/support_lt/ui/page/support_lt_page.dart';
 import 'package:app/feature/venue_map/ui/page/venue_map_page.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';

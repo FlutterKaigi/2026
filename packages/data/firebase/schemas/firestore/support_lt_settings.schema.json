@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/FlutterKaigi/2026/packages/data/firebase/schemas/firestore/support_lt_settings.schema.json",
+  "title": "SupportLtSettings",
+  "description": "Server-managed shared registration code at supportLtSettings/current. Only verified flutterkaigi.jp admins can read it; issueSupportLtCode is the only writer. The code has no expiry and stays valid until a rotation, which atomically invalidates its predecessor.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "code",
+    "issuedAt",
+    "issuedBy",
+    "version"
+  ],
+  "properties": {
+    "code": {
+      "type": "string",
+      "pattern": "^[0-9]{6}$"
+    },
+    "issuedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "issuedBy": {
+      "type": "string",
+      "minLength": 1
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 1
+    }
+  }
+}
