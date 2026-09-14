@@ -13,8 +13,7 @@ enum SnsPlatform {
   qiita('qiita', 'Qiita', null),
   note('note', 'note', null),
   medium('medium', 'Medium', null),
-  other('web', null, null)
-  ;
+  other('web', null, null);
 
   const SnsPlatform(this.key, this._label, this.iconAsset);
 

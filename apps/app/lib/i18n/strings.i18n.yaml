@@ -120,6 +120,64 @@ venueMap:
   viewMode: 地図の表示方法
   useTwoD: 2Dで表示
   saveFailed: 表示方法を保存できませんでした
+venueWalk:
+  sceneLabel: だしゅまると会場さんぽ。スティック、床のタップ、または矢印キーで歩けます。
+  currentLocation: ただいま
+  entrance: エントランス
+  entranceSign: 入口
+  selectedPoint: 選んだ場所
+  headingTo: $placeへ移動中
+  arrivedAt: $placeに到着
+  unreachable: そこへは移動できません
+  photoMode: 撮影モード
+  walkToPhotoSpot: フォトスポットへ歩く
+  followTooltip: だしゅまるを追う
+  overviewTooltip: フロア全体を見る
+  follow: 追いかける
+  overview: 全体を見る
+  help: 遊び方
+  stickHint: スティックで歩く
+  stickLabel: だしゅまるを動かすスティック
+  stopTooltip: 移動を止める
+  stop: ここで止まる
+  reset: 入口に戻る
+  wave: 手をふる
+  backToWalk: さんぽに戻る
+  run: 走る
+  runningSpeed: 走る速度
+  walkingSpeed: 歩く速度
+  runHint: 押している間だけ走ります。離すと歩きます。キーボードではShiftキーを使います。
+  close: 閉じる
+  instructions:
+    title: 会場さんぽの遊び方
+    movement: 左下のスティックで歩きます。右下の走るアイコンを押している間は走り、離すと歩く速さに戻ります。
+    camera: 背景をドラッグして見回し、ピンチで近づいたり離れたりできます。床をタップすると、その場所まで自動で歩きます。
+    places: 「場所を探す」で行き先を選んで、4つのホールを巡ってみましょう。地図アイコンで会場全体を見渡せます。
+    photos: カメラで記念撮影。隣の写真アイコンを押すと、クリエイティブボードの前まで歩きます。ポーズやフレームを選んで撮影できます。
+    keyboard: パソコンでは W A S D または矢印キーで移動、Shiftを押している間は走り、Escで止まります。
+    scope: 5階の会場を散歩できます。実際の現在地を示すものではなく、エスカレーターでの階移動はできません。
+    credits: "3Dモデル: yakitama5 / flutter_deck_slides\nだしゅまる: FlutterKaigi"
+  photo:
+    title: だしゅまると記念撮影
+    resultTitle: 記念写真
+    imageLabel: 撮影しただしゅまるの記念写真
+    downloadStarted: 写真のダウンロードを開始しました
+    saveFailed: 写真を保存できませんでした。もう一度お試しください。
+    savePng: PNGを保存
+    captureFailed: 撮影できませんでした。もう一度お試しください。
+    caption: だしゅまると、会場さんぽ。
+    captionAt: だしゅまると、$placeで。
+    shutter: 写真を撮る
+    capturing: 撮影中
+    hideUi: UIを隠す。画面をタップすると戻ります
+    faceCamera: こちらを向く
+    removeFrame: フレームを外す
+    addFrame: フレームを付ける
+    poses:
+      standing: 立つ
+      wave: 手をふる
+      sitting: 座る
+      jumping: ジャンプ
 eventInfo:
   title: イベント概要
   newsTitle: 最新のお知らせ

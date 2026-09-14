@@ -2,8 +2,7 @@
 enum WindowSize {
   compact,
   medium,
-  expanded
-  ;
+  expanded;
 
   /// Returns the [WindowSize] matching the given [width] in logical pixels.
   factory WindowSize.fromWidth(double width) => switch (width) {
