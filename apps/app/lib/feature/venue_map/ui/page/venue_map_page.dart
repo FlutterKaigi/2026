@@ -4,6 +4,7 @@ import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/ui/widget/settings_icon_button.dart';
 import 'package:app/feature/venue_map/data/venue_floor_plan.dart';
 import 'package:app/feature/venue_map/provider/venue_map_view_mode.dart';
+import 'package:app/feature/venue_map/ui/page/venue_walk_page.dart';
 import 'package:app/feature/venue_map/ui/widget/venue_map_2d_controller.dart';
 import 'package:app/feature/venue_map/ui/widget/venue_map_2d_view.dart';
 import 'package:app/feature/venue_map/ui/widget/venue_map_3d_view.dart';
@@ -134,7 +135,16 @@ class _VenueMapPageState extends ConsumerState<VenueMapPage> {
       appBar: AppBar(
         toolbarHeight: 52,
         title: Text(t.title, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
-        actions: const [SettingsIconButton()],
+        actions: [
+          TextButton.icon(
+            onPressed: () => Navigator.of(context, rootNavigator: true).push<void>(
+              MaterialPageRoute(builder: (_) => const VenueWalkPage()),
+            ),
+            icon: const Icon(Icons.directions_walk),
+            label: Text(Localizations.localeOf(context).languageCode == 'ja' ? 'さんぽ' : 'Explore'),
+          ),
+          const SettingsIconButton(),
+        ],
       ),
       body: SafeArea(
         top: false,
