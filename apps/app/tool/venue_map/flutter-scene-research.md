@@ -2,7 +2,7 @@
 
 ## 採用構成
 
-Flutter **3.47.0 / Dart 3.13.0**とFlutter Scene **0.23.0**を使用します。アプリの既存の3D切り替え先を散歩UIにし、会場マップの領域内でモデルを操作します。実装と通常アプリでの起動手順は [会場さんぽ](venue-walk.md) を参照してください。
+Flutter **3.47.3 / Dart 3.13.3**とFlutter Scene **0.23.0**を使用します。アプリの既存の3D切り替え先を散歩UIにし、会場マップの領域内でモデルを操作します。実装と通常アプリでの起動手順は [会場さんぽ](venue-walk.md) を参照してください。
 
 ネイティブはFlutter GPU / Impeller、WebはFlutter Scene内蔵WebGL2を使います。モデルと両テーマの床画像は `hook/build.dart` で事前変換します。[Flutter Scene 0.23の設定](https://github.com/bdero/flutter_scene/blob/flutter_scene-0.23.0/README.md)
 
