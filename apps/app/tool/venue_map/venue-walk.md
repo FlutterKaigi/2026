@@ -4,6 +4,8 @@
 
 Flutter **3.47.3 / Dart 3.13.3**、Flutter Scene **0.23.0**を使用します。選定理由は [調査レポート](flutter-scene-research.md)、モデルの出典は [モデルのREADME](../../assets/models/README.md) を参照してください。
 
+描画・経路探索の改善内容と計測手順は [性能と現在地判定の修正](venue-walk-performance.md) を参照してください。
+
 ## 起動と確認
 
 アプリ通常のFirebase設定または開発用スタブを準備し、リポジトリルートで `fvm install` と `fvm flutter pub get` を実行します。`apps/app` からアプリ本体を起動します。
