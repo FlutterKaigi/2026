@@ -2,6 +2,8 @@ import 'package:app/feature/mission/data/profile_exchange_progress.dart';
 import 'package:data/data.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'test_profiles.dart';
+
 void main() {
   ProfileExchangeProgress evaluate(List<UserProfile?> others, {UserProfile? self}) =>
       ProfileExchangeProgress.evaluate(uid: 'me', profile: self ?? profile('me', 'JP'), exchangedProfiles: others);
@@ -37,11 +39,3 @@ void main() {
     expect(evaluate([profile('a', 'US')], self: profile('me', 'ZZ')).hasDifferentCountry, isFalse);
   });
 }
-
-UserProfile profile(String uid, String country) => UserProfile(
-  id: uid,
-  displayName: uid,
-  countryOrRegion: country,
-  createdAt: DateTime.utc(2026),
-  updatedAt: DateTime.utc(2026),
-);

@@ -20,7 +20,7 @@ final class SnsPostRegistration {
   static bool isValidUrl(String value) {
     final uri = Uri.tryParse(value);
     return value.length <= urlMaxLength &&
-        RegExp(r'^https?://[^/?#\s@]+[.][^/?#\s@]+/[^\s]+$').hasMatch(value) &&
+        RegExp(r'^https?://[^/?#\s@]+[.][^/?#\s@]+/[^?#\s][^\s]*$').hasMatch(value) &&
         uri != null &&
         uri.host.isNotEmpty &&
         uri.userInfo.isEmpty &&

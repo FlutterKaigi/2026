@@ -24,6 +24,7 @@ void main() {
       'https://x.com',
       'https://x.com/',
       'https://x.com/?query=post',
+      'https://x.com/#post',
       'https://x.com/a b',
       'https://user:password@x.com/post/123',
       'https://localhost/post/123',

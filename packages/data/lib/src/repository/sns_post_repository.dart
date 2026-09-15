@@ -21,7 +21,7 @@ final class FirestoreSnsPostRepository implements SnsPostRepository {
 
   @override
   Stream<SnsPostRegistration?> watch(String uid) =>
-      watchFirestoreDocument(_document(uid)).where((snapshot) => !snapshot.metadata.hasPendingWrites).map((snapshot) {
+      watchFirestoreDocument(_document(uid), includePendingWrites: false).map((snapshot) {
         final data = snapshot.data();
         if (data == null) {
           return null;

@@ -314,6 +314,7 @@ snsPost:
   saving: Saving…
   cancel: Cancel
   saveFailed: Could not save. Check your connection and try again.
+  invalidRegistration: The saved registration could not be read. Register the post URL and companion category again.
   registeredTitle: SNS post registered
   registeredBody: Your SNS post mission is complete.
   updatedAt: "Updated: $date"
@@ -332,12 +333,12 @@ mission:
   allComplete: All missions complete!
   inProgress: Mission progress
   checkFailed: Some results are unavailable
-  progress: $n of 3 missions complete
+  progress: $n of $total missions complete
   ltTitle: Join Support LT
   ltDescription: Supporters and speakers register with the code at the venue
   exchangeTitle: Exchange profiles
-  exchangeDescription: Meet at least 3 people, including someone from a different country or region
-  exchangeCount: "$n / 3 people met"
+  exchangeDescription: Meet at least $required people, including someone from a different country or region
+  exchangeCount: "$n / $required people met"
   differentCountry: Met someone from a different country or region
   profileRequired: Add your country or region to your profile
   snsTitle: Share a photo on SNS

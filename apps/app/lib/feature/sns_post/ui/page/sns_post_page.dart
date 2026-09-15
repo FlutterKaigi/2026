@@ -3,9 +3,9 @@ import 'package:app/core/log/talker.dart';
 import 'package:app/core/router/router.dart';
 import 'package:app/core/ui/launch_external_url.dart';
 import 'package:app/core/ui/widget/app_error_view.dart';
-import 'package:app/core/ui/widget/app_scrollbar.dart';
+import 'package:app/core/ui/widget/app_page_content.dart';
 import 'package:app/core/ui/widget/brand_header_card.dart';
-import 'package:app/feature/auth/data/provider/auth_state.dart';
+import 'package:app/feature/auth/ui/widget/authenticated_body.dart';
 import 'package:app/feature/auth/ui/widget/sign_in_card.dart';
 import 'package:app/feature/sns_post/data/sns_post_provider.dart';
 import 'package:app/feature/sns_post/ui/sns_post_companion_label.dart';
@@ -15,13 +15,12 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 
-class SnsPostPage extends ConsumerWidget {
+class SnsPostPage extends StatelessWidget {
   const SnsPostPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final t = Translations.of(context);
-    final auth = ref.watch(authStateChangesProvider);
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 52,
@@ -30,23 +29,19 @@ class SnsPostPage extends ConsumerWidget {
           style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
         ),
       ),
-      body: switch (auth) {
-        AsyncData(value: null) => _PageContent(
+      body: AuthenticatedBody(
+        signedOut: AppPageContent(
+          maxWidth: 560,
           child: SignInCard(title: t.auth.signIn.required, description: t.snsPost.signInRequired),
         ),
-        AsyncData(:final value?) => _RegistrationBody(key: ValueKey(value.uid), uid: value.uid),
-        AsyncError(:final error) => AppErrorView(
-          error: error,
-          onRetry: () => ref.invalidate(authStateChangesProvider),
-        ),
-        _ => const Center(child: CircularProgressIndicator.adaptive()),
-      },
+        builder: (uid) => _RegistrationBody(uid: uid),
+      ),
     );
   }
 }
 
 class _RegistrationBody extends HookConsumerWidget {
-  const _RegistrationBody({required this.uid, super.key});
+  const _RegistrationBody({required this.uid});
 
   final String uid;
 
@@ -55,7 +50,8 @@ class _RegistrationBody extends HookConsumerWidget {
     final registration = ref.watch(snsPostRegistrationProvider(uid));
     final editing = useState(false);
     return switch (registration) {
-      AsyncData(:final value) => _PageContent(
+      AsyncData(:final value) => AppPageContent(
+        maxWidth: 560,
         child: BrandHeaderCard(
           child: value == null || editing.value
               ? _RegistrationForm(
@@ -65,6 +61,18 @@ class _RegistrationBody extends HookConsumerWidget {
                   onCancel: value == null ? null : () => editing.value = false,
                 )
               : _RegisteredContent(registration: value, onEdit: () => editing.value = true),
+        ),
+      ),
+      AsyncError(error: FormatException()) => AppPageContent(
+        maxWidth: 560,
+        child: BrandHeaderCard(
+          child: _RegistrationForm(
+            uid: uid,
+            initial: null,
+            notice: Translations.of(context).snsPost.invalidRegistration,
+            onSaved: () => ref.invalidate(snsPostRegistrationProvider(uid)),
+            onCancel: null,
+          ),
         ),
       ),
       AsyncError(:final error) => AppErrorView(
@@ -77,12 +85,19 @@ class _RegistrationBody extends HookConsumerWidget {
 }
 
 class _RegistrationForm extends HookConsumerWidget {
-  const _RegistrationForm({required this.uid, required this.initial, required this.onSaved, required this.onCancel});
+  const _RegistrationForm({
+    required this.uid,
+    required this.initial,
+    required this.onSaved,
+    required this.onCancel,
+    this.notice,
+  });
 
   final String uid;
   final SnsPostRegistration? initial;
   final VoidCallback onSaved;
   final VoidCallback? onCancel;
+  final String? notice;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -90,7 +105,7 @@ class _RegistrationForm extends HookConsumerWidget {
     final theme = Theme.of(context);
     final formKey = useMemoized(GlobalKey<FormState>.new);
     final controller = useTextEditingController(text: initial?.url);
-    final companion = useState(initial?.companion);
+    final companionKey = useMemoized(GlobalKey<FormFieldState<SnsPostCompanion>>.new);
     final submitting = useState(false);
     final error = useState<String?>(null);
 
@@ -107,7 +122,7 @@ class _RegistrationForm extends HookConsumerWidget {
             .save(
               uid: uid,
               url: controller.text.trim(),
-              companion: companion.value!,
+              companion: companionKey.currentState!.value!,
             );
         if (context.mounted) {
           onSaved();
@@ -124,110 +139,107 @@ class _RegistrationForm extends HookConsumerWidget {
       }
     }
 
-    return PopScope(
-      canPop: !submitting.value,
-      child: Form(
-        key: formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              t.snsPost.heading,
-              textAlign: TextAlign.center,
-              style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              t.snsPost.description,
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-            ),
-            const SizedBox(height: 28),
-            Text(t.snsPost.companionLabel, style: theme.textTheme.titleMedium),
-            const SizedBox(height: 4),
-            Text(t.snsPost.companionHint, style: theme.textTheme.bodySmall),
-            const SizedBox(height: 12),
-            FormField<SnsPostCompanion>(
-              initialValue: companion.value,
-              validator: (value) => value == null ? t.snsPost.companionRequired : null,
-              builder: (field) => Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 4,
-                    children: [
-                      for (final option in SnsPostCompanion.values)
-                        ChoiceChip(
-                          label: Text(snsPostCompanionLabel(t, option)),
-                          selected: companion.value == option,
-                          onSelected: submitting.value
-                              ? null
-                              : (_) {
-                                  companion.value = option;
-                                  field.didChange(option);
-                                },
-                        ),
-                    ],
-                  ),
-                  if (field.errorText case final message?)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8),
-                      child: Text(message, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error)),
-                    ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-            TextFormField(
-              controller: controller,
-              enabled: !submitting.value,
-              keyboardType: TextInputType.url,
-              textInputAction: TextInputAction.done,
-              autocorrect: false,
-              enableSuggestions: false,
-              maxLength: SnsPostRegistration.urlMaxLength,
-              decoration: InputDecoration(
-                labelText: t.snsPost.urlLabel,
-                hintText: 'https://x.com/…/status/…',
-                helperText: t.snsPost.urlHint,
-                helperMaxLines: 2,
-                border: const OutlineInputBorder(),
-                prefixIcon: const Icon(Icons.link),
-                counterText: '',
-              ),
-              validator: (value) => SnsPostRegistration.isValidUrl(value?.trim() ?? '') ? null : t.snsPost.invalidUrl,
-              onFieldSubmitted: (_) => submit(),
-            ),
-            if (error.value case final message?) ...[
-              const SizedBox(height: 16),
-              Text(
-                message,
-                style: TextStyle(color: theme.colorScheme.error),
-                semanticsLabel: message,
-              ),
-            ],
-            const SizedBox(height: 24),
-            FilledButton.icon(
-              onPressed: submitting.value ? null : submit,
-              style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(48)),
-              icon: submitting.value
-                  ? const SizedBox.square(dimension: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                  : const Icon(Icons.check),
-              label: Text(
-                submitting.value
-                    ? t.snsPost.saving
-                    : initial == null
-                    ? t.snsPost.register
-                    : t.snsPost.update,
-              ),
-            ),
-            if (onCancel != null) ...[
-              const SizedBox(height: 8),
-              TextButton(onPressed: submitting.value ? null : onCancel, child: Text(t.snsPost.cancel)),
-            ],
+    return Form(
+      key: formKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (notice != null) ...[
+            Text(notice!, style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.error)),
+            const SizedBox(height: 16),
           ],
-        ),
+          Text(
+            t.snsPost.heading,
+            textAlign: TextAlign.center,
+            style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            t.snsPost.description,
+            textAlign: TextAlign.center,
+            style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+          ),
+          const SizedBox(height: 28),
+          Text(t.snsPost.companionLabel, style: theme.textTheme.titleMedium),
+          const SizedBox(height: 4),
+          Text(t.snsPost.companionHint, style: theme.textTheme.bodySmall),
+          const SizedBox(height: 12),
+          FormField<SnsPostCompanion>(
+            key: companionKey,
+            initialValue: initial?.companion,
+            validator: (value) => value == null ? t.snsPost.companionRequired : null,
+            builder: (field) => Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 4,
+                  children: [
+                    for (final option in SnsPostCompanion.values)
+                      ChoiceChip(
+                        label: Text(snsPostCompanionLabel(t, option)),
+                        selected: field.value == option,
+                        onSelected: submitting.value ? null : (_) => field.didChange(option),
+                      ),
+                  ],
+                ),
+                if (field.errorText case final message?)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Text(message, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error)),
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+          TextFormField(
+            controller: controller,
+            enabled: !submitting.value,
+            keyboardType: TextInputType.url,
+            textInputAction: TextInputAction.done,
+            autocorrect: false,
+            enableSuggestions: false,
+            maxLength: SnsPostRegistration.urlMaxLength,
+            decoration: InputDecoration(
+              labelText: t.snsPost.urlLabel,
+              hintText: 'https://x.com/…/status/…',
+              helperText: t.snsPost.urlHint,
+              helperMaxLines: 2,
+              border: const OutlineInputBorder(),
+              prefixIcon: const Icon(Icons.link),
+              counterText: '',
+            ),
+            validator: (value) => SnsPostRegistration.isValidUrl(value?.trim() ?? '') ? null : t.snsPost.invalidUrl,
+            onFieldSubmitted: (_) => submit(),
+          ),
+          if (error.value case final message?) ...[
+            const SizedBox(height: 16),
+            Text(
+              message,
+              style: TextStyle(color: theme.colorScheme.error),
+              semanticsLabel: message,
+            ),
+          ],
+          const SizedBox(height: 24),
+          FilledButton.icon(
+            onPressed: submitting.value ? null : submit,
+            style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(48)),
+            icon: submitting.value
+                ? const SizedBox.square(dimension: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                : const Icon(Icons.check),
+            label: Text(
+              submitting.value
+                  ? t.snsPost.saving
+                  : initial == null
+                  ? t.snsPost.register
+                  : t.snsPost.update,
+            ),
+          ),
+          if (onCancel != null) ...[
+            const SizedBox(height: 8),
+            TextButton(onPressed: submitting.value ? null : onCancel, child: Text(t.snsPost.cancel)),
+          ],
+        ],
       ),
     );
   }
@@ -309,20 +321,4 @@ class _RegisteredContent extends StatelessWidget {
       ],
     );
   }
-}
-
-class _PageContent extends StatelessWidget {
-  const _PageContent({required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) => AppScrollbar(
-    child: SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-      child: Center(
-        child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 560), child: child),
-      ),
-    ),
-  );
 }

@@ -4,8 +4,8 @@ const { FieldValue, Timestamp } = require("firebase-admin/firestore");
 const {
   issueSupportLtCodeForUser,
   registerSupportLtForUser,
-  deleteSupportLtUserData,
 } = require("../lib/support_lt_service.js");
+const { deleteAuthUserData } = require("../lib/auth_user_data.js");
 
 const NOW = 1_800_000_000_000;
 const BUCKET = String(Math.floor(NOW / 600_000));
@@ -312,14 +312,16 @@ test("expired lock and old failure window reset attempts, and success clears sta
   }
 });
 
-test("account cleanup deletes registration and attempts without requiring a profile", async () => {
+test("account cleanup deletes all account-scoped mission data and attempts without requiring a profile", async () => {
   const { dependencies, documents } = fixture({
     [`supportLtRegistrations/${USER.uid}`]: { displayName: "Name" },
     [`supportLtRegistrationAttempts/${USER.uid}`]: { failCount: 2 },
+    [`snsPostRegistrations/${USER.uid}`]: { companion: "staff" },
+    [`exchangeCodeAttempts/${USER.uid}`]: { failCount: 1 },
     "supportLtRegistrations/other": { displayName: "Other" },
   });
-  await deleteSupportLtUserData(USER.uid, dependencies.db);
-  await deleteSupportLtUserData(USER.uid, dependencies.db);
+  await deleteAuthUserData(USER.uid, dependencies.db);
+  await deleteAuthUserData(USER.uid, dependencies.db);
   assert.deepEqual([...documents.keys()], ["supportLtRegistrations/other"]);
 });
 

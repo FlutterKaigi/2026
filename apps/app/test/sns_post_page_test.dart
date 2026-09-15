@@ -158,6 +158,45 @@ void main() {
     expect(find.byType(TextFormField), findsOneWidget);
   });
 
+  testWidgets('can leave while a save awaits server acknowledgement', (tester) async {
+    await tester.pumpWidget(subject());
+    await tester.pumpAndSettle();
+    router.go('/account/missions');
+    await tester.pumpAndSettle();
+    unawaited(router.push<void>('/account/sns-post'));
+    await tester.pumpAndSettle();
+    final pending = repository.saveGate = Completer<void>();
+    await tester.tap(find.text('スタッフ'));
+    await tester.enterText(find.byType(TextFormField), 'https://x.com/test/status/123');
+    await tester.ensureVisible(find.byType(FilledButton));
+    await tester.tap(find.byType(FilledButton));
+    await tester.pump();
+    expect(repository.registrations, isEmpty);
+
+    await tester.tap(find.byType(BackButton));
+    await tester.pump(const Duration(milliseconds: 400));
+    final locationWhilePending = router.routeInformationProvider.value.uri.path;
+    pending.complete();
+    await tester.pumpAndSettle();
+
+    expect(locationWhilePending, '/account/missions');
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('malformed stored registrations can be replaced from the form', (tester) async {
+    repository.watchError = const FormatException('Invalid SNS post registration.');
+    await tester.pumpWidget(subject());
+    await tester.pumpAndSettle();
+    expect(find.byType(TextFormField), findsOneWidget);
+    expect(find.text('SNS投稿を登録しました'), findsNothing);
+
+    repository.watchError = null;
+    await tester.tap(find.text('スタッフ'));
+    await tester.enterText(find.byType(TextFormField), 'https://x.com/test/status/123');
+    await tapSave(tester);
+    expect(find.text('SNS投稿を登録しました'), findsOneWidget);
+  });
+
   testWidgets('switching accounts discards the previous account draft', (tester) async {
     await tester.pumpWidget(subject());
     await tester.pumpAndSettle();

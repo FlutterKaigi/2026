@@ -433,6 +433,7 @@ class _Translations$snsPost$en extends Translations$snsPost$ja {
 	@override String get saving => 'Saving…';
 	@override String get cancel => 'Cancel';
 	@override String get saveFailed => 'Could not save. Check your connection and try again.';
+	@override String get invalidRegistration => 'The saved registration could not be read. Register the post URL and companion category again.';
 	@override String get registeredTitle => 'SNS post registered';
 	@override String get registeredBody => 'Your SNS post mission is complete.';
 	@override String updatedAt({required Object date}) => 'Updated: ${date}';
@@ -458,12 +459,12 @@ class _Translations$mission$en extends Translations$mission$ja {
 	@override String get allComplete => 'All missions complete!';
 	@override String get inProgress => 'Mission progress';
 	@override String get checkFailed => 'Some results are unavailable';
-	@override String progress({required Object n}) => '${n} of 3 missions complete';
+	@override String progress({required Object n, required Object total}) => '${n} of ${total} missions complete';
 	@override String get ltTitle => 'Join Support LT';
 	@override String get ltDescription => 'Supporters and speakers register with the code at the venue';
 	@override String get exchangeTitle => 'Exchange profiles';
-	@override String get exchangeDescription => 'Meet at least 3 people, including someone from a different country or region';
-	@override String exchangeCount({required Object n}) => '${n} / 3 people met';
+	@override String exchangeDescription({required Object required}) => 'Meet at least ${required} people, including someone from a different country or region';
+	@override String exchangeCount({required Object n, required Object required}) => '${n} / ${required} people met';
 	@override String get differentCountry => 'Met someone from a different country or region';
 	@override String get profileRequired => 'Add your country or region to your profile';
 	@override String get snsTitle => 'Share a photo on SNS';
@@ -1146,6 +1147,7 @@ extension on TranslationsEn {
 			'snsPost.saving' => 'Saving…',
 			'snsPost.cancel' => 'Cancel',
 			'snsPost.saveFailed' => 'Could not save. Check your connection and try again.',
+			'snsPost.invalidRegistration' => 'The saved registration could not be read. Register the post URL and companion category again.',
 			'snsPost.registeredTitle' => 'SNS post registered',
 			'snsPost.registeredBody' => 'Your SNS post mission is complete.',
 			'snsPost.updatedAt' => ({required Object date}) => 'Updated: ${date}',
@@ -1162,12 +1164,12 @@ extension on TranslationsEn {
 			'mission.allComplete' => 'All missions complete!',
 			'mission.inProgress' => 'Mission progress',
 			'mission.checkFailed' => 'Some results are unavailable',
-			'mission.progress' => ({required Object n}) => '${n} of 3 missions complete',
+			'mission.progress' => ({required Object n, required Object total}) => '${n} of ${total} missions complete',
 			'mission.ltTitle' => 'Join Support LT',
 			'mission.ltDescription' => 'Supporters and speakers register with the code at the venue',
 			'mission.exchangeTitle' => 'Exchange profiles',
-			'mission.exchangeDescription' => 'Meet at least 3 people, including someone from a different country or region',
-			'mission.exchangeCount' => ({required Object n}) => '${n} / 3 people met',
+			'mission.exchangeDescription' => ({required Object required}) => 'Meet at least ${required} people, including someone from a different country or region',
+			'mission.exchangeCount' => ({required Object n, required Object required}) => '${n} / ${required} people met',
 			'mission.differentCountry' => 'Met someone from a different country or region',
 			'mission.profileRequired' => 'Add your country or region to your profile',
 			'mission.snsTitle' => 'Share a photo on SNS',

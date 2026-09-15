@@ -101,6 +101,8 @@ test("SNS registrations validate fields, enforce ownership, and follow Auth dele
     const invalid = [
       { url: { stringValue: "javascript:alert(1)" } },
       { url: { stringValue: "https://x.com" } },
+      { url: { stringValue: "https://x.com/?query=post" } },
+      { url: { stringValue: "https://x.com/#post" } },
       { url: { stringValue: "https://x.com/a b" } },
       { url: { stringValue: "https://user:password@x.com/post/123" } },
       { url: { stringValue: `https://x.com/${"a".repeat(2048)}` } },
@@ -108,9 +110,12 @@ test("SNS registrations validate fields, enforce ownership, and follow Auth dele
       { companion: { arrayValue: { values: [{ stringValue: "staff" }, { stringValue: "speaker" }] } } },
       { image: { stringValue: "not-a-supported-field" } },
     ];
-    for (const fields of invalid) assert.equal((await write(owner, owner.uid, fields)).status, 403);
-    assert.equal((await write(owner, owner.uid, { updatedAt: { timestampValue: "2026-01-01T00:00:00Z" } }, false)).status, 403);
-    assert.equal((await write(owner, owner.uid, {}, false)).status, 403);
+    // The owner's document exists (update); the stranger's does not (create).
+    for (const user of [owner, stranger]) {
+      for (const fields of invalid) assert.equal((await write(user, user.uid, fields)).status, 403);
+      assert.equal((await write(user, user.uid, { updatedAt: { timestampValue: "2026-01-01T00:00:00Z" } }, false)).status, 403);
+      assert.equal((await write(user, user.uid, {}, false)).status, 403);
+    }
   });
 
   await t.test("the owner can remove their registration", async () => {
@@ -119,12 +124,20 @@ test("SNS registrations validate fields, enforce ownership, and follow Auth dele
     assert.equal((await write(owner, owner.uid)).status, 200);
   });
 
-  await t.test("deleting an Auth account without a profile cleans up the post", async () => {
+  await t.test("deleting an Auth account without a profile cleans up all mission data and attempts", async () => {
+    const collections = ["snsPostRegistrations", "supportLtRegistrations", "supportLtRegistrationAttempts", "exchangeCodeAttempts"];
+    for (const collection of collections.slice(1)) {
+      await db.doc(`${collection}/${owner.uid}`).set({ test: true });
+    }
+    assert.equal((await write(stranger, stranger.uid)).status, 200);
     await auth.deleteUser(owner.uid);
     const deadline = Date.now() + 20_000;
-    while (Date.now() < deadline && (await db.doc(path).get()).exists) {
+    const remaining = async () => (await db.getAll(...collections.map((collection) => db.doc(`${collection}/${owner.uid}`))))
+      .filter((document) => document.exists);
+    while (Date.now() < deadline && (await remaining()).length > 0) {
       await new Promise((resolve) => setTimeout(resolve, 200));
     }
-    assert.equal((await db.doc(path).get()).exists, false);
+    assert.deepEqual(await remaining(), []);
+    assert.equal((await db.doc(`snsPostRegistrations/${stranger.uid}`).get()).exists, true);
   });
 });

@@ -2,9 +2,9 @@ import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/log/talker.dart';
 import 'package:app/core/router/router.dart';
 import 'package:app/core/ui/widget/app_error_view.dart';
-import 'package:app/core/ui/widget/app_scrollbar.dart';
+import 'package:app/core/ui/widget/app_page_content.dart';
 import 'package:app/core/ui/widget/brand_header_card.dart';
-import 'package:app/feature/auth/data/provider/auth_state.dart';
+import 'package:app/feature/auth/ui/widget/authenticated_body.dart';
 import 'package:app/feature/auth/ui/widget/sign_in_card.dart';
 import 'package:app/feature/support_lt/data/provider/support_lt_provider.dart';
 import 'package:app/feature/support_lt/ui/support_lt_error_message.dart';
@@ -14,13 +14,12 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 /// Registers attendance with the shared code supplied by event organizers.
-class SupportLtPage extends ConsumerWidget {
+class SupportLtPage extends StatelessWidget {
   const SupportLtPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final t = Translations.of(context);
-    final auth = ref.watch(authStateChangesProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -30,27 +29,24 @@ class SupportLtPage extends ConsumerWidget {
           style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
         ),
       ),
-      body: switch (auth) {
-        // 共有リンクから開いた参加者も、アカウントタブへ移らずにこの場でサインインできる。
-        AsyncData(value: null) => _PageContent(
+      body: AuthenticatedBody(
+        signedOut: AppPageContent(
+          maxWidth: signInCardMaxWidth,
+          padding: const EdgeInsets.all(24),
+          centerVertically: true,
           child: SignInCard(
             title: t.auth.signIn.required,
             description: t.supportLt.signInRequired,
           ),
         ),
-        AsyncData(:final value?) => _RegistrationBody(key: ValueKey(value.uid), uid: value.uid),
-        AsyncError(:final error) => AppErrorView(
-          error: error,
-          onRetry: () => ref.invalidate(authStateChangesProvider),
-        ),
-        _ => const Center(child: CircularProgressIndicator.adaptive()),
-      },
+        builder: (uid) => _RegistrationBody(uid: uid),
+      ),
     );
   }
 }
 
 class _RegistrationBody extends ConsumerWidget {
-  const _RegistrationBody({required this.uid, super.key});
+  const _RegistrationBody({required this.uid});
 
   final String uid;
 
@@ -110,7 +106,10 @@ class _RegistrationForm extends HookConsumerWidget {
       }
     }
 
-    return _PageContent(
+    return AppPageContent(
+      maxWidth: signInCardMaxWidth,
+      padding: const EdgeInsets.all(24),
+      centerVertically: true,
       child: BrandHeaderCard(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -152,7 +151,10 @@ class _RegisteredContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = Translations.of(context);
     final theme = Theme.of(context);
-    return _PageContent(
+    return AppPageContent(
+      maxWidth: signInCardMaxWidth,
+      padding: const EdgeInsets.all(24),
+      centerVertically: true,
       child: BrandHeaderCard(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -181,24 +183,4 @@ class _RegisteredContent extends StatelessWidget {
       ),
     );
   }
-}
-
-class _PageContent extends StatelessWidget {
-  const _PageContent({required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) => AppScrollbar(
-    child: Center(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        // どの状態もサインインカードと同じ幅にそろえる。
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: signInCardMaxWidth),
-          child: child,
-        ),
-      ),
-    ),
-  );
 }

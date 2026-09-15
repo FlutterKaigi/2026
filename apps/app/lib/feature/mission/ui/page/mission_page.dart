@@ -1,23 +1,23 @@
 import 'package:app/core/designsystem/theme/app_gradients.dart';
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/router/router.dart';
-import 'package:app/core/ui/widget/app_error_view.dart';
-import 'package:app/core/ui/widget/app_scrollbar.dart';
-import 'package:app/feature/auth/data/provider/auth_state.dart';
+import 'package:app/core/ui/widget/app_page_content.dart';
+import 'package:app/feature/auth/ui/widget/authenticated_body.dart';
 import 'package:app/feature/auth/ui/widget/sign_in_card.dart';
 import 'package:app/feature/exchange/data/provider/profile_exchange_provider.dart';
 import 'package:app/feature/mission/data/mission_provider.dart';
+import 'package:app/feature/mission/data/profile_exchange_progress.dart';
 import 'package:app/feature/sns_post/data/sns_post_provider.dart';
 import 'package:app/feature/sns_post/ui/sns_post_companion_label.dart';
 import 'package:app/feature/support_lt/data/provider/support_lt_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-class MissionPage extends ConsumerWidget {
+class MissionPage extends StatelessWidget {
   const MissionPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final t = Translations.of(context);
     return Scaffold(
       appBar: AppBar(
@@ -27,17 +27,13 @@ class MissionPage extends ConsumerWidget {
           style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
         ),
       ),
-      body: switch (ref.watch(authStateChangesProvider)) {
-        AsyncData(value: null) => _PageContent(
+      body: AuthenticatedBody(
+        signedOut: AppPageContent(
+          maxWidth: 640,
           child: SignInCard(title: t.auth.signIn.required, description: t.mission.signInRequired),
         ),
-        AsyncData(:final value?) => _MissionBody(key: ValueKey(value.uid), uid: value.uid),
-        AsyncError(:final error) => AppErrorView(
-          error: error,
-          onRetry: () => ref.invalidate(authStateChangesProvider),
-        ),
-        _ => const Center(child: CircularProgressIndicator.adaptive()),
-      },
+        builder: (uid) => _MissionBody(uid: uid),
+      ),
     );
   }
 }
@@ -63,7 +59,7 @@ enum _Status {
 }
 
 class _MissionBody extends ConsumerWidget {
-  const _MissionBody({required this.uid, super.key});
+  const _MissionBody({required this.uid});
 
   final String uid;
 
@@ -81,15 +77,13 @@ class _MissionBody extends ConsumerWidget {
     final post = sns.asData?.value;
 
     void retryExchange() {
-      final entries = ref.read(missionExchangesProvider(uid)).value ?? [];
-      for (final entry in entries) {
-        ref.invalidate(exchangedUserProfileProvider(entry.id));
-      }
       ref.invalidate(exchangedUserProfileProvider(uid));
       ref.invalidate(missionExchangesProvider(uid));
+      ref.invalidate(missionExchangedProfilesProvider(uid));
     }
 
-    return _PageContent(
+    return AppPageContent(
+      maxWidth: 640,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -109,7 +103,9 @@ class _MissionBody extends ConsumerWidget {
             key: const ValueKey('mission-exchange'),
             icon: Icons.people_outline,
             title: t.mission.exchangeTitle,
-            description: progress == null ? t.mission.exchangeDescription : null,
+            description: progress == null
+                ? t.mission.exchangeDescription(required: ProfileExchangeProgress.requiredCount)
+                : null,
             status: exchangeStatus,
             onTap: () => const ExchangeHomeRoute().push<void>(context),
             onRetry: retryExchange,
@@ -119,8 +115,11 @@ class _MissionBody extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _Condition(
-                        complete: progress.count >= 3,
-                        text: t.mission.exchangeCount(n: progress.count),
+                        complete: progress.hasRequiredCount,
+                        text: t.mission.exchangeCount(
+                          n: progress.count,
+                          required: ProfileExchangeProgress.requiredCount,
+                        ),
                       ),
                       const SizedBox(height: 6),
                       _Condition(complete: progress.hasDifferentCountry, text: t.mission.differentCountry),
@@ -159,7 +158,8 @@ class _SummaryCard extends StatelessWidget {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
     final count = statuses.where((status) => status == _Status.complete).length;
-    final complete = count == 3;
+    final total = statuses.length;
+    final complete = count == total;
     final summary = complete
         ? t.mission.allComplete
         : statuses.contains(_Status.error)
@@ -198,8 +198,8 @@ class _SummaryCard extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  '$count / 3',
-                                  semanticsLabel: t.mission.progress(n: count),
+                                  '$count / $total',
+                                  semanticsLabel: t.mission.progress(n: count, total: total),
                                   style: theme.textTheme.displayMedium?.copyWith(
                                     color: Colors.white,
                                     fontWeight: FontWeight.w800,
@@ -391,20 +391,4 @@ class _Condition extends StatelessWidget {
       ],
     );
   }
-}
-
-class _PageContent extends StatelessWidget {
-  const _PageContent({required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) => AppScrollbar(
-    child: SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-      child: Center(
-        child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 640), child: child),
-      ),
-    ),
-  );
 }

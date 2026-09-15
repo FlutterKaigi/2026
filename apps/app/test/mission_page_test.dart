@@ -19,7 +19,7 @@ import 'fake_profile_exchange_repository.dart';
 import 'fake_sns_post_repository.dart';
 import 'fake_support_lt_repository.dart';
 import 'fake_user_profile_repository.dart';
-import 'profile_exchange_progress_test.dart' show profile;
+import 'test_profiles.dart';
 
 void main() {
   late FakeAuthRepository auth;
@@ -167,6 +167,22 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('すべて達成！'), findsNothing);
     expect(find.text('0 / 3'), findsOneWidget);
+  });
+
+  testWidgets('a failed profile batch can be retried with the current exchange IDs', (tester) async {
+    profiles.watchManyError = Exception('unavailable');
+    await tester.pumpWidget(subject());
+    await tester.pumpAndSettle();
+    expect(find.text('確認できない項目があります'), findsOneWidget);
+    expect(profiles.watchedGroups.single, {'a', 'b', 'c'});
+
+    profiles.watchManyError = null;
+    await tester.ensureVisible(find.text('再試行'));
+    await tester.tap(find.text('再試行'));
+    await tester.pumpAndSettle();
+    expect(find.text('1 / 3'), findsOneWidget);
+    expect(find.text('3 / 3人と交換'), findsOneWidget);
+    expect(profiles.watchedGroups.last, {'a', 'b', 'c'});
   });
 
   testWidgets('signed out visitors do not read private mission data', (tester) async {

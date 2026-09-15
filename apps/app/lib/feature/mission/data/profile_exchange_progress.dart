@@ -33,5 +33,7 @@ final class ProfileExchangeProgress {
 
   static const requiredCount = 3;
 
-  bool get isComplete => hasProfile && count >= requiredCount && hasDifferentCountry;
+  bool get hasRequiredCount => count >= requiredCount;
+
+  bool get isComplete => hasProfile && hasRequiredCount && hasDifferentCountry;
 }

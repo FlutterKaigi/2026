@@ -824,6 +824,9 @@ class Translations$snsPost$ja {
 	/// ja: '保存できませんでした。通信状態を確認して、もう一度お試しください。'
 	String get saveFailed => '保存できませんでした。通信状態を確認して、もう一度お試しください。';
 
+	/// ja: '登録内容を確認できません。投稿URLと相手のタグを登録し直してください。'
+	String get invalidRegistration => '登録内容を確認できません。投稿URLと相手のタグを登録し直してください。';
+
 	/// ja: 'SNS投稿を登録しました'
 	String get registeredTitle => 'SNS投稿を登録しました';
 
@@ -881,8 +884,8 @@ class Translations$mission$ja {
 	/// ja: '確認できない項目があります'
 	String get checkFailed => '確認できない項目があります';
 
-	/// ja: '3項目中$n項目を達成'
-	String progress({required Object n}) => '3項目中${n}項目を達成';
+	/// ja: '$total項目中$n項目を達成'
+	String progress({required Object total, required Object n}) => '${total}項目中${n}項目を達成';
 
 	/// ja: '応援LTに参加'
 	String get ltTitle => '応援LTに参加';
@@ -893,11 +896,11 @@ class Translations$mission$ja {
 	/// ja: 'プロフィール交換'
 	String get exchangeTitle => 'プロフィール交換';
 
-	/// ja: '3人以上と交換し、出身国・地域が異なる人を1人以上含む'
-	String get exchangeDescription => '3人以上と交換し、出身国・地域が異なる人を1人以上含む';
+	/// ja: '$required人以上と交換し、出身国・地域が異なる人を1人以上含む'
+	String exchangeDescription({required Object required}) => '${required}人以上と交換し、出身国・地域が異なる人を1人以上含む';
 
-	/// ja: '$n / 3人と交換'
-	String exchangeCount({required Object n}) => '${n} / 3人と交換';
+	/// ja: '$n / $required人と交換'
+	String exchangeCount({required Object n, required Object required}) => '${n} / ${required}人と交換';
 
 	/// ja: '出身国・地域が異なる人と交換'
 	String get differentCountry => '出身国・地域が異なる人と交換';
@@ -1970,6 +1973,7 @@ extension on Translations {
 			'snsPost.saving' => '保存中…',
 			'snsPost.cancel' => 'キャンセル',
 			'snsPost.saveFailed' => '保存できませんでした。通信状態を確認して、もう一度お試しください。',
+			'snsPost.invalidRegistration' => '登録内容を確認できません。投稿URLと相手のタグを登録し直してください。',
 			'snsPost.registeredTitle' => 'SNS投稿を登録しました',
 			'snsPost.registeredBody' => 'SNS投稿のミッションを達成しました。',
 			'snsPost.updatedAt' => ({required Object date}) => '更新日時：${date}',
@@ -1986,12 +1990,12 @@ extension on Translations {
 			'mission.allComplete' => 'すべて達成！',
 			'mission.inProgress' => 'ミッション達成状況',
 			'mission.checkFailed' => '確認できない項目があります',
-			'mission.progress' => ({required Object n}) => '3項目中${n}項目を達成',
+			'mission.progress' => ({required Object total, required Object n}) => '${total}項目中${n}項目を達成',
 			'mission.ltTitle' => '応援LTに参加',
 			'mission.ltDescription' => '応援側・登壇者とも、会場のコードで参加登録',
 			'mission.exchangeTitle' => 'プロフィール交換',
-			'mission.exchangeDescription' => '3人以上と交換し、出身国・地域が異なる人を1人以上含む',
-			'mission.exchangeCount' => ({required Object n}) => '${n} / 3人と交換',
+			'mission.exchangeDescription' => ({required Object required}) => '${required}人以上と交換し、出身国・地域が異なる人を1人以上含む',
+			'mission.exchangeCount' => ({required Object n, required Object required}) => '${n} / ${required}人と交換',
 			'mission.differentCountry' => '出身国・地域が異なる人と交換',
 			'mission.profileRequired' => 'プロフィールで出身国・地域を登録する',
 			'mission.snsTitle' => '写真をSNSに投稿',

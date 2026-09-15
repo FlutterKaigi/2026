@@ -10,7 +10,7 @@
     "url": {
       "type": "string",
       "maxLength": 2048,
-      "pattern": "^https?://[^/?#\\s@]+[.][^/?#\\s@]+/[^\\s]+$"
+      "pattern": "^https?://[^/?#\\s@]+[.][^/?#\\s@]+/[^?#\\s][^\\s]*$"
     },
     "companion": {
       "type": "string",
