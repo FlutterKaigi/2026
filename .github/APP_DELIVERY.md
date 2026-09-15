@@ -42,6 +42,7 @@ Repositoryの`Settings > Secrets and variables > Actions > Variables > New repos
 | `IOS_BUNDLE_ID` | `jp.flutterkaigi.conf2026` | 外部サービスから取得する値ではなく、このProjectで決めた本番Bundle IDです。Apple DeveloperのApp ID、App Store Connectのアプリ、Xcode設定をこの値に揃えます。 |
 | `ANDROID_PACKAGE_NAME` | `jp.flutterkaigi.conf2026` | 外部サービスから取得する値ではなく、`apps/app/android/app/build.gradle.kts`の`applicationId`です。Google Play Consoleへ同じPackage Nameでアプリを登録します。 |
 | `GOOGLE_PLAY_TRACK` | `internal` | Codemagic CLIがGoogle Play Internal Testingを指定するためのTrack名です。このworkflowでは`internal`を使用します。Play Consoleでは`Testing > Internal testing`で対象Trackを確認します。 |
+| `PROD_ANDROID_SHA256_FINGERPRINTS` | 本番Android Appの署名証明書SHA-256フィンガープリント（カンマ区切り、複数可） | `apps/website`のUniversal Links／App Links検証ファイル（`/.well-known/assetlinks.json`）生成に使用します。取得手順は後述の「Universal Links／App Links」を参照してください。 |
 | `ENABLE_APP_WEB_PRODUCTION_DEPLOY` | 未登録または`false`で停止、`true`で有効化 | `apps/app`のProduction Web配布だけを一時停止する制御値です。現在は登録しないか`false`にします。`apps/website`の配布とApp Web Previewには影響しません。 |
 
 ### Repository Secrets
@@ -180,6 +181,24 @@ base64 < play-service-account.json | tr -d '\n'
 
 出力全体をRepository Secretの`GOOGLE_PLAY_SERVICE_ACCOUNT_BASE64`へ登録します。
 
+## Universal Links / App Links（プロフィール交換の共有リンク）
+
+`apps/website`は`Deploy website to Cloudflare Workers`のデプロイ時に、`tool/generate_well_known.dart`で`/.well-known/apple-app-site-association`と`/.well-known/assetlinks.json`を生成します（`APPLE_TEAM_ID`／`IOS_BUNDLE_ID`／`ANDROID_PACKAGE_NAME`は前述のRepository Variablesを共用し、新規に登録するのは`PROD_ANDROID_SHA256_FINGERPRINTS`のみです）。どちらかのプラットフォームの値が未設定でもデプロイ自体は成功し、そのプラットフォームのファイルだけが出力されません（値を推測して埋めることはしません）。
+
+### `PROD_ANDROID_SHA256_FINGERPRINTS`
+
+Google PlayはInternal Testing以降のArtifactをPlay App Signingで再署名するため、実際に配布されるAPKの署名証明書は、CIが使うUpload Key（`ANDROID_SIGNING_KEYSTORE_BASE64`）と異なります。`assetlinks.json`は端末にインストールされた実物のAPKの証明書で検証されるため、Play App Signingの証明書のフィンガープリントを登録する必要があります。
+
+1. Google Play Consoleで対象アプリを開き、`Setup > App integrity > App signing`を選択します。
+2. `App signing key certificate`の`SHA-256 certificate fingerprint`をコピーします。[Google PlayのApp signing手順](https://support.google.com/googleplay/android-developer/answer/9842756)を参照してください。
+3. ローカル実機ビルド（Upload Keyでの直接インストール）でも動作確認したい場合は、Upload Keyのフィンガープリントも併せて控えます。
+
+```bash
+keytool -list -v -keystore release.jks -alias flutterkaigi2026 | grep 'SHA256:'
+```
+
+4. 取得したフィンガープリント（コロン区切りの16進数）をカンマ区切りで連結し、Repository Variableの`PROD_ANDROID_SHA256_FINGERPRINTS`へ登録します（例: `AA:BB:...,CC:DD:...`）。App signing key certificateの値は必ず含めてください。
+
 ## Firebase SDK settings
 
 FirebaseのAPI KeyやApp IDは、それ自体がFirebase Consoleやデータへの管理権限を与える秘密鍵ではありません。Firebaseの認可はIAM、Security Rules、Authentication、App Checkで行います。ただし、このRepositoryでは既存Dashboardと同じくFirebase OptionsをGitへコミットしない運用に揃えます。[FirebaseのAPI Key管理](https://firebase.google.com/docs/projects/api-keys)と[Firebase Security Rules](https://firebase.google.com/docs/rules/get-started)も参照してください。
@@ -268,3 +287,4 @@ OptionsをGit管理外にしても、それだけをデータ保護の境界に�
 - `firebase_options.dart`、`google-services.json`、`GoogleService-Info.plist`がGit管理外であることを確認している
 - Firestore／Storage Rules、API Key restrictions、App Check enforcementを確認している
 - RepositoryのBranch protectionで`App CI / style`と`App CI / validate`を必須Checkに設定している
+- `PROD_ANDROID_SHA256_FINGERPRINTS`にPlay App Signingの証明書フィンガープリントを登録し、`apps/website`のデプロイ後に`/.well-known/apple-app-site-association`と`/.well-known/assetlinks.json`が公開されていることを確認している

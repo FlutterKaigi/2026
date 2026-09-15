@@ -59,4 +59,21 @@ void main() {
       expect(parseScannedExchangeToken('not a token'), isNull);
     });
   });
+
+  group('isExchangeTokenExpired', () {
+    test('is false for a token whose embedded exp is in the future', () {
+      final expSeconds = DateTime.now().add(const Duration(hours: 1)).millisecondsSinceEpoch ~/ 1000;
+      expect(isExchangeTokenExpired('v1.other-uid.$expSeconds.deadbeef'), isFalse);
+    });
+
+    test('is true for a token whose embedded exp is in the past', () {
+      final expSeconds = DateTime.now().subtract(const Duration(hours: 1)).millisecondsSinceEpoch ~/ 1000;
+      expect(isExchangeTokenExpired('v1.other-uid.$expSeconds.deadbeef'), isTrue);
+    });
+
+    test('is false for a malformed token (deferred to server-side verification)', () {
+      expect(isExchangeTokenExpired('not-a-token'), isFalse);
+      expect(isExchangeTokenExpired('v1.other-uid.not-a-number.deadbeef'), isFalse);
+    });
+  });
 }

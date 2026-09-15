@@ -96,6 +96,21 @@ jobs:
           FIRESTORE_HOST: firestore.googleapis.com
           FIRESTORE_ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
 
+      # Generates apps/website/web/.well-known/{apple-app-site-association,
+      # assetlinks.json} from Repository Variables not in this repo (see
+      # .github/APP_DELIVERY.md). jaspr build copies dot-directories under
+      # web/ into the output verbatim, so this must run before it. Any
+      # variable left unset skips that platform's file — the deploy still
+      # succeeds, just without that platform's Universal Links / App Links
+      # verification file yet.
+      - name: Generate Universal Links / App Links verification files
+        run: dart run tool/generate_well_known.dart
+        env:
+          APPLE_TEAM_ID: ${{ vars.APPLE_TEAM_ID }}
+          IOS_BUNDLE_ID: ${{ vars.IOS_BUNDLE_ID }}
+          ANDROID_PACKAGE_NAME: ${{ vars.ANDROID_PACKAGE_NAME }}
+          PROD_ANDROID_SHA256_FINGERPRINTS: ${{ vars.PROD_ANDROID_SHA256_FINGERPRINTS }}
+
       - working-directory: apps/website
         run: dart run jaspr_cli:jaspr build
 
