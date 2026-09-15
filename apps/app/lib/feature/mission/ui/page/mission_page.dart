@@ -1,3 +1,4 @@
+import 'package:app/core/designsystem/theme/app_gradients.dart';
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/router/router.dart';
 import 'package:app/core/ui/widget/app_error_view.dart';
@@ -19,16 +20,18 @@ class MissionPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final t = Translations.of(context);
     return Scaffold(
-      appBar: AppBar(title: Text(t.mission.title)),
+      appBar: AppBar(
+        toolbarHeight: 52,
+        title: Text(
+          t.mission.title,
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+        ),
+      ),
       body: switch (ref.watch(authStateChangesProvider)) {
         AsyncData(value: null) => _PageContent(
           child: SignInCard(title: t.auth.signIn.required, description: t.mission.signInRequired),
         ),
-        AsyncData(:final value?) => _MissionBody(
-          key: ValueKey(value.uid),
-          uid: value.uid,
-          displayName: value.displayName,
-        ),
+        AsyncData(:final value?) => _MissionBody(key: ValueKey(value.uid), uid: value.uid),
         AsyncError(:final error) => AppErrorView(
           error: error,
           onRetry: () => ref.invalidate(authStateChangesProvider),
@@ -60,10 +63,9 @@ enum _Status {
 }
 
 class _MissionBody extends ConsumerWidget {
-  const _MissionBody({required this.uid, required this.displayName, super.key});
+  const _MissionBody({required this.uid, super.key});
 
   final String uid;
-  final String? displayName;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -75,8 +77,6 @@ class _MissionBody extends ConsumerWidget {
     final exchangeStatus = _Status.from(exchanges, (value) => value.isComplete);
     final snsStatus = _Status.from(sns, (value) => value != null);
     final statuses = [ltStatus, exchangeStatus, snsStatus];
-    final count = statuses.where((status) => status == _Status.complete).length;
-    final profile = ref.watch(exchangedUserProfileProvider(uid));
     final progress = exchanges.asData?.value;
     final post = sns.asData?.value;
 
@@ -93,12 +93,7 @@ class _MissionBody extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _SummaryCard(
-            count: count,
-            name: profile.asData?.value?.displayName ?? displayName,
-            hasError: statuses.contains(_Status.error),
-            isLoading: statuses.contains(_Status.loading),
-          ),
+          _SummaryCard(statuses: statuses),
           const SizedBox(height: 16),
           _MissionCard(
             key: const ValueKey('mission-lt'),
@@ -114,7 +109,7 @@ class _MissionBody extends ConsumerWidget {
             key: const ValueKey('mission-exchange'),
             icon: Icons.people_outline,
             title: t.mission.exchangeTitle,
-            description: t.mission.exchangeDescription,
+            description: progress == null ? t.mission.exchangeDescription : null,
             status: exchangeStatus,
             onTap: () => const ExchangeHomeRoute().push<void>(context),
             onRetry: retryExchange,
@@ -127,7 +122,7 @@ class _MissionBody extends ConsumerWidget {
                         complete: progress.count >= 3,
                         text: t.mission.exchangeCount(n: progress.count),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 6),
                       _Condition(complete: progress.hasDifferentCountry, text: t.mission.differentCountry),
                       if (!progress.hasProfile)
                         TextButton(
@@ -147,82 +142,114 @@ class _MissionBody extends ConsumerWidget {
             onTap: () => const SnsPostRoute().push<void>(context),
             onRetry: () => ref.invalidate(snsPostRegistrationProvider(uid)),
           ),
-          const SizedBox(height: 16),
-          Text(t.mission.presentationHint, textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodySmall),
         ],
       ),
     );
   }
 }
 
-Color _successColor(ThemeData theme) =>
-    theme.brightness == Brightness.dark ? const Color(0xFF83DBAC) : const Color(0xFF18784B);
-
 class _SummaryCard extends StatelessWidget {
-  const _SummaryCard({required this.count, required this.name, required this.hasError, required this.isLoading});
+  const _SummaryCard({required this.statuses});
 
-  final int count;
-  final String? name;
-  final bool hasError;
-  final bool isLoading;
+  final List<_Status> statuses;
 
   @override
   Widget build(BuildContext context) {
     final t = Translations.of(context);
     final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final count = statuses.where((status) => status == _Status.complete).length;
     final complete = count == 3;
-    final color = complete ? _successColor(theme) : theme.colorScheme.primary;
+    final summary = complete
+        ? t.mission.allComplete
+        : statuses.contains(_Status.error)
+        ? t.mission.checkFailed
+        : statuses.contains(_Status.loading)
+        ? t.mission.loading
+        : t.mission.inProgress;
     return Semantics(
       container: true,
-      child: Container(
+      child: Card.outlined(
         key: const ValueKey('mission-summary'),
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.08),
-          border: Border.all(color: color.withValues(alpha: 0.4)),
-          borderRadius: BorderRadius.circular(16),
+        margin: EdgeInsets.zero,
+        clipBehavior: Clip.antiAlias,
+        color: colors.surfaceContainerLow,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+          side: BorderSide(color: colors.outlineVariant),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            if (name != null && name!.isNotEmpty) ...[
-              Text(name!, style: theme.textTheme.titleSmall, maxLines: 2, overflow: TextOverflow.ellipsis),
-              const SizedBox(height: 8),
-            ],
-            Row(
-              children: [
-                Expanded(
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      '$count / 3',
-                      style: theme.textTheme.displaySmall?.copyWith(color: color, fontWeight: FontWeight.w800),
-                    ),
+            DecoratedBox(
+              decoration: const BoxDecoration(gradient: AppGradients.brand),
+              // Keep white text readable over the magenta end of the artwork.
+              child: ColoredBox(
+                color: Colors.black.withValues(alpha: 0.16),
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  '$count / 3',
+                                  semanticsLabel: t.mission.progress(n: count),
+                                  style: theme.textTheme.displayMedium?.copyWith(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  summary,
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Image.asset(
+                            'res/assets/shuriken-logo.png',
+                            width: 96,
+                            height: 96,
+                            excludeFromSemantics: true,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      ExcludeSemantics(
+                        child: Row(
+                          children: [
+                            for (var index = 0; index < statuses.length; index++) ...[
+                              if (index > 0) const SizedBox(width: 6),
+                              Expanded(
+                                child: Container(
+                                  height: 6,
+                                  decoration: BoxDecoration(
+                                    color: statuses[index] == _Status.complete
+                                        ? Colors.white
+                                        : Colors.white.withValues(alpha: 0.24),
+                                    borderRadius: BorderRadius.circular(3),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                if (complete) Icon(Icons.verified_outlined, size: 36, color: color),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              complete
-                  ? t.mission.allComplete
-                  : hasError
-                  ? t.mission.checkFailed
-                  : isLoading
-                  ? t.mission.loading
-                  : t.mission.inProgress,
-              style: theme.textTheme.titleMedium?.copyWith(color: color, fontWeight: FontWeight.w700),
-            ),
-            const SizedBox(height: 16),
-            LinearProgressIndicator(
-              value: count / 3,
-              minHeight: 6,
-              borderRadius: BorderRadius.circular(3),
-              color: color,
-              backgroundColor: color.withValues(alpha: 0.12),
-              semanticsLabel: t.mission.progress(n: count),
+              ),
             ),
           ],
         ),
@@ -245,7 +272,7 @@ class _MissionCard extends StatelessWidget {
 
   final IconData icon;
   final String title;
-  final String description;
+  final String? description;
   final _Status status;
   final VoidCallback onTap;
   final VoidCallback onRetry;
@@ -253,71 +280,91 @@ class _MissionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final t = Translations.of(context);
     final theme = Theme.of(context);
+    final colors = theme.colorScheme;
     final complete = status == _Status.complete;
-    final color = complete ? _successColor(theme) : theme.colorScheme.onSurfaceVariant;
     return Card.outlined(
       margin: EdgeInsets.zero,
       clipBehavior: Clip.antiAlias,
       semanticContainer: false,
+      color: complete ? colors.surfaceContainerLow : colors.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(color: complete ? colors.primary.withValues(alpha: 0.35) : colors.outlineVariant),
+      ),
       child: InkWell(
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(14),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Row(
                 children: [
-                  Icon(icon, color: theme.colorScheme.primary, size: 24),
-                  const SizedBox(width: 10),
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: complete ? colors.primaryContainer : colors.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(icon, color: complete ? colors.onPrimaryContainer : colors.primary, size: 22),
+                  ),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: Text(title, style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700)),
                   ),
                   const SizedBox(width: 8),
-                  DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: color.withValues(alpha: 0.10),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            complete
-                                ? Icons.check_circle
-                                : status == _Status.error
-                                ? Icons.error_outline
-                                : Icons.radio_button_unchecked,
-                            size: 16,
-                            color: color,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            status.label(t),
-                            style: theme.textTheme.labelMedium?.copyWith(color: color, fontWeight: FontWeight.w700),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  const Icon(Icons.chevron_right, size: 18),
+                  _StatusBadge(status: status),
                 ],
               ),
-              const SizedBox(height: 8),
-              Text(description, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+              if (description != null) ...[
+                const SizedBox(height: 8),
+                Text(description!, style: theme.textTheme.bodySmall?.copyWith(color: colors.onSurfaceVariant)),
+              ],
               if (detail != null) ...[const SizedBox(height: 10), detail!],
               if (status == _Status.error)
                 Align(
                   alignment: Alignment.centerLeft,
-                  child: TextButton(onPressed: onRetry, child: Text(t.error.retry)),
+                  child: TextButton(onPressed: onRetry, child: Text(Translations.of(context).error.retry)),
                 ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _StatusBadge extends StatelessWidget {
+  const _StatusBadge({required this.status});
+
+  final _Status status;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final (background, foreground, icon) = switch (status) {
+      _Status.complete => (colors.primaryContainer, colors.onPrimaryContainer, Icons.check_circle),
+      _Status.incomplete => (colors.surfaceContainerHighest, colors.onSurfaceVariant, Icons.radio_button_unchecked),
+      _Status.loading => (colors.tertiaryContainer, colors.onTertiaryContainer, Icons.hourglass_top_rounded),
+      _Status.error => (colors.errorContainer, colors.onErrorContainer, Icons.error_outline),
+    };
+    return DecoratedBox(
+      decoration: BoxDecoration(color: background, borderRadius: BorderRadius.circular(20)),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 16, color: foreground),
+            const SizedBox(width: 4),
+            Text(
+              status.label(Translations.of(context)),
+              style: theme.textTheme.labelMedium?.copyWith(color: foreground, fontWeight: FontWeight.w700),
+            ),
+          ],
         ),
       ),
     );
@@ -333,7 +380,7 @@ class _Condition extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final color = complete ? _successColor(theme) : theme.colorScheme.onSurfaceVariant;
+    final color = complete ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant;
     return Row(
       children: [
         Icon(complete ? Icons.check_circle_outline : Icons.radio_button_unchecked, size: 16, color: color),

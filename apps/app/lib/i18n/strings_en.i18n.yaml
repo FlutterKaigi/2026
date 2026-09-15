@@ -342,7 +342,6 @@ mission:
   profileRequired: Add your country or region to your profile
   snsTitle: Share a photo on SNS
   snsDescription: Post a photo with an eligible attendee and register its URL and category
-  presentationHint: Show this screen to the staff\nwhen joining the final event.
 
 exchange:
   title: Profile Exchange

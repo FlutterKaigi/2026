@@ -910,9 +910,6 @@ class Translations$mission$ja {
 
 	/// ja: '対象の相手との写真を投稿し、URLとタグを登録'
 	String get snsDescription => '対象の相手との写真を投稿し、URLとタグを登録';
-
-	/// ja: '最後のイベントに参加する際、\nこの画面をスタッフに見せてください。'
-	String get presentationHint => '最後のイベントに参加する際、\nこの画面をスタッフに見せてください。';
 }
 
 // Path: exchange
@@ -1999,7 +1996,6 @@ extension on Translations {
 			'mission.profileRequired' => 'プロフィールで出身国・地域を登録する',
 			'mission.snsTitle' => '写真をSNSに投稿',
 			'mission.snsDescription' => '対象の相手との写真を投稿し、URLとタグを登録',
-			'mission.presentationHint' => '最後のイベントに参加する際、\nこの画面をスタッフに見せてください。',
 			'exchange.title' => 'プロフィール交換',
 			'exchange.qrDescription' => 'このQRコードを相手に見せて読み取ってもらうと、お互いのプロフィールを交換できます',
 			'exchange.qrSemanticLabel' => 'プロフィール交換用のQRコード',

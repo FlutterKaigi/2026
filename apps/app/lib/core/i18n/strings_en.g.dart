@@ -468,7 +468,6 @@ class _Translations$mission$en extends Translations$mission$ja {
 	@override String get profileRequired => 'Add your country or region to your profile';
 	@override String get snsTitle => 'Share a photo on SNS';
 	@override String get snsDescription => 'Post a photo with an eligible attendee and register its URL and category';
-	@override String get presentationHint => 'Show this screen to the staff\nwhen joining the final event.';
 }
 
 // Path: exchange
@@ -1173,7 +1172,6 @@ extension on TranslationsEn {
 			'mission.profileRequired' => 'Add your country or region to your profile',
 			'mission.snsTitle' => 'Share a photo on SNS',
 			'mission.snsDescription' => 'Post a photo with an eligible attendee and register its URL and category',
-			'mission.presentationHint' => 'Show this screen to the staff\nwhen joining the final event.',
 			'exchange.title' => 'Profile Exchange',
 			'exchange.qrDescription' => 'Show this QR code to another attendee and have them scan it to exchange profiles',
 			'exchange.qrSemanticLabel' => 'Profile exchange QR code',

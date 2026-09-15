@@ -4,6 +4,7 @@ import 'package:app/core/router/router.dart';
 import 'package:app/core/ui/launch_external_url.dart';
 import 'package:app/core/ui/widget/app_error_view.dart';
 import 'package:app/core/ui/widget/app_scrollbar.dart';
+import 'package:app/core/ui/widget/brand_header_card.dart';
 import 'package:app/feature/auth/data/provider/auth_state.dart';
 import 'package:app/feature/auth/ui/widget/sign_in_card.dart';
 import 'package:app/feature/sns_post/data/sns_post_provider.dart';
@@ -22,7 +23,13 @@ class SnsPostPage extends ConsumerWidget {
     final t = Translations.of(context);
     final auth = ref.watch(authStateChangesProvider);
     return Scaffold(
-      appBar: AppBar(title: Text(t.snsPost.title)),
+      appBar: AppBar(
+        toolbarHeight: 52,
+        title: Text(
+          t.snsPost.title,
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+        ),
+      ),
       body: switch (auth) {
         AsyncData(value: null) => _PageContent(
           child: SignInCard(title: t.auth.signIn.required, description: t.snsPost.signInRequired),
@@ -49,14 +56,16 @@ class _RegistrationBody extends HookConsumerWidget {
     final editing = useState(false);
     return switch (registration) {
       AsyncData(:final value) => _PageContent(
-        child: value == null || editing.value
-            ? _RegistrationForm(
-                uid: uid,
-                initial: value,
-                onSaved: () => editing.value = false,
-                onCancel: value == null ? null : () => editing.value = false,
-              )
-            : _RegisteredContent(registration: value, onEdit: () => editing.value = true),
+        child: BrandHeaderCard(
+          child: value == null || editing.value
+              ? _RegistrationForm(
+                  uid: uid,
+                  initial: value,
+                  onSaved: () => editing.value = false,
+                  onCancel: value == null ? null : () => editing.value = false,
+                )
+              : _RegisteredContent(registration: value, onEdit: () => editing.value = true),
+        ),
       ),
       AsyncError(:final error) => AppErrorView(
         error: error,
@@ -122,11 +131,17 @@ class _RegistrationForm extends HookConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Icon(Icons.add_photo_alternate_outlined, size: 44, color: theme.colorScheme.primary),
-            const SizedBox(height: 12),
-            Text(t.snsPost.heading, textAlign: TextAlign.center, style: theme.textTheme.headlineSmall),
+            Text(
+              t.snsPost.heading,
+              textAlign: TextAlign.center,
+              style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+            ),
             const SizedBox(height: 8),
-            Text(t.snsPost.description, textAlign: TextAlign.center, style: theme.textTheme.bodyMedium),
+            Text(
+              t.snsPost.description,
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+            ),
             const SizedBox(height: 28),
             Text(t.snsPost.companionLabel, style: theme.textTheme.titleMedium),
             const SizedBox(height: 4),
@@ -232,20 +247,38 @@ class _RegisteredContent extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Icon(Icons.check_circle, size: 64, color: theme.colorScheme.primary),
+        Center(
+          child: Container(
+            width: 56,
+            height: 56,
+            decoration: BoxDecoration(color: theme.colorScheme.primaryContainer, shape: BoxShape.circle),
+            child: Icon(Icons.check_rounded, size: 32, color: theme.colorScheme.onPrimaryContainer),
+          ),
+        ),
         const SizedBox(height: 16),
-        Text(t.snsPost.registeredTitle, textAlign: TextAlign.center, style: theme.textTheme.headlineSmall),
+        Text(
+          t.snsPost.registeredTitle,
+          textAlign: TextAlign.center,
+          style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+        ),
         const SizedBox(height: 8),
         Text(t.snsPost.registeredBody, textAlign: TextAlign.center),
         const SizedBox(height: 24),
         Card.outlined(
           margin: EdgeInsets.zero,
+          color: theme.colorScheme.surfaceContainerLow,
           child: Padding(
             padding: const EdgeInsets.all(20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Chip(label: Text(snsPostCompanionLabel(t, registration.companion))),
+                Chip(
+                  avatar: Icon(Icons.people_outline, size: 18, color: theme.colorScheme.onTertiaryContainer),
+                  label: Text(snsPostCompanionLabel(t, registration.companion)),
+                  backgroundColor: theme.colorScheme.tertiaryContainer,
+                  labelStyle: TextStyle(color: theme.colorScheme.onTertiaryContainer),
+                  side: BorderSide.none,
+                ),
                 const SizedBox(height: 8),
                 SelectableText(registration.url, style: theme.textTheme.bodyMedium),
                 const SizedBox(height: 8),
@@ -267,6 +300,7 @@ class _RegisteredContent extends StatelessWidget {
         const SizedBox(height: 24),
         FilledButton.icon(
           onPressed: () => const MissionRoute().go(context),
+          style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(48)),
           icon: const Icon(Icons.fact_check_outlined),
           label: Text(t.snsPost.viewMissions),
         ),
@@ -285,7 +319,7 @@ class _PageContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) => AppScrollbar(
     child: SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
       child: Center(
         child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 560), child: child),
       ),
