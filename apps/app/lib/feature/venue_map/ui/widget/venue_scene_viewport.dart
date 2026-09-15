@@ -9,11 +9,15 @@ class VenueSceneViewport extends StatelessWidget {
   final double pixelRatio;
 
   @override
-  Widget build(BuildContext context) => fs.SceneView(
-    game.scene,
-    camera: game.camera,
-    pixelRatio: pixelRatio,
-    autoTick: !game.paused,
-    onTick: game.tick,
+  Widget build(BuildContext context) => TickerMode(
+    enabled: !game.paused,
+    // Keep SceneView's single ticker alive. Toggling autoTick recreates it and
+    // triggers a SingleTickerProviderStateMixin assertion when resuming.
+    child: fs.SceneView(
+      game.scene,
+      camera: game.camera,
+      pixelRatio: pixelRatio,
+      onTick: game.tick,
+    ),
   );
 }
