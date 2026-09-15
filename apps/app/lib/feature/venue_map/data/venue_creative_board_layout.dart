@@ -18,7 +18,7 @@ class VenueCreativeBoardLayout {
 
   void registerObstacles(VenueNavigation navigation) {
     for (final rect in obstacles) {
-      navigation.blocked.add([
+      navigation.addObstacle([
         MapPoint(rect.left, rect.top),
         MapPoint(rect.right, rect.top),
         MapPoint(rect.right, rect.bottom),

@@ -332,12 +332,15 @@ class VenueWalkArchitecture {
     List<fs.Material>? fadingMaterials,
   }) {
     final frame = fadingMaterials == null ? _green : _material(const Color(0xff205c50), roughness: .76);
-    final sign = fs.Node(mesh: fs.Mesh(fs.CuboidGeometry(vm.Vector3(width, height, .065)), frame));
+    final sign = fs.Node(mesh: fs.Mesh(fs.CuboidGeometry(vm.Vector3(width, height, .065)), frame))
+      ..shadowStatic = fadingMaterials == null;
     fadingMaterials?.addAll([frame, material]);
     final mesh = fs.Mesh(fs.PlaneGeometry(width: width - .025, depth: height - .025), material);
     for (final side in [-1, 1]) {
       sign.add(
         fs.Node(mesh: mesh)
+          // The opaque frame casts the same silhouette as its inset lettering.
+          ..castsShadows = false
           ..position = vm.Vector3(0, 0, side * .035)
           ..rotation =
               vm.Quaternion.axisAngle(vm.Vector3(0, 1, 0), side == -1 ? 0 : math.pi) *

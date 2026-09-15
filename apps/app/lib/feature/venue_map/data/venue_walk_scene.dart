@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:math' as math;
 
+import 'package:app/feature/venue_map/data/venue_box_batch.dart';
 import 'package:app/feature/venue_map/data/venue_escalator_layout.dart';
 import 'package:app/feature/venue_map/data/venue_localized_signs.dart';
 import 'package:app/feature/venue_map/data/venue_walk_architecture.dart';
@@ -61,6 +62,11 @@ class VenueWalkScene extends ChangeNotifier {
   final _clips = <String, fs.AnimationClip>{};
   final _actor = fs.Node(name: 'Dashumaru movement');
   final _routeRoot = fs.Node(name: 'Walking route');
+  late final _routeMarks = fs.InstancedMesh(
+    geometry: fs.DiscGeometry(radius: .065, segments: 8),
+    material: _unlit(0x339883),
+    cullInstances: true,
+  );
   late fs.Node _target;
   late fs.Node _footRing;
   late fs.Node _faceNormal;
@@ -96,6 +102,8 @@ class VenueWalkScene extends ChangeNotifier {
   bool _dark = false;
   void Function()? _applyAppearance;
   final _surfaceColors = <(fs.PhysicallyBasedMaterial, int, int)>[];
+  final _boxMaterials = <(int, int?), fs.PhysicallyBasedMaterial>{};
+  final _boxes = VenueBoxBatch();
   static const unit = .04;
   static const _compactElevationOffset = .43;
 
@@ -187,7 +195,7 @@ class VenueWalkScene extends ChangeNotifier {
     for (final (a, b) in navigation.walls) {
       final dx = (b.x - a.x) * unit;
       final dz = (a.y - b.y) * unit;
-      final node = _box(
+      _box(
         MapPoint((a.x + b.x) / 2, (a.y + b.y) / 2),
         math.sqrt(dx * dx + dz * dz),
         .85,
@@ -195,8 +203,8 @@ class VenueWalkScene extends ChangeNotifier {
         0xd6e3df,
         darkColor: 0x536574,
         height: .44,
+        yaw: -math.atan2(dz, dx),
       );
-      node.rotation = vm.Quaternion.axisAngle(vm.Vector3(0, 1, 0), -math.atan2(dz, dx));
     }
     for (final booth in (data['booths']! as List).cast<Map<String, Object?>>()) {
       final r = (booth['rect']! as List).cast<num>();
@@ -210,6 +218,7 @@ class VenueWalkScene extends ChangeNotifier {
         height: .28,
       );
     }
+    scene.add(_boxes.root);
     if (showcase) {
       architecture = VenueWalkArchitecture(
         navigation: navigation,
@@ -250,6 +259,7 @@ class VenueWalkScene extends ChangeNotifier {
         ..weight = name == 'Idle' ? 1 : 0;
     }
     _footRing = fs.Node(mesh: fs.Mesh(fs.RingGeometry(innerRadius: .54, outerRadius: .60), _unlit(0x1f937d)));
+    _footRing.castsShadows = false;
     _actor.add(_footRing..position = vm.Vector3(0, .014, 0));
     for (var i = 0; i < 12; i++) {
       _photoShadow.add(
@@ -265,7 +275,11 @@ class VenueWalkScene extends ChangeNotifier {
     }
     _actor.add(_photoShadow);
     _target = fs.Node(mesh: fs.Mesh(fs.RingGeometry(innerRadius: .24, outerRadius: .34), _unlit(0x1f937d)))
+      ..castsShadows = false
       ..visible = false;
+    _routeRoot
+      ..castsShadows = false
+      ..addComponent(fs.InstancedMeshComponent(_routeMarks));
     scene.add(_routeRoot);
     scene.add(_target);
     _updateCamera(1, snap: true);
@@ -333,27 +347,32 @@ class VenueWalkScene extends ChangeNotifier {
 
   fs.UnlitMaterial _unlit(int color) => fs.UnlitMaterial()..baseColorFactor = _color(color);
 
-  fs.Node _box(MapPoint p, double w, double h, double d, int color, {required double height, int? darkColor}) {
-    final material = fs.PhysicallyBasedMaterial()
-      ..baseColorFactor = _color(color)
-      ..roughnessFactor = .86;
-    if (darkColor != null) {
-      _surfaceColors.add((material, color, darkColor));
-    }
-    final node = fs.Node(
-      mesh: fs.Mesh(
-        fs.CuboidGeometry(vm.Vector3(w, h, d)),
-        material,
-      ),
-    )..position = world(p, height);
-    scene.add(node);
-    return node;
+  void _box(
+    MapPoint p,
+    double w,
+    double h,
+    double d,
+    int color, {
+    required double height,
+    int? darkColor,
+    double yaw = 0,
+  }) {
+    final material = _boxMaterials.putIfAbsent((color, darkColor), () {
+      final material = fs.PhysicallyBasedMaterial()
+        ..baseColorFactor = _color(color)
+        ..roughnessFactor = .86;
+      if (darkColor != null) {
+        _surfaceColors.add((material, color, darkColor));
+      }
+      return material;
+    });
+    _boxes.add(position: world(p, height), size: vm.Vector3(w, h, d), material: material, yaw: yaw);
   }
 
   void _clearPath() {
     path = [];
     _destination = null;
-    _routeRoot.children.toList().forEach(_routeRoot.remove);
+    _routeMarks.clearInstances();
     _target.visible = false;
   }
 
@@ -499,19 +518,19 @@ class VenueWalkScene extends ChangeNotifier {
   void goToPlace(String id) {
     for (final place in navigation.places) {
       if (place.id == id) {
-        final target = navigation.approach(position, place);
-        goTo(target ?? place.anchor, placeId: place.id);
+        _followRoute(navigation.routeToPlace(position, place), placeId: place.id);
         return;
       }
     }
   }
 
-  void goTo(MapPoint target, {String? placeId}) {
+  void goTo(MapPoint target, {String? placeId}) => _followRoute(navigation.route(position, target), placeId: placeId);
+
+  void _followRoute(List<MapPoint> route, {String? placeId}) {
     _clearPath();
     keys.clear();
     stick = Offset.zero;
     _waveTime = 0;
-    final route = navigation.route(position, target);
     if (route.isEmpty) {
       _notice = WalkNotice.unreachable;
       _noticeTime = 2.5;
@@ -527,16 +546,15 @@ class VenueWalkScene extends ChangeNotifier {
       final count = (from.distanceTo(to) / 14).ceil();
       for (var i = 1; i <= count; i++) {
         final t = i / count;
-        _routeRoot.add(
-          fs.Node(mesh: fs.Mesh(fs.DiscGeometry(radius: .065, segments: 8), _unlit(0x339883)))
-            ..position = world(MapPoint(from.x + (to.x - from.x) * t, from.y + (to.y - from.y) * t), .032),
+        _routeMarks.addInstance(
+          vm.Matrix4.translation(world(MapPoint(from.x + (to.x - from.x) * t, from.y + (to.y - from.y) * t), .032)),
         );
       }
       from = to;
     }
     _target
       ..visible = true
-      ..position = world(target, .04);
+      ..position = world(route.last, .04);
     _publish();
   }
 
@@ -697,9 +715,9 @@ class VenueWalkScene extends ChangeNotifier {
   }
 
   void _publish() {
-    final hall = navigation.hallAt(position);
+    final place = navigation.placeAt(position);
     status.value = (
-      location: hall?.id ?? (position.y > 587 ? 'entrance' : null),
+      location: place?.id ?? (position.y > 587 ? 'entrance' : null),
       destination: _destination,
       notice: _notice,
       arrivedAt: _notice == WalkNotice.arrived ? _arrivedAt : null,
