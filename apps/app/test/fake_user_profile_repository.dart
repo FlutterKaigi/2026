@@ -22,6 +22,9 @@ final class FakeUserProfileRepository implements UserProfileRepository {
   /// Whether [watch] should emit its current value immediately.
   bool emitsInitialValue = true;
 
+  final watchedGroups = <Set<String>>[];
+  Exception? watchManyError;
+
   UserProfile? profileFor(String uid) => _profiles[uid];
 
   @override
@@ -30,6 +33,23 @@ final class FakeUserProfileRepository implements UserProfileRepository {
       yield _profiles[uid];
     }
     yield* _controller.stream.map((_) => _profiles[uid]);
+  }
+
+  @override
+  Stream<List<UserProfile>> watchMany(Iterable<String> uids) async* {
+    final ids = uids.toSet();
+    watchedGroups.add(ids);
+    if (watchManyError case final error?) {
+      throw error;
+    }
+    List<UserProfile> current() => [
+      for (final id in ids)
+        if (_profiles[id] case final profile?) profile,
+    ];
+    if (emitsInitialValue) {
+      yield current();
+    }
+    yield* _controller.stream.map((_) => current());
   }
 
   @override

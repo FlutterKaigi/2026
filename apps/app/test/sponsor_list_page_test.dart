@@ -1,11 +1,13 @@
 import 'package:app/core/designsystem/theme/app_theme.dart';
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/router/router.dart';
+import 'package:app/core/ui/root_scaffold.dart';
 import 'package:app/core/ui/widget/trademark_footer_widget.dart';
 import 'package:app/feature/sponsor/data/provider/sponsor_list_provider.dart';
 import 'package:app/feature/sponsor/data/provider/sponsor_repository.dart';
 import 'package:app/feature/sponsor/ui/page/sponsor_details_page.dart';
 import 'package:app/feature/sponsor/ui/page/sponsor_list_page.dart';
+import 'package:app/feature/sponsor/ui/widget/sponsor_logo_card_widget.dart';
 import 'package:data/data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -128,6 +130,176 @@ void main() {
       findsNothing,
     );
   });
+
+  testWidgets('sponsor rows fit beside the desktop navigation rail', (tester) async {
+    const sponsorCount = 4;
+    tester.view.physicalSize = const Size(1280, 1600);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final router = GoRouter(
+      initialLocation: '/sponsors',
+      routes: [
+        StatefulShellRoute.indexedStack(
+          builder: (_, _, navigationShell) => RootScaffold(
+            navigationShell: navigationShell,
+            destinations: const [
+              RootDestination(icon: Icons.event, label: 'Event'),
+              RootDestination(icon: Icons.business_outlined, label: 'Sponsors'),
+            ],
+          ),
+          branches: [
+            StatefulShellBranch(
+              routes: [GoRoute(path: '/event', builder: (_, _) => const SizedBox())],
+            ),
+            StatefulShellBranch(
+              routes: [GoRoute(path: '/sponsors', builder: (_, _) => const SponsorListPage())],
+            ),
+          ],
+        ),
+      ],
+    );
+    addTearDown(router.dispose);
+
+    await tester.pumpWidget(
+      TranslationProvider(
+        child: ProviderScope(
+          overrides: [
+            sponsorListProvider.overrideWithValue(
+              AsyncData([
+                for (var index = 1; index <= sponsorCount; index++) _sponsor(id: '$index', name: 'Sponsor $index'),
+              ]),
+            ),
+          ],
+          child: MaterialApp.router(
+            theme: lightTheme(),
+            routerConfig: router,
+            supportedLocales: AppLocaleUtils.supportedLocales,
+            localizationsDelegates: GlobalMaterialLocalizations.delegates,
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(NavigationRail), findsOneWidget);
+    // Resize the mounted shell through extended/compact rails and bottom navigation.
+    for (final width in [1280.0, 1024.0, 840.0, 839.0, 600.0, 599.0, 390.0, 1600.0]) {
+      tester.view.physicalSize = Size(width, 1600);
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull, reason: 'window width $width');
+      final page = tester.getRect(find.byType(SponsorListPage));
+      final cards = find.byType(SponsorLogoCardWidget);
+      expect(cards, findsNWidgets(sponsorCount));
+      final rows = <double, List<Rect>>{};
+      for (final card in cards.evaluate()) {
+        final bounds = tester.getRect(find.byWidget(card.widget));
+        expect(bounds.left, greaterThanOrEqualTo(page.left), reason: 'window width $width');
+        expect(bounds.right, lessThanOrEqualTo(page.right), reason: 'window width $width');
+        rows.putIfAbsent(bounds.top, () => []).add(bounds);
+      }
+      for (final row in rows.values) {
+        expect((row.first.left + row.last.right) / 2, closeTo(page.center.dx, 0.1), reason: 'window width $width');
+      }
+    }
+  });
+
+  for (final locale in AppLocale.values) {
+    for (final width in [320.0, 390.0]) {
+      testWidgets('amusement layout and details work at $width px in ${locale.languageCode}', (tester) async {
+        tester.view.physicalSize = Size(width, 844);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+        final previousLocale = LocaleSettings.currentLocale;
+        await tester.runAsync(() => LocaleSettings.setLocale(locale));
+        addTearDown(() => LocaleSettings.setLocaleSync(previousLocale));
+
+        final router = GoRouter(
+          initialLocation: '/sponsors',
+          routes: [
+            GoRoute(
+              path: '/sponsors',
+              builder: (context, state) => const SponsorListPage(),
+              routes: [
+                GoRoute(
+                  path: ':sponsorKey',
+                  builder: (context, state) => SponsorDetailsPage(
+                    sponsorKey: state.pathParameters['sponsorKey']!,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        );
+        addTearDown(router.dispose);
+
+        await tester.pumpWidget(
+          TranslationProvider(
+            child: ProviderScope(
+              overrides: [
+                sponsorListProvider.overrideWithValue(
+                  AsyncData([
+                    _sponsor(id: 'gold', name: 'Gold Company', tier: SponsorTier.gold),
+                    _sponsor(id: 'tool', name: 'Tool Company', tier: SponsorTier.tool),
+                    _sponsor(
+                      id: 'entertainment',
+                      name: 'Lumen Arcade',
+                      tier: SponsorTier.entertainment,
+                      slug: 'lumen-arcade',
+                    ),
+                  ]),
+                ),
+              ],
+              child: MaterialApp.router(
+                theme: lightTheme(),
+                locale: locale.flutterLocale,
+                routerConfig: router,
+                supportedLocales: AppLocaleUtils.supportedLocales,
+                localizationsDelegates: GlobalMaterialLocalizations.delegates,
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        final goldCard = find.ancestor(of: find.text('Gold Company'), matching: find.byType(SponsorLogoCardWidget));
+        expect(tester.getSize(goldCard), const Size(192, 192));
+
+        await tester.scrollUntilVisible(find.text('Lumen Arcade'), 200);
+        await tester.pumpAndSettle();
+
+        final heading = tester.widget<Text>(find.text('Amusement Sponsor'));
+        expect(heading.style?.fontSize, 28);
+        expect(heading.style?.fontWeight, FontWeight.w500);
+        final amusementCard = find.ancestor(
+          of: find.text('Lumen Arcade'),
+          matching: find.byType(SponsorLogoCardWidget),
+        );
+        expect(tester.getSize(amusementCard), const Size(192, 192));
+        expect(tester.getCenter(amusementCard).dx, closeTo(width / 2, 0.1));
+        expect(tester.takeException(), isNull);
+
+        await tester.tap(find.text('Lumen Arcade'));
+        await tester.pumpAndSettle();
+
+        expect(router.routeInformationProvider.value.uri.path, '/sponsors/lumen-arcade');
+        expect(find.text(locale.translations.sponsors.tierBadge(tier: 'Amusement')), findsOneWidget);
+        expect(find.textContaining('Entertainment'), findsNothing);
+        expect(find.textContaining('Sponsor Sponsor'), findsNothing);
+        expect(find.textContaining('Sponsor スポンサー'), findsNothing);
+        expect(tester.takeException(), isNull);
+
+        router.pop();
+        await tester.pumpAndSettle();
+
+        expect(router.routeInformationProvider.value.uri.path, '/sponsors');
+        expect(find.text('Amusement Sponsor'), findsOneWidget);
+        expect(tester.takeException(), isNull);
+      });
+    }
+  }
 
   testWidgets('SponsorListPage centers an incomplete sponsor row', (tester) async {
     tester.view.physicalSize = const Size(800, 844);

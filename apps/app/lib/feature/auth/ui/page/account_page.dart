@@ -326,7 +326,7 @@ class _SignedInView extends StatelessWidget {
                     title: Text(t.auth.account.mission, style: theme.textTheme.bodyMedium),
                     subtitle: Text(t.auth.account.missionDescription, style: theme.textTheme.bodySmall),
                     trailing: const Icon(Icons.chevron_right, size: 20),
-                    onTap: onComingSoon,
+                    onTap: () => const MissionRoute().push<void>(context),
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -355,7 +355,7 @@ class _SignedInView extends StatelessWidget {
                       _NavigationTile(
                         icon: Icons.image_outlined,
                         title: t.auth.account.snsPost,
-                        onTap: onComingSoon,
+                        onTap: () => const SnsPostRoute().push<void>(context),
                       ),
                     ],
                   ),

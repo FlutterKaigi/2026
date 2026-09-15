@@ -58,6 +58,8 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	late final Translations$eventInfo$ja eventInfo = Translations$eventInfo$ja.internal(_root);
 	late final Translations$auth$ja auth = Translations$auth$ja.internal(_root);
 	late final Translations$profile$ja profile = Translations$profile$ja.internal(_root);
+	late final Translations$snsPost$ja snsPost = Translations$snsPost$ja.internal(_root);
+	late final Translations$mission$ja mission = Translations$mission$ja.internal(_root);
 	late final Translations$exchange$ja exchange = Translations$exchange$ja.internal(_root);
 	late final Translations$supportLt$ja supportLt = Translations$supportLt$ja.internal(_root);
 	late final Translations$countryRegion$ja countryRegion = Translations$countryRegion$ja.internal(_root);
@@ -765,6 +767,152 @@ class Translations$profile$ja {
 
 	/// ja: '編集を続ける'
 	String get keepEditing => '編集を続ける';
+}
+
+// Path: snsPost
+class Translations$snsPost$ja {
+	Translations$snsPost$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'SNS投稿登録'
+	String get title => 'SNS投稿登録';
+
+	/// ja: 'SNS投稿を登録するにはサインインしてください'
+	String get signInRequired => 'SNS投稿を登録するにはサインインしてください';
+
+	/// ja: '写真の投稿を登録しよう'
+	String get heading => '写真の投稿を登録しよう';
+
+	/// ja: '対象の参加者と撮った写真をSNSに投稿し、\nその投稿のURLを登録してください。'
+	String get description => '対象の参加者と撮った写真をSNSに投稿し、\nその投稿のURLを登録してください。';
+
+	/// ja: '誰と撮りましたか？'
+	String get companionLabel => '誰と撮りましたか？';
+
+	/// ja: '写真に写っている相手のタグを1つ選んでください'
+	String get companionHint => '写真に写っている相手のタグを1つ選んでください';
+
+	/// ja: '相手のタグを1つ選んでください'
+	String get companionRequired => '相手のタグを1つ選んでください';
+
+	late final Translations$snsPost$companions$ja companions = Translations$snsPost$companions$ja.internal(_root);
+
+	/// ja: 'SNS投稿のURL'
+	String get urlLabel => 'SNS投稿のURL';
+
+	/// ja: 'プロフィールページではなく、写真を投稿したページのURL'
+	String get urlHint => 'プロフィールページではなく、写真を投稿したページのURL';
+
+	/// ja: '有効な投稿URL（https://…）を入力してください'
+	String get invalidUrl => '有効な投稿URL（https://…）を入力してください';
+
+	/// ja: '投稿を登録する'
+	String get register => '投稿を登録する';
+
+	/// ja: '登録内容を更新する'
+	String get update => '登録内容を更新する';
+
+	/// ja: '保存中…'
+	String get saving => '保存中…';
+
+	/// ja: 'キャンセル'
+	String get cancel => 'キャンセル';
+
+	/// ja: '保存できませんでした。通信状態を確認して、もう一度お試しください。'
+	String get saveFailed => '保存できませんでした。通信状態を確認して、もう一度お試しください。';
+
+	/// ja: '登録内容を確認できません。投稿URLと相手のタグを登録し直してください。'
+	String get invalidRegistration => '登録内容を確認できません。投稿URLと相手のタグを登録し直してください。';
+
+	/// ja: 'SNS投稿を登録しました'
+	String get registeredTitle => 'SNS投稿を登録しました';
+
+	/// ja: 'SNS投稿のミッションを達成しました。'
+	String get registeredBody => 'SNS投稿のミッションを達成しました。';
+
+	/// ja: '更新日時：$date'
+	String updatedAt({required Object date}) => '更新日時：${date}';
+
+	/// ja: '投稿を開く'
+	String get openPost => '投稿を開く';
+
+	/// ja: '投稿を開けませんでした'
+	String get openFailed => '投稿を開けませんでした';
+
+	/// ja: 'ミッションの達成状況を見る'
+	String get viewMissions => 'ミッションの達成状況を見る';
+
+	/// ja: 'URL・タグを修正する'
+	String get edit => 'URL・タグを修正する';
+}
+
+// Path: mission
+class Translations$mission$ja {
+	Translations$mission$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'ミッション'
+	String get title => 'ミッション';
+
+	/// ja: 'ミッションの達成状況を見るにはサインインしてください'
+	String get signInRequired => 'ミッションの達成状況を見るにはサインインしてください';
+
+	/// ja: '達成'
+	String get complete => '達成';
+
+	/// ja: '未達成'
+	String get incomplete => '未達成';
+
+	/// ja: '確認中'
+	String get loading => '確認中';
+
+	/// ja: '確認できません'
+	String get loadFailed => '確認できません';
+
+	/// ja: 'すべて達成！'
+	String get allComplete => 'すべて達成！';
+
+	/// ja: 'ミッション達成状況'
+	String get inProgress => 'ミッション達成状況';
+
+	/// ja: '確認できない項目があります'
+	String get checkFailed => '確認できない項目があります';
+
+	/// ja: '$total項目中$n項目を達成'
+	String progress({required Object total, required Object n}) => '${total}項目中${n}項目を達成';
+
+	/// ja: '応援LTに参加'
+	String get ltTitle => '応援LTに参加';
+
+	/// ja: '応援側・登壇者とも、会場のコードで参加登録'
+	String get ltDescription => '応援側・登壇者とも、会場のコードで参加登録';
+
+	/// ja: 'プロフィール交換'
+	String get exchangeTitle => 'プロフィール交換';
+
+	/// ja: '$required人以上と交換し、出身国・地域が異なる人を1人以上含む'
+	String exchangeDescription({required Object required}) => '${required}人以上と交換し、出身国・地域が異なる人を1人以上含む';
+
+	/// ja: '$n / $required人と交換'
+	String exchangeCount({required Object n, required Object required}) => '${n} / ${required}人と交換';
+
+	/// ja: '出身国・地域が異なる人と交換'
+	String get differentCountry => '出身国・地域が異なる人と交換';
+
+	/// ja: 'プロフィールで出身国・地域を登録する'
+	String get profileRequired => 'プロフィールで出身国・地域を登録する';
+
+	/// ja: '写真をSNSに投稿'
+	String get snsTitle => '写真をSNSに投稿';
+
+	/// ja: '対象の相手との写真を投稿し、URLとタグを登録'
+	String get snsDescription => '対象の相手との写真を投稿し、URLとタグを登録';
 }
 
 // Path: exchange
@@ -1480,6 +1628,30 @@ class Translations$auth$error$ja {
 	String get unknown => '認証に失敗しました。もう一度お試しください';
 }
 
+// Path: snsPost.companions
+class Translations$snsPost$companions$ja {
+	Translations$snsPost$companions$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'スタッフ'
+	String get staff => 'スタッフ';
+
+	/// ja: 'スピーカー'
+	String get speaker => 'スピーカー';
+
+	/// ja: 'スポンサー'
+	String get sponsor => 'スポンサー';
+
+	/// ja: '初参加の人'
+	String get firstTime => '初参加の人';
+
+	/// ja: '出身国・地域が異なる人'
+	String get differentCountry => '出身国・地域が異なる人';
+}
+
 // Path: settings.themeMode
 class Translations$settings$themeMode$ja {
 	Translations$settings$themeMode$ja.internal(this._root);
@@ -1811,6 +1983,53 @@ extension on Translations {
 			'profile.discardBody' => '保存していない変更は失われます。',
 			'profile.discardAction' => '破棄する',
 			'profile.keepEditing' => '編集を続ける',
+			'snsPost.title' => 'SNS投稿登録',
+			'snsPost.signInRequired' => 'SNS投稿を登録するにはサインインしてください',
+			'snsPost.heading' => '写真の投稿を登録しよう',
+			'snsPost.description' => '対象の参加者と撮った写真をSNSに投稿し、\nその投稿のURLを登録してください。',
+			'snsPost.companionLabel' => '誰と撮りましたか？',
+			'snsPost.companionHint' => '写真に写っている相手のタグを1つ選んでください',
+			'snsPost.companionRequired' => '相手のタグを1つ選んでください',
+			'snsPost.companions.staff' => 'スタッフ',
+			'snsPost.companions.speaker' => 'スピーカー',
+			'snsPost.companions.sponsor' => 'スポンサー',
+			'snsPost.companions.firstTime' => '初参加の人',
+			'snsPost.companions.differentCountry' => '出身国・地域が異なる人',
+			'snsPost.urlLabel' => 'SNS投稿のURL',
+			'snsPost.urlHint' => 'プロフィールページではなく、写真を投稿したページのURL',
+			'snsPost.invalidUrl' => '有効な投稿URL（https://…）を入力してください',
+			'snsPost.register' => '投稿を登録する',
+			'snsPost.update' => '登録内容を更新する',
+			'snsPost.saving' => '保存中…',
+			'snsPost.cancel' => 'キャンセル',
+			'snsPost.saveFailed' => '保存できませんでした。通信状態を確認して、もう一度お試しください。',
+			'snsPost.invalidRegistration' => '登録内容を確認できません。投稿URLと相手のタグを登録し直してください。',
+			'snsPost.registeredTitle' => 'SNS投稿を登録しました',
+			'snsPost.registeredBody' => 'SNS投稿のミッションを達成しました。',
+			'snsPost.updatedAt' => ({required Object date}) => '更新日時：${date}',
+			'snsPost.openPost' => '投稿を開く',
+			'snsPost.openFailed' => '投稿を開けませんでした',
+			'snsPost.viewMissions' => 'ミッションの達成状況を見る',
+			'snsPost.edit' => 'URL・タグを修正する',
+			'mission.title' => 'ミッション',
+			'mission.signInRequired' => 'ミッションの達成状況を見るにはサインインしてください',
+			'mission.complete' => '達成',
+			'mission.incomplete' => '未達成',
+			'mission.loading' => '確認中',
+			'mission.loadFailed' => '確認できません',
+			'mission.allComplete' => 'すべて達成！',
+			'mission.inProgress' => 'ミッション達成状況',
+			'mission.checkFailed' => '確認できない項目があります',
+			'mission.progress' => ({required Object total, required Object n}) => '${total}項目中${n}項目を達成',
+			'mission.ltTitle' => '応援LTに参加',
+			'mission.ltDescription' => '応援側・登壇者とも、会場のコードで参加登録',
+			'mission.exchangeTitle' => 'プロフィール交換',
+			'mission.exchangeDescription' => ({required Object required}) => '${required}人以上と交換し、出身国・地域が異なる人を1人以上含む',
+			'mission.exchangeCount' => ({required Object n, required Object required}) => '${n} / ${required}人と交換',
+			'mission.differentCountry' => '出身国・地域が異なる人と交換',
+			'mission.profileRequired' => 'プロフィールで出身国・地域を登録する',
+			'mission.snsTitle' => '写真をSNSに投稿',
+			'mission.snsDescription' => '対象の相手との写真を投稿し、URLとタグを登録',
 			'exchange.title' => 'プロフィール交換',
 			'exchange.qrDescription' => 'このQRコードを相手に見せて読み取ってもらうと、お互いのプロフィールを交換できます',
 			'exchange.qrSemanticLabel' => 'プロフィール交換用のQRコード',

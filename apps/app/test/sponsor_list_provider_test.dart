@@ -58,6 +58,24 @@ void main() {
     expect(findSponsorByRouteKey(sponsors, 'D2026-021')?.id, 'D2026-021');
     expect(findSponsorByRouteKey(sponsors, 'missing'), isNull);
   });
+
+  test('buildSponsorWallData places amusement after Tool and before Community and Individual', () {
+    final data = buildSponsorWallData([
+      for (final tier in SponsorTier.values.reversed) _sponsor(id: tier.name, name: tier.name, tier: tier),
+    ]);
+
+    expect(data.groups.map((group) => group.tier), [
+      SponsorTier.platinum,
+      SponsorTier.gold,
+      SponsorTier.silver,
+      SponsorTier.bronze,
+      SponsorTier.tool,
+      SponsorTier.entertainment,
+      SponsorTier.community,
+      SponsorTier.individual,
+    ]);
+    expect(data.groups.expand((group) => group.sponsors), hasLength(SponsorTier.values.length));
+  });
 }
 
 final class _FakeSponsorRepository implements SponsorRepository {

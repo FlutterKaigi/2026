@@ -293,6 +293,58 @@ profile:
   discardBody: 保存していない変更は失われます。
   discardAction: 破棄する
   keepEditing: 編集を続ける
+snsPost:
+  title: SNS投稿登録
+  signInRequired: SNS投稿を登録するにはサインインしてください
+  heading: 写真の投稿を登録しよう
+  description: 対象の参加者と撮った写真をSNSに投稿し、\nその投稿のURLを登録してください。
+  companionLabel: 誰と撮りましたか？
+  companionHint: 写真に写っている相手のタグを1つ選んでください
+  companionRequired: 相手のタグを1つ選んでください
+  companions:
+    staff: スタッフ
+    speaker: スピーカー
+    sponsor: スポンサー
+    firstTime: 初参加の人
+    differentCountry: 出身国・地域が異なる人
+  urlLabel: SNS投稿のURL
+  urlHint: プロフィールページではなく、写真を投稿したページのURL
+  invalidUrl: 有効な投稿URL（https://…）を入力してください
+  register: 投稿を登録する
+  update: 登録内容を更新する
+  saving: 保存中…
+  cancel: キャンセル
+  saveFailed: 保存できませんでした。通信状態を確認して、もう一度お試しください。
+  invalidRegistration: 登録内容を確認できません。投稿URLと相手のタグを登録し直してください。
+  registeredTitle: SNS投稿を登録しました
+  registeredBody: SNS投稿のミッションを達成しました。
+  updatedAt: "更新日時：$date"
+  openPost: 投稿を開く
+  openFailed: 投稿を開けませんでした
+  viewMissions: ミッションの達成状況を見る
+  edit: URL・タグを修正する
+
+mission:
+  title: ミッション
+  signInRequired: ミッションの達成状況を見るにはサインインしてください
+  complete: 達成
+  incomplete: 未達成
+  loading: 確認中
+  loadFailed: 確認できません
+  allComplete: すべて達成！
+  inProgress: ミッション達成状況
+  checkFailed: 確認できない項目があります
+  progress: $total項目中$n項目を達成
+  ltTitle: 応援LTに参加
+  ltDescription: 応援側・登壇者とも、会場のコードで参加登録
+  exchangeTitle: プロフィール交換
+  exchangeDescription: $required人以上と交換し、出身国・地域が異なる人を1人以上含む
+  exchangeCount: "$n / $required人と交換"
+  differentCountry: 出身国・地域が異なる人と交換
+  profileRequired: プロフィールで出身国・地域を登録する
+  snsTitle: 写真をSNSに投稿
+  snsDescription: 対象の相手との写真を投稿し、URLとタグを登録
+
 exchange:
   title: プロフィール交換
   qrDescription: このQRコードを相手に見せて読み取ってもらうと、お互いのプロフィールを交換できます

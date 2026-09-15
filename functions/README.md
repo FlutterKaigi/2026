@@ -33,9 +33,10 @@ FlutterKaigi 2026 の Cloud Functions。STG → 本番のデータ反映用の
   ドキュメントなのでトランザクションには含めず、判定は通常の読み取り、更新は
   コミット後の `FieldValue.increment` で行う（ロック競合による ABORTED を防ぐ）。
   プロフィール `users/{uid}` はコード一致後にのみ読み取る。
-- `onSupportLtUserDeleted` は Firebase Auth のアカウント削除時に登録と失敗試行を
-  削除する。プロフィールがないユーザーも対象となる。Auth lifecycle のため
-  第 1 世代 Function を使用し、失敗時の再試行を有効にする。
+- `onSupportLtUserDeleted` は Firebase Auth のアカウント削除時に共通の
+  `src/auth_user_data.ts` を使い、LT参加登録・LT失敗試行・SNS投稿登録・交換コード失敗試行を削除する。
+  プロフィールがないユーザーも対象となる。`src/auth_user_cleanup.ts` に実装し、
+  既存のデプロイ名を維持する。Auth lifecycle のため第1世代Functionを使用し、失敗時は再試行する。
 
 callable は削除・無効化済みアカウントの古い ID トークンを受け付けない。
 `src/support_lt_auth.ts` で Auth アカウント状態を確認する。登録時は Firestore
@@ -84,6 +85,16 @@ npm --prefix functions run test:emulator
 削除・無効化後の古い ID トークンの拒否まで検証する。
 専用のテストユーザーを作成・削除し、既存コードを保存・復元するため、
 実行中はダッシュボードからコードを再発行しないこと。
+
+## SNS投稿登録
+
+共通のAuth削除処理（`onSupportLtUserDeleted`）がアカウント削除時に
+`snsPostRegistrations/{uid}`を削除する。SNS投稿登録はプロフィールを必要としないため、
+`users/{uid}`の削除トリガーには依存しない。登録・更新自体はアプリがFirestoreへ直接保存し、
+ルールで本人の所有権、URL、5種類のうち1つのタグ、サーバー時刻を検証する。
+
+`test/sns_post.emulator.test.cjs`で所有権、入力検証、更新、プロフィール未作成アカウントの
+削除トリガーを検証する。既存の`npm run test:emulator`に含まれる。
 
 ## プロフィール交換
 

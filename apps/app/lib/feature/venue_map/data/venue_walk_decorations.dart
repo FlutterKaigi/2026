@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
+import 'package:app/feature/venue_map/data/venue_box_batch.dart';
 import 'package:app/feature/venue_map/data/venue_creative_board_layout.dart';
 import 'package:app/feature/venue_map/data/venue_localized_signs.dart';
 import 'package:app/feature/venue_map/data/venue_walk_navigation.dart';
@@ -16,6 +17,8 @@ class VenueWalkDecorations {
   final VenueLocalizedSigns localizedSigns;
   final vm.Vector3 Function(MapPoint, double) world;
   final root = fs.Node(name: 'Demo exhibition decorations');
+  final _boxes = VenueBoxBatch();
+  final _materials = <Color, fs.PhysicallyBasedMaterial>{};
   late final layout = VenueCreativeBoardLayout(navigation);
   static const _green = Color(0xff205c50);
   static const _cream = Color(0xfff8f5e9);
@@ -124,9 +127,10 @@ class VenueWalkDecorations {
       )..position = world(MapPoint(layout.area.center.dx, layout.area.center.dy), .034),
     );
     layout.registerObstacles(navigation);
+    root.add(_boxes.root);
   }
 
-  void _obstacle(MapPoint p, double w, double h) => navigation.blocked.add([
+  void _obstacle(MapPoint p, double w, double h) => navigation.addObstacle([
     MapPoint(p.x - w / 2, p.y - h / 2),
     MapPoint(p.x + w / 2, p.y - h / 2),
     MapPoint(p.x + w / 2, p.y + h / 2),
@@ -138,11 +142,14 @@ class VenueWalkDecorations {
     return vm.Vector4(f(c.r), f(c.g), f(c.b), c.a);
   }
 
-  fs.PhysicallyBasedMaterial _material(Color color) => fs.PhysicallyBasedMaterial()
-    ..baseColorFactor = _linear(color)
-    ..roughnessFactor = .9;
+  fs.PhysicallyBasedMaterial _material(Color color) => _materials.putIfAbsent(
+    color,
+    () => fs.PhysicallyBasedMaterial()
+      ..baseColorFactor = _linear(color)
+      ..roughnessFactor = .9,
+  );
 
-  fs.Node _box(
+  void _box(
     MapPoint p, {
     required double width,
     required double height,
@@ -151,11 +158,12 @@ class VenueWalkDecorations {
     required Color color,
     double yaw = 0,
   }) {
-    final node = fs.Node(mesh: fs.Mesh(fs.CuboidGeometry(vm.Vector3(width, height, depth)), _material(color)))
-      ..position = world(p, elevation)
-      ..rotation = vm.Quaternion.axisAngle(vm.Vector3(0, 1, 0), yaw);
-    root.add(node);
-    return node;
+    _boxes.add(
+      position: world(p, elevation),
+      size: vm.Vector3(width, height, depth),
+      material: _material(color),
+      yaw: yaw,
+    );
   }
 
   fs.UnlitMaterial _textured(fs.Texture2D texture) =>
@@ -173,17 +181,23 @@ class VenueWalkDecorations {
     double depth = .09,
     bool bothSides = true,
   }) {
-    final board = _box(p, width: width, height: height, depth: depth, elevation: elevation, color: color, yaw: yaw);
+    _box(p, width: width, height: height, depth: depth, elevation: elevation, color: color, yaw: yaw);
+    final board = fs.Node()
+      ..position = world(p, elevation)
+      ..rotation = vm.Quaternion.axisAngle(vm.Vector3(0, 1, 0), yaw);
+    root.add(board);
     final mesh = fs.Mesh(fs.PlaneGeometry(width: width - .04, depth: height - .04), material);
     final upright = vm.Quaternion.axisAngle(vm.Vector3(1, 0, 0), -math.pi / 2);
     board.add(
       fs.Node(mesh: mesh)
+        ..castsShadows = false
         ..position = vm.Vector3(0, 0, -depth / 2 - .006)
         ..rotation = upright,
     );
     if (bothSides) {
       board.add(
         fs.Node(mesh: mesh)
+          ..castsShadows = false
           ..position = vm.Vector3(0, 0, depth / 2 + .006)
           ..rotation = vm.Quaternion.axisAngle(vm.Vector3(0, 1, 0), math.pi) * upright,
       );

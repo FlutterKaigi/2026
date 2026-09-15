@@ -8,6 +8,8 @@ import { assertAdmin } from "./admin_auth";
 import { defaultFirestore } from "./firebase_admin";
 import { FUNCTIONS_REGION, isEmulator } from "./environment";
 
+export { onSupportLtUserDeleted } from "./auth_user_cleanup";
+
 export {
   issueExchangeCode,
   issueExchangeToken,
@@ -18,7 +20,6 @@ export {
 
 export {
   issueSupportLtCode,
-  onSupportLtUserDeleted,
   registerSupportLt,
 } from "./support_lt";
 
