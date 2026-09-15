@@ -4,6 +4,7 @@ import 'package:app/core/designsystem/theme/app_theme.dart';
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/provider/shared_preferences.dart';
 import 'package:app/feature/venue_map/data/venue_floor_plan.dart';
+import 'package:app/feature/venue_map/data/venue_walk_navigation.dart';
 import 'package:app/feature/venue_map/data/venue_walk_scene.dart';
 import 'package:app/feature/venue_map/provider/venue_map_view_mode.dart';
 import 'package:app/feature/venue_map/provider/venue_walk_scene_factory.dart';
@@ -19,6 +20,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'support/lifecycle_test_scene.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -183,7 +186,13 @@ void main() {
     expect(commands.where((c) => c['action'] == 'focus'), hasLength(1));
   });
 
-  Future<void> pumpMap(WidgetTester tester, {double textScale = 1, bool dark = false, bool english = false}) async {
+  Future<void> pumpMap(
+    WidgetTester tester, {
+    double textScale = 1,
+    bool dark = false,
+    bool english = false,
+    VenueWalkScene? scene,
+  }) async {
     SharedPreferences.setMockInitialValues({});
     final prefs = await SharedPreferences.getInstance();
     await tester.runAsync(() => LocaleSettings.setLocale(english ? AppLocale.en : AppLocale.ja));
@@ -192,6 +201,7 @@ void main() {
         overrides: [
           sharedPreferencesProvider.overrideWithValue(prefs),
           venueFloorPlanProvider.overrideWith((ref) => plan),
+          if (scene != null) venueWalkSceneFactoryProvider.overrideWithValue(({required showcase}) => scene),
         ],
         child: TranslationProvider(
           child: MaterialApp(
@@ -245,6 +255,70 @@ void main() {
     expect(camera.scale, scale);
     expect((camera.unproject(camera.viewport.center(Offset.zero)) - worldCenter).distance, lessThan(.001));
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('3D search resumes after repeated selections and dismissal, and after returning from 2D', (tester) async {
+    final scene = createLifecycleTestScene();
+    if (scene == null) {
+      return;
+    }
+    tester.view.physicalSize = const Size(600, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final game = _SearchScene(sourcePlan, scene);
+    await pumpMap(tester, scene: game);
+    await tester.tap(find.text('3D'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.pump(const Duration(milliseconds: 16));
+    expect(game.ticks, greaterThan(0));
+
+    final destinations = <String>[];
+    for (final (name, id) in [('Cupertino', 'grand_hall_a'), ('Material', 'grand_hall_b')]) {
+      await tester.tap(find.text('場所を探す'));
+      await tester.pumpAndSettle();
+      expect(game.paused, isTrue);
+      final pausedTicks = game.ticks;
+      await tester.pump(const Duration(seconds: 1));
+      expect(game.ticks, pausedTicks);
+
+      await tester.enterText(find.byType(TextField), name);
+      await tester.pumpAndSettle();
+      await tester.tap(find.bySemanticsLabel(plan.find(id)!.semanticsLabel('ja')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(tester.takeException(), isNull);
+      expect(game.paused, isFalse);
+      expect(game.ticks, greaterThan(pausedTicks));
+      destinations.add(id);
+      expect(game.destinations, destinations);
+      expect(find.byType(VenuePlaceSummary), findsOneWidget);
+    }
+
+    await tester.tap(find.text('場所を探す'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(CloseButton));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(tester.takeException(), isNull);
+    expect(game.paused, isFalse);
+    expect(game.destinations, destinations);
+
+    await tester.tap(find.text('2D'));
+    await tester.pumpAndSettle();
+    expect(game.paused, isTrue);
+    final pausedTicks = game.ticks;
+    await tester.pump(const Duration(seconds: 1));
+    expect(game.ticks, pausedTicks);
+    await tester.tap(find.text('3D'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(tester.takeException(), isNull);
+    expect(game.paused, isFalse);
+    expect(game.ticks, greaterThan(pausedTicks));
+    expect(game.destinations, destinations);
+    await tester.pumpWidget(const SizedBox.shrink());
   });
 
   testWidgets('small display, dark theme, English and large text remain usable', (tester) async {
@@ -412,4 +486,35 @@ void main() {
 class _FailedScene extends VenueWalkScene {
   @override
   Future<void> load() async => throw StateError('GPU unavailable');
+}
+
+class _SearchScene extends VenueWalkScene {
+  _SearchScene(Map<String, Object?> plan, this._scene) : super(showcase: true) {
+    navigation = VenueNavigation(plan);
+  }
+
+  final LifecycleTestScene _scene;
+  final destinations = <String>[];
+  int ticks = 0;
+
+  @override
+  LifecycleTestScene get scene => _scene;
+
+  @override
+  Future<void> load() async {}
+
+  @override
+  void tick(Duration elapsed, double delta) => ticks++;
+
+  @override
+  void stop() => releaseInput();
+
+  @override
+  void goToPlace(String id) => destinations.add(id);
+
+  @override
+  void dispose() {
+    _scene.dispose();
+    super.dispose();
+  }
 }
