@@ -8,7 +8,9 @@ import 'package:app/feature/session/data/provider/session_timetable_provider.dar
 import 'package:app/feature/session/ui/widget/session_speaker_widget.dart';
 import 'package:app/feature/session/util/event_time.dart';
 import 'package:app/feature/session/util/session_language.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 const _timeColumnWidth = 64.0;
@@ -19,7 +21,7 @@ const _minimumRoomColumnWidth = 216.0;
 /// Rows are grouped by start time and size themselves to their content. Unlike
 /// a pixel-per-minute timeline, this keeps every title and speaker readable
 /// without letting short or overlapping sessions paint over each other.
-class SessionTimetableRoomTimelineWidget extends StatelessWidget {
+class SessionTimetableRoomTimelineWidget extends HookWidget {
   const SessionTimetableRoomTimelineWidget({
     required this.day,
     super.key,
@@ -29,6 +31,16 @@ class SessionTimetableRoomTimelineWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scrollController = useScrollController();
+    final scrollOffset = useValueNotifier<double>(0);
+    useEffect(
+      () {
+        void updateScrollOffset() => scrollOffset.value = scrollController.offset;
+        scrollController.addListener(updateScrollOffset);
+        return () => scrollController.removeListener(updateScrollOffset);
+      },
+      [scrollController, scrollOffset],
+    );
     if (day.entries.isEmpty) {
       return const SizedBox.shrink();
     }
@@ -51,54 +63,159 @@ class SessionTimetableRoomTimelineWidget extends StatelessWidget {
           );
           final tableWidth = _timeColumnWidth + roomColumnWidth * columns.length;
 
-          return SingleChildScrollView(
-            key: ValueKey(('room-schedule-scroll', day.date)),
-            scrollDirection: Axis.horizontal,
-            physics: const ClampingScrollPhysics(),
-            child: SizedBox(
-              width: tableWidth,
-              child: Table(
-                columnWidths: {
-                  0: const FixedColumnWidth(_timeColumnWidth),
-                  for (var index = 0; index < columns.length; index++) index + 1: FixedColumnWidth(roomColumnWidth),
-                },
-                border: TableBorder(
-                  top: borderSide,
-                  bottom: borderSide,
-                  left: borderSide,
-                  right: borderSide,
-                  horizontalInside: borderSide,
-                  verticalInside: borderSide,
-                ),
-                children: [
-                  TableRow(
-                    decoration: BoxDecoration(color: colorScheme.surfaceContainerHigh),
-                    children: [
-                      const _TimeHeaderCellWidget(),
-                      for (final column in columns) _RoomHeaderCellWidget(label: column.label),
-                    ],
+          return NotificationListener<ScrollMetricsNotification>(
+            onNotification: (notification) {
+              // Resizing can clamp the offset without notifying the controller.
+              scrollOffset.value = notification.metrics.pixels;
+              return false;
+            },
+            child: SingleChildScrollView(
+              key: ValueKey(('room-schedule-scroll', day.date)),
+              controller: scrollController,
+              scrollDirection: Axis.horizontal,
+              physics: const ClampingScrollPhysics(),
+              child: SizedBox(
+                width: tableWidth,
+                child: Table(
+                  defaultVerticalAlignment: TableCellVerticalAlignment.intrinsicHeight,
+                  columnWidths: {
+                    0: const FixedColumnWidth(_timeColumnWidth),
+                    for (var index = 0; index < columns.length; index++) index + 1: FixedColumnWidth(roomColumnWidth),
+                  },
+                  border: TableBorder(
+                    top: borderSide,
+                    bottom: borderSide,
+                    horizontalInside: borderSide,
                   ),
-                  for (final row in rows)
+                  children: [
                     TableRow(
-                      key: ValueKey('room-schedule-row-${row.startsAt.toIso8601String()}'),
+                      decoration: BoxDecoration(color: colorScheme.surfaceContainerHigh),
                       children: [
-                        _TimeCellWidget(startsAt: row.startsAt),
-                        for (final column in columns)
-                          _ScheduleCellWidget(
-                            entries: [
-                              for (final entry in row.entries)
-                                if (entry.venueId == column.venueId) entry,
-                            ],
+                        _PinnedTimeCellWidget(
+                          scrollOffset: scrollOffset,
+                          backgroundColor: colorScheme.surfaceContainerHigh,
+                          child: const _TimeHeaderCellWidget(),
+                        ),
+                        for (var index = 0; index < columns.length; index++)
+                          _ClippedRoomCellWidget(
+                            scrollOffset: scrollOffset,
+                            roomOffset: index * roomColumnWidth,
+                            child: _RoomHeaderCellWidget(label: columns[index].label),
                           ),
                       ],
                     ),
-                ],
+                    for (final row in rows)
+                      TableRow(
+                        key: ValueKey('room-schedule-row-${row.startsAt.toIso8601String()}'),
+                        children: [
+                          _PinnedTimeCellWidget(
+                            scrollOffset: scrollOffset,
+                            backgroundColor: colorScheme.surface,
+                            child: _TimeCellWidget(startsAt: row.startsAt),
+                          ),
+                          for (var index = 0; index < columns.length; index++)
+                            _ClippedRoomCellWidget(
+                              scrollOffset: scrollOffset,
+                              roomOffset: index * roomColumnWidth,
+                              child: _ScheduleCellWidget(
+                                entries: [
+                                  for (final entry in row.entries)
+                                    if (entry.venueId == columns[index].venueId) entry,
+                                ],
+                              ),
+                            ),
+                        ],
+                      ),
+                  ],
+                ),
               ),
             ),
           );
         },
       ),
     );
+  }
+}
+
+// Keep one table so time labels and room cells share content-driven row heights.
+// Counter the horizontal scroll for the time cells and clip rooms at that edge.
+class _PinnedTimeCellWidget extends StatelessWidget {
+  const _PinnedTimeCellWidget({
+    required this.scrollOffset,
+    required this.backgroundColor,
+    required this.child,
+  });
+
+  final ValueListenable<double> scrollOffset;
+  final Color backgroundColor;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final borderSide = BorderSide(color: Theme.of(context).colorScheme.outlineVariant);
+    return AnimatedBuilder(
+      animation: scrollOffset,
+      builder: (context, child) => Transform.translate(
+        offset: Offset(scrollOffset.value, 0),
+        child: child,
+      ),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: backgroundColor,
+          border: Border(left: borderSide, right: borderSide),
+        ),
+        child: Align(alignment: Alignment.topCenter, child: child),
+      ),
+    );
+  }
+}
+
+class _ClippedRoomCellWidget extends StatelessWidget {
+  const _ClippedRoomCellWidget({
+    required this.scrollOffset,
+    required this.roomOffset,
+    required this.child,
+  });
+
+  final ValueListenable<double> scrollOffset;
+  final double roomOffset;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRect(
+      clipper: _RoomCellClipper(
+        scrollOffset: scrollOffset,
+        roomOffset: roomOffset,
+      ),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          border: Border(right: BorderSide(color: Theme.of(context).colorScheme.outlineVariant)),
+        ),
+        child: Align(alignment: Alignment.topCenter, child: child),
+      ),
+    );
+  }
+}
+
+class _RoomCellClipper extends CustomClipper<Rect> {
+  _RoomCellClipper({
+    required this.scrollOffset,
+    required this.roomOffset,
+  }) : super(reclip: scrollOffset);
+
+  final ValueListenable<double> scrollOffset;
+  final double roomOffset;
+
+  @override
+  Rect getClip(Size size) {
+    final left = (scrollOffset.value - roomOffset).clamp(0.0, size.width);
+    return Rect.fromLTRB(left, 0, size.width, size.height);
+  }
+
+  @override
+  bool shouldReclip(_RoomCellClipper oldClipper) {
+    return scrollOffset != oldClipper.scrollOffset || roomOffset != oldClipper.roomOffset;
   }
 }
 
