@@ -36,6 +36,12 @@ void main() {
           matching: find.byType(Scrollable),
         ),
       );
+      final timeLabel = find.text('10:00');
+      final timeHeader = find.byIcon(Icons.schedule);
+      final timeLabelPosition = tester.getTopLeft(timeLabel);
+      final timeHeaderPosition = tester.getTopLeft(timeHeader);
+      final firstRoomHeader = find.text('Stress Room 0');
+      final firstRoomPosition = tester.getTopLeft(firstRoomHeader);
       final lastTitle = tester.widget<Text>(
         find.byKey(const ValueKey('room-session-title-stress-session-29')),
       );
@@ -65,15 +71,52 @@ void main() {
         );
         await tester.pumpAndSettle();
         expect(scrollable.position.pixels, greaterThan(0));
+        expect(tester.getTopLeft(timeLabel), timeLabelPosition);
+        expect(tester.getTopLeft(timeHeader), timeHeaderPosition);
+        expect(tester.getTopLeft(firstRoomHeader).dx, lessThan(firstRoomPosition.dx));
+        final firstCard = find.byKey(const ValueKey('room-timeline-entry-stress-session-0'));
+        final pointOnTimeColumn = Offset(
+          tester.getCenter(timeLabel).dx,
+          tester.getTopLeft(firstCard).dy + 12,
+        );
+        expect(tester.getRect(firstCard).contains(pointOnTimeColumn), isTrue);
+        expect(
+          tester.hitTestOnBinding(pointOnTimeColumn).path.map((entry) => entry.target),
+          isNot(contains(tester.renderObject(firstCard))),
+        );
         scrollable.position.jumpTo(
           scrollable.position.maxScrollExtent,
         );
         await tester.pump();
         expect(scrollable.position.pixels, greaterThan(0));
+        expect(tester.getTopLeft(timeLabel), timeLabelPosition);
+        expect(tester.getTopLeft(timeHeader), timeHeaderPosition);
+        tester.view.physicalSize = const Size(1200, 1000);
+        await tester.pumpAndSettle();
+        expect(scrollable.position.pixels, 0);
+        expect(tester.getTopLeft(timeLabel).dx, timeLabelPosition.dx);
+        expect(tester.getTopLeft(timeHeader).dx, timeHeaderPosition.dx);
+        tester.view.physicalSize = Size(viewport.value, 1000);
+        await tester.pumpAndSettle();
         scrollable.position.jumpTo(0);
         await tester.pump();
         expect(scrollable.position.pixels, 0);
       }
+
+      final laterTime = find.text('10:20');
+      final laterCard = find.byKey(const ValueKey('room-timeline-entry-stress-session-2'));
+      final timeBeforeVerticalScroll = tester.getTopLeft(laterTime);
+      final cardBeforeVerticalScroll = tester.getTopLeft(laterCard);
+      await tester.dragFrom(tester.getCenter(laterTime), const Offset(0, -160));
+      await tester.pumpAndSettle();
+      final timeAfterVerticalScroll = tester.getTopLeft(laterTime);
+      final cardAfterVerticalScroll = tester.getTopLeft(laterCard);
+      expect(timeAfterVerticalScroll.dx, timeBeforeVerticalScroll.dx);
+      expect(timeAfterVerticalScroll.dy, lessThan(timeBeforeVerticalScroll.dy));
+      expect(
+        cardAfterVerticalScroll.dy - cardBeforeVerticalScroll.dy,
+        closeTo(timeAfterVerticalScroll.dy - timeBeforeVerticalScroll.dy, 0.01),
+      );
       expect(tester.takeException(), isNull);
     });
   }
