@@ -1,6 +1,7 @@
 import 'package:app/core/designsystem/theme/app_theme.dart';
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/router/router.dart';
+import 'package:app/core/ui/root_scaffold.dart';
 import 'package:app/core/ui/widget/trademark_footer_widget.dart';
 import 'package:app/feature/sponsor/data/provider/sponsor_list_provider.dart';
 import 'package:app/feature/sponsor/data/provider/sponsor_repository.dart';
@@ -128,6 +129,80 @@ void main() {
       find.text('Platinum Sponsor 1', skipOffstage: false),
       findsNothing,
     );
+  });
+
+  testWidgets('sponsor rows fit beside the desktop navigation rail', (tester) async {
+    const sponsorCount = 4;
+    tester.view.physicalSize = const Size(1280, 1600);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final router = GoRouter(
+      initialLocation: '/sponsors',
+      routes: [
+        StatefulShellRoute.indexedStack(
+          builder: (_, _, navigationShell) => RootScaffold(
+            navigationShell: navigationShell,
+            destinations: const [
+              RootDestination(icon: Icons.event, label: 'Event'),
+              RootDestination(icon: Icons.business_outlined, label: 'Sponsors'),
+            ],
+          ),
+          branches: [
+            StatefulShellBranch(
+              routes: [GoRoute(path: '/event', builder: (_, _) => const SizedBox())],
+            ),
+            StatefulShellBranch(
+              routes: [GoRoute(path: '/sponsors', builder: (_, _) => const SponsorListPage())],
+            ),
+          ],
+        ),
+      ],
+    );
+    addTearDown(router.dispose);
+
+    await tester.pumpWidget(
+      TranslationProvider(
+        child: ProviderScope(
+          overrides: [
+            sponsorListProvider.overrideWithValue(
+              AsyncData([
+                for (var index = 1; index <= sponsorCount; index++) _sponsor(id: '$index', name: 'Sponsor $index'),
+              ]),
+            ),
+          ],
+          child: MaterialApp.router(
+            theme: lightTheme(),
+            routerConfig: router,
+            supportedLocales: AppLocaleUtils.supportedLocales,
+            localizationsDelegates: GlobalMaterialLocalizations.delegates,
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(NavigationRail), findsOneWidget);
+    // Resize the mounted shell through extended/compact rails and bottom navigation.
+    for (final width in [1280.0, 1024.0, 840.0, 839.0, 600.0, 599.0, 390.0, 1600.0]) {
+      tester.view.physicalSize = Size(width, 1600);
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull, reason: 'window width $width');
+      final page = tester.getRect(find.byType(SponsorListPage));
+      final cards = find.byType(SponsorLogoCardWidget);
+      expect(cards, findsNWidgets(sponsorCount));
+      final rows = <double, List<Rect>>{};
+      for (final card in cards.evaluate()) {
+        final bounds = tester.getRect(find.byWidget(card.widget));
+        expect(bounds.left, greaterThanOrEqualTo(page.left), reason: 'window width $width');
+        expect(bounds.right, lessThanOrEqualTo(page.right), reason: 'window width $width');
+        rows.putIfAbsent(bounds.top, () => []).add(bounds);
+      }
+      for (final row in rows.values) {
+        expect((row.first.left + row.last.right) / 2, closeTo(page.center.dx, 0.1), reason: 'window width $width');
+      }
+    }
   });
 
   for (final locale in AppLocale.values) {
