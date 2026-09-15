@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:rxdart/rxdart.dart';
 
 import '../model/user_profile.dart';
 import 'firestore_watch.dart';
@@ -6,6 +7,9 @@ import 'firestore_watch.dart';
 abstract interface class UserProfileRepository {
   /// Emits the profile stored for [uid], or `null` while none exists.
   Stream<UserProfile?> watch(String uid);
+
+  /// Watches distinct profiles in batches; missing profiles are omitted.
+  Stream<List<UserProfile>> watchMany(Iterable<String> uids);
 
   /// Creates or updates the profile for [UserProfile.id].
   ///
@@ -26,6 +30,26 @@ final class FirestoreUserProfileRepository implements UserProfileRepository {
 
   @override
   Stream<UserProfile?> watch(String uid) => watchFirestoreDocument(_collection.doc(uid)).map(_toProfile);
+
+  @override
+  Stream<List<UserProfile>> watchMany(Iterable<String> uids) {
+    final ids = uids.toSet().toList()..sort();
+    if (ids.isEmpty) {
+      return Stream.value(const []);
+    }
+    // Firestore permits up to 30 document IDs in one `in` query.
+    const batchSize = 30;
+    final batches = <Stream<List<UserProfile>>>[];
+    for (var start = 0; start < ids.length; start += batchSize) {
+      final batch = ids.skip(start).take(batchSize).toList();
+      batches.add(
+        watchFirestoreQuery(
+          _collection.where(FieldPath.documentId, whereIn: batch),
+        ).map((snapshot) => [for (final document in snapshot.docs) _toProfile(document)!]),
+      );
+    }
+    return Rx.combineLatestList(batches).map((profiles) => profiles.expand((batch) => batch).toList());
+  }
 
   /// Parses [snapshot], or returns `null` for a missing document.
   ///
