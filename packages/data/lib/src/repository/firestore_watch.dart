@@ -144,9 +144,15 @@ Stream<T> waitForUsableInitialSnapshot<T>(
 /// cache. A cache miss is held until the server confirms the document is
 /// genuinely absent, so an unreachable backend is not mistaken for a missing
 /// document.
+/// When [includePendingWrites] is false, unacknowledged writes also keep the
+/// initial timeout active and are suppressed after the first usable snapshot.
 Stream<DocumentSnapshot<Map<String, dynamic>>> watchFirestoreDocument(
-  DocumentReference<Map<String, dynamic>> reference,
-) => waitForUsableInitialSnapshot(
+  DocumentReference<Map<String, dynamic>> reference, {
+  bool includePendingWrites = true,
+}) => waitForUsableInitialSnapshot(
   reference.snapshots(includeMetadataChanges: true),
-  isUsableInitialSnapshot: (snapshot) => snapshot.exists || !snapshot.metadata.isFromCache,
+  isUsableInitialSnapshot: (snapshot) =>
+      (includePendingWrites || !snapshot.metadata.hasPendingWrites) &&
+      (snapshot.exists || !snapshot.metadata.isFromCache),
+  shouldForwardAfterInitial: (snapshot) => includePendingWrites || !snapshot.metadata.hasPendingWrites,
 );

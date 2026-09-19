@@ -43,6 +43,12 @@ apps/website/lib/constants/generated_staff.dart
 # git history before it is announced.
 apps/website/lib/constants/generated_sessions.dart
 
+# Generated Universal Links / App Links verification files
+# (apple-app-site-association / assetlinks.json). Built from Repository
+# Variables (APPLE_TEAM_ID / ANDROID_SHA256_FINGERPRINTS) at deploy time —
+# see tool/generate_well_known.dart — and never committed.
+apps/website/web/.well-known/
+
 # Local venue-map reference assets
 apps/app/prototypes/venue-map/
 apps/app/**/reference-plan.png

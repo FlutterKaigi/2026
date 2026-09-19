@@ -12,6 +12,7 @@ export 'src/model/quiz_question.dart' show QuizQuestion, QuizQuestionStatus;
 export 'src/model/quiz_question_secret.dart' show QuizQuestionSecret;
 export 'src/model/quiz_team.dart' show QuizTeam, QuizTeamMember;
 export 'src/model/sns_link.dart' show SnsLink;
+export 'src/model/sns_post.dart' show SnsPostCompanion, SnsPostRegistration;
 export 'src/model/speaker.dart' show Speaker;
 export 'src/model/staff_member.dart' show StaffMember;
 export 'src/model/session.dart' show Session;
@@ -32,6 +33,7 @@ export 'src/repository/quiz_participant_repository.dart'
     show FirestoreQuizParticipantRepository, QuizParticipantRepository;
 export 'src/repository/quiz_question_repository.dart' show FirestoreQuizQuestionRepository, QuizQuestionRepository;
 export 'src/repository/quiz_team_repository.dart' show FirestoreQuizTeamRepository, QuizTeamRepository;
+export 'src/repository/sns_post_repository.dart' show FirestoreSnsPostRepository, SnsPostRepository;
 export 'src/repository/speaker_repository.dart' show FirestoreSpeakerRepository, SpeakerRepository;
 export 'src/repository/staff_member_repository.dart' show FirestoreStaffMemberRepository, StaffMemberRepository;
 export 'src/repository/session_repository.dart' show FirestoreSessionRepository, SessionRepository;

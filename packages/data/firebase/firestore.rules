@@ -252,6 +252,22 @@ service cloud.firestore {
       }
     }
 
+    // 写真の相手の分類と SNS 投稿 URL を自己申告で登録する。1人1件。
+    // プロフィールの公開範囲とは分け、本人だけが参照・変更できる。
+    // 登録には匿名認証ではなくアカウントでのサインインが必要。
+    match /snsPostRegistrations/{uid} {
+      allow get: if isOwner(uid);
+      allow create, update: if isOwner(uid)
+        && request.auth.token.firebase.sign_in_provider != 'anonymous'
+        && request.resource.data.keys().hasOnly(['url', 'companion', 'updatedAt'])
+        && request.resource.data.url is string
+        && request.resource.data.url.size() <= 2048
+        && request.resource.data.url.matches('^https?://[^/?#\\s@]+[.][^/?#\\s@]+/[^?#\\s][^\\s]*$')
+        && request.resource.data.companion in ['staff', 'speaker', 'sponsor', 'firstTime', 'differentCountry']
+        && request.resource.data.updatedAt == request.time;
+      allow delete: if isOwner(uid);
+    }
+
     // 応援 LT の共通認証コード（current）と全体の失敗回数（attempts）。
     // 管理者も callable 経由で発行・再発行する。
     // 参加者に read を許可するとコードによる参加確認が成立しなくなる。

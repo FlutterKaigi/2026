@@ -2,6 +2,7 @@ import { randomInt } from "node:crypto";
 import { FieldValue, Firestore, Timestamp } from "firebase-admin/firestore";
 import { HttpsError } from "firebase-functions/v2/https";
 import { assertAdmin } from "./admin_auth";
+import { deleteAuthUserData } from "./auth_user_data";
 import { assertActiveSupportLtUser, InactiveSupportLtUserError, SupportLtGetUser } from "./support_lt_auth";
 
 const CODE_SPACE = 1_000_000;
@@ -241,7 +242,7 @@ export async function registerSupportLtForUser(
     // after rollback, never under this transaction's registration read lock,
     // or it would wait on its own lock indefinitely.
     if (error instanceof InactiveSupportLtUserError && error.deleted) {
-      await deleteSupportLtUserData(user.uid, db);
+      await deleteAuthUserData(user.uid, db);
     }
     // Many simultaneous calls from one account contend for its registration
     // lock; once the SDK's retries are exhausted, report a retryable status
@@ -263,12 +264,4 @@ export async function registerSupportLtForUser(
     throw new HttpsError("not-found", "コードが正しくありません。運営に確認してください。");
   }
   return outcome.result;
-}
-
-/** Auth deletion also reaches attendees who never created a users/{uid} profile. */
-export async function deleteSupportLtUserData(uid: string, db: Firestore): Promise<void> {
-  const batch = db.batch();
-  batch.delete(db.doc(`supportLtRegistrations/${uid}`));
-  batch.delete(db.doc(`supportLtRegistrationAttempts/${uid}`));
-  await batch.commit();
 }

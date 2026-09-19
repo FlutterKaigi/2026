@@ -19,15 +19,17 @@ class SponsorTierHeaderWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final isAmusement = tier == SponsorTier.entertainment;
+    final headingStyle = isAmusement ? textTheme.headlineMedium : textTheme.titleLarge;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 32),
       child: Text(
-        tier.label,
+        tier.wallHeading,
         textAlign: TextAlign.center,
-        style: textTheme.titleLarge?.copyWith(
+        style: headingStyle?.copyWith(
           color: colorScheme.onSurface,
-          fontWeight: FontWeight.w400,
+          fontWeight: isAmusement ? FontWeight.w500 : FontWeight.w400,
         ),
       ),
     );

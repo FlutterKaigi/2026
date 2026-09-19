@@ -30,6 +30,10 @@ final class FakeProfileExchangeRepository implements ProfileExchangeRepository {
   /// When set, the next [updateNote] throws this error once.
   Exception? nextUpdateNoteError;
 
+  /// When set, the next [create] awaits this before resolving, letting tests
+  /// assert on the in-flight state instead of it completing immediately.
+  Completer<void>? createGate;
+
   /// When set, the next [delete] awaits this before resolving, letting tests
   /// assert on the in-flight state instead of it completing immediately.
   Completer<void>? deleteGate;
@@ -48,6 +52,10 @@ final class FakeProfileExchangeRepository implements ProfileExchangeRepository {
   @override
   Future<void> create({required String uid, required String otherUid, required String token}) async {
     createCalls.add((uid: uid, otherUid: otherUid, token: token));
+    final gate = createGate;
+    if (gate != null) {
+      await gate.future;
+    }
     final error = nextError;
     if (error != null) {
       nextError = null;

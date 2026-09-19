@@ -16,22 +16,22 @@ class TranslationsEn extends Translations with BaseTranslations<AppLocale, Trans
 	/// Constructing via the enum [AppLocale.build] is preferred.
 	TranslationsEn({Map<String, Node>? overrides, PluralResolver? cardinalResolver, PluralResolver? ordinalResolver, TranslationMetadata<AppLocale, Translations>? meta})
 		: assert(overrides == null, 'Set "translation_overrides: true" in order to enable this feature.'),
-		  $meta = meta ?? TranslationMetadata(
+		  _meta = meta ?? TranslationMetadata(
 		    locale: AppLocale.en,
 		    overrides: overrides ?? {},
 		    cardinalResolver: cardinalResolver,
 		    ordinalResolver: ordinalResolver,
 		  ),
 		  super(cardinalResolver: cardinalResolver, ordinalResolver: ordinalResolver) {
-		super.$meta.setFlatMapFunction($meta.getTranslation); // copy base translations to super.$meta
-		$meta.setFlatMapFunction(_flatMapFunction);
+		_meta.setFlatMapFunction(_flatMapFunction);
 	}
 
 	/// Metadata for the translations of <en>.
-	@override final TranslationMetadata<AppLocale, Translations> $meta;
+	final TranslationMetadata<AppLocale, Translations> _meta;
+	@override TranslationMetadata<AppLocale, Translations> get $meta => _meta;
 
 	/// Access flat map
-	@override dynamic operator[](String key) => $meta.getTranslation(key) ?? super.$meta.getTranslation(key);
+	@override dynamic operator[](String key) => _meta.getTranslation(key) ?? super[key];
 
 	late final TranslationsEn _root = this; // ignore: unused_field
 
@@ -56,6 +56,8 @@ class TranslationsEn extends Translations with BaseTranslations<AppLocale, Trans
 	@override late final _Translations$eventInfo$en eventInfo = _Translations$eventInfo$en._(_root);
 	@override late final _Translations$auth$en auth = _Translations$auth$en._(_root);
 	@override late final _Translations$profile$en profile = _Translations$profile$en._(_root);
+	@override late final _Translations$snsPost$en snsPost = _Translations$snsPost$en._(_root);
+	@override late final _Translations$mission$en mission = _Translations$mission$en._(_root);
 	@override late final _Translations$exchange$en exchange = _Translations$exchange$en._(_root);
 	@override late final _Translations$supportLt$en supportLt = _Translations$supportLt$en._(_root);
 	@override late final _Translations$countryRegion$en countryRegion = _Translations$countryRegion$en._(_root);
@@ -410,6 +412,67 @@ class _Translations$profile$en extends Translations$profile$ja {
 	@override String get keepEditing => 'Keep editing';
 }
 
+// Path: snsPost
+class _Translations$snsPost$en extends Translations$snsPost$ja {
+	_Translations$snsPost$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Register SNS post';
+	@override String get signInRequired => 'Sign in to register your SNS post';
+	@override String get heading => 'Register your photo post';
+	@override String get description => 'Post a photo with an eligible attendee on SNS,\nthen register the URL of that post.';
+	@override String get companionLabel => 'Who is in your photo?';
+	@override String get companionHint => 'Choose one category for the person in the photo';
+	@override String get companionRequired => 'Choose one companion category';
+	@override late final _Translations$snsPost$companions$en companions = _Translations$snsPost$companions$en._(_root);
+	@override String get urlLabel => 'SNS post URL';
+	@override String get urlHint => 'Link to the photo post, not your profile page';
+	@override String get invalidUrl => 'Enter a valid post URL (https://…)';
+	@override String get register => 'Register post';
+	@override String get update => 'Update registration';
+	@override String get saving => 'Saving…';
+	@override String get cancel => 'Cancel';
+	@override String get saveFailed => 'Could not save. Check your connection and try again.';
+	@override String get invalidRegistration => 'The saved registration could not be read. Register the post URL and companion category again.';
+	@override String get registeredTitle => 'SNS post registered';
+	@override String get registeredBody => 'Your SNS post mission is complete.';
+	@override String updatedAt({required Object date}) => 'Updated: ${date}';
+	@override String get openPost => 'Open post';
+	@override String get openFailed => 'Could not open the post';
+	@override String get viewMissions => 'View mission progress';
+	@override String get edit => 'Edit URL or category';
+}
+
+// Path: mission
+class _Translations$mission$en extends Translations$mission$ja {
+	_Translations$mission$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Missions';
+	@override String get signInRequired => 'Sign in to view your mission progress';
+	@override String get complete => 'Complete';
+	@override String get incomplete => 'Incomplete';
+	@override String get loading => 'Checking';
+	@override String get loadFailed => 'Unavailable';
+	@override String get allComplete => 'All missions complete!';
+	@override String get inProgress => 'Mission progress';
+	@override String get checkFailed => 'Some results are unavailable';
+	@override String progress({required Object n, required Object total}) => '${n} of ${total} missions complete';
+	@override String get ltTitle => 'Join Support LT';
+	@override String get ltDescription => 'Supporters and speakers register with the code at the venue';
+	@override String get exchangeTitle => 'Exchange profiles';
+	@override String exchangeDescription({required Object required}) => 'Meet at least ${required} people, including someone from a different country or region';
+	@override String exchangeCount({required Object n, required Object required}) => '${n} / ${required} people met';
+	@override String get differentCountry => 'Met someone from a different country or region';
+	@override String get profileRequired => 'Add your country or region to your profile';
+	@override String get snsTitle => 'Share a photo on SNS';
+	@override String get snsDescription => 'Post a photo with an eligible attendee and register its URL and category';
+}
+
 // Path: exchange
 class _Translations$exchange$en extends Translations$exchange$ja {
 	_Translations$exchange$en._(TranslationsEn root) : this._root = root, super.internal(root);
@@ -468,6 +531,16 @@ class _Translations$exchange$en extends Translations$exchange$ja {
 	@override String get redeemInvalid => 'This code wasn\'t found, or it has expired';
 	@override String get redeemSelf => 'You can\'t enter your own code';
 	@override String get redeemRateLimited => 'Too many attempts. Please try again in a few minutes';
+	@override String get shareLinkSignInRequired => 'Sign in to exchange profiles with them';
+	@override String get shareLinkProfileRequired => 'Create a profile to exchange profiles with them';
+	@override String get shareLinkInvalidTitle => 'This link isn\'t valid';
+	@override String get shareLinkInvalidBody => 'Make sure it\'s a profile exchange link';
+	@override String get shareLinkExpiredTitle => 'This link has expired';
+	@override String get shareLinkExpiredBody => 'Ask the other attendee to share their QR code or link again';
+	@override String get shareLinkSelfTitle => 'This is your own share link';
+	@override String get shareLinkSelfBody => 'Other attendees who open this link can exchange profiles with you';
+	@override String get shareLinkGoHome => 'Back to home';
+	@override String get shareLinkViewList => 'View exchanged profiles';
 }
 
 // Path: supportLt
@@ -775,6 +848,20 @@ class _Translations$auth$error$en extends Translations$auth$error$ja {
 	@override String get userMismatch => 'The re-authenticated account does not match the signed-in account';
 	@override String get appleTokenRevocationFailed => 'Could not delete the account because revoking the Apple token failed. Please try again';
 	@override String get unknown => 'Authentication failed. Please try again';
+}
+
+// Path: snsPost.companions
+class _Translations$snsPost$companions$en extends Translations$snsPost$companions$ja {
+	_Translations$snsPost$companions$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get staff => 'Staff';
+	@override String get speaker => 'Speaker';
+	@override String get sponsor => 'Sponsor';
+	@override String get firstTime => 'First-time attendee';
+	@override String get differentCountry => 'Different country or region';
 }
 
 // Path: settings.themeMode
@@ -1261,6 +1348,53 @@ extension on TranslationsEn {
 			'profile.discardBody' => 'Unsaved changes will be lost.',
 			'profile.discardAction' => 'Discard',
 			'profile.keepEditing' => 'Keep editing',
+			'snsPost.title' => 'Register SNS post',
+			'snsPost.signInRequired' => 'Sign in to register your SNS post',
+			'snsPost.heading' => 'Register your photo post',
+			'snsPost.description' => 'Post a photo with an eligible attendee on SNS,\nthen register the URL of that post.',
+			'snsPost.companionLabel' => 'Who is in your photo?',
+			'snsPost.companionHint' => 'Choose one category for the person in the photo',
+			'snsPost.companionRequired' => 'Choose one companion category',
+			'snsPost.companions.staff' => 'Staff',
+			'snsPost.companions.speaker' => 'Speaker',
+			'snsPost.companions.sponsor' => 'Sponsor',
+			'snsPost.companions.firstTime' => 'First-time attendee',
+			'snsPost.companions.differentCountry' => 'Different country or region',
+			'snsPost.urlLabel' => 'SNS post URL',
+			'snsPost.urlHint' => 'Link to the photo post, not your profile page',
+			'snsPost.invalidUrl' => 'Enter a valid post URL (https://…)',
+			'snsPost.register' => 'Register post',
+			'snsPost.update' => 'Update registration',
+			'snsPost.saving' => 'Saving…',
+			'snsPost.cancel' => 'Cancel',
+			'snsPost.saveFailed' => 'Could not save. Check your connection and try again.',
+			'snsPost.invalidRegistration' => 'The saved registration could not be read. Register the post URL and companion category again.',
+			'snsPost.registeredTitle' => 'SNS post registered',
+			'snsPost.registeredBody' => 'Your SNS post mission is complete.',
+			'snsPost.updatedAt' => ({required Object date}) => 'Updated: ${date}',
+			'snsPost.openPost' => 'Open post',
+			'snsPost.openFailed' => 'Could not open the post',
+			'snsPost.viewMissions' => 'View mission progress',
+			'snsPost.edit' => 'Edit URL or category',
+			'mission.title' => 'Missions',
+			'mission.signInRequired' => 'Sign in to view your mission progress',
+			'mission.complete' => 'Complete',
+			'mission.incomplete' => 'Incomplete',
+			'mission.loading' => 'Checking',
+			'mission.loadFailed' => 'Unavailable',
+			'mission.allComplete' => 'All missions complete!',
+			'mission.inProgress' => 'Mission progress',
+			'mission.checkFailed' => 'Some results are unavailable',
+			'mission.progress' => ({required Object n, required Object total}) => '${n} of ${total} missions complete',
+			'mission.ltTitle' => 'Join Support LT',
+			'mission.ltDescription' => 'Supporters and speakers register with the code at the venue',
+			'mission.exchangeTitle' => 'Exchange profiles',
+			'mission.exchangeDescription' => ({required Object required}) => 'Meet at least ${required} people, including someone from a different country or region',
+			'mission.exchangeCount' => ({required Object n, required Object required}) => '${n} / ${required} people met',
+			'mission.differentCountry' => 'Met someone from a different country or region',
+			'mission.profileRequired' => 'Add your country or region to your profile',
+			'mission.snsTitle' => 'Share a photo on SNS',
+			'mission.snsDescription' => 'Post a photo with an eligible attendee and register its URL and category',
 			'exchange.title' => 'Profile Exchange',
 			'exchange.qrDescription' => 'Show this QR code to another attendee and have them scan it to exchange profiles',
 			'exchange.qrSemanticLabel' => 'Profile exchange QR code',
@@ -1312,6 +1446,16 @@ extension on TranslationsEn {
 			'exchange.redeemInvalid' => 'This code wasn\'t found, or it has expired',
 			'exchange.redeemSelf' => 'You can\'t enter your own code',
 			'exchange.redeemRateLimited' => 'Too many attempts. Please try again in a few minutes',
+			'exchange.shareLinkSignInRequired' => 'Sign in to exchange profiles with them',
+			'exchange.shareLinkProfileRequired' => 'Create a profile to exchange profiles with them',
+			'exchange.shareLinkInvalidTitle' => 'This link isn\'t valid',
+			'exchange.shareLinkInvalidBody' => 'Make sure it\'s a profile exchange link',
+			'exchange.shareLinkExpiredTitle' => 'This link has expired',
+			'exchange.shareLinkExpiredBody' => 'Ask the other attendee to share their QR code or link again',
+			'exchange.shareLinkSelfTitle' => 'This is your own share link',
+			'exchange.shareLinkSelfBody' => 'Other attendees who open this link can exchange profiles with you',
+			'exchange.shareLinkGoHome' => 'Back to home',
+			'exchange.shareLinkViewList' => 'View exchanged profiles',
 			'supportLt.title' => 'Support LT Registration',
 			'supportLt.description' => 'Enter the 6-digit code provided by the organizers to register your participation in Support LT',
 			'supportLt.codeLabel' => 'Registration code',

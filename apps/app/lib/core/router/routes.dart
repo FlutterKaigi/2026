@@ -9,6 +9,21 @@ class SettingsRoute extends GoRouteData with $SettingsRoute {
   Widget build(BuildContext context, GoRouterState state) => const SettingsPage();
 }
 
+/// `/x/:token` — a profile-exchange share link
+/// (`ExchangeToken.qrPayload`/`exchangeShareBaseUrl`), opened as a Universal
+/// Link / App Link or in-app. Declared as a top-level route (not nested
+/// under `/account`) so it resolves the same way regardless of which tab —
+/// or no tab yet — is active when the link is opened.
+@TypedGoRoute<ShareLinkRoute>(path: '/x/:token')
+class ShareLinkRoute extends GoRouteData with $ShareLinkRoute {
+  const ShareLinkRoute({required this.token});
+
+  final String token;
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => ExchangeShareLinkPage(token: token);
+}
+
 /// Shell hosting the main bottom/rail navigation destinations.
 ///
 /// Uses [StatefulShellRoute.indexedStack] so switching tabs swaps branches
@@ -66,6 +81,8 @@ class SettingsRoute extends GoRouteData with $SettingsRoute {
               routes: [TypedGoRoute<QuizRoute>(path: ':eventId')],
             ),
             TypedGoRoute<SupportLtRoute>(path: 'support-lt'),
+            TypedGoRoute<MissionRoute>(path: 'missions'),
+            TypedGoRoute<SnsPostRoute>(path: 'sns-post'),
             TypedGoRoute<ExchangeHomeRoute>(
               path: 'exchange',
               routes: [
@@ -196,6 +213,22 @@ class SupportLtRoute extends GoRouteData with $SupportLtRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) => const SupportLtPage();
+}
+
+/// `/account/missions` — at-a-glance event eligibility and mission progress.
+class MissionRoute extends GoRouteData with $MissionRoute {
+  const MissionRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const MissionPage();
+}
+
+/// `/account/sns-post` — register a photo post URL and one companion category.
+class SnsPostRoute extends GoRouteData with $SnsPostRoute {
+  const SnsPostRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const SnsPostPage();
 }
 
 /// `/account/exchange` — the signed-in user's own QR code and the entry

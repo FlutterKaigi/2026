@@ -13,9 +13,13 @@ class SponsorWallWidget extends StatelessWidget {
   final SponsorWallData data;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => LayoutBuilder(
+    // The navigation rail reduces the content width without changing MediaQuery.
+    builder: (context, constraints) => _buildWall(context, constraints.maxWidth),
+  );
+
+  Widget _buildWall(BuildContext context, double width) {
     final t = Translations.of(context);
-    final width = MediaQuery.sizeOf(context).width;
     final pagePadding = _pagePadding(width);
     final availableWidth = math.max<double>(0, width - pagePadding.horizontal);
     final sectionGap = width < 640 ? 40.0 : (width < 960 ? 48.0 : 64.0);
