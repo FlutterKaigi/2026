@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/FlutterKaigi/2026/packages/data/firebase/schemas/firestore/quiz_operation.schema.json",
+  "title": "QuizOperation",
+  "description": "Server-only Firestore document at quizEvents/{eventId}/operations/{operationId}.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "operation",
+    "result",
+    "createdAt",
+    "requestedBy",
+    "request"
+  ],
+  "properties": {
+    "operation": {
+      "type": "string"
+    },
+    "result": {
+      "type": "object"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "requestedBy": {
+      "type": "string"
+    },
+    "request": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "operation",
+        "questionId",
+        "uid",
+        "seconds"
+      ],
+      "properties": {
+        "operation": {
+          "type": "string"
+        },
+        "questionId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "uid": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "seconds": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      }
+    }
+  }
+}

@@ -61,7 +61,10 @@ function fixture(entries = {}) {
     const writes = [];
     return {
       writes,
-      set: (reference, data) => writes.push(() => documents.set(reference.path, data)),
+      set: (reference, data, options) => writes.push(() => {
+        if (options?.merge) merge(reference.path, data);
+        else documents.set(reference.path, data);
+      }),
       create: (reference, data) => {
         assert.equal(documents.has(reference.path), false);
         writes.push(() => documents.set(reference.path, data));
@@ -71,7 +74,14 @@ function fixture(entries = {}) {
   };
   const db = {
     doc: ref,
-    collection: (path) => ({ doc: (id) => ref(`${path}/${id}`) }),
+    collection: (path) => ({
+      doc: (id) => ref(`${path}/${id}`),
+      get: async () => ({
+        docs: [...documents.keys()]
+          .filter((key) => key.startsWith(`${path}/`) && key.split("/").length === path.split("/").length + 1)
+          .map((key) => ({ id: key.split("/").at(-1), ...snapshot(key) })),
+      }),
+    }),
     runTransaction: async (callback) => {
       const writes = mutations();
       try {
@@ -322,7 +332,29 @@ test("account cleanup deletes all account-scoped mission data and attempts witho
   });
   await deleteAuthUserData(USER.uid, dependencies.db);
   await deleteAuthUserData(USER.uid, dependencies.db);
-  assert.deepEqual([...documents.keys()], ["supportLtRegistrations/other"]);
+  assert.deepEqual([...documents.keys()], ["supportLtRegistrations/other", `quizParticipation/${USER.uid}`]);
+  assert.equal(documents.get(`quizParticipation/${USER.uid}`).accountDeleted, true);
+});
+
+test("account cleanup removes quiz account details while preserving the active roster and score", async () => {
+  const privatePaths = ["participantAccounts", "entryClaims", "entryAttempts"]
+    .map((collection) => `quizEvents/half-1/${collection}/${USER.uid}`);
+  const { dependencies, documents } = fixture({
+    "quizEvents/half-1": { status: "inProgress" },
+    [`quizParticipation/${USER.uid}`]: { eventId: "half-1" },
+    [`quizEvents/half-1/participants/${USER.uid}`]: { displayName: "Player", teamId: "team" },
+    "quizEvents/half-1/teams/team": { score: 20 },
+    "quizEvents/half-1/participantAccounts/other": { email: "other@example.test" },
+    ...Object.fromEntries(privatePaths.map((path) => [path, { email: "attendee@example.test" }])),
+  });
+  await deleteAuthUserData(USER.uid, dependencies.db);
+  await deleteAuthUserData(USER.uid, dependencies.db);
+  for (const path of privatePaths) assert.equal(documents.has(path), false);
+  assert.equal(documents.get("quizEvents/half-1/teams/team").score, 20);
+  assert.equal(documents.get(`quizEvents/half-1/participants/${USER.uid}`).teamId, "team");
+  assert.equal(documents.has("quizEvents/half-1/participantAccounts/other"), true);
+  assert.equal(documents.get(`quizParticipation/${USER.uid}`).accountDeleted, true);
+  assert.equal(documents.get(`quizParticipation/${USER.uid}`).eventId, "half-1");
 });
 
 test("active Auth lookup holds the registration document read lock and precedes all outcomes", async () => {

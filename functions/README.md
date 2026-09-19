@@ -3,6 +3,34 @@
 FlutterKaigi 2026 の Cloud Functions。STG → 本番のデータ反映用の
 `syncCollectionsToProd`、プロフィール交換用の各種関数、応援 LT 参加登録を提供する。
 
+## クイズ大会
+
+`src/quiz.ts` がCallableを公開し、`src/quiz_service.ts` が受付・回答・進行を
+Firestoreトランザクションで処理する。リージョンは `asia-northeast1`、本番はApp Check必須。
+管理者認可は既存の `assertAdmin` と共通。詳細は
+[設計](../docs/quiz-event/DESIGN.md)・[当日手順](../docs/quiz-event/RUNBOOK.md)を参照。
+
+- `registerQuizParticipant({eventId, displayName, entryCode})`: 非匿名アカウントの登録。
+  コード、定員、前後半の重複参加をサーバーで検証する。
+- `submitQuizAnswer({eventId, questionId, teamId, selectedOptionIndex})`: 所属とサーバー期限を検証する。
+- `quizEventOperation({eventId, operation, questionId?, uid?, seconds?, operationId?})`: 管理者の進行操作。
+  すべての操作で操作IDを再利用して再試行する。
+- `getQuizServerTime({})`: `serverNowMs`（epochミリ秒）を返す。
+
+Functions・Rules・アプリ・ダッシュボードを受付開始前に揃える。
+旧クライアントの直接書き込みは新Rulesで拒否するため、進行中の切り替えは避ける。
+クイズは `syncCollectionsToProd` の同期対象には含めない。
+
+Auth削除時は非公開のクイズアカウント情報・旧claims・失敗試行を削除する。
+共通の参加記録へ削除マーカーを先に保存し、実行中の登録による個人情報の再作成を防ぐ。
+進行中のチーム・回答・表示名・参加記録は保持する。
+
+`npm test` に単体テスト、`npm run test:emulator` にAuth/Functions/Firestoreの統合テストを含む。
+統合テストは下記の既存接続環境変数を使用し、プロジェクトは `QUIZ_TEST_PROJECT_ID`、
+未指定なら `SUPPORT_LT_TEST_PROJECT_ID` を使用する。クイズ専用のテスト大会を作成・削除する。
+80並列の負荷試験は、準備済みの受付に対し同じプロセスからサービスを呼び、実Auth・Firestore
+エミュレーターで検証する。Callableの接続・認可は別のHTTP統合ケースで検証する。
+
 ## 応援 LT 参加登録
 
 `src/support_lt.ts` が callable / Auth トリガーを公開し、

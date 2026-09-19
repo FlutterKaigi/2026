@@ -6,6 +6,13 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    // 匿名認証ではない、実アカウントでサインインしているか。
+    // クイズ大会は本人に紐づく記録を残すため、使い捨ての匿名 uid を排除する。
+    function signedInWithAccount() {
+      return signedIn()
+        && request.auth.token.firebase.sign_in_provider != 'anonymous';
+    }
+
     function hasAdminAccess() {
       return signedIn()
         && request.auth.token.email_verified == true
@@ -132,6 +139,118 @@ service cloud.firestore {
       allow read: if true;
       allow write: if hasAdminAccess();
     }
+
+    function quizBeforeStart(eventId) {
+      return get(/databases/$(database)/documents/quizEvents/$(eventId)).data.status
+        in ['draft', 'published', 'registration', 'entryClosed'];
+    }
+
+    function quizQuestionContent(data) {
+      return data.options is list && data.options.size() >= 2 && data.options.size() <= 4
+        && data.durationSeconds is int && data.durationSeconds > 0 && data.durationSeconds <= 1800;
+    }
+
+    // Lifecycle, registration, membership and answers go through transactional
+    // callables. Direct admin writes are limited to draft/configuration fields.
+    match /quizEvents/{eventId} {
+      allow get, list: if hasAdminAccess()
+        || (signedInWithAccount() && resource.data.isPublic == true);
+      allow create: if hasAdminAccess()
+        && request.resource.data.keys().hasOnly([
+          'title', 'status', 'isPublic', 'currentQuestionId', 'sponsorIds',
+          'capacity', 'teamNamePool', 'createdAt', 'updatedAt', 'revision', 'participantCount'
+        ])
+        && request.resource.data.status == 'draft'
+        && request.resource.data.isPublic == false
+        && request.resource.data.get('currentQuestionId', null) == null
+        && request.resource.data.get('participantCount', 0) == 0
+        && request.resource.data.get('revision', 0) == 0
+        && request.resource.data.capacity is int
+        && request.resource.data.capacity >= 3 && request.resource.data.capacity <= 80
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.updatedAt == request.time;
+      allow update: if hasAdminAccess()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'title', 'sponsorIds', 'capacity', 'teamNamePool', 'updatedAt'
+        ])
+        && request.resource.data.capacity is int
+        && request.resource.data.capacity >= 3 && request.resource.data.capacity <= 80
+        && (request.resource.data.capacity == resource.data.capacity
+          || (resource.data.status in ['draft', 'published']
+            && resource.data.get('admissionSlotsReady', false) != true))
+        && (resource.data.status in ['draft', 'published', 'registration', 'entryClosed']
+          || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['teamNamePool', 'updatedAt']))
+        && request.resource.data.updatedAt == request.time;
+      allow delete: if false;
+
+      match /secret/{secretId} {
+        allow read: if hasAdminAccess();
+        allow write: if false;
+      }
+      match /entryClaims/{uid} {
+        allow read: if hasAdminAccess();
+        allow write: if false;
+      }
+      match /entryAttempts/{uid} { allow read, write: if false; }
+      match /admissionSlots/{slotId} { allow read, write: if false; }
+      match /operations/{operationId} { allow read, write: if false; }
+      match /participantAccounts/{uid} {
+        allow get: if hasAdminAccess() || (signedInWithAccount() && request.auth.uid == uid);
+        allow list: if hasAdminAccess();
+        allow write: if false;
+      }
+      match /participants/{uid} {
+        allow read: if hasAdminAccess() || signedInWithAccount();
+        allow write: if false;
+      }
+      match /teams/{teamId} {
+        allow read: if hasAdminAccess() || signedInWithAccount();
+        allow update: if hasAdminAccess()
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name'])
+          && request.resource.data.name is string
+          && request.resource.data.name.size() > 0 && request.resource.data.name.size() <= 80;
+        allow create, delete: if false;
+      }
+      match /questions/{questionId} {
+        allow get: if hasAdminAccess() || (signedInWithAccount() && resource.data.status != 'draft');
+        allow list: if hasAdminAccess();
+        allow create: if hasAdminAccess() && quizBeforeStart(eventId)
+          && request.resource.data.keys().hasOnly([
+            'sponsorId', 'order', 'title', 'options', 'durationSeconds', 'status',
+            'openedAt', 'closesAt', 'correctOptionIndex', 'explanation'
+          ])
+          && request.resource.data.status == 'draft'
+          && request.resource.data.get('openedAt', null) == null
+          && request.resource.data.get('closesAt', null) == null
+          && request.resource.data.get('correctOptionIndex', null) == null
+          && request.resource.data.get('explanation', null) == null
+          && quizQuestionContent(request.resource.data);
+        allow update: if hasAdminAccess() && quizBeforeStart(eventId)
+          && resource.data.status == 'draft'
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'sponsorId', 'order', 'title', 'options', 'durationSeconds'
+          ]) && quizQuestionContent(request.resource.data);
+        allow delete: if hasAdminAccess() && quizBeforeStart(eventId) && resource.data.status == 'draft';
+        match /secret/{secretId} {
+          allow read: if hasAdminAccess();
+          allow create, update: if hasAdminAccess() && quizBeforeStart(eventId)
+            && getAfter(/databases/$(database)/documents/quizEvents/$(eventId)/questions/$(questionId)).data.status == 'draft'
+            && request.resource.data.keys().hasOnly(['correctOptionIndex', 'explanation'])
+            && request.resource.data.correctOptionIndex is int
+            && request.resource.data.correctOptionIndex >= 0
+            && request.resource.data.correctOptionIndex < getAfter(/databases/$(database)/documents/quizEvents/$(eventId)/questions/$(questionId)).data.options.size();
+          allow delete: if hasAdminAccess() && quizBeforeStart(eventId)
+            && get(/databases/$(database)/documents/quizEvents/$(eventId)/questions/$(questionId)).data.status == 'draft';
+        }
+      }
+      match /answers/{answerId} {
+        allow get: if hasAdminAccess()
+          || (signedInWithAccount() && request.auth.uid in get(/databases/$(database)/documents/quizEvents/$(eventId)/teams/$(resource.data.teamId)).data.memberUids);
+        allow list: if hasAdminAccess();
+        allow write: if false;
+      }
+    }
+    match /quizParticipation/{uid} { allow read, write: if false; }
 
     // 写真の相手の分類と SNS 投稿 URL を自己申告で登録する。1人1件。
     // プロフィールの公開範囲とは分け、本人だけが参照・変更できる。

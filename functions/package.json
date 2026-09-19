@@ -1,6 +1,6 @@
 {
   "name": "flutterkaigi-2026-functions",
-  "description": "FlutterKaigi 2026 Cloud Functions (STG → 本番 データ反映)",
+  "description": "FlutterKaigi 2026 Cloud Functions (STG \u2192 \u672c\u756a \u30c7\u30fc\u30bf\u53cd\u6620)",
   "private": true,
   "main": "lib/index.js",
   "engines": {
@@ -10,8 +10,8 @@
     "build": "tsc",
     "build:watch": "tsc --watch",
     "lint": "tsc --noEmit",
-    "test": "npm run build && node --test test/support_lt.test.cjs test/support_lt_auth.test.cjs",
-    "test:coverage": "npm run build && node --test --experimental-test-coverage --test-coverage-include='lib/support_lt_*.js' --test-coverage-include='lib/auth_user_data.js' --test-coverage-lines=80 --test-coverage-branches=80 --test-coverage-functions=80 test/support_lt.test.cjs test/support_lt_auth.test.cjs",
+    "test": "npm run build && node --test test/support_lt.test.cjs test/support_lt_auth.test.cjs test/quiz.test.cjs",
+    "test:coverage": "npm run build && node --test --experimental-test-coverage --test-coverage-include='lib/support_lt_*.js' --test-coverage-include='lib/auth_user_data.js' --test-coverage-lines=80 --test-coverage-branches=80 --test-coverage-functions=80 test/support_lt.test.cjs test/support_lt_auth.test.cjs test/quiz.test.cjs",
     "test:emulator": "node --test test/*.emulator.test.cjs"
   },
   "dependencies": {

@@ -19,6 +19,7 @@ final class FakeUser extends Fake implements User {
     this.email,
     this.displayName,
     this.photoURL,
+    this.isAnonymous = false,
     List<String> providerIds = const [],
   }) : providerData = [for (final id in providerIds) FakeUserInfo(id)];
 
@@ -33,6 +34,9 @@ final class FakeUser extends Fake implements User {
 
   @override
   final String? photoURL;
+
+  @override
+  final bool isAnonymous;
 
   @override
   final List<UserInfo> providerData;
