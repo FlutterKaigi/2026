@@ -46,6 +46,7 @@ Map<String, dynamic> _$QuizQuestionToJson(_QuizQuestion instance) => <String, dy
 
 const _$QuizQuestionStatusEnumMap = {
   QuizQuestionStatus.draft: 'draft',
+  QuizQuestionStatus.reading: 'reading',
   QuizQuestionStatus.open: 'open',
   QuizQuestionStatus.closed: 'closed',
   QuizQuestionStatus.revealed: 'revealed',

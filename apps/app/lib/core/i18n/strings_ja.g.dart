@@ -1844,6 +1844,21 @@ class Translations$quiz$registration$ja {
 
 	/// ja: '登録できませんでした。受付コードが正しいか確認してください。'
 	String get codeMismatch => '登録できませんでした。受付コードが正しいか確認してください。';
+
+	/// ja: '別の回に参加登録済みのため、この回には登録できません。'
+	String get alreadyParticipated => '別の回に参加登録済みのため、この回には登録できません。';
+
+	/// ja: 'この回の参加受付は終了しました。'
+	String get closed => 'この回の参加受付は終了しました。';
+
+	/// ja: '登録を確認できませんでした。通信状況を確認して再試行してください。'
+	String get unavailable => '登録を確認できませんでした。通信状況を確認して再試行してください。';
+
+	/// ja: '入力回数が多すぎます。1分待ってから、受付コードを確認して再試行してください。'
+	String get rateLimited => '入力回数が多すぎます。1分待ってから、受付コードを確認して再試行してください。';
+
+	/// ja: 'このアカウントでは参加できません。運営にお問い合わせください。'
+	String get accountUnavailable => 'このアカウントでは参加できません。運営にお問い合わせください。';
 }
 
 // Path: quiz.waiting
@@ -1925,6 +1940,30 @@ class Translations$quiz$question$ja {
 
 	/// ja: 'メンバー'
 	String get member => 'メンバー';
+
+	/// ja: '問題を読み上げています。回答開始をお待ちください。'
+	String get reading => '問題を読み上げています。回答開始をお待ちください。';
+
+	/// ja: 'サーバー時刻を確認しています…'
+	String get synchronizing => 'サーバー時刻を確認しています…';
+
+	/// ja: '通信を確認できません。接続を確認して再試行してください。'
+	String get connectionUnavailable => '通信を確認できません。接続を確認して再試行してください。';
+
+	/// ja: '保存済みの情報を表示しています。チームの最新回答を確認できていません。'
+	String get cached => '保存済みの情報を表示しています。チームの最新回答を確認できていません。';
+
+	/// ja: '回答を送信しています…'
+	String get sending => '回答を送信しています…';
+
+	/// ja: '回答がサーバーで受理されました。'
+	String get received => '回答がサーバーで受理されました。';
+
+	/// ja: '選択表示はサーバーで受理したチームの回答です。締切までは全員が変更できます。'
+	String get teamAnswer => '選択表示はサーバーで受理したチームの回答です。締切までは全員が変更できます。';
+
+	/// ja: '回答の受理を確認できません。通信状況とチームの現在の回答を確認し、締切までに再試行してください。'
+	String get submitUnconfirmed => '回答の受理を確認できません。通信状況とチームの現在の回答を確認し、締切までに再試行してください。';
 }
 
 // Path: quiz.suspense
@@ -2501,6 +2540,11 @@ extension on Translations {
 			'quiz.registration.full' => ({required Object max}) => '定員（${max} 人）に達しました',
 			'quiz.registration.failed' => '登録できませんでした。時間をおいて再度お試しください。',
 			'quiz.registration.codeMismatch' => '登録できませんでした。受付コードが正しいか確認してください。',
+			'quiz.registration.alreadyParticipated' => '別の回に参加登録済みのため、この回には登録できません。',
+			'quiz.registration.closed' => 'この回の参加受付は終了しました。',
+			'quiz.registration.unavailable' => '登録を確認できませんでした。通信状況を確認して再試行してください。',
+			'quiz.registration.rateLimited' => '入力回数が多すぎます。1分待ってから、受付コードを確認して再試行してください。',
+			'quiz.registration.accountUnavailable' => 'このアカウントでは参加できません。運営にお問い合わせください。',
 			'quiz.waiting.title' => '登録完了！',
 			'quiz.waiting.description' => 'チーム発表までしばらくお待ちください',
 			'quiz.team.yourTable' => 'あなたのテーブルは',
@@ -2516,6 +2560,14 @@ extension on Translations {
 			'quiz.question.submitFailed' => '送信できませんでした。締め切られた可能性があります。',
 			'quiz.question.answeredBy' => ({required Object name}) => '${name} が選択',
 			'quiz.question.member' => 'メンバー',
+			'quiz.question.reading' => '問題を読み上げています。回答開始をお待ちください。',
+			'quiz.question.synchronizing' => 'サーバー時刻を確認しています…',
+			'quiz.question.connectionUnavailable' => '通信を確認できません。接続を確認して再試行してください。',
+			'quiz.question.cached' => '保存済みの情報を表示しています。チームの最新回答を確認できていません。',
+			'quiz.question.sending' => '回答を送信しています…',
+			'quiz.question.received' => '回答がサーバーで受理されました。',
+			'quiz.question.teamAnswer' => '選択表示はサーバーで受理したチームの回答です。締切までは全員が変更できます。',
+			'quiz.question.submitUnconfirmed' => '回答の受理を確認できません。通信状況とチームの現在の回答を確認し、締切までに再試行してください。',
 			'quiz.suspense.title' => '回答締切！',
 			'quiz.suspense.description' => '正解発表をお待ちください',
 			'quiz.revealed.title' => '正解発表',

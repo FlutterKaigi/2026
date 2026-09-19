@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/FlutterKaigi/2026/packages/data/firebase/schemas/firestore/quiz_entry_attempt.schema.json",
+  "title": "QuizEntryAttempt",
+  "description": "Server-only Firestore document at quizEvents/{eventId}/entryAttempts/{uid}.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "count",
+    "windowStartedAt"
+  ],
+  "properties": {
+    "count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "windowStartedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

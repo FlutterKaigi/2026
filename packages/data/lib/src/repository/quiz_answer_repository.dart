@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 
 import '../model/quiz_answer.dart';
 
@@ -7,14 +8,14 @@ abstract interface class QuizAnswerRepository {
   /// 出題前で未作成の間は `null` を流す。
   Stream<QuizAnswer?> watchByQuestionAndTeam(String eventId, String questionId, String teamId);
 
-  /// 選択肢を送信する。ドキュメントは出題時に運営が事前作成済みのため、
-  /// ここでは `selectedOptionIndex` / `answeredBy` / `submittedAt` のみを update する。
+  /// オンラインのサーバーに送信し、受理された場合にだけ成功する。
+  /// Firestore のオフライン書き込みキューには保存しない。本人情報・締切はサーバーが検証する。
   Future<void> submit(
     String eventId,
     String questionId,
     String teamId, {
     required int selectedOptionIndex,
-    required String uid,
+    String? uid,
   });
 
   /// 当該問題の全チームの回答を購読する（運営用）。
@@ -22,19 +23,25 @@ abstract interface class QuizAnswerRepository {
 }
 
 final class FirestoreQuizAnswerRepository implements QuizAnswerRepository {
-  FirestoreQuizAnswerRepository({FirebaseFirestore? firestore}) : _firestore = firestore ?? FirebaseFirestore.instance;
+  FirestoreQuizAnswerRepository({FirebaseFirestore? firestore, FirebaseFunctions? functions})
+    : _firestore = firestore ?? FirebaseFirestore.instance,
+      _functions = functions ?? FirebaseFunctions.instanceFor(region: 'asia-northeast1');
 
   final FirebaseFirestore _firestore;
+  final FirebaseFunctions _functions;
 
   CollectionReference<Map<String, dynamic>> _collection(String eventId) =>
       _firestore.collection('quizEvents').doc(eventId).collection('answers');
 
   @override
   Stream<QuizAnswer?> watchByQuestionAndTeam(String eventId, String questionId, String teamId) {
-    return _collection(eventId).doc('${questionId}_$teamId').snapshots().map((snapshot) {
+    return _collection(eventId).doc('${questionId}_$teamId').snapshots(includeMetadataChanges: true).map((snapshot) {
       final data = snapshot.data();
       if (data == null) return null;
-      return QuizAnswer.fromJson(<String, dynamic>{...data, 'id': snapshot.id});
+      return QuizAnswer.fromJson(<String, dynamic>{...data, 'id': snapshot.id}).copyWith(
+        isFromCache: snapshot.metadata.isFromCache,
+        hasPendingWrites: snapshot.metadata.hasPendingWrites,
+      );
     });
   }
 
@@ -44,13 +51,19 @@ final class FirestoreQuizAnswerRepository implements QuizAnswerRepository {
     String questionId,
     String teamId, {
     required int selectedOptionIndex,
-    required String uid,
-  }) {
-    return _collection(eventId).doc('${questionId}_$teamId').update(<String, dynamic>{
-      'selectedOptionIndex': selectedOptionIndex,
-      'answeredBy': uid,
-      'submittedAt': FieldValue.serverTimestamp(),
-    });
+    String? uid,
+  }) async {
+    await _functions
+        .httpsCallable(
+          'submitQuizAnswer',
+          options: HttpsCallableOptions(timeout: const Duration(seconds: 10)),
+        )
+        .call<void>(<String, dynamic>{
+          'eventId': eventId,
+          'questionId': questionId,
+          'teamId': teamId,
+          'selectedOptionIndex': selectedOptionIndex,
+        });
   }
 
   @override

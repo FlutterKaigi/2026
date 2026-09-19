@@ -71,6 +71,7 @@
       "type": "string",
       "enum": [
         "draft",
+        "reading",
         "open",
         "closed",
         "revealed"

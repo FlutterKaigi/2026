@@ -11,6 +11,7 @@ import 'package:data/speaker.dart';
 import 'package:data/staff_member.dart';
 import 'package:data/venue.dart';
 import 'package:dashboard/feature/quiz/ui/page/quiz_console_page.dart';
+import 'package:dashboard/feature/quiz/ui/page/quiz_projection_page.dart';
 import 'package:dashboard/feature/quiz/ui/page/quiz_event_list_page.dart';
 import 'package:dashboard/feature/quiz/ui/page/quiz_question_edit_page.dart';
 import 'package:dashboard/feature/session/ui/page/session_edit_page.dart';

@@ -954,6 +954,11 @@ class _Translations$quiz$registration$en extends Translations$quiz$registration$
 	@override String full({required Object max}) => 'Full capacity (${max} participants) reached';
 	@override String get failed => 'Could not register. Please try again later.';
 	@override String get codeMismatch => 'Could not register. Please check the entry code.';
+	@override String get alreadyParticipated => 'You have already registered for another round and cannot join this one.';
+	@override String get closed => 'Registration for this round has closed.';
+	@override String get unavailable => 'Registration could not be confirmed. Check your connection and try again.';
+	@override String get rateLimited => 'Too many attempts. Wait one minute, check the entry code, and try again.';
+	@override String get accountUnavailable => 'This account cannot join. Please contact event staff.';
 }
 
 // Path: quiz.waiting
@@ -1005,6 +1010,14 @@ class _Translations$quiz$question$en extends Translations$quiz$question$ja {
 	@override String get submitFailed => 'Could not submit. The question may have closed.';
 	@override String answeredBy({required Object name}) => 'Selected by ${name}';
 	@override String get member => 'a member';
+	@override String get reading => 'The question is being read. Please wait for answers to open.';
+	@override String get synchronizing => 'Checking server time…';
+	@override String get connectionUnavailable => 'Connection unavailable. Check your connection and try again.';
+	@override String get cached => 'Showing saved information. Your team\'s latest answer has not been confirmed.';
+	@override String get sending => 'Sending your answer…';
+	@override String get received => 'Your answer was accepted by the server.';
+	@override String get teamAnswer => 'The selection shows the team\'s server-accepted answer. Any member can change it before the deadline.';
+	@override String get submitUnconfirmed => 'Acceptance could not be confirmed. Check your connection and the current team answer, and retry before the deadline.';
 }
 
 // Path: quiz.suspense
@@ -1533,6 +1546,11 @@ extension on TranslationsEn {
 			'quiz.registration.full' => ({required Object max}) => 'Full capacity (${max} participants) reached',
 			'quiz.registration.failed' => 'Could not register. Please try again later.',
 			'quiz.registration.codeMismatch' => 'Could not register. Please check the entry code.',
+			'quiz.registration.alreadyParticipated' => 'You have already registered for another round and cannot join this one.',
+			'quiz.registration.closed' => 'Registration for this round has closed.',
+			'quiz.registration.unavailable' => 'Registration could not be confirmed. Check your connection and try again.',
+			'quiz.registration.rateLimited' => 'Too many attempts. Wait one minute, check the entry code, and try again.',
+			'quiz.registration.accountUnavailable' => 'This account cannot join. Please contact event staff.',
 			'quiz.waiting.title' => 'You\'re in!',
 			'quiz.waiting.description' => 'Please wait for the team announcement',
 			'quiz.team.yourTable' => 'Your table is',
@@ -1548,6 +1566,14 @@ extension on TranslationsEn {
 			'quiz.question.submitFailed' => 'Could not submit. The question may have closed.',
 			'quiz.question.answeredBy' => ({required Object name}) => 'Selected by ${name}',
 			'quiz.question.member' => 'a member',
+			'quiz.question.reading' => 'The question is being read. Please wait for answers to open.',
+			'quiz.question.synchronizing' => 'Checking server time…',
+			'quiz.question.connectionUnavailable' => 'Connection unavailable. Check your connection and try again.',
+			'quiz.question.cached' => 'Showing saved information. Your team\'s latest answer has not been confirmed.',
+			'quiz.question.sending' => 'Sending your answer…',
+			'quiz.question.received' => 'Your answer was accepted by the server.',
+			'quiz.question.teamAnswer' => 'The selection shows the team\'s server-accepted answer. Any member can change it before the deadline.',
+			'quiz.question.submitUnconfirmed' => 'Acceptance could not be confirmed. Check your connection and the current team answer, and retry before the deadline.',
 			'quiz.suspense.title' => 'Time\'s up!',
 			'quiz.suspense.description' => 'Waiting for the answer reveal',
 			'quiz.revealed.title' => 'Answer reveal',

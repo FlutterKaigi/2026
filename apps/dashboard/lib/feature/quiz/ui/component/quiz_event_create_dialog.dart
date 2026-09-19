@@ -7,7 +7,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-/// クイズイベントの新規作成ダイアログ（PoC 用の最小構成）。
+/// クイズイベントの新規作成ダイアログ。
 ///
 /// タイトル（日本語 / 英語）・定員・スポンサーの複数選択を受け取り、
 /// `status = draft`（非公開）の新規イベントとして保存する。
@@ -58,15 +58,20 @@ class QuizEventCreateDialog extends HookConsumerWidget {
         );
         final eventId = await ref.read(quizEventRepositoryProvider).save(event);
         // 現地受付コードを自動生成しておく（コンソールで確認・再生成できる）。
-        await ref.read(quizOperationsRepositoryProvider).regenerateEntryCode(eventId);
+        var message = 'クイズイベントを作成しました（非公開）';
+        try {
+          await ref.read(quizOperationsRepositoryProvider).regenerateEntryCode(eventId);
+        } catch (_) {
+          message = 'イベントは作成済みです。受付コードの発行を確認できませんでした。進行コンソールで確認・再生成してください。';
+        }
         if (context.mounted) {
+          context.showSnackBar(message);
           context.pop();
-          context.showSnackBar('クイズイベントを作成しました（非公開）');
         }
       } catch (e) {
         if (context.mounted) context.showSnackBar('作成に失敗しました: $e');
       } finally {
-        isSaving.value = false;
+        if (context.mounted) isSaving.value = false;
       }
     }
 
@@ -103,7 +108,7 @@ class QuizEventCreateDialog extends HookConsumerWidget {
                   ),
                   validator: (v) {
                     final n = int.tryParse((v ?? '').trim());
-                    if (n == null || n < 1) return '1 以上の整数を入力してください';
+                    if (n == null || n < 3 || n > 80) return '3〜80 の整数を入力してください';
                     return null;
                   },
                 ),
@@ -208,14 +213,12 @@ List<_TierGroup> _groupByTier(List<Sponsor> sponsors) {
       if (sponsors.any((s) => s.tier == tier))
         (
           tier: tier,
-          sponsors: sponsors.where((s) => s.tier == tier).toList()
-            ..sort((a, b) => _sortKey(a).compareTo(_sortKey(b))),
+          sponsors: sponsors.where((s) => s.tier == tier).toList()..sort((a, b) => _sortKey(a).compareTo(_sortKey(b))),
         ),
   ];
 }
 
-String _sortKey(Sponsor sponsor) =>
-    sponsor.nameKana ?? (sponsor.name.ja.isEmpty ? sponsor.name.en : sponsor.name.ja);
+String _sortKey(Sponsor sponsor) => sponsor.nameKana ?? (sponsor.name.ja.isEmpty ? sponsor.name.en : sponsor.name.ja);
 
 /// 選択済み ID をプラン順 → プラン内の表示名順に整列する。
 List<String> _sortIdsByTier(List<String> ids, List<Sponsor> sponsors) {

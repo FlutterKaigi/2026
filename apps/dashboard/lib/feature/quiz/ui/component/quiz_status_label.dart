@@ -14,7 +14,8 @@ String quizEventStatusLabel(QuizEventStatus status) => switch (status) {
 /// 問題の status を日本語ラベルにする。
 String quizQuestionStatusLabel(QuizQuestionStatus status) => switch (status) {
   QuizQuestionStatus.draft => '下書き',
-  QuizQuestionStatus.open => '出題中',
+  QuizQuestionStatus.reading => '読み上げ中',
+  QuizQuestionStatus.open => '回答受付中',
   QuizQuestionStatus.closed => '締切',
   QuizQuestionStatus.revealed => '発表済み',
 };
@@ -55,6 +56,7 @@ class QuizQuestionStatusChip extends StatelessWidget {
 
   Color _color(ColorScheme scheme) => switch (status) {
     QuizQuestionStatus.draft => scheme.outline,
+    QuizQuestionStatus.reading => scheme.secondary,
     QuizQuestionStatus.open => scheme.primary,
     QuizQuestionStatus.closed => scheme.tertiary,
     QuizQuestionStatus.revealed => scheme.secondary,

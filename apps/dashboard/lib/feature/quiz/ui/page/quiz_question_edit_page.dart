@@ -14,19 +14,31 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 ///
 /// 編集できるのは `draft` の問題のみ。`open` 以降は読み取り専用で表示する。
 class QuizQuestionEditPage extends HookConsumerWidget {
-  const QuizQuestionEditPage({super.key, required this.eventId, this.question});
+  const QuizQuestionEditPage({super.key, required this.eventId, this.questionId, this.question});
 
   final String eventId;
+  final String? questionId;
   final QuizQuestion? question;
 
-  bool get _isNew => question == null;
+  String? get _questionId => questionId ?? question?.id;
 
-  bool get _isEditable => question == null || question!.status == QuizQuestionStatus.draft;
+  bool get _isNew => _questionId == null;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final event = ref.watch(quizEventProvider(eventId));
     final sponsors = ref.watch(quizSponsorListProvider);
+    final questionState = _questionId == null
+        ? const AsyncData<QuizQuestion?>(null)
+        : ref.watch(quizQuestionProvider((eventId: eventId, questionId: _questionId!)));
+    final secretState = _questionId == null
+        ? const AsyncData<QuizQuestionSecret?>(null)
+        : ref.watch(quizQuestionSecretProvider((eventId: eventId, questionId: _questionId!)));
+    final currentQuestion = questionState.asData?.value;
+    final isEditable =
+        (_questionId == null || currentQuestion?.status == QuizQuestionStatus.draft) &&
+        event.asData?.value?.status != QuizEventStatus.inProgress &&
+        event.asData?.value?.status != QuizEventStatus.finished;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -37,7 +49,7 @@ class QuizQuestionEditPage extends HookConsumerWidget {
             children: [
               BackButton(onPressed: () => context.pop()),
               Text(
-                _isNew ? '問題を追加' : (_isEditable ? '問題を編集' : '問題の詳細'),
+                _isNew ? '問題を追加' : (isEditable ? '問題を編集' : '問題の詳細'),
                 style: Theme.of(context).textTheme.titleLarge,
               ),
             ],
@@ -45,16 +57,35 @@ class QuizQuestionEditPage extends HookConsumerWidget {
         ),
         const Divider(height: 1),
         Expanded(
-          child: switch ((event, sponsors)) {
-            (AsyncData(value: final ev), AsyncData(value: final sponsorList)) when ev != null => _QuizQuestionForm(
-              eventId: eventId,
-              question: question,
-              sponsorIds: ev.sponsorIds,
-              sponsors: sponsorList,
-              isEditable: _isEditable,
+          child: switch ((event, sponsors, questionState, secretState)) {
+            (AsyncData(value: final ev), _, _, _)
+                when _questionId == null &&
+                    (ev?.status == QuizEventStatus.inProgress || ev?.status == QuizEventStatus.finished) =>
+              const Center(child: Text('クイズ開始後は問題を追加できません。')),
+            (
+              AsyncData(value: final ev),
+              AsyncData(value: final sponsorList),
+              AsyncData(),
+              AsyncData(value: final secret),
+            )
+                when ev != null && (_questionId == null || (currentQuestion != null && secret != null)) =>
+              _QuizQuestionForm(
+                key: ValueKey(_questionId ?? 'new'),
+                eventId: eventId,
+                question: currentQuestion,
+                secret: secret,
+                sponsorIds: ev.sponsorIds,
+                sponsors: sponsorList,
+                isEditable: isEditable,
+              ),
+            (AsyncError(:final error), _, _, _) ||
+            (_, AsyncError(:final error), _, _) ||
+            (_, _, AsyncError(:final error), _) ||
+            (_, _, _, AsyncError(:final error)) => Center(child: Text('読み込みに失敗しました: $error')),
+            (AsyncData(value: null), _, _, _) => const Center(child: Text('イベントが見つかりません')),
+            (_, _, AsyncData(), AsyncData()) when _questionId != null => const Center(
+              child: Text('問題または正解データが見つかりません。再度一覧から開いてください。'),
             ),
-            (AsyncError(:final error), _) || (_, AsyncError(:final error)) => Center(child: Text('エラー: $error')),
-            (AsyncData(value: null), _) => const Center(child: Text('イベントが見つかりません')),
             _ => const Center(child: CircularProgressIndicator()),
           },
         ),
@@ -65,8 +96,10 @@ class QuizQuestionEditPage extends HookConsumerWidget {
 
 class _QuizQuestionForm extends HookConsumerWidget {
   const _QuizQuestionForm({
+    super.key,
     required this.eventId,
     required this.question,
+    required this.secret,
     required this.sponsorIds,
     required this.sponsors,
     required this.isEditable,
@@ -74,6 +107,7 @@ class _QuizQuestionForm extends HookConsumerWidget {
 
   final String eventId;
   final QuizQuestion? question;
+  final QuizQuestionSecret? secret;
   final List<String> sponsorIds;
   final List<Sponsor> sponsors;
   final bool isEditable;
@@ -87,13 +121,13 @@ class _QuizQuestionForm extends HookConsumerWidget {
     final titleEnController = useTextEditingController(text: question?.title.en ?? '');
     final orderController = useTextEditingController(text: question?.order.toString() ?? '');
     final durationController = useTextEditingController(text: (question?.durationSeconds ?? 180).toString());
-    final explanationJaController = useTextEditingController(text: question?.explanation?.ja ?? '');
-    final explanationEnController = useTextEditingController(text: question?.explanation?.en ?? '');
+    final explanationJaController = useTextEditingController(text: secret?.explanation.ja ?? '');
+    final explanationEnController = useTextEditingController(text: secret?.explanation.en ?? '');
     final sponsorId = useState<String?>(question?.sponsorId ?? (sponsorIds.isNotEmpty ? sponsorIds.first : null));
 
     // 選択肢は 2〜4 件（日英ペア）。デフォルトは 2 件の空欄。
-    final optionControllers = useState<List<({TextEditingController ja, TextEditingController en})>>(
-      question != null && question!.options.isNotEmpty
+    final initialOptionControllers = useMemoized(
+      () => question != null && question!.options.isNotEmpty
           ? question!.options
                 .map((o) => (ja: TextEditingController(text: o.ja), en: TextEditingController(text: o.en)))
                 .toList()
@@ -102,7 +136,8 @@ class _QuizQuestionForm extends HookConsumerWidget {
               (ja: TextEditingController(), en: TextEditingController()),
             ],
     );
-    final correctOptionIndex = useState<int?>(question?.correctOptionIndex);
+    final optionControllers = useState(initialOptionControllers);
+    final correctOptionIndex = useState<int?>(secret?.correctOptionIndex);
 
     useEffect(() {
       return () {
@@ -189,7 +224,7 @@ class _QuizQuestionForm extends HookConsumerWidget {
       try {
         await save();
       } finally {
-        isSaving.value = false;
+        if (context.mounted) isSaving.value = false;
       }
     }
 
@@ -200,7 +235,10 @@ class _QuizQuestionForm extends HookConsumerWidget {
     }
 
     if (!isEditable) {
-      return _ReadOnlyQuestionView(question: question!, sponsorLabel: sponsorLabel);
+      return _ReadOnlyQuestionView(
+        question: question!.copyWith(correctOptionIndex: secret?.correctOptionIndex, explanation: secret?.explanation),
+        sponsorLabel: sponsorLabel,
+      );
     }
 
     return Column(
@@ -328,7 +366,7 @@ class _QuizQuestionForm extends HookConsumerWidget {
                       validator: (v) {
                         if (v == null || v.trim().isEmpty) return '制限時間を入力してください';
                         final n = int.tryParse(v.trim());
-                        if (n == null || n <= 0) return '正の数値を入力してください';
+                        if (n == null || n <= 0 || n > 1800) return '1〜1800 秒で入力してください';
                         return null;
                       },
                     ),
@@ -369,12 +407,15 @@ class _ReadOnlyQuestionView extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 8),
-            Text('出題中以降の問題は編集できません（読み取り専用）', style: theme.textTheme.bodySmall),
+            Text('クイズ開始後の問題は編集できません（読み取り専用）', style: theme.textTheme.bodySmall),
             const SizedBox(height: 24),
             Text('問題文', style: theme.textTheme.labelLarge),
             const SizedBox(height: 4),
             Text(question.title.ja, style: theme.textTheme.bodyLarge),
-            Text(question.title.en, style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+            Text(
+              question.title.en,
+              style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+            ),
             const SizedBox(height: 24),
             Text('選択肢', style: theme.textTheme.labelLarge),
             const SizedBox(height: 8),
@@ -396,7 +437,11 @@ class _ReadOnlyQuestionView extends StatelessWidget {
             const SizedBox(height: 24),
             Text('解説', style: theme.textTheme.labelLarge),
             const SizedBox(height: 4),
-            Text(question.explanation == null || question.explanation!.ja.isEmpty ? '(なし)' : '${question.explanation!.ja}\n${question.explanation!.en}'),
+            Text(
+              question.explanation == null || question.explanation!.ja.isEmpty
+                  ? '(なし)'
+                  : '${question.explanation!.ja}\n${question.explanation!.en}',
+            ),
             const SizedBox(height: 24),
             Text('制限時間: ${question.durationSeconds} 秒', style: theme.textTheme.bodyMedium),
           ],

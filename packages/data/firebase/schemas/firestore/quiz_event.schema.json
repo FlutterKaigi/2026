@@ -5,38 +5,67 @@
   "description": "Firestore document schema for the `quizEvents` collection.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["title", "status", "createdAt", "updatedAt"],
+  "required": [
+    "title",
+    "status",
+    "createdAt",
+    "updatedAt"
+  ],
   "properties": {
     "title": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["ja", "en"],
+      "required": [
+        "ja",
+        "en"
+      ],
       "properties": {
-        "ja": { "type": "string" },
-        "en": { "type": "string" }
+        "ja": {
+          "type": "string"
+        },
+        "en": {
+          "type": "string"
+        }
       }
     },
     "status": {
       "type": "string",
-      "enum": ["draft", "published", "registration", "entryClosed", "inProgress", "finished"]
+      "enum": [
+        "draft",
+        "published",
+        "registration",
+        "entryClosed",
+        "inProgress",
+        "finished"
+      ]
     },
     "isPublic": {
       "type": "boolean"
     },
     "currentQuestionId": {
-      "type": ["string", "null"]
+      "type": [
+        "string",
+        "null"
+      ]
     },
     "capacity": {
       "type": "integer",
-      "minimum": 1
+      "minimum": 3,
+      "maximum": 80
     },
     "sponsorIds": {
       "type": "array",
-      "items": { "type": "string" }
+      "items": {
+        "type": "string"
+      }
     },
     "teamNamePool": {
       "type": "array",
-      "items": { "type": "string", "minLength": 1, "maxLength": 30 }
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 30
+      }
     },
     "createdAt": {
       "type": "string",
@@ -45,6 +74,20 @@
     "updatedAt": {
       "type": "string",
       "format": "date-time"
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "participantCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 80,
+      "description": "Legacy count retained for older records; live registration counts come from the roster."
+    },
+    "admissionSlotsReady": {
+      "type": "boolean",
+      "description": "Server-only marker: existing participants have been assigned capacity reservations."
     }
   }
 }

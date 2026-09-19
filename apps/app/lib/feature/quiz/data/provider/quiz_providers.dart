@@ -116,14 +116,17 @@ final currentQuestionProvider = StreamProvider<QuizQuestion?>((ref) {
 /// 現在の問題または自チームが未確定の間、および出題前で回答ドキュメントが
 /// 未作成の間は `null` を流す。
 ///
-/// 問題ドキュメントは status や closesAt の更新でも変化するため、`select`
-/// で id の変化だけに反応させて購読の張り直しを防ぐ。
+/// 読み上げ中は回答ドキュメントがまだないため購読せず、同じ問題でも
+/// 回答受付が開始したら購読を開始する。
 final teamAnswerProvider = StreamProvider<QuizAnswer?>((ref) {
-  final questionId = ref.watch(
-    currentQuestionProvider.select((question) => question.value?.id),
+  final (questionId, status) = ref.watch(
+    currentQuestionProvider.select((question) => (question.value?.id, question.value?.status)),
   );
   final teamId = ref.watch(myTeamProvider.select((team) => team.value?.id));
-  if (questionId == null || teamId == null) {
+  if (questionId == null ||
+      teamId == null ||
+      status == QuizQuestionStatus.reading ||
+      status == QuizQuestionStatus.draft) {
     return Stream.value(null);
   }
   final eventId = ref.watch(quizEventIdProvider);

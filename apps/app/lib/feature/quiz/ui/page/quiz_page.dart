@@ -11,6 +11,7 @@ import 'package:app/feature/quiz/ui/component/quiz_question_view.dart';
 import 'package:app/feature/quiz/ui/component/quiz_result_view.dart';
 import 'package:app/feature/quiz/ui/component/quiz_sign_in_required_view.dart';
 import 'package:app/feature/quiz/ui/component/quiz_team_badge.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:data/data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -148,8 +149,8 @@ class _QuizBody extends ConsumerWidget {
     }
 
     return switch (question.status) {
-      QuizQuestionStatus.open => (
-        QuizQuestionView(question: question, team: team),
+      QuizQuestionStatus.reading || QuizQuestionStatus.open => (
+        QuizQuestionView(key: ValueKey(question.id), question: question, team: team),
         'question-${question.id}',
       ),
       QuizQuestionStatus.closed => (_SuspenseView(team: team), 'closed-${question.id}'),
@@ -167,7 +168,7 @@ class _QuizBody extends ConsumerWidget {
 /// ニックネーム・現地受付コードの入力。
 ///
 /// 受付コードは会場の受付で案内される 6 桁の数字。コードの照合は
-/// セキュリティルールが行い、不一致は permission-denied で失敗する。
+/// サーバーが行い、不一致・定員・重複参加・受付終了を区別して返す。
 class _RegistrationForm extends ConsumerWidget {
   const _RegistrationForm({required this.event});
 
@@ -235,7 +236,7 @@ class _RegistrationFormBody extends HookConsumerWidget {
 
     final trimmed = text.value.trim();
     final code = codeText.value.trim();
-    final isValid = trimmed.isNotEmpty && trimmed.length <= 20 && code.isNotEmpty;
+    final isValid = trimmed.isNotEmpty && trimmed.characters.length <= 20 && RegExp(r'^\d{6}$').hasMatch(code);
 
     Future<void> register() async {
       if (!isValid || user == null || submitting.value) {
@@ -244,30 +245,39 @@ class _RegistrationFormBody extends HookConsumerWidget {
       submitting.value = true;
       errorMessage.value = null;
       try {
-        // 複数のプロバイダを紐づけたアカウントでは providerData の先頭が今回
-        // サインインに使ったものとは限らないため、ID トークンの
-        // sign_in_provider を優先する。セキュリティルールが同じ値と
-        // 突き合わせて検証する。
-        final tokenResult = await user.getIdTokenResult();
-        final providerData = user.providerData;
         await ref
             .read(quizParticipantRepositoryProvider)
             .register(
               ref.read(quizEventIdProvider),
-              uid: user.uid,
               displayName: trimmed,
               entryCode: code,
-              signInProvider:
-                  tokenResult.signInProvider ?? (providerData.isEmpty ? 'unknown' : providerData.first.providerId),
-              email: user.email,
-              accountName: user.displayName,
-              photoUrl: user.photoURL,
             );
+      } on FirebaseFunctionsException catch (error) {
+        if (!context.mounted) {
+          return;
+        }
+        final details = error.details;
+        final reason = details is Map ? details['reason'] : null;
+        errorMessage.value = switch (error.code) {
+          'resource-exhausted' when reason == 'rate-limited' => t.quiz.registration.rateLimited,
+          'permission-denied' when reason == 'disabled-account' => t.quiz.registration.accountUnavailable,
+          'permission-denied' => t.quiz.registration.codeMismatch,
+          'resource-exhausted' => t.quiz.registration.full(max: '${event.capacity}'),
+          'already-exists' => t.quiz.registration.alreadyParticipated,
+          'failed-precondition' || 'not-found' => t.quiz.registration.closed,
+          'unauthenticated' => t.quiz.errors.signInFailed,
+          'unavailable' || 'deadline-exceeded' => t.quiz.registration.unavailable,
+          _ => t.quiz.registration.failed,
+        };
       } on Exception {
-        // 主因は受付コード不一致（ルールで permission-denied）。
-        errorMessage.value = t.quiz.registration.codeMismatch;
+        if (!context.mounted) {
+          return;
+        }
+        errorMessage.value = t.quiz.registration.failed;
       } finally {
-        submitting.value = false;
+        if (context.mounted) {
+          submitting.value = false;
+        }
       }
     }
 
@@ -336,6 +346,7 @@ class _RegistrationFormBody extends HookConsumerWidget {
               controller: codeController,
               maxLength: 6,
               keyboardType: TextInputType.number,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               enabled: !isFull && !submitting.value,
               decoration: InputDecoration(
                 labelText: t.quiz.registration.entryCode,

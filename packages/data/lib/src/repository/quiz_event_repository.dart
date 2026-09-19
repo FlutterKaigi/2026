@@ -16,6 +16,8 @@ abstract interface class QuizEventRepository {
 
   /// イベントを保存し、ドキュメント ID を返す（新規作成時は採番された ID）。
   Future<String> save(QuizEvent event);
+
+  Future<void> updateTeamNamePool(String eventId, List<String> names);
 }
 
 final class FirestoreQuizEventRepository implements QuizEventRepository {
@@ -40,8 +42,6 @@ final class FirestoreQuizEventRepository implements QuizEventRepository {
   @override
   Stream<List<QuizEvent>> watchPublished() {
     // ルールの list 条件（isPublic == true）をクエリの等価条件で保証する。
-    // status の whereIn では一部環境（エミュレータの gRPC 経路）でルール評価が
-    // 失敗するため、公開判定は専用フラグに寄せている。
     return _collection
         .where('isPublic', isEqualTo: true)
         .orderBy('createdAt', descending: true)
@@ -64,18 +64,49 @@ final class FirestoreQuizEventRepository implements QuizEventRepository {
 
   @override
   Future<String> save(QuizEvent event) async {
-    final data = event.toJson()
-      ..remove('id')
-      ..remove('createdAt')
-      ..remove('updatedAt');
-    data['updatedAt'] = FieldValue.serverTimestamp();
-
-    if (event.isNew) {
-      data['createdAt'] = FieldValue.serverTimestamp();
-      final ref = await _collection.add(data);
-      return ref.id;
+    if (event.capacity < 3 || event.capacity > 80) {
+      throw ArgumentError('定員は 3〜80 人で設定してください。');
     }
-    await _collection.doc(event.id).set(data, SetOptions(merge: true));
+    // 編集画面が保持する古い status/currentQuestionId で進行を巻き戻さない。
+    final data = <String, dynamic>{
+      'title': event.title.toJson(),
+      'sponsorIds': event.sponsorIds,
+      'capacity': event.capacity,
+      'teamNamePool': event.teamNamePool,
+      'updatedAt': FieldValue.serverTimestamp(),
+    };
+    if (event.isNew) {
+      data.addAll({
+        'status': 'draft',
+        'isPublic': false,
+        'currentQuestionId': null,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+      return (await _collection.add(data)).id;
+    }
+    await _firestore.runTransaction((transaction) async {
+      final reference = _collection.doc(event.id);
+      final current = await transaction.get(reference);
+      if (current.data() == null ||
+          !const ['draft', 'published', 'registration', 'entryClosed'].contains(current.data()?['status'])) {
+        throw StateError('クイズ開始後はイベント設定を変更できません。');
+      }
+      if (event.capacity != (current.data()?['capacity'] ?? 80) &&
+          (!const ['draft', 'published'].contains(current.data()?['status']) ||
+              current.data()?['admissionSlotsReady'] == true)) {
+        throw StateError('受付開始後は定員を変更できません。');
+      }
+      if (event.capacity < ((current.data()?['participantCount'] as num?)?.toInt() ?? 0)) {
+        throw StateError('登録済みの参加者数より定員を減らせません。');
+      }
+      transaction.update(reference, data);
+    });
     return event.id;
   }
+
+  @override
+  Future<void> updateTeamNamePool(String eventId, List<String> names) => _collection.doc(eventId).update({
+    'teamNamePool': names,
+    'updatedAt': FieldValue.serverTimestamp(),
+  });
 }

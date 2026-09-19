@@ -7,7 +7,7 @@ part 'quiz_question.freezed.dart';
 part 'quiz_question.g.dart';
 
 @JsonEnum()
-enum QuizQuestionStatus { draft, open, closed, revealed }
+enum QuizQuestionStatus { draft, reading, open, closed, revealed }
 
 @freezed
 abstract class QuizQuestion with _$QuizQuestion {

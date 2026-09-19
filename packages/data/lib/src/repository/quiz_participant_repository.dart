@@ -1,28 +1,19 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 
 import '../model/quiz_participant.dart';
 import '../model/quiz_participant_account.dart';
 
 abstract interface class QuizParticipantRepository {
-  /// 参加者を登録する。ドキュメント ID は [uid]。`registeredAt` は
-  /// サーバ時刻で書き込む。
-  ///
-  /// クイズ大会はログイン必須のため、[uid] は匿名ではない実アカウントのもの
-  /// である必要がある（セキュリティルールが `sign_in_provider` で検証する）。
-  /// [signInProvider] 以下のアカウント情報は読み取りを本人と運営に限定した
-  /// `participantAccounts/{uid}` に保存し、参加記録をログインアカウントに
-  /// 紐づける。
-  ///
-  /// [entryCode] は現地受付に掲示されるコード。参加者ドキュメントとは別の
-  /// 読み取り不可コレクション（`entryClaims/{uid}`）へ先に書き込み、
-  /// その時点でセキュリティルールが `secret/entry` のコードと突き合わせて
-  /// 検証する。コード不一致・受付時間外は `permission-denied` で失敗する。
+  /// サーバーで受付コード・定員・他の回への参加を検証して登録する。
+  /// アカウント情報は認証トークンから取得し、端末が渡す情報は信用しない。
+  /// 同じイベントへの再送は登録済みとして成功する。
   Future<void> register(
     String eventId, {
-    required String uid,
+    String? uid,
     required String displayName,
     required String entryCode,
-    required String signInProvider,
+    String? signInProvider,
     String? email,
     String? accountName,
     String? photoUrl,
@@ -40,10 +31,12 @@ abstract interface class QuizParticipantRepository {
 }
 
 final class FirestoreQuizParticipantRepository implements QuizParticipantRepository {
-  FirestoreQuizParticipantRepository({FirebaseFirestore? firestore})
-    : _firestore = firestore ?? FirebaseFirestore.instance;
+  FirestoreQuizParticipantRepository({FirebaseFirestore? firestore, FirebaseFunctions? functions})
+    : _firestore = firestore ?? FirebaseFirestore.instance,
+      _functions = functions ?? FirebaseFunctions.instanceFor(region: 'asia-northeast1');
 
   final FirebaseFirestore _firestore;
+  final FirebaseFunctions _functions;
 
   DocumentReference<Map<String, dynamic>> _event(String eventId) => _firestore.collection('quizEvents').doc(eventId);
 
@@ -55,37 +48,24 @@ final class FirestoreQuizParticipantRepository implements QuizParticipantReposit
   @override
   Future<void> register(
     String eventId, {
-    required String uid,
+    String? uid,
     required String displayName,
     required String entryCode,
-    required String signInProvider,
+    String? signInProvider,
     String? email,
     String? accountName,
     String? photoUrl,
   }) async {
-    // コードは参加者ドキュメント（サインイン済みなら読める）には載せず、
-    // 読み取り不可の entryClaims にのみ書く。コードの照合はこの書き込みの
-    // ルールで行われるため、不一致ならここで permission-denied になり
-    // 参加者は作成されない。
-    await _event(eventId).collection('entryClaims').doc(uid).set(<String, dynamic>{'code': entryCode});
-
-    // ログインアカウントとの紐づけ。参加者ドキュメントの作成ルールが
-    // このドキュメントの存在を要求するため、必ず先に書き込む。
-    // 値の正しさ（uid / email / signInProvider）はルールが ID トークンと
-    // 突き合わせて検証する。
-    await _accounts(eventId).doc(uid).set(<String, dynamic>{
-      'uid': uid,
-      'email': email,
-      'accountName': accountName,
-      'photoUrl': photoUrl,
-      'signInProvider': signInProvider,
-      'linkedAt': FieldValue.serverTimestamp(),
-    });
-
-    await _collection(eventId).doc(uid).set(<String, dynamic>{
-      'displayName': displayName,
-      'registeredAt': FieldValue.serverTimestamp(),
-    });
+    await _functions
+        .httpsCallable(
+          'registerQuizParticipant',
+          options: HttpsCallableOptions(timeout: const Duration(seconds: 30)),
+        )
+        .call<void>(<String, dynamic>{
+          'eventId': eventId,
+          'displayName': displayName,
+          'entryCode': entryCode,
+        });
   }
 
   @override

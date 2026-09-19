@@ -7,15 +7,12 @@ import 'package:app/feature/quiz/data/provider/quiz_repositories.dart';
 import 'package:app/feature/quiz/ui/component/quiz_motion.dart';
 import 'package:app/feature/quiz/ui/component/quiz_option_card.dart';
 import 'package:app/feature/quiz/ui/component/quiz_team_badge.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:data/data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-
-/// 締切の何秒前で UI 側の入力をロックするか。サーバ側の write 拒否を
-/// ユーザーに体感させないためのクライアント側マージン。
-const _lockLeadSeconds = 3;
 
 /// 残り時間がこの割合を下回ったらタイマーを警告色に切り替える。
 const _urgentRatio = 0.2;
@@ -24,11 +21,10 @@ const _urgentRatio = 0.2;
 ///
 /// スポンサー名・問題文・選択肢カードを表示し、タップで自チームの回答を
 /// 送信する。自チームの現在の選択はリアルタイムに反映し、`closesAt` から
-/// カウントダウンをクライアント計算する。残り [_lockLeadSeconds] 秒で入力を
-/// ロックする。
+/// サーバーと同期したカウントダウンを計算する。受付可否は送信時に
+/// サーバーが最終判断し、画面では締切に到達したとき入力をロックする。
 ///
-/// 毎秒の時計更新は [_CountdownBar] の内部に閉じているため、選択肢カードを
-/// 含む本体は回答・ロック状態が変化したときだけ再構築される。
+/// 時刻はサーバーへ定期的に同期し、その間は単調増加の時計で進める。
 class QuizQuestionView extends HookConsumerWidget {
   const QuizQuestionView({
     required this.question,
@@ -45,7 +41,35 @@ class QuizQuestionView extends HookConsumerWidget {
     final t = Translations.of(context);
     final locale = Localizations.localeOf(context);
     final uid = ref.watch(quizUserProvider).value?.uid;
-    final teamAnswer = ref.watch(teamAnswerProvider).value;
+    final answerAsync = ref.watch(teamAnswerProvider);
+    final teamAnswer = answerAsync.value;
+    final clockAsync = ref.watch(quizClockProvider);
+    final clock = clockAsync.hasError || clockAsync.isLoading ? null : clockAsync.value;
+    final tick = useState(0);
+    useEffect(() {
+      final timer = Timer.periodic(const Duration(seconds: 1), (_) => tick.value++);
+      final resync = Timer.periodic(const Duration(seconds: 30), (_) => ref.invalidate(quizClockProvider));
+      final lifecycle = AppLifecycleListener(onResume: () => ref.invalidate(quizClockProvider));
+      return () {
+        timer.cancel();
+        resync.cancel();
+        lifecycle.dispose();
+      };
+    }, const []);
+    // Recalibrate as soon as a cached answer stream reconnects.
+    ref.listen(teamAnswerProvider, (previous, next) {
+      if ((previous?.value?.isFromCache ?? false) && next.value?.isFromCache == false) {
+        ref.invalidate(quizClockProvider);
+      }
+    });
+    final reading = question.status == QuizQuestionStatus.reading;
+    final synchronized = clock != null && clock.isFresh;
+    final remaining = synchronized ? question.closesAt?.difference(clock.now) : null;
+    final expired = remaining != null && remaining <= Duration.zero;
+    final cached = teamAnswer?.isFromCache ?? false;
+    final unconfirmed = teamAnswer?.hasPendingWrites ?? false;
+    final answerReady = answerAsync is AsyncData<QuizAnswer?> && teamAnswer != null && !cached && !unconfirmed;
+    final locked = reading || !synchronized || remaining == null || expired || !answerReady;
     final sponsorName = ref
         .watch(
           quizSponsorsProvider.select(
@@ -57,37 +81,18 @@ class QuizQuestionView extends HookConsumerWidget {
         )
         ?.resolve(locale);
 
-    // 送信失敗を静かに表示するためのインラインメッセージ。締切直後の
-    // permission-denied は正常系として扱う。
     final submitError = useState<String?>(null);
-
-    // 締切 [_lockLeadSeconds] 秒前に一度だけ入力をロックする。毎秒の再計算は
-    // 行わず、締切時刻から逆算したワンショットタイマーで切り替える。
-    final locked = useState(false);
-    useEffect(() {
-      final closesAt = question.closesAt;
-      if (closesAt == null) {
-        // closesAt 未設定時はロックしない（出題直後の一瞬を許容）。
-        locked.value = false;
-        return null;
-      }
-      final lockAt = closesAt.subtract(const Duration(seconds: _lockLeadSeconds));
-      final untilLock = lockAt.difference(DateTime.now());
-      if (untilLock.isNegative) {
-        locked.value = true;
-        return null;
-      }
-      locked.value = false;
-      final timer = Timer(untilLock, () => locked.value = true);
-      return timer.cancel;
-    }, [question.closesAt]);
+    final sending = useState(false);
+    final accepted = useState(false);
 
     Future<void> submit(int index) async {
-      if (locked.value || uid == null) {
+      if (locked || sending.value || uid == null) {
         return;
       }
       unawaited(HapticFeedback.mediumImpact());
       submitError.value = null;
+      accepted.value = false;
+      sending.value = true;
       try {
         await ref
             .read(quizAnswerRepositoryProvider)
@@ -96,15 +101,33 @@ class QuizQuestionView extends HookConsumerWidget {
               question.id,
               team.id,
               selectedOptionIndex: index,
-              uid: uid,
             );
+        if (!context.mounted) {
+          return;
+        }
+        accepted.value = true;
+      } on FirebaseFunctionsException catch (error) {
+        if (!context.mounted) {
+          return;
+        }
+        submitError.value = switch (error.code) {
+          'failed-precondition' => t.quiz.question.locked,
+          'unavailable' || 'deadline-exceeded' => t.quiz.question.submitUnconfirmed,
+          _ => t.quiz.question.submitFailed,
+        };
       } on Exception {
-        // 締切直後の拒否などは静かに扱い、小さなインラインメッセージのみ出す。
-        submitError.value = t.quiz.question.submitFailed;
+        if (!context.mounted) {
+          return;
+        }
+        submitError.value = t.quiz.question.submitUnconfirmed;
+      } finally {
+        if (context.mounted) {
+          sending.value = false;
+        }
       }
     }
 
-    final selectedIndex = teamAnswer?.selectedOptionIndex;
+    final selectedIndex = answerReady ? teamAnswer.selectedOptionIndex : null;
     final answeredBy = teamAnswer?.answeredBy;
 
     return SingleChildScrollView(
@@ -132,10 +155,12 @@ class QuizQuestionView extends HookConsumerWidget {
           const SizedBox(height: 16),
           Entrance(
             delay: const Duration(milliseconds: 120),
-            child: _CountdownBar(
-              closesAt: question.closesAt,
-              durationSeconds: question.durationSeconds,
-            ),
+            child: reading
+                ? Text(t.quiz.question.reading, textAlign: TextAlign.center, style: theme.textTheme.titleMedium)
+                : _CountdownBar(
+                    remaining: remaining,
+                    durationSeconds: question.durationSeconds,
+                  ),
           ),
           const SizedBox(height: 24),
           for (var index = 0; index < question.options.length; index++) ...[
@@ -150,13 +175,13 @@ class QuizQuestionView extends HookConsumerWidget {
                     ? t.quiz.question.answeredBy(name: _answeredByName(context, team, answeredBy))
                     : null,
                 minHeight: question.options.length <= 2 ? 96 : 72,
-                enabled: !locked.value,
+                enabled: !locked && !sending.value,
                 onTap: () => unawaited(submit(index)),
               ),
             ),
             const SizedBox(height: 12),
           ],
-          if (locked.value)
+          if (!reading && expired)
             Padding(
               padding: const EdgeInsets.only(top: 4),
               child: Text(
@@ -168,6 +193,25 @@ class QuizQuestionView extends HookConsumerWidget {
                 ),
               ),
             ),
+          if (!reading && !synchronized) ...[
+            Text(
+              clockAsync.hasError ? t.quiz.question.connectionUnavailable : t.quiz.question.synchronizing,
+              textAlign: TextAlign.center,
+            ),
+            TextButton(
+              onPressed: () => ref.invalidate(quizClockProvider),
+              child: Text(t.common.retry),
+            ),
+          ],
+          if (cached || unconfirmed)
+            Text(t.quiz.question.cached, textAlign: TextAlign.center)
+          else if (answerAsync.hasError)
+            Text(t.quiz.question.connectionUnavailable, textAlign: TextAlign.center),
+          if (sending.value)
+            Text(t.quiz.question.sending, textAlign: TextAlign.center)
+          else if (accepted.value)
+            Text(t.quiz.question.received, textAlign: TextAlign.center),
+          if (selectedIndex != null) Text(t.quiz.question.teamAnswer, textAlign: TextAlign.center),
           if (submitError.value != null)
             Padding(
               padding: const EdgeInsets.only(top: 8),
@@ -193,31 +237,20 @@ class QuizQuestionView extends HookConsumerWidget {
 
 /// 残り時間の数字とプログレスバー。
 ///
-/// 毎秒の時計はこのウィジェット内で完結させ、親（選択肢カードを含む
-/// 回答画面全体）を毎秒再構築しないようにする。残りが [_urgentRatio] を
+/// サーバーに同期した残り時間を表示する。残りが [_urgentRatio] を
 /// 切ると警告色に変わり、10 秒以下では数字が脈動して緊迫感を出す
 /// （Kahoot 等のライブクイズで定番の演出）。
-class _CountdownBar extends HookWidget {
-  const _CountdownBar({required this.closesAt, required this.durationSeconds});
+class _CountdownBar extends StatelessWidget {
+  const _CountdownBar({required this.remaining, required this.durationSeconds});
 
-  final DateTime? closesAt;
+  final Duration? remaining;
   final int durationSeconds;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    // 毎秒更新する現在時刻。カウントダウンの再計算に使う。
-    final now = useState(DateTime.now());
-    useEffect(() {
-      final timer = Timer.periodic(const Duration(seconds: 1), (_) {
-        now.value = DateTime.now();
-      });
-      return timer.cancel;
-    }, const []);
-
-    final remaining = closesAt?.difference(now.value).inSeconds;
-    final seconds = remaining?.clamp(0, durationSeconds);
+    final seconds = remaining == null ? null : (remaining!.inMilliseconds / 1000).ceil().clamp(0, durationSeconds);
     final ratio = seconds == null || durationSeconds == 0 ? 1.0 : seconds / durationSeconds;
     final urgent = ratio <= _urgentRatio;
     final color = urgent ? theme.colorScheme.error : theme.colorScheme.primary;

@@ -17,6 +17,8 @@ abstract class QuizAnswer with _$QuizAnswer {
     String? answeredBy,
     @FirestoreNullableDateTimeConverter() DateTime? submittedAt,
     bool? isCorrect,
+    @JsonKey(includeFromJson: false, includeToJson: false) @Default(false) bool isFromCache,
+    @JsonKey(includeFromJson: false, includeToJson: false) @Default(false) bool hasPendingWrites,
   }) = _QuizAnswer;
 
   factory QuizAnswer.fromJson(Map<String, dynamic> json) => _$QuizAnswerFromJson(json);

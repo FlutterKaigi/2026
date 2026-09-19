@@ -45,3 +45,11 @@ final quizSponsorListProvider = StreamProvider<List<Sponsor>>(
 final quizEntryCodeProvider = StreamProvider.family<String?, String>(
   (ref, eventId) => ref.watch(quizOperationsRepositoryProvider).watchEntryCode(eventId),
 );
+
+final quizQuestionProvider = StreamProvider.family<QuizQuestion?, ({String eventId, String questionId})>(
+  (ref, args) => ref.watch(quizQuestionRepositoryProvider).watchById(args.eventId, args.questionId),
+);
+
+final quizQuestionSecretProvider = StreamProvider.family<QuizQuestionSecret?, ({String eventId, String questionId})>(
+  (ref, args) => ref.watch(quizQuestionRepositoryProvider).watchSecret(args.eventId, args.questionId),
+);

@@ -26,6 +26,7 @@ export 'src/repository/news_repository.dart' show FirestoreNewsRepository, NewsR
 export 'src/repository/profile_exchange_repository.dart'
     show FirestoreProfileExchangeRepository, ProfileExchangeAlreadyExistsException, ProfileExchangeRepository;
 export 'src/repository/quiz_answer_repository.dart' show FirestoreQuizAnswerRepository, QuizAnswerRepository;
+export 'src/repository/quiz_clock_repository.dart' show FirebaseQuizClockRepository, QuizClock, QuizClockRepository;
 export 'src/repository/quiz_event_repository.dart' show FirestoreQuizEventRepository, QuizEventRepository;
 export 'src/repository/quiz_operations_repository.dart'
     show FirestoreQuizOperationsRepository, QuizOperationsRepository, quizTeamWidgetNames, splitIntoTeamSizes;

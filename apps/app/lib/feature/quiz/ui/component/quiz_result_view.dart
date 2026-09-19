@@ -31,8 +31,11 @@ class QuizResultView extends ConsumerWidget {
 
   Widget _buildBody(BuildContext context, ThemeData theme, List<QuizTeam> teams) {
     final sorted = _sortedByRank(teams);
-    // 順位確定済みの上位 3 チームだけを表彰台に載せる。
-    final podium = sorted.where((team) => team.rank != null && team.rank! <= 3).toList();
+    // 同率上位は全員を同じ一覧で表示する。表彰台が代表 1 チームを選んで
+    // 残りの同率チームを消してしまわないようにする。
+    final topTeams = sorted.where((team) => team.rank != null && team.rank! <= 3).toList();
+    final hasTopTie = topTeams.map((team) => team.rank).toSet().length != topTeams.length;
+    final podium = hasTopTie ? <QuizTeam>[] : topTeams;
     final rest = sorted.where((team) => !podium.contains(team)).toList();
     final podiumDone = 900 + podium.length * 100;
 
@@ -87,7 +90,8 @@ class QuizResultView extends ConsumerWidget {
         final ra = a.rank;
         final rb = b.rank;
         if (ra != null && rb != null) {
-          return ra.compareTo(rb);
+          final rankComparison = ra.compareTo(rb);
+          return rankComparison != 0 ? rankComparison : a.tableNumber.compareTo(b.tableNumber);
         }
         if (ra != null) {
           return -1;

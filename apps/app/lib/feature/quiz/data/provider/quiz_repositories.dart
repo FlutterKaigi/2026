@@ -32,3 +32,12 @@ final quizAnswerRepositoryProvider = Provider<QuizAnswerRepository>(
 final quizSponsorRepositoryProvider = Provider<SponsorRepository>(
   (ref) => FirestoreSponsorRepository(),
 );
+
+/// サーバー時刻との同期。端末の時計設定に依存しないカウントダウンを供給する。
+final quizClockRepositoryProvider = Provider<QuizClockRepository>(
+  (ref) => FirebaseQuizClockRepository(),
+);
+
+final quizClockProvider = FutureProvider.autoDispose<QuizClock>(
+  (ref) => ref.watch(quizClockRepositoryProvider).synchronize(),
+);

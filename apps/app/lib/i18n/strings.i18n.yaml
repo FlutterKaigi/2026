@@ -505,6 +505,11 @@ quiz:
     full: 定員（$max 人）に達しました
     failed: 登録できませんでした。時間をおいて再度お試しください。
     codeMismatch: 登録できませんでした。受付コードが正しいか確認してください。
+    alreadyParticipated: 別の回に参加登録済みのため、この回には登録できません。
+    closed: この回の参加受付は終了しました。
+    unavailable: 登録を確認できませんでした。通信状況を確認して再試行してください。
+    rateLimited: 入力回数が多すぎます。1分待ってから、受付コードを確認して再試行してください。
+    accountUnavailable: このアカウントでは参加できません。運営にお問い合わせください。
   waiting:
     title: 登録完了！
     description: チーム発表までしばらくお待ちください
@@ -525,6 +530,14 @@ quiz:
     submitFailed: 送信できませんでした。締め切られた可能性があります。
     answeredBy: $name が選択
     member: メンバー
+    reading: 問題を読み上げています。回答開始をお待ちください。
+    synchronizing: サーバー時刻を確認しています…
+    connectionUnavailable: 通信を確認できません。接続を確認して再試行してください。
+    cached: 保存済みの情報を表示しています。チームの最新回答を確認できていません。
+    sending: 回答を送信しています…
+    received: 回答がサーバーで受理されました。
+    teamAnswer: 選択表示はサーバーで受理したチームの回答です。締切までは全員が変更できます。
+    submitUnconfirmed: 回答の受理を確認できません。通信状況とチームの現在の回答を確認し、締切までに再試行してください。
   suspense:
     title: 回答締切！
     description: 正解発表をお待ちください

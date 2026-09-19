@@ -504,6 +504,11 @@ quiz:
     full: Full capacity ($max participants) reached
     failed: Could not register. Please try again later.
     codeMismatch: Could not register. Please check the entry code.
+    alreadyParticipated: You have already registered for another round and cannot join this one.
+    closed: Registration for this round has closed.
+    unavailable: Registration could not be confirmed. Check your connection and try again.
+    rateLimited: Too many attempts. Wait one minute, check the entry code, and try again.
+    accountUnavailable: This account cannot join. Please contact event staff.
   waiting:
     title: You're in!
     description: Please wait for the team announcement
@@ -524,6 +529,14 @@ quiz:
     submitFailed: Could not submit. The question may have closed.
     answeredBy: Selected by $name
     member: a member
+    reading: The question is being read. Please wait for answers to open.
+    synchronizing: Checking server time…
+    connectionUnavailable: Connection unavailable. Check your connection and try again.
+    cached: Showing saved information. Your team's latest answer has not been confirmed.
+    sending: Sending your answer…
+    received: Your answer was accepted by the server.
+    teamAnswer: The selection shows the team's server-accepted answer. Any member can change it before the deadline.
+    submitUnconfirmed: Acceptance could not be confirmed. Check your connection and the current team answer, and retry before the deadline.
   suspense:
     title: Time's up!
     description: Waiting for the answer reveal

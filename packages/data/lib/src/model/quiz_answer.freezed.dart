@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$QuizAnswer {
 
- String get id; String get questionId; String get teamId; int? get selectedOptionIndex; String? get answeredBy;@FirestoreNullableDateTimeConverter() DateTime? get submittedAt; bool? get isCorrect;
+ String get id; String get questionId; String get teamId; int? get selectedOptionIndex; String? get answeredBy;@FirestoreNullableDateTimeConverter() DateTime? get submittedAt; bool? get isCorrect;@JsonKey(includeFromJson: false, includeToJson: false) bool get isFromCache;@JsonKey(includeFromJson: false, includeToJson: false) bool get hasPendingWrites;
 /// Create a copy of QuizAnswer
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $QuizAnswerCopyWith<QuizAnswer> get copyWith => _$QuizAnswerCopyWithImpl<QuizAns
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is QuizAnswer&&(identical(other.id, id) || other.id == id)&&(identical(other.questionId, questionId) || other.questionId == questionId)&&(identical(other.teamId, teamId) || other.teamId == teamId)&&(identical(other.selectedOptionIndex, selectedOptionIndex) || other.selectedOptionIndex == selectedOptionIndex)&&(identical(other.answeredBy, answeredBy) || other.answeredBy == answeredBy)&&(identical(other.submittedAt, submittedAt) || other.submittedAt == submittedAt)&&(identical(other.isCorrect, isCorrect) || other.isCorrect == isCorrect));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is QuizAnswer&&(identical(other.id, id) || other.id == id)&&(identical(other.questionId, questionId) || other.questionId == questionId)&&(identical(other.teamId, teamId) || other.teamId == teamId)&&(identical(other.selectedOptionIndex, selectedOptionIndex) || other.selectedOptionIndex == selectedOptionIndex)&&(identical(other.answeredBy, answeredBy) || other.answeredBy == answeredBy)&&(identical(other.submittedAt, submittedAt) || other.submittedAt == submittedAt)&&(identical(other.isCorrect, isCorrect) || other.isCorrect == isCorrect)&&(identical(other.isFromCache, isFromCache) || other.isFromCache == isFromCache)&&(identical(other.hasPendingWrites, hasPendingWrites) || other.hasPendingWrites == hasPendingWrites));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,questionId,teamId,selectedOptionIndex,answeredBy,submittedAt,isCorrect);
+int get hashCode => Object.hash(runtimeType,id,questionId,teamId,selectedOptionIndex,answeredBy,submittedAt,isCorrect,isFromCache,hasPendingWrites);
 
 @override
 String toString() {
-  return 'QuizAnswer(id: $id, questionId: $questionId, teamId: $teamId, selectedOptionIndex: $selectedOptionIndex, answeredBy: $answeredBy, submittedAt: $submittedAt, isCorrect: $isCorrect)';
+  return 'QuizAnswer(id: $id, questionId: $questionId, teamId: $teamId, selectedOptionIndex: $selectedOptionIndex, answeredBy: $answeredBy, submittedAt: $submittedAt, isCorrect: $isCorrect, isFromCache: $isFromCache, hasPendingWrites: $hasPendingWrites)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $QuizAnswerCopyWith<$Res>  {
   factory $QuizAnswerCopyWith(QuizAnswer value, $Res Function(QuizAnswer) _then) = _$QuizAnswerCopyWithImpl;
 @useResult
 $Res call({
- String id, String questionId, String teamId, int? selectedOptionIndex, String? answeredBy,@FirestoreNullableDateTimeConverter() DateTime? submittedAt, bool? isCorrect
+ String id, String questionId, String teamId, int? selectedOptionIndex, String? answeredBy,@FirestoreNullableDateTimeConverter() DateTime? submittedAt, bool? isCorrect,@JsonKey(includeFromJson: false, includeToJson: false) bool isFromCache,@JsonKey(includeFromJson: false, includeToJson: false) bool hasPendingWrites
 });
 
 
@@ -65,7 +65,7 @@ class _$QuizAnswerCopyWithImpl<$Res>
 
 /// Create a copy of QuizAnswer
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? questionId = null,Object? teamId = null,Object? selectedOptionIndex = freezed,Object? answeredBy = freezed,Object? submittedAt = freezed,Object? isCorrect = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? questionId = null,Object? teamId = null,Object? selectedOptionIndex = freezed,Object? answeredBy = freezed,Object? submittedAt = freezed,Object? isCorrect = freezed,Object? isFromCache = null,Object? hasPendingWrites = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,questionId: null == questionId ? _self.questionId : questionId // ignore: cast_nullable_to_non_nullable
@@ -74,7 +74,9 @@ as String,selectedOptionIndex: freezed == selectedOptionIndex ? _self.selectedOp
 as int?,answeredBy: freezed == answeredBy ? _self.answeredBy : answeredBy // ignore: cast_nullable_to_non_nullable
 as String?,submittedAt: freezed == submittedAt ? _self.submittedAt : submittedAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,isCorrect: freezed == isCorrect ? _self.isCorrect : isCorrect // ignore: cast_nullable_to_non_nullable
-as bool?,
+as bool?,isFromCache: null == isFromCache ? _self.isFromCache : isFromCache // ignore: cast_nullable_to_non_nullable
+as bool,hasPendingWrites: null == hasPendingWrites ? _self.hasPendingWrites : hasPendingWrites // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 
@@ -159,10 +161,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String questionId,  String teamId,  int? selectedOptionIndex,  String? answeredBy, @FirestoreNullableDateTimeConverter()  DateTime? submittedAt,  bool? isCorrect)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String questionId,  String teamId,  int? selectedOptionIndex,  String? answeredBy, @FirestoreNullableDateTimeConverter()  DateTime? submittedAt,  bool? isCorrect, @JsonKey(includeFromJson: false, includeToJson: false)  bool isFromCache, @JsonKey(includeFromJson: false, includeToJson: false)  bool hasPendingWrites)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _QuizAnswer() when $default != null:
-return $default(_that.id,_that.questionId,_that.teamId,_that.selectedOptionIndex,_that.answeredBy,_that.submittedAt,_that.isCorrect);case _:
+return $default(_that.id,_that.questionId,_that.teamId,_that.selectedOptionIndex,_that.answeredBy,_that.submittedAt,_that.isCorrect,_that.isFromCache,_that.hasPendingWrites);case _:
   return orElse();
 
 }
@@ -180,10 +182,10 @@ return $default(_that.id,_that.questionId,_that.teamId,_that.selectedOptionIndex
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String questionId,  String teamId,  int? selectedOptionIndex,  String? answeredBy, @FirestoreNullableDateTimeConverter()  DateTime? submittedAt,  bool? isCorrect)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String questionId,  String teamId,  int? selectedOptionIndex,  String? answeredBy, @FirestoreNullableDateTimeConverter()  DateTime? submittedAt,  bool? isCorrect, @JsonKey(includeFromJson: false, includeToJson: false)  bool isFromCache, @JsonKey(includeFromJson: false, includeToJson: false)  bool hasPendingWrites)  $default,) {final _that = this;
 switch (_that) {
 case _QuizAnswer():
-return $default(_that.id,_that.questionId,_that.teamId,_that.selectedOptionIndex,_that.answeredBy,_that.submittedAt,_that.isCorrect);case _:
+return $default(_that.id,_that.questionId,_that.teamId,_that.selectedOptionIndex,_that.answeredBy,_that.submittedAt,_that.isCorrect,_that.isFromCache,_that.hasPendingWrites);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -200,10 +202,10 @@ return $default(_that.id,_that.questionId,_that.teamId,_that.selectedOptionIndex
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String questionId,  String teamId,  int? selectedOptionIndex,  String? answeredBy, @FirestoreNullableDateTimeConverter()  DateTime? submittedAt,  bool? isCorrect)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String questionId,  String teamId,  int? selectedOptionIndex,  String? answeredBy, @FirestoreNullableDateTimeConverter()  DateTime? submittedAt,  bool? isCorrect, @JsonKey(includeFromJson: false, includeToJson: false)  bool isFromCache, @JsonKey(includeFromJson: false, includeToJson: false)  bool hasPendingWrites)?  $default,) {final _that = this;
 switch (_that) {
 case _QuizAnswer() when $default != null:
-return $default(_that.id,_that.questionId,_that.teamId,_that.selectedOptionIndex,_that.answeredBy,_that.submittedAt,_that.isCorrect);case _:
+return $default(_that.id,_that.questionId,_that.teamId,_that.selectedOptionIndex,_that.answeredBy,_that.submittedAt,_that.isCorrect,_that.isFromCache,_that.hasPendingWrites);case _:
   return null;
 
 }
@@ -215,7 +217,7 @@ return $default(_that.id,_that.questionId,_that.teamId,_that.selectedOptionIndex
 @JsonSerializable()
 
 class _QuizAnswer extends QuizAnswer {
-  const _QuizAnswer({required this.id, required this.questionId, required this.teamId, this.selectedOptionIndex, this.answeredBy, @FirestoreNullableDateTimeConverter() this.submittedAt, this.isCorrect}): super._();
+  const _QuizAnswer({required this.id, required this.questionId, required this.teamId, this.selectedOptionIndex, this.answeredBy, @FirestoreNullableDateTimeConverter() this.submittedAt, this.isCorrect, @JsonKey(includeFromJson: false, includeToJson: false) this.isFromCache = false, @JsonKey(includeFromJson: false, includeToJson: false) this.hasPendingWrites = false}): super._();
   factory _QuizAnswer.fromJson(Map<String, dynamic> json) => _$QuizAnswerFromJson(json);
 
 @override final  String id;
@@ -225,6 +227,8 @@ class _QuizAnswer extends QuizAnswer {
 @override final  String? answeredBy;
 @override@FirestoreNullableDateTimeConverter() final  DateTime? submittedAt;
 @override final  bool? isCorrect;
+@override@JsonKey(includeFromJson: false, includeToJson: false) final  bool isFromCache;
+@override@JsonKey(includeFromJson: false, includeToJson: false) final  bool hasPendingWrites;
 
 /// Create a copy of QuizAnswer
 /// with the given fields replaced by the non-null parameter values.
@@ -239,16 +243,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _QuizAnswer&&(identical(other.id, id) || other.id == id)&&(identical(other.questionId, questionId) || other.questionId == questionId)&&(identical(other.teamId, teamId) || other.teamId == teamId)&&(identical(other.selectedOptionIndex, selectedOptionIndex) || other.selectedOptionIndex == selectedOptionIndex)&&(identical(other.answeredBy, answeredBy) || other.answeredBy == answeredBy)&&(identical(other.submittedAt, submittedAt) || other.submittedAt == submittedAt)&&(identical(other.isCorrect, isCorrect) || other.isCorrect == isCorrect));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _QuizAnswer&&(identical(other.id, id) || other.id == id)&&(identical(other.questionId, questionId) || other.questionId == questionId)&&(identical(other.teamId, teamId) || other.teamId == teamId)&&(identical(other.selectedOptionIndex, selectedOptionIndex) || other.selectedOptionIndex == selectedOptionIndex)&&(identical(other.answeredBy, answeredBy) || other.answeredBy == answeredBy)&&(identical(other.submittedAt, submittedAt) || other.submittedAt == submittedAt)&&(identical(other.isCorrect, isCorrect) || other.isCorrect == isCorrect)&&(identical(other.isFromCache, isFromCache) || other.isFromCache == isFromCache)&&(identical(other.hasPendingWrites, hasPendingWrites) || other.hasPendingWrites == hasPendingWrites));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,questionId,teamId,selectedOptionIndex,answeredBy,submittedAt,isCorrect);
+int get hashCode => Object.hash(runtimeType,id,questionId,teamId,selectedOptionIndex,answeredBy,submittedAt,isCorrect,isFromCache,hasPendingWrites);
 
 @override
 String toString() {
-  return 'QuizAnswer(id: $id, questionId: $questionId, teamId: $teamId, selectedOptionIndex: $selectedOptionIndex, answeredBy: $answeredBy, submittedAt: $submittedAt, isCorrect: $isCorrect)';
+  return 'QuizAnswer(id: $id, questionId: $questionId, teamId: $teamId, selectedOptionIndex: $selectedOptionIndex, answeredBy: $answeredBy, submittedAt: $submittedAt, isCorrect: $isCorrect, isFromCache: $isFromCache, hasPendingWrites: $hasPendingWrites)';
 }
 
 
@@ -259,7 +263,7 @@ abstract mixin class _$QuizAnswerCopyWith<$Res> implements $QuizAnswerCopyWith<$
   factory _$QuizAnswerCopyWith(_QuizAnswer value, $Res Function(_QuizAnswer) _then) = __$QuizAnswerCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String questionId, String teamId, int? selectedOptionIndex, String? answeredBy,@FirestoreNullableDateTimeConverter() DateTime? submittedAt, bool? isCorrect
+ String id, String questionId, String teamId, int? selectedOptionIndex, String? answeredBy,@FirestoreNullableDateTimeConverter() DateTime? submittedAt, bool? isCorrect,@JsonKey(includeFromJson: false, includeToJson: false) bool isFromCache,@JsonKey(includeFromJson: false, includeToJson: false) bool hasPendingWrites
 });
 
 
@@ -276,7 +280,7 @@ class __$QuizAnswerCopyWithImpl<$Res>
 
 /// Create a copy of QuizAnswer
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? questionId = null,Object? teamId = null,Object? selectedOptionIndex = freezed,Object? answeredBy = freezed,Object? submittedAt = freezed,Object? isCorrect = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? questionId = null,Object? teamId = null,Object? selectedOptionIndex = freezed,Object? answeredBy = freezed,Object? submittedAt = freezed,Object? isCorrect = freezed,Object? isFromCache = null,Object? hasPendingWrites = null,}) {
   return _then(_QuizAnswer(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,questionId: null == questionId ? _self.questionId : questionId // ignore: cast_nullable_to_non_nullable
@@ -285,7 +289,9 @@ as String,selectedOptionIndex: freezed == selectedOptionIndex ? _self.selectedOp
 as int?,answeredBy: freezed == answeredBy ? _self.answeredBy : answeredBy // ignore: cast_nullable_to_non_nullable
 as String?,submittedAt: freezed == submittedAt ? _self.submittedAt : submittedAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,isCorrect: freezed == isCorrect ? _self.isCorrect : isCorrect // ignore: cast_nullable_to_non_nullable
-as bool?,
+as bool?,isFromCache: null == isFromCache ? _self.isFromCache : isFromCache // ignore: cast_nullable_to_non_nullable
+as bool,hasPendingWrites: null == hasPendingWrites ? _self.hasPendingWrites : hasPendingWrites // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 

@@ -23,6 +23,8 @@ export {
   registerSupportLt,
 } from "./support_lt";
 
+export { getQuizServerTime, quizEventOperation, registerQuizParticipant, submitQuizAnswer } from "./quiz";
+
 // デプロイ先（= 同期元）と同期先のリージョン・プロジェクト設定。
 // SYNC_TARGET_PROJECT_ID は functions/.env（Git 管理外）で指定する。
 // 例: SYNC_TARGET_PROJECT_ID=flutterkaigi-2026-283db
