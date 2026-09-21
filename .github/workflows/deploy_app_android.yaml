@@ -1,12 +1,24 @@
 name: Deploy App Android
 
 on:
+  push:
+    branches: [main]
   release:
-    types: [published]
+    types: [released]
   workflow_dispatch:
+    inputs:
+      environment:
+        description: 配布する環境（Firebase プロジェクトとアプリID）
+        type: choice
+        options: [prod, stg]
+        default: prod
+      upload_to_play:
+        description: Google Play の内部テストへ送信する（初回の手動AABアップロード時は無効）
+        type: boolean
+        default: false
 
 concurrency:
-  group: deploy-app-android-production
+  group: deploy-app-android-${{ inputs.environment || 'prod' }}
   cancel-in-progress: false
 
 permissions: {}
@@ -23,14 +35,16 @@ jobs:
       contents: read
       id-token: write
     env:
-      FIREBASE_PROJECT_ID: ${{ vars.PROD_FIREBASE_PROJECT_ID }}
-      ANDROID_PACKAGE_NAME: ${{ vars.ANDROID_PACKAGE_NAME }}
+      DEPLOY_ENVIRONMENT: ${{ inputs.environment || 'prod' }}
+      UPLOAD_TO_PLAY: ${{ github.event_name != 'workflow_dispatch' || inputs.upload_to_play }}
+      FIREBASE_PROJECT_ID: ${{ vars[format('{0}_FIREBASE_PROJECT_ID', inputs.environment == 'stg' && 'STG' || 'PROD')] }}
+      ANDROID_PACKAGE_NAME: ${{ inputs.environment == 'stg' && 'jp.flutterkaigi.conf2026.stg' || vars.ANDROID_PACKAGE_NAME }}
       GOOGLE_PLAY_TRACK: ${{ vars.GOOGLE_PLAY_TRACK }}
       ANDROID_SIGNING_KEYSTORE_BASE64: ${{ secrets.ANDROID_SIGNING_KEYSTORE_BASE64 }}
       ANDROID_KEY_PROPERTIES_BASE64: ${{ secrets.ANDROID_KEY_PROPERTIES_BASE64 }}
       GOOGLE_PLAY_SERVICE_ACCOUNT_BASE64: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_BASE64 }}
-      GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER_PROD }}
-      GCP_SERVICE_ACCOUNT: ${{ vars.GCP_SERVICE_ACCOUNT_PROD }}
+      GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ vars[format('GCP_WORKLOAD_IDENTITY_PROVIDER_{0}', inputs.environment == 'stg' && 'STG' || 'PROD')] }}
+      GCP_SERVICE_ACCOUNT: ${{ vars[format('GCP_SERVICE_ACCOUNT_{0}', inputs.environment == 'stg' && 'STG' || 'PROD')] }}
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
@@ -53,25 +67,35 @@ jobs:
 
       - name: Validate delivery configuration
         run: |
-          for name in FIREBASE_PROJECT_ID ANDROID_PACKAGE_NAME GOOGLE_PLAY_TRACK ANDROID_SIGNING_KEYSTORE_BASE64 \
-            ANDROID_KEY_PROPERTIES_BASE64 GOOGLE_PLAY_SERVICE_ACCOUNT_BASE64 \
+          for name in FIREBASE_PROJECT_ID ANDROID_PACKAGE_NAME ANDROID_SIGNING_KEYSTORE_BASE64 \
+            ANDROID_KEY_PROPERTIES_BASE64 \
             GCP_WORKLOAD_IDENTITY_PROVIDER GCP_SERVICE_ACCOUNT; do
             if [ -z "${!name}" ]; then
               echo "::error::$name is not configured as a Repository Variable or Secret."
               exit 1
             fi
           done
-          if [ "$ANDROID_PACKAGE_NAME" != "jp.flutterkaigi.conf2026" ]; then
-            echo "::error::ANDROID_PACKAGE_NAME must match jp.flutterkaigi.conf2026."
+          environment_file="apps/app/environments/.env.$DEPLOY_ENVIRONMENT"
+          expected_project="$(sed -n 's/^FIREBASE_PROJECT_ID=//p' "$environment_file")"
+          suffix="$(sed -n 's/^APP_ID_SUFFIX=//p' "$environment_file")"
+          if [ "$FIREBASE_PROJECT_ID" != "$expected_project" ] || [ "$ANDROID_PACKAGE_NAME" != "jp.flutterkaigi.conf2026$suffix" ]; then
+            echo "::error::Firebase プロジェクトとパッケージ名を $environment_file に揃えてください。"
             exit 1
+          fi
+          if [ "$UPLOAD_TO_PLAY" = true ]; then
+            test -n "$GOOGLE_PLAY_SERVICE_ACCOUNT_BASE64"
+            if [ "$GOOGLE_PLAY_TRACK" != internal ]; then
+              echo "::error::GOOGLE_PLAY_TRACK は internal を指定してください。"
+              exit 1
+            fi
           fi
 
       - name: Authenticate to Firebase with Workload Identity Federation
         uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3
         with:
-          project_id: ${{ vars.PROD_FIREBASE_PROJECT_ID }}
-          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER_PROD }}
-          service_account: ${{ vars.GCP_SERVICE_ACCOUNT_PROD }}
+          project_id: ${{ env.FIREBASE_PROJECT_ID }}
+          workload_identity_provider: ${{ env.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ env.GCP_SERVICE_ACCOUNT }}
 
       - name: Install pinned Firebase configuration tools
         run: |
@@ -79,7 +103,7 @@ jobs:
           dart pub global activate flutterfire_cli 1.4.0
           echo "$HOME/.pub-cache/bin" >> "$GITHUB_PATH"
 
-      - name: Generate production Firebase options
+      - name: 選択した環境の Firebase 設定を生成
         working-directory: apps/app
         run: >-
           flutterfire configure
@@ -90,7 +114,7 @@ jobs:
           --android-out=android/app/google-services.json
           --out=lib/firebase_options.dart
 
-      - name: Validate generated production Firebase options
+      - name: 生成した Firebase 設定を検証
         working-directory: apps/app
         run: |
           jq -e --arg project "$FIREBASE_PROJECT_ID" '.project_info.project_id == $project' \
@@ -101,6 +125,7 @@ jobs:
           grep -Fq "projectId: '$FIREBASE_PROJECT_ID'" lib/firebase_options.dart
 
       - name: Install Google Play CLI
+        if: ${{ env.UPLOAD_TO_PLAY == 'true' }}
         run: |
           python3 -m venv "$RUNNER_TEMP/codemagic-cli"
           "$RUNNER_TEMP/codemagic-cli/bin/pip" install codemagic-cli-tools==0.61.1
@@ -108,26 +133,32 @@ jobs:
 
       - name: Restore signing and Google Play credentials
         run: |
+          umask 077
           printf '%s' "$ANDROID_SIGNING_KEYSTORE_BASE64" | base64 -d \
             > apps/app/android/app/release.jks
           printf '%s' "$ANDROID_KEY_PROPERTIES_BASE64" | base64 -d \
             > apps/app/android/key.properties
-          printf '%s' "$GOOGLE_PLAY_SERVICE_ACCOUNT_BASE64" | base64 -d \
-            > "$RUNNER_TEMP/google-play-service-account.json"
+          if [ "$UPLOAD_TO_PLAY" = true ]; then
+            printf '%s' "$GOOGLE_PLAY_SERVICE_ACCOUNT_BASE64" | base64 -d \
+              > "$RUNNER_TEMP/google-play-service-account.json"
+          fi
 
       - name: Google Play の最新ビルド番号に1を加算
         run: |
-          latest_build_number="$(google-play get-latest-build-number \
-            --credentials="@file:$RUNNER_TEMP/google-play-service-account.json" \
-            --package-name="$ANDROID_PACKAGE_NAME")"
-          if ! [[ "$latest_build_number" =~ ^[0-9]+$ ]]; then
-            echo "::error::Google Play の最新ビルド番号を整数として取得できませんでした。"
-            exit 1
+          latest_build_number=0
+          if [ "$UPLOAD_TO_PLAY" = true ]; then
+            latest_build_number="$(google-play get-latest-build-number \
+              --credentials="@file:$RUNNER_TEMP/google-play-service-account.json" \
+              --package-name="$ANDROID_PACKAGE_NAME")"
+            if ! [[ "$latest_build_number" =~ ^[0-9]+$ ]]; then
+              echo "::error::Google Play の最新番号を取得できません。初回は AAB の作成のみを選択してください。"
+              exit 1
+            fi
           fi
           build_number=$((10#$latest_build_number + 1))
           echo "BUILD_NUMBER=$build_number" >> "$GITHUB_ENV"
-          echo "### Android: ビルド $build_number" >> "$GITHUB_STEP_SUMMARY"
-          echo "登録済みの最新番号 $latest_build_number + 1; パッケージ: $ANDROID_PACKAGE_NAME; コミット: $GITHUB_SHA" >> "$GITHUB_STEP_SUMMARY"
+          echo "### Android $DEPLOY_ENVIRONMENT: ビルド $build_number" >> "$GITHUB_STEP_SUMMARY"
+          echo "パッケージ: $ANDROID_PACKAGE_NAME; コミット: $GITHUB_SHA; Play へ送信: $UPLOAD_TO_PLAY" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Build signed Android App Bundle
         working-directory: apps/app
@@ -136,18 +167,19 @@ jobs:
           --release
           --no-pub
           --build-number="$BUILD_NUMBER"
-          --dart-define-from-file=environments/.env.prod
+          --dart-define-from-file=environments/.env.$DEPLOY_ENVIRONMENT
           --dart-define=FIREBASE_PROJECT_ID=$FIREBASE_PROJECT_ID
           --dart-define=COMMIT_INFORMATION=${{ github.ref_name }}-${{ github.sha }}
 
       - name: Upload AAB artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: FlutterKaigi-2026-android-${{ github.run_number }}
+          name: FlutterKaigi-2026-android-${{ env.DEPLOY_ENVIRONMENT }}-${{ env.BUILD_NUMBER }}
           path: apps/app/build/app/outputs/bundle/release/app-release.aab
           if-no-files-found: error
 
       - name: Create release notes
+        if: ${{ env.UPLOAD_TO_PLAY == 'true' }}
         run: >-
           jq -n
           --arg text "${GITHUB_REF_NAME} (${GITHUB_SHA:0:7})"
@@ -155,9 +187,14 @@ jobs:
           > "$RUNNER_TEMP/release-notes.json"
 
       - name: Upload AAB to Google Play Internal Testing
+        if: ${{ env.UPLOAD_TO_PLAY == 'true' }}
         run: |
           google-play bundles publish \
             --credentials="@file:$RUNNER_TEMP/google-play-service-account.json" \
             --bundle apps/app/build/app/outputs/bundle/release/app-release.aab \
             --track "$GOOGLE_PLAY_TRACK" \
             --release-notes="@file:$RUNNER_TEMP/release-notes.json"
+
+      - name: 一時的な署名情報を削除
+        if: ${{ always() }}
+        run: rm -f apps/app/android/app/release.jks apps/app/android/key.properties "$RUNNER_TEMP/google-play-service-account.json"

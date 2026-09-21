@@ -2,14 +2,9 @@ name: Deploy App Web
 
 on:
   push:
-    branches:
-      - main
-    paths:
-      - apps/app/**
-      - packages/data/**
-      - .fvmrc
-      - pubspec.yaml
-      - .github/workflows/deploy_app_web.yaml
+    branches: [main]
+  release:
+    types: [released]
   workflow_dispatch:
 
 concurrency:
@@ -24,9 +19,6 @@ defaults:
 
 jobs:
   deploy:
-    # Temporarily keep only the conference app's production web deployment disabled.
-    # apps/website deployments and apps/app PR previews are not affected.
-    if: ${{ vars.ENABLE_APP_WEB_PRODUCTION_DEPLOY == 'true' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     permissions:
