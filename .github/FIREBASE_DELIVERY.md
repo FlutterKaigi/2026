@@ -36,6 +36,10 @@ main 制限は Google Cloud 側で強制し、GitHub Environment の作成権限
 - Functions: `roles/cloudfunctions.developer` と、使用する runtime / build サービスアカウントへの `roles/iam.serviceAccountUser`
 - Secret Manager: 使用する Secret に限定した `roles/secretmanager.viewer`。配布アカウントには秘密値の取得権限を付与しない。
 
+新規 HTTP 関数の呼び出し権限を設定するため、`firebaseFunctionsDeploymentIam` カスタムロールには
+`cloudfunctions.functions.setIamPolicy`、`run.services.getIamPolicy`、`run.services.setIamPolicy` の3権限だけを含める。
+これを対象プロジェクトの配布アカウントへ付与する。プロジェクト全体の IAM 変更権限は付与しない。
+
 Firebase CLI の preflight や Storage の既定バケット参照で不足する権限は、失敗ログの対象操作を確認して追加する。
 Owner / Editor をまとめて付与しない。API の初回有効化、課金設定、Storage バケット作成、
 Functions のビルド実行サービスアカウントの設定はプロジェクト管理者が行う。

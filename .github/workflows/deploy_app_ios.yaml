@@ -171,9 +171,9 @@ jobs:
           --no-codesign
           --no-pub
           --build-number="$BUILD_NUMBER"
-          --dart-define-from-file=environments/.env.$DEPLOY_ENVIRONMENT
-          --dart-define=FIREBASE_PROJECT_ID=$FIREBASE_PROJECT_ID
-          --dart-define=COMMIT_INFORMATION=${{ github.ref_name }}-${{ github.sha }}
+          --dart-define-from-file="environments/.env.$DEPLOY_ENVIRONMENT"
+          --dart-define=FIREBASE_PROJECT_ID="$FIREBASE_PROJECT_ID"
+          --dart-define=COMMIT_INFORMATION="$GITHUB_REF_NAME-$GITHUB_SHA"
 
       - name: Archive iOS app
         working-directory: apps/app
@@ -253,6 +253,7 @@ jobs:
               echo "App Store Connect へのビルド $BUILD_NUMBER の登録反映を確認しました。" >> "$GITHUB_STEP_SUMMARY"
               exit 0
             fi
+            echo "App Store Connect の登録反映を待機しています ($attempt/30)。"
             sleep 20
           done
           echo "::error::アップロード後の登録反映を確認できません。再実行前に App Store Connect の処理状態を確認してください。"

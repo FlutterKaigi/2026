@@ -120,6 +120,8 @@ jobs:
 
       - name: 適用したリビジョンを記録
         run: |
-          echo "### Firebase $DEPLOY_ENVIRONMENT" >> "$GITHUB_STEP_SUMMARY"
-          echo "プロジェクト: $FIREBASE_PROJECT_ID; コミット: $GITHUB_SHA" >> "$GITHUB_STEP_SUMMARY"
-          echo "Functions の適用: $DEPLOY_FUNCTIONS; Remote Config 初期値の適用: ${{ inputs.apply_remote_config_defaults }}" >> "$GITHUB_STEP_SUMMARY"
+          {
+            echo "### Firebase $DEPLOY_ENVIRONMENT"
+            echo "プロジェクト: $FIREBASE_PROJECT_ID; コミット: $GITHUB_SHA"
+            echo "Functions の適用: $DEPLOY_FUNCTIONS; Remote Config 初期値の適用: ${{ inputs.apply_remote_config_defaults }}"
+          } >> "$GITHUB_STEP_SUMMARY"

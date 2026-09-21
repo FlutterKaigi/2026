@@ -97,10 +97,10 @@ jobs:
         run: >-
           flutter build web
           --release
-          --dart-define-from-file=environments/.env.$DEPLOY_ENVIRONMENT
-          --dart-define=FIREBASE_PROJECT_ID=$FIREBASE_PROJECT_ID
-          --dart-define=APP_CHECK_SITE_KEY=$APP_CHECK_SITE_KEY
-          --dart-define=COMMIT_INFORMATION=${{ github.ref_name }}-${{ github.sha }}
+          --dart-define-from-file="environments/.env.$DEPLOY_ENVIRONMENT"
+          --dart-define=FIREBASE_PROJECT_ID="$FIREBASE_PROJECT_ID"
+          --dart-define=APP_CHECK_SITE_KEY="$APP_CHECK_SITE_KEY"
+          --dart-define=COMMIT_INFORMATION="$GITHUB_REF_NAME-$GITHUB_SHA"
 
       - name: Cloudflare Workers へ配布
         id: deploy
@@ -115,6 +115,8 @@ jobs:
         env:
           DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
         run: |
-          echo "### Web $DEPLOY_ENVIRONMENT" >> "$GITHUB_STEP_SUMMARY"
-          echo "Firebase: $FIREBASE_PROJECT_ID; コミット: $GITHUB_SHA" >> "$GITHUB_STEP_SUMMARY"
-          echo "配布URL: $DEPLOYMENT_URL" >> "$GITHUB_STEP_SUMMARY"
+          {
+            echo "### Web $DEPLOY_ENVIRONMENT"
+            echo "Firebase: $FIREBASE_PROJECT_ID; コミット: $GITHUB_SHA"
+            echo "配布URL: $DEPLOYMENT_URL"
+          } >> "$GITHUB_STEP_SUMMARY"

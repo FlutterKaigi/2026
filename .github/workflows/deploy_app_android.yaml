@@ -155,9 +155,9 @@ jobs:
           --release
           --no-pub
           --build-number="$BUILD_NUMBER"
-          --dart-define-from-file=environments/.env.$DEPLOY_ENVIRONMENT
-          --dart-define=FIREBASE_PROJECT_ID=$FIREBASE_PROJECT_ID
-          --dart-define=COMMIT_INFORMATION=${{ github.ref_name }}-${{ github.sha }}
+          --dart-define-from-file="environments/.env.$DEPLOY_ENVIRONMENT"
+          --dart-define=FIREBASE_PROJECT_ID="$FIREBASE_PROJECT_ID"
+          --dart-define=COMMIT_INFORMATION="$GITHUB_REF_NAME-$GITHUB_SHA"
 
       - name: Upload AAB artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
