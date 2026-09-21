@@ -6,6 +6,7 @@ on:
     paths:
       - apps/website/**
       - .github/workflows/preview_website.yaml
+      - .github/actions/setup-flutter/**
 
 concurrency:
   group: preview-website-${{ github.event.number }}
@@ -15,6 +16,7 @@ permissions: {}
 
 jobs:
   preview:
+    if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions:
@@ -24,14 +26,7 @@ jobs:
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
-      - id: flutter-version
-        run: echo "version=$(jq -r .flutter .fvmrc)" >> "$GITHUB_OUTPUT"
-
-      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
-        with:
-          flutter-version: ${{ steps.flutter-version.outputs.version }}
-          channel: stable
-          cache: true
+      - uses: ./.github/actions/setup-flutter
 
       - run: dart pub get
 

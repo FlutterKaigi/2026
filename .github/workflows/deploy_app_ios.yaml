@@ -1,21 +1,15 @@
 name: Deploy App iOS
 
 on:
-  push:
-    branches: [main]
-  release:
-    types: [released]
-  workflow_dispatch:
+  workflow_call:
     inputs:
       environment:
-        description: 配布する環境（Firebase プロジェクトとアプリID）
-        type: choice
-        options: [prod, stg]
-        default: prod
-
-concurrency:
-  group: deploy-app-ios-${{ inputs.environment || 'prod' }}
-  cancel-in-progress: false
+        description: 配布先（stg または prod）
+        type: string
+        required: true
+    secrets:
+      APP_STORE_CONNECT_API_KEY_BASE64:
+        required: true
 
 permissions: {}
 
@@ -25,13 +19,17 @@ defaults:
 
 jobs:
   deploy:
+    name: ios (${{ inputs.environment }})
+    concurrency:
+      group: deploy-app-ios-${{ inputs.environment }}
+      cancel-in-progress: false
     runs-on: macos-26
     timeout-minutes: 60
     permissions:
       contents: read
       id-token: write
     env:
-      DEPLOY_ENVIRONMENT: ${{ inputs.environment || 'prod' }}
+      DEPLOY_ENVIRONMENT: ${{ inputs.environment }}
       XCODE_VERSION: "26.4.1"
       FIREBASE_PROJECT_ID: ${{ vars[format('{0}_FIREBASE_PROJECT_ID', inputs.environment == 'stg' && 'STG' || 'PROD')] }}
       APPLE_TEAM_ID: ${{ vars.APPLE_TEAM_ID }}
@@ -54,14 +52,7 @@ jobs:
           xcodebuild -version
           xcrun --sdk iphoneos --show-sdk-version
 
-      - id: flutter-version
-        run: echo "version=$(jq -r .flutter .fvmrc)" >> "$GITHUB_OUTPUT"
-
-      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
-        with:
-          flutter-version: ${{ steps.flutter-version.outputs.version }}
-          channel: stable
-          cache: true
+      - uses: ./.github/actions/setup-flutter
 
       - name: Enable Swift Package Manager
         run: flutter config --enable-swift-package-manager
@@ -87,18 +78,11 @@ jobs:
             exit 1
           fi
 
-      - name: Authenticate to Firebase with Workload Identity Federation
-        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3
+      - uses: ./.github/actions/setup-firebase
         with:
-          project_id: ${{ env.FIREBASE_PROJECT_ID }}
-          workload_identity_provider: ${{ env.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-          service_account: ${{ env.GCP_SERVICE_ACCOUNT }}
-
-      - name: Install pinned Firebase configuration tools
-        run: |
-          npm install --global firebase-tools@13.35.1
-          dart pub global activate flutterfire_cli 1.4.0
-          echo "$HOME/.pub-cache/bin" >> "$GITHUB_PATH"
+          project-id: ${{ env.FIREBASE_PROJECT_ID }}
+          workload-identity-provider: ${{ env.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service-account: ${{ env.GCP_SERVICE_ACCOUNT }}
 
       - name: 選択した環境の Firebase 設定を生成
         working-directory: apps/app
@@ -231,6 +215,7 @@ jobs:
           test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$app_plist")" = "$IOS_BUNDLE_ID"
           test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$app_plist")" = "$APP_VERSION"
           test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$app_plist")" = "$BUILD_NUMBER"
+          test "$(/usr/libexec/PlistBuddy -c 'Print :ITSAppUsesNonExemptEncryption' "$app_plist")" = false
 
       - name: Upload IPA artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
