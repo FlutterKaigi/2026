@@ -283,6 +283,9 @@ profile:
   removeSnsLink: Remove this link
   snsPlatformLabel: Service
   snsUrlLabel: URL
+  snsIdOrUrlLabel: ID or URL
+  snsIdOrUrlRequired: Enter an ID or URL
+  snsIdOrUrlInvalid: Enter a valid ID or a URL starting with https://
   snsUrlRequired: Enter a URL
   snsUrlInvalid: Enter a URL starting with https://
   snsLinksMax: You can add up to $n links

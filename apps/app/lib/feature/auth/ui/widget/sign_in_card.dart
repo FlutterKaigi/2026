@@ -1,6 +1,5 @@
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/log/talker.dart';
-import 'package:app/core/provider/environment.dart';
 import 'package:app/core/router/router.dart';
 import 'package:app/core/ui/widget/brand_header_card.dart';
 import 'package:app/feature/auth/data/provider/auth_repository.dart';
@@ -17,19 +16,16 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 /// Whether the current build may expose native Sign in with Apple.
 bool isAppleSignInAvailable({
-  required Flavor flavor,
   required bool isWeb,
   required TargetPlatform platform,
-}) => flavor == Flavor.production && !isWeb && platform == TargetPlatform.iOS;
+}) => !isWeb && platform == TargetPlatform.iOS;
 
-final appleSignInAvailabilityProvider = Provider<bool>((ref) {
-  final environment = ref.watch(environmentProvider);
-  return isAppleSignInAvailable(
-    flavor: environment.flavor,
+final appleSignInAvailabilityProvider = Provider<bool>(
+  (ref) => isAppleSignInAvailable(
     isWeb: kIsWeb,
     platform: defaultTargetPlatform,
-  );
-});
+  ),
+);
 
 /// Maximum width of [SignInCard]: the shared sign-in button width plus the card
 /// padding on both sides.
