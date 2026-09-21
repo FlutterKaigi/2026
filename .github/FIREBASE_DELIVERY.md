@@ -73,7 +73,6 @@ FIREBASE_ACCESS_TOKEN="$(gcloud auth print-access-token)" \
 
 公開する場合は `--apply --backup=/private/tmp/remote-config-stg-before.json` を追加する。
 既存のバックアップファイルは上書きしない。APIキーやアクセストークンをチャット・ログへ貼り付けない。
-審査提出時は両環境の当日機能を ON にする。提出後の OFF への切り替えは Console から手動で行う。
 通常のデプロイでは `apply_remote_config_defaults=false` のままにし、手動で切り替えた値を戻さない。
 公開後は Firebase Console のバージョン履歴とクライアントの取得結果を確認する。
 
