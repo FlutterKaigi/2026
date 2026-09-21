@@ -16,26 +16,26 @@ class TranslationsEn extends Translations with BaseTranslations<AppLocale, Trans
 	/// Constructing via the enum [AppLocale.build] is preferred.
 	TranslationsEn({Map<String, Node>? overrides, PluralResolver? cardinalResolver, PluralResolver? ordinalResolver, TranslationMetadata<AppLocale, Translations>? meta})
 		: assert(overrides == null, 'Set "translation_overrides: true" in order to enable this feature.'),
-		  _meta = meta ?? TranslationMetadata(
+		  $meta = meta ?? TranslationMetadata(
 		    locale: AppLocale.en,
 		    overrides: overrides ?? {},
 		    cardinalResolver: cardinalResolver,
 		    ordinalResolver: ordinalResolver,
 		  ),
 		  super(cardinalResolver: cardinalResolver, ordinalResolver: ordinalResolver) {
-		_meta.setFlatMapFunction(_flatMapFunction);
+		super.$meta.setFlatMapFunction($meta.getTranslation); // copy base translations to super.$meta
+		$meta.setFlatMapFunction(_flatMapFunction);
 	}
 
 	/// Metadata for the translations of <en>.
-	final TranslationMetadata<AppLocale, Translations> _meta;
-	@override TranslationMetadata<AppLocale, Translations> get $meta => _meta;
+	@override final TranslationMetadata<AppLocale, Translations> $meta;
 
 	/// Access flat map
-	@override dynamic operator[](String key) => _meta.getTranslation(key) ?? super[key];
+	@override dynamic operator[](String key) => $meta.getTranslation(key) ?? super.$meta.getTranslation(key);
 
 	late final TranslationsEn _root = this; // ignore: unused_field
 
-	@override
+	@override 
 	TranslationsEn $copyWith({TranslationMetadata<AppLocale, Translations>? meta}) => TranslationsEn(meta: meta ?? this.$meta);
 
 	// Translations
@@ -67,6 +67,7 @@ class TranslationsEn extends Translations with BaseTranslations<AppLocale, Trans
 	@override late final _Translations$notFound$en notFound = _Translations$notFound$en._(_root);
 	@override late final _Translations$common$en common = _Translations$common$en._(_root);
 	@override late final _Translations$quiz$en quiz = _Translations$quiz$en._(_root);
+	@override late final _Translations$forceUpdate$en forceUpdate = _Translations$forceUpdate$en._(_root);
 }
 
 // Path: app
@@ -676,6 +677,18 @@ class _Translations$quiz$en extends Translations$quiz$ja {
 	@override late final _Translations$quiz$result$en result = _Translations$quiz$result$en._(_root);
 }
 
+// Path: forceUpdate
+class _Translations$forceUpdate$en extends Translations$forceUpdate$ja {
+	_Translations$forceUpdate$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Update Required';
+	@override String get message => 'A new version of the app is available. Please update to the latest version.';
+	@override String get updateButton => 'Update';
+}
+
 // Path: sessionTimetable.view
 class _Translations$sessionTimetable$view$en extends Translations$sessionTimetable$view$ja {
 	_Translations$sessionTimetable$view$en._(TranslationsEn root) : this._root = root, super.internal(root);
@@ -1156,7 +1169,7 @@ extension on TranslationsEn {
 			'sessionSearch.promptBody' => 'Enter a keyword or select a day, session type, or language',
 			'sessionSearch.emptyTitle' => 'No sessions found',
 			'sessionSearch.emptyBody' => 'Try changing the keyword or filters',
-			'sessionSearch.resultCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} session', other: '${n} sessions', ),
+			'sessionSearch.resultCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} session', other: '${n} sessions', ), 
 			'sessionDetails.title' => 'Session Details',
 			'sessionDetails.description' => 'Description',
 			'sessionDetails.schedule' => 'Schedule and Venue',
@@ -1506,7 +1519,7 @@ extension on TranslationsEn {
 			'licenses.title' => 'Licenses',
 			'licenses.searchHint' => 'Search packages',
 			'licenses.clearSearch' => 'Clear search',
-			'licenses.licenseCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} license', other: '${n} licenses', ),
+			'licenses.licenseCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} license', other: '${n} licenses', ), 
 			'licenses.notFound' => 'License not found',
 			'error.title' => 'Could not load data',
 			'error.message' => 'Check your connection and try again.',
@@ -1589,6 +1602,9 @@ extension on TranslationsEn {
 			'quiz.result.yourTeamUnranked' => ({required Object name, required Object score}) => '${name} (${score} pts)',
 			'quiz.result.perfect' => ({required Object sponsor}) => 'Visit the ${sponsor} booth to claim your prize!',
 			'quiz.result.error' => 'Failed to load results',
+			'forceUpdate.title' => 'Update Required',
+			'forceUpdate.message' => 'A new version of the app is available. Please update to the latest version.',
+			'forceUpdate.updateButton' => 'Update',
 			_ => null,
 		};
 	}

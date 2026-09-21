@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/provider/environment.dart';
 import 'package:app/core/provider/shared_preferences.dart';
+import 'package:app/core/remote_config/remote_config_keys.dart';
+import 'package:app/core/remote_config/remote_config_provider.dart';
 import 'package:app/core/router/router.dart' as app_router;
 import 'package:app/feature/auth/data/provider/auth_repository.dart';
 import 'package:app/feature/auth/ui/page/account_page.dart';
@@ -31,6 +33,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'fake_auth_repository.dart';
 import 'fake_profile_exchange_repository.dart';
+import 'fake_remote_config_repository.dart';
 import 'fake_support_lt_repository.dart';
 import 'fake_user_profile_repository.dart';
 
@@ -49,10 +52,18 @@ void main() {
     Flavor flavor = Flavor.production,
     bool showsAppleSignIn = false,
     ValueNotifier<bool>? showsAccountPage,
+    FakeRemoteConfigRepository? remoteConfigRepository,
   }) => TranslationProvider(
     child: ProviderScope(
       overrides: [
         authRepositoryProvider.overrideWithValue(repository),
+        remoteConfigRepositoryProvider.overrideWith((ref) {
+          final config = remoteConfigRepository ?? FakeRemoteConfigRepository();
+          if (remoteConfigRepository == null) {
+            ref.onDispose(config.dispose);
+          }
+          return config;
+        }),
         if (quizRepository != null) quizEventRepositoryProvider.overrideWithValue(quizRepository),
         userProfileRepositoryProvider.overrideWithValue(profileRepository ?? FakeUserProfileRepository()),
         supportLtRepositoryProvider.overrideWith((ref) {
@@ -713,6 +724,73 @@ void main() {
 
     expect(repository.calledMethods, isEmpty);
     expect(find.text('attendee@example.com'), findsOneWidget);
+  });
+
+  testWidgets('shows the mission entry and join-event section when event_features_enabled is true', (
+    tester,
+  ) async {
+    final repository = FakeAuthRepository(initialUser: FakeUser(uid: 'uid-1'));
+    addTearDown(repository.dispose);
+
+    await tester.pumpWidget(
+      buildSubject(
+        repository,
+        preferences: preferences,
+        remoteConfigRepository: FakeRemoteConfigRepository(
+          initialValues: const {RemoteConfigKeys.eventFeaturesEnabled: true},
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('ミッション'), findsOneWidget);
+    expect(find.text('イベントに参加'), findsOneWidget);
+    expect(find.text(t.auth.account.quiz), findsOneWidget);
+  });
+
+  testWidgets('hides the mission entry and join-event section when event_features_enabled is false', (
+    tester,
+  ) async {
+    final repository = FakeAuthRepository(initialUser: FakeUser(uid: 'uid-1'));
+    addTearDown(repository.dispose);
+
+    await tester.pumpWidget(
+      buildSubject(
+        repository,
+        preferences: preferences,
+        remoteConfigRepository: FakeRemoteConfigRepository(
+          initialValues: const {RemoteConfigKeys.eventFeaturesEnabled: false},
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('ミッション'), findsNothing);
+    expect(find.text('イベントに参加'), findsNothing);
+    expect(find.text(t.auth.account.quiz), findsNothing);
+    // 削除・サインアウトなどアカウント自体の操作は引き続き表示される。
+    expect(find.text('サインアウト'), findsOneWidget);
+  });
+
+  testWidgets('hides the join-event section as soon as the flag flips while the tab is open', (tester) async {
+    final repository = FakeAuthRepository(initialUser: FakeUser(uid: 'uid-1'));
+    addTearDown(repository.dispose);
+    final remoteConfig = FakeRemoteConfigRepository(
+      initialValues: const {RemoteConfigKeys.eventFeaturesEnabled: true},
+    );
+    addTearDown(remoteConfig.dispose);
+
+    await tester.pumpWidget(
+      buildSubject(repository, preferences: preferences, remoteConfigRepository: remoteConfig),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('イベントに参加'), findsOneWidget);
+
+    remoteConfig.setValue(RemoteConfigKeys.eventFeaturesEnabled, false);
+    await tester.pumpAndSettle();
+
+    expect(find.text('イベントに参加'), findsNothing);
   });
 }
 

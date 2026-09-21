@@ -20,21 +20,20 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	/// Constructing via the enum [AppLocale.build] is preferred.
 	Translations({Map<String, Node>? overrides, PluralResolver? cardinalResolver, PluralResolver? ordinalResolver, TranslationMetadata<AppLocale, Translations>? meta})
 		: assert(overrides == null, 'Set "translation_overrides: true" in order to enable this feature.'),
-		  _meta = meta ?? TranslationMetadata(
+		  $meta = meta ?? TranslationMetadata(
 		    locale: AppLocale.ja,
 		    overrides: overrides ?? {},
 		    cardinalResolver: cardinalResolver,
 		    ordinalResolver: ordinalResolver,
 		  ) {
-		_meta.setFlatMapFunction(_flatMapFunction);
+		$meta.setFlatMapFunction(_flatMapFunction);
 	}
 
 	/// Metadata for the translations of <ja>.
-	final TranslationMetadata<AppLocale, Translations> _meta;
-	@override TranslationMetadata<AppLocale, Translations> get $meta => _meta;
+	@override final TranslationMetadata<AppLocale, Translations> $meta;
 
 	/// Access flat map
-	dynamic operator[](String key) => _meta.getTranslation(key);
+	dynamic operator[](String key) => $meta.getTranslation(key);
 
 	late final Translations _root = this; // ignore: unused_field
 
@@ -69,6 +68,7 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	late final Translations$notFound$ja notFound = Translations$notFound$ja.internal(_root);
 	late final Translations$common$ja common = Translations$common$ja.internal(_root);
 	late final Translations$quiz$ja quiz = Translations$quiz$ja.internal(_root);
+	late final Translations$forceUpdate$ja forceUpdate = Translations$forceUpdate$ja.internal(_root);
 }
 
 // Path: app
@@ -1332,6 +1332,24 @@ class Translations$quiz$ja {
 	late final Translations$quiz$result$ja result = Translations$quiz$result$ja.internal(_root);
 }
 
+// Path: forceUpdate
+class Translations$forceUpdate$ja {
+	Translations$forceUpdate$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'アップデートが必要です'
+	String get title => 'アップデートが必要です';
+
+	/// ja: '新しいバージョンのアプリが利用可能です。最新バージョンにアップデートしてください。'
+	String get message => '新しいバージョンのアプリが利用可能です。最新バージョンにアップデートしてください。';
+
+	/// ja: 'アップデート'
+	String get updateButton => 'アップデート';
+}
+
 // Path: sessionTimetable.view
 class Translations$sessionTimetable$view$ja {
 	Translations$sessionTimetable$view$ja.internal(this._root);
@@ -2150,7 +2168,7 @@ extension on Translations {
 			'sessionSearch.promptBody' => 'キーワードを入力するか、日程・種類・言語を選択してください',
 			'sessionSearch.emptyTitle' => 'セッションが見つかりません',
 			'sessionSearch.emptyBody' => 'キーワードや絞り込み条件を変更してみてください',
-			'sessionSearch.resultCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(n, one: '${n}件のセッション', other: '${n}件のセッション', ),
+			'sessionSearch.resultCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(n, one: '${n}件のセッション', other: '${n}件のセッション', ), 
 			'sessionDetails.title' => 'セッション詳細',
 			'sessionDetails.description' => '概要',
 			'sessionDetails.schedule' => '日時・会場',
@@ -2500,7 +2518,7 @@ extension on Translations {
 			'licenses.title' => 'ライセンス',
 			'licenses.searchHint' => 'パッケージを検索',
 			'licenses.clearSearch' => '検索をクリア',
-			'licenses.licenseCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(n, one: 'ライセンス: ${n}件', other: 'ライセンス: ${n}件', ),
+			'licenses.licenseCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(n, one: 'ライセンス: ${n}件', other: 'ライセンス: ${n}件', ), 
 			'licenses.notFound' => 'ライセンスが見つかりませんでした',
 			'error.title' => 'データを読み込めませんでした',
 			'error.message' => '通信状況を確認して、もう一度お試しください。',
@@ -2583,6 +2601,9 @@ extension on Translations {
 			'quiz.result.yourTeamUnranked' => ({required Object name, required Object score}) => '${name}（${score} 点）',
 			'quiz.result.perfect' => ({required Object sponsor}) => '${sponsor} のブースへ景品を受け取りに行こう！',
 			'quiz.result.error' => '結果の取得に失敗しました',
+			'forceUpdate.title' => 'アップデートが必要です',
+			'forceUpdate.message' => '新しいバージョンのアプリが利用可能です。最新バージョンにアップデートしてください。',
+			'forceUpdate.updateButton' => 'アップデート',
 			_ => null,
 		};
 	}
