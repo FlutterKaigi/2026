@@ -15,6 +15,24 @@
 | `Deploy App iOS` | GitHub Releaseのpublish、手動、PRへの`deploy-app-ios`ラベル付与 | App Store Connect / TestFlight |
 | `Deploy App Android` | GitHub Releaseのpublish、手動 | Google Play Internal Testing |
 
+## ビルド番号
+
+iOSは App Store Connect の同じ公開バージョンの最新ビルド番号に1を加算します。
+期限切れのビルドも含めて取得し、未アップロードの場合のみ1から開始します。
+API の認証失敗を0扱いにせず停止し、アップロード後は登録反映を確認してから次の実行に進みます。
+本番の `1.0.0 (401)` は旧式 `GITHUB_RUN_NUMBER * 100 + GITHUB_RUN_ATTEMPT` による番号でした。
+次回は公開バージョン `1.0.0` のまま **402**、以後は403、404と増加します。
+次の公開バージョン（例: `1.0.1`）へ上げた際は、そのバージョンのビルドを **1** から開始します。
+アプリ内に表示するビルド番号も、App Store Connect に登録する実際の番号と揃えます。
+Androidは FlutterKaigi 2025 と同じく Google Play の最新番号に1を加算します。
+取得に失敗した場合は番号を推測せず停止します。初回は Play Console への手動アップロードが必要です。
+Android の `versionCode` は公開バージョンを上げてもリセットせず、アプリ全体で増やし続けます。
+Xcode Export時の番号自動変更を無効にし、IPA内のBundle ID・公開バージョン・ビルド番号を
+アップロード前に検証します。番号とコミットはActionsのSummaryに記録されます。
+
+同じ公開バージョン内では小さい番号へ戻さず、既存ストアの番号を継続してください。
+ストアが表示するバージョン（`1.0.0`）とビルド番号（例: `401`）は別の値です。
+
 ## GitHub側の登録場所
 
 環境差分はRepository Variableの接頭辞（`STG`／`PROD`）と`apps/app/environments/.env.stg`／`.env.prod`で管理します。Firebase OptionsはコミットやSecret登録をせず、各ビルドでFlutterFire CLIから生成します。
