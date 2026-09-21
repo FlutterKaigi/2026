@@ -38,13 +38,10 @@ class SnsLinkDraft {
   SnsLinkDraft copyWith({SnsPlatform? platform, String? value}) =>
       SnsLinkDraft(id: id, platform: platform ?? this.platform, value: value ?? this.value);
 
-  /// Converts to a persisted [SnsLink], or `null` when the URL is blank.
+  /// Converts an ID or URL to a persisted [SnsLink].
   SnsLink? toSnsLink() {
-    final trimmed = value.trim();
-    if (trimmed.isEmpty) {
-      return null;
-    }
-    return SnsLink(type: platform.key, value: trimmed);
+    final url = platform.normalizeInput(value);
+    return url == null ? null : SnsLink(type: platform.key, value: url);
   }
 }
 
@@ -112,7 +109,10 @@ class _ProfileForm extends HookConsumerWidget {
     final countryError = useState<String?>(null);
     final snsLinks = useState<List<SnsLinkDraft>>([
       for (final link in profile?.snsLinks ?? const <SnsLink>[])
-        SnsLinkDraft.create(platform: SnsPlatform.fromKey(link.type), value: link.value),
+        SnsLinkDraft.create(
+          platform: SnsPlatform.fromKey(link.type),
+          value: SnsPlatform.fromKey(link.type).inputValue(link.value),
+        ),
     ]);
     final isSaving = useState(false);
     final isDirty = useState(false);
@@ -449,7 +449,7 @@ class _SnsLinksSection extends StatelessWidget {
   }
 }
 
-/// Platform selector plus URL field for one SNS link.
+/// Platform selector plus ID or URL field for one SNS link.
 ///
 /// Owns its [TextEditingController] so the text survives parent rebuilds
 /// caused by sibling rows changing.
@@ -512,17 +512,25 @@ class _SnsLinkRow extends HookWidget {
             autocorrect: false,
             textInputAction: TextInputAction.next,
             decoration: InputDecoration(
-              labelText: t.profile.snsUrlLabel,
-              hintText: 'https://',
+              labelText: draft.platform.supportsUserId ? t.profile.snsIdOrUrlLabel : t.profile.snsUrlLabel,
+              hintText: switch (draft.platform) {
+                SnsPlatform.other => 'https://',
+                SnsPlatform.bluesky => 'example.bsky.social',
+                SnsPlatform.mastodon => '@user@mastodon.social',
+                _ => 'FlutterKaigi',
+              },
               border: const OutlineInputBorder(),
             ),
             onChanged: (value) => onChanged(draft.copyWith(value: value)),
             validator: (value) {
               final text = value?.trim() ?? '';
               if (text.isEmpty) {
-                return t.profile.snsUrlRequired;
+                return draft.platform.supportsUserId ? t.profile.snsIdOrUrlRequired : t.profile.snsUrlRequired;
               }
-              return isValidSnsLinkUrl(text) ? null : t.profile.snsUrlInvalid;
+              if (draft.platform.normalizeInput(text) != null) {
+                return null;
+              }
+              return draft.platform.supportsUserId ? t.profile.snsIdOrUrlInvalid : t.profile.snsUrlInvalid;
             },
           ),
         ),

@@ -740,6 +740,15 @@ class Translations$profile$ja {
 	/// ja: 'URL'
 	String get snsUrlLabel => 'URL';
 
+	/// ja: 'IDまたはURL'
+	String get snsIdOrUrlLabel => 'IDまたはURL';
+
+	/// ja: 'ID または URL を入力してください'
+	String get snsIdOrUrlRequired => 'ID または URL を入力してください';
+
+	/// ja: '有効な ID または https:// から始まる URL を入力してください'
+	String get snsIdOrUrlInvalid => '有効な ID または https:// から始まる URL を入力してください';
+
 	/// ja: 'URL を入力してください'
 	String get snsUrlRequired => 'URL を入力してください';
 
@@ -2363,6 +2372,9 @@ extension on Translations {
 			'profile.removeSnsLink' => 'このリンクを削除',
 			'profile.snsPlatformLabel' => 'サービス',
 			'profile.snsUrlLabel' => 'URL',
+			'profile.snsIdOrUrlLabel' => 'IDまたはURL',
+			'profile.snsIdOrUrlRequired' => 'ID または URL を入力してください',
+			'profile.snsIdOrUrlInvalid' => '有効な ID または https:// から始まる URL を入力してください',
 			'profile.snsUrlRequired' => 'URL を入力してください',
 			'profile.snsUrlInvalid' => 'https:// から始まる URL を入力してください',
 			'profile.snsLinksMax' => ({required Object n}) => 'SNSリンクは ${n} 件まで登録できます',
