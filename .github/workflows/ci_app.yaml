@@ -11,6 +11,8 @@ on:
       - pubspec.yaml
       - .github/workflows/ci_app.yaml
       - .github/workflows/deploy_app_ios.yaml
+      - .github/workflows/deploy_app_android.yaml
+      - .github/workflows/deploy_app_web.yaml
   push:
     branches:
       - main
@@ -23,6 +25,8 @@ on:
       - pubspec.yaml
       - .github/workflows/ci_app.yaml
       - .github/workflows/deploy_app_ios.yaml
+      - .github/workflows/deploy_app_android.yaml
+      - .github/workflows/deploy_app_web.yaml
   workflow_dispatch:
 
 concurrency:

@@ -168,7 +168,7 @@ void main() {
     expect(find.text('プロフィールを編集'), findsOneWidget);
     expect(find.widgetWithText(TextFormField, 'Saved Name'), findsOneWidget);
     expect(find.text('アメリカ合衆国'), findsOneWidget);
-    expect(find.widgetWithText(TextFormField, 'https://x.com/saved'), findsOneWidget);
+    expect(find.widgetWithText(TextFormField, 'saved'), findsOneWidget);
     expect(find.widgetWithText(TextFormField, 'Saved bio'), findsOneWidget);
 
     await tester.enterText(find.widgetWithText(TextFormField, 'Saved Name'), 'Renamed');
@@ -184,7 +184,7 @@ void main() {
     expect(saved.createdAt, DateTime.utc(2026, 7));
   });
 
-  testWidgets('rejects SNS links that are not https URLs', (tester) async {
+  testWidgets('rejects invalid social IDs and URLs', (tester) async {
     final authRepository = FakeAuthRepository(
       initialUser: FakeUser(uid: 'uid-1', displayName: 'Auth Name'),
     );
@@ -195,13 +195,55 @@ void main() {
     await tester.pumpWidget(buildSubject(authRepository, profileRepository, buildRouter()));
     await tester.pumpAndSettle();
 
-    await tester.enterText(find.widgetWithText(TextFormField, 'https://x.com/saved'), 'x.com/saved');
+    await tester.enterText(find.widgetWithText(TextFormField, 'saved'), 'x.com/saved');
     await tester.ensureVisible(find.widgetWithText(FilledButton, '保存'));
     await tester.tap(find.widgetWithText(FilledButton, '保存'));
     await tester.pumpAndSettle();
 
-    expect(find.text('https:// から始まる URL を入力してください'), findsOneWidget);
+    expect(find.text('有効な ID または https:// から始まる URL を入力してください'), findsOneWidget);
     expect(profileRepository.savedProfiles, isEmpty);
+  });
+
+  for (final input in ['FlutterKaigi', '@FlutterKaigi', ' https://x.com/FlutterKaigi ']) {
+    testWidgets('saves the X input $input as an HTTPS URL', (tester) async {
+      final authRepository = FakeAuthRepository(initialUser: FakeUser(uid: 'uid-1'));
+      addTearDown(authRepository.dispose);
+      final profileRepository = FakeUserProfileRepository(initialProfile: existingProfile());
+      addTearDown(profileRepository.dispose);
+
+      await tester.pumpWidget(buildSubject(authRepository, profileRepository, buildRouter()));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.widgetWithText(TextFormField, 'saved'), input);
+      await tester.ensureVisible(find.widgetWithText(FilledButton, '保存'));
+      await tester.tap(find.widgetWithText(FilledButton, '保存'));
+      await tester.pumpAndSettle();
+
+      expect(profileRepository.savedProfiles.single.snsLinks, const [
+        SnsLink(type: 'x', value: 'https://x.com/FlutterKaigi'),
+      ]);
+    });
+  }
+
+  testWidgets('uses the selected service when saving a social ID', (tester) async {
+    final authRepository = FakeAuthRepository(initialUser: FakeUser(uid: 'uid-1'));
+    addTearDown(authRepository.dispose);
+    final profileRepository = FakeUserProfileRepository(initialProfile: existingProfile());
+    addTearDown(profileRepository.dispose);
+
+    await tester.pumpWidget(buildSubject(authRepository, profileRepository, buildRouter()));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('X').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('GitHub').last);
+    await tester.pumpAndSettle();
+    await tester.enterText(find.widgetWithText(TextFormField, 'saved'), 'FlutterKaigi');
+    await tester.ensureVisible(find.widgetWithText(FilledButton, '保存'));
+    await tester.tap(find.widgetWithText(FilledButton, '保存'));
+    await tester.pumpAndSettle();
+
+    expect(profileRepository.savedProfiles.single.snsLinks, const [
+      SnsLink(type: 'github', value: 'https://github.com/FlutterKaigi'),
+    ]);
   });
 
   testWidgets('adds and removes SNS link rows', (tester) async {
@@ -219,7 +261,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byTooltip('このリンクを削除'), findsNWidgets(2));
 
-    await tester.enterText(find.widgetWithText(TextFormField, 'URL').last, 'https://github.com/example');
+    await tester.enterText(find.widgetWithText(TextFormField, 'IDまたはURL').last, 'https://github.com/example');
     await tester.pump();
     await tester.ensureVisible(find.byTooltip('このリンクを削除').first);
     await tester.tap(find.byTooltip('このリンクを削除').first);

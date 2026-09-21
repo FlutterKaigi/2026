@@ -7,8 +7,11 @@ import 'package:data/data.dart';
 enum SnsPlatform {
   x('x', 'X', 'res/assets/icons/link_x.svg'),
   github('github', 'GitHub', 'res/assets/icons/link_github.svg'),
+  linkedin('linkedin', 'LinkedIn', null),
   bluesky('bluesky', 'Bluesky', null),
+  mastodon('mastodon', 'Mastodon', null),
   mixi2('mixi2', 'mixi2', null),
+  devto('devto', 'DEV (dev.to)', null),
   zenn('zenn', 'Zenn', null),
   qiita('qiita', 'Qiita', null),
   note('note', 'note', null),
@@ -27,6 +30,79 @@ enum SnsPlatform {
 
   /// Brand name, or `null` for [other] (localized by the caller).
   String? get label => _label;
+
+  String? get _profileUrlPrefix => switch (this) {
+    x => 'https://x.com/',
+    github => 'https://github.com/',
+    linkedin => 'https://www.linkedin.com/in/',
+    bluesky => 'https://bsky.app/profile/',
+    mastodon => null,
+    mixi2 => 'https://mixi.social/@',
+    devto => 'https://dev.to/',
+    zenn => 'https://zenn.dev/',
+    qiita => 'https://qiita.com/',
+    note => 'https://note.com/',
+    medium => 'https://medium.com/@',
+    other => null,
+  };
+
+  bool get supportsUserId => this != other;
+
+  /// 入力された ID または URL を、保存・リンク表示用の HTTPS URL に揃える。
+  /// 既存の URL はパスやクエリを含めて維持する。
+  String? normalizeInput(String value) {
+    final input = value.trim();
+    if (isValidSnsLinkUrl(input)) {
+      return input;
+    }
+    if (this == mastodon) {
+      // Mastodon はサーバーごとにユーザー名を持つため、ドメインも必須。
+      final match = RegExp(r'^@?([a-zA-Z0-9_]+)@(.+)$').firstMatch(input);
+      if (match == null || !_isDomain(match.group(2)!)) {
+        return null;
+      }
+      return 'https://${match.group(2)}/@${match.group(1)}';
+    }
+    final prefix = _profileUrlPrefix;
+    if (prefix == null) {
+      return null;
+    }
+    final id = input.startsWith('@') ? input.substring(1) : input;
+    if (!_isValidUserId(id)) {
+      return null;
+    }
+    return '$prefix$id';
+  }
+
+  /// 補完したプロフィール URL は、再編集時に ID だけを表示する。
+  /// 投稿リンクや独自ドメインなどは URL のまま表示して情報を失わない。
+  String inputValue(String value) {
+    if (this == mastodon) {
+      final uri = Uri.tryParse(value);
+      if (uri == null || !uri.path.startsWith('/@')) {
+        return value;
+      }
+      final address = '@${uri.path.substring(2)}@${uri.host}';
+      return normalizeInput(address) == value ? address : value;
+    }
+    final prefix = _profileUrlPrefix;
+    if (prefix == null || !value.startsWith(prefix)) {
+      return value;
+    }
+    final id = value.substring(prefix.length);
+    return _isValidUserId(id) && normalizeInput(id) == value ? id : value;
+  }
+
+  bool _isValidUserId(String id) {
+    if (this == bluesky) {
+      // Bluesky のハンドルにはドメインまで入力する。独自ドメインにも対応する。
+      return _isDomain(id);
+    }
+    return id != '.' && id != '..' && RegExp(r'^[a-zA-Z0-9_.-]+$').hasMatch(id);
+  }
+
+  static bool _isDomain(String value) =>
+      RegExp(r'^(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?$').hasMatch(value);
 
   /// Resolves the platform for a stored [SnsLink.type], treating unknown keys
   /// (including legacy `twitter`) as [other] or [x] respectively.

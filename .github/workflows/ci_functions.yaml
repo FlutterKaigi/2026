@@ -6,6 +6,8 @@ on:
       - functions/**
       - packages/data/firebase/**
       - firebase.json
+      - tool/remote_config*.mjs
+      - .github/workflows/deploy_firebase.yaml
       - .github/workflows/ci_functions.yaml
   push:
     branches:
@@ -14,6 +16,8 @@ on:
       - functions/**
       - packages/data/firebase/**
       - firebase.json
+      - tool/remote_config*.mjs
+      - .github/workflows/deploy_firebase.yaml
       - .github/workflows/ci_functions.yaml
   workflow_dispatch:
 
@@ -53,6 +57,9 @@ jobs:
       - name: Unit tests with coverage
         working-directory: functions
         run: npm run test:coverage
+
+      - name: Remote Config 適用ツールのテスト
+        run: node --test tool/remote_config.test.mjs
 
       - uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
         with:
