@@ -555,3 +555,7 @@ quiz:
     yourTeamUnranked: $name ($score pts)
     perfect: Visit the $sponsor booth to claim your prize!
     error: Failed to load results
+forceUpdate:
+  title: Update Required
+  message: A new version of the app is available. Please update to the latest version.
+  updateButton: Update

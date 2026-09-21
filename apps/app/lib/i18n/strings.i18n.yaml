@@ -556,3 +556,7 @@ quiz:
     yourTeamUnranked: $name（$score 点）
     perfect: $sponsor のブースへ景品を受け取りに行こう！
     error: 結果の取得に失敗しました
+forceUpdate:
+  title: アップデートが必要です
+  message: 新しいバージョンのアプリが利用可能です。最新バージョンにアップデートしてください。
+  updateButton: アップデート
