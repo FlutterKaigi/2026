@@ -5,12 +5,15 @@
 > Secret、Token、秘密鍵、パスワード、Service Account JSON、Debug Tokenの実値は記載しません。
 > 外部Contributorのローカル開発には、ここで説明するstg／prodの権限や設定は不要です。
 
-`apps/app`のCI/CDは次のworkflowで構成します。
+`apps/app`のCI/CDは次のworkflowで構成します。公式サイト `apps/website` の本番・プレビューは、それぞれ
+`deploy_website.yaml` / `preview_website.yaml` として独立させます。
+app・website は本番の変更検知、PRプレビューの変更検知、配布先、PRコメントの更新先を分けます。
+各アプリだけの変更は対応するworkflowで処理し、SDKや共有データモデルの変更は両方で検証します。
 
 | Workflow | Trigger | Delivery target |
 | --- | --- | --- |
 | `App CI` | app関連のPR、配布Workflowからの呼び出し、手動 | format/analyze/test、dprint |
-| `Deploy App` | `main` push、正式なGitHub Releaseの公開、手動 | iOS / Android / Web を stg と prod へ配布 |
+| `Deploy App` | app関連の `main` push、正式なGitHub Releaseの公開、手動 | iOS / Android / Web を stg と prod へ配布 |
 | `Preview App Web` | app関連のPR、手動 | stg に接続するPR別のWebプレビュー |
 | `Deploy Firebase` | Firebase関連の `main` push、`main` から手動 | stg / prod の Rules・Indexes・Functions |
 
@@ -30,7 +33,7 @@ Firebase配布の準備と実行手順は[Firebase 配布手順](FIREBASE_DELIVE
 ### 自動配布の起点
 
 [FlutterKaigi 2025](https://github.com/FlutterKaigi/2025/blob/main/.github/workflows/deploy-app.yaml)と同じく、
-`main` 更新または正式リリースの `released` イベントで、iOS / Android / Web を同じコミットから **stg と prod の両方**へ配布します。
+app関連の `main` 更新または正式リリースの `released` イベントで、iOS / Android / Web を同じコミットから **stg と prod の両方**へ配布します。
 iOS は TestFlight、Android は Google Play の内部テストまでを自動化します。
 ストア審査への提出と一般公開はストア管理画面から行います。
 PR は Web Preview で確認し、ネイティブアプリの確認は手動実行で prod / stg を選択します。

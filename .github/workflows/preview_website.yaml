@@ -5,6 +5,13 @@ on:
     types: [opened, synchronize, reopened]
     paths:
       - apps/website/**
+      - packages/data/**
+      - tool/generate_sponsors.dart
+      - tool/generate_staff.dart
+      - tool/generate_news.dart
+      - tool/generate_sessions.dart
+      - .fvmrc
+      - pubspec.yaml
       - .github/workflows/preview_website.yaml
       - .github/actions/setup-flutter/**
 

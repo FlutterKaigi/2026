@@ -6,6 +6,14 @@ on:
       - main
     paths:
       - apps/website/**
+      - packages/data/**
+      - tool/generate_sponsors.dart
+      - tool/generate_staff.dart
+      - tool/generate_news.dart
+      - tool/generate_sessions.dart
+      - tool/generate_well_known.dart
+      - .fvmrc
+      - pubspec.yaml
       - .github/workflows/deploy_website.yaml
       - .github/actions/setup-flutter/**
   workflow_dispatch:

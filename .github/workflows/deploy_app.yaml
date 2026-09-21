@@ -3,6 +3,18 @@ name: Deploy App
 on:
   push:
     branches: [main]
+    paths:
+      - apps/app/**
+      - packages/data/**
+      - .fvmrc
+      - pubspec.yaml
+      - .github/workflows/deploy_app.yaml
+      - .github/workflows/deploy_app_ios.yaml
+      - .github/workflows/deploy_app_android.yaml
+      - .github/workflows/deploy_app_web.yaml
+      - .github/workflows/ci_app.yaml
+      - .github/actions/setup-flutter/**
+      - .github/actions/setup-firebase/**
   release:
     types: [released]
   workflow_dispatch:
@@ -90,4 +102,3 @@ jobs:
       environment: ${{ matrix.environment }}
     secrets:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-

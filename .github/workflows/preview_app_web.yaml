@@ -10,7 +10,8 @@ on:
       - pubspec.yaml
       - .github/workflows/preview_app_web.yaml
       - .github/workflows/deploy_app_web.yaml
-      - .github/actions/**
+      - .github/actions/setup-flutter/**
+      - .github/actions/setup-firebase/**
   workflow_dispatch:
 
 concurrency:
