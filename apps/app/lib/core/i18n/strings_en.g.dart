@@ -401,6 +401,9 @@ class _Translations$profile$en extends Translations$profile$ja {
 	@override String get removeSnsLink => 'Remove this link';
 	@override String get snsPlatformLabel => 'Service';
 	@override String get snsUrlLabel => 'URL';
+	@override String get snsIdOrUrlLabel => 'ID or URL';
+	@override String get snsIdOrUrlRequired => 'Enter an ID or URL';
+	@override String get snsIdOrUrlInvalid => 'Enter a valid ID or a URL starting with https://';
 	@override String get snsUrlRequired => 'Enter a URL';
 	@override String get snsUrlInvalid => 'Enter a URL starting with https://';
 	@override String snsLinksMax({required Object n}) => 'You can add up to ${n} links';
@@ -1364,6 +1367,9 @@ extension on TranslationsEn {
 			'profile.removeSnsLink' => 'Remove this link',
 			'profile.snsPlatformLabel' => 'Service',
 			'profile.snsUrlLabel' => 'URL',
+			'profile.snsIdOrUrlLabel' => 'ID or URL',
+			'profile.snsIdOrUrlRequired' => 'Enter an ID or URL',
+			'profile.snsIdOrUrlInvalid' => 'Enter a valid ID or a URL starting with https://',
 			'profile.snsUrlRequired' => 'Enter a URL',
 			'profile.snsUrlInvalid' => 'Enter a URL starting with https://',
 			'profile.snsLinksMax' => ({required Object n}) => 'You can add up to ${n} links',
