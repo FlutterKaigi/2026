@@ -50,7 +50,7 @@ void main() {
     String? pendingExchangeToken,
     String? pendingExchangeTokenUid,
     Flavor flavor = Flavor.production,
-    bool showsAppleSignIn = false,
+    bool? showsAppleSignIn = false,
     ValueNotifier<bool>? showsAccountPage,
     FakeRemoteConfigRepository? remoteConfigRepository,
   }) => TranslationProvider(
@@ -73,9 +73,7 @@ void main() {
           }
           return repository;
         }),
-        appleSignInAvailabilityProvider.overrideWithValue(
-          showsAppleSignIn,
-        ),
+        if (showsAppleSignIn != null) appleSignInAvailabilityProvider.overrideWithValue(showsAppleSignIn),
         sharedPreferencesProvider.overrideWithValue(preferences),
         if (codeCache != null) exchangeCodeCacheRepositoryProvider.overrideWithValue(codeCache),
         if (exchangeRepository != null) profileExchangeRepositoryProvider.overrideWithValue(exchangeRepository),
@@ -135,25 +133,21 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  test('allows Apple sign-in only on production iOS', () {
+  test('allows Apple sign-in only in the native iOS app', () {
     expect(
       isAppleSignInAvailable(
-        flavor: Flavor.production,
         isWeb: false,
         platform: TargetPlatform.iOS,
       ),
       isTrue,
     );
     for (final condition in [
-      (flavor: Flavor.staging, isWeb: false, platform: TargetPlatform.iOS),
-      (flavor: Flavor.develop, isWeb: false, platform: TargetPlatform.iOS),
-      (flavor: Flavor.production, isWeb: true, platform: TargetPlatform.iOS),
-      (flavor: Flavor.production, isWeb: false, platform: TargetPlatform.android),
-      (flavor: Flavor.production, isWeb: false, platform: TargetPlatform.macOS),
+      (isWeb: true, platform: TargetPlatform.iOS),
+      (isWeb: false, platform: TargetPlatform.android),
+      (isWeb: false, platform: TargetPlatform.macOS),
     ]) {
       expect(
         isAppleSignInAvailable(
-          flavor: condition.flavor,
           isWeb: condition.isWeb,
           platform: condition.platform,
         ),
@@ -184,35 +178,25 @@ void main() {
     expect(find.text('サインインが必要です'), findsNothing);
   });
 
-  testWidgets('shows Apple sign-in on production iOS', (tester) async {
-    final repository = FakeAuthRepository();
-    addTearDown(repository.dispose);
+  for (final flavor in Flavor.values) {
+    testWidgets('shows Apple sign-in on ${flavor.shortName} iOS', (tester) async {
+      final repository = FakeAuthRepository();
+      addTearDown(repository.dispose);
 
-    await tester.pumpWidget(
-      buildSubject(repository, preferences: preferences, showsAppleSignIn: true),
-    );
-    await tester.pumpAndSettle();
+      await tester.pumpWidget(
+        buildSubject(repository, preferences: preferences, flavor: flavor, showsAppleSignIn: null),
+      );
+      await tester.pumpAndSettle();
 
-    expect(find.text('Appleでサインイン'), findsOneWidget);
+      expect(find.text('Appleでサインイン'), findsOneWidget);
 
-    await tester.tap(find.text('Appleでサインイン'));
-    await tester.pumpAndSettle();
+      await tester.tap(find.text('Appleでサインイン'));
+      await tester.pumpAndSettle();
 
-    expect(repository.calledMethods, ['signInWithApple']);
-    expect(find.text('Apple User'), findsOneWidget);
-  });
-
-  testWidgets('hides Apple sign-in on staging iOS', (tester) async {
-    final repository = FakeAuthRepository();
-    addTearDown(repository.dispose);
-
-    await tester.pumpWidget(
-      buildSubject(repository, preferences: preferences, flavor: Flavor.staging),
-    );
-    await tester.pumpAndSettle();
-
-    expect(find.text('Appleでサインイン'), findsNothing);
-  });
+      expect(repository.calledMethods, ['signInWithApple']);
+      expect(find.text('Apple User'), findsOneWidget);
+    }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
+  }
 
   testWidgets('keeps all sign-in method buttons at the same size', (tester) async {
     final repository = FakeAuthRepository();

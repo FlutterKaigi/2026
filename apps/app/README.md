@@ -36,18 +36,18 @@ stg/prodの設定生成と配布はメンテナー向けWorkflowで行います�
 
 ## 認証
 
-Google / メールアドレス+パスワードのサインインに対応し、本番版のiOSだけAppleサインインも表示します。リポジトリ実装は`packages/data`の`AuthRepository`、UIはアカウントタブ(`/account`)です。アカウントタブからはサインアウトと、再認証をともなうアカウント削除(App Store Review Guideline 5.1.1(v)対応)ができます。Appleユーザーの削除ではiOSのFirebase SDKでAppleのトークンを失効させてから削除します(Emulator接続時は失効をスキップ)。
+Google / メールアドレス+パスワードのサインインに対応し、iOSアプリではAppleサインインも表示します。Appleサインインの表示条件はiOSアプリであることのみで、dev / stg / prodによる違いはありません。リポジトリ実装は`packages/data`の`AuthRepository`、UIはアカウントタブ(`/account`)です。アカウントタブからはサインアウトと、再認証をともなうアカウント削除(App Store Review Guideline 5.1.1(v)対応)ができます。Appleユーザーの削除ではiOSのFirebase SDKでAppleのトークンを失効させてから削除します(Emulator接続時は失効をスキップ)。
 
 devフレーバーはAuth Emulator(port 9099)へ自動接続します。
 
 Emulator接続時は次のように動作します。
 
 - Google: Webでは、有効なOAuth helper設定を使用するメンテナー確認で、Emulatorの擬似IdP画面から任意のダミーアカウントでサインインできます(実プロバイダの認証情報は不要)。
-- Apple: dev / stgでは表示しません。本番版のiOSではネイティブのSign in with Appleを使用します。
+- Apple: iOSアプリでは環境に関係なく表示します。ネイティブのSign in with Appleを使用します。
 - メール+パスワード: アカウント作成・サインイン・パスワード再設定を利用できます。再設定メールのリンクはEmulatorを起動したターミナルのログに出力されます。
 - 登録されたユーザーはEmulator UI(`http://localhost:4000/auth`)で確認できます。
 
-iOSのGoogleサインインはブラウザ経由(`signInWithProvider`)で行われ、`Info.plist`のコールバックスキームでアプリへ戻ります。本番版iOSのAppleサインインはSign in with Apple Capabilityを使用します。配布に必要なコールバックスキーム、Entitlements、Provisioning Profileはメンテナー向けWorkflowとApple Developer Portalで管理します。dev / stgのApp IDにSign in with Appleを有効化する必要はありません。Web OAuthを提供しないため、AppleのServices IDも使用しません。
+iOSのGoogleサインインはブラウザ経由(`signInWithProvider`)で行われ、`Info.plist`のコールバックスキームでアプリへ戻ります。iOSのAppleサインインは全環境で共通のEntitlementsを使い、Sign in with Apple Capabilityを要求します。署名に使う各App IDでもCapabilityを有効化し、対応するProvisioning Profileを用意してください。Firebaseに接続するstg / prodではAppleプロバイダを有効化します。配布に必要なコールバックスキーム、Entitlements、Provisioning Profileはメンテナー向けWorkflowとApple Developer Portalで管理します。Web OAuthを提供しないため、AppleのServices IDは使用しません。
 
 ## プロフィール
 
