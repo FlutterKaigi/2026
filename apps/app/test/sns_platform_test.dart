@@ -6,6 +6,8 @@ void main() {
     const cases = [
       (SnsPlatform.x, 'FlutterKaigi', 'https://x.com/FlutterKaigi'),
       (SnsPlatform.github, 'FlutterKaigi', 'https://github.com/FlutterKaigi'),
+      (SnsPlatform.linkedin, 'example-user', 'https://www.linkedin.com/in/example-user'),
+      (SnsPlatform.devto, 'example', 'https://dev.to/example'),
       (SnsPlatform.bluesky, 'bsky.app', 'https://bsky.app/profile/bsky.app'),
       (SnsPlatform.bluesky, 'example.bsky.social', 'https://bsky.app/profile/example.bsky.social'),
       (SnsPlatform.mixi2, 'mixi2', 'https://mixi.social/@mixi2'),
@@ -19,6 +21,33 @@ void main() {
       expect(platform.normalizeInput('@$id'), url);
       expect(platform.inputValue(url), id);
       expect(platform.normalizeInput(platform.inputValue(url)), url);
+    }
+  });
+
+  test('Mastodon addresses include the server and round-trip without losing URL information', () {
+    const platform = SnsPlatform.mastodon;
+    expect(platform.normalizeInput(' @example@fosstodon.org '), 'https://fosstodon.org/@example');
+    expect(platform.normalizeInput('example@mastodon.social'), 'https://mastodon.social/@example');
+    expect(platform.inputValue('https://fosstodon.org/@example'), '@example@fosstodon.org');
+    for (final url in [
+      'https://fosstodon.org/@example/123',
+      'https://fosstodon.org/@example?ref=profile',
+      'https://fosstodon.org/@example#posts',
+      'https://fosstodon.org/users/example',
+    ]) {
+      expect(platform.inputValue(url), url);
+      expect(platform.normalizeInput(url), url);
+    }
+    for (final input in [
+      'example',
+      '@example',
+      '@example@localhost',
+      '@example@server/path',
+      '@example@server.example:443',
+      '@example@server.example?x=1',
+      '@example@server.example@evil.example',
+    ]) {
+      expect(platform.normalizeInput(input), isNull, reason: input);
     }
   });
 

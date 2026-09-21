@@ -516,6 +516,7 @@ class _SnsLinkRow extends HookWidget {
               hintText: switch (draft.platform) {
                 SnsPlatform.other => 'https://',
                 SnsPlatform.bluesky => 'example.bsky.social',
+                SnsPlatform.mastodon => '@user@mastodon.social',
                 _ => 'FlutterKaigi',
               },
               border: const OutlineInputBorder(),
