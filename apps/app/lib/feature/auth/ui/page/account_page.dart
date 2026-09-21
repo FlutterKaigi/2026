@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/log/talker.dart';
+import 'package:app/core/remote_config/event_features_provider.dart';
 import 'package:app/core/router/router.dart';
 import 'package:app/core/ui/widget/app_error_view.dart';
 import 'package:app/core/ui/widget/app_scrollbar.dart';
@@ -259,7 +260,7 @@ class _SignedOutView extends StatelessWidget {
 
 /// Signed-in account tab: profile card, missions, event entry points and
 /// account actions as a top-aligned scrolling list.
-class _SignedInView extends StatelessWidget {
+class _SignedInView extends ConsumerWidget {
   const _SignedInView({
     required this.user,
     required this.profileState,
@@ -281,12 +282,13 @@ class _SignedInView extends StatelessWidget {
   final VoidCallback onComingSoon;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final t = Translations.of(context);
     final theme = Theme.of(context);
     final profile = profileState.value;
     final title = profile?.displayName ?? user.displayName ?? user.email ?? t.auth.account.noEmail;
     final subtitle = title != user.email ? user.email : null;
+    final eventFeaturesEnabled = ref.watch(eventFeaturesEnabledProvider);
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
@@ -315,53 +317,56 @@ class _SignedInView extends StatelessWidget {
                     ),
                   ),
                 },
-                const SizedBox(height: 8),
-                Card.outlined(
-                  margin: EdgeInsets.zero,
-                  clipBehavior: Clip.antiAlias,
-                  semanticContainer: false,
-                  child: ListTile(
-                    minTileHeight: 56,
-                    leading: const Icon(Icons.track_changes_outlined, size: 22),
-                    title: Text(t.auth.account.mission, style: theme.textTheme.bodyMedium),
-                    subtitle: Text(t.auth.account.missionDescription, style: theme.textTheme.bodySmall),
-                    trailing: const Icon(Icons.chevron_right, size: 20),
-                    onTap: () => const MissionRoute().push<void>(context),
+                if (eventFeaturesEnabled) ...[
+                  const SizedBox(height: 8),
+                  Card.outlined(
+                    margin: EdgeInsets.zero,
+                    clipBehavior: Clip.antiAlias,
+                    semanticContainer: false,
+                    child: ListTile(
+                      minTileHeight: 56,
+                      leading: const Icon(Icons.track_changes_outlined, size: 22),
+                      title: Text(t.auth.account.mission, style: theme.textTheme.bodyMedium),
+                      subtitle: Text(t.auth.account.missionDescription, style: theme.textTheme.bodySmall),
+                      trailing: const Icon(Icons.chevron_right, size: 20),
+                      onTap: () => const MissionRoute().push<void>(context),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 24),
-                _SectionHeading(title: t.auth.account.joinEvent),
-                const SizedBox(height: 8),
-                Card.outlined(
-                  margin: EdgeInsets.zero,
-                  clipBehavior: Clip.antiAlias,
-                  semanticContainer: false,
-                  child: Column(
-                    children: [
-                      // クイズ大会は参加と回答の記録をアカウントに紐づけるため、
-                      // サインイン中のここが唯一の入口になる。
-                      _NavigationTile(
-                        icon: Icons.quiz_outlined,
-                        title: t.auth.account.quiz,
-                        onTap: () => unawaited(const QuizListRoute().push<void>(context)),
-                      ),
-                      const Divider(height: 1),
-                      _SupportLtNavigationTile(uid: user.uid),
-                      const Divider(height: 1),
-                      _NavigationTile(
-                        icon: Icons.qr_code_2_outlined,
-                        title: t.auth.account.profileExchange,
-                        onTap: () => const ExchangeHomeRoute().push<void>(context),
-                      ),
-                      const Divider(height: 1),
-                      _NavigationTile(
-                        icon: Icons.image_outlined,
-                        title: t.auth.account.snsPost,
-                        onTap: () => const SnsPostRoute().push<void>(context),
-                      ),
-                    ],
+                  const SizedBox(height: 24),
+                  _SectionHeading(title: t.auth.account.joinEvent),
+                  const SizedBox(height: 8),
+                  Card.outlined(
+                    margin: EdgeInsets.zero,
+                    clipBehavior: Clip.antiAlias,
+                    semanticContainer: false,
+                    child: Column(
+                      children: [
+                        // クイズ大会は参加と回答の記録をアカウントに紐づけるため、
+                        // サインイン中のここが唯一の入口になる。
+                        _NavigationTile(
+                          icon: Icons.quiz_outlined,
+                          title: t.auth.account.quiz,
+                          onTap: () => unawaited(const QuizListRoute().push<void>(context)),
+                        ),
+                        const Divider(height: 1),
+                        _SupportLtNavigationTile(uid: user.uid),
+                        const Divider(height: 1),
+                        _NavigationTile(
+                          icon: Icons.qr_code_2_outlined,
+                          title: t.auth.account.profileExchange,
+                          onTap: () => const ExchangeHomeRoute().push<void>(context),
+                        ),
+                        const Divider(height: 1),
+                        _NavigationTile(
+                          icon: Icons.image_outlined,
+                          title: t.auth.account.snsPost,
+                          onTap: () => const SnsPostRoute().push<void>(context),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
+                ],
+                // フラグの ON/OFF どちらでもアカウント見出しの前に同じ余白を置く。
                 const SizedBox(height: 24),
                 _SectionHeading(title: t.auth.account.title),
                 const SizedBox(height: 8),
