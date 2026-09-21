@@ -284,6 +284,9 @@ profile:
   removeSnsLink: このリンクを削除
   snsPlatformLabel: サービス
   snsUrlLabel: URL
+  snsIdOrUrlLabel: IDまたはURL
+  snsIdOrUrlRequired: ID または URL を入力してください
+  snsIdOrUrlInvalid: 有効な ID または https:// から始まる URL を入力してください
   snsUrlRequired: URL を入力してください
   snsUrlInvalid: https:// から始まる URL を入力してください
   snsLinksMax: SNSリンクは $n 件まで登録できます
