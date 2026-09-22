@@ -115,7 +115,8 @@ Repositoryの`Settings > Secrets and variables > Actions > Variables > New repos
 | `IOS_BUNDLE_ID` | `jp.flutterkaigi.conf2026` | 外部サービスから取得する値ではなく、このProjectで決めた本番Bundle IDです。Apple DeveloperのApp ID、App Store Connectのアプリ、Xcode設定をこの値に揃えます。 |
 | `ANDROID_PACKAGE_NAME` | `jp.flutterkaigi.conf2026` | 外部サービスから取得する値ではなく、`apps/app/android/app/build.gradle.kts`の`applicationId`です。Google Play Consoleへ同じPackage Nameでアプリを登録します。 |
 | `GOOGLE_PLAY_TRACK` | `internal` | Codemagic CLIがGoogle Play Internal Testingを指定するためのTrack名です。このworkflowでは`internal`を使用します。Play Consoleでは`Testing > Internal testing`で対象Trackを確認します。 |
-| `PROD_ANDROID_SHA256_FINGERPRINTS` | 本番Android Appの署名証明書SHA-256フィンガープリント（カンマ区切り、複数可） | `apps/website`のUniversal Links／App Links検証ファイル（`/.well-known/assetlinks.json`）生成に使用します。取得手順は後述の「Universal Links／App Links」を参照してください。 |
+| `STG_ANDROID_SHA256_FINGERPRINTS` | stg Android Appの署名証明書SHA-256フィンガープリント（カンマ区切り、複数可） | `.stg` アプリのPlay App Signing証明書を指定します。stg／PRプレビューの `assetlinks.json` 生成に必須です。取得手順は後述の「Universal Links / App Links」を参照してください。 |
+| `PROD_ANDROID_SHA256_FINGERPRINTS` | 本番Android Appの署名証明書SHA-256フィンガープリント（カンマ区切り、複数可） | 本番アプリのPlay App Signing証明書を指定します。Webアプリ本番の `assetlinks.json` 生成に必須で、旧共有リンク用の `apps/website` でも使用します。 |
 
 ### Repository Secrets
 
@@ -304,23 +305,61 @@ base64 < play-service-account.json | tr -d '\n'
 
 出力全体をRepository Secretの`GOOGLE_PLAY_SERVICE_ACCOUNT_BASE64`へ登録します。
 
-## Universal Links / App Links（プロフィール交換の共有リンク）
+## Universal Links / App Links
 
-`apps/website`は`Deploy website to Cloudflare Workers`のデプロイ時に、`tool/generate_well_known.dart`で`/.well-known/apple-app-site-association`と`/.well-known/assetlinks.json`を生成します（`APPLE_TEAM_ID`／`IOS_BUNDLE_ID`／`ANDROID_PACKAGE_NAME`は前述のRepository Variablesを共用し、新規に登録するのは`PROD_ANDROID_SHA256_FINGERPRINTS`のみです）。どちらかのプラットフォームの値が未設定でもデプロイ自体は成功し、そのプラットフォームのファイルだけが出力されません（値を推測して埋めることはしません）。
+Webアプリとネイティブアプリは同じ `/account` や `/x/<token>` などのパスを使います。OSが関連付けを有効と判断するとアプリへ、アプリがない場合などはWebへ進みます。
 
-### `PROD_ANDROID_SHA256_FINGERPRINTS`
+| 環境 | アプリ起動用のホスト | iOS Bundle ID / Android Package Name |
+| --- | --- | --- |
+| prod | `2026-app.flutterkaigi.jp` | `jp.flutterkaigi.conf2026` |
+| stg | `stg-flutterkaigi-2026-conference-app.flutterkaigi.workers.dev` | `jp.flutterkaigi.conf2026.stg` |
+| PRプレビュー | Webの確認にはPR固有URL、生成するQRには上記stg固定ホスト | `jp.flutterkaigi.conf2026.stg` |
 
-Google PlayはInternal Testing以降のArtifactをPlay App Signingで再署名するため、実際に配布されるAPKの署名証明書は、CIが使うUpload Key（`ANDROID_SIGNING_KEYSTORE_BASE64`）と異なります。`assetlinks.json`は端末にインストールされた実物のAPKの証明書で検証されるため、Play App Signingの証明書のフィンガープリントを登録する必要があります。
+ネイティブ設定は `apps/app/environments/.env.*` の `APP_LINK_HOST` を使用します。ホストを追加・変更した場合はネイティブの再ビルド・再配布が必要です。iOSでは本番・stg両方のApp IDにAssociated Domains Capabilityを設定し、対応するProvisioning Profileを使用してください。[Flutter iOS設定](https://docs.flutter.dev/cookbook/navigation/set-up-universal-links)
 
-1. Google Play Consoleで対象アプリを開き、`Setup > App integrity > App signing`を選択します。
-2. `App signing key certificate`の`SHA-256 certificate fingerprint`をコピーします。[Google PlayのApp signing手順](https://support.google.com/googleplay/android-developer/answer/9842756)を参照してください。
-3. ローカル実機ビルド（Upload Keyでの直接インストール）でも動作確認したい場合は、Upload Keyのフィンガープリントも併せて控えます。
+PR固有の `workers.dev` URL自体はネイティブへの直接起動対象ではありません。各プレビューに `.stg` 用の検証ファイルを含めても、未登録のホストが自動で関連付けられるわけではありません。stg固定URLは最新stg版を表示し、PR固有版を表示するURLとは異なります。固定aliasは `main` または手動のstg Web配布で更新し、PRプレビューの配布では更新しません。[Cloudflare Preview URLs](https://developers.cloudflare.com/workers/versions-and-deployments/preview-urls/)
+
+### 検証ファイルの生成と公開
+
+`Deploy App Web` は [tool/generate_app_links.dart](../tool/generate_app_links.dart) に `--environment=prod|stg` を渡し、AASAとassetlinksを生成します。PRプレビューはstg限定です。以下の環境変数はすべて必須で、未設定・形式不正・環境とApp IDの不一致はアップロード前に失敗します。
+
+| 生成CLIの環境変数 | Workflowでの設定 |
+| --- | --- |
+| `APPLE_TEAM_ID` | 同名のRepository Variable |
+| `IOS_BUNDLE_ID` | prodは同名Variable、stgは `jp.flutterkaigi.conf2026.stg` |
+| `ANDROID_PACKAGE_NAME` | prodは同名Variable、stgは `jp.flutterkaigi.conf2026.stg` |
+| `ANDROID_SHA256_FINGERPRINTS` | prodは `PROD_ANDROID_SHA256_FINGERPRINTS`、stg／PRは `STG_ANDROID_SHA256_FINGERPRINTS` |
+
+ローカルでは上記4変数に対象環境の値を設定して、Repositoryルートで実行します。
 
 ```bash
-keytool -list -v -keystore release.jks -alias flutterkaigi2026 | grep 'SHA256:'
+fvm dart tool/generate_app_links.dart --environment=stg --output-dir=/tmp/flutterkaigi-stg-app-links
 ```
 
-4. 取得したフィンガープリント（コロン区切りの16進数）をカンマ区切りで連結し、Repository Variableの`PROD_ANDROID_SHA256_FINGERPRINTS`へ登録します（例: `AA:BB:...,CC:DD:...`）。App signing key certificateの値は必ず含めてください。
+`--output-dir` を省略すると `apps/app/build/web/.well-known` へ出力するため、Webビルド後に実行します。Workflowは先に一時ディレクトリへ生成し、ビルド後にコピーします。配信後は対象URLの `/.well-known/apple-app-site-association` と `/.well-known/assetlinks.json` がredirectなしのHTTP 200・`application/json`で取得でき、内容が生成結果と一致することを確認します。
+
+旧 `2026.flutterkaigi.jp/x/<token>` の本番関連付けは残します。ブラウザに到達した旧リンクは、トークンを保持した302で本番Webアプリへ進みます。website側は従来の `tool/generate_well_known.dart` を引き続き使い、未設定のプラットフォームは生成をスキップするため、Webアプリ側の必須チェックとは挙動が異なります。
+
+### Androidの署名フィンガープリント
+
+Google PlayのInternal TestingからインストールしたアプリはPlay App Signingの証明書で検証されます。CIのUpload Keyだけでは一致しません。本番とstgのアプリごとに、Play ConsoleのApp integrity / App signingで `App signing key certificate` のSHA-256を取得し、それぞれ `PROD_ANDROID_SHA256_FINGERPRINTS` / `STG_ANDROID_SHA256_FINGERPRINTS` へ登録してください。値は32バイトのコロン区切り16進数で、複数ある場合はカンマ区切りです。[Androidの関連付け設定](https://developer.android.com/training/app-links/configure-assetlinks)
+
+2026-09-22にPlay Consoleの署名設定から値を取得し、両環境の `*_ANDROID_SHA256_FINGERPRINTS` をRepository Variablesへ登録しました。本番は1件、stgは以前の鍵・現行の従来鍵・ポスト量子暗号鍵の3件です。アップロード鍵は含めていません。登録値を読み戻し、`app-website` Environmentの設定も含めた実際のGitHub設定から、両環境のAASA / assetlinksを生成できることを確認しました。署名鍵の更新時には、配布対象の新旧証明書が含まれるようVariableも更新してください。
+
+### 初回の配布順序
+
+1. stg / prodの署名フィンガープリントを登録し、iOS両App IDのCapabilityとProvisioning Profileを準備します。
+2. `Deploy App` をWebのみ・両環境で実行し、本番ホストとstg固定aliasのアプリ・検証ファイルを先に公開します。PRプレビューの配布だけではstg固定aliasは更新されません。
+3. ネイティブをビルド・配布し、websiteの配布を実行します。先行して停止したwebsiteのジョブは、Webアプリ公開後に再実行します。
+
+`Deploy App` でWeb配布も指定した場合、iOS / AndroidはWebの成功後に進み、Webが失敗するとネイティブ配布も停止します。手動の `web=false` はネイティブだけの配布を許可しますが、関連付けファイルが事前公開済みであることが前提です。websiteのWorkflowも、旧リンクの転送を公開する前に本番WebアプリのAASAがHTTP 200・JSON・本番App IDで取得できることを確認します。
+
+### 動作確認時の注意
+
+- iOS / Androidの関連付けと、インストール済み・未インストール、アプリ終了中・起動中を実機で確認します。実装変更だけで端末上の成功を確認したことにはなりません。
+- Safariの同一ドメイン内リンクやアドレスバーへの直入力はブラウザに残る場合があります。[Apple TN3155](https://developer.apple.com/documentation/technotes/tn3155-debugging-universal-links)
+- 旧 `/#/route` は起動時にパス形式へ変換します。本番scannerは新本番URLと旧website URL、stg scannerはstg固定URLを受け付け、他環境のURLを拒否します。devのQRはEmulator用の生トークンです。
+- 交換のpending状態はメモリ内です。Webからネイティブへの切り替えには `/x/<token>` 全体を渡し、ログイン途中の再読み込み・プロセス終了後は元リンクから再開します。`event_features_enabled=false` の交換機能制限は維持します。
 
 ## Firebase SDK settings
 
@@ -410,4 +449,6 @@ OptionsをGit管理外にしても、それだけをデータ保護の境界に�
 - `firebase_options.dart`、`google-services.json`、`GoogleService-Info.plist`がGit管理外であることを確認している
 - Firestore／Storage Rules、API Key restrictions、App Check enforcementを確認している
 - RepositoryのBranch protectionで`App CI / style`と`App CI / validate`を必須Checkに設定している
-- `PROD_ANDROID_SHA256_FINGERPRINTS`にPlay App Signingの証明書フィンガープリントを登録し、`apps/website`のデプロイ後に`/.well-known/apple-app-site-association`と`/.well-known/assetlinks.json`が公開されていることを確認している
+- `STG_ANDROID_SHA256_FINGERPRINTS` / `PROD_ANDROID_SHA256_FINGERPRINTS`に各アプリのPlay App Signing証明書SHA-256を登録している
+- iOSの両App IDでAssociated Domainsを有効にし、対応するProvisioning Profileでネイティブアプリを再配布している
+- 本番・stg固定ホストと旧websiteホストで検証ファイルを公開し、実機でリンクの起動先とWeb fallbackを確認している

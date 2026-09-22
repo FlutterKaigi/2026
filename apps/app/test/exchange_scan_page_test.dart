@@ -1,5 +1,7 @@
 import 'package:app/core/i18n/strings.g.dart';
+import 'package:app/core/provider/environment.dart';
 import 'package:app/feature/auth/data/provider/auth_repository.dart';
+import 'package:app/feature/exchange/data/exchange_token.dart';
 import 'package:app/feature/exchange/data/provider/profile_exchange_repository.dart';
 import 'package:app/feature/exchange/ui/page/exchange_scan_page.dart';
 import 'package:app/feature/profile/data/provider/user_profile_repository.dart';
@@ -32,9 +34,11 @@ void main() {
     required FakeAuthRepository authRepository,
     required FakeUserProfileRepository profileRepository,
     required FakeProfileExchangeRepository exchangeRepository,
+    Flavor flavor = Flavor.production,
   }) => TranslationProvider(
     child: ProviderScope(
       overrides: [
+        environmentProvider.overrideWithValue(Environment.fromEnvironment().copyWith(flavor: flavor)),
         authRepositoryProvider.overrideWithValue(authRepository),
         userProfileRepositoryProvider.overrideWithValue(profileRepository),
         profileExchangeRepositoryProvider.overrideWithValue(exchangeRepository),
@@ -173,6 +177,46 @@ void main() {
     expect(find.text('open scan'), findsOneWidget);
     expect(find.byType(ExchangeScanPage), findsNothing);
   });
+
+  for (final scenario in [
+    (flavor: Flavor.production, accepted: productionExchangeOrigin, rejected: [stagingExchangeOrigin]),
+    (
+      flavor: Flavor.staging,
+      accepted: stagingExchangeOrigin,
+      rejected: [productionExchangeOrigin, legacyExchangeOrigin],
+    ),
+  ]) {
+    testWidgets('${scenario.flavor.shortName} scanning rejects another backend before accepting its own URL', (
+      tester,
+    ) async {
+      final authRepository = FakeAuthRepository(initialUser: FakeUser(uid: 'uid-1'));
+      addTearDown(authRepository.dispose);
+      final profileRepository = FakeUserProfileRepository(initialProfile: ownProfile());
+      addTearDown(profileRepository.dispose);
+      final exchangeRepository = FakeProfileExchangeRepository();
+      addTearDown(exchangeRepository.dispose);
+      await openScanPage(
+        tester,
+        buildSubject(
+          authRepository: authRepository,
+          profileRepository: profileRepository,
+          exchangeRepository: exchangeRepository,
+          flavor: scenario.flavor,
+        ),
+      );
+
+      const token = 'v1.uid-2.9999999999.deadbeef';
+      for (final origin in scenario.rejected) {
+        await detect(tester, '$origin/x/$token');
+        expect(exchangeRepository.createCalls, isEmpty);
+        expect(find.byType(ExchangeScanPage), findsOneWidget);
+      }
+
+      await detect(tester, '${scenario.accepted}/x/$token');
+      expect(exchangeRepository.createCalls, [(uid: 'uid-1', otherUid: 'uid-2', token: token)]);
+      expect(find.byType(ExchangeScanPage), findsNothing);
+    });
+  }
 
   testWidgets('shows an already-exchanged message and keeps scanning on a duplicate scan', (tester) async {
     final authRepository = FakeAuthRepository(initialUser: FakeUser(uid: 'uid-1'));

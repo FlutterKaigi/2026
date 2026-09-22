@@ -1,15 +1,14 @@
 /**
- * Routes every profile-exchange share-link request — `/x/<token>` and its
- * English-locale `/en/x/<token>` equivalent (see `ShareLinkFallbackPage` /
- * `AppLocale.shareLinkFallbackRoutePath`) — to the single static fallback
- * page the site builds for that locale. `jaspr` can only pre-render fixed
- * routes (SSG), so there is no per-token page to serve; every other request
- * is passed straight through to the static assets unchanged, so this leaves
- * every other path's behaviour — 404s included — exactly as the assets
- * binding would produce with no Worker script in front of it at all.
+ * Sends legacy profile-exchange links (`/x/<token>` and `/en/x/<token>`) to
+ * the conference app, preserving the token for native or web handling.
+ * Missing tokens and malformed paths still serve the locale's static
+ * fallback page. All unrelated requests, including association files, pass
+ * through to static assets unchanged.
  */
 
 const SHARE_LINK_FALLBACK_PATTERN = /^\/(en\/)?x(\/|$)/;
+const SHARE_LINK_TOKEN_PATTERN = /^\/(?:en\/)?x\/([^/]+)$/;
+const APP_SHARE_LINK_BASE_URL = "https://2026-app.flutterkaigi.jp/x/";
 
 /** Whether `pathname` is a share-link request with no per-token page. */
 export function isShareLinkFallbackPath(pathname) {
@@ -37,6 +36,20 @@ export default {
     const url = new URL(request.url);
     if (!isShareLinkFallbackPath(url.pathname)) {
       return assets.fetch(request);
+    }
+
+    const shareLink = SHARE_LINK_TOKEN_PATTERN.exec(url.pathname);
+    if (shareLink) {
+      // Keep the encoded token as one path segment under a fixed origin.
+      // Query parameters do not belong to the exchange token and are omitted.
+      return new Response(null, {
+        status: 302,
+        headers: {
+          Location: `${APP_SHARE_LINK_BASE_URL}${shareLink[1]}`,
+          "Cache-Control": "no-store",
+          "Referrer-Policy": "no-referrer",
+        },
+      });
     }
 
     try {

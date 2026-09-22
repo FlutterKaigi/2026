@@ -57,6 +57,13 @@ android {
             applicationIdSuffix = it
         }
         manifestPlaceholders["appLabel"] = dartDefines["APP_NAME"] ?: "FlutterKaigi 2026"
+        val appLinkHost = dartDefines["APP_LINK_HOST"] ?: "localhost"
+        manifestPlaceholders["appLinkHost"] = appLinkHost
+        // Android 11 and earlier require every declared host to verify. Only
+        // production owns the legacy website association; other environments
+        // reuse their own host instead of declaring an unverifiable one.
+        manifestPlaceholders["legacyShareLinkHost"] =
+            if (dartDefines["FLAVOR"] == "prod") "2026.flutterkaigi.jp" else appLinkHost
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode

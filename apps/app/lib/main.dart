@@ -6,6 +6,7 @@ import 'package:app/core/provider/environment.dart';
 import 'package:app/core/provider/shared_preferences.dart';
 import 'package:app/core/remote_config/remote_config_provider.dart';
 import 'package:app/core/remote_config/remote_config_repository.dart';
+import 'package:app/core/router/app_url_strategy.dart';
 import 'package:app/core/ui/app.dart';
 import 'package:data/data.dart';
 import 'package:flutter/foundation.dart';
@@ -16,6 +17,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 
 Future<void> main() async {
+  configureAppUrlStrategy();
   WidgetsFlutterBinding.ensureInitialized();
 
   // バンドルした Noto Sans JP の OFL ライセンスをアプリのライセンス一覧に登録。

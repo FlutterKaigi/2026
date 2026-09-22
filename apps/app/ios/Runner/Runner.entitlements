@@ -8,6 +8,9 @@
 	</array>
 	<key>com.apple.developer.associated-domains</key>
 	<array>
+		<string>applinks:$(APP_LINK_HOST)</string>
+		<!-- Existing production exchange links remain valid. The website's
+		     AASA only associates the production app, never .stg or .dev. -->
 		<string>applinks:2026.flutterkaigi.jp</string>
 	</array>
 	<key>com.apple.developer.devicecheck.appattest-environment</key>

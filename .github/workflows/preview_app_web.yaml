@@ -6,6 +6,7 @@ on:
     paths:
       - apps/app/**
       - packages/data/**
+      - tool/generate_app_links.dart
       - .fvmrc
       - pubspec.yaml
       - .github/workflows/preview_app_web.yaml

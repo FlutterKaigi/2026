@@ -5,6 +5,7 @@ import 'package:app/core/log/talker.dart';
 import 'package:app/feature/auth/data/provider/auth_state.dart';
 import 'package:app/feature/exchange/data/exchange_scan_handler.dart';
 import 'package:app/feature/exchange/data/exchange_token.dart';
+import 'package:app/feature/exchange/data/provider/exchange_link_configuration.dart';
 import 'package:app/feature/exchange/data/provider/profile_exchange_repository.dart';
 import 'package:app/feature/exchange/ui/widget/exchange_access_gate.dart';
 import 'package:flutter/material.dart';
@@ -39,6 +40,7 @@ class _ScannerBody extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final t = Translations.of(context);
     final myUid = ref.watch(authStateChangesProvider).value?.uid;
+    final linkConfiguration = ref.watch(exchangeLinkConfigurationProvider);
     final controller = useMemoized(MobileScannerController.new);
     useEffect(
       () =>
@@ -62,7 +64,7 @@ class _ScannerBody extends HookConsumerWidget {
       if (raw == null) {
         return;
       }
-      final scanned = parseScannedExchangeToken(raw);
+      final scanned = parseScannedExchangeToken(raw, allowedOrigins: linkConfiguration.allowedOrigins);
       if (scanned == null) {
         showMessage(t.exchange.scanInvalid);
         return;

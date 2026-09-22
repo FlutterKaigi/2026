@@ -10,7 +10,7 @@ class SettingsRoute extends GoRouteData with $SettingsRoute {
 }
 
 /// `/x/:token` — a profile-exchange share link
-/// (`ExchangeToken.qrPayload`/`exchangeShareBaseUrl`), opened as a Universal
+/// (`ExchangeToken.qrPayload`), opened as a Universal
 /// Link / App Link or in-app. Declared as a top-level route (not nested
 /// under `/account`) so it resolves the same way regardless of which tab —
 /// or no tab yet — is active when the link is opened.

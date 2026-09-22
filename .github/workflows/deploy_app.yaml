@@ -6,6 +6,7 @@ on:
     paths:
       - apps/app/**
       - packages/data/**
+      - tool/generate_app_links.dart
       - .fvmrc
       - pubspec.yaml
       - .github/workflows/deploy_app.yaml
@@ -51,8 +52,8 @@ jobs:
       contents: read
 
   ios:
-    needs: validate
-    if: ${{ github.event_name != 'workflow_dispatch' || inputs.ios }}
+    needs: [validate, web]
+    if: ${{ !cancelled() && needs.validate.result == 'success' && (needs.web.result == 'success' || needs.web.result == 'skipped') && (github.event_name != 'workflow_dispatch' || inputs.ios) }}
     strategy:
       fail-fast: false
       matrix:
@@ -70,8 +71,8 @@ jobs:
       IOS_PROVISIONING_PROFILE_BASE64: ${{ secrets[format('{0}_IOS_PROVISIONING_PROFILE_BASE64', matrix.environment == 'stg' && 'STG' || 'PROD')] }}
 
   android:
-    needs: validate
-    if: ${{ github.event_name != 'workflow_dispatch' || inputs.android }}
+    needs: [validate, web]
+    if: ${{ !cancelled() && needs.validate.result == 'success' && (needs.web.result == 'success' || needs.web.result == 'skipped') && (github.event_name != 'workflow_dispatch' || inputs.android) }}
     strategy:
       fail-fast: false
       matrix:

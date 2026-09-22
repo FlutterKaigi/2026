@@ -15,6 +15,9 @@ on:
       url:
         description: 配布先 URL
         value: ${{ jobs.deploy.outputs.url }}
+      app-link-url:
+        description: 配布環境のネイティブアプリに関連付けた固定 URL
+        value: ${{ jobs.deploy.outputs.app-link-url }}
     secrets:
       CLOUDFLARE_API_TOKEN:
         required: true
@@ -37,6 +40,7 @@ jobs:
       cancel-in-progress: ${{ inputs.preview }}
     outputs:
       url: ${{ steps.deploy.outputs.deployment-url }}
+      app-link-url: ${{ steps.links.outputs.url }}
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     permissions:
@@ -44,6 +48,11 @@ jobs:
       id-token: write
     env:
       DEPLOY_ENVIRONMENT: ${{ inputs.environment }}
+      IS_PREVIEW: ${{ inputs.preview }}
+      APPLE_TEAM_ID: ${{ vars.APPLE_TEAM_ID }}
+      IOS_BUNDLE_ID: ${{ inputs.environment == 'stg' && 'jp.flutterkaigi.conf2026.stg' || vars.IOS_BUNDLE_ID }}
+      ANDROID_PACKAGE_NAME: ${{ inputs.environment == 'stg' && 'jp.flutterkaigi.conf2026.stg' || vars.ANDROID_PACKAGE_NAME }}
+      ANDROID_SHA256_FINGERPRINTS: ${{ vars[format('{0}_ANDROID_SHA256_FINGERPRINTS', inputs.environment == 'stg' && 'STG' || 'PROD')] }}
       FIREBASE_PROJECT_ID: ${{ vars[format('{0}_FIREBASE_PROJECT_ID', inputs.environment == 'stg' && 'STG' || 'PROD')] }}
       FIREBASE_WEB_APP_ID: ${{ vars[format('{0}_APP_FIREBASE_WEB_APP_ID', inputs.environment == 'stg' && 'STG' || 'PROD')] }}
       APP_CHECK_SITE_KEY: ${{ vars[format('{0}_APP_CHECK_SITE_KEY', inputs.environment == 'stg' && 'STG' || 'PROD')] }}
@@ -59,6 +68,14 @@ jobs:
 
       - name: 配布環境の Firebase 設定を検証
         run: |
+          case "$DEPLOY_ENVIRONMENT" in
+            stg|prod) ;;
+            *) echo "::error::environment must be stg or prod."; exit 1 ;;
+          esac
+          if [ "$IS_PREVIEW" = true ] && [ "$DEPLOY_ENVIRONMENT" != stg ]; then
+            echo "::error::PR previews must use stg Firebase and app associations."
+            exit 1
+          fi
           for name in FIREBASE_PROJECT_ID FIREBASE_WEB_APP_ID APP_CHECK_SITE_KEY \
             GCP_WORKLOAD_IDENTITY_PROVIDER GCP_SERVICE_ACCOUNT; do
             if [ -z "${!name}" ]; then
@@ -68,6 +85,19 @@ jobs:
           done
           expected_project="$(sed -n 's/^FIREBASE_PROJECT_ID=//p' "apps/app/environments/.env.$DEPLOY_ENVIRONMENT")"
           test "$FIREBASE_PROJECT_ID" = "$expected_project"
+
+      # Build association files from the same environment as Firebase and the
+      # native app. Missing signing settings fail before any upload; never ship
+      # a preview that accidentally points to production or an HTML fallback.
+      - name: Universal Links / App Links の検証ファイルを生成
+        id: links
+        run: |
+          dart tool/generate_app_links.dart \
+            --environment="$DEPLOY_ENVIRONMENT" \
+            --output-dir="$RUNNER_TEMP/app-links"
+          app_link_host="$(sed -n 's/^APP_LINK_HOST=//p' "apps/app/environments/.env.$DEPLOY_ENVIRONMENT")"
+          test -n "$app_link_host"
+          echo "url=https://$app_link_host" >> "$GITHUB_OUTPUT"
 
       - uses: ./.github/actions/setup-firebase
         with:
@@ -102,6 +132,15 @@ jobs:
           --dart-define=APP_CHECK_SITE_KEY="$APP_CHECK_SITE_KEY"
           --dart-define=COMMIT_INFORMATION="$GITHUB_REF_NAME-$GITHUB_SHA"
 
+      # Copy after flutter build web, which recreates build/web. _headers ships
+      # from web/ and gives the extensionless AASA its application/json type.
+      - name: 検証ファイルを Web 配布物へ追加
+        run: |
+          cp -R "$RUNNER_TEMP/app-links" apps/app/build/web/.well-known
+          test -s apps/app/build/web/.well-known/apple-app-site-association
+          test -s apps/app/build/web/.well-known/assetlinks.json
+          test -s apps/app/build/web/_headers
+
       - name: Cloudflare Workers へ配布
         id: deploy
         uses: cloudflare/wrangler-action@ebbaa1584979971c8614a24965b4405ff95890e0 # v4.0.0
@@ -111,12 +150,36 @@ jobs:
           workingDirectory: apps/app
           command: ${{ inputs.preview && 'versions upload' || inputs.environment == 'prod' && 'deploy' || 'versions upload --preview-alias stg' }}
 
+      - name: 配信された検証ファイルを確認
+        env:
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
+          APP_LINK_URL: ${{ steps.links.outputs.url }}
+        run: |
+          verification_url="$APP_LINK_URL"
+          if [ "$IS_PREVIEW" = true ]; then
+            verification_url="$DEPLOYMENT_URL"
+          fi
+          test -n "$verification_url"
+          for file in apple-app-site-association assetlinks.json; do
+            status="$(curl --silent --show-error --fail --retry 3 --max-time 30 \
+              --dump-header "$RUNNER_TEMP/link-headers" \
+              --output "$RUNNER_TEMP/deployed-$file" \
+              --write-out '%{http_code}' \
+              "${verification_url%/}/.well-known/$file")"
+            test "$status" = 200
+            grep -iq '^content-type: application/json' "$RUNNER_TEMP/link-headers"
+            diff <(jq -S . "$RUNNER_TEMP/app-links/$file") \
+              <(jq -S . "$RUNNER_TEMP/deployed-$file")
+          done
+
       - name: 配布先を記録
         env:
           DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
+          APP_LINK_URL: ${{ steps.links.outputs.url }}
         run: |
           {
             echo "### Web $DEPLOY_ENVIRONMENT"
             echo "Firebase: $FIREBASE_PROJECT_ID; コミット: $GITHUB_SHA"
             echo "配布URL: $DEPLOYMENT_URL"
+            echo "アプリ起動URL: $APP_LINK_URL; iOS: $IOS_BUNDLE_ID; Android: $ANDROID_PACKAGE_NAME"
           } >> "$GITHUB_STEP_SUMMARY"
