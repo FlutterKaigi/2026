@@ -20,20 +20,21 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	/// Constructing via the enum [AppLocale.build] is preferred.
 	Translations({Map<String, Node>? overrides, PluralResolver? cardinalResolver, PluralResolver? ordinalResolver, TranslationMetadata<AppLocale, Translations>? meta})
 		: assert(overrides == null, 'Set "translation_overrides: true" in order to enable this feature.'),
-		  $meta = meta ?? TranslationMetadata(
+		  _meta = meta ?? TranslationMetadata(
 		    locale: AppLocale.ja,
 		    overrides: overrides ?? {},
 		    cardinalResolver: cardinalResolver,
 		    ordinalResolver: ordinalResolver,
 		  ) {
-		$meta.setFlatMapFunction(_flatMapFunction);
+		_meta.setFlatMapFunction(_flatMapFunction);
 	}
 
 	/// Metadata for the translations of <ja>.
-	@override final TranslationMetadata<AppLocale, Translations> $meta;
+	final TranslationMetadata<AppLocale, Translations> _meta;
+	@override TranslationMetadata<AppLocale, Translations> get $meta => _meta;
 
 	/// Access flat map
-	dynamic operator[](String key) => $meta.getTranslation(key);
+	dynamic operator[](String key) => _meta.getTranslation(key);
 
 	late final Translations _root = this; // ignore: unused_field
 
@@ -55,6 +56,7 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	late final Translations$venueMap$ja venueMap = Translations$venueMap$ja.internal(_root);
 	late final Translations$venueWalk$ja venueWalk = Translations$venueWalk$ja.internal(_root);
 	late final Translations$eventInfo$ja eventInfo = Translations$eventInfo$ja.internal(_root);
+	late final Translations$contributors$ja contributors = Translations$contributors$ja.internal(_root);
 	late final Translations$auth$ja auth = Translations$auth$ja.internal(_root);
 	late final Translations$profile$ja profile = Translations$profile$ja.internal(_root);
 	late final Translations$snsPost$ja snsPost = Translations$snsPost$ja.internal(_root);
@@ -613,6 +615,12 @@ class Translations$eventInfo$ja {
 	/// ja: '地図を見る'
 	String get viewMap => '地図を見る';
 
+	/// ja: 'クレジット'
+	String get credits => 'クレジット';
+
+	/// ja: 'コントリビューター'
+	String get contributors => 'コントリビューター';
+
 	/// ja: 'その他'
 	String get other => 'その他';
 
@@ -639,6 +647,30 @@ class Translations$eventInfo$ja {
 
 	/// ja: 'OSSライセンス'
 	String get ossLicenses => 'OSSライセンス';
+}
+
+// Path: contributors
+class Translations$contributors$ja {
+	Translations$contributors$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'コントリビューター'
+	String get title => 'コントリビューター';
+
+	/// ja: 'FlutterKaigi/2026 のリポジトリを開く'
+	String get openRepository => 'FlutterKaigi/2026 のリポジトリを開く';
+
+	/// ja: 'コントリビューターが見つかりませんでした'
+	String get empty => 'コントリビューターが見つかりませんでした';
+
+	/// ja: '(one) {$n contributions} (other) {$n contributions}'
+	String contributionsCount({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(n,
+		one: '${n} contributions',
+		other: '${n} contributions',
+	);
 }
 
 // Path: auth
@@ -2286,6 +2318,8 @@ extension on Translations {
 			'eventInfo.venueLabel' => '会場',
 			'eventInfo.venue' => '浜松町コンベンションホール',
 			'eventInfo.viewMap' => '地図を見る',
+			'eventInfo.credits' => 'クレジット',
+			'eventInfo.contributors' => 'コントリビューター',
 			'eventInfo.other' => 'その他',
 			'eventInfo.officialWebsite' => '公式Webサイト',
 			'eventInfo.codeOfConduct' => '行動規範',
@@ -2295,6 +2329,10 @@ extension on Translations {
 			'eventInfo.sourceCode' => 'ソースコードを見る',
 			'eventInfo.staffMembers' => 'スタッフ',
 			'eventInfo.ossLicenses' => 'OSSライセンス',
+			'contributors.title' => 'コントリビューター',
+			'contributors.openRepository' => 'FlutterKaigi/2026 のリポジトリを開く',
+			'contributors.empty' => 'コントリビューターが見つかりませんでした',
+			'contributors.contributionsCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(n, one: '${n} contributions', other: '${n} contributions', ),
 			'auth.signIn.required' => 'サインインが必要です',
 			'auth.signIn.description' => 'FlutterKaigi 2026 アプリで利用するサインイン方法を選択してください',
 			'auth.signIn.withGoogle' => 'Google でサインイン',

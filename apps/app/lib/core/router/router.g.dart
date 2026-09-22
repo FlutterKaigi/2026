@@ -37,7 +37,11 @@ mixin $SettingsRoute on GoRouteData {
   void replace(BuildContext context) => context.replace(location);
 }
 
-RouteBase get $shareLinkRoute => GoRouteData.$route(path: '/x/:token', factory: $ShareLinkRoute._fromState);
+RouteBase get $shareLinkRoute => GoRouteData.$route(
+  path: '/x/:token',
+  hasOverriddenOnExit: false,
+  factory: $ShareLinkRoute._fromState,
+);
 
 mixin $ShareLinkRoute on GoRouteData {
   static ShareLinkRoute _fromState(GoRouterState state) => ShareLinkRoute(token: state.pathParameters['token']!);
@@ -93,6 +97,11 @@ RouteBase get $appShellRoute => StatefulShellRouteData.$route(
               factory: $LicenseDetailRoute._fromState,
             ),
           ],
+        ),
+        GoRouteData.$route(
+          path: '/contributors',
+          hasOverriddenOnExit: false,
+          factory: $ContributorsRoute._fromState,
         ),
       ],
     ),
@@ -166,10 +175,12 @@ RouteBase get $appShellRoute => StatefulShellRouteData.$route(
             ),
             GoRouteData.$route(
               path: 'quiz',
+              hasOverriddenOnExit: false,
               factory: $QuizListRoute._fromState,
               routes: [
                 GoRouteData.$route(
                   path: ':eventId',
+                  hasOverriddenOnExit: false,
                   factory: $QuizRoute._fromState,
                 ),
               ],
@@ -303,6 +314,25 @@ mixin $LicenseDetailRoute on GoRouteData {
   String get location => GoRouteData.$location(
     '/licenses/${Uri.encodeComponent(_self.packageName)}',
   );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) => context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $ContributorsRoute on GoRouteData {
+  static ContributorsRoute _fromState(GoRouterState state) => const ContributorsRoute();
+
+  @override
+  String get location => GoRouteData.$location('/contributors');
 
   @override
   void go(BuildContext context) => context.go(location);

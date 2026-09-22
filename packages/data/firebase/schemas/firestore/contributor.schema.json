@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/FlutterKaigi/2026/packages/data/firebase/schemas/firestore/contributor.schema.json",
+  "title": "Contributor",
+  "description": "Firestore document schema for the `contributors` collection.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["login", "avatarUrl", "htmlUrl", "contributions", "updatedAt"],
+  "properties": {
+    "login": {
+      "type": "string",
+      "minLength": 1
+    },
+    "avatarUrl": {
+      "type": "string",
+      "format": "uri"
+    },
+    "htmlUrl": {
+      "type": "string",
+      "format": "uri"
+    },
+    "contributions": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

@@ -210,3 +210,7 @@ melos:
     sessions:generate:
       run: fvm dart run tool/generate_sessions.dart
       description: Regenerate apps/website/lib/constants/generated_sessions.dart from the Firestore emulator (or a configured STG/prod project). Git-ignored output.
+
+    contributors:refresh:
+      run: fvm dart run tool/refresh_contributors.dart
+      description: Refresh the Firestore contributors collection from the GitHub API (emulator by default; set FIRESTORE_HOST/FIRESTORE_ACCESS_TOKEN for STG/prod)

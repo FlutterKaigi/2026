@@ -1,0 +1,76 @@
+name: Refresh Contributors
+
+# コントリビューター一覧 (Firestore `contributors` コレクション) を GitHub API から
+# 日次で更新する。アプリは Firestore を読むだけなので、GitHub API のレート制限が
+# クライアントに影響しない。
+
+on:
+  schedule:
+    # 毎日 06:00 JST (21:00 UTC)。
+    - cron: "0 21 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: refresh-contributors
+  cancel-in-progress: false
+
+permissions: {}
+
+defaults:
+  run:
+    shell: bash -euo pipefail {0}
+
+jobs:
+  refresh:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      id-token: write
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [stg, prod]
+    env:
+      FIREBASE_PROJECT_ID: ${{ matrix.target == 'stg' && vars.STG_FIREBASE_PROJECT_ID || vars.PROD_FIREBASE_PROJECT_ID }}
+      GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ matrix.target == 'stg' && vars.GCP_WORKLOAD_IDENTITY_PROVIDER_STG || vars.GCP_WORKLOAD_IDENTITY_PROVIDER_PROD }}
+      GCP_SERVICE_ACCOUNT: ${{ matrix.target == 'stg' && vars.GCP_SERVICE_ACCOUNT_CONTRIBUTORS_STG || vars.GCP_SERVICE_ACCOUNT_CONTRIBUTORS_PROD }}
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - id: flutter-version
+        run: echo "version=$(jq -r .flutter .fvmrc)" >> "$GITHUB_OUTPUT"
+
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version: ${{ steps.flutter-version.outputs.version }}
+          channel: stable
+          cache: true
+
+      - name: Resolve dependencies
+        run: flutter pub get
+
+      - name: Validate Firebase configuration
+        run: |
+          for name in FIREBASE_PROJECT_ID GCP_WORKLOAD_IDENTITY_PROVIDER GCP_SERVICE_ACCOUNT; do
+            if [ -z "${!name}" ]; then
+              echo "::error::$name is not configured as a Repository Variable (target: ${{ matrix.target }})."
+              exit 1
+            fi
+          done
+
+      - name: Authenticate to Firestore with Workload Identity Federation
+        id: auth
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3
+        with:
+          project_id: ${{ env.FIREBASE_PROJECT_ID }}
+          workload_identity_provider: ${{ env.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ env.GCP_SERVICE_ACCOUNT }}
+          token_format: access_token
+
+      - name: Refresh the Firestore contributors collection
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          FIRESTORE_HOST: firestore.googleapis.com
+          FIRESTORE_ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
+        run: dart run tool/refresh_contributors.dart

@@ -191,6 +191,8 @@ eventInfo:
   venueLabel: Venue
   venue: Hamamatsucho Convention Hall
   viewMap: View Map
+  credits: Credits
+  contributors: Contributors
   other: Other
   officialWebsite: Official Website
   codeOfConduct: Code of Conduct
@@ -200,6 +202,13 @@ eventInfo:
   sourceCode: View Source Code
   staffMembers: Staff
   ossLicenses: OSS Licenses
+contributors:
+  title: Contributors
+  openRepository: Open the FlutterKaigi/2026 repository
+  empty: No contributors found
+  contributionsCount:
+    one: $n contribution
+    other: $n contributions
 auth:
   signIn:
     required: Sign in required

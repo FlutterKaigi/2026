@@ -1,6 +1,7 @@
 export 'src/country/country.dart' show Country, CountryRegion, findCountry;
 export 'src/country/generated_countries.dart' show countries;
 export 'src/firebase/firebase_initializer.dart' show FirebaseInitializer;
+export 'src/model/contributor.dart' show Contributor;
 export 'src/model/locale_map.dart' show LocaleMap;
 export 'src/model/news.dart' show News;
 export 'src/model/profile_exchange.dart' show ProfileExchange, ProfileExchangeOrigin;
@@ -22,6 +23,7 @@ export 'src/model/timeline_event.dart' show TimelineEvent;
 export 'src/model/user_profile.dart' show UserProfile;
 export 'src/model/venue.dart' show Venue;
 export 'src/repository/auth_repository.dart' show FirebaseAuthRepository, AuthRepository;
+export 'src/repository/contributor_repository.dart' show ContributorRepository, FirestoreContributorRepository;
 export 'src/repository/news_repository.dart' show FirestoreNewsRepository, NewsRepository;
 export 'src/repository/profile_exchange_repository.dart'
     show FirestoreProfileExchangeRepository, ProfileExchangeAlreadyExistsException, ProfileExchangeRepository;

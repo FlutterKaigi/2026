@@ -16,22 +16,22 @@ class TranslationsEn extends Translations with BaseTranslations<AppLocale, Trans
 	/// Constructing via the enum [AppLocale.build] is preferred.
 	TranslationsEn({Map<String, Node>? overrides, PluralResolver? cardinalResolver, PluralResolver? ordinalResolver, TranslationMetadata<AppLocale, Translations>? meta})
 		: assert(overrides == null, 'Set "translation_overrides: true" in order to enable this feature.'),
-		  $meta = meta ?? TranslationMetadata(
+		  _meta = meta ?? TranslationMetadata(
 		    locale: AppLocale.en,
 		    overrides: overrides ?? {},
 		    cardinalResolver: cardinalResolver,
 		    ordinalResolver: ordinalResolver,
 		  ),
 		  super(cardinalResolver: cardinalResolver, ordinalResolver: ordinalResolver) {
-		super.$meta.setFlatMapFunction($meta.getTranslation); // copy base translations to super.$meta
-		$meta.setFlatMapFunction(_flatMapFunction);
+		_meta.setFlatMapFunction(_flatMapFunction);
 	}
 
 	/// Metadata for the translations of <en>.
-	@override final TranslationMetadata<AppLocale, Translations> $meta;
+	final TranslationMetadata<AppLocale, Translations> _meta;
+	@override TranslationMetadata<AppLocale, Translations> get $meta => _meta;
 
 	/// Access flat map
-	@override dynamic operator[](String key) => $meta.getTranslation(key) ?? super.$meta.getTranslation(key);
+	@override dynamic operator[](String key) => _meta.getTranslation(key) ?? super[key];
 
 	late final TranslationsEn _root = this; // ignore: unused_field
 
@@ -54,6 +54,7 @@ class TranslationsEn extends Translations with BaseTranslations<AppLocale, Trans
 	@override late final _Translations$venueMap$en venueMap = _Translations$venueMap$en._(_root);
 	@override late final _Translations$venueWalk$en venueWalk = _Translations$venueWalk$en._(_root);
 	@override late final _Translations$eventInfo$en eventInfo = _Translations$eventInfo$en._(_root);
+	@override late final _Translations$contributors$en contributors = _Translations$contributors$en._(_root);
 	@override late final _Translations$auth$en auth = _Translations$auth$en._(_root);
 	@override late final _Translations$profile$en profile = _Translations$profile$en._(_root);
 	@override late final _Translations$snsPost$en snsPost = _Translations$snsPost$en._(_root);
@@ -344,6 +345,8 @@ class _Translations$eventInfo$en extends Translations$eventInfo$ja {
 	@override String get venueLabel => 'Venue';
 	@override String get venue => 'Hamamatsucho Convention Hall';
 	@override String get viewMap => 'View Map';
+	@override String get credits => 'Credits';
+	@override String get contributors => 'Contributors';
 	@override String get other => 'Other';
 	@override String get officialWebsite => 'Official Website';
 	@override String get codeOfConduct => 'Code of Conduct';
@@ -353,6 +356,22 @@ class _Translations$eventInfo$en extends Translations$eventInfo$ja {
 	@override String get sourceCode => 'View Source Code';
 	@override String get staffMembers => 'Staff';
 	@override String get ossLicenses => 'OSS Licenses';
+}
+
+// Path: contributors
+class _Translations$contributors$en extends Translations$contributors$ja {
+	_Translations$contributors$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Contributors';
+	@override String get openRepository => 'Open the FlutterKaigi/2026 repository';
+	@override String get empty => 'No contributors found';
+	@override String contributionsCount({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n,
+		one: '${n} contribution',
+		other: '${n} contributions',
+	);
 }
 
 // Path: auth
@@ -1281,6 +1300,8 @@ extension on TranslationsEn {
 			'eventInfo.venueLabel' => 'Venue',
 			'eventInfo.venue' => 'Hamamatsucho Convention Hall',
 			'eventInfo.viewMap' => 'View Map',
+			'eventInfo.credits' => 'Credits',
+			'eventInfo.contributors' => 'Contributors',
 			'eventInfo.other' => 'Other',
 			'eventInfo.officialWebsite' => 'Official Website',
 			'eventInfo.codeOfConduct' => 'Code of Conduct',
@@ -1290,6 +1311,10 @@ extension on TranslationsEn {
 			'eventInfo.sourceCode' => 'View Source Code',
 			'eventInfo.staffMembers' => 'Staff',
 			'eventInfo.ossLicenses' => 'OSS Licenses',
+			'contributors.title' => 'Contributors',
+			'contributors.openRepository' => 'Open the FlutterKaigi/2026 repository',
+			'contributors.empty' => 'No contributors found',
+			'contributors.contributionsCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} contribution', other: '${n} contributions', ),
 			'auth.signIn.required' => 'Sign in required',
 			'auth.signIn.description' => 'Choose how you want to sign in to the FlutterKaigi 2026 app',
 			'auth.signIn.withGoogle' => 'Sign in with Google',

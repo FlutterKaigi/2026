@@ -140,6 +140,12 @@ service cloud.firestore {
       allow write: if hasAdminAccess();
     }
 
+    // 書き込みは GitHub Actions の日次バッチのみ(IAM 経由のため rules を通らない)。
+    match /contributors/{contributorId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
     function quizBeforeStart(eventId) {
       return get(/databases/$(database)/documents/quizEvents/$(eventId)).data.status
         in ['draft', 'published', 'registration', 'entryClosed'];

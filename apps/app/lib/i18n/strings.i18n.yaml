@@ -191,6 +191,8 @@ eventInfo:
   venueLabel: 会場
   venue: 浜松町コンベンションホール
   viewMap: 地図を見る
+  credits: クレジット
+  contributors: コントリビューター
   other: その他
   officialWebsite: 公式Webサイト
   codeOfConduct: 行動規範
@@ -200,6 +202,13 @@ eventInfo:
   sourceCode: ソースコードを見る
   staffMembers: スタッフ
   ossLicenses: OSSライセンス
+contributors:
+  title: コントリビューター
+  openRepository: FlutterKaigi/2026 のリポジトリを開く
+  empty: コントリビューターが見つかりませんでした
+  contributionsCount:
+    one: $n contributions
+    other: $n contributions
 auth:
   signIn:
     required: サインインが必要です
