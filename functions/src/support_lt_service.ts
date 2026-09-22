@@ -31,6 +31,8 @@ export interface SupportLtAuth {
 
 interface Dependencies {
   db: Firestore;
+  /** Dashboard administration can authenticate in a different project. */
+  adminDb?: Firestore;
   getUser: SupportLtGetUser;
   now?: () => number;
   randomInt?: (max: number) => number;
@@ -104,7 +106,10 @@ export async function issueSupportLtCodeForUser(
     throw new HttpsError("invalid-argument", "rotate は真偽値で指定してください。");
   }
   const { db } = dependencies;
-  await Promise.all([assertActiveSupportLtUser(user.uid, dependencies.getUser), assertAdmin(user, db)]);
+  await Promise.all([
+    assertActiveSupportLtUser(user.uid, dependencies.getUser),
+    assertAdmin(user, dependencies.adminDb ?? db),
+  ]);
   const ref = db.doc(SETTINGS_PATH);
   return db.runTransaction(async (tx) => {
     const previous = (await tx.get(ref)).data() as CodeSettings | undefined;

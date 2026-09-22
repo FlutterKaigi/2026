@@ -1,4 +1,5 @@
 import 'package:dashboard/core/router/router.dart';
+import 'package:dashboard/core/event_environment/event_environment.dart';
 import 'package:dashboard/feature/quiz/data/provider/quiz_list_state.dart';
 import 'package:dashboard/feature/quiz/ui/component/quiz_event_create_dialog.dart';
 import 'package:dashboard/feature/quiz/ui/component/quiz_status_label.dart';
@@ -41,7 +42,7 @@ class QuizEventListPage extends ConsumerWidget {
                           const Icon(Icons.chevron_right),
                         ],
                       ),
-                      onTap: () => QuizConsoleRoute(event.id).push(context),
+                      onTap: () => pushEventRoute(context, QuizConsoleRoute(event.id).location),
                     );
                   },
                 ),

@@ -1,4 +1,6 @@
 import 'package:dashboard/core/router/paths.dart';
+import 'package:dashboard/core/event_environment/event_admin_page.dart';
+import 'package:dashboard/core/event_environment/event_environment.dart';
 import 'package:dashboard/core/ui/scaffold_with_nav.dart';
 import 'package:dashboard/feature/auth/data/provider/auth_state.dart';
 import 'package:dashboard/feature/auth/ui/auth/page/login_page.dart';
@@ -47,6 +49,8 @@ part 'quiz.dart';
 part 'support_lt.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
+  // Event detail/projection links must keep their environment on browser reload.
+  GoRouter.optionURLReflectsImperativeAPIs = true;
   final initial = ref.read(authStateProvider);
   final isLoggedInNotifier = ValueNotifier<bool>(initial.value != null);
   final isLoadingNotifier = ValueNotifier<bool>(initial.isLoading);
@@ -72,8 +76,24 @@ final routerProvider = Provider<GoRouter>((ref) {
       final loginLocation = const LoginRoute().location;
       final homeLocation = const HomeRoute().location;
 
-      if (!isLoggedIn) return loc == loginLocation ? null : loginLocation;
-      if (loc == loginLocation) return homeLocation;
+      if (!isLoggedIn) {
+        return loc == loginLocation
+            ? null
+            : Uri(path: loginLocation, queryParameters: {'from': state.uri.toString()}).toString();
+      }
+      if (loc == loginLocation) {
+        final from = Uri.tryParse(state.uri.queryParameters['from'] ?? '');
+        return from != null &&
+                !from.hasScheme &&
+                !from.hasAuthority &&
+                from.path.startsWith('/') &&
+                from.path != loginLocation
+            ? from.toString()
+            : homeLocation;
+      }
+      if (isEventPath(state.uri.path) && !state.uri.queryParameters.containsKey('environment')) {
+        return eventLocation(state.uri.toString(), ref.read(eventEnvironmentProvider));
+      }
       return null;
     },
     routes: $appRoutes,
