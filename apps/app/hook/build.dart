@@ -3,16 +3,12 @@ import 'package:hooks/hooks.dart';
 
 void main(List<String> args) async {
   await build(args, (input, output) async {
-    // Use the supplied mascot and the same floor image as the 2D/3D views.
+    // Cook the mascot. Floor artwork is decoded directly at a smaller size
+    // for 3D to avoid Flutter Scene's expensive runtime ETC2 transcoding.
     buildScenes(
       buildInput: input,
       buildOutput: output,
       inputFilePaths: const ['assets/models/dashmaru.glb'],
-    );
-    buildTextures(
-      buildInput: input,
-      buildOutput: output,
-      textures: const ['assets/venue_map/floor_map_base.png', 'assets/venue_map/floor_map_base_dark.png'],
     );
   });
 }
