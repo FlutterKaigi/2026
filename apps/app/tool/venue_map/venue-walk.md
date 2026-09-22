@@ -5,6 +5,7 @@
 Flutter **3.47.3 / Dart 3.13.3**、Flutter Scene **0.23.0**を使用します。選定理由は [調査レポート](flutter-scene-research.md)、モデルの出典は [モデルのREADME](../../assets/models/README.md) を参照してください。
 
 描画・経路探索の改善内容と計測手順は [性能と現在地判定の修正](venue-walk-performance.md) を参照してください。
+Androidの初回表示で約30秒かかる問題の原因と修正結果は [Android性能調査・修正](android-performance-investigation.md) に記録しています。
 
 ## 起動と確認
 
@@ -22,6 +23,34 @@ fvm flutter test
 node --test tool/venue_map/label-layout.test.cjs
 fvm flutter build web --release --dart-define=FLAVOR=dev
 ```
+
+床画像のGPU読み込み・メモリー上限・mipmapのテストには、ImpellerとFlutter GPUを有効にします。
+
+```sh
+fvm flutter test --no-pub --enable-impeller --enable-flutter-gpu test/venue_floor_texture_test.dart
+```
+
+Androidではアプリを起動し直し、まだ3Dを開いていない2Dマップから次のチェックを実行できます。
+`adb`がPATHにない場合は`--adb`で指定します。20秒以内に3Dの準備完了を確認できなければ終了コード1となり、結果JSONと画面を保存します。
+計測にはUI取得の待ち時間を含みます。2D／3Dの往復では既存シーンを再利用するため、初回表示の計測には使いません。
+
+```sh
+python3 tool/venue_map/check_android_3d.py --serial emulator-5554 \
+  --budget 20 --output /tmp/venue-map-startup
+```
+
+## 看板画像の更新
+
+3D用の看板・装飾は`assets/venue_map/walk_artwork/`の生成済みPNGを使います。起動時には文字の描画を行いません。会場名・スポンサー名・翻訳・フォント・看板の寸法や描画を変更したら、`apps/app`で次を実行し、PNGと`manifest.json`をコミットします。
+
+```sh
+fvm flutter test tool/venue_map/generate_walk_artwork.dart
+fvm flutter test test/venue_walk_artwork_test.dart
+```
+
+生成にはリポジトリ指定のFlutterと同梱のNoto Sans JPを使います。既存の描画レシピは`venue_artwork_painter.dart`、会場寸法との対応は`generate_walk_artwork.dart`にあります。立体の看板寸法を変更する場合は、生成側の寸法も合わせてください。整合性テストで入力の変更と同梱漏れを検出します。
+
+床は最初に選択中のテーマだけを読み込みます。別テーマへの初回切り替えでは、新しい床画像の準備ができるまで現在の会場の色を保ち、床・壁・机をまとめて切り替えます。2回目以降は読み込み済みの画像を再利用します。
 
 ## 操作
 

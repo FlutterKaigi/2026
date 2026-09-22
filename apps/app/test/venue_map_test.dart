@@ -432,6 +432,7 @@ void main() {
   });
 
   testWidgets('3D stays in the map tab, inherits dark mode, and offers a working 2D fallback', (tester) async {
+    final failedScene = _FailedScene();
     final navigatorKey = GlobalKey<NavigatorState>();
     const tabsKey = Key('app navigation');
     SharedPreferences.setMockInitialValues({VenueMapViewModeNotifier.preferencesKey: 'twoD'});
@@ -442,7 +443,7 @@ void main() {
         overrides: [
           sharedPreferencesProvider.overrideWithValue(prefs),
           venueFloorPlanProvider.overrideWith((ref) => plan),
-          venueWalkSceneFactoryProvider.overrideWithValue(({required showcase}) => _FailedScene()),
+          venueWalkSceneFactoryProvider.overrideWithValue(({required showcase}) => failedScene),
         ],
         child: TranslationProvider(
           child: MaterialApp(
@@ -474,6 +475,8 @@ void main() {
     expect(find.byKey(tabsKey).hitTestable(), findsOneWidget);
     final walkContext = tester.element(find.byType(VenueWalkView));
     expect(Theme.of(walkContext).brightness, Brightness.dark);
+    expect(failedScene.darkAtLoad, isTrue);
+    expect(failedScene.languageAtLoad, 'ja');
     expect(find.text('会場マップを読み込めませんでした'), findsOneWidget);
     await tester.tap(find.text('2Dで表示'));
     await tester.pumpAndSettle();
@@ -484,8 +487,23 @@ void main() {
 }
 
 class _FailedScene extends VenueWalkScene {
+  bool? _configuredDark;
+  String? _configuredLanguage;
+  bool? darkAtLoad;
+  String? languageAtLoad;
+
   @override
-  Future<void> load() async => throw StateError('GPU unavailable');
+  void setDarkMode({required bool dark}) => _configuredDark = dark;
+
+  @override
+  Future<void> setLanguage(String languageCode) async => _configuredLanguage = languageCode;
+
+  @override
+  Future<void> load() async {
+    darkAtLoad = _configuredDark;
+    languageAtLoad = _configuredLanguage;
+    throw StateError('GPU unavailable');
+  }
 }
 
 class _SearchScene extends VenueWalkScene {

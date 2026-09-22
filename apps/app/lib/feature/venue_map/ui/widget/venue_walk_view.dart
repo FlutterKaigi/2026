@@ -37,6 +37,7 @@ class _VenueWalkViewState extends ConsumerState<VenueWalkView> {
   final focus = FocusNode(debugLabel: 'Venue walking controls');
   late final AppLifecycleListener lifecycle;
   bool ready = false;
+  bool _loadStarted = false;
   double lastScale = 1;
   bool _foreground = true;
   bool _tickerEnabled = true;
@@ -68,6 +69,10 @@ class _VenueWalkViewState extends ConsumerState<VenueWalkView> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _tickerEnabled = TickerMode.valuesOf(context).enabled;
+    if (!_loadStarted) {
+      _loadStarted = true;
+      unawaited(load());
+    }
     unawaited(_updateSignLanguage());
     game?.setDarkMode(dark: Theme.of(context).brightness == Brightness.dark);
     _syncActivity();
@@ -102,7 +107,6 @@ class _VenueWalkViewState extends ConsumerState<VenueWalkView> {
         }
       },
     );
-    unawaited(load());
   }
 
   Future<void> load() async {
@@ -110,6 +114,12 @@ class _VenueWalkViewState extends ConsumerState<VenueWalkView> {
     game?.dispose();
     game = next;
     try {
+      // Inherited theme/locale are available here, before any textures load.
+      next.setDarkMode(dark: Theme.of(context).brightness == Brightness.dark);
+      await next.setLanguage(context.t.$meta.locale.languageCode);
+      if (!mounted || game != next) {
+        return;
+      }
       await next.load().timeout(const Duration(seconds: 30));
       if (!mounted || game != next) {
         return;

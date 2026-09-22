@@ -14,7 +14,7 @@ dependencies:
   vector_math: ^2.2.0
   data:
     path: ../../packages/data
-  firebase_app_check: ^0.4.5
+  firebase_app_check: ^0.4.6
   firebase_core: ^4.10.0
   flutter:
     sdk: flutter
@@ -50,6 +50,7 @@ dependencies:
   pub_semver: ^2.2.1
 
 dev_dependencies:
+  crypto: ^3.0.7
   flutter_test:
     sdk: flutter
   build_runner: ^2.15.0
@@ -69,6 +70,7 @@ flutter:
     - assets/venue_map/floor_map_base.png
     - assets/venue_map/floor_map_base_dark.png
     - assets/venue_map/THREE_LICENSE.txt
+    - assets/venue_map/walk_artwork/
     - res/assets/dashumaru_magao.webp
     - res/assets/fonts/NotoSansJP/OFL.txt
     # Google 公式の Sign in with Google ボタン素材。

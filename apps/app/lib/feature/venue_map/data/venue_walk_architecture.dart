@@ -1,9 +1,8 @@
 import 'dart:math' as math;
-import 'dart:ui' as ui;
 
-import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/feature/venue_map/data/venue_escalator_layout.dart';
 import 'package:app/feature/venue_map/data/venue_localized_signs.dart';
+import 'package:app/feature/venue_map/data/venue_walk_artwork.dart';
 import 'package:app/feature/venue_map/data/venue_walk_navigation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_scene/scene.dart' as fs;
@@ -41,7 +40,7 @@ class VenueWalkArchitecture {
     ..doubleSided = true;
 
   Future<void> build() async {
-    final tread = fs.PhysicallyBasedMaterial(baseColorTexture: await _treadTexture())
+    final tread = fs.PhysicallyBasedMaterial(baseColorTexture: await loadVenueArtwork('tread'))
       ..metallicFactor = .78
       ..roughnessFactor = .42;
     for (final layout in escalators) {
@@ -49,17 +48,13 @@ class VenueWalkArchitecture {
     }
     await _hallEntrances();
     await _mainEntrance();
-    for (final (id, color) in [
-      ('mens_wc', const Color(0xff446c88)),
-      ('womens_wc', const Color(0xff9b5c76)),
-      ('accessible_wc', const Color(0xff397b6d)),
-    ]) {
+    for (final id in ['mens_wc', 'womens_wc', 'accessible_wc']) {
       final place = navigation.places.firstWhere((p) => p.id == id);
       final north = place.polygon.map((p) => p.y).reduce(math.min);
       final width = id == 'accessible_wc' ? 1.42 : 2.1;
       final sign = _sign(
         await localizedSigns.create(
-          (language) => _signTexture('WC', place.nameFor(language), color, width: width, height: .56),
+          (language) => loadVenueArtwork('wc_$id', language: language),
         ),
         width: width,
         height: .56,
@@ -229,13 +224,7 @@ class VenueWalkArchitecture {
       parts.finish();
       root.add(parts.root);
       final material = signs[(hall.id, width)] ??= await localizedSigns.create(
-        (language) async => _signTexture(
-          hall.nameFor(language),
-          (await (language == 'ja' ? AppLocale.ja : AppLocale.en).build()).venueWalk.entranceSign,
-          const Color(0xff205c50),
-          width: width,
-          height: .36,
-        ),
+        (language) => loadVenueArtwork(venueEntranceArtworkId(hall.id, width), language: language),
       );
       final sign = _sign(material, width: width, height: .36)
         ..position = world(center, 2.14)
@@ -277,13 +266,7 @@ class VenueWalkArchitecture {
     _entranceHeader.add(
       _sign(
         await localizedSigns.create(
-          (_) => _signTexture(
-            'FlutterKaigi 2026',
-            '5F  /  WELCOME',
-            const Color(0xff205c50),
-            width: width - .22,
-            height: .54,
-          ),
+          (_) => loadVenueArtwork('main_entrance'),
         ),
         width: width - .22,
         height: .54,
@@ -348,79 +331,6 @@ class VenueWalkArchitecture {
       );
     }
     return sign;
-  }
-
-  Future<fs.Texture2D> _treadTexture() async {
-    final recorder = ui.PictureRecorder();
-    final canvas = ui.Canvas(recorder);
-    canvas.drawRect(
-      const Rect.fromLTWH(0, 0, 256, 128),
-      Paint()
-        ..shader = ui.Gradient.linear(
-          Offset.zero,
-          const Offset(256, 0),
-          const [Color(0xff829296), Color(0xffc5ced0), Color(0xff91a1a5)],
-          const [0, .42, 1],
-        ),
-    );
-    for (var y = 0; y < 128; y += 8) {
-      canvas.drawRect(Rect.fromLTWH(0, y.toDouble(), 256, 2), Paint()..color = const Color(0xff48585c));
-      canvas.drawRect(Rect.fromLTWH(0, y + 2.0, 256, 1), Paint()..color = const Color(0xffd4dddd));
-    }
-    return _texture(recorder, 256, 128);
-  }
-
-  Future<fs.Texture2D> _signTexture(
-    String title,
-    String caption,
-    Color color, {
-    required double width,
-    required double height,
-  }) async {
-    const pixelsWide = 1024;
-    // The sign's visible face has a .025-unit frame inset.
-    final pixelsHigh = (pixelsWide * (height - .025) / (width - .025)).round();
-    final recorder = ui.PictureRecorder();
-    final canvas = ui.Canvas(recorder);
-    canvas.drawColor(color, BlendMode.src);
-    void text(String value, double y, double size, FontWeight weight) {
-      final painter = TextPainter(
-        text: TextSpan(
-          text: value,
-          style: TextStyle(
-            fontFamily: 'Noto Sans JP',
-            fontSize: size,
-            fontWeight: weight,
-            color: const Color(0xfff8f5e9),
-          ),
-        ),
-        textDirection: TextDirection.ltr,
-        maxLines: 1,
-      )..layout();
-      final scale = math.min<double>(1, (pixelsWide - 68) / painter.width);
-      canvas
-        ..save()
-        ..translate((pixelsWide - painter.width * scale) / 2, y)
-        ..scale(scale);
-      painter.paint(canvas, Offset.zero);
-      canvas.restore();
-      painter.dispose();
-    }
-
-    text(title, pixelsHigh * .10, pixelsHigh * .375, FontWeight.w600);
-    text(caption, pixelsHigh * .69, pixelsHigh * .18, FontWeight.w500);
-    return _texture(recorder, pixelsWide, pixelsHigh);
-  }
-
-  Future<fs.Texture2D> _texture(ui.PictureRecorder recorder, int width, int height) async {
-    final picture = recorder.endRecording();
-    final image = await picture.toImage(width, height);
-    try {
-      return await fs.Texture2D.fromImage(image);
-    } finally {
-      image.dispose();
-      picture.dispose();
-    }
   }
 }
 

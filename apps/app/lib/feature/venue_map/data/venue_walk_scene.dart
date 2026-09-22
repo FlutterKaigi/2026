@@ -1,9 +1,12 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:math' as math;
 
 import 'package:app/feature/venue_map/data/venue_box_batch.dart';
 import 'package:app/feature/venue_map/data/venue_escalator_layout.dart';
+import 'package:app/feature/venue_map/data/venue_floor_texture.dart';
 import 'package:app/feature/venue_map/data/venue_localized_signs.dart';
+import 'package:app/feature/venue_map/data/venue_theme_textures.dart';
 import 'package:app/feature/venue_map/data/venue_walk_architecture.dart';
 import 'package:app/feature/venue_map/data/venue_walk_decorations.dart';
 import 'package:app/feature/venue_map/data/venue_walk_navigation.dart';
@@ -99,8 +102,9 @@ class VenueWalkScene extends ChangeNotifier {
   bool overview = false;
   bool paused = false;
   bool _disposed = false;
-  bool _dark = false;
-  void Function()? _applyAppearance;
+  final _themeTextures = VenueThemeTextures<fs.Texture2D>(load: loadVenueFloorTexture);
+  bool _loaded = false;
+  void Function(fs.Texture2D, {required bool dark})? _applyAppearance;
   final _surfaceColors = <(fs.PhysicallyBasedMaterial, int, int)>[];
   final _boxMaterials = <(int, int?), fs.PhysicallyBasedMaterial>{};
   final _boxes = VenueBoxBatch();
@@ -136,17 +140,6 @@ class VenueWalkScene extends ChangeNotifier {
     if (_disposed) {
       return;
     }
-    final texture = await _resources.track(
-      fs.loadTexture('assets/venue_map/floor_map_base.png'),
-      release: () => fs.releaseTexture('assets/venue_map/floor_map_base.png'),
-    );
-    final darkTexture = await _resources.track(
-      fs.loadTexture('assets/venue_map/floor_map_base_dark.png'),
-      release: () => fs.releaseTexture('assets/venue_map/floor_map_base_dark.png'),
-    );
-    if (_disposed) {
-      return;
-    }
     scene.environmentIntensity = .85;
     scene.directionalLight = fs.DirectionalLight(
       direction: vm.Vector3(-.4, -1, .3),
@@ -157,16 +150,20 @@ class VenueWalkScene extends ChangeNotifier {
       shadowSoftness: .10,
     );
     scene.antiAliasingMode = fs.AntiAliasingMode.fxaa;
-    final floorMaterial = fs.UnlitMaterial(colorTexture: texture)
+    final floorMaterial = fs.UnlitMaterial()
       ..baseColorTextureTransform = fs.TextureTransform(offset: vm.Vector2(0, 1), scale: vm.Vector2(1, -1));
     final cleanFloor = _unlit(0xfcfdfe);
-    _applyAppearance = () {
-      floorMaterial.baseColorTexture = _dark ? darkTexture : texture;
-      cleanFloor.baseColorFactor = _color(_dark ? 0x18232e : 0xfcfdfe);
-      for (final (material, light, dark) in _surfaceColors) {
-        material.baseColorFactor = _color(_dark ? dark : light);
+    _applyAppearance = (texture, {required dark}) {
+      floorMaterial.baseColorTexture = texture;
+      cleanFloor.baseColorFactor = _color(dark ? 0x18232e : 0xfcfdfe);
+      for (final (material, lightColor, darkColor) in _surfaceColors) {
+        material.baseColorFactor = _color(dark ? darkColor : lightColor);
       }
     };
+    await _themeTextures.apply(_applyAppearance!);
+    if (_disposed) {
+      return;
+    }
     final openings = showcase ? escalators.map((layout) => layout.floorOpening).whereType<Rect>().toList() : <Rect>[];
     final artwork = showcase ? escalators.map((layout) => layout.floorArtworkBounds).toList() : <Rect>[];
     _addFloor(
@@ -283,7 +280,8 @@ class VenueWalkScene extends ChangeNotifier {
     scene.add(_routeRoot);
     scene.add(_target);
     _updateCamera(1, snap: true);
-    _applyAppearance!();
+    await _themeTextures.apply(_applyAppearance!);
+    _loaded = !_disposed;
   }
 
   Future<void> setLanguage(String languageCode) async {
@@ -295,8 +293,17 @@ class VenueWalkScene extends ChangeNotifier {
   }
 
   void setDarkMode({required bool dark}) {
-    _dark = dark;
-    _applyAppearance?.call();
+    if (_disposed) {
+      return;
+    }
+    _themeTextures.dark = dark;
+    if (_loaded) {
+      unawaited(
+        _themeTextures.apply(_applyAppearance!).catchError((Object error) {
+          debugPrint('Venue floor theme update failed: $error');
+        }),
+      );
+    }
   }
 
   void _bindPhotoRotations(fs.Node model) {
@@ -734,6 +741,8 @@ class VenueWalkScene extends ChangeNotifier {
     stickInput.dispose();
     _resources.dispose();
     _localizedSigns.dispose();
+    _themeTextures.dispose();
+    _applyAppearance = null;
     status.dispose();
     super.dispose();
   }

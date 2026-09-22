@@ -1,0 +1,428 @@
+{
+  "inputs": {
+    "assets/venue_map/floor_plan.json": "0505c1d7ec0eb05cf710117885992d6c6327367642258b310aa6c43cd0355f8e",
+    "res/assets/fonts/NotoSansJP/NotoSansJP-VariableFont.ttf": "522e50bd93d30ca91266bf06e4dcf2051b926a01f027f794754d735aa7186b1f",
+    "lib/feature/venue_map/data/venue_walk_architecture.dart": "eb3f83988e014673235c9f2366ea4355db266dbb591b45157f395d2eba045a29",
+    "lib/feature/venue_map/data/venue_walk_decorations.dart": "3c745c2a0d0cb49081c34786a5a16eb05390bc9ea22f7507047ce8df1f36d108",
+    "lib/feature/venue_map/data/venue_walk_artwork.dart": "f58a6790053d106095a4627388c5961b2ad5e5ec28d5e94141136039bd79d881",
+    "lib/feature/venue_map/data/venue_walk_navigation.dart": "cd9d6b3f220ae2e5cc50e92641c1c3a337e1aa5135b69cd513fcf10435cfbde6",
+    "tool/venue_map/venue_artwork_painter.dart": "002e59a6c3b186ce1cb3726038e8b6ced236fde4aafd8d11bd9182a2e52fe162",
+    "tool/venue_map/generate_walk_artwork.dart": "a9ae88a3c5418c4efcc0e75c43fca80b64c148229e8569d750638c2ecd6c7b21"
+  },
+  "entranceCaptions": {
+    "ja": "入口",
+    "en": "Entrance"
+  },
+  "images": {
+    "entrance_main_hall_a_1200_ja.png": {
+      "width": 1024,
+      "height": 292,
+      "sha256": "ccac24fb4d860bd23e6e5d0bfd2e9925c9f8f508ee8f6ee18e12540543bafa1d"
+    },
+    "entrance_main_hall_a_1160_ja.png": {
+      "width": 1024,
+      "height": 302,
+      "sha256": "5360117c550968f2bc632bffc191309ab25408b37cb7302bb313f2039ed9200a"
+    },
+    "entrance_main_hall_b_1400_ja.png": {
+      "width": 1024,
+      "height": 249,
+      "sha256": "f39286921f3b7b92380799390304b0b25a0dd5795436f7cce9edd7d7c083d8c7"
+    },
+    "entrance_main_hall_b_1440_ja.png": {
+      "width": 1024,
+      "height": 242,
+      "sha256": "c71a6692b625bf60c542581ee12669291697031d305b1a4c49fc6fc996e6ae70"
+    },
+    "entrance_main_hall_b_1840_ja.png": {
+      "width": 1024,
+      "height": 189,
+      "sha256": "b2dde73285f6e42500809c4f8dd328317ec2194d54a0208e79c0000c9a300b5d"
+    },
+    "entrance_grand_hall_a_1400_ja.png": {
+      "width": 1024,
+      "height": 249,
+      "sha256": "970cec74684d6c16a6145be09b8dd791f6b5dfa76fceb697c4e40148c7fcf228"
+    },
+    "entrance_grand_hall_a_1440_ja.png": {
+      "width": 1024,
+      "height": 242,
+      "sha256": "2323484452cafc5d62eaeb483b37124eb01c9b05344f1f6ff4a70522d044281a"
+    },
+    "entrance_grand_hall_b_1320_ja.png": {
+      "width": 1024,
+      "height": 265,
+      "sha256": "08fe42e4d9a63ebb57018fb5be2233c6da515a5ac9ec1fdd08e4f5fb9400268a"
+    },
+    "entrance_grand_hall_b_1280_ja.png": {
+      "width": 1024,
+      "height": 273,
+      "sha256": "31d584f9faa9a6e25dd14b59df356d73c964685b13725517950ac202c14b64f5"
+    },
+    "entrance_grand_hall_b_1480_ja.png": {
+      "width": 1024,
+      "height": 236,
+      "sha256": "de653211f628041104514f4bb95e011b0361b84007dfffe1d58fa9bffa17b07f"
+    },
+    "wc_mens_wc_ja.png": {
+      "width": 1024,
+      "height": 264,
+      "sha256": "ddbf47a2d9548847500ad91a1809739edd95570e7a232102d8b3d75cbf287db2"
+    },
+    "wc_womens_wc_ja.png": {
+      "width": 1024,
+      "height": 264,
+      "sha256": "606143f21f67de432c1ca7ad0d71d286bf95551e20bb82b5a82c0c3ff09f08f3"
+    },
+    "wc_accessible_wc_ja.png": {
+      "width": 1024,
+      "height": 393,
+      "sha256": "65bd762c1d637f2fc288fd1eb52f82a149b6df1a725a5189c99c1ba290eddd8a"
+    },
+    "stage_main_hall_a_ja.png": {
+      "width": 1024,
+      "height": 241,
+      "sha256": "197cb28357b57e9f75cba19621d188c37fddcb18c8f2423330dba6546d2cd3b2"
+    },
+    "stage_main_hall_b_ja.png": {
+      "width": 1024,
+      "height": 241,
+      "sha256": "28a77d7cfe00773cc79ec0c620e8d0a0c48a374c157a6f0bac7cb42dfa081a19"
+    },
+    "stage_grand_hall_a_ja.png": {
+      "width": 1024,
+      "height": 241,
+      "sha256": "131af9436b886796149edd829ffc53b87ca0c651400c1c72e4ba13064b79b892"
+    },
+    "stage_grand_hall_b_ja.png": {
+      "width": 1024,
+      "height": 241,
+      "sha256": "af86f68d36417452c85607a19a5c649044854a325b039f14742fbad7248b60ae"
+    },
+    "sponsor_1_ja.png": {
+      "width": 768,
+      "height": 280,
+      "sha256": "d047f318538918019002db62390839d7257dd6f8a7ba75faa875eeef6ea34598"
+    },
+    "sponsor_2_ja.png": {
+      "width": 768,
+      "height": 280,
+      "sha256": "17ab732f522f8c0bf5ab07caafeebffa2c0f9f0361f540a03edeef193d2f9ff4"
+    },
+    "sponsor_3_ja.png": {
+      "width": 768,
+      "height": 276,
+      "sha256": "e313fe13ced7f04012389aaab9c5c9559301f3dd40c336745b95978d28759866"
+    },
+    "sponsor_4_ja.png": {
+      "width": 768,
+      "height": 273,
+      "sha256": "822004b3203326b65a41c08ab1a90d42c1f6bf38edfab5f86a3bee88c283e0d2"
+    },
+    "sponsor_5_ja.png": {
+      "width": 768,
+      "height": 280,
+      "sha256": "800704fc2a8308dbfaa9e33973027925d266c8d00350d3646b576a4286892c00"
+    },
+    "sponsor_6_ja.png": {
+      "width": 768,
+      "height": 280,
+      "sha256": "b893573aa8454f1109c1e0fe941be03b44a50c79ad80e0e60c5a1b27cdba6213"
+    },
+    "sponsor_7_ja.png": {
+      "width": 768,
+      "height": 289,
+      "sha256": "e8f83aa114a68cbac4ffe94be92f15d504b78d3c849d7f5b6114e64b808c22fc"
+    },
+    "sponsor_8_ja.png": {
+      "width": 768,
+      "height": 297,
+      "sha256": "447adfa7dbf43788d77f3dd658a5e5ecc411f717d3e6c270b2005a5a50557692"
+    },
+    "sponsor_9_ja.png": {
+      "width": 768,
+      "height": 406,
+      "sha256": "4158c4b11b7aafff997020fd13bdfd2ab51b4af75b0bb590399ae1f9d8e9c413"
+    },
+    "sponsor_10_ja.png": {
+      "width": 768,
+      "height": 407,
+      "sha256": "13bcee91b53a1d1439721f93ecc38a2ba85e49092d610bdeea9ed75388271ebf"
+    },
+    "sponsor_11_ja.png": {
+      "width": 768,
+      "height": 406,
+      "sha256": "4687a411b1ea14da5ea4519480e000a6ae01d68f542bf81a12a6f59a52a0cd5e"
+    },
+    "sponsor_12_ja.png": {
+      "width": 768,
+      "height": 404,
+      "sha256": "f57286ee653ca38a659d37c429cbcd9f129ad1db3f3ac70c5b1ebeb7f411859f"
+    },
+    "sponsor_13_ja.png": {
+      "width": 768,
+      "height": 406,
+      "sha256": "35602dcbc4219c5d4b038d704dea4312537f0090e0017bd252e711d1e648ff87"
+    },
+    "sponsor_14_ja.png": {
+      "width": 768,
+      "height": 406,
+      "sha256": "d77718fa4d999015a55983b0765dbb63ae97ea25086875bba20212b2de4bdac4"
+    },
+    "sponsor_15_ja.png": {
+      "width": 768,
+      "height": 406,
+      "sha256": "65eae97d737bfb101b28241c5dd960e7c5fe4455185c31993d8836040fcc5b58"
+    },
+    "sponsor_16_ja.png": {
+      "width": 768,
+      "height": 406,
+      "sha256": "4d2fdab1e006e223e73190848c645fbfa606d4f93c9a6e9356e75c4adc5379c5"
+    },
+    "sponsor_17_ja.png": {
+      "width": 768,
+      "height": 406,
+      "sha256": "efc8502111908375a3af55ab33540376c573217b5094dca9d7df9b51870f98e7"
+    },
+    "sponsor_18_ja.png": {
+      "width": 768,
+      "height": 406,
+      "sha256": "9c27ad14b60ae2e1ce0c8b7657a6c0fff872f5ff279c1e0f5c76cab74a290f55"
+    },
+    "sponsor_19_ja.png": {
+      "width": 768,
+      "height": 404,
+      "sha256": "888c162ea10d090906689b332a7c9cae267afaae79be4911fcbdcbf0967203da"
+    },
+    "sponsor_20_ja.png": {
+      "width": 768,
+      "height": 405,
+      "sha256": "90ab8f39566aff1bda7d759de4f4768467ca381934dc490fff1d4fb907e26674"
+    },
+    "sponsor_21_ja.png": {
+      "width": 768,
+      "height": 405,
+      "sha256": "e643eb4814518ff4d1a849967f5eda022eec628a1913afa7f5794be225bb6a47"
+    },
+    "sponsor_22_ja.png": {
+      "width": 768,
+      "height": 404,
+      "sha256": "14ce622841c164f38ce6d45c3340bf9fd87b6d095b7df7379c7e514c784e91da"
+    },
+    "entrance_main_hall_a_1200_en.png": {
+      "width": 1024,
+      "height": 292,
+      "sha256": "fb95c7200a352c410e97d21737af0033e606dd743cb5a21ff84e4e9efe253743"
+    },
+    "entrance_main_hall_a_1160_en.png": {
+      "width": 1024,
+      "height": 302,
+      "sha256": "bac3586fad24091c48342135049281b193364729e7d3347bb368999f40032952"
+    },
+    "entrance_main_hall_b_1400_en.png": {
+      "width": 1024,
+      "height": 249,
+      "sha256": "40b4132df3bf3ba5a5b5eedf08145e4821937bda16ccf7272a5f963971a6e8fc"
+    },
+    "entrance_main_hall_b_1440_en.png": {
+      "width": 1024,
+      "height": 242,
+      "sha256": "b802b9bd92edaaec357891f02331b7ffd428750ed52a9dc6f798bd855ae59c5e"
+    },
+    "entrance_main_hall_b_1840_en.png": {
+      "width": 1024,
+      "height": 189,
+      "sha256": "adcc06b215769551a1e7f97cc37d53eaffc66d4a3f9c895265fed7cb78c98207"
+    },
+    "entrance_grand_hall_a_1400_en.png": {
+      "width": 1024,
+      "height": 249,
+      "sha256": "a859377faef3dea2a7d4d24787cda0fb8f037ac963f4b5ca90717ef089d1315f"
+    },
+    "entrance_grand_hall_a_1440_en.png": {
+      "width": 1024,
+      "height": 242,
+      "sha256": "770d2f598cb9ea25e950e9cd74453ddb303a96ff9b3fe08e1003d6b9fdf9ef68"
+    },
+    "entrance_grand_hall_b_1320_en.png": {
+      "width": 1024,
+      "height": 265,
+      "sha256": "36124c4f458f435d03333b682089e6b5774d70553e65c9a0bf7b925cece85366"
+    },
+    "entrance_grand_hall_b_1280_en.png": {
+      "width": 1024,
+      "height": 273,
+      "sha256": "c259d2ffa38206fb5f3f73b2b2a098d5bfe1dc30e5d02e638b6c98c64a5640c8"
+    },
+    "entrance_grand_hall_b_1480_en.png": {
+      "width": 1024,
+      "height": 236,
+      "sha256": "aa3f89d1847b89fcd1e7e0b06b94cd6d7b1c3a702b83ca6d05952f6712188a3e"
+    },
+    "wc_mens_wc_en.png": {
+      "width": 1024,
+      "height": 264,
+      "sha256": "272a8bbc11b4956e020eca4a099bcb78517ff62d5db165f927777dea28e492a3"
+    },
+    "wc_womens_wc_en.png": {
+      "width": 1024,
+      "height": 264,
+      "sha256": "ea1a6a29b4aa1964b4ad8bbaa11e4a83c93d881dfb603d87ace16fbb8fe40716"
+    },
+    "wc_accessible_wc_en.png": {
+      "width": 1024,
+      "height": 393,
+      "sha256": "0a58125763fc2212efd57fedd06dec8524c5116269b51d5a6b80bd514c122655"
+    },
+    "stage_main_hall_a_en.png": {
+      "width": 1024,
+      "height": 241,
+      "sha256": "197cb28357b57e9f75cba19621d188c37fddcb18c8f2423330dba6546d2cd3b2"
+    },
+    "stage_main_hall_b_en.png": {
+      "width": 1024,
+      "height": 241,
+      "sha256": "28a77d7cfe00773cc79ec0c620e8d0a0c48a374c157a6f0bac7cb42dfa081a19"
+    },
+    "stage_grand_hall_a_en.png": {
+      "width": 1024,
+      "height": 241,
+      "sha256": "131af9436b886796149edd829ffc53b87ca0c651400c1c72e4ba13064b79b892"
+    },
+    "stage_grand_hall_b_en.png": {
+      "width": 1024,
+      "height": 241,
+      "sha256": "af86f68d36417452c85607a19a5c649044854a325b039f14742fbad7248b60ae"
+    },
+    "sponsor_1_en.png": {
+      "width": 768,
+      "height": 280,
+      "sha256": "d047f318538918019002db62390839d7257dd6f8a7ba75faa875eeef6ea34598"
+    },
+    "sponsor_2_en.png": {
+      "width": 768,
+      "height": 280,
+      "sha256": "95c9471b530f2ccd716c7cd9b08b826a0a9d7e432222b15f36d8fc65e2c3ba3a"
+    },
+    "sponsor_3_en.png": {
+      "width": 768,
+      "height": 276,
+      "sha256": "b49e3d6b090389f8a6428d5b4139754959b9866c622220586d8a317c43032f70"
+    },
+    "sponsor_4_en.png": {
+      "width": 768,
+      "height": 273,
+      "sha256": "dbd6886a0e162bbc68d6ebac49456c7a3fef91e495fc0427819b370c7cbb2611"
+    },
+    "sponsor_5_en.png": {
+      "width": 768,
+      "height": 280,
+      "sha256": "f997d5bb653ed7f47ab356644d1ef64a6ee4c542ff33e7d3c93cafa816f6d1d7"
+    },
+    "sponsor_6_en.png": {
+      "width": 768,
+      "height": 280,
+      "sha256": "0186fe9a0cfee129df4b1568025542d3d44fbbba3810288ac18fc8c4655140d1"
+    },
+    "sponsor_7_en.png": {
+      "width": 768,
+      "height": 289,
+      "sha256": "feacbd59ef620a9c22c984544f83ee97b6fd61116e49e4fd96bb8d1469d305c1"
+    },
+    "sponsor_8_en.png": {
+      "width": 768,
+      "height": 297,
+      "sha256": "447adfa7dbf43788d77f3dd658a5e5ecc411f717d3e6c270b2005a5a50557692"
+    },
+    "sponsor_9_en.png": {
+      "width": 768,
+      "height": 406,
+      "sha256": "4158c4b11b7aafff997020fd13bdfd2ab51b4af75b0bb590399ae1f9d8e9c413"
+    },
+    "sponsor_10_en.png": {
+      "width": 768,
+      "height": 407,
+      "sha256": "26e14206250fe7da1cd4ebaa9e178449fe32eb1d4254526e6a0612111747da7e"
+    },
+    "sponsor_11_en.png": {
+      "width": 768,
+      "height": 406,
+      "sha256": "eec52ea6dcb6f27346193182d10a71df4e9b5fc9b5d72f36a01d52680a4b5262"
+    },
+    "sponsor_12_en.png": {
+      "width": 768,
+      "height": 404,
+      "sha256": "34d77f65e60421c89cda6964e22e36354605e56cbadbd074473eac32c05238ee"
+    },
+    "sponsor_13_en.png": {
+      "width": 768,
+      "height": 406,
+      "sha256": "a5705cb76e934a9d96ccf0676d6936d6c7233f6627f1aa215c1477d6216d630d"
+    },
+    "sponsor_14_en.png": {
+      "width": 768,
+      "height": 406,
+      "sha256": "77a2ac4b38c2db94487294f46dc3cef55ad6026e848976292dae738adf6aa648"
+    },
+    "sponsor_15_en.png": {
+      "width": 768,
+      "height": 406,
+      "sha256": "7d781e02d4212ffe686a65ee72d122a5b7eb50697243506decde48a26fb87730"
+    },
+    "sponsor_16_en.png": {
+      "width": 768,
+      "height": 406,
+      "sha256": "4d2fdab1e006e223e73190848c645fbfa606d4f93c9a6e9356e75c4adc5379c5"
+    },
+    "sponsor_17_en.png": {
+      "width": 768,
+      "height": 406,
+      "sha256": "e5b7eefde5d27cd2019936ff440b3ee08de80217bf82235a743bba5885253d3f"
+    },
+    "sponsor_18_en.png": {
+      "width": 768,
+      "height": 406,
+      "sha256": "568cbed1a42f51271c2d457eb02b34f3ffc97592937851a0bfc490b893cdf6ea"
+    },
+    "sponsor_19_en.png": {
+      "width": 768,
+      "height": 404,
+      "sha256": "22b445a81044321c5c9eccdc7c3d194bcd5120090bb3f79b881e49b011a3df04"
+    },
+    "sponsor_20_en.png": {
+      "width": 768,
+      "height": 405,
+      "sha256": "c9b89903172c05422a4b9455e950e63f22cc11fa1090c6b535367f90982b1e92"
+    },
+    "sponsor_21_en.png": {
+      "width": 768,
+      "height": 405,
+      "sha256": "d7bca230945e6d2d0285cd074a3da9391275a4a841ef52ba67eb026dc10bda3b"
+    },
+    "sponsor_22_en.png": {
+      "width": 768,
+      "height": 404,
+      "sha256": "eaba338938eb2066e164e14c988379b6db178ab4ecb7e41188f027457b7fe506"
+    },
+    "main_entrance.png": {
+      "width": 1024,
+      "height": 106,
+      "sha256": "438b0fc001a6af1a6af93f872cd1c568ef2043d8a694a9f260166175f0407739"
+    },
+    "tread.png": {
+      "width": 256,
+      "height": 128,
+      "sha256": "bc258cecb5b8a9f409ec3e7c989a34ce38c5198a320738bcd65f2ec5b6870aa9"
+    },
+    "backdrop.png": {
+      "width": 1024,
+      "height": 826,
+      "sha256": "9d1459323a057530c2dc4a899d4f98a6615936794446f2c1375533ed3f7bf20b"
+    },
+    "podium.png": {
+      "width": 512,
+      "height": 896,
+      "sha256": "8b0f2f9dae3b6747c5ec32736ff4ff17afece188b1ee9d51d74a40468b4b4976"
+    }
+  }
+}
