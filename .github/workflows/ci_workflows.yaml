@@ -24,7 +24,7 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-      - name: 復元した認証情報のマスク処理を検証
+      - name: 認証情報のマスク処理と iOS 署名設定を検証
         run: python3 -m unittest discover -s .github/scripts -p 'test_*.py'
       - name: ワークフローと共通アクションを検証
         run: go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.12 -color

@@ -127,7 +127,11 @@ Base64のSecretだけでは復元後の値のマスクは保証されません�
 | Secret | 使用先 | 取得元・取得方法 |
 | --- | --- | --- |
 | `CLOUDFLARE_API_TOKEN` | Web Preview／Production | Cloudflare Dashboardの`Manage Account > Account API Tokens`から、後述の権限とResource範囲に限定して作成します。 |
-| `APP_STORE_CONNECT_API_KEY_BASE64` | iOS prod / stg | App Store ConnectからダウンロードしたTeam Key（`.p8`）をBase64化します。 |
+| `APP_STORE_CONNECT_API_KEY_BASE64` | iOS prod / stg | App Store Connect APIの認証・ビルド番号取得・アップロードに使用するTeam Key（`.p8`）をBase64化します。 |
+| `IOS_DISTRIBUTION_CERTIFICATE_BASE64` | iOS prod / stg | CIで再利用するApple Distribution証明書と秘密鍵を含む`.p12`をBase64化します。両環境で同じ証明書を使います。 |
+| `IOS_DISTRIBUTION_CERTIFICATE_PASSWORD` | iOS prod / stg | `.p12`を書き出した際のパスワードをそのまま登録します。Base64化しません。 |
+| `STG_IOS_PROVISIONING_PROFILE_BASE64` | iOS stg | 共通の配布証明書を含む`jp.flutterkaigi.conf2026.stg`用のApp Store Connect配布プロファイルをBase64化します。 |
+| `PROD_IOS_PROVISIONING_PROFILE_BASE64` | iOS prod | 共通の配布証明書を含む`jp.flutterkaigi.conf2026`用のApp Store Connect配布プロファイルをBase64化します。 |
 | `ANDROID_SIGNING_KEYSTORE_BASE64` | Android prod / stg | チームで生成・保管するAndroid Upload Key（`release.jks`）をBase64化します。 |
 | `ANDROID_KEY_PROPERTIES_BASE64` | Android prod / stg | Upload Keyのaliasとパスワードを記載した`key.properties`をBase64化します。 |
 | `GOOGLE_PLAY_SERVICE_ACCOUNT_BASE64` | Android prod / stg | Google Cloudで発行したGoogle Play配布用Service Account JSONをBase64化します。 |
@@ -170,24 +174,68 @@ PRマージ前にApp Store Connectへのアップロードまで確認する場�
 ### App Store Connect API Key一式
 
 Team Keyを使用します。生成には通常Account HolderまたはAdmin権限が必要です。
+この`.p8`はApp Store Connect APIの認証・ビルド番号取得・アップロード用です。
+アプリへの署名には、後述する配布証明書・秘密鍵・プロファイルを別途使用します。
 
 1. App Store Connectで`Users and Access > Integrations > App Store Connect API > Team Keys`を開きます。
 2. 初回でAPI accessが未有効の場合は、Account Holderが`Request Access`を実行します。
 3. `Generate API Key`または`+`を選択します。
-4. Key名を`github-actions-app-delivery`などとし、まず`Developer` roleで作成します。署名・アップロード権限で不足する場合だけ`App Manager`を検討します。
+4. Key名を`github-actions-app-delivery`などとし、まず`Developer` roleで作成します。APIの読み取り・アップロード権限で不足する場合だけ`App Manager`を検討します。
 5. 画面の`Key ID`を`APP_STORE_CONNECT_API_KEY_ID`へ登録します。
 6. 同じ画面の`Issuer ID`を`APP_STORE_CONNECT_API_KEY_ISSUER_ID`へ登録します。
 7. `Download API Key`から`AuthKey_<KEY_ID>.p8`をダウンロードします。秘密鍵は一度しかダウンロードできないため、安全なPassword Managerにも保存します。
 
 Apple公式の手順は[App Store Connect API](https://developer.apple.com/help/app-store-connect/get-started/app-store-connect-api/)を参照してください。
 
-`.p8`をGitHub Secret用にBase64化します。
+macOSでは、`.p8`をGitHub Secret用にBase64化して、ターミナルへ表示せずクリップボードへコピーできます。
 
 ```bash
-base64 < AuthKey_XXXXXXXXXX.p8 | tr -d '\n'
+base64 < AuthKey_XXXXXXXXXX.p8 | tr -d '\n' | pbcopy
 ```
 
-出力全体をRepository Secretの`APP_STORE_CONNECT_API_KEY_BASE64`へ登録します。元の`.p8`はRepositoryへ追加しません。
+Repository Secretの`APP_STORE_CONNECT_API_KEY_BASE64`へ貼り付けます。元の`.p8`はRepositoryへ追加しません。
+
+### iOS配布用の証明書とプロファイル
+
+CI専用のApple Distribution証明書と、その秘密鍵を含む`.p12`をstg／prodで共用します。
+`.p8`は署名用の秘密鍵の代わりにはなりません。既存証明書を再利用する場合も、
+その証明書に対応する秘密鍵が必要です。
+
+1. Apple Developerの対象TeamでApple Distribution証明書を用意し、秘密鍵と合わせてパスワード付き`.p12`へ書き出します。
+2. stg／prodそれぞれのApp IDに対して、同じ配布証明書を含むApp Store Connect配布用の`.mobileprovision`を用意します。両方のApp IDでSign in with Appleなど、アプリが使うCapabilityを有効にします。
+3. `.p12`・パスワード・各環境のプロファイルを、上記4つのRepository Secretsへ登録します。原本は安全なPassword Managerなどへ保管し、Repositoryへ追加しません。
+4. `Deploy App`をiOSのみ・`environment=stg`で手動実行し、Archive・IPA書き出し・TestFlightへの登録を確認します。その後、`environment=prod`でも同じ確認を行います。
+
+macOSで、準備したファイルを置いたディレクトリから次を**1つずつ**実行し、
+その都度対応するSecretへ貼り付けます。秘密値はターミナルへ表示しません。
+
+```bash
+# IOS_DISTRIBUTION_CERTIFICATE_BASE64
+base64 < distribution.p12 | tr -d '\n' | pbcopy
+
+# IOS_DISTRIBUTION_CERTIFICATE_PASSWORD
+pbcopy < p12-password.txt
+
+# STG_IOS_PROVISIONING_PROFILE_BASE64
+base64 < stg.mobileprovision | tr -d '\n' | pbcopy
+
+# PROD_IOS_PROVISIONING_PROFILE_BASE64
+base64 < prod.mobileprovision | tr -d '\n' | pbcopy
+```
+
+配布ジョブは実行ごとの専用キーチェーンへ`.p12`を取り込み、選択した環境のプロファイルをインストールします。
+Runnerターゲットが読み込む`apps/app/ios/Flutter/Signing.xcconfig`を一時生成して手動署名を指定し、
+依存するSwift Packageへプロファイルの指定を広げません。
+Archive・IPA書き出しのどちらでも自動プロビジョニングを許可せず、CIから証明書を新規発行しません。
+処理の成功・失敗にかかわらず、最後に専用キーチェーン・プロファイル・一時ファイルを削除します。
+ローカル開発では`Signing.xcconfig`を用意する必要はありません。
+
+証明書とプロファイルには有効期限があり、CIで自動更新しません。
+期限前に新しい配布証明書・秘密鍵を用意し、**その証明書を含むstg／prod両方のプロファイル**を作り直します。
+配布が実行されていない間に`.p12`・パスワード・両方のプロファイルのSecretsをまとめて差し替え、
+stg → prodの順で配布を確認します。証明書だけを変更すると、旧証明書に紐づくプロファイルでは署名できません。
+App IDのCapabilityを変更した場合も、対応するプロファイルを再生成します。
+不要になった旧証明書は、他の配布処理で使用していないことを確認してから整理します。
 
 ## Android署名
 
@@ -353,6 +401,7 @@ OptionsをGit管理外にしても、それだけをデータ保護の境界に�
 - 上記のRepository Secretsを登録し、実値をRepository、Issue、PR、ログへ出力していない
 - Cloudflare Tokenの権限とResource範囲を必要最小限にしている
 - Apple Team Keyの3値を登録し、`.p8`原本を安全に保管している
+- 共通のApple Distribution証明書・秘密鍵の`.p12`とパスワード、stg/prodそれぞれの配布プロファイルをSecretsへ登録し、原本と有効期限を管理している
 - Android Upload Keyの2つのBase64値を登録し、原本を安全に保管している
 - Google Play Service AccountへTesting Trackだけの権限を付与している
 - Firebaseへstg/prodそれぞれ3プラットフォームのAppを登録している

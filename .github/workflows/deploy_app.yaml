@@ -15,6 +15,7 @@ on:
       - .github/workflows/ci_app.yaml
       - .github/actions/setup-flutter/**
       - .github/actions/setup-firebase/**
+      - .github/scripts/ios_signing.py
   release:
     types: [released]
   workflow_dispatch:
@@ -65,6 +66,9 @@ jobs:
       environment: ${{ matrix.environment }}
     secrets:
       APP_STORE_CONNECT_API_KEY_BASE64: ${{ secrets.APP_STORE_CONNECT_API_KEY_BASE64 }}
+      IOS_DISTRIBUTION_CERTIFICATE_BASE64: ${{ secrets.IOS_DISTRIBUTION_CERTIFICATE_BASE64 }}
+      IOS_DISTRIBUTION_CERTIFICATE_PASSWORD: ${{ secrets.IOS_DISTRIBUTION_CERTIFICATE_PASSWORD }}
+      IOS_PROVISIONING_PROFILE_BASE64: ${{ secrets[format('{0}_IOS_PROVISIONING_PROFILE_BASE64', matrix.environment == 'stg' && 'STG' || 'PROD')] }}
 
   android:
     needs: validate
