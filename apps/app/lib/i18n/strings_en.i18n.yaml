@@ -2,8 +2,10 @@ app:
   title: FlutterKaigi 2026
 links:
   openError: Could not open the link
+  copied: Link copied
 navigation:
   sessions: Sessions
+  venueMap: Venue Map
   sponsors: Sponsors
   info: Event
   account: Account
@@ -17,11 +19,18 @@ sponsors:
   empty: Sponsors have not been published yet
   notFound: Sponsor not found
   logoSemanticLabel: $name logo
+  githubCardSemanticLabel: View $name's GitHub profile
+  xCardSemanticLabel: View $name's X profile
+  externalCardSemanticLabel: Open $name's link
   tierBadge: $tier Sponsor
   jobBoards: Job Boards
   jobBoardCta: Hiring information
   recruitCta: Careers
   connect: Connect
+staffMembers:
+  title: Staff
+  empty: Staff profiles have not been published yet
+  error: Failed to load staff profiles
 # NOTE: Keep these notices in sync with footerTrademark in apps/website/lib/l10n/strings.dart
 trademarks:
   flutterAffiliation: Flutter and the related logo are trademarks of Google LLC. FlutterKaigi is not affiliated with or otherwise sponsored by Google LLC.
@@ -44,7 +53,6 @@ sessionTimetable:
     regular: Regular Talk
     lightningTalk: Lightning Talk
     beginnersLightningTalk: Beginners LT
-    handsOn: Hands-on
     event: Event
 sessionSearch:
   title: Search sessions
@@ -73,6 +81,8 @@ sessionDetails:
   speakers: Speakers
   links: Links
   sessionize: Sessionize
+  feedback: Send session feedback
+  feedbackDescription: Let us know what you thought of this session
   share: Share
   notFound: Session not found
 sessionBookmark:
@@ -85,6 +95,89 @@ bookmarkedSessions:
   emptyTitle: No bookmarked sessions
   emptyBody: Bookmark sessions to find them here.
   openSessions: Open sessions
+venueMap:
+  title: Venue Map
+  floor: Hamamatsucho Convention Hall · 5F
+  loadError: Could not load the venue map
+  loadErrorDescription: Please try again.
+  search: Find a place
+  searchHint: Hall, sponsor, booth number, facility
+  clearSearch: Clear search
+  placesCount: places
+  showOnMap: Show on map
+  all: All
+  halls: Halls
+  booths: Sponsors
+  facilities: Facilities
+  noResults: No matching places
+  clearSelection: Clear selection
+  zoomIn: Zoom in
+  zoomOut: Zoom out
+  fit: Show entire floor
+  rotate: Rotate map
+  twoD: 2D
+  threeD: 3D
+  viewMode: Map view
+  useTwoD: Show in 2D
+  saveFailed: Could not save the view preference
+venueWalk:
+  sceneLabel: Explore the venue with Dashumaru. Walk using the stick, a tap on the floor, or the arrow keys.
+  currentLocation: You are at
+  entrance: Entrance
+  entranceSign: Entrance
+  selectedPoint: Selected spot
+  headingTo: Walking to $place
+  arrivedAt: Arrived at $place
+  unreachable: Cannot walk to that spot
+  photoMode: Photo mode
+  walkToPhotoSpot: Walk to the photo spot
+  followTooltip: Follow Dashumaru
+  overviewTooltip: View the entire floor
+  follow: Follow
+  overview: Overview
+  help: How to play
+  stickHint: Use the stick to walk
+  stickLabel: Stick to move Dashumaru
+  stopTooltip: Stop walking
+  stop: Stop here
+  reset: Return to the entrance
+  wave: Wave
+  backToWalk: Back to walking
+  run: Run
+  runningSpeed: Running
+  walkingSpeed: Walking
+  runHint: Hold to run. Release to walk. On a keyboard, hold Shift.
+  close: Close
+  instructions:
+    title: Exploring the venue
+    movement: Use the stick at the bottom left to walk. Hold the run icon at the bottom right to run, and release it to walk again.
+    camera: Drag the background to look around and pinch to zoom. Tap the floor to walk to that spot automatically.
+    places: Use “Find a place” to choose a destination and explore the four halls. Tap the map icon for a view of the entire floor.
+    photos: Tap the camera to take a photo. The picture icon beside it takes you to the creative board. Choose a pose and frame for your photo.
+    keyboard: On a computer, use W A S D or the arrow keys to move. Hold Shift to run and press Esc to stop.
+    scope: Explore the venue on the fifth floor. This does not show your real location, and you cannot use the escalators to change floors.
+    credits: "3D model: yakitama5 / flutter_deck_slides\nDashumaru: FlutterKaigi"
+  photo:
+    title: A photo with Dashumaru
+    resultTitle: Your photo
+    imageLabel: A souvenir photo of Dashumaru
+    downloadStarted: Your photo download has started
+    saveFailed: Could not save the photo. Please try again.
+    savePng: Save PNG
+    captureFailed: Could not take the photo. Please try again.
+    caption: Exploring the venue with Dashumaru.
+    captionAt: With Dashumaru at $place.
+    shutter: Take a photo
+    capturing: Taking photo
+    hideUi: Hide controls. Tap the screen to bring them back
+    faceCamera: Face the camera
+    removeFrame: Remove frame
+    addFrame: Add frame
+    poses:
+      standing: Stand
+      wave: Wave
+      sitting: Sit
+      jumping: Jump
 eventInfo:
   title: Event Overview
   newsTitle: Latest News
@@ -107,6 +200,7 @@ eventInfo:
   exclusionPolicy: Exclusion of Anti-Social Forces
   contact: Contact
   sourceCode: View Source Code
+  staffMembers: Staff
   ossLicenses: OSS Licenses
 contributors:
   title: Contributors
@@ -117,6 +211,7 @@ contributors:
     other: $n contributions
 auth:
   signIn:
+    required: Sign in required
     description: Choose how you want to sign in to the FlutterKaigi 2026 app
     withGoogle: Sign in with Google
     withApple: Sign in with Apple
@@ -137,6 +232,7 @@ auth:
     resetEmailSent: Password reset email sent
   account:
     title: Account
+    features: Take part
     signedIn: Signed in
     signOut: Sign out
     signOutError: Could not sign out
@@ -147,6 +243,14 @@ auth:
     deleteConfirmAction: Delete
     deletePasswordTitle: Confirm your password
     deletePasswordBody: Enter your current password to delete your account.
+    mission: Missions
+    missionDescription: Judged by your participation in Support LT, profile exchange and SNS posts
+    joinEvent: Join the event
+    quiz: Quiz
+    lightningTalks: Join Support LT
+    profileExchange: Profile exchange
+    snsPost: Register SNS post
+    comingSoon: This feature is coming soon
     deleted: Your account has been deleted
     cancel: Cancel
   error:
@@ -161,6 +265,184 @@ auth:
     userMismatch: The re-authenticated account does not match the signed-in account
     appleTokenRevocationFailed: Could not delete the account because revoking the Apple token failed. Please try again
     unknown: Authentication failed. Please try again
+profile:
+  title: Profile
+  editTitle: Edit Profile
+  createTitle: Create Profile
+  promptTitle: Set up your profile
+  promptBody: Add your country or region and social links to exchange profiles with other attendees at the venue.
+  create: Create profile
+  edit: Edit profile
+  save: Save
+  saved: Profile saved
+  saveFailed: Could not save the profile
+  visibilityNote: Your profile is visible to other signed-in attendees
+  avatarSemanticLabel: Profile picture
+  displayNameLabel: Display name
+  displayNameRequired: Enter a display name
+  countryLabel: Country / Region
+  countryPlaceholder: Select
+  countryRequired: Select your country or region
+  countrySearchHint: Search countries and regions
+  countryNoResults: No countries or regions match "$query"
+  countryNoResultsHint: You can also search by Japanese name or ISO code
+  snsLinksLabel: Social links
+  snsLinksEmpty: Add links to X, GitHub and more
+  addSnsLink: Add a link
+  removeSnsLink: Remove this link
+  snsPlatformLabel: Service
+  snsUrlLabel: URL
+  snsIdOrUrlLabel: ID or URL
+  snsIdOrUrlRequired: Enter an ID or URL
+  snsIdOrUrlInvalid: Enter a valid ID or a URL starting with https://
+  snsUrlRequired: Enter a URL
+  snsUrlInvalid: Enter a URL starting with https://
+  snsLinksMax: You can add up to $n links
+  snsPlatformOther: Other
+  bioLabel: Bio
+  bioHint: What you work on, what you'd like to talk about today, etc.
+  discardTitle: Discard changes?
+  discardBody: Unsaved changes will be lost.
+  discardAction: Discard
+  keepEditing: Keep editing
+snsPost:
+  title: Register SNS post
+  signInRequired: Sign in to register your SNS post
+  heading: Register your photo post
+  description: Post a photo with an eligible attendee on SNS,\nthen register the URL of that post.
+  companionLabel: Who is in your photo?
+  companionHint: Choose one category for the person in the photo
+  companionRequired: Choose one companion category
+  companions:
+    staff: Staff
+    speaker: Speaker
+    sponsor: Sponsor
+    firstTime: First-time attendee
+    differentCountry: Different country or region
+  urlLabel: SNS post URL
+  urlHint: Link to the photo post, not your profile page
+  invalidUrl: Enter a valid post URL (https://…)
+  register: Register post
+  update: Update registration
+  saving: Saving…
+  cancel: Cancel
+  saveFailed: Could not save. Check your connection and try again.
+  invalidRegistration: The saved registration could not be read. Register the post URL and companion category again.
+  registeredTitle: SNS post registered
+  registeredBody: Your SNS post mission is complete.
+  updatedAt: "Updated: $date"
+  openPost: Open post
+  openFailed: Could not open the post
+  viewMissions: View mission progress
+  edit: Edit URL or category
+
+mission:
+  title: Missions
+  signInRequired: Sign in to view your mission progress
+  complete: Complete
+  incomplete: Incomplete
+  loading: Checking
+  loadFailed: Unavailable
+  allComplete: All missions complete!
+  inProgress: Mission progress
+  checkFailed: Some results are unavailable
+  progress: $n of $total missions complete
+  ltTitle: Join Support LT
+  ltDescription: Supporters and speakers register with the code at the venue
+  exchangeTitle: Exchange profiles
+  exchangeDescription: Meet at least $required people, including someone from a different country or region
+  exchangeCount: "$n / $required people met"
+  differentCountry: Met someone from a different country or region
+  profileRequired: Add your country or region to your profile
+  snsTitle: Share a photo on SNS
+  snsDescription: Post a photo with an eligible attendee and register its URL and category
+
+exchange:
+  title: Profile Exchange
+  qrDescription: Show this QR code to another attendee and have them scan it to exchange profiles
+  qrSemanticLabel: Profile exchange QR code
+  qrExpiresAt: Valid until $date
+  scanButton: Scan a QR code
+  listButton: View exchanged profiles
+  signInRequired: Sign in to show your QR code
+  signInAction: Sign in
+  profileRequired: Create a profile to show your QR code
+  profileRequiredAction: Create profile
+  scanTitle: Scan a QR code
+  scanHint: Line up the other attendee's QR code within the frame
+  scanCameraError: Camera unavailable. Please allow camera access in Settings
+  scanInvalid: Could not read this code. Make sure it's a profile exchange QR code
+  scanSelf: You can't scan your own QR code
+  scanSucceeded: Profile exchanged
+  scanAlreadyExists: Already exchanged
+  scanFailed: Could not exchange profiles
+  listTitle: Exchanged Profiles
+  listEmpty: No exchanges yet
+  listEmptyBody: Scan a QR code to exchange profiles with other attendees
+  profileUnavailable: This profile is no longer available
+  deleteTooltip: Delete
+  deleteConfirmTitle: Delete this exchange?
+  deleteConfirmBody: This only removes it from your own list. The other attendee's list is unaffected.
+  deleteConfirmAction: Delete
+  deleteCancel: Cancel
+  deleteFailed: Could not delete the exchange
+  noteAddTooltip: Add a note
+  noteEditTooltip: Edit note
+  noteEditTitle: Note
+  noteEditHint: Visible only to you
+  noteLabel: Note
+  noteSave: Save
+  noteCancel: Cancel
+  noteSaveFailed: Could not save the note
+  codeSectionTitle: Exchange with a code
+  codeSectionDescription: If the camera isn't available, share and enter a 6-digit code instead. The same code works for everyone until it expires
+  myCodeSemanticLabel: Profile exchange 6-digit code
+  myCodeExpiresAt: Valid until $date
+  myCodeExpired: This code has expired
+  myCodeRefresh: Get a new code
+  myCodeCopy: Copy code
+  myCodeCopied: Code copied
+  enterCodeLabel: Enter the other attendee's code
+  enterCodeHint: "123456"
+  enterCodeButton: Exchange
+  enterCodeInvalidFormat: Enter a 6-digit code
+  redeemInvalid: This code wasn't found, or it has expired
+  redeemSelf: You can't enter your own code
+  redeemRateLimited: Too many attempts. Please try again in a few minutes
+  shareLinkSignInRequired: Sign in to exchange profiles with them
+  shareLinkProfileRequired: Create a profile to exchange profiles with them
+  shareLinkInvalidTitle: This link isn't valid
+  shareLinkInvalidBody: Make sure it's a profile exchange link
+  shareLinkExpiredTitle: This link has expired
+  shareLinkExpiredBody: Ask the other attendee to share their QR code or link again
+  shareLinkSelfTitle: This is your own share link
+  shareLinkSelfBody: Other attendees who open this link can exchange profiles with you
+  shareLinkGoHome: Back to home
+  shareLinkViewList: View exchanged profiles
+supportLt:
+  title: Support LT Registration
+  description: Enter the 6-digit code provided by the organizers to register your participation in Support LT
+  codeLabel: Registration code
+  register: Register participation
+  submitting: Registering…
+  registeredTitle: Registration complete
+  registeredBody: Enjoy Support LT
+  registeredStatus: Registered
+  backToAccount: Back to account
+  signInRequired: Sign in to register your participation in Support LT
+  invalidFormat: Enter a 6-digit code
+  invalidCode: This code is incorrect. Check the code provided by the organizers
+  rateLimited: Too many attempts. Please try again in a few minutes
+  networkError: A network error occurred. Check your connection and try again
+  sessionExpired: Your sign-in session has expired. Please sign in again
+  permissionDenied: Registration is not permitted. Please ask the organizers
+  registrationFailed: Could not register your participation. Please try again
+countryRegion:
+  asia: Asia
+  oceania: Oceania
+  americas: Americas
+  europe: Europe
+  africa: Africa
 settings:
   title: Settings
   appearance: Appearance
@@ -195,3 +477,97 @@ error:
 notFound:
   title: Page not found
   description: The page you are looking for does not exist or may have moved.
+common:
+  retry: Retry
+quiz:
+  title: Quiz
+  entrySubtitle: Join sponsor-provided quizzes
+  list:
+    empty: No quizzes yet
+    error: Failed to load quizzes
+    status:
+      preparing: Coming soon
+      registration: Open for entry
+      entryClosed: Entry closed
+      inProgress: In progress
+      finished: Results
+  signInRequired:
+    title: Sign-in required
+    description: The quiz links your entry and answers to your account.
+      Sign in from the Account tab to take part.
+    button: Go to Account
+  errors:
+    signInFailed: Failed to sign in
+    eventLoadFailed: Failed to load the event
+  preparing:
+    title: The quiz is being prepared
+    description: Once it is announced,
+      you can join from this screen.
+  registration:
+    subtitle: A table-versus-table team battle. Join with a nickname!
+    participantCount: "Participants:"
+    participantUnit: ""
+    nickname: Nickname
+    nicknameHint: 1–20 characters
+    entryCode: Entry code
+    entryCodeHint: 6-digit number
+    entryCodeHelper: Enter the code shown at the on-site reception desk
+    join: Join
+    full: Full capacity ($max participants) reached
+    failed: Could not register. Please try again later.
+    codeMismatch: Could not register. Please check the entry code.
+    alreadyParticipated: You have already registered for another round and cannot join this one.
+    closed: Registration for this round has closed.
+    unavailable: Registration could not be confirmed. Check your connection and try again.
+    rateLimited: Too many attempts. Wait one minute, check the entry code, and try again.
+    accountUnavailable: This account cannot join. Please contact event staff.
+  waiting:
+    title: You're in!
+    description: Please wait for the team announcement
+  team:
+    yourTable: Your table is
+    table: Table
+    teamLabel: Team
+    gatherHint: Gather at your table and wait for the next question!
+    badge: Table $table・$name
+  entryClosed:
+    title: Entry is closed
+    description: The quiz is in progress.
+      Results will be shown on this screen.
+  question:
+    sponsoredBy: "Sponsored by $name"
+    secondsUnit: s
+    locked: Answers are closed
+    submitFailed: Could not submit. The question may have closed.
+    answeredBy: Selected by $name
+    member: a member
+    reading: The question is being read. Please wait for answers to open.
+    synchronizing: Checking server time…
+    connectionUnavailable: Connection unavailable. Check your connection and try again.
+    cached: Showing saved information. Your team's latest answer has not been confirmed.
+    sending: Sending your answer…
+    received: Your answer was accepted by the server.
+    teamAnswer: The selection shows the team's server-accepted answer. Any member can change it before the deadline.
+    submitUnconfirmed: Acceptance could not be confirmed. Check your connection and the current team answer, and retry before the deadline.
+  suspense:
+    title: Time's up!
+    description: Waiting for the answer reveal
+  revealed:
+    title: Answer reveal
+    correct: Correct!
+    wrong: Not this time…
+    yourAnswer: Your team's answer
+    teamScore: "Current team score: $score pts"
+  result:
+    title: Final results
+    table: Table $table
+    points: $score pts
+    yourTeam: Your team
+    yourTeamRanked: "#$rank / $name ($score pts)"
+    yourTeamUnranked: $name ($score pts)
+    perfect: Visit the $sponsor booth to claim your prize!
+    error: Failed to load results
+forceUpdate:
+  title: Update Required
+  message: A new version of the app is available. Please update to the latest version.
+  updateButton: Update

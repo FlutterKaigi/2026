@@ -9,6 +9,21 @@ class SettingsRoute extends GoRouteData with $SettingsRoute {
   Widget build(BuildContext context, GoRouterState state) => const SettingsPage();
 }
 
+/// `/x/:token` — a profile-exchange share link
+/// (`ExchangeToken.qrPayload`/`exchangeShareBaseUrl`), opened as a Universal
+/// Link / App Link or in-app. Declared as a top-level route (not nested
+/// under `/account`) so it resolves the same way regardless of which tab —
+/// or no tab yet — is active when the link is opened.
+@TypedGoRoute<ShareLinkRoute>(path: '/x/:token')
+class ShareLinkRoute extends GoRouteData with $ShareLinkRoute {
+  const ShareLinkRoute({required this.token});
+
+  final String token;
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => ExchangeShareLinkPage(token: token);
+}
+
 /// Shell hosting the main bottom/rail navigation destinations.
 ///
 /// Uses [StatefulShellRoute.indexedStack] so switching tabs swaps branches
@@ -18,7 +33,10 @@ class SettingsRoute extends GoRouteData with $SettingsRoute {
   branches: [
     TypedStatefulShellBranch<EventInfoBranch>(
       routes: [
-        TypedGoRoute<EventInfoRoute>(path: '/info'),
+        TypedGoRoute<EventInfoRoute>(
+          path: '/info',
+          routes: [TypedGoRoute<StaffMemberListRoute>(path: 'staff')],
+        ),
         TypedGoRoute<NewsRoute>(path: '/news'),
         TypedGoRoute<LicenseRoute>(
           path: '/licenses',
@@ -41,6 +59,9 @@ class SettingsRoute extends GoRouteData with $SettingsRoute {
         ),
       ],
     ),
+    TypedStatefulShellBranch<VenueMapBranch>(
+      routes: [TypedGoRoute<VenueMapRoute>(path: '/venue-map')],
+    ),
     TypedStatefulShellBranch<SponsorBranch>(
       routes: [
         TypedGoRoute<SponsorRoute>(
@@ -53,7 +74,24 @@ class SettingsRoute extends GoRouteData with $SettingsRoute {
       routes: [
         TypedGoRoute<AccountRoute>(
           path: '/account',
-          routes: [TypedGoRoute<EmailSignInRoute>(path: 'email')],
+          routes: [
+            TypedGoRoute<EmailSignInRoute>(path: 'email'),
+            TypedGoRoute<ProfileEditRoute>(path: 'profile'),
+            TypedGoRoute<QuizListRoute>(
+              path: 'quiz',
+              routes: [TypedGoRoute<QuizRoute>(path: ':eventId')],
+            ),
+            TypedGoRoute<SupportLtRoute>(path: 'support-lt'),
+            TypedGoRoute<MissionRoute>(path: 'missions'),
+            TypedGoRoute<SnsPostRoute>(path: 'sns-post'),
+            TypedGoRoute<ExchangeHomeRoute>(
+              path: 'exchange',
+              routes: [
+                TypedGoRoute<ExchangeScanRoute>(path: 'scan'),
+                TypedGoRoute<ExchangeListRoute>(path: 'list'),
+              ],
+            ),
+          ],
         ),
       ],
     ),
@@ -81,6 +119,10 @@ class AppShellRoute extends StatefulShellRouteData {
           label: t.navigation.sessions,
         ),
         RootDestination(
+          icon: Icons.map_outlined,
+          label: t.navigation.venueMap,
+        ),
+        RootDestination(
           icon: Icons.business_outlined,
           label: t.navigation.sponsors,
         ),
@@ -103,6 +145,11 @@ class EventInfoBranch extends StatefulShellBranchData {
 /// Branch hosting the session timetable tab.
 class SessionBranch extends StatefulShellBranchData {
   const SessionBranch();
+}
+
+/// Branch hosting the venue map tab.
+class VenueMapBranch extends StatefulShellBranchData {
+  const VenueMapBranch();
 }
 
 /// Branch hosting the sponsors tab.
@@ -130,6 +177,85 @@ class EmailSignInRoute extends GoRouteData with $EmailSignInRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) => const EmailSignInPage();
+}
+
+/// `/account/profile` — create or edit the signed-in user's profile.
+class ProfileEditRoute extends GoRouteData with $ProfileEditRoute {
+  const ProfileEditRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const ProfileEditPage();
+}
+
+/// `/account/quiz` — the quiz event list.
+///
+/// Lives under the account branch because taking part requires being signed
+/// in: the entry point is a tile on the signed-in account page.
+class QuizListRoute extends GoRouteData with $QuizListRoute {
+  const QuizListRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const QuizEventListPage();
+}
+
+/// `/account/quiz/:eventId` — a single quiz event.
+class QuizRoute extends GoRouteData with $QuizRoute {
+  const QuizRoute(this.eventId);
+
+  final String eventId;
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => QuizPage(eventId: eventId);
+}
+
+/// `/account/support-lt` — register attendance with an organizer-issued code.
+class SupportLtRoute extends GoRouteData with $SupportLtRoute {
+  const SupportLtRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const SupportLtPage();
+}
+
+/// `/account/missions` — at-a-glance event eligibility and mission progress.
+class MissionRoute extends GoRouteData with $MissionRoute {
+  const MissionRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const MissionPage();
+}
+
+/// `/account/sns-post` — register a photo post URL and one companion category.
+class SnsPostRoute extends GoRouteData with $SnsPostRoute {
+  const SnsPostRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const SnsPostPage();
+}
+
+/// `/account/exchange` — the signed-in user's own QR code and the entry
+/// points to scan another attendee or view exchanged profiles.
+class ExchangeHomeRoute extends GoRouteData with $ExchangeHomeRoute {
+  const ExchangeHomeRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const ExchangeHomePage();
+}
+
+/// `/account/exchange/scan` — scans another attendee's profile-exchange QR
+/// code.
+class ExchangeScanRoute extends GoRouteData with $ExchangeScanRoute {
+  const ExchangeScanRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const ExchangeScanPage();
+}
+
+/// `/account/exchange/list` — the signed-in user's exchanged profiles.
+class ExchangeListRoute extends GoRouteData with $ExchangeListRoute {
+  const ExchangeListRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const ExchangeListPage();
 }
 
 /// `/news` — the news list opened from the event overview.
@@ -202,6 +328,14 @@ class SessionDetailsRoute extends GoRouteData with $SessionDetailsRoute {
   Widget build(BuildContext context, GoRouterState state) => SessionDetailsPage(sessionId: sessionId);
 }
 
+/// `/venue-map` — the venue map.
+class VenueMapRoute extends GoRouteData with $VenueMapRoute {
+  const VenueMapRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const VenueMapPage();
+}
+
 /// `/sponsors` — the sponsor logo wall.
 class SponsorRoute extends GoRouteData with $SponsorRoute {
   const SponsorRoute();
@@ -228,4 +362,12 @@ class EventInfoRoute extends GoRouteData with $EventInfoRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) => const EventInfoPage();
+}
+
+/// `/info/staff` — the staff profile list.
+class StaffMemberListRoute extends GoRouteData with $StaffMemberListRoute {
+  const StaffMemberListRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const StaffMemberListPage();
 }

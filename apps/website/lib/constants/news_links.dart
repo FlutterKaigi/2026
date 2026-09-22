@@ -79,16 +79,21 @@ class NewsLink {
   final String url;
 }
 
-/// NewsCard に表示する最大件数。それ以降は「すべてのニュース」から辿る。
-const _maxNewsCardItems = 3;
+/// NewsCard に初期表示する件数。それ以降はアコーディオンで展開する。
+const newsCardInitialCount = 3;
 
-/// 指定ロケールのニュース一覧（公開日降順、最大 [_maxNewsCardItems] 件）を返す。
+/// 指定ロケールのニュース一覧（公開日降順、全件）を返す。
+///
+/// 表示件数の絞り込みは呼び出し側（NewsCard）が [newsCardInitialCount] を
+/// 使って行う。Medium 側のページネーションが機能しなくなったため、全件を
+/// サイト内で表示できるようにする。
 List<NewsLink> newsForLocale(AppLocale locale) {
-  final sorted = [...generatedNews]..sort(
-    (a, b) => b.publishedAt.compareTo(a.publishedAt),
-  );
+  final sorted = [...generatedNews]
+    ..sort(
+      (a, b) => b.publishedAt.compareTo(a.publishedAt),
+    );
   return [
-    for (final n in sorted.take(_maxNewsCardItems))
+    for (final n in sorted)
       NewsLink(
         date: n.dateFor(locale),
         title: n.titleFor(locale),
@@ -96,6 +101,3 @@ List<NewsLink> newsForLocale(AppLocale locale) {
       ),
   ];
 }
-
-/// 「すべてのニュース」遷移先（ロケール非依存）。
-const newsViewAllUrl = 'https://medium.com/flutterkaigi';

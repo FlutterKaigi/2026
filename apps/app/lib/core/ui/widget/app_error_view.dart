@@ -1,4 +1,5 @@
 import 'package:app/core/i18n/strings.g.dart';
+import 'package:app/core/ui/widget/app_scrollbar.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
@@ -18,44 +19,46 @@ class AppErrorView extends StatelessWidget {
     final t = Translations.of(context);
     final theme = Theme.of(context);
 
-    return Center(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 480),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Image.asset(
-                'res/assets/dashumaru_magao.webp',
-                height: 180,
-                fit: BoxFit.contain,
-                semanticLabel: t.error.imageSemanticLabel,
-              ),
-              const SizedBox(height: 24),
-              Text(
-                t.error.title,
-                style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w700,
+    return AppScrollbar(
+      child: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 480),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Image.asset(
+                  'res/assets/dashumaru_magao.webp',
+                  height: 180,
+                  fit: BoxFit.contain,
+                  semanticLabel: t.error.imageSemanticLabel,
                 ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                _messageFor(t),
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                  height: 1.5,
+                const SizedBox(height: 24),
+                Text(
+                  t.error.title,
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 20),
-              FilledButton.icon(
-                onPressed: onRetry,
-                icon: const Icon(Icons.refresh),
-                label: Text(t.error.retry),
-              ),
-            ],
+                const SizedBox(height: 8),
+                Text(
+                  _messageFor(t),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                    height: 1.5,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 20),
+                FilledButton.icon(
+                  onPressed: onRetry,
+                  icon: const Icon(Icons.refresh),
+                  label: Text(t.error.retry),
+                ),
+              ],
+            ),
           ),
         ),
       ),

@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/FlutterKaigi/2026/packages/data/firebase/schemas/firestore/quiz_participation.schema.json",
+  "title": "QuizParticipation",
+  "description": "Server-only Firestore document at quizParticipation/{uid}.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "eventId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "registeredAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "accountDeleted": {
+      "type": "boolean",
+      "description": "Deletion tombstone prevents in-flight registration from recreating private account details."
+    }
+  },
+  "anyOf": [
+    {
+      "required": [
+        "eventId",
+        "registeredAt"
+      ]
+    },
+    {
+      "required": [
+        "accountDeleted"
+      ],
+      "properties": {
+        "accountDeleted": {
+          "const": true
+        }
+      }
+    }
+  ]
+}

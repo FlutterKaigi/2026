@@ -1,29 +1,86 @@
+import 'dart:async';
+
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/provider/environment.dart';
+import 'package:app/core/provider/shared_preferences.dart';
+import 'package:app/core/remote_config/remote_config_keys.dart';
+import 'package:app/core/remote_config/remote_config_provider.dart';
+import 'package:app/core/router/router.dart' as app_router;
 import 'package:app/feature/auth/data/provider/auth_repository.dart';
 import 'package:app/feature/auth/ui/page/account_page.dart';
 import 'package:app/feature/auth/ui/widget/apple_sign_in_button.dart';
 import 'package:app/feature/auth/ui/widget/google_sign_in_button.dart';
+import 'package:app/feature/auth/ui/widget/sign_in_card.dart';
+import 'package:app/feature/exchange/data/exchange_code.dart';
+import 'package:app/feature/exchange/data/exchange_token.dart';
+import 'package:app/feature/exchange/data/provider/pending_exchange_token_provider.dart';
+import 'package:app/feature/exchange/data/provider/profile_exchange_provider.dart';
+import 'package:app/feature/exchange/data/provider/profile_exchange_repository.dart';
+import 'package:app/feature/profile/data/provider/user_profile_repository.dart';
+import 'package:app/feature/profile/ui/widget/country_flag_widget.dart';
+import 'package:app/feature/quiz/data/provider/quiz_repositories.dart';
+import 'package:app/feature/quiz/ui/component/quiz_sign_in_required_view.dart';
+import 'package:app/feature/quiz/ui/page/quiz_event_list_page.dart';
+import 'package:app/feature/support_lt/data/provider/support_lt_provider.dart';
+import 'package:data/data.dart';
 import 'package:data/user.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'fake_auth_repository.dart';
+import 'fake_profile_exchange_repository.dart';
+import 'fake_remote_config_repository.dart';
+import 'fake_support_lt_repository.dart';
+import 'fake_user_profile_repository.dart';
 
 void main() {
   Widget buildSubject(
     FakeAuthRepository repository, {
+    required SharedPreferences preferences,
+    FakeUserProfileRepository? profileRepository,
+    FakeSupportLtRepository? supportLtRepository,
+    QuizEventRepository? quizRepository,
+    GoRouter? router,
+    ExchangeCodeCacheRepository? codeCache,
+    FakeProfileExchangeRepository? exchangeRepository,
+    String? pendingExchangeToken,
+    String? pendingExchangeTokenUid,
     Flavor flavor = Flavor.production,
-    bool showsAppleSignIn = false,
+    bool? showsAppleSignIn = false,
+    ValueNotifier<bool>? showsAccountPage,
+    FakeRemoteConfigRepository? remoteConfigRepository,
   }) => TranslationProvider(
     child: ProviderScope(
       overrides: [
         authRepositoryProvider.overrideWithValue(repository),
-        appleSignInAvailabilityProvider.overrideWithValue(
-          showsAppleSignIn,
-        ),
+        remoteConfigRepositoryProvider.overrideWith((ref) {
+          final config = remoteConfigRepository ?? FakeRemoteConfigRepository();
+          if (remoteConfigRepository == null) {
+            ref.onDispose(config.dispose);
+          }
+          return config;
+        }),
+        if (quizRepository != null) quizEventRepositoryProvider.overrideWithValue(quizRepository),
+        userProfileRepositoryProvider.overrideWithValue(profileRepository ?? FakeUserProfileRepository()),
+        supportLtRepositoryProvider.overrideWith((ref) {
+          final repository = supportLtRepository ?? FakeSupportLtRepository();
+          if (supportLtRepository == null) {
+            ref.onDispose(repository.dispose);
+          }
+          return repository;
+        }),
+        if (showsAppleSignIn != null) appleSignInAvailabilityProvider.overrideWithValue(showsAppleSignIn),
+        sharedPreferencesProvider.overrideWithValue(preferences),
+        if (codeCache != null) exchangeCodeCacheRepositoryProvider.overrideWithValue(codeCache),
+        if (exchangeRepository != null) profileExchangeRepositoryProvider.overrideWithValue(exchangeRepository),
+        if (pendingExchangeToken != null)
+          pendingExchangeTokenProvider.overrideWith(
+            () => _SeededPendingExchangeTokenNotifier((uid: pendingExchangeTokenUid, token: pendingExchangeToken)),
+          ),
         environmentProvider.overrideWithValue(
           Environment(
             appIdSuffix: '',
@@ -35,36 +92,62 @@ void main() {
           ),
         ),
       ],
-      child: MaterialApp(
-        locale: const Locale('ja'),
-        supportedLocales: AppLocaleUtils.supportedLocales,
-        localizationsDelegates: GlobalMaterialLocalizations.delegates,
-        home: const AccountPage(),
-      ),
+      child: router == null
+          ? MaterialApp(
+              locale: const Locale('ja'),
+              supportedLocales: AppLocaleUtils.supportedLocales,
+              localizationsDelegates: GlobalMaterialLocalizations.delegates,
+              // `showsAccountPage` を渡すと、`ProviderScope` を保ったまま
+              // AccountPage だけを外せる（別タブへの移動と同じ状況）。
+              home: switch (showsAccountPage) {
+                null => const AccountPage(),
+                final listenable => ValueListenableBuilder(
+                  valueListenable: listenable,
+                  builder: (_, shows, _) => shows ? const AccountPage() : const Scaffold(body: Text('別のタブ')),
+                ),
+              },
+            )
+          : MaterialApp.router(
+              routerConfig: router,
+              locale: const Locale('ja'),
+              supportedLocales: AppLocaleUtils.supportedLocales,
+              localizationsDelegates: GlobalMaterialLocalizations.delegates,
+            ),
     ),
   );
 
-  setUp(() => LocaleSettings.setLocaleSync(AppLocale.ja));
+  late SharedPreferences preferences;
 
-  test('allows Apple sign-in only on production iOS', () {
+  setUp(() async {
+    LocaleSettings.setLocaleSync(AppLocale.ja);
+    SharedPreferences.setMockInitialValues(const {});
+    preferences = await SharedPreferences.getInstance();
+  });
+
+  /// サインイン後の画面はスクロールリストなので、テストの小さな画面では
+  /// 下部の操作を表示域に入れてからタップする。
+  Future<void> tapListItem(WidgetTester tester, String text) async {
+    await tester.ensureVisible(find.text(text));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(text));
+    await tester.pumpAndSettle();
+  }
+
+  test('allows Apple sign-in only in the native iOS app', () {
     expect(
       isAppleSignInAvailable(
-        flavor: Flavor.production,
         isWeb: false,
         platform: TargetPlatform.iOS,
       ),
       isTrue,
     );
     for (final condition in [
-      (flavor: Flavor.staging, isWeb: false, platform: TargetPlatform.iOS),
-      (flavor: Flavor.develop, isWeb: false, platform: TargetPlatform.iOS),
-      (flavor: Flavor.production, isWeb: true, platform: TargetPlatform.iOS),
-      (flavor: Flavor.production, isWeb: false, platform: TargetPlatform.android),
-      (flavor: Flavor.production, isWeb: false, platform: TargetPlatform.macOS),
+      (isWeb: true, platform: TargetPlatform.iOS),
+      (isWeb: false, platform: TargetPlatform.android),
+      (isWeb: false, platform: TargetPlatform.macOS),
     ]) {
       expect(
         isAppleSignInAvailable(
-          flavor: condition.flavor,
           isWeb: condition.isWeb,
           platform: condition.platform,
         ),
@@ -77,9 +160,10 @@ void main() {
     final repository = FakeAuthRepository();
     addTearDown(repository.dispose);
 
-    await tester.pumpWidget(buildSubject(repository));
+    await tester.pumpWidget(buildSubject(repository, preferences: preferences));
     await tester.pumpAndSettle();
 
+    expect(find.text('サインインが必要です'), findsOneWidget);
     expect(find.bySemanticsLabel('Google でサインイン'), findsOneWidget);
     expect(find.text('Appleでサインイン'), findsNothing);
     expect(find.text('メールアドレスでサインイン'), findsOneWidget);
@@ -91,45 +175,35 @@ void main() {
     expect(find.text('Google User'), findsOneWidget);
     expect(find.text('google@example.com'), findsOneWidget);
     expect(find.text('サインイン中'), findsOneWidget);
-    expect(find.text('サインアウト'), findsOneWidget);
+    expect(find.text('サインインが必要です'), findsNothing);
   });
 
-  testWidgets('shows Apple sign-in on production iOS', (tester) async {
-    final repository = FakeAuthRepository();
-    addTearDown(repository.dispose);
+  for (final flavor in Flavor.values) {
+    testWidgets('shows Apple sign-in on ${flavor.shortName} iOS', (tester) async {
+      final repository = FakeAuthRepository();
+      addTearDown(repository.dispose);
 
-    await tester.pumpWidget(
-      buildSubject(repository, showsAppleSignIn: true),
-    );
-    await tester.pumpAndSettle();
+      await tester.pumpWidget(
+        buildSubject(repository, preferences: preferences, flavor: flavor, showsAppleSignIn: null),
+      );
+      await tester.pumpAndSettle();
 
-    expect(find.text('Appleでサインイン'), findsOneWidget);
+      expect(find.text('Appleでサインイン'), findsOneWidget);
 
-    await tester.tap(find.text('Appleでサインイン'));
-    await tester.pumpAndSettle();
+      await tester.tap(find.text('Appleでサインイン'));
+      await tester.pumpAndSettle();
 
-    expect(repository.calledMethods, ['signInWithApple']);
-    expect(find.text('Apple User'), findsOneWidget);
-  });
-
-  testWidgets('hides Apple sign-in on staging iOS', (tester) async {
-    final repository = FakeAuthRepository();
-    addTearDown(repository.dispose);
-
-    await tester.pumpWidget(
-      buildSubject(repository, flavor: Flavor.staging),
-    );
-    await tester.pumpAndSettle();
-
-    expect(find.text('Appleでサインイン'), findsNothing);
-  });
+      expect(repository.calledMethods, ['signInWithApple']);
+      expect(find.text('Apple User'), findsOneWidget);
+    }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
+  }
 
   testWidgets('keeps all sign-in method buttons at the same size', (tester) async {
     final repository = FakeAuthRepository();
     addTearDown(repository.dispose);
 
     await tester.pumpWidget(
-      buildSubject(repository, showsAppleSignIn: true),
+      buildSubject(repository, preferences: preferences, showsAppleSignIn: true),
     );
     await tester.pumpAndSettle();
 
@@ -149,7 +223,7 @@ void main() {
     addTearDown(repository.dispose);
 
     await tester.pumpWidget(
-      buildSubject(repository, showsAppleSignIn: true),
+      buildSubject(repository, preferences: preferences, showsAppleSignIn: true),
     );
     await tester.pumpAndSettle();
 
@@ -176,7 +250,7 @@ void main() {
     addTearDown(repository.dispose);
 
     await tester.pumpWidget(
-      buildSubject(repository, showsAppleSignIn: true),
+      buildSubject(repository, preferences: preferences, showsAppleSignIn: true),
     );
     await tester.pumpAndSettle();
 
@@ -194,7 +268,7 @@ void main() {
     final repository = FakeAuthRepository()..nextError = FirebaseAuthException(code: 'canceled');
     addTearDown(repository.dispose);
 
-    await tester.pumpWidget(buildSubject(repository));
+    await tester.pumpWidget(buildSubject(repository, preferences: preferences));
     await tester.pumpAndSettle();
 
     await tester.tap(find.bySemanticsLabel('Google でサインイン'));
@@ -204,50 +278,388 @@ void main() {
     expect(find.bySemanticsLabel('Google でサインイン'), findsOneWidget);
   });
 
-  testWidgets('signs out from the signed-in view', (tester) async {
+  testWidgets(
+    'signs out from the signed-in view and clears the cached exchange token and pending share link',
+    (tester) async {
+      final repository = FakeAuthRepository(
+        initialUser: FakeUser(email: 'attendee@example.com'),
+      );
+      addTearDown(repository.dispose);
+      final tokenCache = SharedPreferencesExchangeTokenCacheRepository(preferences);
+      await tokenCache.write(
+        'fake-uid',
+        ExchangeToken(
+          value: 'v1.fake-uid.9999999999.deadbeef',
+          expiresAt: DateTime.now().add(const Duration(hours: 24)),
+        ),
+      );
+      final codeCache = InMemoryExchangeCodeCacheRepository()
+        ..write('fake-uid', ExchangeCode(value: '123456', expiresAt: DateTime.now().add(const Duration(minutes: 5))));
+
+      await tester.pumpWidget(
+        buildSubject(
+          repository,
+          preferences: preferences,
+          codeCache: codeCache,
+          // 未消化のまま置き土産になっている状態を再現する。
+          pendingExchangeToken: 'v1.other-uid.9999999999.deadbeef',
+          pendingExchangeTokenUid: 'fake-uid',
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('attendee@example.com'), findsOneWidget);
+      expect(find.text('サインイン中'), findsOneWidget);
+
+      await tapListItem(tester, 'サインアウト');
+
+      expect(repository.calledMethods, ['signOut']);
+      expect(find.bySemanticsLabel('Google でサインイン'), findsOneWidget);
+      expect(tokenCache.read('fake-uid'), isNull);
+      expect(codeCache.read('fake-uid'), isNull);
+      expect(
+        ProviderScope.containerOf(tester.element(find.byType(AccountPage))).read(pendingExchangeTokenProvider),
+        isNull,
+      );
+    },
+  );
+
+  testWidgets(
+    'deletes a Google account after confirmation and clears the cached exchange token and pending share link',
+    (tester) async {
+      final repository = FakeAuthRepository(
+        initialUser: FakeUser(
+          email: 'attendee@example.com',
+          providerIds: const ['google.com'],
+        ),
+      );
+      addTearDown(repository.dispose);
+      final tokenCache = SharedPreferencesExchangeTokenCacheRepository(preferences);
+      await tokenCache.write(
+        'fake-uid',
+        ExchangeToken(
+          value: 'v1.fake-uid.9999999999.deadbeef',
+          expiresAt: DateTime.now().add(const Duration(hours: 24)),
+        ),
+      );
+      final codeCache = InMemoryExchangeCodeCacheRepository()
+        ..write('fake-uid', ExchangeCode(value: '123456', expiresAt: DateTime.now().add(const Duration(minutes: 5))));
+
+      await tester.pumpWidget(
+        buildSubject(
+          repository,
+          preferences: preferences,
+          codeCache: codeCache,
+          pendingExchangeToken: 'v1.other-uid.9999999999.deadbeef',
+          pendingExchangeTokenUid: 'fake-uid',
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tapListItem(tester, 'アカウントを削除');
+
+      expect(find.text('アカウントを削除しますか?'), findsOneWidget);
+
+      await tester.tap(find.text('削除する'));
+      await tester.pumpAndSettle();
+
+      expect(repository.calledMethods, ['deleteAccount']);
+      expect(repository.lastDeletePassword, isNull);
+      expect(repository.beforeDeleteCalled, isTrue);
+      expect(find.text('アカウントを削除しました'), findsOneWidget);
+      expect(find.bySemanticsLabel('Google でサインイン'), findsOneWidget);
+      expect(tokenCache.read('fake-uid'), isNull);
+      expect(codeCache.read('fake-uid'), isNull);
+      expect(
+        ProviderScope.containerOf(tester.element(find.byType(AccountPage))).read(pendingExchangeTokenProvider),
+        isNull,
+      );
+    },
+  );
+
+  testWidgets('deletes the profile document together with the account', (tester) async {
     final repository = FakeAuthRepository(
-      initialUser: FakeUser(email: 'attendee@example.com'),
+      initialUser: FakeUser(uid: 'uid-1', email: 'attendee@example.com', providerIds: const ['google.com']),
     );
     addTearDown(repository.dispose);
+    final profileRepository = FakeUserProfileRepository(initialProfile: _profile(id: 'uid-1'));
+    addTearDown(profileRepository.dispose);
 
-    await tester.pumpWidget(buildSubject(repository));
+    await tester.pumpWidget(buildSubject(repository, preferences: preferences, profileRepository: profileRepository));
     await tester.pumpAndSettle();
 
-    expect(find.text('attendee@example.com'), findsOneWidget);
-    expect(find.text('サインイン中'), findsOneWidget);
-
-    await tester.tap(find.text('サインアウト'));
-    await tester.pumpAndSettle();
-
-    expect(repository.calledMethods, ['signOut']);
-    expect(find.bySemanticsLabel('Google でサインイン'), findsOneWidget);
-  });
-
-  testWidgets('deletes a Google account after confirmation', (tester) async {
-    final repository = FakeAuthRepository(
-      initialUser: FakeUser(
-        email: 'attendee@example.com',
-        providerIds: const ['google.com'],
-      ),
-    );
-    addTearDown(repository.dispose);
-
-    await tester.pumpWidget(buildSubject(repository));
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.text('アカウントを削除'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('アカウントを削除しますか?'), findsOneWidget);
-
+    await tapListItem(tester, 'アカウントを削除');
     await tester.tap(find.text('削除する'));
     await tester.pumpAndSettle();
 
+    expect(profileRepository.deletedUids, ['uid-1']);
     expect(repository.calledMethods, ['deleteAccount']);
-    expect(repository.lastDeletePassword, isNull);
-    expect(find.text('アカウントを削除しました'), findsOneWidget);
-    expect(find.bySemanticsLabel('Google でサインイン'), findsOneWidget);
   });
+
+  testWidgets('invites a signed-in user without a profile to create one', (tester) async {
+    final repository = FakeAuthRepository(
+      initialUser: FakeUser(email: 'attendee@example.com', displayName: 'Attendee'),
+    );
+    addTearDown(repository.dispose);
+
+    await tester.pumpWidget(buildSubject(repository, preferences: preferences));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Attendee'), findsOneWidget);
+    expect(find.text('プロフィールを登録しましょう'), findsOneWidget);
+    expect(find.text('プロフィールを作成'), findsOneWidget);
+    expect(find.text('プロフィールを編集'), findsNothing);
+  });
+
+  testWidgets('opens the quiz list from the signed-in account and returns to the account', (tester) async {
+    final repository = FakeAuthRepository(initialUser: FakeUser(uid: 'uid-1'));
+    final quizzes = _QuizEventRepository();
+    final router = GoRouter(initialLocation: '/account', routes: app_router.$appRoutes);
+    addTearDown(repository.dispose);
+    addTearDown(router.dispose);
+    await tester.pumpWidget(
+      buildSubject(repository, preferences: preferences, router: router, quizRepository: quizzes),
+    );
+    await tester.pumpAndSettle();
+
+    await tapListItem(tester, t.auth.account.quiz);
+
+    expect(find.byType(QuizEventListPage), findsOneWidget);
+    expect(find.text(t.quiz.list.empty), findsOneWidget);
+    expect(quizzes.publishedSubscriptions, 1);
+    expect(tester.takeException(), isNull);
+
+    router.pop();
+    await tester.pumpAndSettle();
+    expect(find.byType(AccountPage), findsOneWidget);
+  });
+
+  testWidgets('requires account sign-in before opening the quiz list', (tester) async {
+    final repository = FakeAuthRepository();
+    final quizzes = _QuizEventRepository();
+    final router = GoRouter(initialLocation: '/account', routes: app_router.$appRoutes);
+    addTearDown(repository.dispose);
+    addTearDown(router.dispose);
+    await tester.pumpWidget(
+      buildSubject(repository, preferences: preferences, router: router, quizRepository: quizzes),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text(t.auth.account.quiz), findsNothing);
+
+    router.go('/account/quiz');
+    await tester.pumpAndSettle();
+
+    expect(find.byType(QuizSignInRequiredView), findsOneWidget);
+    expect(quizzes.publishedSubscriptions, 0);
+    await tester.tap(find.text(t.quiz.signInRequired.button));
+    await tester.pumpAndSettle();
+    expect(find.byType(AccountPage), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('opens support LT registration from the account event tile', (tester) async {
+    final repository = FakeAuthRepository(initialUser: FakeUser(uid: 'uid-1'));
+    addTearDown(repository.dispose);
+    final router = GoRouter(
+      initialLocation: '/account',
+      routes: [
+        GoRoute(
+          path: '/account',
+          builder: (_, _) => const AccountPage(),
+          routes: [
+            GoRoute(
+              path: 'support-lt',
+              builder: (_, _) => const Scaffold(body: Text('support LT destination')),
+            ),
+          ],
+        ),
+      ],
+    );
+    addTearDown(router.dispose);
+    await tester.pumpWidget(buildSubject(repository, preferences: preferences, router: router));
+    await tester.pumpAndSettle();
+
+    await tapListItem(tester, '応援LT参加');
+
+    expect(find.text('support LT destination'), findsOneWidget);
+    expect(find.byType(SnackBar), findsNothing);
+  });
+
+  testWidgets('reflects the signed-in attendee registration without completing other missions', (tester) async {
+    final repository = FakeAuthRepository(initialUser: FakeUser(uid: 'uid-1'));
+    final supportLt = FakeSupportLtRepository();
+    addTearDown(repository.dispose);
+    addTearDown(supportLt.dispose);
+    await tester.pumpWidget(
+      buildSubject(repository, preferences: preferences, supportLtRepository: supportLt),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('参加登録済み'), findsNothing);
+
+    supportLt.setRegistration(
+      SupportLtRegistration(uid: 'uid-1', displayName: 'Attendee', registeredAt: DateTime.utc(2026, 11, 13)),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('参加登録済み'), findsOneWidget);
+    expect(find.text('応援LT参加・プロフィール交換・SNS投稿登録の参加状況で判定'), findsOneWidget);
+
+    await repository.signOut();
+    await tester.pumpAndSettle();
+    await repository.signInWithGoogle();
+    await tester.pumpAndSettle();
+    expect(find.text('参加登録済み'), findsNothing);
+  });
+
+  testWidgets('shows the saved profile with country, links and bio', (tester) async {
+    final repository = FakeAuthRepository(
+      initialUser: FakeUser(uid: 'uid-1', email: 'attendee@example.com', displayName: 'Auth Name'),
+    );
+    addTearDown(repository.dispose);
+    final profileRepository = FakeUserProfileRepository(
+      initialProfile: _profile(
+        id: 'uid-1',
+        displayName: 'Profile Name',
+        countryOrRegion: 'TW',
+        snsLinks: const [SnsLink(type: 'github', value: 'https://github.com/example')],
+        bio: 'Flutter が好きです',
+      ),
+    );
+    addTearDown(profileRepository.dispose);
+
+    await tester.pumpWidget(buildSubject(repository, preferences: preferences, profileRepository: profileRepository));
+    await tester.pumpAndSettle();
+
+    // プロフィールの表示名が Auth の displayName より優先される。
+    expect(find.text('Profile Name'), findsOneWidget);
+    expect(find.text('Auth Name'), findsNothing);
+    expect(find.text('attendee@example.com'), findsOneWidget);
+    expect(find.text('台湾'), findsOneWidget);
+    expect(find.byType(CountryFlagIcon), findsOneWidget);
+    expect(find.text('GitHub'), findsOneWidget);
+    expect(find.text('Flutter が好きです'), findsOneWidget);
+    expect(find.text('プロフィールを編集'), findsOneWidget);
+    expect(find.text('プロフィールを登録しましょう'), findsNothing);
+  });
+
+  testWidgets(
+    'completes a pending share-link exchange once signed in with a profile, and shows the result',
+    (tester) async {
+      final repository = FakeAuthRepository(
+        initialUser: FakeUser(uid: 'uid-1', email: 'attendee@example.com'),
+      );
+      addTearDown(repository.dispose);
+      final profileRepository = FakeUserProfileRepository(
+        initialProfile: _profile(id: 'uid-1'),
+      );
+      addTearDown(profileRepository.dispose);
+      final exchangeRepository = FakeProfileExchangeRepository();
+      addTearDown(exchangeRepository.dispose);
+      final expSeconds = DateTime.now().add(const Duration(hours: 1)).millisecondsSinceEpoch ~/ 1000;
+
+      await tester.pumpWidget(
+        buildSubject(
+          repository,
+          preferences: preferences,
+          profileRepository: profileRepository,
+          exchangeRepository: exchangeRepository,
+          pendingExchangeToken: 'v1.other-uid.$expSeconds.deadbeef',
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(exchangeRepository.createCalls, [
+        (uid: 'uid-1', otherUid: 'other-uid', token: 'v1.other-uid.$expSeconds.deadbeef'),
+      ]);
+      expect(find.text('プロフィールを交換しました'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'clears the pending share-link token even when the tab is left before the exchange lands',
+    (tester) async {
+      final repository = FakeAuthRepository(
+        initialUser: FakeUser(uid: 'uid-1', email: 'attendee@example.com'),
+      );
+      addTearDown(repository.dispose);
+      final profileRepository = FakeUserProfileRepository(
+        initialProfile: _profile(id: 'uid-1'),
+      );
+      addTearDown(profileRepository.dispose);
+      final exchangeRepository = FakeProfileExchangeRepository();
+      addTearDown(exchangeRepository.dispose);
+      final gate = Completer<void>();
+      exchangeRepository.createGate = gate;
+      final showsAccountPage = ValueNotifier(true);
+      addTearDown(showsAccountPage.dispose);
+      final expSeconds = DateTime.now().add(const Duration(hours: 1)).millisecondsSinceEpoch ~/ 1000;
+
+      await tester.pumpWidget(
+        buildSubject(
+          repository,
+          preferences: preferences,
+          profileRepository: profileRepository,
+          exchangeRepository: exchangeRepository,
+          pendingExchangeToken: 'v1.other-uid.$expSeconds.deadbeef',
+          showsAccountPage: showsAccountPage,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(exchangeRepository.createCalls, hasLength(1));
+
+      showsAccountPage.value = false;
+      await tester.pumpAndSettle();
+
+      gate.complete();
+      await tester.pumpAndSettle();
+
+      // 破棄済みの WidgetRef を触って例外になると、交換は成立しているのに
+      // 保留トークンが残り、次にこのタブへ戻ったときに再処理される。
+      expect(tester.takeException(), isNull);
+      expect(
+        ProviderScope.containerOf(tester.element(find.byType(MaterialApp))).read(pendingExchangeTokenProvider),
+        isNull,
+      );
+    },
+  );
+
+  testWidgets(
+    'discards a pending share-link token left behind by a different uid instead of resolving it',
+    (tester) async {
+      final repository = FakeAuthRepository(
+        initialUser: FakeUser(uid: 'uid-1', email: 'attendee@example.com'),
+      );
+      addTearDown(repository.dispose);
+      final profileRepository = FakeUserProfileRepository(
+        initialProfile: _profile(id: 'uid-1'),
+      );
+      addTearDown(profileRepository.dispose);
+      final exchangeRepository = FakeProfileExchangeRepository();
+      addTearDown(exchangeRepository.dispose);
+      final expSeconds = DateTime.now().add(const Duration(hours: 1)).millisecondsSinceEpoch ~/ 1000;
+
+      await tester.pumpWidget(
+        buildSubject(
+          repository,
+          preferences: preferences,
+          profileRepository: profileRepository,
+          exchangeRepository: exchangeRepository,
+          // uid-1 のこの端末で、以前サインインしていた別ユーザーが
+          // プロフィール未作成のまま残していった置き土産。
+          pendingExchangeToken: 'v1.other-uid.$expSeconds.deadbeef',
+          pendingExchangeTokenUid: 'a-different-uid',
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(exchangeRepository.createCalls, isEmpty);
+      expect(find.text('プロフィールを交換しました'), findsNothing);
+      expect(
+        ProviderScope.containerOf(tester.element(find.byType(AccountPage))).read(pendingExchangeTokenProvider),
+        isNull,
+      );
+    },
+  );
 
   testWidgets('asks for the current password before deleting an email account', (tester) async {
     final repository = FakeAuthRepository(
@@ -258,11 +670,10 @@ void main() {
     );
     addTearDown(repository.dispose);
 
-    await tester.pumpWidget(buildSubject(repository));
+    await tester.pumpWidget(buildSubject(repository, preferences: preferences));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('アカウントを削除'));
-    await tester.pumpAndSettle();
+    await tapListItem(tester, 'アカウントを削除');
     await tester.tap(find.text('削除する'));
     await tester.pumpAndSettle();
 
@@ -288,15 +699,118 @@ void main() {
     );
     addTearDown(repository.dispose);
 
-    await tester.pumpWidget(buildSubject(repository));
+    await tester.pumpWidget(buildSubject(repository, preferences: preferences));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('アカウントを削除'));
-    await tester.pumpAndSettle();
+    await tapListItem(tester, 'アカウントを削除');
     await tester.tap(find.text('キャンセル'));
     await tester.pumpAndSettle();
 
     expect(repository.calledMethods, isEmpty);
     expect(find.text('attendee@example.com'), findsOneWidget);
   });
+
+  testWidgets('shows the mission entry and join-event section when event_features_enabled is true', (
+    tester,
+  ) async {
+    final repository = FakeAuthRepository(initialUser: FakeUser(uid: 'uid-1'));
+    addTearDown(repository.dispose);
+
+    await tester.pumpWidget(
+      buildSubject(
+        repository,
+        preferences: preferences,
+        remoteConfigRepository: FakeRemoteConfigRepository(
+          initialValues: const {RemoteConfigKeys.eventFeaturesEnabled: true},
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('ミッション'), findsOneWidget);
+    expect(find.text('イベントに参加'), findsOneWidget);
+    expect(find.text(t.auth.account.quiz), findsOneWidget);
+  });
+
+  testWidgets('hides the mission entry and join-event section when event_features_enabled is false', (
+    tester,
+  ) async {
+    final repository = FakeAuthRepository(initialUser: FakeUser(uid: 'uid-1'));
+    addTearDown(repository.dispose);
+
+    await tester.pumpWidget(
+      buildSubject(
+        repository,
+        preferences: preferences,
+        remoteConfigRepository: FakeRemoteConfigRepository(
+          initialValues: const {RemoteConfigKeys.eventFeaturesEnabled: false},
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('ミッション'), findsNothing);
+    expect(find.text('イベントに参加'), findsNothing);
+    expect(find.text(t.auth.account.quiz), findsNothing);
+    // 削除・サインアウトなどアカウント自体の操作は引き続き表示される。
+    expect(find.text('サインアウト'), findsOneWidget);
+  });
+
+  testWidgets('hides the join-event section as soon as the flag flips while the tab is open', (tester) async {
+    final repository = FakeAuthRepository(initialUser: FakeUser(uid: 'uid-1'));
+    addTearDown(repository.dispose);
+    final remoteConfig = FakeRemoteConfigRepository(
+      initialValues: const {RemoteConfigKeys.eventFeaturesEnabled: true},
+    );
+    addTearDown(remoteConfig.dispose);
+
+    await tester.pumpWidget(
+      buildSubject(repository, preferences: preferences, remoteConfigRepository: remoteConfig),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('イベントに参加'), findsOneWidget);
+
+    remoteConfig.setValue(RemoteConfigKeys.eventFeaturesEnabled, false);
+    await tester.pumpAndSettle();
+
+    expect(find.text('イベントに参加'), findsNothing);
+  });
+}
+
+class _QuizEventRepository extends Fake implements QuizEventRepository {
+  int publishedSubscriptions = 0;
+
+  @override
+  Stream<List<QuizEvent>> watchPublished() {
+    publishedSubscriptions++;
+    return Stream.value(const []);
+  }
+}
+
+UserProfile _profile({
+  required String id,
+  String displayName = 'Attendee',
+  String countryOrRegion = 'JP',
+  List<SnsLink> snsLinks = const [],
+  String? bio,
+}) => UserProfile(
+  id: id,
+  displayName: displayName,
+  countryOrRegion: countryOrRegion,
+  snsLinks: snsLinks,
+  bio: bio,
+  createdAt: DateTime.utc(2026, 8),
+  updatedAt: DateTime.utc(2026, 8),
+);
+
+/// Seeds `pendingExchangeTokenProvider` with [_initial] for a test, instead
+/// of the real notifier's `build() => null`.
+class _SeededPendingExchangeTokenNotifier extends PendingExchangeTokenNotifier {
+  _SeededPendingExchangeTokenNotifier(this._initial);
+
+  final PendingExchangeToken _initial;
+
+  @override
+  PendingExchangeToken? build() => _initial;
 }

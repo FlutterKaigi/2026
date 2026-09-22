@@ -1,37 +1,30 @@
+import 'dart:async';
+
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/log/talker.dart';
-import 'package:app/core/provider/environment.dart';
+import 'package:app/core/remote_config/event_features_provider.dart';
 import 'package:app/core/router/router.dart';
 import 'package:app/core/ui/widget/app_error_view.dart';
+import 'package:app/core/ui/widget/app_scrollbar.dart';
 import 'package:app/core/ui/widget/settings_icon_button.dart';
 import 'package:app/feature/auth/data/provider/auth_repository.dart';
 import 'package:app/feature/auth/data/provider/auth_state.dart';
 import 'package:app/feature/auth/ui/auth_error_message.dart';
-import 'package:app/feature/auth/ui/widget/apple_sign_in_button.dart';
-import 'package:app/feature/auth/ui/widget/google_sign_in_button.dart';
-import 'package:app/feature/auth/ui/widget/sign_in_method_button_style.dart';
+import 'package:app/feature/auth/ui/widget/sign_in_card.dart';
+import 'package:app/feature/exchange/data/exchange_scan_handler.dart';
+import 'package:app/feature/exchange/data/pending_exchange_resolver.dart';
+import 'package:app/feature/exchange/data/provider/pending_exchange_token_provider.dart';
+import 'package:app/feature/exchange/data/provider/profile_exchange_provider.dart';
+import 'package:app/feature/exchange/data/provider/profile_exchange_repository.dart';
+import 'package:app/feature/profile/data/provider/user_profile_provider.dart';
+import 'package:app/feature/profile/data/provider/user_profile_repository.dart';
+import 'package:app/feature/profile/ui/widget/profile_summary_card_widget.dart';
+import 'package:app/feature/support_lt/data/provider/support_lt_provider.dart';
 import 'package:data/data.dart';
 import 'package:data/user.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-
-/// Whether the current build may expose native Sign in with Apple.
-bool isAppleSignInAvailable({
-  required Flavor flavor,
-  required bool isWeb,
-  required TargetPlatform platform,
-}) => flavor == Flavor.production && !isWeb && platform == TargetPlatform.iOS;
-
-final appleSignInAvailabilityProvider = Provider<bool>((ref) {
-  final environment = ref.watch(environmentProvider);
-  return isAppleSignInAvailable(
-    flavor: environment.flavor,
-    isWeb: kIsWeb,
-    platform: defaultTargetPlatform,
-  );
-});
 
 /// The account tab: sign-in options while signed out, account info while
 /// signed in.
@@ -42,14 +35,88 @@ class AccountPage extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final t = Translations.of(context);
     final authState = ref.watch(authStateChangesProvider);
+    final profileState = ref.watch(userProfileProvider);
     final isProcessing = useState(false);
-    final showsAppleSignIn = ref.watch(appleSignInAvailabilityProvider);
 
     void showMessage(String message) {
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
         ..showSnackBar(SnackBar(content: Text(message)));
     }
+
+    // Fallback consumer for `pendingExchangeTokenProvider`: `ExchangeShareLinkPage`
+    // queues a share-link token here when it opens signed-out or profile-less,
+    // then consumes it itself once its own `ExchangeAccessGate` passes. If the
+    // visitor's sign-in / profile-creation detour lands back on this tab
+    // instead — the normal outcome, since neither flow returns to the
+    // original `/x/<token>` URL — this is what actually completes the
+    // exchange. `handledToken` guards against redoing it if `profile` (a
+    // stream value) emits again before the notifier's `state = null` clear is
+    // observed.
+    final pending = ref.watch(pendingExchangeTokenProvider);
+    final profile = profileState.value;
+    final myUid = authState.value?.uid;
+    final handledPendingToken = useState<String?>(null);
+    useEffect(() {
+      if (pending == null || myUid == null || profile == null) {
+        return null;
+      }
+      // A pending entry recorded under a real (non-null) uid only ever
+      // belongs to that uid — see `PendingExchangeTokenNotifier`'s doc
+      // comment. Discard rather than resolve it for a mismatched uid, and
+      // drop it outright so it can't be picked up by yet another account
+      // later on the same device.
+      if (pending.uid != null && pending.uid != myUid) {
+        // Deferred to a microtask: Riverpod disallows modifying a provider
+        // synchronously from a widget life-cycle callback (`useEffect` runs
+        // as one).
+        unawaited(Future.microtask(() => ref.read(pendingExchangeTokenProvider.notifier).clear()));
+        return null;
+      }
+      final pendingToken = pending.token;
+      if (handledPendingToken.value == pendingToken) {
+        return null;
+      }
+      handledPendingToken.value = pendingToken;
+
+      Future<void> resolve() async {
+        // Leaving the tab mid-flight disposes this `ref`, so everything that
+        // still has to happen once the exchange lands — dropping the pending
+        // token above all, or it would be replayed on the next visit — is read
+        // before the await. Only the snack bar is skipped afterwards.
+        final pendingTokens = ref.read(pendingExchangeTokenProvider.notifier);
+        final talker = ref.read(talkerProvider);
+        final resolved = await resolvePendingExchangeToken(
+          token: pendingToken,
+          myUid: myUid,
+          repository: ref.read(profileExchangeRepositoryProvider),
+        );
+        pendingTokens.clearIfCurrent(pendingToken);
+        if (resolved case PendingExchangeResolved(outcome: ExchangeCreateFailed(:final error, :final stackTrace))) {
+          talker.handle(error, stackTrace);
+        }
+        if (!context.mounted) {
+          return;
+        }
+        switch (resolved) {
+          case PendingExchangeResolved(outcome: ExchangeCreated()):
+            showMessage(t.exchange.scanSucceeded);
+          case PendingExchangeResolved(outcome: ExchangeAlreadyExists()):
+            showMessage(t.exchange.scanAlreadyExists);
+          case PendingExchangeResolved(outcome: ExchangeCreateFailed()):
+            showMessage(t.exchange.scanFailed);
+          case PendingExchangeSelf():
+            showMessage(t.exchange.shareLinkSelfTitle);
+          case PendingExchangeInvalid():
+            showMessage(t.exchange.shareLinkInvalidTitle);
+          case PendingExchangeExpired():
+            showMessage(t.exchange.shareLinkExpiredTitle);
+        }
+      }
+
+      unawaited(resolve());
+      return null;
+    }, [pending, myUid, profile]);
 
     Future<void> runAuthAction(
       Future<void> Function(AuthRepository repository) action, {
@@ -116,7 +183,16 @@ class AccountPage extends HookConsumerWidget {
       }
 
       await runAuthAction(
-        (repository) => repository.deleteAccount(password: password),
+        (repository) => repository.deleteAccount(
+          password: password,
+          // 再認証が通ってから、トークンが失効する前にプロフィールを消す。
+          beforeDelete: () async {
+            await ref.read(userProfileRepositoryProvider).delete(user.uid);
+            await ref.read(exchangeTokenCacheRepositoryProvider).clear(user.uid);
+            await ref.read(exchangeCodeCacheRepositoryProvider).clear(user.uid);
+            ref.read(pendingExchangeTokenProvider.notifier).clear();
+          },
+        ),
         successMessage: t.auth.account.deleted,
       );
     }
@@ -133,26 +209,23 @@ class AccountPage extends HookConsumerWidget {
         actions: const [SettingsIconButton()],
       ),
       body: switch (authState) {
-        AsyncData(:final value) => Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: ConstrainedBox(
-              // 認証方法が変わっても操作領域が揃うよう、共通の最大幅にする。
-              constraints: const BoxConstraints(maxWidth: signInMethodButtonMaxWidth),
-              child: value == null
-                  ? _SignedOutView(
-                      isProcessing: isProcessing.value,
-                      showsAppleSignIn: showsAppleSignIn,
-                      onSignIn: runAuthAction,
-                    )
-                  : _SignedInView(
-                      user: value,
-                      isProcessing: isProcessing.value,
-                      onSignOut: () => runAuthAction((repository) => repository.signOut()),
-                      onDeleteAccount: () => deleteAccount(value),
-                    ),
-            ),
-          ),
+        AsyncData(:final value) => AppScrollbar(
+          child: value == null
+              ? const _SignedOutView()
+              : _SignedInView(
+                  user: value,
+                  profileState: profileState,
+                  isProcessing: isProcessing.value,
+                  onRetryProfile: () => ref.invalidate(userProfileProvider),
+                  onSignOut: () => runAuthAction((repository) async {
+                    await ref.read(exchangeTokenCacheRepositoryProvider).clear(value.uid);
+                    await ref.read(exchangeCodeCacheRepositoryProvider).clear(value.uid);
+                    ref.read(pendingExchangeTokenProvider.notifier).clear();
+                    await repository.signOut();
+                  }),
+                  onDeleteAccount: () => deleteAccount(value),
+                  onComingSoon: () => showMessage(t.auth.account.comingSoon),
+                ),
         ),
         AsyncError(:final error) => AppErrorView(
           error: error,
@@ -166,146 +239,312 @@ class AccountPage extends HookConsumerWidget {
   }
 }
 
-/// Sign-in method buttons shown while signed out.
+/// Centered sign-in card shown while signed out.
 class _SignedOutView extends StatelessWidget {
-  const _SignedOutView({
-    required this.isProcessing,
-    required this.showsAppleSignIn,
-    required this.onSignIn,
-  });
-
-  final bool isProcessing;
-  final bool showsAppleSignIn;
-  final Future<void> Function(Future<void> Function(AuthRepository repository) action) onSignIn;
+  const _SignedOutView();
 
   @override
   Widget build(BuildContext context) {
     final t = Translations.of(context);
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: SignInCard(
+          title: t.auth.signIn.required,
+          description: t.auth.signIn.description,
+        ),
+      ),
+    );
+  }
+}
+
+/// Signed-in account tab: profile card, missions, event entry points and
+/// account actions as a top-aligned scrolling list.
+class _SignedInView extends ConsumerWidget {
+  const _SignedInView({
+    required this.user,
+    required this.profileState,
+    required this.isProcessing,
+    required this.onRetryProfile,
+    required this.onSignOut,
+    required this.onDeleteAccount,
+    required this.onComingSoon,
+  });
+
+  final User user;
+  final AsyncValue<UserProfile?> profileState;
+  final bool isProcessing;
+  final VoidCallback onRetryProfile;
+  final Future<void> Function() onSignOut;
+  final Future<void> Function() onDeleteAccount;
+
+  /// Tapped an event entry point whose screen is not implemented yet.
+  final VoidCallback onComingSoon;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final t = Translations.of(context);
     final theme = Theme.of(context);
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+    final profile = profileState.value;
+    final title = profile?.displayName ?? user.displayName ?? user.email ?? t.auth.account.noEmail;
+    final subtitle = title != user.email ? user.email : null;
+    final eventFeaturesEnabled = ref.watch(eventFeaturesEnabledProvider);
+
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
       children: [
-        Icon(
-          Icons.account_circle_outlined,
-          size: 64,
-          color: theme.colorScheme.primary,
-        ),
-        const SizedBox(height: 16),
-        Text(
-          t.auth.signIn.description,
-          textAlign: TextAlign.center,
-          style: theme.textTheme.bodyMedium,
-        ),
-        const SizedBox(height: 24),
-        GoogleSignInButton(
-          onPressed: isProcessing ? null : () async => onSignIn((repository) => repository.signInWithGoogle()),
-        ),
-        const SizedBox(height: 12),
-        if (showsAppleSignIn) ...[
-          AppleSignInButton(
-            onPressed: isProcessing ? null : () async => onSignIn((repository) => repository.signInWithApple()),
-          ),
-          const SizedBox(height: 12),
-        ],
-        OutlinedButton(
-          onPressed: isProcessing ? null : () async => const EmailSignInRoute().push<void>(context),
-          style: OutlinedButton.styleFrom(
-            minimumSize: const Size.fromHeight(signInMethodButtonHeight),
-            maximumSize: const Size.fromHeight(signInMethodButtonHeight),
-            padding: EdgeInsets.zero,
-            textStyle: signInMethodButtonLabelStyle,
-          ),
-          child: SizedBox.expand(
-            child: Stack(
-              alignment: Alignment.center,
+        Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 640),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const PositionedDirectional(
-                  start: signInMethodButtonIconInset,
-                  child: Icon(Icons.mail_outline, size: signInMethodButtonIconSize),
+                switch (profileState) {
+                  AsyncData(:final value) => ProfileCard(
+                    title: title,
+                    subtitle: subtitle,
+                    avatarUrl: value?.avatarUrl ?? user.photoURL,
+                    profile: value,
+                    onEdit: () => const ProfileEditRoute().push<void>(context),
+                    onCreate: () => const ProfileEditRoute().push<void>(context),
+                  ),
+                  AsyncError(:final error) => _ProfileLoadError(error: error, onRetry: onRetryProfile),
+                  AsyncLoading() => const Card.outlined(
+                    margin: EdgeInsets.zero,
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(vertical: 32),
+                      child: Center(child: CircularProgressIndicator.adaptive()),
+                    ),
+                  ),
+                },
+                if (eventFeaturesEnabled) ...[
+                  const SizedBox(height: 8),
+                  Card.outlined(
+                    margin: EdgeInsets.zero,
+                    clipBehavior: Clip.antiAlias,
+                    semanticContainer: false,
+                    child: ListTile(
+                      minTileHeight: 56,
+                      leading: const Icon(Icons.track_changes_outlined, size: 22),
+                      title: Text(t.auth.account.mission, style: theme.textTheme.bodyMedium),
+                      subtitle: Text(t.auth.account.missionDescription, style: theme.textTheme.bodySmall),
+                      trailing: const Icon(Icons.chevron_right, size: 20),
+                      onTap: () => const MissionRoute().push<void>(context),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  _SectionHeading(title: t.auth.account.joinEvent),
+                  const SizedBox(height: 8),
+                  Card.outlined(
+                    margin: EdgeInsets.zero,
+                    clipBehavior: Clip.antiAlias,
+                    semanticContainer: false,
+                    child: Column(
+                      children: [
+                        // クイズ大会は参加と回答の記録をアカウントに紐づけるため、
+                        // サインイン中のここが唯一の入口になる。
+                        _NavigationTile(
+                          icon: Icons.quiz_outlined,
+                          title: t.auth.account.quiz,
+                          onTap: () => unawaited(const QuizListRoute().push<void>(context)),
+                        ),
+                        const Divider(height: 1),
+                        _SupportLtNavigationTile(uid: user.uid),
+                        const Divider(height: 1),
+                        _NavigationTile(
+                          icon: Icons.qr_code_2_outlined,
+                          title: t.auth.account.profileExchange,
+                          onTap: () => const ExchangeHomeRoute().push<void>(context),
+                        ),
+                        const Divider(height: 1),
+                        _NavigationTile(
+                          icon: Icons.image_outlined,
+                          title: t.auth.account.snsPost,
+                          onTap: () => const SnsPostRoute().push<void>(context),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+                // フラグの ON/OFF どちらでもアカウント見出しの前に同じ余白を置く。
+                const SizedBox(height: 24),
+                _SectionHeading(title: t.auth.account.title),
+                const SizedBox(height: 8),
+                Card.outlined(
+                  margin: EdgeInsets.zero,
+                  clipBehavior: Clip.antiAlias,
+                  semanticContainer: false,
+                  child: Column(
+                    children: [
+                      _NavigationTile(
+                        icon: Icons.logout,
+                        title: t.auth.account.signOut,
+                        onTap: isProcessing ? null : () => unawaited(onSignOut()),
+                      ),
+                      const Divider(height: 1),
+                      _NavigationTile(
+                        icon: Icons.delete_outline,
+                        title: t.auth.account.delete,
+                        color: theme.colorScheme.error,
+                        showsChevron: false,
+                        onTap: isProcessing ? null : () => unawaited(onDeleteAccount()),
+                      ),
+                    ],
+                  ),
                 ),
-                Text(t.auth.signIn.withEmail),
               ],
             ),
           ),
         ),
-        if (isProcessing) ...[
-          const SizedBox(height: 24),
-          const Center(child: CircularProgressIndicator()),
-        ],
       ],
     );
   }
 }
 
-/// Account summary and sign-out shown while signed in.
-class _SignedInView extends StatelessWidget {
-  const _SignedInView({
-    required this.user,
-    required this.isProcessing,
-    required this.onSignOut,
-    required this.onDeleteAccount,
+class _SectionHeading extends StatelessWidget {
+  const _SectionHeading({required this.title});
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) => Text(
+    title,
+    style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+  );
+}
+
+class _SupportLtNavigationTile extends ConsumerWidget {
+  const _SupportLtNavigationTile({required this.uid});
+
+  final String uid;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final t = Translations.of(context);
+    ref.listen(supportLtRegistrationProvider(uid), (_, next) {
+      // The tile has no room for an error view; the Support LT page offers a
+      // retry. Record the failure so a permission or network problem is visible.
+      if (next case AsyncError(:final error, :final stackTrace)) {
+        ref.read(talkerProvider).handle(error, stackTrace);
+      }
+    });
+    // `value` keeps the last registration through reloads so the badge does
+    // not flicker while the stream resubscribes.
+    final isRegistered = ref.watch(supportLtRegistrationProvider(uid)).value != null;
+    return _NavigationTile(
+      icon: Icons.mic_none_outlined,
+      title: t.auth.account.lightningTalks,
+      badge: isRegistered ? _RegisteredBadge(label: t.supportLt.registeredStatus) : null,
+      onTap: () => const SupportLtRoute().push<void>(context),
+    );
+  }
+}
+
+/// Compact tonal badge marking a completed Support LT registration.
+class _RegisteredBadge extends StatelessWidget {
+  const _RegisteredBadge({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    return DecoratedBox(
+      // プロフィール編集ボタンと同じく、アカウントタブの強調は primary 系で揃える。
+      decoration: BoxDecoration(
+        color: colorScheme.primaryContainer,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Padding(
+        padding: const EdgeInsetsDirectional.fromSTEB(6, 4, 8, 4),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.check_circle, size: 16, color: colorScheme.onPrimaryContainer),
+            const SizedBox(width: 4),
+            Text(label, style: theme.textTheme.labelMedium?.copyWith(color: colorScheme.onPrimaryContainer)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Dense in-app navigation row, matching the link tiles on the event tab.
+class _NavigationTile extends StatelessWidget {
+  const _NavigationTile({
+    required this.icon,
+    required this.title,
+    required this.onTap,
+    this.color,
+    this.showsChevron = true,
+    this.badge,
   });
 
-  final User user;
-  final bool isProcessing;
-  final Future<void> Function() onSignOut;
-  final Future<void> Function() onDeleteAccount;
+  final IconData icon;
+  final String title;
+  final VoidCallback? onTap;
+
+  /// Overrides the icon and label color (e.g. the error color for delete).
+  final Color? color;
+  final bool showsChevron;
+
+  /// Shown before the chevron, e.g. a status badge.
+  final Widget? badge;
+
+  @override
+  Widget build(BuildContext context) => ListTile(
+    dense: true,
+    minTileHeight: 48,
+    enabled: onTap != null,
+    iconColor: color,
+    textColor: color,
+    leading: Icon(icon, size: 22),
+    title: Text(title, style: Theme.of(context).textTheme.bodyMedium),
+    trailing: badge == null && !showsChevron
+        ? null
+        : Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (badge case final badge?) ...[badge, const SizedBox(width: 4)],
+              if (showsChevron) const Icon(Icons.chevron_right, size: 20),
+            ],
+          ),
+    onTap: onTap,
+  );
+}
+
+/// Compact inline error for the profile section so the rest of the account
+/// tab (sign-out, delete) stays usable.
+class _ProfileLoadError extends StatelessWidget {
+  const _ProfileLoadError({required this.error, required this.onRetry});
+
+  final Object error;
+  final VoidCallback onRetry;
 
   @override
   Widget build(BuildContext context) {
     final t = Translations.of(context);
     final theme = Theme.of(context);
-    final title = user.displayName ?? user.email ?? t.auth.account.noEmail;
-    final subtitle = user.displayName != null ? user.email : null;
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        CircleAvatar(
-          radius: 32,
-          child: Icon(Icons.person, size: 32, semanticLabel: t.auth.account.title),
+    return Card.outlined(
+      margin: EdgeInsets.zero,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              t.error.title,
+              style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+            ),
+            const SizedBox(height: 4),
+            Text(t.error.message, style: theme.textTheme.bodySmall),
+            const SizedBox(height: 12),
+            OutlinedButton(onPressed: onRetry, child: Text(t.error.retry)),
+          ],
         ),
-        const SizedBox(height: 16),
-        Text(
-          title,
-          textAlign: TextAlign.center,
-          style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
-        ),
-        if (subtitle != null) ...[
-          const SizedBox(height: 4),
-          Text(
-            subtitle,
-            textAlign: TextAlign.center,
-            style: theme.textTheme.bodyMedium,
-          ),
-        ],
-        const SizedBox(height: 4),
-        Text(
-          t.auth.account.signedIn,
-          textAlign: TextAlign.center,
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
-        ),
-        const SizedBox(height: 24),
-        OutlinedButton.icon(
-          onPressed: isProcessing ? null : () async => onSignOut(),
-          style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(48)),
-          icon: const Icon(Icons.logout),
-          label: Text(t.auth.account.signOut),
-        ),
-        const SizedBox(height: 8),
-        TextButton.icon(
-          onPressed: isProcessing ? null : () async => onDeleteAccount(),
-          style: TextButton.styleFrom(
-            foregroundColor: theme.colorScheme.error,
-            minimumSize: const Size.fromHeight(48),
-          ),
-          icon: const Icon(Icons.delete_outline),
-          label: Text(t.auth.account.delete),
-        ),
-      ],
+      ),
     );
   }
 }

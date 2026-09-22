@@ -6,18 +6,39 @@ is therefore not part of the schema. Timestamp fields (`createdAt`,
 `updatedAt`, `startsAt`, …) are written as Firestore timestamps and documented
 here as ISO-8601 `date-time` strings.
 
-Schemas committed so far, one per editable collection used by the dashboard:
+Schemas committed so far, including server-managed collections:
 
+- `firestore/counters.schema.json` (`counters`, written by Cloud Functions, not the app or the dashboard)
 - `firestore/news.schema.json` (`news`)
+- `firestore/profile_exchange.schema.json` (`users/{uid}/exchanges`, written by the app, not the dashboard)
+- `firestore/quiz_event.schema.json` (`quizEvents`, server-controlled progress and capacity 3–80)
+- `firestore/quiz_question.schema.json` / `quiz_question_secret.schema.json` (public questions and private answers)
+- `firestore/quiz_team.schema.json` / `quiz_answer.schema.json` (server-controlled teams and submissions)
+- `firestore/quiz_participant.schema.json` / `quiz_participant_account.schema.json` (roster and private account details)
+- `firestore/quiz_entry_secret.schema.json` (current six-digit entry code)
+- `firestore/quiz_admission_slot.schema.json` (`quizEvents/{eventId}/admissionSlots/{slot}`, server-only capacity reservations)
+- `firestore/quiz_participation.schema.json` (`quizParticipation/{uid}`, cross-round registration lock)
+- `firestore/quiz_entry_attempt.schema.json` / `quiz_operation.schema.json` (server-only attempts and retry receipts)
 - `firestore/session.schema.json` (`sessions`)
+- `firestore/sns_post_registration.schema.json` (`snsPostRegistrations/{uid}`, one owner-only photo post URL and companion category)
 - `firestore/speaker.schema.json` (`speakers`)
 - `firestore/sponsor.schema.json` (`sponsors`)
 - `firestore/staff_member.schema.json` (`staffMembers`)
+- `firestore/support_lt_settings.schema.json` (`supportLtSettings/current`, written only by `issueSupportLtCode`)
+- `firestore/support_lt_registration.schema.json` (`supportLtRegistrations/{uid}`, written only by `registerSupportLt`)
+- `firestore/support_lt_registration_attempts.schema.json` (`supportLtRegistrationAttempts/{uid}`, server-only per-account rate limits)
+- `firestore/support_lt_shared_attempts.schema.json` (`supportLtSettings/attempts`, server-only failure counts across all accounts)
 - `firestore/timeline_event.schema.json` (`timelineEvents`)
+- `firestore/user_profile.schema.json` (`users`, written by the app, not the dashboard)
 - `firestore/venue.schema.json` (`venues`)
 
 Each file mirrors the matching model under `../../lib/src/model/`. When a model
-changes, update its schema in the same change.
+changes, update its schema in the same change. Server-only fields and collections
+also document their Cloud Functions contract. Support LT uses Firestore timestamps
+in documents and epoch milliseconds in callable responses; its code is a string
+so leading zeroes survive. Registration does not require a user profile. Codes,
+registrations, and attempts have no seed data: issue and register through the
+local callables so code validation and attendee identity are exercised.
 
 When a new collection becomes necessary:
 

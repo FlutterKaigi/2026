@@ -2,8 +2,10 @@ app:
   title: FlutterKaigi 2026
 links:
   openError: リンクを開けませんでした
+  copied: リンクをコピーしました
 navigation:
   sessions: セッション
+  venueMap: 会場マップ
   sponsors: スポンサー
   info: イベント
   account: アカウント
@@ -17,11 +19,18 @@ sponsors:
   empty: スポンサーはまだ公開されていません
   notFound: スポンサーが見つかりませんでした
   logoSemanticLabel: $name のロゴ
+  githubCardSemanticLabel: $name の GitHub を見る
+  xCardSemanticLabel: $name の X を見る
+  externalCardSemanticLabel: $name のリンクを開く
   tierBadge: $tier スポンサー
   jobBoards: Job Boards
   jobBoardCta: 採用情報
   recruitCta: 採用サイト
   connect: Connect
+staffMembers:
+  title: スタッフ
+  empty: スタッフはまだ公開されていません
+  error: スタッフ情報を取得できませんでした
 # NOTE: apps/website/lib/l10n/strings.dart の footerTrademark と同一文言を維持すること
 trademarks:
   flutterAffiliation: Flutter および関連するロゴは Google LLC の商標です。FlutterKaigi は Google LLC の承認または提携を受けておりません。
@@ -41,10 +50,9 @@ sessionTimetable:
   speaker:
     none: 登壇者未定
   type:
-    regular: 通常セッション
+    regular: セッション
     lightningTalk: LT
     beginnersLightningTalk: 初心者向けLT
-    handsOn: ハンズオン
     event: イベント
 sessionSearch:
   title: セッションを検索
@@ -73,6 +81,8 @@ sessionDetails:
   speakers: 登壇者
   links: リンク
   sessionize: Sessionize
+  feedback: セッションのフィードバックを送る
+  feedbackDescription: このセッションの感想をお聞かせください
   share: 共有
   notFound: セッションが見つかりませんでした
 sessionBookmark:
@@ -85,6 +95,89 @@ bookmarkedSessions:
   emptyTitle: ブックマークしたセッションはありません
   emptyBody: 気になるセッションをブックマークすると、ここからすぐに見つけられます
   openSessions: タイムテーブルを開く
+venueMap:
+  title: 会場マップ
+  floor: 浜松町コンベンションホール · 5F
+  loadError: 会場マップを読み込めませんでした
+  loadErrorDescription: 再試行してください。
+  search: 場所を探す
+  searchHint: ホール・スポンサー名・番号・設備
+  clearSearch: 検索をクリア
+  placesCount: 件
+  showOnMap: 地図で見る
+  all: すべて
+  halls: ホール
+  booths: スポンサー
+  facilities: 設備
+  noResults: 一致する場所がありません
+  clearSelection: 選択を解除
+  zoomIn: 拡大
+  zoomOut: 縮小
+  fit: 全体を表示
+  rotate: 地図の向きを変える
+  twoD: 2D
+  threeD: 3D
+  viewMode: 地図の表示方法
+  useTwoD: 2Dで表示
+  saveFailed: 表示方法を保存できませんでした
+venueWalk:
+  sceneLabel: だしゅまると会場さんぽ。スティック、床のタップ、または矢印キーで歩けます。
+  currentLocation: ただいま
+  entrance: エントランス
+  entranceSign: 入口
+  selectedPoint: 選んだ場所
+  headingTo: $placeへ移動中
+  arrivedAt: $placeに到着
+  unreachable: そこへは移動できません
+  photoMode: 撮影モード
+  walkToPhotoSpot: フォトスポットへ歩く
+  followTooltip: だしゅまるを追う
+  overviewTooltip: フロア全体を見る
+  follow: 追いかける
+  overview: 全体を見る
+  help: 遊び方
+  stickHint: スティックで歩く
+  stickLabel: だしゅまるを動かすスティック
+  stopTooltip: 移動を止める
+  stop: ここで止まる
+  reset: 入口に戻る
+  wave: 手をふる
+  backToWalk: さんぽに戻る
+  run: 走る
+  runningSpeed: 走る速度
+  walkingSpeed: 歩く速度
+  runHint: 押している間だけ走ります。離すと歩きます。キーボードではShiftキーを使います。
+  close: 閉じる
+  instructions:
+    title: 会場さんぽの遊び方
+    movement: 左下のスティックで歩きます。右下の走るアイコンを押している間は走り、離すと歩く速さに戻ります。
+    camera: 背景をドラッグして見回し、ピンチで近づいたり離れたりできます。床をタップすると、その場所まで自動で歩きます。
+    places: 「場所を探す」で行き先を選んで、4つのホールを巡ってみましょう。地図アイコンで会場全体を見渡せます。
+    photos: カメラで記念撮影。隣の写真アイコンを押すと、クリエイティブボードの前まで歩きます。ポーズやフレームを選んで撮影できます。
+    keyboard: パソコンでは W A S D または矢印キーで移動、Shiftを押している間は走り、Escで止まります。
+    scope: 5階の会場を散歩できます。実際の現在地を示すものではなく、エスカレーターでの階移動はできません。
+    credits: "3Dモデル: yakitama5 / flutter_deck_slides\nだしゅまる: FlutterKaigi"
+  photo:
+    title: だしゅまると記念撮影
+    resultTitle: 記念写真
+    imageLabel: 撮影しただしゅまるの記念写真
+    downloadStarted: 写真のダウンロードを開始しました
+    saveFailed: 写真を保存できませんでした。もう一度お試しください。
+    savePng: PNGを保存
+    captureFailed: 撮影できませんでした。もう一度お試しください。
+    caption: だしゅまると、会場さんぽ。
+    captionAt: だしゅまると、$placeで。
+    shutter: 写真を撮る
+    capturing: 撮影中
+    hideUi: UIを隠す。画面をタップすると戻ります
+    faceCamera: こちらを向く
+    removeFrame: フレームを外す
+    addFrame: フレームを付ける
+    poses:
+      standing: 立つ
+      wave: 手をふる
+      sitting: 座る
+      jumping: ジャンプ
 eventInfo:
   title: イベント概要
   newsTitle: 最新のお知らせ
@@ -107,6 +200,7 @@ eventInfo:
   exclusionPolicy: 反社会的勢力排除に関する基本方針
   contact: お問い合わせ
   sourceCode: ソースコードを見る
+  staffMembers: スタッフ
   ossLicenses: OSSライセンス
 contributors:
   title: コントリビューター
@@ -117,6 +211,7 @@ contributors:
     other: $n contributions
 auth:
   signIn:
+    required: サインインが必要です
     description: FlutterKaigi 2026 アプリで利用するサインイン方法を選択してください
     withGoogle: Google でサインイン
     # NOTE: Apple 公式の日本語ボタン表記(スペースなし)に合わせる
@@ -138,6 +233,7 @@ auth:
     resetEmailSent: パスワード再設定メールを送信しました
   account:
     title: アカウント
+    features: 参加する
     signedIn: サインイン中
     signOut: サインアウト
     signOutError: サインアウトできませんでした
@@ -148,6 +244,14 @@ auth:
     deleteConfirmAction: 削除する
     deletePasswordTitle: パスワードの確認
     deletePasswordBody: アカウントを削除するには、現在のパスワードを入力してください。
+    mission: ミッション
+    missionDescription: 応援LT参加・プロフィール交換・SNS投稿登録の参加状況で判定
+    joinEvent: イベントに参加
+    quiz: クイズ大会
+    lightningTalks: 応援LT参加
+    profileExchange: プロフィール交換
+    snsPost: SNS投稿登録
+    comingSoon: この機能は準備中です
     deleted: アカウントを削除しました
     cancel: キャンセル
   error:
@@ -162,6 +266,184 @@ auth:
     userMismatch: 再認証したアカウントがサインイン中のアカウントと一致しません
     appleTokenRevocationFailed: Appleのトークン失効に失敗したため、アカウントを削除できませんでした。もう一度お試しください
     unknown: 認証に失敗しました。もう一度お試しください
+profile:
+  title: プロフィール
+  editTitle: プロフィールを編集
+  createTitle: プロフィールを作成
+  promptTitle: プロフィールを登録しましょう
+  promptBody: 出身国・地域や SNS を登録すると、会場での参加者同士のプロフィール交換に使えます。
+  create: プロフィールを作成
+  edit: プロフィールを編集
+  save: 保存
+  saved: プロフィールを保存しました
+  saveFailed: プロフィールを保存できませんでした
+  visibilityNote: プロフィールはサインインしている他の参加者に公開されます
+  avatarSemanticLabel: プロフィール画像
+  displayNameLabel: 表示名
+  displayNameRequired: 表示名を入力してください
+  countryLabel: 出身国・地域
+  countryPlaceholder: 選択してください
+  countryRequired: 出身国・地域を選択してください
+  countrySearchHint: 国名・地域名で検索
+  countryNoResults: 「$query」に一致する国・地域が見つかりません
+  countryNoResultsHint: 英語名やISOコードでも検索できます
+  snsLinksLabel: SNS
+  snsLinksEmpty: X や GitHub などのリンクを追加できます
+  addSnsLink: SNSリンクを追加
+  removeSnsLink: このリンクを削除
+  snsPlatformLabel: サービス
+  snsUrlLabel: URL
+  snsIdOrUrlLabel: IDまたはURL
+  snsIdOrUrlRequired: ID または URL を入力してください
+  snsIdOrUrlInvalid: 有効な ID または https:// から始まる URL を入力してください
+  snsUrlRequired: URL を入力してください
+  snsUrlInvalid: https:// から始まる URL を入力してください
+  snsLinksMax: SNSリンクは $n 件まで登録できます
+  snsPlatformOther: その他
+  bioLabel: 自己紹介
+  bioHint: 普段の仕事や、今日話したいことなど
+  discardTitle: 編集内容を破棄しますか?
+  discardBody: 保存していない変更は失われます。
+  discardAction: 破棄する
+  keepEditing: 編集を続ける
+snsPost:
+  title: SNS投稿登録
+  signInRequired: SNS投稿を登録するにはサインインしてください
+  heading: 写真の投稿を登録しよう
+  description: 対象の参加者と撮った写真をSNSに投稿し、\nその投稿のURLを登録してください。
+  companionLabel: 誰と撮りましたか？
+  companionHint: 写真に写っている相手のタグを1つ選んでください
+  companionRequired: 相手のタグを1つ選んでください
+  companions:
+    staff: スタッフ
+    speaker: スピーカー
+    sponsor: スポンサー
+    firstTime: 初参加の人
+    differentCountry: 出身国・地域が異なる人
+  urlLabel: SNS投稿のURL
+  urlHint: プロフィールページではなく、写真を投稿したページのURL
+  invalidUrl: 有効な投稿URL（https://…）を入力してください
+  register: 投稿を登録する
+  update: 登録内容を更新する
+  saving: 保存中…
+  cancel: キャンセル
+  saveFailed: 保存できませんでした。通信状態を確認して、もう一度お試しください。
+  invalidRegistration: 登録内容を確認できません。投稿URLと相手のタグを登録し直してください。
+  registeredTitle: SNS投稿を登録しました
+  registeredBody: SNS投稿のミッションを達成しました。
+  updatedAt: "更新日時：$date"
+  openPost: 投稿を開く
+  openFailed: 投稿を開けませんでした
+  viewMissions: ミッションの達成状況を見る
+  edit: URL・タグを修正する
+
+mission:
+  title: ミッション
+  signInRequired: ミッションの達成状況を見るにはサインインしてください
+  complete: 達成
+  incomplete: 未達成
+  loading: 確認中
+  loadFailed: 確認できません
+  allComplete: すべて達成！
+  inProgress: ミッション達成状況
+  checkFailed: 確認できない項目があります
+  progress: $total項目中$n項目を達成
+  ltTitle: 応援LTに参加
+  ltDescription: 応援側・登壇者とも、会場のコードで参加登録
+  exchangeTitle: プロフィール交換
+  exchangeDescription: $required人以上と交換し、出身国・地域が異なる人を1人以上含む
+  exchangeCount: "$n / $required人と交換"
+  differentCountry: 出身国・地域が異なる人と交換
+  profileRequired: プロフィールで出身国・地域を登録する
+  snsTitle: 写真をSNSに投稿
+  snsDescription: 対象の相手との写真を投稿し、URLとタグを登録
+
+exchange:
+  title: プロフィール交換
+  qrDescription: このQRコードを相手に見せて読み取ってもらうと、お互いのプロフィールを交換できます
+  qrSemanticLabel: プロフィール交換用のQRコード
+  qrExpiresAt: 有効期限 $date まで
+  scanButton: QRコードを読み取る
+  listButton: 交換した人を見る
+  signInRequired: サインインすると自分のQRコードを表示できます
+  signInAction: サインインする
+  profileRequired: プロフィールを作成すると自分のQRコードを表示できます
+  profileRequiredAction: プロフィールを作成する
+  scanTitle: QRコードを読み取る
+  scanHint: 相手の画面に表示されたQRコードを枠内に収めてください
+  scanCameraError: カメラを利用できません。設定でカメラへのアクセスを許可してください
+  scanInvalid: 読み取れませんでした。プロフィール交換用のQRコードか確認してください
+  scanSelf: 自分のQRコードは読み取れません
+  scanSucceeded: プロフィールを交換しました
+  scanAlreadyExists: すでに交換済みです
+  scanFailed: プロフィールを交換できませんでした
+  listTitle: 交換した人
+  listEmpty: まだ誰とも交換していません
+  listEmptyBody: QRコードを読み取って、参加者とプロフィールを交換しましょう
+  profileUnavailable: このプロフィールは表示できません
+  deleteTooltip: 削除
+  deleteConfirmTitle: 交換を削除しますか?
+  deleteConfirmBody: 自分の一覧からのみ削除されます。相手の一覧はそのまま残ります。
+  deleteConfirmAction: 削除する
+  deleteCancel: キャンセル
+  deleteFailed: 削除できませんでした
+  noteAddTooltip: メモを追加
+  noteEditTooltip: メモを編集
+  noteEditTitle: メモ
+  noteEditHint: 自分だけに見えるメモです
+  noteLabel: メモ
+  noteSave: 保存
+  noteCancel: キャンセル
+  noteSaveFailed: メモを保存できませんでした
+  codeSectionTitle: 6桁コードで交換
+  codeSectionDescription: カメラが使えないときは、6桁のコードを伝え合って交換できます。有効期限内なら、同じコードを何人でも入力できます
+  myCodeSemanticLabel: プロフィール交換用の6桁コード
+  myCodeExpiresAt: 有効期限 $date まで
+  myCodeExpired: コードの有効期限が切れました
+  myCodeRefresh: コードを再発行
+  myCodeCopy: コードをコピー
+  myCodeCopied: コードをコピーしました
+  enterCodeLabel: 相手のコードを入力
+  enterCodeHint: "123456"
+  enterCodeButton: 交換する
+  enterCodeInvalidFormat: 6桁の数字を入力してください
+  redeemInvalid: コードが見つからないか、有効期限が切れています
+  redeemSelf: 自分のコードは入力できません
+  redeemRateLimited: 試行回数が多すぎます。しばらくしてからもう一度お試しください
+  shareLinkSignInRequired: サインインすると相手とプロフィールを交換できます
+  shareLinkProfileRequired: プロフィールを作成すると相手とプロフィールを交換できます
+  shareLinkInvalidTitle: このリンクは無効です
+  shareLinkInvalidBody: プロフィール交換用のリンクか確認してください
+  shareLinkExpiredTitle: このリンクの有効期限が切れています
+  shareLinkExpiredBody: 相手にもう一度QRコードかリンクを共有してもらってください
+  shareLinkSelfTitle: これは自分の共有リンクです
+  shareLinkSelfBody: 他の参加者がこのリンクを開くと、あなたとプロフィールを交換できます
+  shareLinkGoHome: ホームに戻る
+  shareLinkViewList: 交換した人を見る
+supportLt:
+  title: 応援LT参加登録
+  description: 運営から案内された6桁のコードを入力して、応援LTへの参加を登録してください
+  codeLabel: 参加登録コード
+  register: 参加登録する
+  submitting: 登録中…
+  registeredTitle: 参加登録が完了しました
+  registeredBody: 応援LTをお楽しみください
+  registeredStatus: 参加登録済み
+  backToAccount: アカウントに戻る
+  signInRequired: "応援LTに参加登録するには\nサインインしてください"
+  invalidFormat: 6桁の数字を入力してください
+  invalidCode: コードが正しくありません。運営から案内されたコードを確認してください
+  rateLimited: 試行回数が多すぎます。しばらくしてからもう一度お試しください
+  networkError: 通信に失敗しました。通信状況を確認してもう一度お試しください
+  sessionExpired: サインインの有効期限が切れました。もう一度サインインしてください
+  permissionDenied: 参加登録が許可されていません。運営に確認してください
+  registrationFailed: 参加登録できませんでした。もう一度お試しください
+countryRegion:
+  asia: アジア
+  oceania: オセアニア
+  americas: 北米・中南米
+  europe: ヨーロッパ
+  africa: アフリカ
 settings:
   title: 設定
   appearance: 表示設定
@@ -196,3 +478,97 @@ error:
 notFound:
   title: ページが見つかりません
   description: お探しのページは存在しないか、移動した可能性があります。
+common:
+  retry: 再試行
+quiz:
+  title: クイズ大会
+  entrySubtitle: スポンサー提供のクイズに参加
+  list:
+    empty: クイズはまだありません
+    error: クイズ一覧を取得できませんでした
+    status:
+      preparing: 開催準備中
+      registration: 参加受付中
+      entryClosed: 受付終了
+      inProgress: 進行中
+      finished: 結果発表
+  signInRequired:
+    title: サインインが必要です
+    description: クイズ大会は参加と回答の記録をアカウントに紐づけます。
+      アカウントタブからサインインしてご参加ください。
+    button: アカウントへ
+  errors:
+    signInFailed: サインインに失敗しました
+    eventLoadFailed: イベント情報の取得に失敗しました
+  preparing:
+    title: クイズは開催準備中です
+    description: 開始のアナウンスがあったら
+      この画面から参加できます。
+  registration:
+    subtitle: テーブル対抗のチーム戦。ニックネームで参加しよう！
+    participantCount: 現在の参加人数
+    participantUnit: 人
+    nickname: ニックネーム
+    nicknameHint: 1〜20文字
+    entryCode: 受付コード
+    entryCodeHint: 6桁の数字
+    entryCodeHelper: 会場の受付で案内しているコードを入力してください
+    join: 参加する
+    full: 定員（$max 人）に達しました
+    failed: 登録できませんでした。時間をおいて再度お試しください。
+    codeMismatch: 登録できませんでした。受付コードが正しいか確認してください。
+    alreadyParticipated: 別の回に参加登録済みのため、この回には登録できません。
+    closed: この回の参加受付は終了しました。
+    unavailable: 登録を確認できませんでした。通信状況を確認して再試行してください。
+    rateLimited: 入力回数が多すぎます。1分待ってから、受付コードを確認して再試行してください。
+    accountUnavailable: このアカウントでは参加できません。運営にお問い合わせください。
+  waiting:
+    title: 登録完了！
+    description: チーム発表までしばらくお待ちください
+  team:
+    yourTable: あなたのテーブルは
+    table: テーブル
+    teamLabel: チーム
+    gatherHint: テーブルに集まって次の出題を待とう！
+    badge: テーブル $table・$name
+  entryClosed:
+    title: 参加受付は終了しました
+    description: クイズ大会は進行中です。
+      結果発表はこの画面でご覧いただけます。
+  question:
+    sponsoredBy: "提供: $name"
+    secondsUnit: 秒
+    locked: 回答を締め切りました
+    submitFailed: 送信できませんでした。締め切られた可能性があります。
+    answeredBy: $name が選択
+    member: メンバー
+    reading: 問題を読み上げています。回答開始をお待ちください。
+    synchronizing: サーバー時刻を確認しています…
+    connectionUnavailable: 通信を確認できません。接続を確認して再試行してください。
+    cached: 保存済みの情報を表示しています。チームの最新回答を確認できていません。
+    sending: 回答を送信しています…
+    received: 回答がサーバーで受理されました。
+    teamAnswer: 選択表示はサーバーで受理したチームの回答です。締切までは全員が変更できます。
+    submitUnconfirmed: 回答の受理を確認できません。通信状況とチームの現在の回答を確認し、締切までに再試行してください。
+  suspense:
+    title: 回答締切！
+    description: 正解発表をお待ちください
+  revealed:
+    title: 正解発表
+    correct: 正解！
+    wrong: 残念…
+    yourAnswer: あなたのチームの回答
+    teamScore: "現在のチームスコア: $score 点"
+  result:
+    title: 最終結果
+    table: テーブル $table
+    points: $score 点
+    yourTeam: あなたのチーム
+    yourTeamRanked: $rank 位 / $name（$score 点）
+    yourTeamUnranked: $name（$score 点）
+    perfect: $sponsor のブースへ景品を受け取りに行こう！
+    error: 結果の取得に失敗しました
+forceUpdate:
+  title: アップデートが必要です
+  message: 新しいバージョンのアプリが利用可能です。最新バージョンにアップデートしてください。
+  updateButton: アップデート

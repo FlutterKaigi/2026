@@ -19,11 +19,25 @@ Seed files are small, reviewable fixtures for local development.
 
 The `schema` value maps to `packages/data/firebase/schemas/firestore/{schema}.schema.json`.
 
-`firestore/default.json` seeds one sample document set per editable collection:
-`news`, `venues`, `speakers`, `sessions`, `timelineEvents`, `sponsors`, and
-`staffMembers`. References between documents use the target document id, so the
-seeded `sessions` point at the seeded `venues` (`venueId`) and `speakers`
-(`speakerIds`); keep those ids in sync when editing.
+`firestore/default.json` seeds one sample document set per collection this repo
+owns: `news`, `venues`, `sponsors`, `staffMembers` and `users`.
+
+`users` documents are normally created by attendees from the app (the document
+id is their Firebase Auth uid). The seeded `users/seed-user-*` profiles only
+exist so other attendees' profiles can be viewed locally; they are not tied to
+any Auth Emulator account.
+
+`sessions`, `speakers` and `timelineEvents` are deliberately **not** seeded.
+Sessionize owns them, and `tool/import_sessions.dart` writes them under
+Sessionize's own document ids — seeding fixtures under different ids would leave
+both copies in the emulator and render every slot twice. Populate them the same
+way STG does:
+
+```bash
+SESSIONIZE_ENDPOINT_ID=xxxxxxxx fvm dart run melos sessions:import
+```
+
+The import matches Sessionize rooms against `venues` by name, so seed first.
 
 Run:
 

@@ -1,15 +1,15 @@
 name: Deploy App iOS
 
 on:
-  release:
-    types: [published]
-  pull_request:
-    types: [labeled]
-  workflow_dispatch:
-
-concurrency:
-  group: deploy-app-ios-production
-  cancel-in-progress: false
+  workflow_call:
+    inputs:
+      environment:
+        description: 配布先（stg または prod）
+        type: string
+        required: true
+    secrets:
+      APP_STORE_CONNECT_API_KEY_BASE64:
+        required: true
 
 permissions: {}
 
@@ -19,25 +19,27 @@ defaults:
 
 jobs:
   deploy:
-    if: >-
-      ${{ github.event_name != 'pull_request' ||
-          (github.event.label.name == 'deploy-app-ios' &&
-           github.event.pull_request.head.repo.full_name == github.repository) }}
+    name: ios (${{ inputs.environment }})
+    concurrency:
+      group: deploy-app-ios-${{ inputs.environment }}
+      cancel-in-progress: false
     runs-on: macos-26
-    timeout-minutes: 45
+    timeout-minutes: 60
     permissions:
       contents: read
       id-token: write
     env:
+      DEPLOY_ENVIRONMENT: ${{ inputs.environment }}
       XCODE_VERSION: "26.4.1"
-      FIREBASE_PROJECT_ID: ${{ vars.PROD_FIREBASE_PROJECT_ID }}
+      FIREBASE_PROJECT_ID: ${{ vars[format('{0}_FIREBASE_PROJECT_ID', inputs.environment == 'stg' && 'STG' || 'PROD')] }}
       APPLE_TEAM_ID: ${{ vars.APPLE_TEAM_ID }}
-      IOS_BUNDLE_ID: ${{ vars.IOS_BUNDLE_ID }}
+      IOS_BUNDLE_ID: ${{ inputs.environment == 'stg' && 'jp.flutterkaigi.conf2026.stg' || vars.IOS_BUNDLE_ID }}
+      APP_STORE_CONNECT_APP_ID: ${{ inputs.environment == 'stg' && '6806764849' || '6793148059' }}
       APP_STORE_CONNECT_API_KEY_ID: ${{ vars.APP_STORE_CONNECT_API_KEY_ID }}
       APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ vars.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
       APP_STORE_CONNECT_API_KEY_BASE64: ${{ secrets.APP_STORE_CONNECT_API_KEY_BASE64 }}
-      GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER_PROD }}
-      GCP_SERVICE_ACCOUNT: ${{ vars.GCP_SERVICE_ACCOUNT_PROD }}
+      GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ vars[format('GCP_WORKLOAD_IDENTITY_PROVIDER_{0}', inputs.environment == 'stg' && 'STG' || 'PROD')] }}
+      GCP_SERVICE_ACCOUNT: ${{ vars[format('GCP_SERVICE_ACCOUNT_{0}', inputs.environment == 'stg' && 'STG' || 'PROD')] }}
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
@@ -50,14 +52,7 @@ jobs:
           xcodebuild -version
           xcrun --sdk iphoneos --show-sdk-version
 
-      - id: flutter-version
-        run: echo "version=$(jq -r .flutter .fvmrc)" >> "$GITHUB_OUTPUT"
-
-      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
-        with:
-          flutter-version: ${{ steps.flutter-version.outputs.version }}
-          channel: stable
-          cache: true
+      - uses: ./.github/actions/setup-flutter
 
       - name: Enable Swift Package Manager
         run: flutter config --enable-swift-package-manager
@@ -75,25 +70,21 @@ jobs:
               exit 1
             fi
           done
-          if [ "$IOS_BUNDLE_ID" != "jp.flutterkaigi.conf2026" ]; then
-            echo "::error::IOS_BUNDLE_ID must match jp.flutterkaigi.conf2026."
+          environment_file="apps/app/environments/.env.$DEPLOY_ENVIRONMENT"
+          expected_project="$(sed -n 's/^FIREBASE_PROJECT_ID=//p' "$environment_file")"
+          expected_bundle="$(sed -n 's/^IOS_BUNDLE_ID=//p' "$environment_file")"
+          if [ "$FIREBASE_PROJECT_ID" != "$expected_project" ] || [ "$IOS_BUNDLE_ID" != "$expected_bundle" ]; then
+            echo "::error::Firebase プロジェクトと Bundle ID を $environment_file に揃えてください。"
             exit 1
           fi
 
-      - name: Authenticate to Firebase with Workload Identity Federation
-        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3
+      - uses: ./.github/actions/setup-firebase
         with:
-          project_id: ${{ vars.PROD_FIREBASE_PROJECT_ID }}
-          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER_PROD }}
-          service_account: ${{ vars.GCP_SERVICE_ACCOUNT_PROD }}
+          project-id: ${{ env.FIREBASE_PROJECT_ID }}
+          workload-identity-provider: ${{ env.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service-account: ${{ env.GCP_SERVICE_ACCOUNT }}
 
-      - name: Install pinned Firebase configuration tools
-        run: |
-          npm install --global firebase-tools@13.35.1
-          dart pub global activate flutterfire_cli 1.4.0
-          echo "$HOME/.pub-cache/bin" >> "$GITHUB_PATH"
-
-      - name: Generate production Firebase options
+      - name: 選択した環境の Firebase 設定を生成
         working-directory: apps/app
         run: >-
           flutterfire configure
@@ -105,7 +96,7 @@ jobs:
           --ios-out=ios/Runner/GoogleService-Info.plist
           --out=lib/firebase_options.dart
 
-      - name: Validate generated production Firebase options
+      - name: 生成した Firebase 設定を検証
         working-directory: apps/app
         run: |
           test "$(/usr/libexec/PlistBuddy -c 'Print :PROJECT_ID' ios/Runner/GoogleService-Info.plist)" = "$FIREBASE_PROJECT_ID"
@@ -133,11 +124,44 @@ jobs:
           /usr/libexec/PlistBuddy -c 'Print :CFBundleURLTypes:1:CFBundleURLSchemes:0' ios/Runner/Info.plist \
             | grep -Fx "$reversed_client_id"
 
-      - name: Set build number
-        run: echo "BUILD_NUMBER=$((GITHUB_RUN_NUMBER * 100 + GITHUB_RUN_ATTEMPT))" >> "$GITHUB_ENV"
+      - name: App Store Connect CLI を準備
+        run: |
+          python3 -m venv "$RUNNER_TEMP/codemagic-cli"
+          "$RUNNER_TEMP/codemagic-cli/bin/pip" install codemagic-cli-tools==0.61.1
+          echo "$RUNNER_TEMP/codemagic-cli/bin" >> "$GITHUB_PATH"
+
+      - name: App Store Connect キーと書き出し設定を準備
+        run: |
+          umask 077
+          mkdir -p "$HOME/.private_keys" "$RUNNER_TEMP/app-store-export"
+          printf '%s' "$APP_STORE_CONNECT_API_KEY_BASE64" | base64 -d \
+            > "$HOME/.private_keys/AuthKey_$APP_STORE_CONNECT_API_KEY_ID.p8"
+          cp apps/app/ios/ExportOptions.plist "$RUNNER_TEMP/ExportOptions.plist"
+          /usr/libexec/PlistBuddy -c "Set :teamID $APPLE_TEAM_ID" "$RUNNER_TEMP/ExportOptions.plist"
+
+      - name: 登録済みの最新ビルド番号に1を加算
+        env:
+          APP_STORE_CONNECT_ISSUER_ID: ${{ vars.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
+          APP_STORE_CONNECT_KEY_IDENTIFIER: ${{ vars.APP_STORE_CONNECT_API_KEY_ID }}
+        run: |
+          app_version="$(sed -nE 's/^version: ([0-9]+[.][0-9]+[.][0-9]+).*/\1/p' apps/app/pubspec.yaml)"
+          test -n "$app_version"
+          latest_build_number="$(app-store-connect get-latest-testflight-build-number \
+            "$APP_STORE_CONNECT_APP_ID" --platform IOS \
+            --pre-release-version "$app_version" --disable-jwt-cache)"
+          latest_build_number="${latest_build_number:-0}"
+          if ! [[ "$latest_build_number" =~ ^[0-9]+$ ]]; then
+            echo "::error::App Store Connect の最新ビルド番号を整数として取得できませんでした。"
+            exit 1
+          fi
+          build_number=$((10#$latest_build_number + 1))
+          echo "APP_VERSION=$app_version" >> "$GITHUB_ENV"
+          echo "BUILD_NUMBER=$build_number" >> "$GITHUB_ENV"
+          echo "### iOS $DEPLOY_ENVIRONMENT: $app_version ($build_number)" >> "$GITHUB_STEP_SUMMARY"
+          echo "登録済みの最新番号 $latest_build_number + 1; コミット: $GITHUB_SHA" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Configure Xcode environment
-        run: cp apps/app/environments/.env.prod apps/app/ios/Flutter/Environment.xcconfig
+        run: cp "apps/app/environments/.env.$DEPLOY_ENVIRONMENT" apps/app/ios/Flutter/Environment.xcconfig
 
       - name: Configure iOS release
         working-directory: apps/app
@@ -147,17 +171,9 @@ jobs:
           --no-codesign
           --no-pub
           --build-number="$BUILD_NUMBER"
-          --dart-define-from-file=environments/.env.prod
-          --dart-define=FIREBASE_PROJECT_ID=$FIREBASE_PROJECT_ID
-          --dart-define=COMMIT_INFORMATION=${{ github.ref_name }}-${{ github.sha }}
-
-      - name: Prepare App Store Connect key and export options
-        run: |
-          mkdir -p "$HOME/.private_keys" "$RUNNER_TEMP/app-store-export"
-          printf '%s' "$APP_STORE_CONNECT_API_KEY_BASE64" | base64 -d \
-            > "$HOME/.private_keys/AuthKey_$APP_STORE_CONNECT_API_KEY_ID.p8"
-          cp apps/app/ios/ExportOptions.plist "$RUNNER_TEMP/ExportOptions.plist"
-          /usr/libexec/PlistBuddy -c "Set :teamID $APPLE_TEAM_ID" "$RUNNER_TEMP/ExportOptions.plist"
+          --dart-define-from-file="environments/.env.$DEPLOY_ENVIRONMENT"
+          --dart-define=FIREBASE_PROJECT_ID="$FIREBASE_PROJECT_ID"
+          --dart-define=COMMIT_INFORMATION="$GITHUB_REF_NAME-$GITHUB_SHA"
 
       - name: Archive iOS app
         working-directory: apps/app
@@ -188,10 +204,23 @@ jobs:
             -authenticationKeyID "$APP_STORE_CONNECT_API_KEY_ID" \
             -authenticationKeyPath "$HOME/.private_keys/AuthKey_$APP_STORE_CONNECT_API_KEY_ID.p8"
 
+      - name: IPA 内のアプリID・バージョン・ビルド番号を検証
+        working-directory: apps/app
+        run: |
+          ipa_path="$(find build/ios/export -maxdepth 1 -name '*.ipa' -print -quit)"
+          test -n "$ipa_path"
+          verification_dir="$(mktemp -d "$RUNNER_TEMP/verify-ipa.XXXXXX")"
+          unzip -q "$ipa_path" 'Payload/*.app/Info.plist' -d "$verification_dir"
+          app_plist="$(find "$verification_dir/Payload" -mindepth 2 -maxdepth 2 -name Info.plist -print -quit)"
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$app_plist")" = "$IOS_BUNDLE_ID"
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$app_plist")" = "$APP_VERSION"
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$app_plist")" = "$BUILD_NUMBER"
+          test "$(/usr/libexec/PlistBuddy -c 'Print :ITSAppUsesNonExemptEncryption' "$app_plist")" = false
+
       - name: Upload IPA artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: FlutterKaigi-2026-ios-${{ github.run_number }}
+          name: FlutterKaigi-2026-ios-${{ env.DEPLOY_ENVIRONMENT }}-${{ env.BUILD_NUMBER }}
           path: apps/app/build/ios/export/*.ipa
           if-no-files-found: error
 
@@ -209,3 +238,27 @@ jobs:
             --type ios \
             --apiIssuer "$APP_STORE_CONNECT_API_KEY_ISSUER_ID" \
             --apiKey "$APP_STORE_CONNECT_API_KEY_ID"
+
+      - name: 次の実行で同じ番号を使わないよう登録反映を確認
+        timeout-minutes: 12
+        env:
+          APP_STORE_CONNECT_ISSUER_ID: ${{ vars.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
+          APP_STORE_CONNECT_KEY_IDENTIFIER: ${{ vars.APP_STORE_CONNECT_API_KEY_ID }}
+        run: |
+          for attempt in {1..30}; do
+            latest_build_number="$(app-store-connect get-latest-testflight-build-number \
+              "$APP_STORE_CONNECT_APP_ID" --platform IOS \
+              --pre-release-version "$APP_VERSION" --disable-jwt-cache)"
+            if [[ "$latest_build_number" =~ ^[0-9]+$ ]] && (( 10#$latest_build_number >= BUILD_NUMBER )); then
+              echo "App Store Connect へのビルド $BUILD_NUMBER の登録反映を確認しました。" >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            echo "App Store Connect の登録反映を待機しています ($attempt/30)。"
+            sleep 20
+          done
+          echo "::error::アップロード後の登録反映を確認できません。再実行前に App Store Connect の処理状態を確認してください。"
+          exit 1
+
+      - name: 一時的な署名キーを削除
+        if: ${{ always() }}
+        run: rm -f "$HOME/.private_keys/AuthKey_$APP_STORE_CONNECT_API_KEY_ID.p8"

@@ -36,18 +36,70 @@ stg/prodの設定生成と配布はメンテナー向けWorkflowで行います�
 
 ## 認証
 
-Google / メールアドレス+パスワードのサインインに対応し、本番版のiOSだけAppleサインインも表示します。リポジトリ実装は`packages/data`の`AuthRepository`、UIはアカウントタブ(`/account`)です。アカウントタブからはサインアウトと、再認証をともなうアカウント削除(App Store Review Guideline 5.1.1(v)対応)ができます。Appleユーザーの削除ではiOSのFirebase SDKでAppleのトークンを失効させてから削除します(Emulator接続時は失効をスキップ)。
+Google / メールアドレス+パスワードのサインインに対応し、iOSアプリではAppleサインインも表示します。Appleサインインの表示条件はiOSアプリであることのみで、dev / stg / prodによる違いはありません。リポジトリ実装は`packages/data`の`AuthRepository`、UIはアカウントタブ(`/account`)です。アカウントタブからはサインアウトと、再認証をともなうアカウント削除(App Store Review Guideline 5.1.1(v)対応)ができます。Appleユーザーの削除ではiOSのFirebase SDKでAppleのトークンを失効させてから削除します(Emulator接続時は失効をスキップ)。
 
 devフレーバーはAuth Emulator(port 9099)へ自動接続します。
 
 Emulator接続時は次のように動作します。
 
 - Google: Webでは、有効なOAuth helper設定を使用するメンテナー確認で、Emulatorの擬似IdP画面から任意のダミーアカウントでサインインできます(実プロバイダの認証情報は不要)。
-- Apple: dev / stgでは表示しません。本番版のiOSではネイティブのSign in with Appleを使用します。
+- Apple: iOSアプリでは環境に関係なく表示します。ネイティブのSign in with Appleを使用します。
 - メール+パスワード: アカウント作成・サインイン・パスワード再設定を利用できます。再設定メールのリンクはEmulatorを起動したターミナルのログに出力されます。
 - 登録されたユーザーはEmulator UI(`http://localhost:4000/auth`)で確認できます。
 
-iOSのGoogleサインインはブラウザ経由(`signInWithProvider`)で行われ、`Info.plist`のコールバックスキームでアプリへ戻ります。本番版iOSのAppleサインインはSign in with Apple Capabilityを使用します。配布に必要なコールバックスキーム、Entitlements、Provisioning Profileはメンテナー向けWorkflowとApple Developer Portalで管理します。dev / stgのApp IDにSign in with Appleを有効化する必要はありません。Web OAuthを提供しないため、AppleのServices IDも使用しません。
+iOSのGoogleサインインはブラウザ経由(`signInWithProvider`)で行われ、`Info.plist`のコールバックスキームでアプリへ戻ります。iOSのAppleサインインは全環境で共通のEntitlementsを使い、Sign in with Apple Capabilityを要求します。署名に使う各App IDでもCapabilityを有効化し、対応するProvisioning Profileを用意してください。Firebaseに接続するstg / prodではAppleプロバイダを有効化します。配布に必要なコールバックスキーム、Entitlements、Provisioning Profileはメンテナー向けWorkflowとApple Developer Portalで管理します。Web OAuthを提供しないため、AppleのServices IDは使用しません。
+
+## プロフィール
+
+サインイン後、アカウントタブからプロフィール(`/account/profile`)を作成・編集できます。プロフィールはFirestoreの`users/{uid}`に保存され、サインイン済みの他の参加者から参照できます(プロフィール交換ミッション用)。項目は次のとおりです。
+
+- 表示名(必須、30文字まで)
+- 出身国・地域(必須、ISO 3166-1 alpha-2コードで保存)。`packages/data`の`countries`(Unicode CLDR由来、`fvm dart run melos countries:generate`で再生成)から地域別・英語名順で選択します。国旗は`country_flags`パッケージ(MIT、flag-iconsのSVG)で表示します(絵文字の国旗はiOSのFlutterで地域指示子が結合されず豆腐になるため不採用)
+- SNSリンク(任意、10件まで。`SnsLink.type`はダッシュボードのスタッフ編集と同じキー)
+- 自己紹介(任意、300文字まで)
+
+プロフィール画像はサインインプロバイダの`photoURL`を初回作成時に保存し、アプリ内でのアップロードには未対応です。アカウント削除では、再認証後・ユーザー削除前に`users/{uid}`も削除します。参加者種別と初参加フラグはネームプレートで把握する運用のため、プロフィールには持ちません。
+
+## 応援LT参加登録
+
+サインイン後、アカウントタブの「応援LT参加」(`/account/support-lt`)から、運営がダッシュボードで発行した6桁のコードを入力します。プロフィールは未作成でも登録できます。登録が完了すると画面とアカウントタブに登録状況が表示され、再起動後もFirestoreから復元されます。
+
+参加登録にはFunctions Emulator(port 5001)も必要です。通常の`firebase:start`の代わりに、Repositoryルートで次を実行します。
+
+```bash
+fvm dart run melos run functions:install
+fvm dart run melos run firebase:start:functions
+```
+
+別のTerminalから、上記の`fvm flutter run`でdevフレーバーのアプリを起動します。同じEmulatorへ接続したダッシュボードの「応援LT」でコードを発行し、アプリに入力すると、ダッシュボードの参加者一覧と参加人数に反映されます。発行したコードに有効期限はなく、複数の参加者が利用できます。再発行すると旧コードは利用できなくなります。
+
+## SNS投稿登録・ミッション
+
+アカウントタブの「SNS投稿登録」(`/account/sns-post`)から、写真を投稿済みのSNS投稿URLと、
+「誰と撮ったか」のタグを1つ登録します。タグはスタッフ・スピーカー・スポンサー・初参加の人・
+出身国／地域が異なる人の5種類です。アプリ内での写真アップロードやSNSへの投稿は行いません。
+プロフィール未作成でも登録でき、登録後にURL・タグを修正できます。
+
+保存先は `snsPostRegistrations/{uid}`（1人1件）です。本人だけが読み書きでき、サーバーの保存完了後に
+達成と表示します。保存待ちでも前の画面に戻れます。保存未確定のキャッシュだけでは達成とせず、
+初回の取得が10秒で完了しなければ通信エラーと再試行を表示します。不正な保存データは再登録で修復できます。
+アカウント削除時は共通のAuth削除処理（`onSupportLtUserDeleted`）が、プロフィールの有無にかかわらず削除します。
+
+「ミッション」(`/account/missions`)では、以下の3項目と全体の達成数を一覧表示します。
+
+- 応援LT参加：既存の運営コードによる参加登録が完了していること（応援側・登壇者共通）。
+- プロフィール交換：異なる3人以上と交換し、そのうち1人以上の出身国／地域が自分と異なること。
+  サーバーが検証済みの交換と、現在の登録プロフィールから判定します。未検証の交換・自分自身・
+  重複・削除済みプロフィールは数えません。自分のプロフィールが未登録の場合は作成を案内します。
+  交換相手のプロフィールは30人ずつまとめて購読し、国・地域の変更や削除も反映します。
+- SNS投稿：投稿URLと対象の相手のタグが保存済みであること。写真の内容や相手の分類は自己申告です。
+
+最後のイベントの受付ではこの画面をスタッフに提示します。受付済みフラグや再参加防止の操作はありません。
+取得エラーは未達成と区別して表示し、項目ごとに再試行できます。日本語・英語、ライト・ダークテーマに対応します。
+
+ローカル確認は上記のFunctionsを含むEmulator起動手順を使用してください。Webサーバーをin-app browserで
+開く場合は `fvm flutter run -d web-server --web-port 8780 --dart-define-from-file=environments/.env.dev` を実行し、
+`http://localhost:8780/#/account/missions` を開きます。
 
 ## 配布
 

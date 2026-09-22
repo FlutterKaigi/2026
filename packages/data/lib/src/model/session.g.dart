@@ -14,15 +14,11 @@ _Session _$SessionFromJson(Map<String, dynamic> json) => _Session(
   startsAt: const FirestoreDateTimeConverter().fromJson(json['startsAt']),
   endsAt: const FirestoreDateTimeConverter().fromJson(json['endsAt']),
   venueId: json['venueId'] as String,
-  speakerIds:
-      (json['speakerIds'] as List<dynamic>?)
-          ?.map((e) => e as String)
-          .toList() ??
-      const [],
+  speakerIds: (json['speakerIds'] as List<dynamic>?)?.map((e) => e as String).toList() ?? const [],
   isLightningTalk: json['isLightningTalk'] as bool? ?? false,
   isBeginnersLightningTalk: json['isBeginnersLightningTalk'] as bool? ?? false,
-  isHandsOn: json['isHandsOn'] as bool? ?? false,
   sessionizeUrl: json['sessionizeUrl'] as String?,
+  feedbackUrl: json['feedbackUrl'] as String?,
   createdAt: const FirestoreDateTimeConverter().fromJson(json['createdAt']),
   updatedAt: const FirestoreDateTimeConverter().fromJson(json['updatedAt']),
 );
@@ -38,8 +34,8 @@ Map<String, dynamic> _$SessionToJson(_Session instance) => <String, dynamic>{
   'speakerIds': instance.speakerIds,
   'isLightningTalk': instance.isLightningTalk,
   'isBeginnersLightningTalk': instance.isBeginnersLightningTalk,
-  'isHandsOn': instance.isHandsOn,
   'sessionizeUrl': instance.sessionizeUrl,
+  'feedbackUrl': instance.feedbackUrl,
   'createdAt': const FirestoreDateTimeConverter().toJson(instance.createdAt),
   'updatedAt': const FirestoreDateTimeConverter().toJson(instance.updatedAt),
 };

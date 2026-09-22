@@ -19,15 +19,17 @@ class SponsorTierHeaderWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final isAmusement = tier == SponsorTier.entertainment;
+    final headingStyle = isAmusement ? textTheme.headlineMedium : textTheme.titleLarge;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 32),
       child: Text(
-        tier.label,
+        tier.wallHeading,
         textAlign: TextAlign.center,
-        style: textTheme.titleLarge?.copyWith(
+        style: headingStyle?.copyWith(
           color: colorScheme.onSurface,
-          fontWeight: FontWeight.w400,
+          fontWeight: isAmusement ? FontWeight.w500 : FontWeight.w400,
         ),
       ),
     );
@@ -51,10 +53,11 @@ class SponsorTierRowsSliverWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     const spacing = 24.0;
     final contentWidth = math.min<double>(1232, availableWidth);
-    final logoSide = math.min(group.tier.logoSide, contentWidth);
+    final itemWidth = math.min(group.tier.wallItemWidth, contentWidth);
+    final itemHeight = group.tier.wallItemHeight;
     final columnCount = math.max(
       1,
-      ((contentWidth + spacing) / (logoSide + spacing)).floor(),
+      ((contentWidth + spacing) / (itemWidth + spacing)).floor(),
     );
     final rowCount = (group.sponsors.length / columnCount).ceil();
 
@@ -76,8 +79,9 @@ class SponsorTierRowsSliverWidget extends StatelessWidget {
                 for (var sponsorIndex = firstSponsorIndex; sponsorIndex < lastSponsorIndex; sponsorIndex++) ...[
                   IndexedSemantics(
                     index: semanticIndexOffset + sponsorIndex,
-                    child: SizedBox.square(
-                      dimension: logoSide,
+                    child: SizedBox(
+                      width: itemWidth,
+                      height: itemHeight,
                       child: SponsorLogoCardWidget(
                         sponsor: group.sponsors[sponsorIndex],
                         side: group.tier.logoSide,

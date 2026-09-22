@@ -1,6 +1,8 @@
 import 'package:dashboard/core/extension/build_context_extension.dart';
 import 'package:dashboard/core/extension/date_time_extension.dart';
 import 'package:dashboard/core/router/router.dart';
+import 'package:dashboard/core/sync/collection_sync_service.dart';
+import 'package:dashboard/core/ui/collection_sync_button.dart';
 import 'package:dashboard/core/ui/confirm_delete_dialog.dart' show ConfirmDeleteDialog;
 import 'package:dashboard/feature/session/data/provider/session_list_state.dart';
 import 'package:dashboard/feature/session/data/provider/session_repository.dart';
@@ -30,7 +32,7 @@ class SessionListPage extends ConsumerWidget {
       );
     }
 
-    return Stack(
+    final sessionList = Stack(
       children: [
         sessions.when(
           loading: () => const Center(child: CircularProgressIndicator()),
@@ -77,6 +79,30 @@ class SessionListPage extends ConsumerWidget {
             child: const Icon(Icons.add),
           ),
         ),
+      ],
+    );
+
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'セッション・スピーカー・会場・タイムラインをまとめて本番環境へ反映します。',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.outline),
+                ),
+              ),
+              const SizedBox(width: 8),
+              const CollectionSyncButton(target: SyncTarget.sessionData),
+            ],
+          ),
+        ),
+        const Divider(height: 1),
+        Expanded(child: sessionList),
       ],
     );
   }

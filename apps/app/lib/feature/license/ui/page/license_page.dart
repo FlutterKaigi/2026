@@ -1,6 +1,7 @@
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/router/router.dart';
 import 'package:app/core/ui/widget/app_error_view.dart';
+import 'package:app/core/ui/widget/app_scrollbar.dart';
 import 'package:app/feature/license/data/license_provider.dart';
 import 'package:app/feature/license/data/license_repository.dart';
 import 'package:flutter/material.dart';
@@ -91,58 +92,60 @@ class _LicenseList extends StatelessWidget {
         )
         .toList();
 
-    return Center(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 760),
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-              child: SearchBar(
-                controller: searchController,
-                hintText: t.licenses.searchHint,
-                leading: const Icon(Icons.search),
-                trailing: [
-                  if (query.isNotEmpty)
-                    IconButton(
-                      tooltip: t.licenses.clearSearch,
-                      onPressed: () {
-                        searchController.clear();
-                        onQueryChanged('');
-                      },
-                      icon: const Icon(Icons.clear),
-                    ),
-                ],
-                onChanged: onQueryChanged,
-              ),
-            ),
-            Expanded(
-              child: ListView.separated(
-                itemCount: entries.length,
-                separatorBuilder: (_, _) => const Divider(height: 1),
-                itemBuilder: (context, index) {
-                  final entry = entries[index];
-                  return ListTile(
-                    dense: true,
-                    visualDensity: VisualDensity.compact,
-                    title: Text(
-                      entry.key,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontFamily: 'monospace',
+    return AppScrollbar(
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 760),
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                child: SearchBar(
+                  controller: searchController,
+                  hintText: t.licenses.searchHint,
+                  leading: const Icon(Icons.search),
+                  trailing: [
+                    if (query.isNotEmpty)
+                      IconButton(
+                        tooltip: t.licenses.clearSearch,
+                        onPressed: () {
+                          searchController.clear();
+                          onQueryChanged('');
+                        },
+                        icon: const Icon(Icons.clear),
                       ),
-                    ),
-                    subtitle: Text(
-                      t.licenses.licenseCount(n: entry.value.length),
-                    ),
-                    trailing: const Icon(Icons.chevron_right, size: 20),
-                    onTap: () => LicenseDetailRoute(
-                      packageName: entry.key,
-                    ).push<void>(context),
-                  );
-                },
+                  ],
+                  onChanged: onQueryChanged,
+                ),
               ),
-            ),
-          ],
+              Expanded(
+                child: ListView.separated(
+                  itemCount: entries.length,
+                  separatorBuilder: (_, _) => const Divider(height: 1),
+                  itemBuilder: (context, index) {
+                    final entry = entries[index];
+                    return ListTile(
+                      dense: true,
+                      visualDensity: VisualDensity.compact,
+                      title: Text(
+                        entry.key,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontFamily: 'monospace',
+                        ),
+                      ),
+                      subtitle: Text(
+                        t.licenses.licenseCount(n: entry.value.length),
+                      ),
+                      trailing: const Icon(Icons.chevron_right, size: 20),
+                      onTap: () => LicenseDetailRoute(
+                        packageName: entry.key,
+                      ).push<void>(context),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -2,8 +2,11 @@ import 'package:jaspr/dom.dart';
 import 'package:jaspr/jaspr.dart';
 
 import '../components/event_section.dart';
+import '../components/exchange_counter_section.dart';
 import '../components/hiring_section.dart';
 import '../components/sponsors_section.dart';
+import '../components/staff_section.dart';
+import '../components/timetable_section.dart';
 import '../constants/generated_tokens.dart';
 import '../constants/theme.dart';
 import '../l10n/strings.dart';
@@ -79,8 +82,12 @@ class Home extends StatelessComponent {
         ]),
       ]),
       const EventSection(),
+      const ExchangeCounterSection(),
+      // スポンサー情報（JobBoards を含む）を先に並べ、スタッフは末尾に置く。
+      const TimetableSection(),
       const SponsorsSection(),
       const HiringSection(),
+      const StaffSection(),
     ]);
   }
 

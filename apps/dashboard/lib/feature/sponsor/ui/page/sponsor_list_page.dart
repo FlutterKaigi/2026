@@ -1,11 +1,12 @@
 import 'package:dashboard/core/extension/build_context_extension.dart';
 import 'package:dashboard/core/router/router.dart';
+import 'package:dashboard/core/sync/collection_sync_service.dart';
+import 'package:dashboard/core/ui/collection_sync_button.dart';
 import 'package:dashboard/core/ui/confirm_delete_dialog.dart' show ConfirmDeleteDialog;
 import 'package:dashboard/feature/sponsor/data/provider/sponsor_list_state.dart';
 import 'package:dashboard/feature/sponsor/data/provider/sponsor_repository.dart';
 import 'package:dashboard/feature/sponsor/model/sponsor_column.dart';
 import 'package:dashboard/feature/sponsor/model/sponsor_issue_filter.dart';
-import 'package:dashboard/feature/sponsor/ui/widget/sponsor_sync_button.dart';
 import 'package:dashboard/feature/sponsor/ui/widget/sponsor_table.dart';
 import 'package:data/data.dart';
 import 'package:flutter/material.dart';
@@ -112,7 +113,7 @@ class SponsorListPage extends HookConsumerWidget {
                 ),
               ),
               const SizedBox(width: 16),
-              const SponsorSyncButton(),
+              const CollectionSyncButton(target: SyncTarget.sponsors),
             ],
           ),
         ),

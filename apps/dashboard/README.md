@@ -13,6 +13,10 @@ flutterfire configure
 
 dev 環境はエミュレータに接続するため設定ファイル不要。`fvm dart run melos dashboard:run:dev` でそのまま起動できる。
 
+応援LTのコード発行・参加登録には Functions エミュレータも必要。モノレポルートで
+`fvm dart run melos functions:install` を初回実行し、
+`fvm dart run melos firebase:start:functions` で起動してからダッシュボードとアプリを起動する。
+
 ## 環境
 
 | FLAVOR | 接続先 |
@@ -47,16 +51,36 @@ Firebase Hosting へのデプロイは `dashboard:deploy:stg` / `dashboard:deplo
 firebase login
 ```
 
-## スポンサー・ニュースデータの本番反映
+## データの本番反映
 
-スポンサー一覧・ニュース一覧それぞれの画面にある「本番環境へ反映」ボタンで、STG の
-`sponsors` / `news` コレクションを本番環境へワンクリックで完全ミラーできる
-（作成・上書きに加えて、STG に存在しない本番側ドキュメントの**削除**も行う）。
+各画面の「本番環境へ反映」ボタンで、STG のデータを本番環境へワンクリックで完全ミラー
+できる（作成・上書きに加えて、STG に存在しない本番側ドキュメントの**削除**も行う）。
 
-- 実体は STG プロジェクトの Cloud Functions `syncSponsorsToProd` / `syncNewsToProd`（[functions/README.md](../../functions/README.md) 参照）
-- 実行前に dry run の結果（作成/更新/削除の件数）が確認ダイアログに表示される
+| 画面 | 反映されるコレクション |
+| --- | --- |
+| スポンサー一覧 | `sponsors` |
+| ニュース一覧 | `news` |
+| セッション一覧 | `venues` / `speakers` / `sessions` / `timelineEvents` |
+
+セッション系の 4 コレクションは相互に参照を持つ（`sessions.venueId` / `sessions.speakerIds` /
+`timelineEvents.venueId`）ため、個別ではなく**まとめて**反映する。参照切れを避けるため、
+参照される側から作成・上書きし、削除は逆順に実行される。
+
+- 実体は STG プロジェクトの Cloud Functions `syncCollectionsToProd`（[functions/README.md](../../functions/README.md) 参照）
+- 実行前に dry run の結果（作成/更新/削除の件数、複数コレクションの場合は内訳）が確認ダイアログに表示される
 - ボタンは stg / dev フレーバーでのみ表示（prod では非表示）
 - dev フレーバーでは `localhost:5001` の Functions エミュレータに接続する
+
+## 応援LTの参加登録
+
+「応援LT」（`/support-lt`）で共通の6桁の登録コードを発行し、参加人数と参加者一覧を確認する。
+
+- コードに有効期限はなく、再発行するまで有効。発行日時はブラウザのローカル時刻で表示する
+- 「コードを再発行」は確認後に現在のコードを無効にする。登録済みの参加者は保持される
+- 参加者はアプリのアカウントページにある「応援LT参加登録」からコードを入力する
+- 参加人数・表示名・UID・登録日時はリアルタイムに更新される
+- 管理にはメール確認済みの `@flutterkaigi.jp` アカウントと `admins/{uid}` の管理者登録が必要
+- 権限不足・通信失敗時にはエラーを表示し、「再読み込み」で取得し直せる
 
 ## スポンサー一覧の操作
 
@@ -85,3 +109,11 @@ News は**このダッシュボードが編集元**（外部の原本は無い�
 - ヘッダークリックでソート（昇順 → 降順 → 解除）
 - 既存行の削除は行ごとの削除アイコン（即時実行、確認ダイアログあり）。新規行は破棄アイコンで一覧から取り消せる（Firestore には未反映のため確認不要）
 
+## クイズ大会
+
+クイズ大会の作成・6桁受付コードの発行・受付人数確認・チーム編成・出題・採点を行う。
+進行操作にはCloud Functionsが必要。問題表示と回答開始を分け、読み上げ後にタイマーを開始する。
+投影専用画面は `/quiz/:eventId/project`。受付コードや管理操作を映さずに問題・結果を表示できる。
+
+受付再開・参加取消・再編成は初出題前のみ。正解発表前は時間延長できる。
+通信エラー時の再試行、早期終了などの詳細は[当日の運用手順](../../docs/quiz-event/RUNBOOK.md)を参照。

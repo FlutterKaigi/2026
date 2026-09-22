@@ -5,6 +5,7 @@ import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/router/router.dart';
 import 'package:app/core/ui/launch_external_url.dart';
 import 'package:app/core/ui/widget/app_error_view.dart';
+import 'package:app/core/ui/widget/app_scrollbar.dart';
 import 'package:app/core/ui/widget/settings_icon_button.dart';
 import 'package:app/feature/news/data/provider/news_list_provider.dart';
 import 'package:data/data.dart';
@@ -42,30 +43,32 @@ class NewsListPage extends ConsumerWidget {
         ),
         actions: const [SettingsIconButton()],
       ),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 760),
-          child: switch (newsList) {
-            AsyncData(:final value) when value.isEmpty => Center(
-              child: Text(t.news.empty),
-            ),
-            AsyncData(:final value) => RefreshIndicator(
-              onRefresh: () async => ref.invalidate(newsListProvider),
-              child: ListView.separated(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                itemCount: value.length,
-                separatorBuilder: (_, _) => const Divider(height: 1),
-                itemBuilder: (context, index) => _NewsTile(news: value[index]),
+      body: AppScrollbar(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 760),
+            child: switch (newsList) {
+              AsyncData(:final value) when value.isEmpty => Center(
+                child: Text(t.news.empty),
               ),
-            ),
-            AsyncError(:final error) => AppErrorView(
-              error: error,
-              onRetry: () => ref.invalidate(newsListProvider),
-            ),
-            AsyncLoading() => const Center(
-              child: CircularProgressIndicator.adaptive(),
-            ),
-          },
+              AsyncData(:final value) => RefreshIndicator(
+                onRefresh: () async => ref.invalidate(newsListProvider),
+                child: ListView.separated(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  itemCount: value.length,
+                  separatorBuilder: (_, _) => const Divider(height: 1),
+                  itemBuilder: (context, index) => _NewsTile(news: value[index]),
+                ),
+              ),
+              AsyncError(:final error) => AppErrorView(
+                error: error,
+                onRetry: () => ref.invalidate(newsListProvider),
+              ),
+              AsyncLoading() => const Center(
+                child: CircularProgressIndicator.adaptive(),
+              ),
+            },
+          ),
         ),
       ),
     );

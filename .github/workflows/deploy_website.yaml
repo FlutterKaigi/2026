@@ -6,7 +6,16 @@ on:
       - main
     paths:
       - apps/website/**
+      - packages/data/**
+      - tool/generate_sponsors.dart
+      - tool/generate_staff.dart
+      - tool/generate_news.dart
+      - tool/generate_sessions.dart
+      - tool/generate_well_known.dart
+      - .fvmrc
+      - pubspec.yaml
       - .github/workflows/deploy_website.yaml
+      - .github/actions/setup-flutter/**
   workflow_dispatch:
 
 concurrency:
@@ -17,6 +26,9 @@ permissions: {}
 
 jobs:
   deploy:
+    environment:
+      name: website
+      url: https://2026.flutterkaigi.jp
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions:
@@ -25,14 +37,7 @@ jobs:
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
-      - id: flutter-version
-        run: echo "version=$(jq -r .flutter .fvmrc)" >> "$GITHUB_OUTPUT"
-
-      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
-        with:
-          flutter-version: ${{ steps.flutter-version.outputs.version }}
-          channel: stable
-          cache: true
+      - uses: ./.github/actions/setup-flutter
 
       - run: dart pub get
 
@@ -62,6 +67,15 @@ jobs:
           FIRESTORE_HOST: firestore.googleapis.com
           FIRESTORE_ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
 
+      # Generate the (git-ignored) staff data from the prod Firestore project
+      # (`staffMembers` collection) — same fallback behaviour as the sponsors.
+      - name: Generate staff data
+        run: dart run tool/generate_staff.dart
+        env:
+          FIREBASE_PROJECT_ID: ${{ vars.PROD_FIREBASE_PROJECT_ID }}
+          FIRESTORE_HOST: firestore.googleapis.com
+          FIRESTORE_ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
+
       # Generate news data (packages/data `news` collection) from the prod
       # Firestore project. Unlike sponsor data this output is also committed
       # to git (news is not sensitive); regenerating here keeps a stale commit
@@ -73,6 +87,34 @@ jobs:
           FIREBASE_PROJECT_ID: ${{ vars.PROD_FIREBASE_PROJECT_ID }}
           FIRESTORE_HOST: firestore.googleapis.com
           FIRESTORE_ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
+
+      # Generate the (git-ignored) timetable data from the prod Firestore
+      # project (`sessions` / `speakers` / `venues` / `timelineEvents`, filled
+      # in by tool/import_sessions.dart). There is no sample fixture: with no
+      # token or an unreachable Firestore the generator emits an empty
+      # timetable, so the deploy still succeeds rather than shipping fake
+      # sessions.
+      - name: Generate session data
+        run: dart run tool/generate_sessions.dart
+        env:
+          FIREBASE_PROJECT_ID: ${{ vars.PROD_FIREBASE_PROJECT_ID }}
+          FIRESTORE_HOST: firestore.googleapis.com
+          FIRESTORE_ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
+
+      # Generates apps/website/web/.well-known/{apple-app-site-association,
+      # assetlinks.json} from Repository Variables not in this repo (see
+      # .github/APP_DELIVERY.md). jaspr build copies dot-directories under
+      # web/ into the output verbatim, so this must run before it. Any
+      # variable left unset skips that platform's file — the deploy still
+      # succeeds, just without that platform's Universal Links / App Links
+      # verification file yet.
+      - name: Generate Universal Links / App Links verification files
+        run: dart run tool/generate_well_known.dart
+        env:
+          APPLE_TEAM_ID: ${{ vars.APPLE_TEAM_ID }}
+          IOS_BUNDLE_ID: ${{ vars.IOS_BUNDLE_ID }}
+          ANDROID_PACKAGE_NAME: ${{ vars.ANDROID_PACKAGE_NAME }}
+          PROD_ANDROID_SHA256_FINGERPRINTS: ${{ vars.PROD_ANDROID_SHA256_FINGERPRINTS }}
 
       - working-directory: apps/website
         run: dart run jaspr_cli:jaspr build

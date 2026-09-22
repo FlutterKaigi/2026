@@ -1,0 +1,73 @@
+name: Functions CI
+
+on:
+  pull_request:
+    paths:
+      - functions/**
+      - packages/data/firebase/**
+      - firebase.json
+      - tool/remote_config*.mjs
+      - .github/workflows/deploy_firebase.yaml
+      - .github/workflows/ci_functions.yaml
+  workflow_dispatch:
+  workflow_call:
+
+concurrency:
+  group: functions-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions: {}
+
+defaults:
+  run:
+    shell: bash -euo pipefail {0}
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: functions/package-lock.json
+
+      - name: Install dependencies
+        working-directory: functions
+        run: npm ci
+
+      - name: Lint
+        working-directory: functions
+        run: npm run lint
+
+      - name: Unit tests with coverage
+        working-directory: functions
+        run: npm run test:coverage
+
+      - name: Remote Config 適用ツールのテスト
+        run: node --test tool/remote_config.test.mjs
+
+      - uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Firebase Emulator integration tests
+        env:
+          SUPPORT_LT_TEST_PROJECT_ID: demo-flutterkaigi-601
+        run: |
+          node <<'JS'
+          const fs = require('node:fs');
+          const { randomBytes } = require('node:crypto');
+          fs.writeFileSync('functions/.env', 'SYNC_TARGET_PROJECT_ID=demo-flutterkaigi-601-sync\n');
+          fs.writeFileSync('functions/.secret.local', `EXCHANGE_TOKEN_SECRET=${randomBytes(32).toString('hex')}\n`);
+          JS
+          npx -y firebase-tools@13.35.1 emulators:exec \
+            --project "$SUPPORT_LT_TEST_PROJECT_ID" \
+            --only auth,firestore,functions \
+            "npm --prefix functions run test:emulator"

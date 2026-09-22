@@ -7,7 +7,6 @@ enum SessionSearchTypeFilter {
   regular,
   lightningTalk,
   beginnersLightningTalk,
-  handsOn,
 }
 
 enum SessionSearchLanguageFilter {
@@ -87,9 +86,6 @@ bool _matchesType(Session session, SessionSearchTypeFilter selectedType) {
 }
 
 SessionSearchTypeFilter _typeOf(Session session) {
-  if (session.isHandsOn) {
-    return SessionSearchTypeFilter.handsOn;
-  }
   if (session.isBeginnersLightningTalk) {
     return SessionSearchTypeFilter.beginnersLightningTalk;
   }

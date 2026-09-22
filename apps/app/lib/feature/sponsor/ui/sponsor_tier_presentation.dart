@@ -11,16 +11,25 @@ extension SponsorTierPresentation on SponsorTier {
     SponsorTier.tool => 'Tool',
     SponsorTier.community => 'Community',
     SponsorTier.individual => 'Individual',
-    SponsorTier.entertainment => 'Entertainment',
+    SponsorTier.entertainment => 'Amusement',
   };
+
+  /// Section heading; detail badges append their own localized sponsor suffix.
+  String get wallHeading => this == SponsorTier.entertainment ? 'Amusement Sponsor' : label;
 
   /// Logo tile side length from the website sponsor wall.
   double get logoSide => switch (this) {
     SponsorTier.platinum => 256,
-    SponsorTier.gold => 192,
+    SponsorTier.gold || SponsorTier.entertainment => 192,
     SponsorTier.individual => 96,
     _ => 144,
   };
+
+  /// Width of one item in the sponsor wall grid.
+  double get wallItemWidth => this == SponsorTier.individual ? 140 : logoSide;
+
+  /// Height reserved for one item in the sponsor wall grid.
+  double get wallItemHeight => this == SponsorTier.individual ? 144 : logoSide;
 
   List<Color> get badgeGradientColors => switch (this) {
     SponsorTier.platinum => const [

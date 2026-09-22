@@ -14,12 +14,24 @@ final sponsorWallProvider = Provider<AsyncValue<SponsorWallData>>(
   (ref) => ref.watch(sponsorListProvider).whenData(buildSponsorWallData),
 );
 
+/// Sponsor wall order matching the website, independent of the domain enum.
+const _sponsorTierOrder = [
+  SponsorTier.platinum,
+  SponsorTier.gold,
+  SponsorTier.silver,
+  SponsorTier.bronze,
+  SponsorTier.tool,
+  SponsorTier.entertainment,
+  SponsorTier.community,
+  SponsorTier.individual,
+];
+
 /// Builds sponsor wall data from the raw Firestore sponsor list.
 SponsorWallData buildSponsorWallData(List<Sponsor> sponsors) {
   final ordered = [...sponsors]..sort(_compareSponsors);
   final groups = <SponsorTierGroup>[];
 
-  for (final tier in SponsorTier.values) {
+  for (final tier in _sponsorTierOrder) {
     final sponsorsInTier = [
       for (final sponsor in ordered)
         if (sponsor.tier == tier) sponsor,
@@ -33,10 +45,10 @@ SponsorWallData buildSponsorWallData(List<Sponsor> sponsors) {
 }
 
 int _compareSponsors(Sponsor a, Sponsor b) {
-  final tierCompare = SponsorTier.values
+  final tierCompare = _sponsorTierOrder
       .indexOf(a.tier)
       .compareTo(
-        SponsorTier.values.indexOf(b.tier),
+        _sponsorTierOrder.indexOf(b.tier),
       );
   if (tierCompare != 0) {
     return tierCompare;

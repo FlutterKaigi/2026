@@ -5,10 +5,13 @@ version: 1.0.0+1
 resolution: workspace
 
 environment:
-  sdk: ">=3.11.0 <4.0.0"
-  flutter: ">=3.41.0"
+  sdk: ">=3.13.0 <4.0.0"
+  flutter: ">=3.47.0"
 
 dependencies:
+  flutter_scene: 0.23.0
+  hooks: ^2.0.0
+  vector_math: ^2.2.0
   data:
     path: ../../packages/data
   firebase_app_check: ^0.4.5
@@ -16,6 +19,7 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.8
+  flutter_svg: ^2.3.0
   freezed_annotation: ^3.1.0
   hooks_riverpod: ^3.3.2
   flutter_hooks: ^0.21.3+1
@@ -30,7 +34,20 @@ dependencies:
   intl: ^0.20.2
   flutter_localizations:
     sdk: flutter
+  webview_flutter: ^4.14.1
+  web: ^1.1.1
   cached_network_image: ^3.4.1
+  country_flags: ^4.1.2
+  # 3.11.0 は sdk ^3.6.0 のまま新しい SDK でしか使えない API（JSAny.isA）を
+  # 使っており、Flutter 3.41.7 の Web ビルド（dart2js）が失敗する。修正版が
+  # 出たら上限を外す。
+  firebase_core_web: ">=3.10.0 <3.11.0"
+  qr_flutter: ^4.1.0
+  mobile_scanner: ^7.4.0
+  cloud_functions: ^6.3.6
+  clock: ^1.1.2
+  firebase_remote_config: ^6.5.6
+  pub_semver: ^2.2.1
 
 dev_dependencies:
   flutter_test:
@@ -46,10 +63,17 @@ flutter:
   uses-material-design: true
 
   assets:
+    - flutter_scene_generated/
+    - assets/html/venue_floor_plan_webview.html
+    - assets/venue_map/floor_plan.json
+    - assets/venue_map/floor_map_base.png
+    - assets/venue_map/floor_map_base_dark.png
+    - assets/venue_map/THREE_LICENSE.txt
     - res/assets/dashumaru_magao.webp
     - res/assets/fonts/NotoSansJP/OFL.txt
     # Google 公式の Sign in with Google ボタン素材。
     - res/assets/google_sign_in/
+    - res/assets/icons/
     - res/assets/shuriken-logo.png
 
   fonts:

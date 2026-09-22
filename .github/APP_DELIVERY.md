@@ -5,15 +5,88 @@
 > Secret、Token、秘密鍵、パスワード、Service Account JSON、Debug Tokenの実値は記載しません。
 > 外部Contributorのローカル開発には、ここで説明するstg／prodの権限や設定は不要です。
 
-`apps/app`のCI/CDは次のworkflowで構成します。
+`apps/app`のCI/CDは次のworkflowで構成します。公式サイト `apps/website` の本番・プレビューは、それぞれ
+`deploy_website.yaml` / `preview_website.yaml` として独立させます。
+app・website は本番の変更検知、PRプレビューの変更検知、配布先、PRコメントの更新先を分けます。
+各アプリだけの変更は対応するworkflowで処理し、SDKや共有データモデルの変更は両方で検証します。
 
 | Workflow | Trigger | Delivery target |
 | --- | --- | --- |
-| `App CI` | app関連のPR、`main` push、手動 | format/analyze/test、dprint |
-| `Preview App Web` | app関連のPR、手動 | Cloudflare Workers Version |
-| `Deploy App Web` | app関連の`main` push、手動（現在は明示的に有効化するまでJobをskip） | Cloudflare Workers Production |
-| `Deploy App iOS` | GitHub Releaseのpublish、手動、PRへの`deploy-app-ios`ラベル付与 | App Store Connect / TestFlight |
-| `Deploy App Android` | GitHub Releaseのpublish、手動 | Google Play Internal Testing |
+| `App CI` | app関連のPR、配布Workflowからの呼び出し、手動 | format/analyze/test、dprint |
+| `Deploy App` | app関連の `main` push、正式なGitHub Releaseの公開、手動 | iOS / Android / Web を stg と prod へ配布 |
+| `Preview App Web` | app関連のPR、手動 | stg に接続するPR別のWebプレビュー |
+| `Deploy Firebase` | Firebase関連の `main` push、`main` から手動 | Rules・Indexes・Functions。stg は自動、prod は手動のみ |
+
+2025 と同じく、公開URLを持つ本番Webの配布を Deployments に記録します。
+Webアプリは `app-website`、公式サイトは `website` とし、コミット・配布先URL・成功/失敗を記録します。
+stg・PRプレビュー・ストアへのアップロード・Firebase設定の適用はActionsの実行結果で確認します。
+環境名を空にせず、[Environment の `deployment` 設定](https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-deployments/control-deployments#using-environments-without-deployments)で、本番への配布時だけ記録を有効にします。
+
+配布の入口は `deploy_app.yaml` に集約しています。iOS / Android / Web の実装は
+`workflow_call` で呼び出す専用ファイルに分け、Flutter SDK と Firebase 認証・CLI の準備は
+`.github/actions` の共通アクションを使います。Web の配布処理は PR プレビューでも共用します。
+手動実行では対象OSと環境を選択でき、環境の初期値は `all`（stg と prod）です。
+環境ごとの `fail-fast: false` と排他制御により、一方の失敗で他方を中断せず、同じアプリの採番・配布は直列化します。
+
+Firebase配布の準備と実行手順は[Firebase 配布手順](FIREBASE_DELIVERY.md)を参照してください。
+
+### 自動配布の起点
+
+[FlutterKaigi 2025](https://github.com/FlutterKaigi/2025/blob/main/.github/workflows/deploy-app.yaml)と同じく、
+app関連の `main` 更新または正式リリースの `released` イベントで、iOS / Android / Web を同じコミットから **stg と prod の両方**へ配布します。
+iOS は TestFlight、Android は Google Play の内部テストまでを自動化します。
+ストア審査への提出と一般公開はストア管理画面から行います。
+PR は Web Preview で確認し、ネイティブアプリの確認は手動実行で prod / stg を選択します。
+Web の stg は既存の Workers プレビューへ `stg` エイリアスを付けて配布し、固定のプレビューURLを更新します。
+prod は既存のカスタムドメインへ配布します。各環境のビルド番号・排他制御・Firebase 設定は独立しています。
+アプリ Web 本番の一時停止フラグ `ENABLE_APP_WEB_PRODUCTION_DEPLOY` は廃止します。
+
+自動配布を有効にする PR のマージ前に、Android の初回登録、必要な Variables / Secrets、
+Web 本番用 App Check の設定を完了してください。
+
+## 初回配布とstg
+
+Androidの初回は `Deploy App` で Android のみを選び、 `upload_to_play=false` で実行し、
+Artifactsから署名済みAABを取得してPlay Consoleの内部テストへ手動アップロードします。
+このモードはGoogle Play APIの認証を要求しません。2回目以降は
+`upload_to_play=true` で内部テストへアップロードできます。
+`main` push と正式リリースでは `upload_to_play=true` として stg / prod の両方を内部テストへ配布します。
+
+手動実行の `environment=stg` は `.env.stg`、stgのFirebase/WIF、
+`jp.flutterkaigi.conf2026.stg` を使用します。本番とは別のApp Store Connect / Play Console
+アプリレコードが必要で、Androidのstgも初回アップロードを行います。
+既存のAppleチームキーとAndroidアップロード鍵を使用するため、
+その権限・証明書がstgにも適用されていることを確認してください。
+stgのAndroidでもPlay Integrityを使用するため、ストア外へのAPK配布はこのWorkflowの対象ではありません。
+
+### ビルド番号
+
+iOSは App Store Connect の同じ公開バージョン・同じ環境の最新ビルド番号に1を加算します。
+期限切れのビルドも含めて取得し、未アップロードの場合のみ1から開始します。
+API の認証失敗を0扱いにせず停止し、アップロード後は登録反映を確認してから次の実行に進みます。
+本番の `1.0.0 (401)` は旧式 `GITHUB_RUN_NUMBER * 100 + GITHUB_RUN_ATTEMPT` による番号でした。
+以後はストアに登録された最新番号から402、403、404と増加します。
+次の公開バージョン（例: `1.0.1`）へ上げた際は、そのバージョンのビルドを **1** から開始します。
+アプリ内に表示するビルド番号も、App Store Connect に登録する実際の番号と揃えます。
+Androidは FlutterKaigi 2025 と同じく Google Play の最新番号に1を加算します。
+取得に失敗した場合は番号を推測せず停止します。初回の手動アップロード用AABは1です。
+Android の `versionCode` は公開バージョンを上げてもリセットせず、アプリ全体で増やし続けます。
+`upload_to_play=false` は初回専用とし、登録後は `true` で既存番号を取得してください。
+Xcode Export時の番号自動変更を無効にし、IPA内のBundle ID・公開バージョン・ビルド番号を
+アップロード前に検証します。番号、環境、コミットはActionsのSummaryに記録されます。
+
+同じ公開バージョン内では小さい番号へ戻さず、既存ストアの番号を継続してください。
+ストアが表示するバージョン（`1.0.0`）とビルド番号（例: `401`）は別の値です。
+
+### iOS の輸出コンプライアンス
+
+2025年と同じく `Info.plist` に `ITSAppUsesNonExemptEncryption=false` を含めます。
+現在のクライアントの暗号化用途は HTTPS/TLS と認証で、独自の暗号化機能は提供していません。
+iOS の配布ジョブは、書き出した IPA にもこの値が含まれることをアップロード前に検証します。
+設定が反映されるのは、この変更を含む新しいビルドからです。
+暗号化機能・依存ライブラリの利用用途を変更するときは、
+[Apple の輸出コンプライアンス手順](https://developer.apple.com/documentation/security/complying-with-encryption-export-regulations)
+に沿って申告内容も見直してください。
 
 ## GitHub側の登録場所
 
@@ -42,7 +115,7 @@ Repositoryの`Settings > Secrets and variables > Actions > Variables > New repos
 | `IOS_BUNDLE_ID` | `jp.flutterkaigi.conf2026` | 外部サービスから取得する値ではなく、このProjectで決めた本番Bundle IDです。Apple DeveloperのApp ID、App Store Connectのアプリ、Xcode設定をこの値に揃えます。 |
 | `ANDROID_PACKAGE_NAME` | `jp.flutterkaigi.conf2026` | 外部サービスから取得する値ではなく、`apps/app/android/app/build.gradle.kts`の`applicationId`です。Google Play Consoleへ同じPackage Nameでアプリを登録します。 |
 | `GOOGLE_PLAY_TRACK` | `internal` | Codemagic CLIがGoogle Play Internal Testingを指定するためのTrack名です。このworkflowでは`internal`を使用します。Play Consoleでは`Testing > Internal testing`で対象Trackを確認します。 |
-| `ENABLE_APP_WEB_PRODUCTION_DEPLOY` | 未登録または`false`で停止、`true`で有効化 | `apps/app`のProduction Web配布だけを一時停止する制御値です。現在は登録しないか`false`にします。`apps/website`の配布とApp Web Previewには影響しません。 |
+| `PROD_ANDROID_SHA256_FINGERPRINTS` | 本番Android Appの署名証明書SHA-256フィンガープリント（カンマ区切り、複数可） | `apps/website`のUniversal Links／App Links検証ファイル（`/.well-known/assetlinks.json`）生成に使用します。取得手順は後述の「Universal Links／App Links」を参照してください。 |
 
 ### Repository Secrets
 
@@ -51,10 +124,10 @@ Repositoryの`Settings > Secrets and variables > Actions > Secrets > New reposit
 | Secret | 使用先 | 取得元・取得方法 |
 | --- | --- | --- |
 | `CLOUDFLARE_API_TOKEN` | Web Preview／Production | Cloudflare Dashboardの`Manage Account > Account API Tokens`から、後述の権限とResource範囲に限定して作成します。 |
-| `APP_STORE_CONNECT_API_KEY_BASE64` | iOS Production | App Store ConnectからダウンロードしたTeam Key（`.p8`）をBase64化します。 |
-| `ANDROID_SIGNING_KEYSTORE_BASE64` | Android Production | チームで生成・保管するAndroid Upload Key（`release.jks`）をBase64化します。 |
-| `ANDROID_KEY_PROPERTIES_BASE64` | Android Production | Upload Keyのaliasとパスワードを記載した`key.properties`をBase64化します。 |
-| `GOOGLE_PLAY_SERVICE_ACCOUNT_BASE64` | Android Production | Google Cloudで発行したGoogle Play配布用Service Account JSONをBase64化します。 |
+| `APP_STORE_CONNECT_API_KEY_BASE64` | iOS prod / stg | App Store ConnectからダウンロードしたTeam Key（`.p8`）をBase64化します。 |
+| `ANDROID_SIGNING_KEYSTORE_BASE64` | Android prod / stg | チームで生成・保管するAndroid Upload Key（`release.jks`）をBase64化します。 |
+| `ANDROID_KEY_PROPERTIES_BASE64` | Android prod / stg | Upload Keyのaliasとパスワードを記載した`key.properties`をBase64化します。 |
+| `GOOGLE_PLAY_SERVICE_ACCOUNT_BASE64` | Android prod / stg | Google Cloudで発行したGoogle Play配布用Service Account JSONをBase64化します。 |
 
 ## Cloudflare
 
@@ -78,14 +151,14 @@ TokenはGit、Issue、Slackへ貼り付けません。権限と対象Resourceは
 
 ## Apple Developer / App Store Connect
 
-PRマージ前にApp Store Connectへのアップロードまで確認する場合は、同一Repository内のPRへ`deploy-app-ios`ラベルを付与します。Fork由来のPRでは実行されません。通常のPR作成やpushではiOS配布を開始しません。
+PRマージ前にApp Store Connectへのアップロードまで確認する場合は、`Deploy App` で iOS のみを選んで手動実行し、対象ブランチと `environment=stg` を選択します。本番接続版が必要な場合は `prod` を選択します。`main` 更新と正式リリースでは stg / prod の両方を自動アップロードします。
 
 ### App IDとApp Store Connectアプリ
 
 1. Apple Developerの`Certificates, Identifiers & Profiles > Identifiers > + > App IDs`を開きます。
 2. `Explicit App ID`を選び、本番は`jp.flutterkaigi.conf2026`、stg実機を使う場合は`jp.flutterkaigi.conf2026.stg`を登録します。XcodeのBundle IDと完全一致させます。[AppleのApp ID登録手順](https://developer.apple.com/help/account/identifiers/register-an-app-id/)を参照してください。
 3. App Store Connectの`Apps > + > New App`を開き、Bundle IDに`jp.flutterkaigi.conf2026`を選んでアプリレコードを作成します。
-4. Sign in with Appleは本番iOSだけで使用します。本番App IDでCapabilityを有効化しますが、stg App IDでの有効化とServices IDの作成は不要です。
+4. Sign in with Appleは環境に関係なくiOSアプリで使用します。本番・stgを含む署名対象の各App IDでCapabilityを有効化し、対応するProvisioning Profileを用意します。Firebase Authenticationでも対象プロジェクトのAppleプロバイダを有効化します。Web OAuthを提供しないため、Services IDの作成は不要です。
 
 ### `APPLE_TEAM_ID`
 
@@ -180,6 +253,24 @@ base64 < play-service-account.json | tr -d '\n'
 
 出力全体をRepository Secretの`GOOGLE_PLAY_SERVICE_ACCOUNT_BASE64`へ登録します。
 
+## Universal Links / App Links（プロフィール交換の共有リンク）
+
+`apps/website`は`Deploy website to Cloudflare Workers`のデプロイ時に、`tool/generate_well_known.dart`で`/.well-known/apple-app-site-association`と`/.well-known/assetlinks.json`を生成します（`APPLE_TEAM_ID`／`IOS_BUNDLE_ID`／`ANDROID_PACKAGE_NAME`は前述のRepository Variablesを共用し、新規に登録するのは`PROD_ANDROID_SHA256_FINGERPRINTS`のみです）。どちらかのプラットフォームの値が未設定でもデプロイ自体は成功し、そのプラットフォームのファイルだけが出力されません（値を推測して埋めることはしません）。
+
+### `PROD_ANDROID_SHA256_FINGERPRINTS`
+
+Google PlayはInternal Testing以降のArtifactをPlay App Signingで再署名するため、実際に配布されるAPKの署名証明書は、CIが使うUpload Key（`ANDROID_SIGNING_KEYSTORE_BASE64`）と異なります。`assetlinks.json`は端末にインストールされた実物のAPKの証明書で検証されるため、Play App Signingの証明書のフィンガープリントを登録する必要があります。
+
+1. Google Play Consoleで対象アプリを開き、`Setup > App integrity > App signing`を選択します。
+2. `App signing key certificate`の`SHA-256 certificate fingerprint`をコピーします。[Google PlayのApp signing手順](https://support.google.com/googleplay/android-developer/answer/9842756)を参照してください。
+3. ローカル実機ビルド（Upload Keyでの直接インストール）でも動作確認したい場合は、Upload Keyのフィンガープリントも併せて控えます。
+
+```bash
+keytool -list -v -keystore release.jks -alias flutterkaigi2026 | grep 'SHA256:'
+```
+
+4. 取得したフィンガープリント（コロン区切りの16進数）をカンマ区切りで連結し、Repository Variableの`PROD_ANDROID_SHA256_FINGERPRINTS`へ登録します（例: `AA:BB:...,CC:DD:...`）。App signing key certificateの値は必ず含めてください。
+
 ## Firebase SDK settings
 
 FirebaseのAPI KeyやApp IDは、それ自体がFirebase Consoleやデータへの管理権限を与える秘密鍵ではありません。Firebaseの認可はIAM、Security Rules、Authentication、App Checkで行います。ただし、このRepositoryでは既存Dashboardと同じくFirebase OptionsをGitへコミットしない運用に揃えます。[FirebaseのAPI Key管理](https://firebase.google.com/docs/projects/api-keys)と[Firebase Security Rules](https://firebase.google.com/docs/rules/get-started)も参照してください。
@@ -244,8 +335,8 @@ stg／prodのCI Service Accountへ、対象Projectで次の読み取り専用Rol
 | --- | --- | --- |
 | Web Preview | stg Project ID＋`STG_APP_FIREBASE_WEB_APP_ID` | Web Options |
 | Web Production | prod Project ID＋`PROD_APP_FIREBASE_WEB_APP_ID` | Web Options |
-| Android | prod Project ID＋`ANDROID_PACKAGE_NAME` | Dart Options＋`google-services.json` |
-| iOS | prod Project ID＋`IOS_BUNDLE_ID`＋`Release` | Dart Options＋`GoogleService-Info.plist` |
+| Android | 選択環境のProject ID＋Package Name | Dart Options＋`google-services.json` |
+| iOS | 選択環境のProject ID＋Bundle ID＋`Release` | Dart Options＋`GoogleService-Info.plist` |
 
 生成直後にDart OptionsとNative設定ファイルのProject ID／App ID／Package Name／Bundle IDを指定値と照合し、一致しない場合はビルドを停止します。
 
@@ -256,7 +347,6 @@ OptionsをGit管理外にしても、それだけをデータ保護の境界に�
 ## 設定チェックリスト
 
 - 配布に必要なRepository Variablesを登録している
-- `ENABLE_APP_WEB_PRODUCTION_DEPLOY`を未登録または`false`にし、`apps/app`のProduction Web配布を停止している
 - 上記のRepository Secretsを登録し、実値をRepository、Issue、PR、ログへ出力していない
 - Cloudflare Tokenの権限とResource範囲を必要最小限にしている
 - Apple Team Keyの3値を登録し、`.p8`原本を安全に保管している
@@ -268,3 +358,4 @@ OptionsをGit管理外にしても、それだけをデータ保護の境界に�
 - `firebase_options.dart`、`google-services.json`、`GoogleService-Info.plist`がGit管理外であることを確認している
 - Firestore／Storage Rules、API Key restrictions、App Check enforcementを確認している
 - RepositoryのBranch protectionで`App CI / style`と`App CI / validate`を必須Checkに設定している
+- `PROD_ANDROID_SHA256_FINGERPRINTS`にPlay App Signingの証明書フィンガープリントを登録し、`apps/website`のデプロイ後に`/.well-known/apple-app-site-association`と`/.well-known/assetlinks.json`が公開されていることを確認している

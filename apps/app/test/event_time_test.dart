@@ -27,4 +27,12 @@ void main() {
       '09:00-10:15',
     );
   });
+
+  test('hasSessionEnded treats the end time itself as ended', () {
+    final endsAt = DateTime.utc(2026, 10, 29, 1, 45);
+
+    expect(hasSessionEnded(endsAt: endsAt, now: endsAt.subtract(const Duration(seconds: 1))), isFalse);
+    expect(hasSessionEnded(endsAt: endsAt, now: endsAt), isTrue);
+    expect(hasSessionEnded(endsAt: endsAt, now: endsAt.add(const Duration(days: 1))), isTrue);
+  });
 }

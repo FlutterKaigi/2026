@@ -136,3 +136,23 @@ Stream<T> waitForUsableInitialSnapshot<T>(
 
   return controller.stream;
 }
+
+/// Watches a single document with the same offline-first policy as
+/// [watchFirestoreQuery].
+///
+/// A cached snapshot is emitted immediately when the document exists in the
+/// cache. A cache miss is held until the server confirms the document is
+/// genuinely absent, so an unreachable backend is not mistaken for a missing
+/// document.
+/// When [includePendingWrites] is false, unacknowledged writes also keep the
+/// initial timeout active and are suppressed after the first usable snapshot.
+Stream<DocumentSnapshot<Map<String, dynamic>>> watchFirestoreDocument(
+  DocumentReference<Map<String, dynamic>> reference, {
+  bool includePendingWrites = true,
+}) => waitForUsableInitialSnapshot(
+  reference.snapshots(includeMetadataChanges: true),
+  isUsableInitialSnapshot: (snapshot) =>
+      (includePendingWrites || !snapshot.metadata.hasPendingWrites) &&
+      (snapshot.exists || !snapshot.metadata.isFromCache),
+  shouldForwardAfterInitial: (snapshot) => includePendingWrites || !snapshot.metadata.hasPendingWrites,
+);

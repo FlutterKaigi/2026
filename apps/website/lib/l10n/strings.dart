@@ -4,8 +4,7 @@ import '../constants/build_config.dart';
 
 enum AppLocale {
   ja(code: 'ja', homePath: '/', relativeHref: ''),
-  en(code: 'en', homePath: '/en', relativeHref: 'en/')
-  ;
+  en(code: 'en', homePath: '/en', relativeHref: 'en/');
 
   const AppLocale({
     required this.code,
@@ -35,11 +34,27 @@ enum AppLocale {
   /// Navigation href to the Event Info section on the home page.
   String get eventInfoAnchorHref => '$linkHref#event-info';
 
+  /// Navigation href to the Timetable section on the home page.
+  String get timetableAnchorHref => '$linkHref#timetable';
+
   /// Navigation href to the Sponsors section on the home page.
   String get sponsorsAnchorHref => '$linkHref#sponsors';
 
   /// Navigation href to the Job Boards section on the home page.
   String get jobBoardsAnchorHref => '$linkHref#job-boards';
+
+  /// Navigation href to the Staff section on the home page.
+  String get staffAnchorHref => '$linkHref#staff';
+
+  /// Navigation href for the profile-exchange share-link fallback page.
+  String get shareLinkFallbackHref => '${linkHref}x';
+
+  /// Jaspr Router route path (absolute, **no** baseHref) for the
+  /// profile-exchange share-link fallback page — this drives the SSG output
+  /// directory. Matches every `/x/<token>` request via the Worker script
+  /// (`apps/website/worker.js`), which forwards them all to this one static
+  /// page — see its doc comment for why.
+  String get shareLinkFallbackRoutePath => '${homePath == '/' ? '' : homePath}/x';
 
   /// The other supported locale (the site ships exactly two).
   AppLocale get other => this == AppLocale.ja ? AppLocale.en : AppLocale.ja;
@@ -124,9 +139,106 @@ class Strings {
     AppLocale.en => 'News',
   };
 
-  String get newsViewAllCta => switch (locale) {
-    AppLocale.ja => 'すべてのニュースを見る',
-    AppLocale.en => 'View All News',
+  String get newsShowAllCta => switch (locale) {
+    AppLocale.ja => 'すべてのニュースを表示',
+    AppLocale.en => 'Show All News',
+  };
+
+  String get newsShowLessCta => switch (locale) {
+    AppLocale.ja => '閉じる',
+    AppLocale.en => 'Show Less',
+  };
+
+  String get latestUpdatesCta => switch (locale) {
+    AppLocale.ja => 'FlutterKaigi 2026 スポンサー募集について',
+    AppLocale.en => 'FlutterKaigi 2026 Sponsorship Opportunities',
+  };
+
+  String get latestUpdatesCtaUrl => switch (locale) {
+    AppLocale.ja => 'https://medium.com/flutterkaigi/flutterkaigi-2026-opportunities-guide-ja-0e8cdb0a4acb',
+    AppLocale.en => 'https://medium.com/flutterkaigi/flutterkaigi-2026-opportunities-guide-en-1e5bd6c14461',
+  };
+
+  // ── Profile exchange ────────────────────────────────────────────────
+
+  /// Live count of `counters/profileExchanges` — hidden entirely (see
+  /// `ExchangeCounterSection`) when the client-side fetch hasn't
+  /// (yet, or ever) succeeded, so these strings only ever appear alongside
+  /// a real number.
+  String get exchangeCounterTitle => switch (locale) {
+    AppLocale.ja => 'プロフィール交換',
+    AppLocale.en => 'Profile Exchanges',
+  };
+
+  String get exchangeCounterCaption => switch (locale) {
+    AppLocale.ja => '会場で交換されたプロフィールの件数（リアルタイム）',
+    AppLocale.en => 'Profiles exchanged at the venue, updated live',
+  };
+
+  String get exchangeCounterUnit => switch (locale) {
+    AppLocale.ja => '件',
+    AppLocale.en => 'exchanges',
+  };
+
+  // ── Share-link fallback page (`/x/<token>`) ────────────────────────
+
+  String get shareLinkPageTitle => switch (locale) {
+    AppLocale.ja => 'アプリでプロフィールを交換',
+    AppLocale.en => 'Open the App to Exchange Profiles',
+  };
+
+  String get shareLinkPageLead => switch (locale) {
+    AppLocale.ja => 'このリンクは FlutterKaigi 2026 アプリで参加者同士のプロフィールを交換するためのものです。',
+    AppLocale.en => 'This link is for exchanging attendee profiles in the FlutterKaigi 2026 app.',
+  };
+
+  String get shareLinkPageAppInstalledHint => switch (locale) {
+    AppLocale.ja => 'アプリをインストール済みの場合は自動的に開きます。開かない場合は、アプリを起動してから相手にもう一度リンクを共有してもらってください。',
+    AppLocale.en =>
+      "If you already have the app installed, it should have opened automatically. If it didn't, open the app "
+          'and ask the other attendee to share the link again.',
+  };
+
+  String get shareLinkPageComingSoon => switch (locale) {
+    AppLocale.ja => 'アプリの配布情報は近日公開予定です。公開までしばらくお待ちください。',
+    AppLocale.en => 'App download details will be announced soon. Thanks for your patience.',
+  };
+
+  String get shareLinkPageBackHome => switch (locale) {
+    AppLocale.ja => 'トップページに戻る',
+    AppLocale.en => 'Back to home',
+  };
+
+  String get shareLinkPageGetIos => switch (locale) {
+    AppLocale.ja => 'App Store からダウンロード',
+    AppLocale.en => 'Download on the App Store',
+  };
+
+  String get shareLinkPageGetAndroid => switch (locale) {
+    AppLocale.ja => 'Google Play で手に入れよう',
+    AppLocale.en => 'Get it on Google Play',
+  };
+
+  // ── Dialog（共通） ───────────────────────────────────────────────────
+
+  String get dialogCloseLabel => switch (locale) {
+    AppLocale.ja => 'ダイアログを閉じる',
+    AppLocale.en => 'Close dialog',
+  };
+
+  // ── Timetable ───────────────────────────────────────────────────────
+
+  String get timetableTitle => 'Timetable';
+
+  String get timetableSubtitle => switch (locale) {
+    AppLocale.ja => 'FlutterKaigi 2026 当日のセッションタイムライン',
+    AppLocale.en => 'Session timeline for the two days of FlutterKaigi 2026',
+  };
+
+  /// タイムテーブル未確定（生成データが空）のときに表示する。
+  String get timetableComingSoon => switch (locale) {
+    AppLocale.ja => 'タイムテーブルは準備中です。確定次第このページで公開します。',
+    AppLocale.en => 'The timetable is being finalised. It will be published on this page once it is ready.',
   };
 
   // ── Sponsors ────────────────────────────────────────────────────────
@@ -146,6 +258,13 @@ class Strings {
     AppLocale.en => 'View details for $name',
   };
 
+  /// Accessible label for an individual sponsor's card, which links directly
+  /// to their GitHub profile rather than a detail page (in a new tab).
+  String sponsorGithubCardAriaLabel(String name) => switch (locale) {
+    AppLocale.ja => '$name の GitHub を見る（新しいタブで開く）',
+    AppLocale.en => "View $name's GitHub profile (opens in a new tab)",
+  };
+
   String get sponsorBackToList => switch (locale) {
     AppLocale.ja => 'スポンサー一覧に戻る',
     AppLocale.en => 'Back to Sponsors',
@@ -157,6 +276,19 @@ class Strings {
   String sponsorTierBadge(String tierLabel) => switch (locale) {
     AppLocale.ja => '$tierLabel スポンサー',
     AppLocale.en => '$tierLabel Sponsor',
+  };
+
+  // ── Staff ───────────────────────────────────────────────────────────
+
+  /// Section title / nav label (kept in English in both locales, per design).
+  String get staffTitle => 'Staff';
+
+  String get staffSubtitle => 'Members building FlutterKaigi 2026';
+
+  /// Accessible label for a staff member's SNS icon link.
+  String staffSnsAriaLabel(String name, String platform) => switch (locale) {
+    AppLocale.ja => '$name の $platform を見る（新しいタブで開く）',
+    AppLocale.en => "View $name's $platform (opens in a new tab)",
   };
 
   String get footerCopyright => switch (locale) {

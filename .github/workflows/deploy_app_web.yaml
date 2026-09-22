@@ -1,20 +1,23 @@
 name: Deploy App Web
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - apps/app/**
-      - packages/data/**
-      - .fvmrc
-      - pubspec.yaml
-      - .github/workflows/deploy_app_web.yaml
-  workflow_dispatch:
-
-concurrency:
-  group: deploy-app-web-production
-  cancel-in-progress: false
+  workflow_call:
+    inputs:
+      environment:
+        description: 配布先（stg または prod）
+        type: string
+        required: true
+      preview:
+        description: PR ごとのプレビューとして配布する
+        type: boolean
+        default: false
+    outputs:
+      url:
+        description: 配布先 URL
+        value: ${{ jobs.deploy.outputs.url }}
+    secrets:
+      CLOUDFLARE_API_TOKEN:
+        required: true
 
 permissions: {}
 
@@ -24,36 +27,37 @@ defaults:
 
 jobs:
   deploy:
-    # Temporarily keep only the conference app's production web deployment disabled.
-    # apps/website deployments and apps/app PR previews are not affected.
-    if: ${{ vars.ENABLE_APP_WEB_PRODUCTION_DEPLOY == 'true' }}
+    name: web (${{ inputs.environment }})
+    environment:
+      name: app-website
+      deployment: ${{ inputs.environment == 'prod' && !inputs.preview }}
+      url: https://2026-app.flutterkaigi.jp
+    concurrency:
+      group: deploy-app-web-${{ inputs.preview && format('preview-{0}', github.event.pull_request.number || github.ref) || inputs.environment }}
+      cancel-in-progress: ${{ inputs.preview }}
+    outputs:
+      url: ${{ steps.deploy.outputs.deployment-url }}
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     permissions:
       contents: read
       id-token: write
     env:
-      FIREBASE_PROJECT_ID: ${{ vars.PROD_FIREBASE_PROJECT_ID }}
-      FIREBASE_WEB_APP_ID: ${{ vars.PROD_APP_FIREBASE_WEB_APP_ID }}
-      APP_CHECK_SITE_KEY: ${{ vars.PROD_APP_CHECK_SITE_KEY }}
-      GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER_PROD }}
-      GCP_SERVICE_ACCOUNT: ${{ vars.GCP_SERVICE_ACCOUNT_PROD }}
+      DEPLOY_ENVIRONMENT: ${{ inputs.environment }}
+      FIREBASE_PROJECT_ID: ${{ vars[format('{0}_FIREBASE_PROJECT_ID', inputs.environment == 'stg' && 'STG' || 'PROD')] }}
+      FIREBASE_WEB_APP_ID: ${{ vars[format('{0}_APP_FIREBASE_WEB_APP_ID', inputs.environment == 'stg' && 'STG' || 'PROD')] }}
+      APP_CHECK_SITE_KEY: ${{ vars[format('{0}_APP_CHECK_SITE_KEY', inputs.environment == 'stg' && 'STG' || 'PROD')] }}
+      GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ vars[format('GCP_WORKLOAD_IDENTITY_PROVIDER_{0}', inputs.environment == 'stg' && 'STG' || 'PROD')] }}
+      GCP_SERVICE_ACCOUNT: ${{ vars[format('GCP_SERVICE_ACCOUNT_{0}', inputs.environment == 'stg' && 'STG' || 'PROD')] }}
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
-      - id: flutter-version
-        run: echo "version=$(jq -r .flutter .fvmrc)" >> "$GITHUB_OUTPUT"
-
-      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
-        with:
-          flutter-version: ${{ steps.flutter-version.outputs.version }}
-          channel: stable
-          cache: true
+      - uses: ./.github/actions/setup-flutter
 
       - name: Resolve dependencies
         run: flutter pub get
 
-      - name: Validate production Firebase configuration
+      - name: 配布環境の Firebase 設定を検証
         run: |
           for name in FIREBASE_PROJECT_ID FIREBASE_WEB_APP_ID APP_CHECK_SITE_KEY \
             GCP_WORKLOAD_IDENTITY_PROVIDER GCP_SERVICE_ACCOUNT; do
@@ -62,21 +66,16 @@ jobs:
               exit 1
             fi
           done
+          expected_project="$(sed -n 's/^FIREBASE_PROJECT_ID=//p' "apps/app/environments/.env.$DEPLOY_ENVIRONMENT")"
+          test "$FIREBASE_PROJECT_ID" = "$expected_project"
 
-      - name: Authenticate to Firebase with Workload Identity Federation
-        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3
+      - uses: ./.github/actions/setup-firebase
         with:
-          project_id: ${{ vars.PROD_FIREBASE_PROJECT_ID }}
-          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER_PROD }}
-          service_account: ${{ vars.GCP_SERVICE_ACCOUNT_PROD }}
+          project-id: ${{ env.FIREBASE_PROJECT_ID }}
+          workload-identity-provider: ${{ env.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service-account: ${{ env.GCP_SERVICE_ACCOUNT }}
 
-      - name: Install pinned Firebase configuration tools
-        run: |
-          npm install --global firebase-tools@13.35.1
-          dart pub global activate flutterfire_cli 1.4.0
-          echo "$HOME/.pub-cache/bin" >> "$GITHUB_PATH"
-
-      - name: Generate production Firebase options
+      - name: 配布環境の Firebase 設定を生成
         working-directory: apps/app
         run: >-
           flutterfire configure
@@ -86,27 +85,38 @@ jobs:
           --web-app-id="$FIREBASE_WEB_APP_ID"
           --out=lib/firebase_options.dart
 
-      - name: Validate generated production Firebase options
+      - name: 生成した Firebase 設定を検証
         working-directory: apps/app
         run: |
           grep -Fq "projectId: '$FIREBASE_PROJECT_ID'" lib/firebase_options.dart
           grep -Fq "appId: '$FIREBASE_WEB_APP_ID'" lib/firebase_options.dart
           grep -Fq "authDomain:" lib/firebase_options.dart
 
-      - name: Build production web app
+      - name: Web アプリをビルド
         working-directory: apps/app
         run: >-
           flutter build web
           --release
-          --dart-define-from-file=environments/.env.prod
-          --dart-define=FIREBASE_PROJECT_ID=$FIREBASE_PROJECT_ID
-          --dart-define=APP_CHECK_SITE_KEY=$APP_CHECK_SITE_KEY
-          --dart-define=COMMIT_INFORMATION=${{ github.ref_name }}-${{ github.sha }}
+          --dart-define-from-file="environments/.env.$DEPLOY_ENVIRONMENT"
+          --dart-define=FIREBASE_PROJECT_ID="$FIREBASE_PROJECT_ID"
+          --dart-define=APP_CHECK_SITE_KEY="$APP_CHECK_SITE_KEY"
+          --dart-define=COMMIT_INFORMATION="$GITHUB_REF_NAME-$GITHUB_SHA"
 
-      - name: Deploy to Cloudflare Workers
+      - name: Cloudflare Workers へ配布
+        id: deploy
         uses: cloudflare/wrangler-action@ebbaa1584979971c8614a24965b4405ff95890e0 # v4.0.0
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: apps/app
-          command: deploy
+          command: ${{ inputs.preview && 'versions upload' || inputs.environment == 'prod' && 'deploy' || 'versions upload --preview-alias stg' }}
+
+      - name: 配布先を記録
+        env:
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          {
+            echo "### Web $DEPLOY_ENVIRONMENT"
+            echo "Firebase: $FIREBASE_PROJECT_ID; コミット: $GITHUB_SHA"
+            echo "配布URL: $DEPLOYMENT_URL"
+          } >> "$GITHUB_STEP_SUMMARY"

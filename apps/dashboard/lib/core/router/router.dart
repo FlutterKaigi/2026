@@ -10,10 +10,15 @@ import 'package:dashboard/feature/venue/ui/page/venue_edit_page.dart';
 import 'package:data/speaker.dart';
 import 'package:data/staff_member.dart';
 import 'package:data/venue.dart';
+import 'package:dashboard/feature/quiz/ui/page/quiz_console_page.dart';
+import 'package:dashboard/feature/quiz/ui/page/quiz_projection_page.dart';
+import 'package:dashboard/feature/quiz/ui/page/quiz_event_list_page.dart';
+import 'package:dashboard/feature/quiz/ui/page/quiz_question_edit_page.dart';
 import 'package:dashboard/feature/session/ui/page/session_edit_page.dart';
 import 'package:dashboard/feature/session/ui/page/session_list_page.dart';
 import 'package:dashboard/feature/sponsor/ui/page/sponsor_edit_page.dart';
 import 'package:dashboard/feature/sponsor/ui/page/sponsor_list_page.dart';
+import 'package:data/data.dart' show QuizQuestion;
 import 'package:data/session.dart';
 import 'package:data/sponsor.dart';
 import 'package:dashboard/feature/speaker/ui/page/speaker_list_page.dart';
@@ -22,6 +27,7 @@ import 'package:dashboard/feature/timeline_event/ui/page/timeline_event_edit_pag
 import 'package:dashboard/feature/timeline_event/ui/page/timeline_event_list_page.dart';
 import 'package:data/timeline_event.dart';
 import 'package:dashboard/feature/venue/ui/page/venue_list_page.dart';
+import 'package:dashboard/feature/support_lt/ui/page/support_lt_page.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -37,6 +43,8 @@ part 'staff_member.dart';
 part 'timeline_event.dart';
 part 'session.dart';
 part 'sponsor.dart';
+part 'quiz.dart';
+part 'support_lt.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final initial = ref.read(authStateProvider);

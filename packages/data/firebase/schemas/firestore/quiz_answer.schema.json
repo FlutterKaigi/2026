@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/FlutterKaigi/2026/packages/data/firebase/schemas/firestore/quiz_answer.schema.json",
+  "title": "QuizAnswer",
+  "description": "Firestore document schema for the `quizEvents/{eventId}/answers` subcollection. Document ID is `{questionId}_{teamId}`.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["questionId", "teamId"],
+  "properties": {
+    "questionId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "teamId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "selectedOptionIndex": {
+      "type": ["integer", "null"],
+      "minimum": 0
+    },
+    "answeredBy": {
+      "type": ["string", "null"]
+    },
+    "submittedAt": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "isCorrect": {
+      "type": ["boolean", "null"]
+    }
+  }
+}

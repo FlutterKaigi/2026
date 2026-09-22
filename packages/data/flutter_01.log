@@ -1,0 +1,74 @@
+Flutter crash report.
+Please report a bug at https://github.com/flutter/flutter/issues.
+
+## command
+
+flutter analyze
+
+## exception
+
+_Exception: Exception: analysis server exited with code 64 and output:
+[stderr] Project
+[stderr]   build       Build a Dart application including code assets.
+[stderr]   compile     Compile Dart to various formats.
+[stderr]   create      Create a new Dart project.
+[stderr]   pub         Work with packages.
+[stderr]   run         Run a Dart program from a file or a local package.
+[stderr]   test        Run tests for a project.
+[stderr] 
+[stderr] Source code
+[stderr]   analyze     Analyze Dart code in a directory.
+[stderr]   doc         Generate API documentation for Dart projects.
+[stderr]   fix         Apply automated fixes to Dart source code.
+[stderr]   format      Idiomatically format Dart source code.
+[stderr] 
+[stderr] Tools
+[stderr]   devtools    Open DevTools (optionally connecting to an existing application).
+[stderr]   info        Show diagnostic information about the installed tooling.
+[stderr] 
+[stderr] Run "dart help <command>" for more information about a command.
+[stderr] See https://dart.dev/tools/dart-tool for detailed documentation.
+
+```
+```
+
+## flutter doctor
+
+```
+[✓] Flutter (Channel stable, 3.41.7, on macOS 26.5.2 25F84 darwin-arm64, locale ja-JP) [503ms]
+    • Flutter version 3.41.7 on channel stable at /Users/yuhei/fvm/versions/3.41.7
+    • Upstream repository https://github.com/flutter/flutter.git
+    • Framework revision cc0734ac71 (5 months ago), 2026-04-15 21:21:08 -0700
+    • Engine revision 59aa584fdf
+    • Dart version 3.11.5
+    • DevTools version 2.54.2
+    • Feature flags: enable-web, no-enable-linux-desktop, enable-macos-desktop, no-enable-windows-desktop, enable-android, enable-ios, cli-animations, enable-native-assets, enable-swift-package-manager, omit-legacy-version-file, enable-lldb-debugging, enable-uiscene-migration
+
+[!] Android toolchain - develop for Android devices (Android SDK version 35.0.0) [1,752ms]
+    • Android SDK at /Users/yuhei/Library/Android/sdk
+    • Emulator version 35.2.10.0 (build_id 12414864) (CL:N/A)
+    • Platform android-36, build-tools 35.0.0
+    • Java binary at: /Applications/Android Studio.app/Contents/jbr/Contents/Home/bin/java
+      This is the JDK bundled with the latest Android Studio installation on this machine.
+      To manually set the JDK path, use: `flutter config --jdk-dir="path/to/jdk"`.
+    • Java version OpenJDK Runtime Environment (build 25.0.2+-15348964-b329.117)
+    ! Some Android licenses not accepted. To resolve this, run: flutter doctor --android-licenses
+
+[✓] Xcode - develop for iOS and macOS (Xcode 26.3) [1,124ms]
+    • Xcode at /Applications/Xcode-26.3.0.app/Contents/Developer
+    • Build 17C529
+    • CocoaPods version 1.17.0
+
+[✓] Chrome - develop for the web [3ms]
+    • Chrome at /Applications/Google Chrome.app/Contents/MacOS/Google Chrome
+
+[✓] Connected device (3 available) [9.6s]
+    • iPhone 17 Pro (mobile) • EF367A3D-3177-4284-B537-2287F89DC570 • ios            • com.apple.CoreSimulator.SimRuntime.iOS-26-3 (simulator)
+    • macOS (desktop)        • macos                                • darwin-arm64   • macOS 26.5.2 25F84 darwin-arm64
+    • Chrome (web)           • chrome                               • web-javascript • Google Chrome 152.0.7977.84
+
+[✓] Network resources [915ms]
+    • All expected network resources are available.
+
+! Doctor found issues in 1 category.
+```

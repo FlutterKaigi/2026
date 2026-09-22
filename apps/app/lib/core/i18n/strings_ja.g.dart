@@ -20,20 +20,21 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	/// Constructing via the enum [AppLocale.build] is preferred.
 	Translations({Map<String, Node>? overrides, PluralResolver? cardinalResolver, PluralResolver? ordinalResolver, TranslationMetadata<AppLocale, Translations>? meta})
 		: assert(overrides == null, 'Set "translation_overrides: true" in order to enable this feature.'),
-		  $meta = meta ?? TranslationMetadata(
+		  _meta = meta ?? TranslationMetadata(
 		    locale: AppLocale.ja,
 		    overrides: overrides ?? {},
 		    cardinalResolver: cardinalResolver,
 		    ordinalResolver: ordinalResolver,
 		  ) {
-		$meta.setFlatMapFunction(_flatMapFunction);
+		_meta.setFlatMapFunction(_flatMapFunction);
 	}
 
 	/// Metadata for the translations of <ja>.
-	@override final TranslationMetadata<AppLocale, Translations> $meta;
+	final TranslationMetadata<AppLocale, Translations> _meta;
+	@override TranslationMetadata<AppLocale, Translations> get $meta => _meta;
 
 	/// Access flat map
-	dynamic operator[](String key) => $meta.getTranslation(key);
+	dynamic operator[](String key) => _meta.getTranslation(key);
 
 	late final Translations _root = this; // ignore: unused_field
 
@@ -45,19 +46,31 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	late final Translations$navigation$ja navigation = Translations$navigation$ja.internal(_root);
 	late final Translations$news$ja news = Translations$news$ja.internal(_root);
 	late final Translations$sponsors$ja sponsors = Translations$sponsors$ja.internal(_root);
+	late final Translations$staffMembers$ja staffMembers = Translations$staffMembers$ja.internal(_root);
 	late final Translations$trademarks$ja trademarks = Translations$trademarks$ja.internal(_root);
 	late final Translations$sessionTimetable$ja sessionTimetable = Translations$sessionTimetable$ja.internal(_root);
 	late final Translations$sessionSearch$ja sessionSearch = Translations$sessionSearch$ja.internal(_root);
 	late final Translations$sessionDetails$ja sessionDetails = Translations$sessionDetails$ja.internal(_root);
 	late final Translations$sessionBookmark$ja sessionBookmark = Translations$sessionBookmark$ja.internal(_root);
 	late final Translations$bookmarkedSessions$ja bookmarkedSessions = Translations$bookmarkedSessions$ja.internal(_root);
+	late final Translations$venueMap$ja venueMap = Translations$venueMap$ja.internal(_root);
+	late final Translations$venueWalk$ja venueWalk = Translations$venueWalk$ja.internal(_root);
 	late final Translations$eventInfo$ja eventInfo = Translations$eventInfo$ja.internal(_root);
 	late final Translations$contributors$ja contributors = Translations$contributors$ja.internal(_root);
 	late final Translations$auth$ja auth = Translations$auth$ja.internal(_root);
+	late final Translations$profile$ja profile = Translations$profile$ja.internal(_root);
+	late final Translations$snsPost$ja snsPost = Translations$snsPost$ja.internal(_root);
+	late final Translations$mission$ja mission = Translations$mission$ja.internal(_root);
+	late final Translations$exchange$ja exchange = Translations$exchange$ja.internal(_root);
+	late final Translations$supportLt$ja supportLt = Translations$supportLt$ja.internal(_root);
+	late final Translations$countryRegion$ja countryRegion = Translations$countryRegion$ja.internal(_root);
 	late final Translations$settings$ja settings = Translations$settings$ja.internal(_root);
 	late final Translations$licenses$ja licenses = Translations$licenses$ja.internal(_root);
 	late final Translations$error$ja error = Translations$error$ja.internal(_root);
 	late final Translations$notFound$ja notFound = Translations$notFound$ja.internal(_root);
+	late final Translations$common$ja common = Translations$common$ja.internal(_root);
+	late final Translations$quiz$ja quiz = Translations$quiz$ja.internal(_root);
+	late final Translations$forceUpdate$ja forceUpdate = Translations$forceUpdate$ja.internal(_root);
 }
 
 // Path: app
@@ -82,6 +95,9 @@ class Translations$links$ja {
 
 	/// ja: 'リンクを開けませんでした'
 	String get openError => 'リンクを開けませんでした';
+
+	/// ja: 'リンクをコピーしました'
+	String get copied => 'リンクをコピーしました';
 }
 
 // Path: navigation
@@ -94,6 +110,9 @@ class Translations$navigation$ja {
 
 	/// ja: 'セッション'
 	String get sessions => 'セッション';
+
+	/// ja: '会場マップ'
+	String get venueMap => '会場マップ';
 
 	/// ja: 'スポンサー'
 	String get sponsors => 'スポンサー';
@@ -146,6 +165,15 @@ class Translations$sponsors$ja {
 	/// ja: '$name のロゴ'
 	String logoSemanticLabel({required Object name}) => '${name} のロゴ';
 
+	/// ja: '$name の GitHub を見る'
+	String githubCardSemanticLabel({required Object name}) => '${name} の GitHub を見る';
+
+	/// ja: '$name の X を見る'
+	String xCardSemanticLabel({required Object name}) => '${name} の X を見る';
+
+	/// ja: '$name のリンクを開く'
+	String externalCardSemanticLabel({required Object name}) => '${name} のリンクを開く';
+
 	/// ja: '$tier スポンサー'
 	String tierBadge({required Object tier}) => '${tier} スポンサー';
 
@@ -160,6 +188,24 @@ class Translations$sponsors$ja {
 
 	/// ja: 'Connect'
 	String get connect => 'Connect';
+}
+
+// Path: staffMembers
+class Translations$staffMembers$ja {
+	Translations$staffMembers$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'スタッフ'
+	String get title => 'スタッフ';
+
+	/// ja: 'スタッフはまだ公開されていません'
+	String get empty => 'スタッフはまだ公開されていません';
+
+	/// ja: 'スタッフ情報を取得できませんでした'
+	String get error => 'スタッフ情報を取得できませんでした';
 }
 
 // Path: trademarks
@@ -296,6 +342,12 @@ class Translations$sessionDetails$ja {
 	/// ja: 'Sessionize'
 	String get sessionize => 'Sessionize';
 
+	/// ja: 'セッションのフィードバックを送る'
+	String get feedback => 'セッションのフィードバックを送る';
+
+	/// ja: 'このセッションの感想をお聞かせください'
+	String get feedbackDescription => 'このセッションの感想をお聞かせください';
+
 	/// ja: '共有'
 	String get share => '共有';
 
@@ -343,6 +395,180 @@ class Translations$bookmarkedSessions$ja {
 
 	/// ja: 'タイムテーブルを開く'
 	String get openSessions => 'タイムテーブルを開く';
+}
+
+// Path: venueMap
+class Translations$venueMap$ja {
+	Translations$venueMap$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: '会場マップ'
+	String get title => '会場マップ';
+
+	/// ja: '浜松町コンベンションホール · 5F'
+	String get floor => '浜松町コンベンションホール · 5F';
+
+	/// ja: '会場マップを読み込めませんでした'
+	String get loadError => '会場マップを読み込めませんでした';
+
+	/// ja: '再試行してください。'
+	String get loadErrorDescription => '再試行してください。';
+
+	/// ja: '場所を探す'
+	String get search => '場所を探す';
+
+	/// ja: 'ホール・スポンサー名・番号・設備'
+	String get searchHint => 'ホール・スポンサー名・番号・設備';
+
+	/// ja: '検索をクリア'
+	String get clearSearch => '検索をクリア';
+
+	/// ja: '件'
+	String get placesCount => '件';
+
+	/// ja: '地図で見る'
+	String get showOnMap => '地図で見る';
+
+	/// ja: 'すべて'
+	String get all => 'すべて';
+
+	/// ja: 'ホール'
+	String get halls => 'ホール';
+
+	/// ja: 'スポンサー'
+	String get booths => 'スポンサー';
+
+	/// ja: '設備'
+	String get facilities => '設備';
+
+	/// ja: '一致する場所がありません'
+	String get noResults => '一致する場所がありません';
+
+	/// ja: '選択を解除'
+	String get clearSelection => '選択を解除';
+
+	/// ja: '拡大'
+	String get zoomIn => '拡大';
+
+	/// ja: '縮小'
+	String get zoomOut => '縮小';
+
+	/// ja: '全体を表示'
+	String get fit => '全体を表示';
+
+	/// ja: '地図の向きを変える'
+	String get rotate => '地図の向きを変える';
+
+	/// ja: '2D'
+	String get twoD => '2D';
+
+	/// ja: '3D'
+	String get threeD => '3D';
+
+	/// ja: '地図の表示方法'
+	String get viewMode => '地図の表示方法';
+
+	/// ja: '2Dで表示'
+	String get useTwoD => '2Dで表示';
+
+	/// ja: '表示方法を保存できませんでした'
+	String get saveFailed => '表示方法を保存できませんでした';
+}
+
+// Path: venueWalk
+class Translations$venueWalk$ja {
+	Translations$venueWalk$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'だしゅまると会場さんぽ。スティック、床のタップ、または矢印キーで歩けます。'
+	String get sceneLabel => 'だしゅまると会場さんぽ。スティック、床のタップ、または矢印キーで歩けます。';
+
+	/// ja: 'ただいま'
+	String get currentLocation => 'ただいま';
+
+	/// ja: 'エントランス'
+	String get entrance => 'エントランス';
+
+	/// ja: '入口'
+	String get entranceSign => '入口';
+
+	/// ja: '選んだ場所'
+	String get selectedPoint => '選んだ場所';
+
+	/// ja: '$placeへ移動中'
+	String headingTo({required Object place}) => '${place}へ移動中';
+
+	/// ja: '$placeに到着'
+	String arrivedAt({required Object place}) => '${place}に到着';
+
+	/// ja: 'そこへは移動できません'
+	String get unreachable => 'そこへは移動できません';
+
+	/// ja: '撮影モード'
+	String get photoMode => '撮影モード';
+
+	/// ja: 'フォトスポットへ歩く'
+	String get walkToPhotoSpot => 'フォトスポットへ歩く';
+
+	/// ja: 'だしゅまるを追う'
+	String get followTooltip => 'だしゅまるを追う';
+
+	/// ja: 'フロア全体を見る'
+	String get overviewTooltip => 'フロア全体を見る';
+
+	/// ja: '追いかける'
+	String get follow => '追いかける';
+
+	/// ja: '全体を見る'
+	String get overview => '全体を見る';
+
+	/// ja: '遊び方'
+	String get help => '遊び方';
+
+	/// ja: 'スティックで歩く'
+	String get stickHint => 'スティックで歩く';
+
+	/// ja: 'だしゅまるを動かすスティック'
+	String get stickLabel => 'だしゅまるを動かすスティック';
+
+	/// ja: '移動を止める'
+	String get stopTooltip => '移動を止める';
+
+	/// ja: 'ここで止まる'
+	String get stop => 'ここで止まる';
+
+	/// ja: '入口に戻る'
+	String get reset => '入口に戻る';
+
+	/// ja: '手をふる'
+	String get wave => '手をふる';
+
+	/// ja: 'さんぽに戻る'
+	String get backToWalk => 'さんぽに戻る';
+
+	/// ja: '走る'
+	String get run => '走る';
+
+	/// ja: '走る速度'
+	String get runningSpeed => '走る速度';
+
+	/// ja: '歩く速度'
+	String get walkingSpeed => '歩く速度';
+
+	/// ja: '押している間だけ走ります。離すと歩きます。キーボードではShiftキーを使います。'
+	String get runHint => '押している間だけ走ります。離すと歩きます。キーボードではShiftキーを使います。';
+
+	/// ja: '閉じる'
+	String get close => '閉じる';
+
+	late final Translations$venueWalk$instructions$ja instructions = Translations$venueWalk$instructions$ja.internal(_root);
+	late final Translations$venueWalk$photo$ja photo = Translations$venueWalk$photo$ja.internal(_root);
 }
 
 // Path: eventInfo
@@ -416,6 +642,9 @@ class Translations$eventInfo$ja {
 	/// ja: 'ソースコードを見る'
 	String get sourceCode => 'ソースコードを見る';
 
+	/// ja: 'スタッフ'
+	String get staffMembers => 'スタッフ';
+
 	/// ja: 'OSSライセンス'
 	String get ossLicenses => 'OSSライセンス';
 }
@@ -455,6 +684,554 @@ class Translations$auth$ja {
 	late final Translations$auth$email$ja email = Translations$auth$email$ja.internal(_root);
 	late final Translations$auth$account$ja account = Translations$auth$account$ja.internal(_root);
 	late final Translations$auth$error$ja error = Translations$auth$error$ja.internal(_root);
+}
+
+// Path: profile
+class Translations$profile$ja {
+	Translations$profile$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'プロフィール'
+	String get title => 'プロフィール';
+
+	/// ja: 'プロフィールを編集'
+	String get editTitle => 'プロフィールを編集';
+
+	/// ja: 'プロフィールを作成'
+	String get createTitle => 'プロフィールを作成';
+
+	/// ja: 'プロフィールを登録しましょう'
+	String get promptTitle => 'プロフィールを登録しましょう';
+
+	/// ja: '出身国・地域や SNS を登録すると、会場での参加者同士のプロフィール交換に使えます。'
+	String get promptBody => '出身国・地域や SNS を登録すると、会場での参加者同士のプロフィール交換に使えます。';
+
+	/// ja: 'プロフィールを作成'
+	String get create => 'プロフィールを作成';
+
+	/// ja: 'プロフィールを編集'
+	String get edit => 'プロフィールを編集';
+
+	/// ja: '保存'
+	String get save => '保存';
+
+	/// ja: 'プロフィールを保存しました'
+	String get saved => 'プロフィールを保存しました';
+
+	/// ja: 'プロフィールを保存できませんでした'
+	String get saveFailed => 'プロフィールを保存できませんでした';
+
+	/// ja: 'プロフィールはサインインしている他の参加者に公開されます'
+	String get visibilityNote => 'プロフィールはサインインしている他の参加者に公開されます';
+
+	/// ja: 'プロフィール画像'
+	String get avatarSemanticLabel => 'プロフィール画像';
+
+	/// ja: '表示名'
+	String get displayNameLabel => '表示名';
+
+	/// ja: '表示名を入力してください'
+	String get displayNameRequired => '表示名を入力してください';
+
+	/// ja: '出身国・地域'
+	String get countryLabel => '出身国・地域';
+
+	/// ja: '選択してください'
+	String get countryPlaceholder => '選択してください';
+
+	/// ja: '出身国・地域を選択してください'
+	String get countryRequired => '出身国・地域を選択してください';
+
+	/// ja: '国名・地域名で検索'
+	String get countrySearchHint => '国名・地域名で検索';
+
+	/// ja: '「$query」に一致する国・地域が見つかりません'
+	String countryNoResults({required Object query}) => '「${query}」に一致する国・地域が見つかりません';
+
+	/// ja: '英語名やISOコードでも検索できます'
+	String get countryNoResultsHint => '英語名やISOコードでも検索できます';
+
+	/// ja: 'SNS'
+	String get snsLinksLabel => 'SNS';
+
+	/// ja: 'X や GitHub などのリンクを追加できます'
+	String get snsLinksEmpty => 'X や GitHub などのリンクを追加できます';
+
+	/// ja: 'SNSリンクを追加'
+	String get addSnsLink => 'SNSリンクを追加';
+
+	/// ja: 'このリンクを削除'
+	String get removeSnsLink => 'このリンクを削除';
+
+	/// ja: 'サービス'
+	String get snsPlatformLabel => 'サービス';
+
+	/// ja: 'URL'
+	String get snsUrlLabel => 'URL';
+
+	/// ja: 'IDまたはURL'
+	String get snsIdOrUrlLabel => 'IDまたはURL';
+
+	/// ja: 'ID または URL を入力してください'
+	String get snsIdOrUrlRequired => 'ID または URL を入力してください';
+
+	/// ja: '有効な ID または https:// から始まる URL を入力してください'
+	String get snsIdOrUrlInvalid => '有効な ID または https:// から始まる URL を入力してください';
+
+	/// ja: 'URL を入力してください'
+	String get snsUrlRequired => 'URL を入力してください';
+
+	/// ja: 'https:// から始まる URL を入力してください'
+	String get snsUrlInvalid => 'https:// から始まる URL を入力してください';
+
+	/// ja: 'SNSリンクは $n 件まで登録できます'
+	String snsLinksMax({required Object n}) => 'SNSリンクは ${n} 件まで登録できます';
+
+	/// ja: 'その他'
+	String get snsPlatformOther => 'その他';
+
+	/// ja: '自己紹介'
+	String get bioLabel => '自己紹介';
+
+	/// ja: '普段の仕事や、今日話したいことなど'
+	String get bioHint => '普段の仕事や、今日話したいことなど';
+
+	/// ja: '編集内容を破棄しますか?'
+	String get discardTitle => '編集内容を破棄しますか?';
+
+	/// ja: '保存していない変更は失われます。'
+	String get discardBody => '保存していない変更は失われます。';
+
+	/// ja: '破棄する'
+	String get discardAction => '破棄する';
+
+	/// ja: '編集を続ける'
+	String get keepEditing => '編集を続ける';
+}
+
+// Path: snsPost
+class Translations$snsPost$ja {
+	Translations$snsPost$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'SNS投稿登録'
+	String get title => 'SNS投稿登録';
+
+	/// ja: 'SNS投稿を登録するにはサインインしてください'
+	String get signInRequired => 'SNS投稿を登録するにはサインインしてください';
+
+	/// ja: '写真の投稿を登録しよう'
+	String get heading => '写真の投稿を登録しよう';
+
+	/// ja: '対象の参加者と撮った写真をSNSに投稿し、\nその投稿のURLを登録してください。'
+	String get description => '対象の参加者と撮った写真をSNSに投稿し、\nその投稿のURLを登録してください。';
+
+	/// ja: '誰と撮りましたか？'
+	String get companionLabel => '誰と撮りましたか？';
+
+	/// ja: '写真に写っている相手のタグを1つ選んでください'
+	String get companionHint => '写真に写っている相手のタグを1つ選んでください';
+
+	/// ja: '相手のタグを1つ選んでください'
+	String get companionRequired => '相手のタグを1つ選んでください';
+
+	late final Translations$snsPost$companions$ja companions = Translations$snsPost$companions$ja.internal(_root);
+
+	/// ja: 'SNS投稿のURL'
+	String get urlLabel => 'SNS投稿のURL';
+
+	/// ja: 'プロフィールページではなく、写真を投稿したページのURL'
+	String get urlHint => 'プロフィールページではなく、写真を投稿したページのURL';
+
+	/// ja: '有効な投稿URL（https://…）を入力してください'
+	String get invalidUrl => '有効な投稿URL（https://…）を入力してください';
+
+	/// ja: '投稿を登録する'
+	String get register => '投稿を登録する';
+
+	/// ja: '登録内容を更新する'
+	String get update => '登録内容を更新する';
+
+	/// ja: '保存中…'
+	String get saving => '保存中…';
+
+	/// ja: 'キャンセル'
+	String get cancel => 'キャンセル';
+
+	/// ja: '保存できませんでした。通信状態を確認して、もう一度お試しください。'
+	String get saveFailed => '保存できませんでした。通信状態を確認して、もう一度お試しください。';
+
+	/// ja: '登録内容を確認できません。投稿URLと相手のタグを登録し直してください。'
+	String get invalidRegistration => '登録内容を確認できません。投稿URLと相手のタグを登録し直してください。';
+
+	/// ja: 'SNS投稿を登録しました'
+	String get registeredTitle => 'SNS投稿を登録しました';
+
+	/// ja: 'SNS投稿のミッションを達成しました。'
+	String get registeredBody => 'SNS投稿のミッションを達成しました。';
+
+	/// ja: '更新日時：$date'
+	String updatedAt({required Object date}) => '更新日時：${date}';
+
+	/// ja: '投稿を開く'
+	String get openPost => '投稿を開く';
+
+	/// ja: '投稿を開けませんでした'
+	String get openFailed => '投稿を開けませんでした';
+
+	/// ja: 'ミッションの達成状況を見る'
+	String get viewMissions => 'ミッションの達成状況を見る';
+
+	/// ja: 'URL・タグを修正する'
+	String get edit => 'URL・タグを修正する';
+}
+
+// Path: mission
+class Translations$mission$ja {
+	Translations$mission$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'ミッション'
+	String get title => 'ミッション';
+
+	/// ja: 'ミッションの達成状況を見るにはサインインしてください'
+	String get signInRequired => 'ミッションの達成状況を見るにはサインインしてください';
+
+	/// ja: '達成'
+	String get complete => '達成';
+
+	/// ja: '未達成'
+	String get incomplete => '未達成';
+
+	/// ja: '確認中'
+	String get loading => '確認中';
+
+	/// ja: '確認できません'
+	String get loadFailed => '確認できません';
+
+	/// ja: 'すべて達成！'
+	String get allComplete => 'すべて達成！';
+
+	/// ja: 'ミッション達成状況'
+	String get inProgress => 'ミッション達成状況';
+
+	/// ja: '確認できない項目があります'
+	String get checkFailed => '確認できない項目があります';
+
+	/// ja: '$total項目中$n項目を達成'
+	String progress({required Object total, required Object n}) => '${total}項目中${n}項目を達成';
+
+	/// ja: '応援LTに参加'
+	String get ltTitle => '応援LTに参加';
+
+	/// ja: '応援側・登壇者とも、会場のコードで参加登録'
+	String get ltDescription => '応援側・登壇者とも、会場のコードで参加登録';
+
+	/// ja: 'プロフィール交換'
+	String get exchangeTitle => 'プロフィール交換';
+
+	/// ja: '$required人以上と交換し、出身国・地域が異なる人を1人以上含む'
+	String exchangeDescription({required Object required}) => '${required}人以上と交換し、出身国・地域が異なる人を1人以上含む';
+
+	/// ja: '$n / $required人と交換'
+	String exchangeCount({required Object n, required Object required}) => '${n} / ${required}人と交換';
+
+	/// ja: '出身国・地域が異なる人と交換'
+	String get differentCountry => '出身国・地域が異なる人と交換';
+
+	/// ja: 'プロフィールで出身国・地域を登録する'
+	String get profileRequired => 'プロフィールで出身国・地域を登録する';
+
+	/// ja: '写真をSNSに投稿'
+	String get snsTitle => '写真をSNSに投稿';
+
+	/// ja: '対象の相手との写真を投稿し、URLとタグを登録'
+	String get snsDescription => '対象の相手との写真を投稿し、URLとタグを登録';
+}
+
+// Path: exchange
+class Translations$exchange$ja {
+	Translations$exchange$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'プロフィール交換'
+	String get title => 'プロフィール交換';
+
+	/// ja: 'このQRコードを相手に見せて読み取ってもらうと、お互いのプロフィールを交換できます'
+	String get qrDescription => 'このQRコードを相手に見せて読み取ってもらうと、お互いのプロフィールを交換できます';
+
+	/// ja: 'プロフィール交換用のQRコード'
+	String get qrSemanticLabel => 'プロフィール交換用のQRコード';
+
+	/// ja: '有効期限 $date まで'
+	String qrExpiresAt({required Object date}) => '有効期限 ${date} まで';
+
+	/// ja: 'QRコードを読み取る'
+	String get scanButton => 'QRコードを読み取る';
+
+	/// ja: '交換した人を見る'
+	String get listButton => '交換した人を見る';
+
+	/// ja: 'サインインすると自分のQRコードを表示できます'
+	String get signInRequired => 'サインインすると自分のQRコードを表示できます';
+
+	/// ja: 'サインインする'
+	String get signInAction => 'サインインする';
+
+	/// ja: 'プロフィールを作成すると自分のQRコードを表示できます'
+	String get profileRequired => 'プロフィールを作成すると自分のQRコードを表示できます';
+
+	/// ja: 'プロフィールを作成する'
+	String get profileRequiredAction => 'プロフィールを作成する';
+
+	/// ja: 'QRコードを読み取る'
+	String get scanTitle => 'QRコードを読み取る';
+
+	/// ja: '相手の画面に表示されたQRコードを枠内に収めてください'
+	String get scanHint => '相手の画面に表示されたQRコードを枠内に収めてください';
+
+	/// ja: 'カメラを利用できません。設定でカメラへのアクセスを許可してください'
+	String get scanCameraError => 'カメラを利用できません。設定でカメラへのアクセスを許可してください';
+
+	/// ja: '読み取れませんでした。プロフィール交換用のQRコードか確認してください'
+	String get scanInvalid => '読み取れませんでした。プロフィール交換用のQRコードか確認してください';
+
+	/// ja: '自分のQRコードは読み取れません'
+	String get scanSelf => '自分のQRコードは読み取れません';
+
+	/// ja: 'プロフィールを交換しました'
+	String get scanSucceeded => 'プロフィールを交換しました';
+
+	/// ja: 'すでに交換済みです'
+	String get scanAlreadyExists => 'すでに交換済みです';
+
+	/// ja: 'プロフィールを交換できませんでした'
+	String get scanFailed => 'プロフィールを交換できませんでした';
+
+	/// ja: '交換した人'
+	String get listTitle => '交換した人';
+
+	/// ja: 'まだ誰とも交換していません'
+	String get listEmpty => 'まだ誰とも交換していません';
+
+	/// ja: 'QRコードを読み取って、参加者とプロフィールを交換しましょう'
+	String get listEmptyBody => 'QRコードを読み取って、参加者とプロフィールを交換しましょう';
+
+	/// ja: 'このプロフィールは表示できません'
+	String get profileUnavailable => 'このプロフィールは表示できません';
+
+	/// ja: '削除'
+	String get deleteTooltip => '削除';
+
+	/// ja: '交換を削除しますか?'
+	String get deleteConfirmTitle => '交換を削除しますか?';
+
+	/// ja: '自分の一覧からのみ削除されます。相手の一覧はそのまま残ります。'
+	String get deleteConfirmBody => '自分の一覧からのみ削除されます。相手の一覧はそのまま残ります。';
+
+	/// ja: '削除する'
+	String get deleteConfirmAction => '削除する';
+
+	/// ja: 'キャンセル'
+	String get deleteCancel => 'キャンセル';
+
+	/// ja: '削除できませんでした'
+	String get deleteFailed => '削除できませんでした';
+
+	/// ja: 'メモを追加'
+	String get noteAddTooltip => 'メモを追加';
+
+	/// ja: 'メモを編集'
+	String get noteEditTooltip => 'メモを編集';
+
+	/// ja: 'メモ'
+	String get noteEditTitle => 'メモ';
+
+	/// ja: '自分だけに見えるメモです'
+	String get noteEditHint => '自分だけに見えるメモです';
+
+	/// ja: 'メモ'
+	String get noteLabel => 'メモ';
+
+	/// ja: '保存'
+	String get noteSave => '保存';
+
+	/// ja: 'キャンセル'
+	String get noteCancel => 'キャンセル';
+
+	/// ja: 'メモを保存できませんでした'
+	String get noteSaveFailed => 'メモを保存できませんでした';
+
+	/// ja: '6桁コードで交換'
+	String get codeSectionTitle => '6桁コードで交換';
+
+	/// ja: 'カメラが使えないときは、6桁のコードを伝え合って交換できます。有効期限内なら、同じコードを何人でも入力できます'
+	String get codeSectionDescription => 'カメラが使えないときは、6桁のコードを伝え合って交換できます。有効期限内なら、同じコードを何人でも入力できます';
+
+	/// ja: 'プロフィール交換用の6桁コード'
+	String get myCodeSemanticLabel => 'プロフィール交換用の6桁コード';
+
+	/// ja: '有効期限 $date まで'
+	String myCodeExpiresAt({required Object date}) => '有効期限 ${date} まで';
+
+	/// ja: 'コードの有効期限が切れました'
+	String get myCodeExpired => 'コードの有効期限が切れました';
+
+	/// ja: 'コードを再発行'
+	String get myCodeRefresh => 'コードを再発行';
+
+	/// ja: 'コードをコピー'
+	String get myCodeCopy => 'コードをコピー';
+
+	/// ja: 'コードをコピーしました'
+	String get myCodeCopied => 'コードをコピーしました';
+
+	/// ja: '相手のコードを入力'
+	String get enterCodeLabel => '相手のコードを入力';
+
+	/// ja: '123456'
+	String get enterCodeHint => '123456';
+
+	/// ja: '交換する'
+	String get enterCodeButton => '交換する';
+
+	/// ja: '6桁の数字を入力してください'
+	String get enterCodeInvalidFormat => '6桁の数字を入力してください';
+
+	/// ja: 'コードが見つからないか、有効期限が切れています'
+	String get redeemInvalid => 'コードが見つからないか、有効期限が切れています';
+
+	/// ja: '自分のコードは入力できません'
+	String get redeemSelf => '自分のコードは入力できません';
+
+	/// ja: '試行回数が多すぎます。しばらくしてからもう一度お試しください'
+	String get redeemRateLimited => '試行回数が多すぎます。しばらくしてからもう一度お試しください';
+
+	/// ja: 'サインインすると相手とプロフィールを交換できます'
+	String get shareLinkSignInRequired => 'サインインすると相手とプロフィールを交換できます';
+
+	/// ja: 'プロフィールを作成すると相手とプロフィールを交換できます'
+	String get shareLinkProfileRequired => 'プロフィールを作成すると相手とプロフィールを交換できます';
+
+	/// ja: 'このリンクは無効です'
+	String get shareLinkInvalidTitle => 'このリンクは無効です';
+
+	/// ja: 'プロフィール交換用のリンクか確認してください'
+	String get shareLinkInvalidBody => 'プロフィール交換用のリンクか確認してください';
+
+	/// ja: 'このリンクの有効期限が切れています'
+	String get shareLinkExpiredTitle => 'このリンクの有効期限が切れています';
+
+	/// ja: '相手にもう一度QRコードかリンクを共有してもらってください'
+	String get shareLinkExpiredBody => '相手にもう一度QRコードかリンクを共有してもらってください';
+
+	/// ja: 'これは自分の共有リンクです'
+	String get shareLinkSelfTitle => 'これは自分の共有リンクです';
+
+	/// ja: '他の参加者がこのリンクを開くと、あなたとプロフィールを交換できます'
+	String get shareLinkSelfBody => '他の参加者がこのリンクを開くと、あなたとプロフィールを交換できます';
+
+	/// ja: 'ホームに戻る'
+	String get shareLinkGoHome => 'ホームに戻る';
+
+	/// ja: '交換した人を見る'
+	String get shareLinkViewList => '交換した人を見る';
+}
+
+// Path: supportLt
+class Translations$supportLt$ja {
+	Translations$supportLt$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: '応援LT参加登録'
+	String get title => '応援LT参加登録';
+
+	/// ja: '運営から案内された6桁のコードを入力して、応援LTへの参加を登録してください'
+	String get description => '運営から案内された6桁のコードを入力して、応援LTへの参加を登録してください';
+
+	/// ja: '参加登録コード'
+	String get codeLabel => '参加登録コード';
+
+	/// ja: '参加登録する'
+	String get register => '参加登録する';
+
+	/// ja: '登録中…'
+	String get submitting => '登録中…';
+
+	/// ja: '参加登録が完了しました'
+	String get registeredTitle => '参加登録が完了しました';
+
+	/// ja: '応援LTをお楽しみください'
+	String get registeredBody => '応援LTをお楽しみください';
+
+	/// ja: '参加登録済み'
+	String get registeredStatus => '参加登録済み';
+
+	/// ja: 'アカウントに戻る'
+	String get backToAccount => 'アカウントに戻る';
+
+	/// ja: '応援LTに参加登録するには サインインしてください'
+	String get signInRequired => '応援LTに参加登録するには\nサインインしてください';
+
+	/// ja: '6桁の数字を入力してください'
+	String get invalidFormat => '6桁の数字を入力してください';
+
+	/// ja: 'コードが正しくありません。運営から案内されたコードを確認してください'
+	String get invalidCode => 'コードが正しくありません。運営から案内されたコードを確認してください';
+
+	/// ja: '試行回数が多すぎます。しばらくしてからもう一度お試しください'
+	String get rateLimited => '試行回数が多すぎます。しばらくしてからもう一度お試しください';
+
+	/// ja: '通信に失敗しました。通信状況を確認してもう一度お試しください'
+	String get networkError => '通信に失敗しました。通信状況を確認してもう一度お試しください';
+
+	/// ja: 'サインインの有効期限が切れました。もう一度サインインしてください'
+	String get sessionExpired => 'サインインの有効期限が切れました。もう一度サインインしてください';
+
+	/// ja: '参加登録が許可されていません。運営に確認してください'
+	String get permissionDenied => '参加登録が許可されていません。運営に確認してください';
+
+	/// ja: '参加登録できませんでした。もう一度お試しください'
+	String get registrationFailed => '参加登録できませんでした。もう一度お試しください';
+}
+
+// Path: countryRegion
+class Translations$countryRegion$ja {
+	Translations$countryRegion$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'アジア'
+	String get asia => 'アジア';
+
+	/// ja: 'オセアニア'
+	String get oceania => 'オセアニア';
+
+	/// ja: '北米・中南米'
+	String get americas => '北米・中南米';
+
+	/// ja: 'ヨーロッパ'
+	String get europe => 'ヨーロッパ';
+
+	/// ja: 'アフリカ'
+	String get africa => 'アフリカ';
 }
 
 // Path: settings
@@ -556,6 +1333,64 @@ class Translations$notFound$ja {
 	String get description => 'お探しのページは存在しないか、移動した可能性があります。';
 }
 
+// Path: common
+class Translations$common$ja {
+	Translations$common$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: '再試行'
+	String get retry => '再試行';
+}
+
+// Path: quiz
+class Translations$quiz$ja {
+	Translations$quiz$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'クイズ大会'
+	String get title => 'クイズ大会';
+
+	/// ja: 'スポンサー提供のクイズに参加'
+	String get entrySubtitle => 'スポンサー提供のクイズに参加';
+
+	late final Translations$quiz$list$ja list = Translations$quiz$list$ja.internal(_root);
+	late final Translations$quiz$signInRequired$ja signInRequired = Translations$quiz$signInRequired$ja.internal(_root);
+	late final Translations$quiz$errors$ja errors = Translations$quiz$errors$ja.internal(_root);
+	late final Translations$quiz$preparing$ja preparing = Translations$quiz$preparing$ja.internal(_root);
+	late final Translations$quiz$registration$ja registration = Translations$quiz$registration$ja.internal(_root);
+	late final Translations$quiz$waiting$ja waiting = Translations$quiz$waiting$ja.internal(_root);
+	late final Translations$quiz$team$ja team = Translations$quiz$team$ja.internal(_root);
+	late final Translations$quiz$entryClosed$ja entryClosed = Translations$quiz$entryClosed$ja.internal(_root);
+	late final Translations$quiz$question$ja question = Translations$quiz$question$ja.internal(_root);
+	late final Translations$quiz$suspense$ja suspense = Translations$quiz$suspense$ja.internal(_root);
+	late final Translations$quiz$revealed$ja revealed = Translations$quiz$revealed$ja.internal(_root);
+	late final Translations$quiz$result$ja result = Translations$quiz$result$ja.internal(_root);
+}
+
+// Path: forceUpdate
+class Translations$forceUpdate$ja {
+	Translations$forceUpdate$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'アップデートが必要です'
+	String get title => 'アップデートが必要です';
+
+	/// ja: '新しいバージョンのアプリが利用可能です。最新バージョンにアップデートしてください。'
+	String get message => '新しいバージョンのアプリが利用可能です。最新バージョンにアップデートしてください。';
+
+	/// ja: 'アップデート'
+	String get updateButton => 'アップデート';
+}
+
 // Path: sessionTimetable.view
 class Translations$sessionTimetable$view$ja {
 	Translations$sessionTimetable$view$ja.internal(this._root);
@@ -606,8 +1441,8 @@ class Translations$sessionTimetable$type$ja {
 
 	// Translations
 
-	/// ja: '通常セッション'
-	String get regular => '通常セッション';
+	/// ja: 'セッション'
+	String get regular => 'セッション';
 
 	/// ja: 'LT'
 	String get lightningTalk => 'LT';
@@ -615,11 +1450,97 @@ class Translations$sessionTimetable$type$ja {
 	/// ja: '初心者向けLT'
 	String get beginnersLightningTalk => '初心者向けLT';
 
-	/// ja: 'ハンズオン'
-	String get handsOn => 'ハンズオン';
-
 	/// ja: 'イベント'
 	String get event => 'イベント';
+}
+
+// Path: venueWalk.instructions
+class Translations$venueWalk$instructions$ja {
+	Translations$venueWalk$instructions$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: '会場さんぽの遊び方'
+	String get title => '会場さんぽの遊び方';
+
+	/// ja: '左下のスティックで歩きます。右下の走るアイコンを押している間は走り、離すと歩く速さに戻ります。'
+	String get movement => '左下のスティックで歩きます。右下の走るアイコンを押している間は走り、離すと歩く速さに戻ります。';
+
+	/// ja: '背景をドラッグして見回し、ピンチで近づいたり離れたりできます。床をタップすると、その場所まで自動で歩きます。'
+	String get camera => '背景をドラッグして見回し、ピンチで近づいたり離れたりできます。床をタップすると、その場所まで自動で歩きます。';
+
+	/// ja: '「場所を探す」で行き先を選んで、4つのホールを巡ってみましょう。地図アイコンで会場全体を見渡せます。'
+	String get places => '「場所を探す」で行き先を選んで、4つのホールを巡ってみましょう。地図アイコンで会場全体を見渡せます。';
+
+	/// ja: 'カメラで記念撮影。隣の写真アイコンを押すと、クリエイティブボードの前まで歩きます。ポーズやフレームを選んで撮影できます。'
+	String get photos => 'カメラで記念撮影。隣の写真アイコンを押すと、クリエイティブボードの前まで歩きます。ポーズやフレームを選んで撮影できます。';
+
+	/// ja: 'パソコンでは W A S D または矢印キーで移動、Shiftを押している間は走り、Escで止まります。'
+	String get keyboard => 'パソコンでは W A S D または矢印キーで移動、Shiftを押している間は走り、Escで止まります。';
+
+	/// ja: '5階の会場を散歩できます。実際の現在地を示すものではなく、エスカレーターでの階移動はできません。'
+	String get scope => '5階の会場を散歩できます。実際の現在地を示すものではなく、エスカレーターでの階移動はできません。';
+
+	/// ja: '3Dモデル: yakitama5 / flutter_deck_slides だしゅまる: FlutterKaigi'
+	String get credits => '3Dモデル: yakitama5 / flutter_deck_slides\nだしゅまる: FlutterKaigi';
+}
+
+// Path: venueWalk.photo
+class Translations$venueWalk$photo$ja {
+	Translations$venueWalk$photo$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'だしゅまると記念撮影'
+	String get title => 'だしゅまると記念撮影';
+
+	/// ja: '記念写真'
+	String get resultTitle => '記念写真';
+
+	/// ja: '撮影しただしゅまるの記念写真'
+	String get imageLabel => '撮影しただしゅまるの記念写真';
+
+	/// ja: '写真のダウンロードを開始しました'
+	String get downloadStarted => '写真のダウンロードを開始しました';
+
+	/// ja: '写真を保存できませんでした。もう一度お試しください。'
+	String get saveFailed => '写真を保存できませんでした。もう一度お試しください。';
+
+	/// ja: 'PNGを保存'
+	String get savePng => 'PNGを保存';
+
+	/// ja: '撮影できませんでした。もう一度お試しください。'
+	String get captureFailed => '撮影できませんでした。もう一度お試しください。';
+
+	/// ja: 'だしゅまると、会場さんぽ。'
+	String get caption => 'だしゅまると、会場さんぽ。';
+
+	/// ja: 'だしゅまると、$placeで。'
+	String captionAt({required Object place}) => 'だしゅまると、${place}で。';
+
+	/// ja: '写真を撮る'
+	String get shutter => '写真を撮る';
+
+	/// ja: '撮影中'
+	String get capturing => '撮影中';
+
+	/// ja: 'UIを隠す。画面をタップすると戻ります'
+	String get hideUi => 'UIを隠す。画面をタップすると戻ります';
+
+	/// ja: 'こちらを向く'
+	String get faceCamera => 'こちらを向く';
+
+	/// ja: 'フレームを外す'
+	String get removeFrame => 'フレームを外す';
+
+	/// ja: 'フレームを付ける'
+	String get addFrame => 'フレームを付ける';
+
+	late final Translations$venueWalk$photo$poses$ja poses = Translations$venueWalk$photo$poses$ja.internal(_root);
 }
 
 // Path: auth.signIn
@@ -629,6 +1550,9 @@ class Translations$auth$signIn$ja {
 	final Translations _root; // ignore: unused_field
 
 	// Translations
+
+	/// ja: 'サインインが必要です'
+	String get required => 'サインインが必要です';
 
 	/// ja: 'FlutterKaigi 2026 アプリで利用するサインイン方法を選択してください'
 	String get description => 'FlutterKaigi 2026 アプリで利用するサインイン方法を選択してください';
@@ -702,6 +1626,9 @@ class Translations$auth$account$ja {
 	/// ja: 'アカウント'
 	String get title => 'アカウント';
 
+	/// ja: '参加する'
+	String get features => '参加する';
+
 	/// ja: 'サインイン中'
 	String get signedIn => 'サインイン中';
 
@@ -731,6 +1658,30 @@ class Translations$auth$account$ja {
 
 	/// ja: 'アカウントを削除するには、現在のパスワードを入力してください。'
 	String get deletePasswordBody => 'アカウントを削除するには、現在のパスワードを入力してください。';
+
+	/// ja: 'ミッション'
+	String get mission => 'ミッション';
+
+	/// ja: '応援LT参加・プロフィール交換・SNS投稿登録の参加状況で判定'
+	String get missionDescription => '応援LT参加・プロフィール交換・SNS投稿登録の参加状況で判定';
+
+	/// ja: 'イベントに参加'
+	String get joinEvent => 'イベントに参加';
+
+	/// ja: 'クイズ大会'
+	String get quiz => 'クイズ大会';
+
+	/// ja: '応援LT参加'
+	String get lightningTalks => '応援LT参加';
+
+	/// ja: 'プロフィール交換'
+	String get profileExchange => 'プロフィール交換';
+
+	/// ja: 'SNS投稿登録'
+	String get snsPost => 'SNS投稿登録';
+
+	/// ja: 'この機能は準備中です'
+	String get comingSoon => 'この機能は準備中です';
 
 	/// ja: 'アカウントを削除しました'
 	String get deleted => 'アカウントを削除しました';
@@ -781,6 +1732,30 @@ class Translations$auth$error$ja {
 	String get unknown => '認証に失敗しました。もう一度お試しください';
 }
 
+// Path: snsPost.companions
+class Translations$snsPost$companions$ja {
+	Translations$snsPost$companions$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'スタッフ'
+	String get staff => 'スタッフ';
+
+	/// ja: 'スピーカー'
+	String get speaker => 'スピーカー';
+
+	/// ja: 'スポンサー'
+	String get sponsor => 'スポンサー';
+
+	/// ja: '初参加の人'
+	String get firstTime => '初参加の人';
+
+	/// ja: '出身国・地域が異なる人'
+	String get differentCountry => '出身国・地域が異なる人';
+}
+
 // Path: settings.themeMode
 class Translations$settings$themeMode$ja {
 	Translations$settings$themeMode$ja.internal(this._root);
@@ -820,6 +1795,353 @@ class Translations$settings$language$ja {
 	String get english => 'English';
 }
 
+// Path: quiz.list
+class Translations$quiz$list$ja {
+	Translations$quiz$list$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'クイズはまだありません'
+	String get empty => 'クイズはまだありません';
+
+	/// ja: 'クイズ一覧を取得できませんでした'
+	String get error => 'クイズ一覧を取得できませんでした';
+
+	late final Translations$quiz$list$status$ja status = Translations$quiz$list$status$ja.internal(_root);
+}
+
+// Path: quiz.signInRequired
+class Translations$quiz$signInRequired$ja {
+	Translations$quiz$signInRequired$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'サインインが必要です'
+	String get title => 'サインインが必要です';
+
+	/// ja: 'クイズ大会は参加と回答の記録をアカウントに紐づけます。 アカウントタブからサインインしてご参加ください。'
+	String get description => 'クイズ大会は参加と回答の記録をアカウントに紐づけます。 アカウントタブからサインインしてご参加ください。';
+
+	/// ja: 'アカウントへ'
+	String get button => 'アカウントへ';
+}
+
+// Path: quiz.errors
+class Translations$quiz$errors$ja {
+	Translations$quiz$errors$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'サインインに失敗しました'
+	String get signInFailed => 'サインインに失敗しました';
+
+	/// ja: 'イベント情報の取得に失敗しました'
+	String get eventLoadFailed => 'イベント情報の取得に失敗しました';
+}
+
+// Path: quiz.preparing
+class Translations$quiz$preparing$ja {
+	Translations$quiz$preparing$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'クイズは開催準備中です'
+	String get title => 'クイズは開催準備中です';
+
+	/// ja: '開始のアナウンスがあったら この画面から参加できます。'
+	String get description => '開始のアナウンスがあったら この画面から参加できます。';
+}
+
+// Path: quiz.registration
+class Translations$quiz$registration$ja {
+	Translations$quiz$registration$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'テーブル対抗のチーム戦。ニックネームで参加しよう！'
+	String get subtitle => 'テーブル対抗のチーム戦。ニックネームで参加しよう！';
+
+	/// ja: '現在の参加人数'
+	String get participantCount => '現在の参加人数';
+
+	/// ja: '人'
+	String get participantUnit => '人';
+
+	/// ja: 'ニックネーム'
+	String get nickname => 'ニックネーム';
+
+	/// ja: '1〜20文字'
+	String get nicknameHint => '1〜20文字';
+
+	/// ja: '受付コード'
+	String get entryCode => '受付コード';
+
+	/// ja: '6桁の数字'
+	String get entryCodeHint => '6桁の数字';
+
+	/// ja: '会場の受付で案内しているコードを入力してください'
+	String get entryCodeHelper => '会場の受付で案内しているコードを入力してください';
+
+	/// ja: '参加する'
+	String get join => '参加する';
+
+	/// ja: '定員（$max 人）に達しました'
+	String full({required Object max}) => '定員（${max} 人）に達しました';
+
+	/// ja: '登録できませんでした。時間をおいて再度お試しください。'
+	String get failed => '登録できませんでした。時間をおいて再度お試しください。';
+
+	/// ja: '登録できませんでした。受付コードが正しいか確認してください。'
+	String get codeMismatch => '登録できませんでした。受付コードが正しいか確認してください。';
+
+	/// ja: '別の回に参加登録済みのため、この回には登録できません。'
+	String get alreadyParticipated => '別の回に参加登録済みのため、この回には登録できません。';
+
+	/// ja: 'この回の参加受付は終了しました。'
+	String get closed => 'この回の参加受付は終了しました。';
+
+	/// ja: '登録を確認できませんでした。通信状況を確認して再試行してください。'
+	String get unavailable => '登録を確認できませんでした。通信状況を確認して再試行してください。';
+
+	/// ja: '入力回数が多すぎます。1分待ってから、受付コードを確認して再試行してください。'
+	String get rateLimited => '入力回数が多すぎます。1分待ってから、受付コードを確認して再試行してください。';
+
+	/// ja: 'このアカウントでは参加できません。運営にお問い合わせください。'
+	String get accountUnavailable => 'このアカウントでは参加できません。運営にお問い合わせください。';
+}
+
+// Path: quiz.waiting
+class Translations$quiz$waiting$ja {
+	Translations$quiz$waiting$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: '登録完了！'
+	String get title => '登録完了！';
+
+	/// ja: 'チーム発表までしばらくお待ちください'
+	String get description => 'チーム発表までしばらくお待ちください';
+}
+
+// Path: quiz.team
+class Translations$quiz$team$ja {
+	Translations$quiz$team$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'あなたのテーブルは'
+	String get yourTable => 'あなたのテーブルは';
+
+	/// ja: 'テーブル'
+	String get table => 'テーブル';
+
+	/// ja: 'チーム'
+	String get teamLabel => 'チーム';
+
+	/// ja: 'テーブルに集まって次の出題を待とう！'
+	String get gatherHint => 'テーブルに集まって次の出題を待とう！';
+
+	/// ja: 'テーブル $table・$name'
+	String badge({required Object table, required Object name}) => 'テーブル ${table}・${name}';
+}
+
+// Path: quiz.entryClosed
+class Translations$quiz$entryClosed$ja {
+	Translations$quiz$entryClosed$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: '参加受付は終了しました'
+	String get title => '参加受付は終了しました';
+
+	/// ja: 'クイズ大会は進行中です。 結果発表はこの画面でご覧いただけます。'
+	String get description => 'クイズ大会は進行中です。 結果発表はこの画面でご覧いただけます。';
+}
+
+// Path: quiz.question
+class Translations$quiz$question$ja {
+	Translations$quiz$question$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: '提供: $name'
+	String sponsoredBy({required Object name}) => '提供: ${name}';
+
+	/// ja: '秒'
+	String get secondsUnit => '秒';
+
+	/// ja: '回答を締め切りました'
+	String get locked => '回答を締め切りました';
+
+	/// ja: '送信できませんでした。締め切られた可能性があります。'
+	String get submitFailed => '送信できませんでした。締め切られた可能性があります。';
+
+	/// ja: '$name が選択'
+	String answeredBy({required Object name}) => '${name} が選択';
+
+	/// ja: 'メンバー'
+	String get member => 'メンバー';
+
+	/// ja: '問題を読み上げています。回答開始をお待ちください。'
+	String get reading => '問題を読み上げています。回答開始をお待ちください。';
+
+	/// ja: 'サーバー時刻を確認しています…'
+	String get synchronizing => 'サーバー時刻を確認しています…';
+
+	/// ja: '通信を確認できません。接続を確認して再試行してください。'
+	String get connectionUnavailable => '通信を確認できません。接続を確認して再試行してください。';
+
+	/// ja: '保存済みの情報を表示しています。チームの最新回答を確認できていません。'
+	String get cached => '保存済みの情報を表示しています。チームの最新回答を確認できていません。';
+
+	/// ja: '回答を送信しています…'
+	String get sending => '回答を送信しています…';
+
+	/// ja: '回答がサーバーで受理されました。'
+	String get received => '回答がサーバーで受理されました。';
+
+	/// ja: '選択表示はサーバーで受理したチームの回答です。締切までは全員が変更できます。'
+	String get teamAnswer => '選択表示はサーバーで受理したチームの回答です。締切までは全員が変更できます。';
+
+	/// ja: '回答の受理を確認できません。通信状況とチームの現在の回答を確認し、締切までに再試行してください。'
+	String get submitUnconfirmed => '回答の受理を確認できません。通信状況とチームの現在の回答を確認し、締切までに再試行してください。';
+}
+
+// Path: quiz.suspense
+class Translations$quiz$suspense$ja {
+	Translations$quiz$suspense$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: '回答締切！'
+	String get title => '回答締切！';
+
+	/// ja: '正解発表をお待ちください'
+	String get description => '正解発表をお待ちください';
+}
+
+// Path: quiz.revealed
+class Translations$quiz$revealed$ja {
+	Translations$quiz$revealed$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: '正解発表'
+	String get title => '正解発表';
+
+	/// ja: '正解！'
+	String get correct => '正解！';
+
+	/// ja: '残念…'
+	String get wrong => '残念…';
+
+	/// ja: 'あなたのチームの回答'
+	String get yourAnswer => 'あなたのチームの回答';
+
+	/// ja: '現在のチームスコア: $score 点'
+	String teamScore({required Object score}) => '現在のチームスコア: ${score} 点';
+}
+
+// Path: quiz.result
+class Translations$quiz$result$ja {
+	Translations$quiz$result$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: '最終結果'
+	String get title => '最終結果';
+
+	/// ja: 'テーブル $table'
+	String table({required Object table}) => 'テーブル ${table}';
+
+	/// ja: '$score 点'
+	String points({required Object score}) => '${score} 点';
+
+	/// ja: 'あなたのチーム'
+	String get yourTeam => 'あなたのチーム';
+
+	/// ja: '$rank 位 / $name（$score 点）'
+	String yourTeamRanked({required Object rank, required Object name, required Object score}) => '${rank} 位 / ${name}（${score} 点）';
+
+	/// ja: '$name（$score 点）'
+	String yourTeamUnranked({required Object name, required Object score}) => '${name}（${score} 点）';
+
+	/// ja: '$sponsor のブースへ景品を受け取りに行こう！'
+	String perfect({required Object sponsor}) => '${sponsor} のブースへ景品を受け取りに行こう！';
+
+	/// ja: '結果の取得に失敗しました'
+	String get error => '結果の取得に失敗しました';
+}
+
+// Path: venueWalk.photo.poses
+class Translations$venueWalk$photo$poses$ja {
+	Translations$venueWalk$photo$poses$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: '立つ'
+	String get standing => '立つ';
+
+	/// ja: '手をふる'
+	String get wave => '手をふる';
+
+	/// ja: '座る'
+	String get sitting => '座る';
+
+	/// ja: 'ジャンプ'
+	String get jumping => 'ジャンプ';
+}
+
+// Path: quiz.list.status
+class Translations$quiz$list$status$ja {
+	Translations$quiz$list$status$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: '開催準備中'
+	String get preparing => '開催準備中';
+
+	/// ja: '参加受付中'
+	String get registration => '参加受付中';
+
+	/// ja: '受付終了'
+	String get entryClosed => '受付終了';
+
+	/// ja: '進行中'
+	String get inProgress => '進行中';
+
+	/// ja: '結果発表'
+	String get finished => '結果発表';
+}
+
 /// The flat map containing all translations for locale <ja>.
 /// Only for edge cases! For simple maps, use the map function of this library.
 ///
@@ -830,7 +2152,9 @@ extension on Translations {
 		return switch (path) {
 			'app.title' => 'FlutterKaigi 2026',
 			'links.openError' => 'リンクを開けませんでした',
+			'links.copied' => 'リンクをコピーしました',
 			'navigation.sessions' => 'セッション',
+			'navigation.venueMap' => '会場マップ',
 			'navigation.sponsors' => 'スポンサー',
 			'navigation.info' => 'イベント',
 			'navigation.account' => 'アカウント',
@@ -842,11 +2166,17 @@ extension on Translations {
 			'sponsors.empty' => 'スポンサーはまだ公開されていません',
 			'sponsors.notFound' => 'スポンサーが見つかりませんでした',
 			'sponsors.logoSemanticLabel' => ({required Object name}) => '${name} のロゴ',
+			'sponsors.githubCardSemanticLabel' => ({required Object name}) => '${name} の GitHub を見る',
+			'sponsors.xCardSemanticLabel' => ({required Object name}) => '${name} の X を見る',
+			'sponsors.externalCardSemanticLabel' => ({required Object name}) => '${name} のリンクを開く',
 			'sponsors.tierBadge' => ({required Object tier}) => '${tier} スポンサー',
 			'sponsors.jobBoards' => 'Job Boards',
 			'sponsors.jobBoardCta' => '採用情報',
 			'sponsors.recruitCta' => '採用サイト',
 			'sponsors.connect' => 'Connect',
+			'staffMembers.title' => 'スタッフ',
+			'staffMembers.empty' => 'スタッフはまだ公開されていません',
+			'staffMembers.error' => 'スタッフ情報を取得できませんでした',
 			'trademarks.flutterAffiliation' => 'Flutter および関連するロゴは Google LLC の商標です。FlutterKaigi は Google LLC の承認または提携を受けておりません。',
 			'trademarks.flutterNameAndLogo' => 'Flutter の名称およびロゴは Google LLC の商標です。',
 			'trademarks.revComm' => 'RevCommは、株式会社 RevComm の登録商標または商標です。',
@@ -859,10 +2189,9 @@ extension on Translations {
 			'sessionTimetable.emptyFiltered' => 'この日の予定はありません',
 			'sessionTimetable.venue.unknown' => '会場未定',
 			'sessionTimetable.speaker.none' => '登壇者未定',
-			'sessionTimetable.type.regular' => '通常セッション',
+			'sessionTimetable.type.regular' => 'セッション',
 			'sessionTimetable.type.lightningTalk' => 'LT',
 			'sessionTimetable.type.beginnersLightningTalk' => '初心者向けLT',
-			'sessionTimetable.type.handsOn' => 'ハンズオン',
 			'sessionTimetable.type.event' => 'イベント',
 			'sessionSearch.title' => 'セッションを検索',
 			'sessionSearch.hint' => 'タイトル・概要・登壇者を検索',
@@ -887,6 +2216,8 @@ extension on Translations {
 			'sessionDetails.speakers' => '登壇者',
 			'sessionDetails.links' => 'リンク',
 			'sessionDetails.sessionize' => 'Sessionize',
+			'sessionDetails.feedback' => 'セッションのフィードバックを送る',
+			'sessionDetails.feedbackDescription' => 'このセッションの感想をお聞かせください',
 			'sessionDetails.share' => '共有',
 			'sessionDetails.notFound' => 'セッションが見つかりませんでした',
 			'sessionBookmark.openBookmarked' => 'ブックマークしたセッション',
@@ -897,6 +2228,84 @@ extension on Translations {
 			'bookmarkedSessions.emptyTitle' => 'ブックマークしたセッションはありません',
 			'bookmarkedSessions.emptyBody' => '気になるセッションをブックマークすると、ここからすぐに見つけられます',
 			'bookmarkedSessions.openSessions' => 'タイムテーブルを開く',
+			'venueMap.title' => '会場マップ',
+			'venueMap.floor' => '浜松町コンベンションホール · 5F',
+			'venueMap.loadError' => '会場マップを読み込めませんでした',
+			'venueMap.loadErrorDescription' => '再試行してください。',
+			'venueMap.search' => '場所を探す',
+			'venueMap.searchHint' => 'ホール・スポンサー名・番号・設備',
+			'venueMap.clearSearch' => '検索をクリア',
+			'venueMap.placesCount' => '件',
+			'venueMap.showOnMap' => '地図で見る',
+			'venueMap.all' => 'すべて',
+			'venueMap.halls' => 'ホール',
+			'venueMap.booths' => 'スポンサー',
+			'venueMap.facilities' => '設備',
+			'venueMap.noResults' => '一致する場所がありません',
+			'venueMap.clearSelection' => '選択を解除',
+			'venueMap.zoomIn' => '拡大',
+			'venueMap.zoomOut' => '縮小',
+			'venueMap.fit' => '全体を表示',
+			'venueMap.rotate' => '地図の向きを変える',
+			'venueMap.twoD' => '2D',
+			'venueMap.threeD' => '3D',
+			'venueMap.viewMode' => '地図の表示方法',
+			'venueMap.useTwoD' => '2Dで表示',
+			'venueMap.saveFailed' => '表示方法を保存できませんでした',
+			'venueWalk.sceneLabel' => 'だしゅまると会場さんぽ。スティック、床のタップ、または矢印キーで歩けます。',
+			'venueWalk.currentLocation' => 'ただいま',
+			'venueWalk.entrance' => 'エントランス',
+			'venueWalk.entranceSign' => '入口',
+			'venueWalk.selectedPoint' => '選んだ場所',
+			'venueWalk.headingTo' => ({required Object place}) => '${place}へ移動中',
+			'venueWalk.arrivedAt' => ({required Object place}) => '${place}に到着',
+			'venueWalk.unreachable' => 'そこへは移動できません',
+			'venueWalk.photoMode' => '撮影モード',
+			'venueWalk.walkToPhotoSpot' => 'フォトスポットへ歩く',
+			'venueWalk.followTooltip' => 'だしゅまるを追う',
+			'venueWalk.overviewTooltip' => 'フロア全体を見る',
+			'venueWalk.follow' => '追いかける',
+			'venueWalk.overview' => '全体を見る',
+			'venueWalk.help' => '遊び方',
+			'venueWalk.stickHint' => 'スティックで歩く',
+			'venueWalk.stickLabel' => 'だしゅまるを動かすスティック',
+			'venueWalk.stopTooltip' => '移動を止める',
+			'venueWalk.stop' => 'ここで止まる',
+			'venueWalk.reset' => '入口に戻る',
+			'venueWalk.wave' => '手をふる',
+			'venueWalk.backToWalk' => 'さんぽに戻る',
+			'venueWalk.run' => '走る',
+			'venueWalk.runningSpeed' => '走る速度',
+			'venueWalk.walkingSpeed' => '歩く速度',
+			'venueWalk.runHint' => '押している間だけ走ります。離すと歩きます。キーボードではShiftキーを使います。',
+			'venueWalk.close' => '閉じる',
+			'venueWalk.instructions.title' => '会場さんぽの遊び方',
+			'venueWalk.instructions.movement' => '左下のスティックで歩きます。右下の走るアイコンを押している間は走り、離すと歩く速さに戻ります。',
+			'venueWalk.instructions.camera' => '背景をドラッグして見回し、ピンチで近づいたり離れたりできます。床をタップすると、その場所まで自動で歩きます。',
+			'venueWalk.instructions.places' => '「場所を探す」で行き先を選んで、4つのホールを巡ってみましょう。地図アイコンで会場全体を見渡せます。',
+			'venueWalk.instructions.photos' => 'カメラで記念撮影。隣の写真アイコンを押すと、クリエイティブボードの前まで歩きます。ポーズやフレームを選んで撮影できます。',
+			'venueWalk.instructions.keyboard' => 'パソコンでは W A S D または矢印キーで移動、Shiftを押している間は走り、Escで止まります。',
+			'venueWalk.instructions.scope' => '5階の会場を散歩できます。実際の現在地を示すものではなく、エスカレーターでの階移動はできません。',
+			'venueWalk.instructions.credits' => '3Dモデル: yakitama5 / flutter_deck_slides\nだしゅまる: FlutterKaigi',
+			'venueWalk.photo.title' => 'だしゅまると記念撮影',
+			'venueWalk.photo.resultTitle' => '記念写真',
+			'venueWalk.photo.imageLabel' => '撮影しただしゅまるの記念写真',
+			'venueWalk.photo.downloadStarted' => '写真のダウンロードを開始しました',
+			'venueWalk.photo.saveFailed' => '写真を保存できませんでした。もう一度お試しください。',
+			'venueWalk.photo.savePng' => 'PNGを保存',
+			'venueWalk.photo.captureFailed' => '撮影できませんでした。もう一度お試しください。',
+			'venueWalk.photo.caption' => 'だしゅまると、会場さんぽ。',
+			'venueWalk.photo.captionAt' => ({required Object place}) => 'だしゅまると、${place}で。',
+			'venueWalk.photo.shutter' => '写真を撮る',
+			'venueWalk.photo.capturing' => '撮影中',
+			'venueWalk.photo.hideUi' => 'UIを隠す。画面をタップすると戻ります',
+			'venueWalk.photo.faceCamera' => 'こちらを向く',
+			'venueWalk.photo.removeFrame' => 'フレームを外す',
+			'venueWalk.photo.addFrame' => 'フレームを付ける',
+			'venueWalk.photo.poses.standing' => '立つ',
+			'venueWalk.photo.poses.wave' => '手をふる',
+			'venueWalk.photo.poses.sitting' => '座る',
+			'venueWalk.photo.poses.jumping' => 'ジャンプ',
 			'eventInfo.title' => 'イベント概要',
 			'eventInfo.newsTitle' => '最新のお知らせ',
 			'eventInfo.newsSubtitle' => 'FlutterKaigi 2026 の最新情報を確認',
@@ -918,11 +2327,13 @@ extension on Translations {
 			'eventInfo.exclusionPolicy' => '反社会的勢力排除に関する基本方針',
 			'eventInfo.contact' => 'お問い合わせ',
 			'eventInfo.sourceCode' => 'ソースコードを見る',
+			'eventInfo.staffMembers' => 'スタッフ',
 			'eventInfo.ossLicenses' => 'OSSライセンス',
 			'contributors.title' => 'コントリビューター',
 			'contributors.openRepository' => 'FlutterKaigi/2026 のリポジトリを開く',
 			'contributors.empty' => 'コントリビューターが見つかりませんでした',
-			'contributors.contributionsCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(n, one: '${n} contributions', other: '${n} contributions', ), 
+			'contributors.contributionsCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(n, one: '${n} contributions', other: '${n} contributions', ),
+			'auth.signIn.required' => 'サインインが必要です',
 			'auth.signIn.description' => 'FlutterKaigi 2026 アプリで利用するサインイン方法を選択してください',
 			'auth.signIn.withGoogle' => 'Google でサインイン',
 			'auth.signIn.withApple' => 'Appleでサインイン',
@@ -941,6 +2352,7 @@ extension on Translations {
 			'auth.email.forgotPassword' => 'パスワードを再設定する',
 			'auth.email.resetEmailSent' => 'パスワード再設定メールを送信しました',
 			'auth.account.title' => 'アカウント',
+			'auth.account.features' => '参加する',
 			'auth.account.signedIn' => 'サインイン中',
 			'auth.account.signOut' => 'サインアウト',
 			'auth.account.signOutError' => 'サインアウトできませんでした',
@@ -951,6 +2363,14 @@ extension on Translations {
 			'auth.account.deleteConfirmAction' => '削除する',
 			'auth.account.deletePasswordTitle' => 'パスワードの確認',
 			'auth.account.deletePasswordBody' => 'アカウントを削除するには、現在のパスワードを入力してください。',
+			'auth.account.mission' => 'ミッション',
+			'auth.account.missionDescription' => '応援LT参加・プロフィール交換・SNS投稿登録の参加状況で判定',
+			'auth.account.joinEvent' => 'イベントに参加',
+			'auth.account.quiz' => 'クイズ大会',
+			'auth.account.lightningTalks' => '応援LT参加',
+			'auth.account.profileExchange' => 'プロフィール交換',
+			'auth.account.snsPost' => 'SNS投稿登録',
+			'auth.account.comingSoon' => 'この機能は準備中です',
 			'auth.account.deleted' => 'アカウントを削除しました',
 			'auth.account.cancel' => 'キャンセル',
 			'auth.error.invalidEmail' => 'メールアドレスの形式が正しくありません',
@@ -964,6 +2384,175 @@ extension on Translations {
 			'auth.error.userMismatch' => '再認証したアカウントがサインイン中のアカウントと一致しません',
 			'auth.error.appleTokenRevocationFailed' => 'Appleのトークン失効に失敗したため、アカウントを削除できませんでした。もう一度お試しください',
 			'auth.error.unknown' => '認証に失敗しました。もう一度お試しください',
+			'profile.title' => 'プロフィール',
+			'profile.editTitle' => 'プロフィールを編集',
+			'profile.createTitle' => 'プロフィールを作成',
+			'profile.promptTitle' => 'プロフィールを登録しましょう',
+			'profile.promptBody' => '出身国・地域や SNS を登録すると、会場での参加者同士のプロフィール交換に使えます。',
+			'profile.create' => 'プロフィールを作成',
+			'profile.edit' => 'プロフィールを編集',
+			'profile.save' => '保存',
+			'profile.saved' => 'プロフィールを保存しました',
+			'profile.saveFailed' => 'プロフィールを保存できませんでした',
+			'profile.visibilityNote' => 'プロフィールはサインインしている他の参加者に公開されます',
+			'profile.avatarSemanticLabel' => 'プロフィール画像',
+			'profile.displayNameLabel' => '表示名',
+			'profile.displayNameRequired' => '表示名を入力してください',
+			'profile.countryLabel' => '出身国・地域',
+			'profile.countryPlaceholder' => '選択してください',
+			'profile.countryRequired' => '出身国・地域を選択してください',
+			'profile.countrySearchHint' => '国名・地域名で検索',
+			'profile.countryNoResults' => ({required Object query}) => '「${query}」に一致する国・地域が見つかりません',
+			'profile.countryNoResultsHint' => '英語名やISOコードでも検索できます',
+			'profile.snsLinksLabel' => 'SNS',
+			'profile.snsLinksEmpty' => 'X や GitHub などのリンクを追加できます',
+			'profile.addSnsLink' => 'SNSリンクを追加',
+			'profile.removeSnsLink' => 'このリンクを削除',
+			'profile.snsPlatformLabel' => 'サービス',
+			'profile.snsUrlLabel' => 'URL',
+			'profile.snsIdOrUrlLabel' => 'IDまたはURL',
+			'profile.snsIdOrUrlRequired' => 'ID または URL を入力してください',
+			'profile.snsIdOrUrlInvalid' => '有効な ID または https:// から始まる URL を入力してください',
+			'profile.snsUrlRequired' => 'URL を入力してください',
+			'profile.snsUrlInvalid' => 'https:// から始まる URL を入力してください',
+			'profile.snsLinksMax' => ({required Object n}) => 'SNSリンクは ${n} 件まで登録できます',
+			'profile.snsPlatformOther' => 'その他',
+			'profile.bioLabel' => '自己紹介',
+			'profile.bioHint' => '普段の仕事や、今日話したいことなど',
+			'profile.discardTitle' => '編集内容を破棄しますか?',
+			'profile.discardBody' => '保存していない変更は失われます。',
+			'profile.discardAction' => '破棄する',
+			'profile.keepEditing' => '編集を続ける',
+			'snsPost.title' => 'SNS投稿登録',
+			'snsPost.signInRequired' => 'SNS投稿を登録するにはサインインしてください',
+			'snsPost.heading' => '写真の投稿を登録しよう',
+			'snsPost.description' => '対象の参加者と撮った写真をSNSに投稿し、\nその投稿のURLを登録してください。',
+			'snsPost.companionLabel' => '誰と撮りましたか？',
+			'snsPost.companionHint' => '写真に写っている相手のタグを1つ選んでください',
+			'snsPost.companionRequired' => '相手のタグを1つ選んでください',
+			'snsPost.companions.staff' => 'スタッフ',
+			'snsPost.companions.speaker' => 'スピーカー',
+			'snsPost.companions.sponsor' => 'スポンサー',
+			'snsPost.companions.firstTime' => '初参加の人',
+			'snsPost.companions.differentCountry' => '出身国・地域が異なる人',
+			'snsPost.urlLabel' => 'SNS投稿のURL',
+			'snsPost.urlHint' => 'プロフィールページではなく、写真を投稿したページのURL',
+			'snsPost.invalidUrl' => '有効な投稿URL（https://…）を入力してください',
+			'snsPost.register' => '投稿を登録する',
+			'snsPost.update' => '登録内容を更新する',
+			'snsPost.saving' => '保存中…',
+			'snsPost.cancel' => 'キャンセル',
+			'snsPost.saveFailed' => '保存できませんでした。通信状態を確認して、もう一度お試しください。',
+			'snsPost.invalidRegistration' => '登録内容を確認できません。投稿URLと相手のタグを登録し直してください。',
+			'snsPost.registeredTitle' => 'SNS投稿を登録しました',
+			'snsPost.registeredBody' => 'SNS投稿のミッションを達成しました。',
+			'snsPost.updatedAt' => ({required Object date}) => '更新日時：${date}',
+			'snsPost.openPost' => '投稿を開く',
+			'snsPost.openFailed' => '投稿を開けませんでした',
+			'snsPost.viewMissions' => 'ミッションの達成状況を見る',
+			'snsPost.edit' => 'URL・タグを修正する',
+			'mission.title' => 'ミッション',
+			'mission.signInRequired' => 'ミッションの達成状況を見るにはサインインしてください',
+			'mission.complete' => '達成',
+			'mission.incomplete' => '未達成',
+			'mission.loading' => '確認中',
+			'mission.loadFailed' => '確認できません',
+			'mission.allComplete' => 'すべて達成！',
+			'mission.inProgress' => 'ミッション達成状況',
+			'mission.checkFailed' => '確認できない項目があります',
+			'mission.progress' => ({required Object total, required Object n}) => '${total}項目中${n}項目を達成',
+			'mission.ltTitle' => '応援LTに参加',
+			'mission.ltDescription' => '応援側・登壇者とも、会場のコードで参加登録',
+			'mission.exchangeTitle' => 'プロフィール交換',
+			'mission.exchangeDescription' => ({required Object required}) => '${required}人以上と交換し、出身国・地域が異なる人を1人以上含む',
+			'mission.exchangeCount' => ({required Object n, required Object required}) => '${n} / ${required}人と交換',
+			'mission.differentCountry' => '出身国・地域が異なる人と交換',
+			'mission.profileRequired' => 'プロフィールで出身国・地域を登録する',
+			'mission.snsTitle' => '写真をSNSに投稿',
+			'mission.snsDescription' => '対象の相手との写真を投稿し、URLとタグを登録',
+			'exchange.title' => 'プロフィール交換',
+			'exchange.qrDescription' => 'このQRコードを相手に見せて読み取ってもらうと、お互いのプロフィールを交換できます',
+			'exchange.qrSemanticLabel' => 'プロフィール交換用のQRコード',
+			'exchange.qrExpiresAt' => ({required Object date}) => '有効期限 ${date} まで',
+			'exchange.scanButton' => 'QRコードを読み取る',
+			'exchange.listButton' => '交換した人を見る',
+			'exchange.signInRequired' => 'サインインすると自分のQRコードを表示できます',
+			'exchange.signInAction' => 'サインインする',
+			'exchange.profileRequired' => 'プロフィールを作成すると自分のQRコードを表示できます',
+			'exchange.profileRequiredAction' => 'プロフィールを作成する',
+			'exchange.scanTitle' => 'QRコードを読み取る',
+			'exchange.scanHint' => '相手の画面に表示されたQRコードを枠内に収めてください',
+			'exchange.scanCameraError' => 'カメラを利用できません。設定でカメラへのアクセスを許可してください',
+			'exchange.scanInvalid' => '読み取れませんでした。プロフィール交換用のQRコードか確認してください',
+			'exchange.scanSelf' => '自分のQRコードは読み取れません',
+			'exchange.scanSucceeded' => 'プロフィールを交換しました',
+			'exchange.scanAlreadyExists' => 'すでに交換済みです',
+			'exchange.scanFailed' => 'プロフィールを交換できませんでした',
+			'exchange.listTitle' => '交換した人',
+			'exchange.listEmpty' => 'まだ誰とも交換していません',
+			'exchange.listEmptyBody' => 'QRコードを読み取って、参加者とプロフィールを交換しましょう',
+			'exchange.profileUnavailable' => 'このプロフィールは表示できません',
+			'exchange.deleteTooltip' => '削除',
+			'exchange.deleteConfirmTitle' => '交換を削除しますか?',
+			'exchange.deleteConfirmBody' => '自分の一覧からのみ削除されます。相手の一覧はそのまま残ります。',
+			'exchange.deleteConfirmAction' => '削除する',
+			'exchange.deleteCancel' => 'キャンセル',
+			'exchange.deleteFailed' => '削除できませんでした',
+			'exchange.noteAddTooltip' => 'メモを追加',
+			'exchange.noteEditTooltip' => 'メモを編集',
+			'exchange.noteEditTitle' => 'メモ',
+			'exchange.noteEditHint' => '自分だけに見えるメモです',
+			'exchange.noteLabel' => 'メモ',
+			'exchange.noteSave' => '保存',
+			'exchange.noteCancel' => 'キャンセル',
+			'exchange.noteSaveFailed' => 'メモを保存できませんでした',
+			'exchange.codeSectionTitle' => '6桁コードで交換',
+			'exchange.codeSectionDescription' => 'カメラが使えないときは、6桁のコードを伝え合って交換できます。有効期限内なら、同じコードを何人でも入力できます',
+			'exchange.myCodeSemanticLabel' => 'プロフィール交換用の6桁コード',
+			'exchange.myCodeExpiresAt' => ({required Object date}) => '有効期限 ${date} まで',
+			'exchange.myCodeExpired' => 'コードの有効期限が切れました',
+			'exchange.myCodeRefresh' => 'コードを再発行',
+			'exchange.myCodeCopy' => 'コードをコピー',
+			'exchange.myCodeCopied' => 'コードをコピーしました',
+			'exchange.enterCodeLabel' => '相手のコードを入力',
+			'exchange.enterCodeHint' => '123456',
+			'exchange.enterCodeButton' => '交換する',
+			'exchange.enterCodeInvalidFormat' => '6桁の数字を入力してください',
+			'exchange.redeemInvalid' => 'コードが見つからないか、有効期限が切れています',
+			'exchange.redeemSelf' => '自分のコードは入力できません',
+			'exchange.redeemRateLimited' => '試行回数が多すぎます。しばらくしてからもう一度お試しください',
+			'exchange.shareLinkSignInRequired' => 'サインインすると相手とプロフィールを交換できます',
+			'exchange.shareLinkProfileRequired' => 'プロフィールを作成すると相手とプロフィールを交換できます',
+			'exchange.shareLinkInvalidTitle' => 'このリンクは無効です',
+			'exchange.shareLinkInvalidBody' => 'プロフィール交換用のリンクか確認してください',
+			'exchange.shareLinkExpiredTitle' => 'このリンクの有効期限が切れています',
+			'exchange.shareLinkExpiredBody' => '相手にもう一度QRコードかリンクを共有してもらってください',
+			'exchange.shareLinkSelfTitle' => 'これは自分の共有リンクです',
+			'exchange.shareLinkSelfBody' => '他の参加者がこのリンクを開くと、あなたとプロフィールを交換できます',
+			'exchange.shareLinkGoHome' => 'ホームに戻る',
+			'exchange.shareLinkViewList' => '交換した人を見る',
+			'supportLt.title' => '応援LT参加登録',
+			'supportLt.description' => '運営から案内された6桁のコードを入力して、応援LTへの参加を登録してください',
+			'supportLt.codeLabel' => '参加登録コード',
+			'supportLt.register' => '参加登録する',
+			'supportLt.submitting' => '登録中…',
+			'supportLt.registeredTitle' => '参加登録が完了しました',
+			'supportLt.registeredBody' => '応援LTをお楽しみください',
+			'supportLt.registeredStatus' => '参加登録済み',
+			'supportLt.backToAccount' => 'アカウントに戻る',
+			'supportLt.signInRequired' => '応援LTに参加登録するには\nサインインしてください',
+			'supportLt.invalidFormat' => '6桁の数字を入力してください',
+			'supportLt.invalidCode' => 'コードが正しくありません。運営から案内されたコードを確認してください',
+			'supportLt.rateLimited' => '試行回数が多すぎます。しばらくしてからもう一度お試しください',
+			'supportLt.networkError' => '通信に失敗しました。通信状況を確認してもう一度お試しください',
+			'supportLt.sessionExpired' => 'サインインの有効期限が切れました。もう一度サインインしてください',
+			'supportLt.permissionDenied' => '参加登録が許可されていません。運営に確認してください',
+			'supportLt.registrationFailed' => '参加登録できませんでした。もう一度お試しください',
+			'countryRegion.asia' => 'アジア',
+			'countryRegion.oceania' => 'オセアニア',
+			'countryRegion.americas' => '北米・中南米',
+			'countryRegion.europe' => 'ヨーロッパ',
+			'countryRegion.africa' => 'アフリカ',
 			'settings.title' => '設定',
 			'settings.appearance' => '表示設定',
 			'settings.appInfo' => 'アプリ情報',
@@ -990,6 +2579,81 @@ extension on Translations {
 			'error.imageSemanticLabel' => '困った表情のダシュマル',
 			'notFound.title' => 'ページが見つかりません',
 			'notFound.description' => 'お探しのページは存在しないか、移動した可能性があります。',
+			'common.retry' => '再試行',
+			'quiz.title' => 'クイズ大会',
+			'quiz.entrySubtitle' => 'スポンサー提供のクイズに参加',
+			'quiz.list.empty' => 'クイズはまだありません',
+			'quiz.list.error' => 'クイズ一覧を取得できませんでした',
+			'quiz.list.status.preparing' => '開催準備中',
+			'quiz.list.status.registration' => '参加受付中',
+			'quiz.list.status.entryClosed' => '受付終了',
+			'quiz.list.status.inProgress' => '進行中',
+			'quiz.list.status.finished' => '結果発表',
+			'quiz.signInRequired.title' => 'サインインが必要です',
+			'quiz.signInRequired.description' => 'クイズ大会は参加と回答の記録をアカウントに紐づけます。 アカウントタブからサインインしてご参加ください。',
+			'quiz.signInRequired.button' => 'アカウントへ',
+			'quiz.errors.signInFailed' => 'サインインに失敗しました',
+			'quiz.errors.eventLoadFailed' => 'イベント情報の取得に失敗しました',
+			'quiz.preparing.title' => 'クイズは開催準備中です',
+			'quiz.preparing.description' => '開始のアナウンスがあったら この画面から参加できます。',
+			'quiz.registration.subtitle' => 'テーブル対抗のチーム戦。ニックネームで参加しよう！',
+			'quiz.registration.participantCount' => '現在の参加人数',
+			'quiz.registration.participantUnit' => '人',
+			'quiz.registration.nickname' => 'ニックネーム',
+			'quiz.registration.nicknameHint' => '1〜20文字',
+			'quiz.registration.entryCode' => '受付コード',
+			'quiz.registration.entryCodeHint' => '6桁の数字',
+			'quiz.registration.entryCodeHelper' => '会場の受付で案内しているコードを入力してください',
+			'quiz.registration.join' => '参加する',
+			'quiz.registration.full' => ({required Object max}) => '定員（${max} 人）に達しました',
+			'quiz.registration.failed' => '登録できませんでした。時間をおいて再度お試しください。',
+			'quiz.registration.codeMismatch' => '登録できませんでした。受付コードが正しいか確認してください。',
+			'quiz.registration.alreadyParticipated' => '別の回に参加登録済みのため、この回には登録できません。',
+			'quiz.registration.closed' => 'この回の参加受付は終了しました。',
+			'quiz.registration.unavailable' => '登録を確認できませんでした。通信状況を確認して再試行してください。',
+			'quiz.registration.rateLimited' => '入力回数が多すぎます。1分待ってから、受付コードを確認して再試行してください。',
+			'quiz.registration.accountUnavailable' => 'このアカウントでは参加できません。運営にお問い合わせください。',
+			'quiz.waiting.title' => '登録完了！',
+			'quiz.waiting.description' => 'チーム発表までしばらくお待ちください',
+			'quiz.team.yourTable' => 'あなたのテーブルは',
+			'quiz.team.table' => 'テーブル',
+			'quiz.team.teamLabel' => 'チーム',
+			'quiz.team.gatherHint' => 'テーブルに集まって次の出題を待とう！',
+			'quiz.team.badge' => ({required Object table, required Object name}) => 'テーブル ${table}・${name}',
+			'quiz.entryClosed.title' => '参加受付は終了しました',
+			'quiz.entryClosed.description' => 'クイズ大会は進行中です。 結果発表はこの画面でご覧いただけます。',
+			'quiz.question.sponsoredBy' => ({required Object name}) => '提供: ${name}',
+			'quiz.question.secondsUnit' => '秒',
+			'quiz.question.locked' => '回答を締め切りました',
+			'quiz.question.submitFailed' => '送信できませんでした。締め切られた可能性があります。',
+			'quiz.question.answeredBy' => ({required Object name}) => '${name} が選択',
+			'quiz.question.member' => 'メンバー',
+			'quiz.question.reading' => '問題を読み上げています。回答開始をお待ちください。',
+			'quiz.question.synchronizing' => 'サーバー時刻を確認しています…',
+			'quiz.question.connectionUnavailable' => '通信を確認できません。接続を確認して再試行してください。',
+			'quiz.question.cached' => '保存済みの情報を表示しています。チームの最新回答を確認できていません。',
+			'quiz.question.sending' => '回答を送信しています…',
+			'quiz.question.received' => '回答がサーバーで受理されました。',
+			'quiz.question.teamAnswer' => '選択表示はサーバーで受理したチームの回答です。締切までは全員が変更できます。',
+			'quiz.question.submitUnconfirmed' => '回答の受理を確認できません。通信状況とチームの現在の回答を確認し、締切までに再試行してください。',
+			'quiz.suspense.title' => '回答締切！',
+			'quiz.suspense.description' => '正解発表をお待ちください',
+			'quiz.revealed.title' => '正解発表',
+			'quiz.revealed.correct' => '正解！',
+			'quiz.revealed.wrong' => '残念…',
+			'quiz.revealed.yourAnswer' => 'あなたのチームの回答',
+			'quiz.revealed.teamScore' => ({required Object score}) => '現在のチームスコア: ${score} 点',
+			'quiz.result.title' => '最終結果',
+			'quiz.result.table' => ({required Object table}) => 'テーブル ${table}',
+			'quiz.result.points' => ({required Object score}) => '${score} 点',
+			'quiz.result.yourTeam' => 'あなたのチーム',
+			'quiz.result.yourTeamRanked' => ({required Object rank, required Object name, required Object score}) => '${rank} 位 / ${name}（${score} 点）',
+			'quiz.result.yourTeamUnranked' => ({required Object name, required Object score}) => '${name}（${score} 点）',
+			'quiz.result.perfect' => ({required Object sponsor}) => '${sponsor} のブースへ景品を受け取りに行こう！',
+			'quiz.result.error' => '結果の取得に失敗しました',
+			'forceUpdate.title' => 'アップデートが必要です',
+			'forceUpdate.message' => '新しいバージョンのアプリが利用可能です。最新バージョンにアップデートしてください。',
+			'forceUpdate.updateButton' => 'アップデート',
 			_ => null,
 		};
 	}
