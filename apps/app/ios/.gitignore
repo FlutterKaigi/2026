@@ -32,3 +32,6 @@ Runner/GeneratedPluginRegistrant.*
 !default.mode2v3
 !default.pbxuser
 !default.perspectivev3
+
+# Generated only while CI imports its distribution signing assets.
+Flutter/Signing.xcconfig

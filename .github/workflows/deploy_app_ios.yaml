@@ -10,6 +10,12 @@ on:
     secrets:
       APP_STORE_CONNECT_API_KEY_BASE64:
         required: true
+      IOS_DISTRIBUTION_CERTIFICATE_BASE64:
+        required: true
+      IOS_DISTRIBUTION_CERTIFICATE_PASSWORD:
+        required: true
+      IOS_PROVISIONING_PROFILE_BASE64:
+        required: true
 
 permissions: {}
 
@@ -130,15 +136,13 @@ jobs:
           "$RUNNER_TEMP/codemagic-cli/bin/pip" install codemagic-cli-tools==0.61.1
           echo "$RUNNER_TEMP/codemagic-cli/bin" >> "$GITHUB_PATH"
 
-      - name: App Store Connect キーと書き出し設定を準備
+      - name: App Store Connect キーを準備
         run: |
           umask 077
-          mkdir -p "$HOME/.private_keys" "$RUNNER_TEMP/app-store-export"
+          mkdir -p "$HOME/.private_keys"
           printf '%s' "$APP_STORE_CONNECT_API_KEY_BASE64" | base64 -d \
             > "$HOME/.private_keys/AuthKey_$APP_STORE_CONNECT_API_KEY_ID.p8"
           python3 .github/scripts/mask_credentials.py pem "$HOME/.private_keys/AuthKey_$APP_STORE_CONNECT_API_KEY_ID.p8"
-          cp apps/app/ios/ExportOptions.plist "$RUNNER_TEMP/ExportOptions.plist"
-          /usr/libexec/PlistBuddy -c "Set :teamID $APPLE_TEAM_ID" "$RUNNER_TEMP/ExportOptions.plist"
 
       - name: 登録済みの最新ビルド番号に1を加算
         env:
@@ -176,6 +180,13 @@ jobs:
           --dart-define=FIREBASE_PROJECT_ID="$FIREBASE_PROJECT_ID"
           --dart-define=COMMIT_INFORMATION="$GITHUB_REF_NAME-$GITHUB_SHA"
 
+      - name: 配布証明書とプロファイルを復元して検証
+        env:
+          IOS_DISTRIBUTION_CERTIFICATE_BASE64: ${{ secrets.IOS_DISTRIBUTION_CERTIFICATE_BASE64 }}
+          IOS_DISTRIBUTION_CERTIFICATE_PASSWORD: ${{ secrets.IOS_DISTRIBUTION_CERTIFICATE_PASSWORD }}
+          IOS_PROVISIONING_PROFILE_BASE64: ${{ secrets.IOS_PROVISIONING_PROFILE_BASE64 }}
+        run: python3 .github/scripts/ios_signing.py prepare
+
       - name: Archive iOS app
         working-directory: apps/app
         run: |
@@ -185,13 +196,7 @@ jobs:
             -configuration Release \
             -sdk iphoneos \
             -destination 'generic/platform=iOS' \
-            -archivePath build/ios/Runner.xcarchive \
-            DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
-            CODE_SIGN_STYLE=Automatic \
-            -allowProvisioningUpdates \
-            -authenticationKeyIssuerID "$APP_STORE_CONNECT_API_KEY_ISSUER_ID" \
-            -authenticationKeyID "$APP_STORE_CONNECT_API_KEY_ID" \
-            -authenticationKeyPath "$HOME/.private_keys/AuthKey_$APP_STORE_CONNECT_API_KEY_ID.p8"
+            -archivePath build/ios/Runner.xcarchive
 
       - name: Export signed IPA
         working-directory: apps/app
@@ -199,11 +204,7 @@ jobs:
           xcodebuild -exportArchive \
             -archivePath build/ios/Runner.xcarchive \
             -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" \
-            -exportPath build/ios/export \
-            -allowProvisioningUpdates \
-            -authenticationKeyIssuerID "$APP_STORE_CONNECT_API_KEY_ISSUER_ID" \
-            -authenticationKeyID "$APP_STORE_CONNECT_API_KEY_ID" \
-            -authenticationKeyPath "$HOME/.private_keys/AuthKey_$APP_STORE_CONNECT_API_KEY_ID.p8"
+            -exportPath build/ios/export
 
       - name: IPA 内のアプリID・バージョン・ビルド番号を検証
         working-directory: apps/app
@@ -260,6 +261,8 @@ jobs:
           echo "::error::アップロード後の登録反映を確認できません。再実行前に App Store Connect の処理状態を確認してください。"
           exit 1
 
-      - name: 一時的な署名キーを削除
+      - name: 一時的な署名情報を削除
         if: ${{ always() }}
-        run: rm -f "$HOME/.private_keys/AuthKey_$APP_STORE_CONNECT_API_KEY_ID.p8"
+        run: |
+          rm -f "$HOME/.private_keys/AuthKey_$APP_STORE_CONNECT_API_KEY_ID.p8"
+          python3 .github/scripts/ios_signing.py cleanup
