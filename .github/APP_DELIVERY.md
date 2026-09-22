@@ -121,6 +121,9 @@ Repositoryの`Settings > Secrets and variables > Actions > Variables > New repos
 
 Repositoryの`Settings > Secrets and variables > Actions > Secrets > New repository secret`から登録します。Web UIのほか、GitHub CLIへ再認証済みならRepositoryルートで`gh secret set SECRET_NAME`でも登録できます。詳細は[GitHubのActions Secrets設定手順](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets)を参照してください。
 
+Base64から復元した秘密鍵やパスワードは、配布ツールへ渡す前に`.github/scripts/mask_credentials.py`でログのマスク対象へ登録します。
+Base64のSecretだけでは復元後の値のマスクは保証されません。マスク登録に失敗した場合は、機密値を表示せず配布を停止します。
+
 | Secret | 使用先 | 取得元・取得方法 |
 | --- | --- | --- |
 | `CLOUDFLARE_API_TOKEN` | Web Preview／Production | Cloudflare Dashboardの`Manage Account > Account API Tokens`から、後述の権限とResource範囲に限定して作成します。 |
