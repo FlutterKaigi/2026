@@ -9,6 +9,7 @@ import { defaultFirestore } from "./firebase_admin";
 import { FUNCTIONS_REGION, isEmulator } from "./environment";
 
 export { onSupportLtUserDeleted } from "./auth_user_cleanup";
+export { eventAdministration } from "./event_admin";
 
 export {
   issueExchangeCode,

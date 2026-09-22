@@ -7,5 +7,8 @@ class SupportLtRoute extends GoRouteData with $SupportLtRoute {
   Page<void> buildPage(BuildContext context, GoRouterState state) => NoTransitionPage(child: build(context, state));
 
   @override
-  Widget build(BuildContext context, GoRouterState state) => const SupportLtPage();
+  Widget build(BuildContext context, GoRouterState state) => const EventAdminPage(
+    view: EventAdminView.supportLt,
+    child: SupportLtPage(),
+  );
 }

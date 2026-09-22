@@ -19,9 +19,10 @@ class QuizEventCreateDialog extends HookConsumerWidget {
     required BuildContext context,
     required WidgetRef ref,
   }) async {
+    final container = ProviderScope.containerOf(context);
     await showDialog<void>(
       context: context,
-      builder: (_) => const QuizEventCreateDialog._(),
+      builder: (_) => UncontrolledProviderScope(container: container, child: const QuizEventCreateDialog._()),
     );
   }
 

@@ -1,4 +1,5 @@
 import 'package:dashboard/core/router/paths.dart';
+import 'package:dashboard/core/event_environment/event_environment.dart';
 import 'package:dashboard/feature/auth/data/provider/auth_repository.dart';
 import 'package:dashboard/feature/auth/data/provider/auth_state.dart';
 import 'package:flutter/material.dart';
@@ -105,18 +106,24 @@ int _selectedNavIndex(String location) {
   return 0;
 }
 
-class _NavDrawer extends StatelessWidget {
+void _navigate(BuildContext context, WidgetRef ref, String path) {
+  final environment = parseEventEnvironment(GoRouterState.of(context).uri.queryParameters['environment']);
+  if (environment != null) ref.read(eventEnvironmentProvider.notifier).select(environment);
+  context.go(environment != null && isEventPath(path) ? eventLocation(path, environment) : path);
+}
+
+class _NavDrawer extends ConsumerWidget {
   const _NavDrawer({required this.currentLocation});
 
   final String currentLocation;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return NavigationDrawer(
       selectedIndex: _selectedNavIndex(currentLocation),
       onDestinationSelected: (index) {
         Navigator.of(context).pop();
-        context.go(_navItems[index].path);
+        _navigate(context, ref, _navItems[index].path);
       },
       children: [
         const Padding(padding: EdgeInsets.all(24), child: Text('管理メニュー')),
@@ -126,18 +133,18 @@ class _NavDrawer extends StatelessWidget {
   }
 }
 
-class _SideNav extends StatelessWidget {
+class _SideNav extends ConsumerWidget {
   const _SideNav({required this.currentLocation});
 
   final String currentLocation;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return NavigationRail(
       scrollable: true,
       selectedIndex: _selectedNavIndex(currentLocation),
       labelType: NavigationRailLabelType.all,
-      onDestinationSelected: (i) => context.go(_navItems[i].path),
+      onDestinationSelected: (i) => _navigate(context, ref, _navItems[i].path),
       destinations: [
         for (final item in _navItems)
           NavigationRailDestination(

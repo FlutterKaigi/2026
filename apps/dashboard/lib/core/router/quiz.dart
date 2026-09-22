@@ -7,7 +7,10 @@ class QuizEventListRoute extends GoRouteData with $QuizEventListRoute {
   Page<void> buildPage(BuildContext context, GoRouterState state) => NoTransitionPage(child: build(context, state));
 
   @override
-  Widget build(BuildContext context, GoRouterState state) => const QuizEventListPage();
+  Widget build(BuildContext context, GoRouterState state) => const EventAdminPage(
+    view: EventAdminView.quizEvents,
+    child: QuizEventListPage(),
+  );
 }
 
 class QuizConsoleRoute extends GoRouteData with $QuizConsoleRoute {
@@ -19,7 +22,11 @@ class QuizConsoleRoute extends GoRouteData with $QuizConsoleRoute {
   Page<void> buildPage(BuildContext context, GoRouterState state) => NoTransitionPage(child: build(context, state));
 
   @override
-  Widget build(BuildContext context, GoRouterState state) => QuizConsolePage(eventId: eventId);
+  Widget build(BuildContext context, GoRouterState state) => EventAdminPage(
+    view: EventAdminView.quizConsole,
+    eventId: eventId,
+    child: QuizConsolePage(eventId: eventId),
+  );
 }
 
 class QuizQuestionEditRoute extends GoRouteData with $QuizQuestionEditRoute {
@@ -33,8 +40,12 @@ class QuizQuestionEditRoute extends GoRouteData with $QuizQuestionEditRoute {
   Page<void> buildPage(BuildContext context, GoRouterState state) => NoTransitionPage(child: build(context, state));
 
   @override
-  Widget build(BuildContext context, GoRouterState state) =>
-      QuizQuestionEditPage(eventId: eventId, questionId: questionId, question: $extra);
+  Widget build(BuildContext context, GoRouterState state) => EventAdminPage(
+    view: EventAdminView.quizQuestion,
+    eventId: eventId,
+    questionId: questionId ?? $extra?.id,
+    child: QuizQuestionEditPage(eventId: eventId, questionId: questionId, question: $extra),
+  );
 }
 
 @TypedGoRoute<QuizProjectionRoute>(path: '/quiz/:eventId/project')
@@ -44,5 +55,11 @@ class QuizProjectionRoute extends GoRouteData with $QuizProjectionRoute {
   final String eventId;
 
   @override
-  Widget build(BuildContext context, GoRouterState state) => QuizProjectionPage(eventId: eventId);
+  Widget build(BuildContext context, GoRouterState state) => Scaffold(
+    body: EventAdminPage(
+      view: EventAdminView.quizProjection,
+      eventId: eventId,
+      child: QuizProjectionPage(eventId: eventId),
+    ),
+  );
 }

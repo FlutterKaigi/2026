@@ -180,6 +180,76 @@ firebase functions:secrets:set EXCHANGE_TOKEN_SECRET --project flutterkaigi-2026
 `SYNC_TARGET_PROJECT_ID` が未設定だとエミュレータ起動時に対話プロンプトで
 停止し、関数が 1 つも登録されない。
 
+## eventAdministration
+
+ダッシュボードの1回のログインで、STG / 本番の応援LT・クイズを管理する callable。
+ブラウザは常にダッシュボードの接続先プロジェクトのこの関数を呼び出す。
+`environment` で選んだ Firestore をサーバーから操作するため、操作先への Google 再認証、
+Auth アカウント、`admins/{uid}` の追加登録は不要。
+
+認可は **ダッシュボードの接続元**で、確認済み `@flutterkaigi.jp`、`admins/{uid}`、
+Auth アカウントの有効性、App Check を検証する。読取も毎回この検証を行う。
+クライアント指定の任意のプロジェクトID・ドキュメントパスは受け付けない。
+
+| environment | 操作先 |
+| --- | --- |
+| `stg` | `flutterkaigi-2026-stg` |
+| `prod` | `flutterkaigi-2026-283db` |
+| `dev` | Functions エミュレータのプロジェクト（エミュレータでのみ許可） |
+
+エミュレータから `stg` / `prod` への操作は拒否する。実環境では既知の STG / 本番プロジェクトに
+デプロイされた関数からの操作だけを許可する。
+
+リクエスト例:
+
+```json
+{
+  "environment": "prod",
+  "action": "quizOperation",
+  "payload": {
+    "eventId": "event-id",
+    "operation": "openRegistration",
+    "operationId": "unique-retry-id"
+  }
+}
+```
+
+`action` は `read`、`clock`、`issueSupportLtCode`、`quizOperation`、`saveEvent`、
+`saveQuestion`、`deleteQuestion`、`updateTeamNamePool`、`renameTeam`、
+`previewQuizPromotion`、`promoteQuizEvent`、`withdrawQuizPromotion` のみ。
+読取の `view` は `supportLt` / `quizEvents` / `quizConsole` / `quizQuestion` / `quizProjection`。
+投影用の取得では受付コードや非公開の正解を取得しない。
+画面全体で1回の取得を共有し、2秒間隔と操作直後に更新する。
+
+出題・採点・受付・再編成は既存のトランザクション処理を使う。問題編集は開始前かつ未出題に
+制限し、正解を公開データへ混ぜない。操作ログには操作環境・実行者・操作名・イベントIDを記録する。
+
+STGダッシュボードで利用する場合は STG にこの関数をデプロイし、その**実行サービスアカウント**に
+本番プロジェクトの `roles/datastore.user` を付与する（既存の `syncCollectionsToProd` と同じ権限）。
+本番ダッシュボードから STG も操作する場合は逆方向の権限も必要。
+参加者アプリ側の受付・回答用 Functions と Firestore ルールは各環境に引き続き必要。
+
+### クイズのイベント単位の本番反映
+
+- `previewQuizPromotion` は `environment: stg` と `payload.eventId` で1件の定義を確認する。
+  戻り値の `revision` は設定・問題・正解を含む内容のハッシュ。確認画面と異なる版の反映を防ぐ。
+- `promoteQuizEvent` は同じ `eventId`・`revision` と、再試行でも維持する `operationId` を受け取る。
+  本番に別 ID (`operationId`) の非公開・下書きイベントを作り、問題をすべて未出題に戻す。
+  正解は `questions/{id}/secret/answer` にのみ格納する。参加者、チーム、回答、得点、受付コード、
+  進行状態、過去の操作履歴はコピーしない。スポンサー本体の同期も行わず、本番側の存在を検証する。
+- 問題数は1〜100問、定義は4 MB以下。本番のイベント・問題・正解・反映履歴を1トランザクションで
+  作成するため、途中まで反映されたイベントは残らない。反映済みイベントの上書きは行わない。
+- `quizPromotions/{stgEventId}` に有効なコピーを記録し、別端末の同時反映でも重複作成を防ぐ。
+  同じ操作の再試行は既存結果を返し、本番や STG がその後編集されても本番を上書きしない。
+- `withdrawQuizPromotion` は `environment: prod` と反映先 `eventId` で取り消す。受付準備・開始前の
+  下書き・公開済みに限定し、参加者・進行データもトランザクションで検証する。
+  `promotionWithdrawn: true` と `isPublic: false` を設定し、内容・実行者・日時を履歴として保持する。
+  通常一覧から除外し、クイズの進行操作・設定や問題の再保存を拒否する。
+- 取り消し後の古い反映リクエストは拒否する。改めて確認した新しい反映だけを別 ID で作成できる。
+  受付・回答開始後の自動ロールバックや初期化は提供しない。
+
+`syncCollectionsToProd` の全体ミラーの対象に `quizEvents` は追加しない。
+
 ## syncCollectionsToProd
 
 STG プロジェクトにデプロイする callable function。管理ダッシュボード（STG）からの

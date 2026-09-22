@@ -1,8 +1,10 @@
 import 'package:dashboard/core/router/router.dart';
+import 'package:dashboard/core/event_environment/event_environment.dart';
 import 'package:dashboard/feature/quiz/data/provider/quiz_list_state.dart';
 import 'package:dashboard/feature/quiz/data/provider/quiz_repository.dart';
 import 'package:dashboard/feature/quiz/ui/component/quiz_status_label.dart';
 import 'package:dashboard/feature/quiz/ui/component/quiz_countdown.dart';
+import 'package:dashboard/feature/quiz/ui/component/quiz_promotion_controls.dart';
 import 'package:data/data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -125,12 +127,14 @@ class _ConsoleBody extends HookConsumerWidget {
               QuizEventStatusChip(status: event.status),
               const Spacer(),
               OutlinedButton.icon(
-                onPressed: () => QuizProjectionRoute(eventId).push(context),
+                onPressed: () => pushEventRoute(context, QuizProjectionRoute(eventId).location),
                 icon: const Icon(Icons.present_to_all),
                 label: const Text('投影画面'),
               ),
             ],
           ),
+          const SizedBox(height: 16),
+          QuizPromotionControls(event: event, busy: isBusy),
           const SizedBox(height: 16),
           Wrap(
             spacing: 8,
@@ -323,7 +327,7 @@ class _ConsoleBody extends HookConsumerWidget {
               Text('問題一覧', style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(width: 12),
               OutlinedButton.icon(
-                onPressed: isPrestart ? () => QuizQuestionEditRoute(eventId).push(context) : null,
+                onPressed: isPrestart ? () => pushEventRoute(context, QuizQuestionEditRoute(eventId).location) : null,
                 icon: const Icon(Icons.add),
                 label: const Text('問題を追加'),
               ),
@@ -565,7 +569,8 @@ class _QuestionRow extends ConsumerWidget {
                 IconButton(
                   tooltip: '編集・詳細',
                   icon: const Icon(Icons.edit_outlined),
-                  onPressed: () => QuizQuestionEditRoute(eventId, questionId: question.id).push(context),
+                  onPressed: () =>
+                      pushEventRoute(context, QuizQuestionEditRoute(eventId, questionId: question.id).location),
                 ),
               ],
             ),

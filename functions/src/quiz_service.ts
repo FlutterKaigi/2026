@@ -425,10 +425,11 @@ export async function operateQuizEvent(
   rawAuth: QuizAuth | undefined,
   rawData: unknown,
   db: Firestore,
+  adminDb: Firestore = db,
 ): Promise<Record<string, unknown>> {
   if (!rawAuth)
     throw new HttpsError("unauthenticated", "サインインが必要です。");
-  await assertAdmin(rawAuth, db);
+  await assertAdmin(rawAuth, adminDb);
   const data = dataObject(rawData);
   const eventId = id(data.eventId, "eventId");
   const operation = id(data.operation, "operation");
@@ -456,6 +457,7 @@ export async function operateQuizEvent(
     const event = await tx.get(ref);
     requireState(event.exists, "イベントが見つかりません。");
     const eventData = event.data()!;
+    requireState(eventData.promotionWithdrawn !== true, "本番への反映が取り消されたイベントです。");
     const receipt = await tx.get(receiptRef);
     if (receipt.exists) {
       requireState(
