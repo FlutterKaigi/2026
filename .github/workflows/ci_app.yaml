@@ -6,6 +6,10 @@ on:
       - apps/app/**
       - packages/data/**
       - packages/flutterkaigi_lints/**
+      - tool/generate_app_links.dart
+      - test/generate_app_links_test.dart
+      - apps/website/worker.js
+      - apps/website/test/worker.test.mjs
       - .fvmrc
       - dprint.jsonc
       - pubspec.yaml
@@ -73,6 +77,11 @@ jobs:
       - name: Test app
         working-directory: apps/app
         run: flutter test
+
+      - name: Test app association files and legacy share links
+        run: |
+          dart test test/generate_app_links_test.dart
+          node --test apps/website/test/worker.test.mjs
 
       - name: Test venue map labels
         working-directory: apps/app

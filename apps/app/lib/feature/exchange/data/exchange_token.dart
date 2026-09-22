@@ -3,11 +3,11 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'exchange_token.freezed.dart';
 
-/// Base URL for the profile-exchange QR payload.
-///
-/// Kept URL-shaped (rather than the bare token) so a future share-link
-/// handler (Phase 3) can reuse the same route without changing the QR format.
-const exchangeShareBaseUrl = 'https://2026.flutterkaigi.jp/x';
+/// Origins hosting exchange links. The website origin remains scan-compatible
+/// with QR codes issued before the app received its own canonical origin.
+const productionExchangeOrigin = 'https://2026-app.flutterkaigi.jp';
+const stagingExchangeOrigin = 'https://stg-flutterkaigi-2026-conference-app.flutterkaigi.workers.dev';
+const legacyExchangeOrigin = 'https://2026.flutterkaigi.jp';
 
 /// A signed, time-limited token for displaying the signed-in user's QR code.
 ///
@@ -24,8 +24,9 @@ abstract class ExchangeToken with _$ExchangeToken {
 
   bool get isExpired => !DateTime.now().isBefore(expiresAt);
 
-  /// The QR code payload embedding [value].
-  String get qrPayload => '$exchangeShareBaseUrl/$value';
+  /// The caller chooses the origin for its backend environment. Local emulator
+  /// builds pass null and display a bare token instead of linking to a live app.
+  String qrPayload({required String? origin}) => origin == null ? value : '$origin/x/$value';
 }
 
 /// A token scanned from another attendee's QR code, with the uid it embeds.
@@ -38,15 +39,35 @@ typedef ScannedExchangeToken = ({String token, String otherUid});
 /// verified server-side by the `onProfileExchangeCreated` trigger.
 final _tokenPattern = RegExp(r'^v1\.([^.]+)\.\d+\.[0-9a-f]+$');
 
-/// Validates scanned QR content as either the `$exchangeShareBaseUrl/<token>`
-/// URL form or a bare token, and extracts the other attendee's uid from it.
+/// Validates an allowed origin's `/x/<token>` URL or a bare token, and extracts
+/// the other attendee's uid. Scanners pass their environment's [allowedOrigins]
+/// so a production QR cannot be exchanged against the staging backend, or vice
+/// versa. Bare tokens remain supported for server responses and local QR codes;
+/// their signatures are always checked by the backend.
 ///
 /// Returns `null` when [raw] matches neither shape.
-ScannedExchangeToken? parseScannedExchangeToken(String raw) {
+ScannedExchangeToken? parseScannedExchangeToken(
+  String raw, {
+  Set<String> allowedOrigins = const {productionExchangeOrigin, legacyExchangeOrigin},
+}) {
   final trimmed = raw.trim();
-  final candidate = trimmed.startsWith('$exchangeShareBaseUrl/')
-      ? trimmed.substring(exchangeShareBaseUrl.length + 1)
-      : trimmed;
+  var candidate = trimmed;
+  if (!_tokenPattern.hasMatch(candidate)) {
+    final uri = Uri.tryParse(trimmed);
+    if (uri == null ||
+        uri.scheme != 'https' ||
+        !uri.hasAuthority ||
+        uri.host.isEmpty ||
+        uri.userInfo.isNotEmpty ||
+        !allowedOrigins.contains(uri.origin) ||
+        uri.hasQuery ||
+        uri.hasFragment ||
+        uri.pathSegments.length != 2 ||
+        uri.pathSegments.first != 'x') {
+      return null;
+    }
+    candidate = uri.pathSegments.last;
+  }
   final match = _tokenPattern.firstMatch(candidate);
   if (match == null) {
     return null;

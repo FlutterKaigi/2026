@@ -6,6 +6,7 @@ on:
     paths:
       - apps/app/**
       - packages/data/**
+      - tool/generate_app_links.dart
       - .fvmrc
       - pubspec.yaml
       - .github/workflows/preview_app_web.yaml
@@ -47,6 +48,9 @@ jobs:
           message: |
             ## 📱 App Web Preview
             🔗 ${{ needs.preview.outputs.url }}
+
+            アプリ起動用（`.stg`）: ${{ needs.preview.outputs.app-link-url }}
+            PR 固有 URL は Web プレビュー用です。プロフィール交換リンクは上記の固定 STG ホストを使用します。
 
             🔑 Commit: `${{ github.event.pull_request.head.sha }}`
           comment-tag: deploy-conference-app-web

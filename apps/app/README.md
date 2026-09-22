@@ -34,6 +34,22 @@ WebでGoogleのEmulator擬似IdPまで確認する場合だけ、Firebase Web SD
 
 stg/prodの設定生成と配布はメンテナー向けWorkflowで行います。詳細は[App delivery setup](../../.github/APP_DELIVERY.md#firebase-sdk-settings)を参照してください。
 
+## Web URL・プロフィール交換リンク
+
+Webは `/account` や `/x/<token>` のパス形式を使用します。以前の `/#/account` などのブックマークも、起動時に同じホストのパス形式へ変換します。
+
+| 環境              | QR / 共有リンクのホスト                                         | 関連付けるアプリ               |
+| ----------------- | --------------------------------------------------------------- | ------------------------------ |
+| prod              | `2026-app.flutterkaigi.jp`                                      | `jp.flutterkaigi.conf2026`     |
+| stg・PRプレビュー | `stg-flutterkaigi-2026-conference-app.flutterkaigi.workers.dev` | `jp.flutterkaigi.conf2026.stg` |
+| dev               | URLを使わずEmulator用の生トークン                               | ローカル開発用                 |
+
+アプリのインストール・OSの関連付け状態に応じてネイティブまたはWebで開きます。PR固有のプレビューURLはWeb確認用で、そのURL自体からのネイティブ直接起動は対象外です。PRで表示する交換QRも固定stg版へのリンクを使います。固定stg版は `main` または手動配布で更新し、PR配布では更新しません。
+
+本番では旧 `2026.flutterkaigi.jp/x/<token>` のQRも読み取れます。旧リンクをブラウザで開くとトークンを保って本番Webアプリへ転送します。scannerは本番とstgのURLを相互に拒否し、別環境のバックエンドへ誤って交換を送らないようにしています。
+
+未ログイン・プロフィール未作成の場合は、その画面へ移動した後に交換を再開します。待機中のトークンはメモリ内なので、再読み込み・アプリ終了をまたぐ場合は元のリンクを開き直してください。`event_features_enabled=false` のときは従来どおり交換機能を利用できません。Safariの同一ドメイン内リンクなど、アプリがあってもWebに残る操作があります。配布設定と実機確認は[Universal Links / App Links](../../.github/APP_DELIVERY.md#universal-links--app-links)を参照してください。
+
 ## 認証
 
 Google / メールアドレス+パスワードのサインインに対応し、iOSアプリではAppleサインインも表示します。Appleサインインの表示条件はiOSアプリであることのみで、dev / stg / prodによる違いはありません。リポジトリ実装は`packages/data`の`AuthRepository`、UIはアカウントタブ(`/account`)です。アカウントタブからはサインアウトと、再認証をともなうアカウント削除(App Store Review Guideline 5.1.1(v)対応)ができます。Appleユーザーの削除ではiOSのFirebase SDKでAppleのトークンを失効させてから削除します(Emulator接続時は失効をスキップ)。
@@ -101,7 +117,7 @@ fvm dart run melos run firebase:start:functions
 
 ローカル確認は上記のFunctionsを含むEmulator起動手順を使用してください。Webサーバーをin-app browserで
 開く場合は `fvm flutter run -d web-server --web-port 8780 --dart-define-from-file=environments/.env.dev` を実行し、
-`http://localhost:8780/#/account/missions` を開きます。
+`http://localhost:8780/account/missions` を開きます（旧 `/#/account/missions` 形式も起動時に変換します）。
 
 ## 配布
 

@@ -119,6 +119,21 @@ jobs:
       - working-directory: apps/website
         run: dart run jaspr_cli:jaspr build
 
+      # Old /x/<token> URLs now lead to the app Web host. Publish that app's
+      # path-based build and its association files before enabling redirects.
+      - name: Verify app share-link destination is ready
+        shell: bash -euo pipefail {0}
+        run: |
+          status="$(curl --silent --show-error --fail --retry 3 --max-time 30 \
+            --dump-header "$RUNNER_TEMP/app-link-headers" \
+            --output "$RUNNER_TEMP/app-association.json" \
+            --write-out '%{http_code}' \
+            https://2026-app.flutterkaigi.jp/.well-known/apple-app-site-association)"
+          test "$status" = 200
+          grep -iq '^content-type: application/json' "$RUNNER_TEMP/app-link-headers"
+          jq -e 'any(.applinks.details[]; .appID | endswith(".jp.flutterkaigi.conf2026"))' \
+            "$RUNNER_TEMP/app-association.json" > /dev/null
+
       - uses: cloudflare/wrangler-action@ebbaa1584979971c8614a24965b4405ff95890e0 # v4.0.0
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}

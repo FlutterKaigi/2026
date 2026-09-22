@@ -8,6 +8,7 @@ import 'package:app/core/ui/widget/app_scrollbar.dart';
 import 'package:app/feature/auth/data/provider/auth_state.dart';
 import 'package:app/feature/exchange/data/exchange_code.dart';
 import 'package:app/feature/exchange/data/exchange_code_redeem_handler.dart';
+import 'package:app/feature/exchange/data/provider/exchange_link_configuration.dart';
 import 'package:app/feature/exchange/data/provider/profile_exchange_provider.dart';
 import 'package:app/feature/exchange/data/provider/profile_exchange_repository.dart';
 import 'package:app/feature/exchange/ui/widget/exchange_access_gate.dart';
@@ -48,6 +49,7 @@ class _ExchangeHomeBody extends ConsumerWidget {
     final t = Translations.of(context);
     final theme = Theme.of(context);
     final tokenState = ref.watch(myExchangeTokenProvider);
+    final linkConfiguration = ref.watch(exchangeLinkConfigurationProvider);
 
     return AppScrollbar(
       child: Center(
@@ -65,7 +67,10 @@ class _ExchangeHomeBody extends ConsumerWidget {
                 ),
                 const SizedBox(height: 20),
                 switch (tokenState) {
-                  AsyncData(:final value) => _QrCard(qrPayload: value.qrPayload, expiresAt: value.expiresAt),
+                  AsyncData(:final value) => _QrCard(
+                    qrPayload: value.qrPayload(origin: linkConfiguration.origin),
+                    expiresAt: value.expiresAt,
+                  ),
                   AsyncError(:final error) => AppErrorView(
                     error: error,
                     onRetry: () => ref.read(myExchangeTokenProvider.notifier).refresh(),
