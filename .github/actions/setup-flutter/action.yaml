@@ -1,0 +1,13 @@
+name: Setup Flutter
+description: .fvmrc で固定した Flutter SDK を準備する
+runs:
+  using: composite
+  steps:
+    - id: version
+      shell: bash
+      run: echo "version=$(jq -r .flutter .fvmrc)" >> "$GITHUB_OUTPUT"
+    - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+      with:
+        flutter-version: ${{ steps.version.outputs.version }}
+        channel: stable
+        cache: true

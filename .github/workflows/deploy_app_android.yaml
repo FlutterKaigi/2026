@@ -1,25 +1,23 @@
 name: Deploy App Android
 
 on:
-  push:
-    branches: [main]
-  release:
-    types: [released]
-  workflow_dispatch:
+  workflow_call:
     inputs:
       environment:
-        description: 配布する環境（Firebase プロジェクトとアプリID）
-        type: choice
-        options: [prod, stg]
-        default: prod
+        description: 配布先（stg または prod）
+        type: string
+        required: true
       upload_to_play:
-        description: Google Play の内部テストへ送信する（初回の手動AABアップロード時は無効）
+        description: Google Play 内部テストへ送信する
         type: boolean
-        default: false
-
-concurrency:
-  group: deploy-app-android-${{ inputs.environment || 'prod' }}
-  cancel-in-progress: false
+        default: true
+    secrets:
+      ANDROID_SIGNING_KEYSTORE_BASE64:
+        required: true
+      ANDROID_KEY_PROPERTIES_BASE64:
+        required: true
+      GOOGLE_PLAY_SERVICE_ACCOUNT_BASE64:
+        required: false
 
 permissions: {}
 
@@ -29,14 +27,18 @@ defaults:
 
 jobs:
   deploy:
+    name: android (${{ inputs.environment }})
+    concurrency:
+      group: deploy-app-android-${{ inputs.environment }}
+      cancel-in-progress: false
     runs-on: ubuntu-24.04
     timeout-minutes: 35
     permissions:
       contents: read
       id-token: write
     env:
-      DEPLOY_ENVIRONMENT: ${{ inputs.environment || 'prod' }}
-      UPLOAD_TO_PLAY: ${{ github.event_name != 'workflow_dispatch' || inputs.upload_to_play }}
+      DEPLOY_ENVIRONMENT: ${{ inputs.environment }}
+      UPLOAD_TO_PLAY: ${{ inputs.upload_to_play }}
       FIREBASE_PROJECT_ID: ${{ vars[format('{0}_FIREBASE_PROJECT_ID', inputs.environment == 'stg' && 'STG' || 'PROD')] }}
       ANDROID_PACKAGE_NAME: ${{ inputs.environment == 'stg' && 'jp.flutterkaigi.conf2026.stg' || vars.ANDROID_PACKAGE_NAME }}
       GOOGLE_PLAY_TRACK: ${{ vars.GOOGLE_PLAY_TRACK }}
@@ -48,14 +50,7 @@ jobs:
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
-      - id: flutter-version
-        run: echo "version=$(jq -r .flutter .fvmrc)" >> "$GITHUB_OUTPUT"
-
-      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
-        with:
-          flutter-version: ${{ steps.flutter-version.outputs.version }}
-          channel: stable
-          cache: true
+      - uses: ./.github/actions/setup-flutter
 
       - uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
         with:
@@ -90,18 +85,11 @@ jobs:
             fi
           fi
 
-      - name: Authenticate to Firebase with Workload Identity Federation
-        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3
+      - uses: ./.github/actions/setup-firebase
         with:
-          project_id: ${{ env.FIREBASE_PROJECT_ID }}
-          workload_identity_provider: ${{ env.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-          service_account: ${{ env.GCP_SERVICE_ACCOUNT }}
-
-      - name: Install pinned Firebase configuration tools
-        run: |
-          npm install --global firebase-tools@13.35.1
-          dart pub global activate flutterfire_cli 1.4.0
-          echo "$HOME/.pub-cache/bin" >> "$GITHUB_PATH"
+          project-id: ${{ env.FIREBASE_PROJECT_ID }}
+          workload-identity-provider: ${{ env.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service-account: ${{ env.GCP_SERVICE_ACCOUNT }}
 
       - name: 選択した環境の Firebase 設定を生成
         working-directory: apps/app
@@ -167,9 +155,9 @@ jobs:
           --release
           --no-pub
           --build-number="$BUILD_NUMBER"
-          --dart-define-from-file=environments/.env.$DEPLOY_ENVIRONMENT
-          --dart-define=FIREBASE_PROJECT_ID=$FIREBASE_PROJECT_ID
-          --dart-define=COMMIT_INFORMATION=${{ github.ref_name }}-${{ github.sha }}
+          --dart-define-from-file="environments/.env.$DEPLOY_ENVIRONMENT"
+          --dart-define=FIREBASE_PROJECT_ID="$FIREBASE_PROJECT_ID"
+          --dart-define=COMMIT_INFORMATION="$GITHUB_REF_NAME-$GITHUB_SHA"
 
       - name: Upload AAB artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2

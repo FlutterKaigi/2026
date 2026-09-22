@@ -1,6 +1,7 @@
 # Firebase の本番・stg 配布
 
-`Deploy Firebase` は `main` の Rules・Indexes と任意の Functions を、選択した環境へ手動で適用する。
+`Deploy Firebase` は Firebase 関連の変更が `main` に入ると、テスト後に Rules・Indexes・Functions を stg / prod の両方へ適用する。
+手動実行では環境と Functions の適用有無を選択できる。
 アプリの配布 Workflow が使う読み取り専用のサービスアカウントとは分離する。
 
 | 環境 | Firebase Project | Remote Config 初期値 |
@@ -16,19 +17,28 @@
 - `GCP_FIREBASE_DEPLOY_SERVICE_ACCOUNT_STG`
 - `GCP_FIREBASE_DEPLOY_SERVICE_ACCOUNT_PROD`
 
-各値は対象プロジェクトに作成した Firebase 配布専用サービスアカウントのメールアドレスとする。
+各値は対象プロジェクトの `github-actions-firebase@<project-id>.iam.gserviceaccount.com` とする。
 既存の `github-actions-website` アカウントへ書き込み権限を追加しない。
-WIF の許可元を `FlutterKaigi/2026` の `main` に制限し、GitHub Environment
-`firebase-stg` / `firebase-prod` の deployment branch policy も `main` に制限する。
-本番の運用に合わせて Environment に required reviewers を設定する。
+WIF に `attribute.firebase_deploy_repository` を追加し、OIDC の `assertion.ref` が
+`refs/heads/main` の場合だけ `assertion.repository` を割り当てる。それ以外の ref は空文字にする。
+専用アカウントの `roles/iam.workloadIdentityUser` は、この属性が `FlutterKaigi/2026` と一致する
+principalSet だけに付与する。既存の `google.subject`、`attribute.repository`、リポジトリ制限は維持する。
+main 制限は Google Cloud 側で強制し、GitHub Environment の作成権限には依存しない。
+サービスアカウントキーは発行せず、Actions の短期 OIDC 認証を使用する。
 
 配布に必要な権限は対象プロジェクトに限定して設定する。
 
 - Rules: `roles/firebaserules.admin`
 - Firestore Indexes: `roles/datastore.indexAdmin`
 - Firebase のプロジェクト情報参照: `roles/firebase.viewer`
+- API 使用とビルド結果参照: `roles/serviceusage.serviceUsageConsumer`、`roles/cloudbuild.builds.viewer`
 - Remote Config の明示的な初期値適用: `roles/cloudconfig.admin`
 - Functions: `roles/cloudfunctions.developer` と、使用する runtime / build サービスアカウントへの `roles/iam.serviceAccountUser`
+- Secret Manager: 使用する Secret に限定した `roles/secretmanager.viewer`。配布アカウントには秘密値の取得権限を付与しない。
+
+新規 HTTP 関数の呼び出し権限を設定するため、`firebaseFunctionsDeploymentIam` カスタムロールには
+`cloudfunctions.functions.setIamPolicy`、`run.services.getIamPolicy`、`run.services.setIamPolicy` の3権限だけを含める。
+これを対象プロジェクトの配布アカウントへ付与する。プロジェクト全体の IAM 変更権限は付与しない。
 
 Firebase CLI の preflight や Storage の既定バケット参照で不足する権限は、失敗ログの対象操作を確認して追加する。
 Owner / Editor をまとめて付与しない。API の初回有効化、課金設定、Storage バケット作成、
@@ -37,20 +47,28 @@ Functions のビルド実行サービスアカウントの設定はプロジェ�
 
 両環境に `EXCHANGE_TOKEN_SECRET` の有効な Secret Manager バージョンが必要。
 既存の署名鍵は変更せず、初回のみ管理者が作成する。
+実行アカウントには、この Secret に限定して `roles/secretmanager.secretAccessor` を付与する。
 `SYNC_TARGET_PROJECT_ID` は本番プロジェクトIDを環境別 `.env` に書き込む。
 本番では `syncCollectionsToProd` の既存の同一プロジェクトガードにより同期を拒否する。
 この Workflow はコレクション同期を呼び出さない。
 
 ## 実行
 
+通常は `main` マージ後の自動実行を確認する。Functions の lint・単体テスト・Emulator 結合テストが成功すると、
+同じコミットを両環境へ適用する。環境ごとの結果は別々のジョブに表示される。
+Firebase 設定の適用結果は Actions のジョブとサマリーで確認する。
+2025 のデータベース設定適用と同じく、GitHub Deployments には記録しない。
+
+再適用や環境を限定する場合:
+
 1. GitHub Actions の `Deploy Firebase` → `Run workflow` を開く。
-2. Branch を `main`、environment を `stg` にする。
-3. `deploy_functions=true` で Rules・Indexes・Functions を揃える。
-4. 初回の Remote Config 整備時だけ `apply_remote_config_defaults=true` にする。
-5. stg の結果とアプリ動作を確認後、同じ main のリビジョンを prod へ適用する。
+2. Branch は `main`、environment は `all` / `stg` / `prod` を選ぶ。
+3. 通常は `deploy_functions=true` とする。
+4. Remote Config の初期値を適用すると明示的に決めた場合だけ `apply_remote_config_defaults=true` にする。
 
 デプロイ対象は `firestore:rules,firestore:indexes,storage` と任意の `functions`。
 Hosting は含まない。CLI に `--force` は渡さず、関数やインデックスの削除確認が必要な場合は停止する。
+新規関数のリトライ設定などで CLI が確認を要求する場合も、管理者が対象関数を限定して初回適用する。
 新しいインデックスが使用可能になったことを Firebase Console で確認してからアプリを配布する。
 
 ## Remote Config

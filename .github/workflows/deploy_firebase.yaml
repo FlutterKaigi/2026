@@ -1,13 +1,22 @@
 name: Deploy Firebase
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - functions/**
+      - packages/data/firebase/**
+      - firebase.json
+      - tool/remote_config*.mjs
+      - .github/workflows/deploy_firebase.yaml
+      - .github/workflows/ci_functions.yaml
   workflow_dispatch:
     inputs:
       environment:
         description: 適用先の Firebase 環境
         type: choice
-        options: [stg, prod]
-        default: stg
+        options: [all, stg, prod]
+        default: all
       deploy_functions:
         description: ルールとインデックスに加えて Cloud Functions も適用する
         type: boolean
@@ -17,10 +26,6 @@ on:
         type: boolean
         default: false
 
-concurrency:
-  group: deploy-firebase-${{ inputs.environment }}
-  cancel-in-progress: false
-
 permissions: {}
 
 defaults:
@@ -28,19 +33,33 @@ defaults:
     shell: bash -euo pipefail {0}
 
 jobs:
+  validate:
+    uses: ./.github/workflows/ci_functions.yaml
+    permissions:
+      contents: read
+
   deploy:
+    needs: validate
+    name: Firebase (${{ matrix.environment }})
+    strategy:
+      fail-fast: false
+      matrix:
+        environment: ${{ fromJSON(inputs.environment && inputs.environment != 'all' && format('["{0}"]', inputs.environment) || '["stg","prod"]') }}
+    concurrency:
+      group: deploy-firebase-${{ matrix.environment }}
+      cancel-in-progress: false
     if: ${{ github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 45
-    environment: firebase-${{ inputs.environment }}
     permissions:
       contents: read
       id-token: write
     env:
-      DEPLOY_ENVIRONMENT: ${{ inputs.environment }}
-      FIREBASE_PROJECT_ID: ${{ vars[format('{0}_FIREBASE_PROJECT_ID', inputs.environment == 'stg' && 'STG' || 'PROD')] }}
-      GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ vars[format('GCP_WORKLOAD_IDENTITY_PROVIDER_{0}', inputs.environment == 'stg' && 'STG' || 'PROD')] }}
-      GCP_SERVICE_ACCOUNT: ${{ vars[format('GCP_FIREBASE_DEPLOY_SERVICE_ACCOUNT_{0}', inputs.environment == 'stg' && 'STG' || 'PROD')] }}
+      DEPLOY_FUNCTIONS: ${{ github.event_name != 'workflow_dispatch' || inputs.deploy_functions }}
+      DEPLOY_ENVIRONMENT: ${{ matrix.environment }}
+      FIREBASE_PROJECT_ID: ${{ vars[format('{0}_FIREBASE_PROJECT_ID', matrix.environment == 'stg' && 'STG' || 'PROD')] }}
+      GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ vars[format('GCP_WORKLOAD_IDENTITY_PROVIDER_{0}', matrix.environment == 'stg' && 'STG' || 'PROD')] }}
+      GCP_SERVICE_ACCOUNT: ${{ vars[format('GCP_FIREBASE_DEPLOY_SERVICE_ACCOUNT_{0}', matrix.environment == 'stg' && 'STG' || 'PROD')] }}
       SYNC_TARGET_PROJECT_ID: ${{ vars.PROD_FIREBASE_PROJECT_ID }}
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
@@ -65,12 +84,6 @@ jobs:
       - name: Functions の依存パッケージを取得
         run: npm --prefix functions ci
 
-      - name: Functions と Remote Config の適用ツールを検証
-        run: |
-          npm --prefix functions run lint
-          npm --prefix functions test
-          node --test tool/remote_config.test.mjs
-
       - id: auth
         name: Firebase 配布専用サービスアカウントで認証
         uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3
@@ -84,12 +97,10 @@ jobs:
         run: npm install --global firebase-tools@13.35.1
 
       - name: Functions の適用パラメータを設定
-        if: ${{ inputs.deploy_functions }}
+        if: ${{ env.DEPLOY_FUNCTIONS == 'true' }}
         run: printf 'SYNC_TARGET_PROJECT_ID=%s\n' "$SYNC_TARGET_PROJECT_ID" > "functions/.env.$FIREBASE_PROJECT_ID"
 
       - name: ルール・インデックス・指定された Functions を適用
-        env:
-          DEPLOY_FUNCTIONS: ${{ inputs.deploy_functions }}
         run: |
           targets=firestore:rules,firestore:indexes,storage
           if [ "$DEPLOY_FUNCTIONS" = true ]; then
@@ -109,6 +120,8 @@ jobs:
 
       - name: 適用したリビジョンを記録
         run: |
-          echo "### Firebase $DEPLOY_ENVIRONMENT" >> "$GITHUB_STEP_SUMMARY"
-          echo "プロジェクト: $FIREBASE_PROJECT_ID; コミット: $GITHUB_SHA" >> "$GITHUB_STEP_SUMMARY"
-          echo "Functions の適用: ${{ inputs.deploy_functions }}; Remote Config 初期値の適用: ${{ inputs.apply_remote_config_defaults }}" >> "$GITHUB_STEP_SUMMARY"
+          {
+            echo "### Firebase $DEPLOY_ENVIRONMENT"
+            echo "プロジェクト: $FIREBASE_PROJECT_ID; コミット: $GITHUB_SHA"
+            echo "Functions の適用: $DEPLOY_FUNCTIONS; Remote Config 初期値の適用: ${{ inputs.apply_remote_config_defaults }}"
+          } >> "$GITHUB_STEP_SUMMARY"

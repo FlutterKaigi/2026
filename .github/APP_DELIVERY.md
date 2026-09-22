@@ -5,26 +5,40 @@
 > Secret、Token、秘密鍵、パスワード、Service Account JSON、Debug Tokenの実値は記載しません。
 > 外部Contributorのローカル開発には、ここで説明するstg／prodの権限や設定は不要です。
 
-`apps/app`のCI/CDは次のworkflowで構成します。
+`apps/app`のCI/CDは次のworkflowで構成します。公式サイト `apps/website` の本番・プレビューは、それぞれ
+`deploy_website.yaml` / `preview_website.yaml` として独立させます。
+app・website は本番の変更検知、PRプレビューの変更検知、配布先、PRコメントの更新先を分けます。
+各アプリだけの変更は対応するworkflowで処理し、SDKや共有データモデルの変更は両方で検証します。
 
 | Workflow | Trigger | Delivery target |
 | --- | --- | --- |
-| `App CI` | app関連のPR、`main` push、手動 | format/analyze/test、dprint |
-| `Preview App Web` | app関連のPR、手動 | Cloudflare Workers Version |
-| `Deploy App Web` | `main` push、正式なGitHub Releaseの公開、手動 | Cloudflare Workers Production |
-| `Deploy App iOS` | `main` push、正式なGitHub Releaseの公開、手動 | App Store Connect / TestFlight（手動実行でprod / stgを選択） |
-| `Deploy App Android` | `main` push、正式なGitHub Releaseの公開、手動 | 署名済みAAB、任意でGoogle Play Internal Testing（手動実行でprod / stgを選択） |
-| `Deploy Firebase` | `main`から手動 | prod / stgのRules・Indexes・任意のFunctions・明示的に選択したRemote Config初期値 |
+| `App CI` | app関連のPR、配布Workflowからの呼び出し、手動 | format/analyze/test、dprint |
+| `Deploy App` | app関連の `main` push、正式なGitHub Releaseの公開、手動 | iOS / Android / Web を stg と prod へ配布 |
+| `Preview App Web` | app関連のPR、手動 | stg に接続するPR別のWebプレビュー |
+| `Deploy Firebase` | Firebase関連の `main` push、`main` から手動 | stg / prod の Rules・Indexes・Functions |
+
+2025 と同じく、公開URLを持つ本番Webの配布を Deployments に記録します。
+Webアプリは `app-website`、公式サイトは `website` とし、コミット・配布先URL・成功/失敗を記録します。
+stg・PRプレビュー・ストアへのアップロード・Firebase設定の適用はActionsの実行結果で確認します。
+環境名を空にせず、[Environment の `deployment` 設定](https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-deployments/control-deployments#using-environments-without-deployments)で、本番への配布時だけ記録を有効にします。
+
+配布の入口は `deploy_app.yaml` に集約しています。iOS / Android / Web の実装は
+`workflow_call` で呼び出す専用ファイルに分け、Flutter SDK と Firebase 認証・CLI の準備は
+`.github/actions` の共通アクションを使います。Web の配布処理は PR プレビューでも共用します。
+手動実行では対象OSと環境を選択でき、環境の初期値は `all`（stg と prod）です。
+環境ごとの `fail-fast: false` と排他制御により、一方の失敗で他方を中断せず、同じアプリの採番・配布は直列化します。
 
 Firebase配布の準備と実行手順は[Firebase 配布手順](FIREBASE_DELIVERY.md)を参照してください。
 
 ### 自動配布の起点
 
 [FlutterKaigi 2025](https://github.com/FlutterKaigi/2025/blob/main/.github/workflows/deploy-app.yaml)と同じく、
-`main` 更新または正式リリースの `released` イベントで、iOS / Android / Web の本番接続版を配布します。
+app関連の `main` 更新または正式リリースの `released` イベントで、iOS / Android / Web を同じコミットから **stg と prod の両方**へ配布します。
 iOS は TestFlight、Android は Google Play の内部テストまでを自動化します。
 ストア審査への提出と一般公開はストア管理画面から行います。
 PR は Web Preview で確認し、ネイティブアプリの確認は手動実行で prod / stg を選択します。
+Web の stg は既存の Workers プレビューへ `stg` エイリアスを付けて配布し、固定のプレビューURLを更新します。
+prod は既存のカスタムドメインへ配布します。各環境のビルド番号・排他制御・Firebase 設定は独立しています。
 アプリ Web 本番の一時停止フラグ `ENABLE_APP_WEB_PRODUCTION_DEPLOY` は廃止します。
 
 自動配布を有効にする PR のマージ前に、Android の初回登録、必要な Variables / Secrets、
@@ -32,11 +46,11 @@ Web 本番用 App Check の設定を完了してください。
 
 ## 初回配布とstg
 
-Androidの初回は `Deploy App Android` を `upload_to_play=false` で実行し、
+Androidの初回は `Deploy App` で Android のみを選び、 `upload_to_play=false` で実行し、
 Artifactsから署名済みAABを取得してPlay Consoleの内部テストへ手動アップロードします。
 このモードはGoogle Play APIの認証を要求しません。2回目以降は
 `upload_to_play=true` で内部テストへアップロードできます。
-`main` push と正式リリースでは `upload_to_play=true` として本番接続版を内部テストへ配布します。
+`main` push と正式リリースでは `upload_to_play=true` として stg / prod の両方を内部テストへ配布します。
 
 手動実行の `environment=stg` は `.env.stg`、stgのFirebase/WIF、
 `jp.flutterkaigi.conf2026.stg` を使用します。本番とは別のApp Store Connect / Play Console
@@ -51,7 +65,7 @@ iOSは App Store Connect の同じ公開バージョン・同じ環境の最新�
 期限切れのビルドも含めて取得し、未アップロードの場合のみ1から開始します。
 API の認証失敗を0扱いにせず停止し、アップロード後は登録反映を確認してから次の実行に進みます。
 本番の `1.0.0 (401)` は旧式 `GITHUB_RUN_NUMBER * 100 + GITHUB_RUN_ATTEMPT` による番号でした。
-次回は公開バージョン `1.0.0` のまま **402**、以後は403、404と増加します。
+以後はストアに登録された最新番号から402、403、404と増加します。
 次の公開バージョン（例: `1.0.1`）へ上げた際は、そのバージョンのビルドを **1** から開始します。
 アプリ内に表示するビルド番号も、App Store Connect に登録する実際の番号と揃えます。
 Androidは FlutterKaigi 2025 と同じく Google Play の最新番号に1を加算します。
@@ -63,6 +77,16 @@ Xcode Export時の番号自動変更を無効にし、IPA内のBundle ID・公�
 
 同じ公開バージョン内では小さい番号へ戻さず、既存ストアの番号を継続してください。
 ストアが表示するバージョン（`1.0.0`）とビルド番号（例: `401`）は別の値です。
+
+### iOS の輸出コンプライアンス
+
+2025年と同じく `Info.plist` に `ITSAppUsesNonExemptEncryption=false` を含めます。
+現在のクライアントの暗号化用途は HTTPS/TLS と認証で、独自の暗号化機能は提供していません。
+iOS の配布ジョブは、書き出した IPA にもこの値が含まれることをアップロード前に検証します。
+設定が反映されるのは、この変更を含む新しいビルドからです。
+暗号化機能・依存ライブラリの利用用途を変更するときは、
+[Apple の輸出コンプライアンス手順](https://developer.apple.com/documentation/security/complying-with-encryption-export-regulations)
+に沿って申告内容も見直してください。
 
 ## GitHub側の登録場所
 
@@ -127,7 +151,7 @@ TokenはGit、Issue、Slackへ貼り付けません。権限と対象Resourceは
 
 ## Apple Developer / App Store Connect
 
-PRマージ前にApp Store Connectへのアップロードまで確認する場合は、`Deploy App iOS` を手動実行し、対象ブランチと `environment=stg` を選択します。本番接続版が必要な場合は `prod` を選択します。`main` 更新と正式リリースでは本番接続版を自動アップロードします。
+PRマージ前にApp Store Connectへのアップロードまで確認する場合は、`Deploy App` で iOS のみを選んで手動実行し、対象ブランチと `environment=stg` を選択します。本番接続版が必要な場合は `prod` を選択します。`main` 更新と正式リリースでは stg / prod の両方を自動アップロードします。
 
 ### App IDとApp Store Connectアプリ
 

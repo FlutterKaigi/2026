@@ -9,17 +9,8 @@ on:
       - tool/remote_config*.mjs
       - .github/workflows/deploy_firebase.yaml
       - .github/workflows/ci_functions.yaml
-  push:
-    branches:
-      - main
-    paths:
-      - functions/**
-      - packages/data/firebase/**
-      - firebase.json
-      - tool/remote_config*.mjs
-      - .github/workflows/deploy_firebase.yaml
-      - .github/workflows/ci_functions.yaml
   workflow_dispatch:
+  workflow_call:
 
 concurrency:
   group: functions-ci-${{ github.ref }}
