@@ -15,7 +15,7 @@ app・website は本番の変更検知、PRプレビューの変更検知、配�
 | `App CI` | app関連のPR、配布Workflowからの呼び出し、手動 | format/analyze/test、dprint |
 | `Deploy App` | app関連の `main` push、正式なGitHub Releaseの公開、手動 | iOS / Android / Web を stg と prod へ配布 |
 | `Preview App Web` | app関連のPR、手動 | stg に接続するPR別のWebプレビュー |
-| `Deploy Firebase` | Firebase関連の `main` push、`main` から手動 | stg / prod の Rules・Indexes・Functions |
+| `Deploy Firebase` | Firebase関連の `main` push、`main` から手動 | Rules・Indexes・Functions。stg は自動、prod は手動のみ |
 
 2025 と同じく、公開URLを持つ本番Webの配布を Deployments に記録します。
 Webアプリは `app-website`、公式サイトは `website` とし、コミット・配布先URL・成功/失敗を記録します。

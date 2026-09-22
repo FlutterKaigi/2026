@@ -15,8 +15,8 @@ on:
       environment:
         description: 適用先の Firebase 環境
         type: choice
-        options: [all, stg, prod]
-        default: all
+        options: [stg, prod, all]
+        default: stg
       deploy_functions:
         description: ルールとインデックスに加えて Cloud Functions も適用する
         type: boolean
@@ -44,7 +44,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        environment: ${{ fromJSON(inputs.environment && inputs.environment != 'all' && format('["{0}"]', inputs.environment) || '["stg","prod"]') }}
+        environment: ${{ fromJSON(github.event_name == 'workflow_dispatch' && (inputs.environment == 'all' && '["stg","prod"]' || format('["{0}"]', inputs.environment || 'stg')) || '["stg"]') }}
     concurrency:
       group: deploy-firebase-${{ matrix.environment }}
       cancel-in-progress: false
