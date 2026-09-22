@@ -126,9 +126,11 @@ jobs:
             > apps/app/android/app/release.jks
           printf '%s' "$ANDROID_KEY_PROPERTIES_BASE64" | base64 -d \
             > apps/app/android/key.properties
+          python3 .github/scripts/mask_credentials.py android-signing apps/app/android/key.properties
           if [ "$UPLOAD_TO_PLAY" = true ]; then
             printf '%s' "$GOOGLE_PLAY_SERVICE_ACCOUNT_BASE64" | base64 -d \
               > "$RUNNER_TEMP/google-play-service-account.json"
+            python3 .github/scripts/mask_credentials.py google-play "$RUNNER_TEMP/google-play-service-account.json"
           fi
 
       - name: Google Play の最新ビルド番号に1を加算
