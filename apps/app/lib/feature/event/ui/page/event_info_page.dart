@@ -73,6 +73,13 @@ class EventInfoPage extends ConsumerWidget {
                         child: Column(
                           children: [
                             _ExternalLinkTile(
+                              icon: Icons.groups_outlined,
+                              title: t.eventInfo.staffMembers,
+                              external: false,
+                              onTap: () => const StaffMemberListRoute().push<void>(context),
+                            ),
+                            const Divider(height: 1),
+                            _ExternalLinkTile(
                               icon: Icons.people_outline,
                               title: t.eventInfo.contributors,
                               external: false,
@@ -159,13 +166,6 @@ class EventInfoPage extends ConsumerWidget {
                                   failureMessage: t.links.openError,
                                 ),
                               ),
-                            ),
-                            const Divider(height: 1),
-                            _ExternalLinkTile(
-                              icon: Icons.groups_outlined,
-                              title: t.eventInfo.staffMembers,
-                              external: false,
-                              onTap: () => const StaffMemberListRoute().push<void>(context),
                             ),
                             const Divider(height: 1),
                             _ExternalLinkTile(
