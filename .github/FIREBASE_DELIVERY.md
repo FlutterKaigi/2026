@@ -1,7 +1,7 @@
 # Firebase の本番・stg 配布
 
-`Deploy Firebase` は Firebase 関連の変更が `main` に入ると、テスト後に Rules・Indexes・Functions を stg / prod の両方へ適用する。
-手動実行では環境と Functions の適用有無を選択できる。
+`Deploy Firebase` は Firebase 関連の変更が `main` に入ると、テスト後に Rules・Indexes・Functions を stg へ適用する。
+prod への適用は `main` からの手動実行に限定する。手動実行では環境と Functions の適用有無を選択でき、環境の初期値は `stg`。
 アプリの配布 Workflow が使う読み取り専用のサービスアカウントとは分離する。
 
 | 環境 | Firebase Project | Remote Config 初期値 |
@@ -55,16 +55,25 @@ Functions のビルド実行サービスアカウントの設定はプロジェ�
 ## 実行
 
 通常は `main` マージ後の自動実行を確認する。Functions の lint・単体テスト・Emulator 結合テストが成功すると、
-同じコミットを両環境へ適用する。環境ごとの結果は別々のジョブに表示される。
+stg へ適用する。stg で動作確認した後、本番への適用は手動で実行する。
 Firebase 設定の適用結果は Actions のジョブとサマリーで確認する。
 2025 のデータベース設定適用と同じく、GitHub Deployments には記録しない。
 
-再適用や環境を限定する場合:
+本番へ適用、または再適用する場合:
 
 1. GitHub Actions の `Deploy Firebase` → `Run workflow` を開く。
-2. Branch は `main`、environment は `all` / `stg` / `prod` を選ぶ。
+2. Branch は `main`、environment は `stg` / `prod` / `all` を選ぶ。初期値は `stg`。本番のみへの適用は `prod`、両環境への適用は `all`。
 3. 通常は `deploy_functions=true` とする。
 4. Remote Config の初期値を適用すると明示的に決めた場合だけ `apply_remote_config_defaults=true` にする。
+
+手動実行も実行要求時点の `main` のコミットをテストして適用する。stg で確認した後に `main` が更新された場合は、
+新しいコミットの stg への適用と動作確認を済ませてから本番へ適用する。
+
+自動実行は、`functions/**`、`packages/data/firebase/**`、`firebase.json`、`tool/remote_config*.mjs`、
+Firebase 配布・Functions CI の Workflow に変更がある場合が対象。これらのパス内の README やテストだけの変更も対象となる。
+判定対象は push に含まれるファイルの変更であり、Firebase に適用済みの内容との差分ではない。
+手動実行では変更がなくてもテストと `firebase deploy` を実行する。
+デプロイ対象ごとの変更検出や更新の省略は Firebase CLI に委ねる。
 
 デプロイ対象は `firestore:rules,firestore:indexes,storage` と任意の `functions`。
 Hosting は含まない。CLI に `--force` は渡さず、関数やインデックスの削除確認が必要な場合は停止する。
