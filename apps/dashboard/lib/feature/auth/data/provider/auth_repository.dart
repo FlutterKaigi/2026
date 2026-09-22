@@ -5,4 +5,3 @@ final authRepositoryProvider = Provider<AuthRepository>(
   // 管理ダッシュボードは flutterkaigi.jp ドメインへサインインを誘導する（UI ヒント）。
   (_) => FirebaseAuthRepository(hostedDomain: 'flutterkaigi.jp'),
 );
-

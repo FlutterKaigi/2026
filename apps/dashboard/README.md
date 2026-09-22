@@ -86,7 +86,30 @@ STG のダッシュボードから本番を操作する場合は、既存の本�
 
 ## デプロイ
 
-Firebase Hosting へのデプロイは `dashboard:deploy:stg` / `dashboard:deploy:prod` スクリプトで行う。
+### GitHub Actions
+
+| 操作 | Workflow / 配布先 |
+| --- | --- |
+| dashboard 関連の PR | `Dashboard CI` で format・analyze・test・dev の Web ビルド |
+| dashboard 関連の変更を `main` にマージ | `Deploy Dashboard` で CI 成功後に [STG](https://flutterkaigi-2026-stg.web.app/) へ自動配布 |
+| `main` から手動実行 | `Deploy Dashboard` で `stg` / `prod` を選択（初期値 `stg`）。[本番](https://flutterkaigi-2026-283db.web.app/) は手動のみ |
+
+本番への配布は Actions の `Deploy Dashboard` → `Run workflow` で Branch を `main`、
+environment を `prod` にする。手動実行でも CI を通し、実行要求時点の `main` を配布する。
+STG で確認した後に `main` が更新された場合は、新しいコミットを STG で確認してから本番へ配布する。
+
+CI はダミーの Firebase 設定を使う。配布時は既存の OIDC 認証と、
+[`firebase.json`](firebase.json) に記録された dashboard 用 Web App ID から対象環境の設定を生成する。
+新しい Secret・Variable・サービスアカウントは不要。初回実行はワークフローを `main` に反映し、
+追加済みの Hosting 権限が有効になってから行う。認証・権限の詳細は
+[Firebase 配布手順](../../.github/FIREBASE_DELIVERY.md#dashboard-の配布)を参照。
+
+このワークフローは Hosting のみを更新する。`eventAdministration` などの Functions の変更は
+`Deploy Firebase` で別途適用する。
+
+### ローカル
+
+`dashboard:deploy:stg` / `dashboard:deploy:prod` スクリプトでも配布できる。
 内部でビルドと `firebase deploy --only hosting` を順に実行する。
 
 事前に Firebase CLI でログインしていること。

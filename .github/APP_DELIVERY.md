@@ -12,10 +12,17 @@ app・website は本番の変更検知、PRプレビューの変更検知、配�
 
 | Workflow | Trigger | Delivery target |
 | --- | --- | --- |
+| `Workflows CI` | workflow・共通action・配布script関連のPR、手動 | actionlint、配布scriptのテスト（main pushでの単独実行なし） |
 | `App CI` | app関連のPR、配布Workflowからの呼び出し、手動 | format/analyze/test、dprint |
 | `Deploy App` | app関連の `main` push、正式なGitHub Releaseの公開、手動 | iOS / Android / Web を stg と prod へ配布 |
 | `Preview App Web` | app関連のPR、手動 | stg に接続するPR別のWebプレビュー |
 | `Deploy Firebase` | Firebase関連の `main` push、`main` から手動 | Rules・Indexes・Functions。stg は自動、prod は手動のみ |
+| `Dashboard CI` | dashboard関連のPR、配布Workflowからの呼び出し、手動 | format/analyze/test、dev の Web ビルド |
+| `Deploy Dashboard` | dashboard関連の `main` push、`main` から手動 | dashboard の Firebase Hosting。stg は自動、prod は手動のみ |
+
+`Workflows CI` はPRでworkflowと配布scriptを検証します。mainでは各 `Deploy` が必要なアプリのCIを呼んでから配布するため、検証だけのworkflowを別途起動しません。依存バージョンだけの変更も取りこぼさないよう、`pubspec.lock` を変更検知に含めます。
+
+CIの自動キャンセルは同じPRの古い検証に限定します。手動CIや配布から呼び出すCIは実行IDごとに分け、同じmainを使う別の配布をキャンセルしないようにします。実際の配布は対象環境ごとの排他制御を使います。
 
 2025 と同じく、公開URLを持つ本番Webの配布を Deployments に記録します。
 Webアプリは `app-website`、公式サイトは `website` とし、コミット・配布先URL・成功/失敗を記録します。
@@ -338,6 +345,8 @@ fvm dart tool/generate_app_links.dart --environment=stg --output-dir=/tmp/flutte
 
 `--output-dir` を省略すると `apps/app/build/web/.well-known` へ出力するため、Webビルド後に実行します。Workflowは先に一時ディレクトリへ生成し、ビルド後にコピーします。配信後は対象URLの `/.well-known/apple-app-site-association` と `/.well-known/assetlinks.json` がredirectなしのHTTP 200・`application/json`で取得でき、内容が生成結果と一致することを確認します。
 
+[配信確認スクリプト](scripts/verify_app_links.py) は、公開直後の反映を最大5分待ちます。HTTPエラーだけでなく、HTML応答・Content-Type不一致・古いJSON・redirectも10秒間隔で再検証し、期限まで一致しなければ配布を失敗にします。各試行のHTTPステータス・Content-Type・不一致理由をログへ記録し、レスポンス本文は出力しません。
+
 旧 `2026.flutterkaigi.jp/x/<token>` の本番関連付けは残します。ブラウザに到達した旧リンクは、トークンを保持した302で本番Webアプリへ進みます。website側は従来の `tool/generate_well_known.dart` を引き続き使い、未設定のプラットフォームは生成をスキップするため、Webアプリ側の必須チェックとは挙動が異なります。
 
 ### Androidの署名フィンガープリント
@@ -352,7 +361,7 @@ Google PlayのInternal TestingからインストールしたアプリはPlay App
 2. `Deploy App` をWebのみ・両環境で実行し、本番ホストとstg固定aliasのアプリ・検証ファイルを先に公開します。PRプレビューの配布だけではstg固定aliasは更新されません。
 3. ネイティブをビルド・配布し、websiteの配布を実行します。先行して停止したwebsiteのジョブは、Webアプリ公開後に再実行します。
 
-`Deploy App` でWeb配布も指定した場合、iOS / AndroidはWebの成功後に進み、Webが失敗するとネイティブ配布も停止します。手動の `web=false` はネイティブだけの配布を許可しますが、関連付けファイルが事前公開済みであることが前提です。websiteのWorkflowも、旧リンクの転送を公開する前に本番WebアプリのAASAがHTTP 200・JSON・本番App IDで取得できることを確認します。
+`Deploy App` でWeb配布も指定した場合、iOS / AndroidはWebの成功後に進み、Webが失敗するとネイティブ配布も停止します。手動の `web=false` はネイティブだけの配布を許可しますが、関連付けファイルが事前公開済みであることが前提です。websiteのWorkflowも、旧リンクの転送を公開する前に本番WebアプリのAASAがHTTP 200・JSON・本番App IDで取得できることを確認します。初回にappとwebsiteの配布が並行する場合に備え、website側は最大10分待ってから失敗にします。
 
 ### 動作確認時の注意
 
@@ -430,7 +439,7 @@ stg／prodのCI Service Accountへ、対象Projectで次の読み取り専用Rol
 
 生成直後にDart OptionsとNative設定ファイルのProject ID／App ID／Package Name／Bundle IDを指定値と照合し、一致しない場合はビルドを停止します。
 
-App CIは実Projectへ接続しません。`firebase_options.stub.dart`をGit管理外の`firebase_options.dart`へコピーし、`apps/app`と`packages/data`だけを対象にformat/analyze/test、dprintを実行します。Firebase設定ファイルが未整備の`apps/dashboard`は、workflowの変更検知と各品質チェックの両方から明示的に除外しています。実行時はdev FlavorのFirebase Emulatorへ接続します。
+App CIは実Projectへ接続しません。`firebase_options.stub.dart`をGit管理外の`firebase_options.dart`へコピーし、`apps/app`と`packages/data`だけを対象にformat/analyze/test、dprintを実行します。`apps/dashboard`はApp CIの変更検知と品質チェックの対象外で、独立した`Dashboard CI`で検証します。dashboardのHosting配布は`Deploy Dashboard`が担当します（[配布手順](FIREBASE_DELIVERY.md#dashboard-の配布)）。実行時はdev FlavorのFirebase Emulatorへ接続します。
 
 OptionsをGit管理外にしても、それだけをデータ保護の境界にはできません。クライアント配布物からSDK設定を取得できるため、Firestore／Storage Rulesのテスト、API KeyのAPI・Application restrictions、App Check enforcementを配布前に確認します。[Firebase App Check](https://firebase.google.com/docs/app-check)はAuthenticationとSecurity Rulesを補完する仕組みです。
 

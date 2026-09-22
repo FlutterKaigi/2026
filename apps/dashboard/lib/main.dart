@@ -14,9 +14,7 @@ void main() async {
   final siteKey = Env.appCheckSiteKey;
   if (siteKey != null) {
     await FirebaseAppCheck.instance.activate(
-      providerWeb: kDebugMode
-          ? WebDebugProvider()
-          : ReCaptchaEnterpriseProvider(siteKey),
+      providerWeb: kDebugMode ? WebDebugProvider() : ReCaptchaEnterpriseProvider(siteKey),
     );
   }
   usePathUrlStrategy();

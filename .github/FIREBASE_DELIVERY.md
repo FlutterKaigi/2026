@@ -35,6 +35,7 @@ main 制限は Google Cloud 側で強制し、GitHub Environment の作成権限
 - Remote Config の明示的な初期値適用: `roles/cloudconfig.admin`
 - Functions: `roles/cloudfunctions.developer` と、使用する runtime / build サービスアカウントへの `roles/iam.serviceAccountUser`
 - Secret Manager: 使用する Secret に限定した `roles/secretmanager.viewer`。配布アカウントには秘密値の取得権限を付与しない。
+- Dashboard の Hosting 配布: `roles/firebasehosting.admin`、`roles/serviceusage.apiKeysViewer`
 
 新規 HTTP 関数の呼び出し権限を設定するため、`firebaseFunctionsDeploymentIam` カスタムロールには
 `cloudfunctions.functions.setIamPolicy`、`run.services.getIamPolicy`、`run.services.setIamPolicy` の3権限だけを含める。
@@ -76,9 +77,40 @@ Firebase 配布・Functions CI の Workflow に変更がある場合が対象。
 デプロイ対象ごとの変更検出や更新の省略は Firebase CLI に委ねる。
 
 デプロイ対象は `firestore:rules,firestore:indexes,storage` と任意の `functions`。
-Hosting は含まない。CLI に `--force` は渡さず、関数やインデックスの削除確認が必要な場合は停止する。
+Hosting は別の `Deploy Dashboard` で配布する。CLI に `--force` は渡さず、関数やインデックスの削除確認が必要な場合は停止する。
 新規関数のリトライ設定などで CLI が確認を要求する場合も、管理者が対象関数を限定して初回適用する。
 新しいインデックスが使用可能になったことを Firebase Console で確認してからアプリを配布する。
+
+## Dashboard の配布
+
+[`Deploy Dashboard`](workflows/deploy_dashboard.yaml) は dashboard とその依存ファイルの変更が
+`main` に入ると、再利用可能な [`Dashboard CI`](workflows/ci_dashboard.yaml) の成功後に STG へ自動配布する。
+PR では同じ CI が、実 Firebase に接続しないダミー設定で format・analyze・test・dev の Web ビルドを実行する。
+CI は認証情報を必要としない。
+同じ環境への実行は、検証開始からHosting配布完了までまとめて直列化する。検証中の配布を新しい実行でキャンセルしない。
+
+| 環境 | Hosting URL |
+| --- | --- |
+| stg | <https://flutterkaigi-2026-stg.web.app/> |
+| prod | <https://flutterkaigi-2026-283db.web.app/> |
+
+手動実行は Actions の `Deploy Dashboard` → `Run workflow` で Branch を `main`、
+environment を `stg` / `prod` から選ぶ（初期値 `stg`）。本番配布は手動のみ。
+手動実行でも CI を通し、実行要求時点の `main` を配布する。STG 確認後に `main` が更新された場合は、
+新しいコミットを STG で確認してから本番へ配布する。配布先は Actions のサマリーに表示する。
+
+既存の `STG_FIREBASE_PROJECT_ID` / `PROD_FIREBASE_PROJECT_ID`、
+`GCP_WORKLOAD_IDENTITY_PROVIDER_STG` / `_PROD`、
+`GCP_FIREBASE_DEPLOY_SERVICE_ACCOUNT_STG` / `_PROD` を使用する。
+新しい Secret・Variable・サービスアカウントは作成しない。既存の WIF の `main` 制限を維持する。
+両環境の `github-actions-firebase` アカウントには Hosting Admin と API Keys Viewer を追加済み。
+初回実行はワークフローを `main` に反映し、権限の反映が完了してから行う。
+
+配布時は [`apps/dashboard/firebase.json`](../apps/dashboard/firebase.json) の環境別 Project ID と
+Web App ID を使い、FlutterFire CLI で対象環境の Firebase Options を生成する。
+参加者アプリ用の `*_APP_FIREBASE_WEB_APP_ID` は使用しない。もう一方の環境にはコンパイル用のダミー設定を使う。
+ビルド後、ルートの `firebase.json` を使って `apps/dashboard/build/web` を `--only hosting` で配布する。
+Functions・Rules・Indexes は更新しないため、関連するバックエンド変更は `Deploy Firebase` で別途適用する。
 
 ## Remote Config
 

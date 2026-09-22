@@ -7,8 +7,7 @@ import 'package:data/data.dart';
 enum SponsorIssueFilter {
   missingPrimaryLogo('ロゴ(1st)未設定'),
   missingSecondaryLogo('ロゴ(2nd)未設定'),
-  missingSlug('slug未設定')
-  ;
+  missingSlug('slug未設定');
 
   const SponsorIssueFilter(this.label);
 

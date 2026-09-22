@@ -1,0 +1,142 @@
+name: Deploy Dashboard
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - apps/dashboard/**
+      - apps/app/lib/firebase_options.stub.dart
+      - packages/data/**
+      - packages/flutterkaigi_lints/**
+      - .fvmrc
+      - analysis_options.yaml
+      - pubspec.yaml
+      - pubspec.lock
+      - firebase.json
+      - .github/workflows/ci_dashboard.yaml
+      - .github/workflows/deploy_dashboard.yaml
+      - .github/actions/setup-flutter/**
+      - .github/actions/setup-firebase/**
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Dashboard の配布先
+        type: choice
+        options: [stg, prod]
+        default: stg
+
+# Serialize validation and publishing together for each delivery environment.
+concurrency:
+  group: deploy-dashboard-${{ inputs.environment || 'stg' }}
+  cancel-in-progress: false
+
+permissions: {}
+
+defaults:
+  run:
+    shell: bash -euo pipefail {0}
+
+jobs:
+  validate:
+    uses: ./.github/workflows/ci_dashboard.yaml
+    permissions:
+      contents: read
+
+  deploy:
+    needs: validate
+    if: ${{ github.ref == 'refs/heads/main' }}
+    name: Dashboard (${{ inputs.environment || 'stg' }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      DEPLOY_ENVIRONMENT: ${{ inputs.environment || 'stg' }}
+      FIREBASE_PROJECT_ID: ${{ vars[format('{0}_FIREBASE_PROJECT_ID', (inputs.environment || 'stg') == 'stg' && 'STG' || 'PROD')] }}
+      GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ vars[format('GCP_WORKLOAD_IDENTITY_PROVIDER_{0}', (inputs.environment || 'stg') == 'stg' && 'STG' || 'PROD')] }}
+      GCP_SERVICE_ACCOUNT: ${{ vars[format('GCP_FIREBASE_DEPLOY_SERVICE_ACCOUNT_{0}', (inputs.environment || 'stg') == 'stg' && 'STG' || 'PROD')] }}
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - uses: ./.github/actions/setup-flutter
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+
+      - name: 配布先と Dashboard 用 Firebase App を検証
+        run: |
+          case "$DEPLOY_ENVIRONMENT" in
+            stg|prod) ;;
+            *) echo '::error::environment must be stg or prod.'; exit 1 ;;
+          esac
+          for name in FIREBASE_PROJECT_ID GCP_WORKLOAD_IDENTITY_PROVIDER GCP_SERVICE_ACCOUNT; do
+            if [ -z "${!name}" ]; then
+              echo "::error::$name が未設定です。apps/dashboard/README.md を確認してください。"
+              exit 1
+            fi
+          done
+          options_path="lib/firebase_options_$DEPLOY_ENVIRONMENT.dart"
+          expected_project="$(jq -er --arg path "$options_path" \
+            '.flutter.platforms.dart[$path].projectId' apps/dashboard/firebase.json)"
+          test "$FIREBASE_PROJECT_ID" = "$expected_project"
+          web_app_id="$(jq -er --arg path "$options_path" \
+            '.flutter.platforms.dart[$path].configurations.web' apps/dashboard/firebase.json)"
+          echo "FIREBASE_WEB_APP_ID=$web_app_id" >> "$GITHUB_ENV"
+
+      - name: Firebase 設定のスタブを準備
+        run: |
+          for flavor in stg prod; do
+            cp apps/app/lib/firebase_options.stub.dart "apps/dashboard/lib/firebase_options_$flavor.dart"
+          done
+
+      - name: 依存パッケージを取得
+        run: flutter pub get
+
+      - uses: ./.github/actions/setup-firebase
+        with:
+          project-id: ${{ env.FIREBASE_PROJECT_ID }}
+          workload-identity-provider: ${{ env.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service-account: ${{ env.GCP_SERVICE_ACCOUNT }}
+
+      # Env imports both flavors. Keep the unused flavor's stub and replace
+      # only the selected flavor using that project's existing Dashboard app.
+      - name: 配布環境の Firebase 設定を生成
+        working-directory: apps/dashboard
+        run: >-
+          flutterfire configure
+          --yes
+          --project="$FIREBASE_PROJECT_ID"
+          --platforms=web
+          --web-app-id="$FIREBASE_WEB_APP_ID"
+          --out="lib/firebase_options_$DEPLOY_ENVIRONMENT.dart"
+
+      - name: 生成した Firebase 設定を検証
+        working-directory: apps/dashboard
+        run: |
+          options_path="lib/firebase_options_$DEPLOY_ENVIRONMENT.dart"
+          grep -Fq "projectId: '$FIREBASE_PROJECT_ID'" "$options_path"
+          grep -Fq "appId: '$FIREBASE_WEB_APP_ID'" "$options_path"
+          grep -Fq 'authDomain:' "$options_path"
+
+      - name: Dashboard をビルド
+        working-directory: apps/dashboard
+        run: flutter build web --release --dart-define=FLAVOR="$DEPLOY_ENVIRONMENT"
+
+      # Hosting configuration and its public directory are relative to the root.
+      - name: Firebase Hosting へ配布
+        run: >-
+          firebase deploy
+          --config firebase.json
+          --project "$FIREBASE_PROJECT_ID"
+          --only hosting
+          --non-interactive
+
+      - name: 配布先を記録
+        run: |
+          {
+            echo "### Dashboard $DEPLOY_ENVIRONMENT"
+            echo "プロジェクト: $FIREBASE_PROJECT_ID; コミット: $GITHUB_SHA"
+            echo "配布URL: https://$FIREBASE_PROJECT_ID.web.app/"
+          } >> "$GITHUB_STEP_SUMMARY"

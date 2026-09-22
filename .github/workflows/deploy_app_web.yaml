@@ -160,17 +160,11 @@ jobs:
             verification_url="$DEPLOYMENT_URL"
           fi
           test -n "$verification_url"
-          for file in apple-app-site-association assetlinks.json; do
-            status="$(curl --silent --show-error --fail --retry 3 --max-time 30 \
-              --dump-header "$RUNNER_TEMP/link-headers" \
-              --output "$RUNNER_TEMP/deployed-$file" \
-              --write-out '%{http_code}' \
-              "${verification_url%/}/.well-known/$file")"
-            test "$status" = 200
-            grep -iq '^content-type: application/json' "$RUNNER_TEMP/link-headers"
-            diff <(jq -S . "$RUNNER_TEMP/app-links/$file") \
-              <(jq -S . "$RUNNER_TEMP/deployed-$file")
-          done
+          python3 .github/scripts/verify_app_links.py \
+            --base-url "$verification_url" \
+            --expected-dir "$RUNNER_TEMP/app-links" \
+            --timeout-seconds 300 \
+            --interval-seconds 10
 
       - name: 配布先を記録
         env:
