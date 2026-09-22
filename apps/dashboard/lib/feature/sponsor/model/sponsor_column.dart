@@ -11,8 +11,7 @@ enum SponsorColumn {
   primaryLogoUrl('ロゴ (プライマリー)', width: 300),
   secondaryLogoUrl('ロゴ (セカンダリー)', width: 300),
   updatedAt('更新日時', width: 140),
-  actions('操作', width: 100)
-  ;
+  actions('操作', width: 100);
 
   const SponsorColumn(this.label, {required this.width});
 

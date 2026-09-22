@@ -7,8 +7,10 @@ on:
       - apps/app/**
       - packages/data/**
       - tool/generate_app_links.dart
+      - .github/scripts/verify_app_links.py
       - .fvmrc
       - pubspec.yaml
+      - pubspec.lock
       - .github/workflows/preview_app_web.yaml
       - .github/workflows/deploy_app_web.yaml
       - .github/actions/setup-flutter/**

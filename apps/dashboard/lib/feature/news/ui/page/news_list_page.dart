@@ -189,7 +189,8 @@ class NewsListPage extends HookConsumerWidget {
     Future<void> save() async {
       final dirtyExisting = [
         for (final entry in edits.value.entries)
-          if (baseById[entry.key] != null) (newsId: entry.key, createdAt: baseById[entry.key]!.createdAt, draft: entry.value),
+          if (baseById[entry.key] != null)
+            (newsId: entry.key, createdAt: baseById[entry.key]!.createdAt, draft: entry.value),
       ];
       final pendingNew = newRows.value;
 

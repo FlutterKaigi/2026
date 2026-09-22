@@ -13,6 +13,7 @@ on:
       - .fvmrc
       - dprint.jsonc
       - pubspec.yaml
+      - pubspec.lock
       - .github/workflows/ci_app.yaml
       - .github/workflows/deploy_app.yaml
       - .github/actions/**
@@ -23,8 +24,8 @@ on:
   workflow_call:
 
 concurrency:
-  group: app-ci-${{ github.ref }}
-  cancel-in-progress: true
+  group: app-ci-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions: {}
 

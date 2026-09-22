@@ -1,0 +1,70 @@
+name: Dashboard CI
+
+on:
+  pull_request:
+    paths:
+      - apps/dashboard/**
+      - apps/app/lib/firebase_options.stub.dart
+      - packages/data/**
+      - packages/flutterkaigi_lints/**
+      - .fvmrc
+      - pubspec.yaml
+      - pubspec.lock
+      - analysis_options.yaml
+      - .github/workflows/ci_dashboard.yaml
+      - .github/workflows/deploy_dashboard.yaml
+      - .github/actions/setup-flutter/**
+  workflow_dispatch:
+  workflow_call:
+
+concurrency:
+  group: dashboard-ci-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions: {}
+
+defaults:
+  run:
+    shell: bash -euo pipefail {0}
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - uses: ./.github/actions/setup-flutter
+
+      - name: Prepare Firebase options stubs
+        run: |
+          cp apps/app/lib/firebase_options.stub.dart apps/dashboard/lib/firebase_options_stg.dart
+          cp apps/app/lib/firebase_options.stub.dart apps/dashboard/lib/firebase_options_prod.dart
+
+      - name: Resolve dependencies
+        run: flutter pub get
+
+      - name: Check formatting
+        run: dart format --output=none --set-exit-if-changed apps/dashboard/lib apps/dashboard/test
+
+      - name: Analyze dashboard
+        working-directory: apps/dashboard
+        run: dart analyze
+
+      - name: Analyze data package
+        working-directory: packages/data
+        run: dart analyze
+
+      - name: Test dashboard
+        working-directory: apps/dashboard
+        run: flutter test --dart-define=FLAVOR=dev
+
+      - name: Test data package
+        working-directory: packages/data
+        run: flutter test
+
+      - name: Build dashboard web
+        working-directory: apps/dashboard
+        run: flutter build web --release --dart-define=FLAVOR=dev

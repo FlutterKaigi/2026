@@ -31,8 +31,7 @@ enum NewsColumn {
   urlJa('URL (ja)', width: 280),
   urlEn('URL (en)', width: 280),
   updatedAt('更新日時', width: 140),
-  actions('操作', width: 90)
-  ;
+  actions('操作', width: 90);
 
   const NewsColumn(this.label, {required this.width});
 
