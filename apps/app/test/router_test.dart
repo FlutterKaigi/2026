@@ -4,10 +4,12 @@ import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/provider/shared_preferences.dart';
 import 'package:app/core/remote_config/remote_config_keys.dart';
 import 'package:app/core/remote_config/remote_config_provider.dart';
+import 'package:app/core/router/launch_route.dart';
 import 'package:app/core/router/router.dart';
 import 'package:app/core/ui/not_found_page.dart';
 import 'package:app/feature/auth/data/provider/auth_repository.dart';
 import 'package:app/feature/auth/ui/page/account_page.dart';
+import 'package:app/feature/event/ui/page/event_info_page.dart';
 import 'package:app/feature/exchange/ui/page/exchange_share_link_page.dart';
 import 'package:app/feature/profile/data/provider/user_profile_repository.dart';
 import 'package:app/feature/support_lt/data/provider/support_lt_provider.dart';
@@ -118,7 +120,22 @@ void main() {
     /// Pumps the real app router (built through `routerProvider`, kept
     /// unpaused by watching it in the tree) and returns the live [GoRouter]
     /// instance for `.go()` calls.
-    Future<GoRouter> pumpRouter(WidgetTester tester) async {
+    Future<GoRouter> pumpRouter(WidgetTester tester, {Uri? launchRoute}) async {
+      if (launchRoute != null) {
+        // `main` が `LaunchRouteObserver` で受け取ったリンクを override で渡す
+        // のと同じ形。`container` は setUp で作られるので、ここで差し替える。
+        container.dispose();
+        container = ProviderContainer(
+          overrides: [
+            authRepositoryProvider.overrideWithValue(authRepository),
+            userProfileRepositoryProvider.overrideWithValue(profileRepository),
+            supportLtRepositoryProvider.overrideWithValue(supportLtRepository),
+            remoteConfigRepositoryProvider.overrideWithValue(remoteConfig),
+            sharedPreferencesProvider.overrideWithValue(preferences),
+            launchRouteProvider.overrideWithValue(launchRoute),
+          ],
+        );
+      }
       await tester.pumpWidget(
         UncontrolledProviderScope(
           container: container,
@@ -230,6 +247,59 @@ void main() {
         expect(currentPath(router), '/account');
       });
     }
+
+    testWidgets('opens the event info page when the app-host root URL arrives as a universal link', (
+      tester,
+    ) async {
+      final router = await pumpRouter(tester);
+      router.go('/account');
+      await tester.pumpAndSettle();
+
+      for (final location in [
+        'https://2026-app.flutterkaigi.jp/',
+        'https://2026-app.flutterkaigi.jp',
+        'https://2026-app.flutterkaigi.jp/?utm_source=qr',
+        '/',
+      ]) {
+        await sendPlatformUrl(tester, location);
+
+        expect(find.byType(NotFoundPage), findsNothing, reason: location);
+        expect(find.byType(EventInfoPage), findsOneWidget, reason: location);
+        expect(currentPath(router), '/info', reason: location);
+      }
+    });
+
+    testWidgets('opens the event info page on a cold start from the app-host root URL', (tester) async {
+      tester.binding.platformDispatcher.defaultRouteNameTestValue = 'https://2026-app.flutterkaigi.jp/';
+      addTearDown(tester.binding.platformDispatcher.clearDefaultRouteNameTestValue);
+
+      final router = await pumpRouter(tester);
+
+      expect(find.byType(NotFoundPage), findsNothing);
+      expect(find.byType(EventInfoPage), findsOneWidget);
+      expect(currentPath(router), '/info');
+    });
+
+    testWidgets('starts on the share link an iOS cold start delivered before the tree was up', (tester) async {
+      // iOS はリンクを最初のフレーム後に push で渡すので、プラットフォームの
+      // 初期ルートは `/` のまま。`LaunchRouteObserver` が受けた値の方を使う。
+      final router = await pumpRouter(
+        tester,
+        launchRoute: Uri.parse('https://2026-app.flutterkaigi.jp/x/v1.other-uid.9999999999.deadbeef'),
+      );
+
+      expect(find.byType(NotFoundPage), findsNothing);
+      expect(find.byType(ExchangeShareLinkPage), findsOneWidget);
+      expect(currentPath(router), '/x/v1.other-uid.9999999999.deadbeef');
+    });
+
+    testWidgets('starts on the event info page when the launch link is the app-host root URL', (tester) async {
+      final router = await pumpRouter(tester, launchRoute: Uri.parse('https://2026-app.flutterkaigi.jp/'));
+
+      expect(find.byType(NotFoundPage), findsNothing);
+      expect(find.byType(EventInfoPage), findsOneWidget);
+      expect(currentPath(router), '/info');
+    });
 
     testWidgets('continues to route universal links and report unrelated unknown URLs', (tester) async {
       final router = await pumpRouter(tester);
