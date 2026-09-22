@@ -49,6 +49,8 @@ Emulator接続時は次のように動作します。
 
 iOSのGoogleサインインはブラウザ経由(`signInWithProvider`)で行われ、`Info.plist`のコールバックスキームでアプリへ戻ります。iOSのAppleサインインは全環境で共通のEntitlementsを使い、Sign in with Apple Capabilityを要求します。署名に使う各App IDでもCapabilityを有効化し、対応するProvisioning Profileを用意してください。Firebaseに接続するstg / prodではAppleプロバイダを有効化します。配布に必要なコールバックスキーム、Entitlements、Provisioning Profileはメンテナー向けWorkflowとApple Developer Portalで管理します。Web OAuthを提供しないため、AppleのServices IDは使用しません。
 
+認証用の戻りURL(`app-…://firebaseauth/link` / `com.googleusercontent.apps.…://firebaseauth/link`)がFlutterにも通知された場合、ルーターは画面遷移を止め、サインインを開始した画面と戻る履歴を維持します。認証状態の更新はFirebase SDKが処理します。このURLからアプリが新規起動した場合はアカウントタブを表示します。プロフィール交換などのUniversal Linksは引き続き通常のルーティングで処理します。
+
 ## プロフィール
 
 サインイン後、アカウントタブからプロフィール(`/account/profile`)を作成・編集できます。プロフィールはFirestoreの`users/{uid}`に保存され、サインイン済みの他の参加者から参照できます(プロフィール交換ミッション用)。項目は次のとおりです。

@@ -1,11 +1,19 @@
+import 'dart:async';
+
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/provider/shared_preferences.dart';
 import 'package:app/core/remote_config/remote_config_keys.dart';
 import 'package:app/core/remote_config/remote_config_provider.dart';
 import 'package:app/core/router/router.dart';
+import 'package:app/core/ui/not_found_page.dart';
 import 'package:app/feature/auth/data/provider/auth_repository.dart';
 import 'package:app/feature/auth/ui/page/account_page.dart';
+import 'package:app/feature/exchange/ui/page/exchange_share_link_page.dart';
+import 'package:app/feature/profile/data/provider/user_profile_repository.dart';
+import 'package:app/feature/support_lt/data/provider/support_lt_provider.dart';
+import 'package:app/feature/support_lt/ui/page/support_lt_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
@@ -14,6 +22,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'fake_auth_repository.dart';
 import 'fake_remote_config_repository.dart';
+import 'fake_support_lt_repository.dart';
+import 'fake_user_profile_repository.dart';
+
+// Synthetic versions of the two callback schemes configured for iOS builds.
+const _firebaseAuthCallbackQuery = '?deep_link_id=https%3A%2F%2Fexample.firebaseapp.com%2F__%2Fauth%2Fcallback';
+const _firebaseAuthCallbacks = [
+  'app-1-000000000000-ios-0000000000000000000000://firebaseauth/link$_firebaseAuthCallbackQuery',
+  'com.googleusercontent.apps.test-client://firebaseauth/link$_firebaseAuthCallbackQuery',
+];
 
 void main() {
   test('application router reflects pushed deep links in the web URL', () {
@@ -50,15 +67,12 @@ void main() {
     );
   });
 
-  group('event feature redirect', () {
+  group('application navigation', () {
     // go_router only evaluates `redirect` as part of the RouteInformation
     // parsing pipeline driven by a mounted `Router` widget, so these run as
     // `testWidgets` with the real router pumped into a `MaterialApp.router`
-    // instead of calling `router.go` on a bare `GoRouter`. Every blocked
-    // destination shows a sign-in prompt while signed out (see
-    // `AuthenticatedBody` / `ExchangeAccessGate` / `QuizSignInRequiredView`),
-    // so a signed-out `FakeAuthRepository` is enough to render them without
-    // wiring up their other repositories.
+    // instead of calling `router.go` on a bare `GoRouter`. Auth callback tests
+    // also send the platform navigation message received from native iOS.
     //
     // `routerProvider` must be watched from inside the widget tree (as
     // `app.dart` does with `ref.watch(routerProvider)`), not just
@@ -68,6 +82,8 @@ void main() {
     // `eventFeaturesEnabledProvider` of `setValue` calls.
     late FakeAuthRepository authRepository;
     late FakeRemoteConfigRepository remoteConfig;
+    late FakeUserProfileRepository profileRepository;
+    late FakeSupportLtRepository supportLtRepository;
     late SharedPreferences preferences;
     late ProviderContainer container;
 
@@ -77,9 +93,13 @@ void main() {
       preferences = await SharedPreferences.getInstance();
       authRepository = FakeAuthRepository();
       remoteConfig = FakeRemoteConfigRepository();
+      profileRepository = FakeUserProfileRepository();
+      supportLtRepository = FakeSupportLtRepository();
       container = ProviderContainer(
         overrides: [
           authRepositoryProvider.overrideWithValue(authRepository),
+          userProfileRepositoryProvider.overrideWithValue(profileRepository),
+          supportLtRepositoryProvider.overrideWithValue(supportLtRepository),
           remoteConfigRepositoryProvider.overrideWithValue(remoteConfig),
           sharedPreferencesProvider.overrideWithValue(preferences),
         ],
@@ -91,6 +111,8 @@ void main() {
       container.dispose();
       authRepository.dispose();
       remoteConfig.dispose();
+      profileRepository.dispose();
+      supportLtRepository.dispose();
     });
 
     /// Pumps the real app router (built through `routerProvider`, kept
@@ -117,6 +139,119 @@ void main() {
     }
 
     String currentPath(GoRouter router) => router.routeInformationProvider.value.uri.path;
+
+    Future<void> sendPlatformUrl(WidgetTester tester, String location) async {
+      await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/navigation',
+        const JSONMethodCodec().encodeMethodCall(
+          MethodCall('pushRouteInformation', {'location': location}),
+        ),
+        (_) {},
+      );
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('keeps the account page when an iOS Firebase Auth callback arrives', (tester) async {
+      final router = await pumpRouter(tester);
+      router.go('/account');
+      await tester.pumpAndSettle();
+
+      await sendPlatformUrl(tester, _firebaseAuthCallbacks.first);
+
+      expect(find.byType(NotFoundPage), findsNothing);
+      expect(find.byType(AccountPage), findsOneWidget);
+      expect(currentPath(router), '/account');
+    });
+
+    for (final eventFeaturesEnabled in [true, false]) {
+      testWidgets('keeps Google sign-in complete with event features enabled: $eventFeaturesEnabled', (tester) async {
+        remoteConfig.setValue(RemoteConfigKeys.eventFeaturesEnabled, eventFeaturesEnabled);
+        final router = await pumpRouter(tester);
+        router.go('/account');
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.bySemanticsLabel('Google でサインイン'));
+        await tester.pumpAndSettle();
+        expect(authRepository.calledMethods, ['signInWithGoogle']);
+        expect(find.text('Google User'), findsOneWidget);
+        expect(currentPath(router), '/account');
+        expect(container.read(routerProvider), same(router));
+
+        for (final callback in _firebaseAuthCallbacks) {
+          await sendPlatformUrl(tester, callback);
+
+          expect(find.byType(NotFoundPage), findsNothing);
+          expect(find.text('Google User'), findsOneWidget);
+          expect(currentPath(router), '/account');
+        }
+      });
+    }
+
+    testWidgets('preserves a pushed sign-in page and its back stack after the callback', (tester) async {
+      final router = await pumpRouter(tester);
+      router.go('/account');
+      await tester.pumpAndSettle();
+      unawaited(router.push<void>('/account/support-lt'));
+      await tester.pumpAndSettle();
+      final previousConfiguration = router.routerDelegate.currentConfiguration;
+
+      for (final callback in _firebaseAuthCallbacks) {
+        await sendPlatformUrl(tester, callback);
+
+        expect(find.byType(NotFoundPage), findsNothing);
+        expect(find.byType(SupportLtPage), findsOneWidget);
+        expect(router.routerDelegate.currentConfiguration, same(previousConfiguration));
+        expect(currentPath(router), '/account/support-lt');
+        expect(router.canPop(), isTrue);
+      }
+
+      // The auth stream may finish after the platform delivers the callback.
+      await tester.tap(find.bySemanticsLabel('Google でサインイン'));
+      await tester.pumpAndSettle();
+      expect(authRepository.currentUser, isNotNull);
+      expect(find.byType(SupportLtPage), findsOneWidget);
+      expect(find.bySemanticsLabel('Google でサインイン'), findsNothing);
+
+      router.pop();
+      await tester.pumpAndSettle();
+      expect(currentPath(router), '/account');
+      expect(find.text('Google User'), findsOneWidget);
+    });
+
+    for (final callback in _firebaseAuthCallbacks) {
+      testWidgets('opens the account page on a cold start from ${Uri.parse(callback).scheme}', (tester) async {
+        tester.binding.platformDispatcher.defaultRouteNameTestValue = callback;
+        addTearDown(tester.binding.platformDispatcher.clearDefaultRouteNameTestValue);
+
+        final router = await pumpRouter(tester);
+
+        expect(find.byType(NotFoundPage), findsNothing);
+        expect(find.byType(AccountPage), findsOneWidget);
+        expect(currentPath(router), '/account');
+      });
+    }
+
+    testWidgets('continues to route universal links and report unrelated unknown URLs', (tester) async {
+      final router = await pumpRouter(tester);
+      await sendPlatformUrl(tester, 'https://2026.flutterkaigi.jp/x/v1.other-uid.9999999999.deadbeef');
+
+      expect(find.byType(ExchangeShareLinkPage), findsOneWidget);
+      expect(find.byType(NotFoundPage), findsNothing);
+      expect(currentPath(router), '/x/v1.other-uid.9999999999.deadbeef');
+
+      for (final location in [
+        'https://2026.flutterkaigi.jp/link',
+        'https://firebaseauth/link',
+        'unrelated://firebaseauth/link',
+        'com.googleusercontent.apps.test-client://firebaseauth/unknown',
+        'com.googleusercontent.apps.test-client://unrelated/link',
+      ]) {
+        await sendPlatformUrl(tester, location);
+
+        expect(find.byType(NotFoundPage), findsOneWidget, reason: location);
+        expect(router.routeInformationProvider.value.uri, Uri.parse(location));
+      }
+    });
 
     testWidgets('redirects every blocked event-feature destination to /account when the flag is false', (
       tester,
