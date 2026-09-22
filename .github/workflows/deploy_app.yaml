@@ -52,7 +52,6 @@ jobs:
 
   ios:
     needs: validate
-    name: ios (${{ matrix.environment }})
     if: ${{ github.event_name != 'workflow_dispatch' || inputs.ios }}
     strategy:
       fail-fast: false
@@ -72,7 +71,6 @@ jobs:
 
   android:
     needs: validate
-    name: android (${{ matrix.environment }})
     if: ${{ github.event_name != 'workflow_dispatch' || inputs.android }}
     strategy:
       fail-fast: false
@@ -92,7 +90,6 @@ jobs:
 
   web:
     needs: validate
-    name: web (${{ matrix.environment }})
     if: ${{ github.event_name != 'workflow_dispatch' || inputs.web }}
     strategy:
       fail-fast: false
