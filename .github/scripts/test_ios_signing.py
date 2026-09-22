@@ -114,6 +114,66 @@ class ProfileValidationTest(unittest.TestCase):
                 ios_signing.select_identity(output, fingerprints)
 
 
+class PKCS12CompatibilityTest(unittest.TestCase):
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temp.cleanup)
+        self.directory = Path(self.temp.name)
+        self.directory.chmod(0o700)
+        self.certificate = self.directory / "distribution.p12"
+        self.certificate.write_bytes(b"fixture-modern-p12")
+        self.pem = self.directory / "distribution.pem"
+        self.compatible = self.directory / "distribution-compatible.p12"
+
+    def test_repackages_private_files_without_password_arguments_or_output(self):
+        calls = []
+        def run(arguments, **options):
+            calls.append(arguments)
+            self.assertTrue(options["capture_output"])
+            self.assertFalse(options["check"])
+            self.assertEqual(arguments[:2], ["/usr/bin/openssl", "pkcs12"])
+            self.assertNotIn("sensitive-fixture-password", arguments)
+            if "-export" not in arguments:
+                self.assertIn("-nodes", arguments)
+                self.assertEqual(arguments[arguments.index("-passin") + 1], "env:IOS_DISTRIBUTION_CERTIFICATE_PASSWORD")
+                return subprocess.CompletedProcess(arguments, 0, b"sensitive-fixture-private-key", b"")
+            self.assertEqual(self.pem.stat().st_mode & 0o777, 0o600)
+            self.assertEqual(self.compatible.stat().st_mode & 0o777, 0o600)
+            self.assertEqual(self.pem.read_bytes(), b"sensitive-fixture-private-key")
+            self.assertEqual(arguments[arguments.index("-passout") + 1], "env:IOS_DISTRIBUTION_CERTIFICATE_PASSWORD")
+            for flag, value in (("-keypbe", "PBE-SHA1-3DES"), ("-certpbe", "PBE-SHA1-3DES"), ("-macalg", "sha1")):
+                self.assertEqual(arguments[arguments.index(flag) + 1], value)
+            self.compatible.write_bytes(b"fixture-compatible-p12")
+            return subprocess.CompletedProcess(arguments, 0, b"sensitive-fixture-output", b"")
+        stdout, stderr = io.StringIO(), io.StringIO()
+        with mock.patch.object(ios_signing.subprocess, "run", side_effect=run), contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+            ios_signing.normalize_pkcs12(self.certificate)
+        self.assertEqual(len(calls), 2)
+        self.assertEqual(self.certificate.read_bytes(), b"fixture-compatible-p12")
+        self.assertEqual(self.certificate.stat().st_mode & 0o777, 0o600)
+        self.assertFalse(self.pem.exists())
+        self.assertFalse(self.compatible.exists())
+        self.assertEqual(stdout.getvalue() + stderr.getvalue(), "")
+
+    def test_decode_and_export_failures_redact_output_and_remove_intermediates(self):
+        for failing_stage in ("decode", "export"):
+            def run(arguments, **options):
+                if "-export" not in arguments and failing_stage == "export":
+                    return subprocess.CompletedProcess(arguments, 0, b"sensitive-fixture-private-key", b"")
+                if "-export" in arguments:
+                    self.compatible.write_bytes(b"sensitive-fixture-partial-p12")
+                return subprocess.CompletedProcess(arguments, 1, b"sensitive-fixture-stdout", b"sensitive-fixture-stderr")
+            stdout, stderr = io.StringIO(), io.StringIO()
+            with self.subTest(stage=failing_stage), mock.patch.object(ios_signing.subprocess, "run", side_effect=run), contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                with self.assertRaises(ios_signing.SigningError) as raised:
+                    ios_signing.normalize_pkcs12(self.certificate)
+            self.assertNotIn("sensitive-fixture", str(raised.exception))
+            self.assertEqual(stdout.getvalue() + stderr.getvalue(), "")
+            self.assertEqual(self.certificate.read_bytes(), b"fixture-modern-p12")
+            self.assertFalse(self.pem.exists())
+            self.assertFalse(self.compatible.exists())
+
+
 class SigningLifecycleTest(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
@@ -139,6 +199,9 @@ class SigningLifecycleTest(unittest.TestCase):
         })
         self.environment.start()
         self.addCleanup(self.environment.stop)
+        normalization = mock.patch.object(ios_signing, "normalize_pkcs12")
+        self.normalize = normalization.start()
+        self.addCleanup(normalization.stop)
         self.calls = []
 
     def security(self, arguments, failure):
@@ -159,6 +222,7 @@ class SigningLifecycleTest(unittest.TestCase):
     def test_prepare_and_cleanup_generate_manual_signing_and_restore_search_list(self):
         with mock.patch.object(ios_signing, "security", side_effect=self.security), contextlib.redirect_stdout(io.StringIO()):
             ios_signing.prepare()
+            self.normalize.assert_called_once_with(self.signing / "distribution.p12")
             configuration = self.ios / "Flutter/Signing.xcconfig"
             self.assertIn(f"CODE_SIGN_IDENTITY[sdk=iphoneos*][config=Release] = {FINGERPRINT}", configuration.read_text())
             self.assertIn("CODE_SIGN_STYLE[config=Release] = Manual", configuration.read_text())
@@ -195,7 +259,8 @@ class SigningLifecycleTest(unittest.TestCase):
     def test_cleanup_continues_and_can_retry_after_search_list_restore_failure(self):
         with mock.patch.object(ios_signing, "security", side_effect=self.security), contextlib.redirect_stdout(io.StringIO()):
             ios_signing.prepare()
-        (self.signing / "distribution.p12").write_bytes(b"sensitive-fixture")
+        for name in ("distribution.p12", "distribution.pem", "distribution-compatible.p12"):
+            (self.signing / name).write_bytes(b"sensitive-fixture")
         def fail_restore(arguments, failure):
             if arguments[0] == "list-keychains":
                 raise ios_signing.SigningError(failure)
@@ -203,7 +268,8 @@ class SigningLifecycleTest(unittest.TestCase):
         with mock.patch.object(ios_signing, "security", side_effect=fail_restore):
             with self.assertRaises(ios_signing.SigningError):
                 ios_signing.cleanup()
-        self.assertFalse((self.signing / "distribution.p12").exists())
+        for name in ("distribution.p12", "distribution.pem", "distribution-compatible.p12"):
+            self.assertFalse((self.signing / name).exists())
         self.assertFalse((self.signing / "signing.keychain-db").exists())
         self.assertFalse((self.ios / "Flutter/Signing.xcconfig").exists())
         with mock.patch.object(ios_signing, "security", side_effect=self.security):

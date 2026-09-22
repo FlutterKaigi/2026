@@ -23,17 +23,47 @@ class SigningError(Exception):
     """A static message that is safe to show in Actions logs."""
 
 
-def security(arguments, failure):
+def run_private(arguments, failure):
     try:
         result = subprocess.run(
-            ["security", *map(str, arguments)], capture_output=True, check=False
+            list(map(str, arguments)), capture_output=True, check=False
         )
     except OSError:
         raise SigningError(failure) from None
     if result.returncode:
-        # security errors can include passwords, certificate names or file data.
+        # Command output can include passwords, private keys or certificate data.
         raise SigningError(failure)
     return result.stdout
+
+
+def security(arguments, failure):
+    return run_private(["security", *arguments], failure)
+
+
+def normalize_pkcs12(certificate_path):
+    # OpenSSL 3 defaults use algorithms that macOS security import cannot read.
+    # Repackage only the runner copy; keep the original Secret unchanged.
+    pem = certificate_path.with_suffix(".pem")
+    compatible = certificate_path.with_name("distribution-compatible.p12")
+    failure = "Could not prepare a macOS-compatible p12. Check the certificate and password Secrets."
+    try:
+        write_private(pem, run_private([
+            "/usr/bin/openssl", "pkcs12", "-in", certificate_path,
+            "-passin", "env:IOS_DISTRIBUTION_CERTIFICATE_PASSWORD", "-nodes",
+        ], failure))
+        # LibreSSL needs a seekable PEM file, and its output must start private.
+        write_private(compatible, b"")
+        run_private([
+            "/usr/bin/openssl", "pkcs12", "-export", "-in", pem, "-out", compatible,
+            "-passout", "env:IOS_DISTRIBUTION_CERTIFICATE_PASSWORD",
+            "-keypbe", "PBE-SHA1-3DES", "-certpbe", "PBE-SHA1-3DES", "-macalg", "sha1",
+        ], failure)
+        compatible.replace(certificate_path)
+    finally:
+        try:
+            pem.unlink(missing_ok=True)
+        finally:
+            compatible.unlink(missing_ok=True)
 
 
 def decode_secret(name):
@@ -155,6 +185,7 @@ def prepare():
     except (ValueError, TypeError, OSError, plistlib.InvalidFileException):
         raise SigningError("Could not read provisioning profile or Runner entitlements.") from None
     profile_uuid, fingerprints = validate_profile(profile, bundle, team, required)
+    normalize_pkcs12(certificate_path)
     state["keychains"] = shlex.split(
         security(["list-keychains", "-d", "user"], "Could not read the keychain search list.").decode()
     )
@@ -230,7 +261,7 @@ def cleanup():
                 Path(state[name]).unlink(missing_ok=True)
             except OSError:
                 failures.append("Could not remove a temporary signing file.")
-    for name in ("distribution.p12", "profile.mobileprovision"):
+    for name in ("distribution.p12", "distribution.pem", "distribution-compatible.p12", "profile.mobileprovision"):
         try:
             (directory / name).unlink(missing_ok=True)
         except OSError:
