@@ -44,6 +44,13 @@ part 'routes.dart';
 /// `@TypedGoRoute(path: '/x/:token')` と同じ値をここに定数で置く。
 const _shareLinkBasePath = '/x';
 
+/// Native Firebase Auth callbacks belong to the SDK, not the app's pages.
+/// Supports the encoded Firebase app ID and reversed Google client ID schemes.
+bool _isFirebaseAuthCallback(Uri uri) =>
+    (uri.scheme.startsWith('app-') || uri.scheme.startsWith('com.googleusercontent.apps.')) &&
+    uri.host == 'firebaseauth' &&
+    uri.path == '/link';
+
 /// Provides the application [GoRouter].
 ///
 /// Routes are declared with `go_router_builder` typed routes in `routes.dart`;
@@ -87,7 +94,21 @@ final routerProvider = Provider<GoRouter>((ref) {
     observers: [TalkerRouteObserver(talker)],
     errorBuilder: (context, state) => const NotFoundPage(),
     refreshListenable: eventFeaturesEnabled,
+    onEnter: (context, currentState, nextState, router) {
+      // iOS can forward the OAuth callback to Flutter's deep-link handler.
+      // Keep the current page and its back stack while Firebase updates the
+      // auth stream, including when sign-in started from a nested page.
+      if (_isFirebaseAuthCallback(nextState.uri) && router.routerDelegate.currentConfiguration.isNotEmpty) {
+        return const Block.stop();
+      }
+      return const Allow();
+    },
     redirect: (context, state) {
+      // A cold-start callback has no page to preserve. Let it reach this
+      // redirect rather than blocking without a previous route (also a 404).
+      if (_isFirebaseAuthCallback(state.uri)) {
+        return const AccountRoute().location;
+      }
       if (eventFeaturesEnabled.value) {
         return null;
       }
