@@ -14,7 +14,7 @@ app・website は本番の変更検知、PRプレビューの変更検知、配�
 | --- | --- | --- |
 | `Workflows CI` | workflow・共通action・配布script関連のPR、手動 | actionlint、配布scriptのテスト（main pushでの単独実行なし） |
 | `App CI` | app関連のPR、配布Workflowからの呼び出し、手動 | format/analyze/test、dprint |
-| `Deploy App` | app関連の `main` push、正式なGitHub Releaseの公開、手動 | iOS / Android / Web を stg と prod へ配布 |
+| `Deploy App` | app関連の `main` push、手動 | iOS / Android / Web を stg と prod へ配布 |
 | `Preview App Web` | app関連のPR、手動 | stg に接続するPR別のWebプレビュー |
 | `Deploy Firebase` | Firebase関連の `main` push、`main` から手動 | Rules・Indexes・Functions。stg は自動、prod は手動のみ |
 | `Dashboard CI` | dashboard関連のPR、配布Workflowからの呼び出し、手動 | format/analyze/test、dev の Web ビルド |
@@ -40,7 +40,7 @@ Firebase配布の準備と実行手順は[Firebase 配布手順](FIREBASE_DELIVE
 ### 自動配布の起点
 
 [FlutterKaigi 2025](https://github.com/FlutterKaigi/2025/blob/main/.github/workflows/deploy-app.yaml)と同じく、
-app関連の `main` 更新または正式リリースの `released` イベントで、iOS / Android / Web を同じコミットから **stg と prod の両方**へ配布します。
+app関連の `main` 更新で、iOS / Android / Web を同じコミットから **stg と prod の両方**へ配布します。
 iOS は TestFlight、Android は Google Play の内部テストまでを自動化します。
 ストア審査への提出と一般公開はストア管理画面から行います。
 PR は Web Preview で確認し、ネイティブアプリの確認は手動実行で prod / stg を選択します。
@@ -57,7 +57,7 @@ Androidの初回は `Deploy App` で Android のみを選び、 `upload_to_play=
 Artifactsから署名済みAABを取得してPlay Consoleの内部テストへ手動アップロードします。
 このモードはGoogle Play APIの認証を要求しません。2回目以降は
 `upload_to_play=true` で内部テストへアップロードできます。
-`main` push と正式リリースでは `upload_to_play=true` として stg / prod の両方を内部テストへ配布します。
+`main` push では `upload_to_play=true` として stg / prod の両方を内部テストへ配布します。
 
 手動実行の `environment=stg` は `.env.stg`、stgのFirebase/WIF、
 `jp.flutterkaigi.conf2026.stg` を使用します。本番とは別のApp Store Connect / Play Console
@@ -166,7 +166,7 @@ TokenはGit、Issue、Slackへ貼り付けません。権限と対象Resourceは
 
 ## Apple Developer / App Store Connect
 
-PRマージ前にApp Store Connectへのアップロードまで確認する場合は、`Deploy App` で iOS のみを選んで手動実行し、対象ブランチと `environment=stg` を選択します。本番接続版が必要な場合は `prod` を選択します。`main` 更新と正式リリースでは stg / prod の両方を自動アップロードします。
+PRマージ前にApp Store Connectへのアップロードまで確認する場合は、`Deploy App` で iOS のみを選んで手動実行し、対象ブランチと `environment=stg` を選択します。本番接続版が必要な場合は `prod` を選択します。`main` 更新では stg / prod の両方を自動アップロードします。
 
 ### App IDとApp Store Connectアプリ
 
