@@ -210,6 +210,35 @@ void main() {
     });
   }
 
+  testWidgets('ignores a QR code detected while the scanner is closing', (tester) async {
+    final authRepository = FakeAuthRepository(initialUser: FakeUser(uid: 'uid-1'));
+    addTearDown(authRepository.dispose);
+    final profileRepository = FakeUserProfileRepository(initialProfile: ownProfile());
+    addTearDown(profileRepository.dispose);
+    final exchangeRepository = FakeProfileExchangeRepository();
+    addTearDown(exchangeRepository.dispose);
+
+    await openScanPage(
+      tester,
+      buildSubject(
+        authRepository: authRepository,
+        profileRepository: profileRepository,
+        exchangeRepository: exchangeRepository,
+      ),
+    );
+
+    // The camera keeps reporting codes until the closing transition ends.
+    final scanner = tester.widget<MobileScanner>(find.byType(MobileScanner));
+    await tester.tap(find.byType(BackButton));
+    await tester.pump();
+    scanner.onDetect!(const BarcodeCapture(barcodes: [Barcode(rawValue: 'v1.uid-2.9999999999.deadbeef')]));
+    await tester.pumpAndSettle();
+
+    expect(exchangeRepository.createCalls, isEmpty);
+    expect(find.byType(ExchangeScanPage), findsNothing);
+    expect(find.text('open scan'), findsOneWidget);
+  });
+
   testWidgets('shows an already-exchanged message and keeps scanning on a duplicate scan', (tester) async {
     final authRepository = FakeAuthRepository(initialUser: FakeUser(uid: 'uid-1'));
     addTearDown(authRepository.dispose);
