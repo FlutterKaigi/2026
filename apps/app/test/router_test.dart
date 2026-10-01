@@ -12,6 +12,7 @@ import 'package:app/feature/exchange/ui/page/exchange_share_link_page.dart';
 import 'package:app/feature/profile/data/provider/user_profile_repository.dart';
 import 'package:app/feature/support_lt/data/provider/support_lt_provider.dart';
 import 'package:app/feature/support_lt/ui/page/support_lt_page.dart';
+import 'package:data/data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -58,6 +59,11 @@ void main() {
     expect(const AccountRoute().location, '/account');
     expect(const EmailSignInRoute().location, '/account/email');
     expect(const SupportLtRoute().location, '/account/support-lt');
+    // 応援LTのQRコードが指すリンクは、生成側(`supportLtQrPayload`)と同じパスで解決する。
+    expect(
+      const SupportLtLinkRoute(code: '123456').location,
+      Uri.parse(supportLtQrPayload('123456', origin: productionAppOrigin)).path,
+    );
     expect(const ExchangeHomeRoute().location, '/account/exchange');
     expect(const ExchangeScanRoute().location, '/account/exchange/scan');
     expect(const ExchangeListRoute().location, '/account/exchange/list');
@@ -264,6 +270,7 @@ void main() {
         '/account/quiz',
         '/account/quiz/some-event',
         '/account/support-lt',
+        '/account/support-lt/123456',
         '/account/exchange',
         '/account/exchange/scan',
         '/account/exchange/list',
@@ -286,6 +293,7 @@ void main() {
         '/account/missions',
         '/account/quiz',
         '/account/support-lt',
+        '/account/support-lt/123456',
         '/account/exchange',
         '/account/sns-post',
         '/x/v1.other-uid.9999999999.deadbeef',
@@ -295,6 +303,23 @@ void main() {
 
         expect(currentPath(router), location);
       }
+    });
+
+    testWidgets('opens a Support LT QR code link on the registration page above the account page', (tester) async {
+      final router = await pumpRouter(tester);
+
+      await sendPlatformUrl(tester, '/account/support-lt/123456');
+
+      expect(find.byType(SupportLtPage), findsOneWidget);
+      expect(tester.widget<SupportLtPage>(find.byType(SupportLtPage)).linkCode, '123456');
+      expect(currentPath(router), '/account/support-lt/123456');
+      // サインイン前は登録を送信しない。
+      expect(supportLtRepository.submittedCodes, isEmpty);
+
+      router.pop();
+      await tester.pumpAndSettle();
+      expect(find.byType(AccountPage), findsOneWidget);
+      expect(currentPath(router), '/account');
     });
 
     testWidgets('leaves unrelated destinations untouched when the flag is false', (tester) async {

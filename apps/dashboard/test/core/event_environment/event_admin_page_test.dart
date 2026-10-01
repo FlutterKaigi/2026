@@ -6,6 +6,8 @@ import 'package:dashboard/core/event_environment/event_admin_client.dart';
 import 'package:dashboard/core/event_environment/event_environment.dart';
 import 'package:dashboard/core/router/router.dart';
 import 'package:dashboard/feature/auth/data/provider/auth_repository.dart';
+import 'package:dashboard/feature/support_lt/data/provider/support_lt_state.dart';
+import 'package:dashboard/feature/support_lt/ui/widget/support_lt_code_card.dart';
 import 'package:data/data.dart';
 import 'package:data/user.dart';
 import 'package:flutter/material.dart';
@@ -108,8 +110,13 @@ void main() {
 
   testWidgets('switches reads and writes without signing in again and discards old data', (tester) async {
     final (_, router) = await show(tester, '/support-lt?environment=stg');
+    // The QR code must open the attendee app of the operated environment, not
+    // of the environment this dashboard build signs in to.
+    String? qrOrigin() =>
+        ProviderScope.containerOf(tester.element(find.byType(SupportLtCodeCard))).read(supportLtAppOriginProvider);
     expect(find.text('stg の参加者'), findsOneWidget);
     expect(find.text('123456'), findsOneWidget);
+    expect(qrOrigin(), stagingAppOrigin);
     await tester.tap(find.byKey(const Key('event-environment-selector')));
     await tester.pumpAndSettle();
     await tester.tap(find.text('本番').last);
@@ -119,6 +126,7 @@ void main() {
     expect(find.text('prod の参加者'), findsOneWidget);
     expect(find.text('123456'), findsNothing);
     expect(find.text('654321'), findsOneWidget);
+    expect(qrOrigin(), productionAppOrigin);
     await tester.tap(find.text('コードを再発行'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('再発行する'));

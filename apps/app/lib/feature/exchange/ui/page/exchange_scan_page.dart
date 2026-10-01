@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/log/talker.dart';
+import 'package:app/core/ui/widget/qr_scanner_view.dart';
 import 'package:app/feature/auth/data/provider/auth_state.dart';
 import 'package:app/feature/exchange/data/exchange_scan_handler.dart';
 import 'package:app/feature/exchange/data/exchange_token.dart';
@@ -107,28 +108,11 @@ class _ScannerBody extends HookConsumerWidget {
     return Stack(
       fit: StackFit.expand,
       children: [
-        MobileScanner(
+        QrScannerView(
           controller: controller,
           onDetect: (capture) => unawaited(handleDetect(capture)),
-          errorBuilder: (context, error) => _CameraError(message: t.exchange.scanCameraError),
-        ),
-        IgnorePointer(
-          child: Align(
-            alignment: Alignment.bottomCenter,
-            child: Container(
-              margin: const EdgeInsets.only(bottom: 32),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color: Colors.black54,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Text(
-                t.exchange.scanHint,
-                style: const TextStyle(color: Colors.white),
-                textAlign: TextAlign.center,
-              ),
-            ),
-          ),
+          hint: t.exchange.scanHint,
+          cameraErrorMessage: t.exchange.scanCameraError,
         ),
         if (isProcessing.value)
           const ColoredBox(
@@ -138,32 +122,4 @@ class _ScannerBody extends HookConsumerWidget {
       ],
     );
   }
-}
-
-class _CameraError extends StatelessWidget {
-  const _CameraError({required this.message});
-
-  final String message;
-
-  @override
-  Widget build(BuildContext context) => ColoredBox(
-    color: Colors.black,
-    child: Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.no_photography_outlined, color: Colors.white, size: 40),
-            const SizedBox(height: 12),
-            Text(
-              message,
-              style: const TextStyle(color: Colors.white),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
-    ),
-  );
 }

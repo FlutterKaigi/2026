@@ -13,21 +13,13 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 import 'fake_auth_repository.dart';
+import 'fake_mobile_scanner_platform.dart';
 import 'fake_profile_exchange_repository.dart';
 import 'fake_user_profile_repository.dart';
 
 void main() {
-  // mobile_scanner talks to the platform over a method channel that has no
-  // implementation in widget tests. Faking the platform (rather than
-  // stubbing a channel) keeps `MobileScannerController.start()` inside its
-  // own documented error handling (`value.error` -> `errorBuilder`) instead
-  // of throwing an unhandled `MissingPluginException` from `initState()`'s
-  // fire-and-forget `_initializeController()`. `onDetect` itself is a plain
-  // callback stored on the `MobileScanner` widget, so it can still be
-  // invoked directly regardless of this — the tests below never depend on a
-  // real camera preview rendering.
   final originalPlatform = MobileScannerPlatform.instance;
-  setUpAll(() => MobileScannerPlatform.instance = _FakeMobileScannerPlatform());
+  setUpAll(() => MobileScannerPlatform.instance = FakeMobileScannerPlatform());
   tearDownAll(() => MobileScannerPlatform.instance = originalPlatform);
 
   Widget buildSubject({
@@ -284,32 +276,4 @@ void main() {
 
     expect(find.text('カメラを利用できません。設定でカメラへのアクセスを許可してください'), findsOneWidget);
   });
-}
-
-/// Fails every `start()` the way an unavailable camera would, so
-/// [MobileScannerController] surfaces it through `value.error` (and the
-/// widget's `errorBuilder`) rather than a raw platform-channel exception.
-final class _FakeMobileScannerPlatform extends MobileScannerPlatform {
-  @override
-  Stream<BarcodeCapture?> get barcodesStream => const Stream.empty();
-
-  @override
-  Stream<TorchState> get torchStateStream => const Stream.empty();
-
-  @override
-  Stream<double> get zoomScaleStateStream => const Stream.empty();
-
-  @override
-  Future<MobileScannerViewAttributes> start(StartOptions startOptions) {
-    throw const MobileScannerException(
-      errorCode: MobileScannerErrorCode.genericError,
-      errorDetails: MobileScannerErrorDetails(message: 'No platform camera in widget tests.'),
-    );
-  }
-
-  @override
-  Future<void> stop() async {}
-
-  @override
-  Future<void> dispose() async {}
 }

@@ -16,22 +16,22 @@ class TranslationsEn extends Translations with BaseTranslations<AppLocale, Trans
 	/// Constructing via the enum [AppLocale.build] is preferred.
 	TranslationsEn({Map<String, Node>? overrides, PluralResolver? cardinalResolver, PluralResolver? ordinalResolver, TranslationMetadata<AppLocale, Translations>? meta})
 		: assert(overrides == null, 'Set "translation_overrides: true" in order to enable this feature.'),
-		  _meta = meta ?? TranslationMetadata(
+		  $meta = meta ?? TranslationMetadata(
 		    locale: AppLocale.en,
 		    overrides: overrides ?? {},
 		    cardinalResolver: cardinalResolver,
 		    ordinalResolver: ordinalResolver,
 		  ),
 		  super(cardinalResolver: cardinalResolver, ordinalResolver: ordinalResolver) {
-		_meta.setFlatMapFunction(_flatMapFunction);
+		super.$meta.setFlatMapFunction($meta.getTranslation); // copy base translations to super.$meta
+		$meta.setFlatMapFunction(_flatMapFunction);
 	}
 
 	/// Metadata for the translations of <en>.
-	final TranslationMetadata<AppLocale, Translations> _meta;
-	@override TranslationMetadata<AppLocale, Translations> get $meta => _meta;
+	@override final TranslationMetadata<AppLocale, Translations> $meta;
 
 	/// Access flat map
-	@override dynamic operator[](String key) => _meta.getTranslation(key) ?? super[key];
+	@override dynamic operator[](String key) => $meta.getTranslation(key) ?? super.$meta.getTranslation(key);
 
 	late final TranslationsEn _root = this; // ignore: unused_field
 
@@ -574,7 +574,15 @@ class _Translations$supportLt$en extends Translations$supportLt$ja {
 
 	// Translations
 	@override String get title => 'Support LT Registration';
-	@override String get description => 'Enter the 6-digit code provided by the organizers to register your participation in Support LT';
+	@override String get description => 'Scan the QR code shown at the venue to register your participation in Support LT';
+	@override String get scanButton => 'Scan the QR code';
+	@override String get scanTitle => 'Scan the QR code';
+	@override String get scanHint => 'Line up the QR code shown at the venue within the frame';
+	@override String get scanCameraError => 'Camera unavailable. Allow camera access in Settings, or enter the 6-digit code on the previous screen';
+	@override String get scanInvalid => 'Could not read this code. Make sure it\'s the Support LT registration QR code';
+	@override String get linkInvalid => 'This link isn\'t valid. Scan the QR code at the venue again';
+	@override String get codeSectionTitle => 'If you can\'t scan the QR code';
+	@override String get codeSectionDescription => 'Enter the 6-digit code provided by the organizers';
 	@override String get codeLabel => 'Registration code';
 	@override String get register => 'Register participation';
 	@override String get submitting => 'Registering…';
@@ -584,7 +592,7 @@ class _Translations$supportLt$en extends Translations$supportLt$ja {
 	@override String get backToAccount => 'Back to account';
 	@override String get signInRequired => 'Sign in to register your participation in Support LT';
 	@override String get invalidFormat => 'Enter a 6-digit code';
-	@override String get invalidCode => 'This code is incorrect. Check the code provided by the organizers';
+	@override String get invalidCode => 'This code is incorrect. Scan the QR code at the venue again or ask the organizers';
 	@override String get rateLimited => 'Too many attempts. Please try again in a few minutes';
 	@override String get networkError => 'A network error occurred. Check your connection and try again';
 	@override String get sessionExpired => 'Your sign-in session has expired. Please sign in again';
@@ -1314,7 +1322,7 @@ extension on TranslationsEn {
 			'contributors.title' => 'Contributors',
 			'contributors.openRepository' => 'Open the FlutterKaigi/2026 repository',
 			'contributors.empty' => 'No contributors found',
-			'contributors.contributionsCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} contribution', other: '${n} contributions', ),
+			'contributors.contributionsCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} contribution', other: '${n} contributions', ), 
 			'auth.signIn.required' => 'Sign in required',
 			'auth.signIn.description' => 'Choose how you want to sign in to the FlutterKaigi 2026 app',
 			'auth.signIn.withGoogle' => 'Sign in with Google',
@@ -1514,7 +1522,15 @@ extension on TranslationsEn {
 			'exchange.shareLinkGoHome' => 'Back to home',
 			'exchange.shareLinkViewList' => 'View exchanged profiles',
 			'supportLt.title' => 'Support LT Registration',
-			'supportLt.description' => 'Enter the 6-digit code provided by the organizers to register your participation in Support LT',
+			'supportLt.description' => 'Scan the QR code shown at the venue to register your participation in Support LT',
+			'supportLt.scanButton' => 'Scan the QR code',
+			'supportLt.scanTitle' => 'Scan the QR code',
+			'supportLt.scanHint' => 'Line up the QR code shown at the venue within the frame',
+			'supportLt.scanCameraError' => 'Camera unavailable. Allow camera access in Settings, or enter the 6-digit code on the previous screen',
+			'supportLt.scanInvalid' => 'Could not read this code. Make sure it\'s the Support LT registration QR code',
+			'supportLt.linkInvalid' => 'This link isn\'t valid. Scan the QR code at the venue again',
+			'supportLt.codeSectionTitle' => 'If you can\'t scan the QR code',
+			'supportLt.codeSectionDescription' => 'Enter the 6-digit code provided by the organizers',
 			'supportLt.codeLabel' => 'Registration code',
 			'supportLt.register' => 'Register participation',
 			'supportLt.submitting' => 'Registering…',
@@ -1524,7 +1540,7 @@ extension on TranslationsEn {
 			'supportLt.backToAccount' => 'Back to account',
 			'supportLt.signInRequired' => 'Sign in to register your participation in Support LT',
 			'supportLt.invalidFormat' => 'Enter a 6-digit code',
-			'supportLt.invalidCode' => 'This code is incorrect. Check the code provided by the organizers',
+			'supportLt.invalidCode' => 'This code is incorrect. Scan the QR code at the venue again or ask the organizers',
 			'supportLt.rateLimited' => 'Too many attempts. Please try again in a few minutes',
 			'supportLt.networkError' => 'A network error occurred. Check your connection and try again',
 			'supportLt.sessionExpired' => 'Your sign-in session has expired. Please sign in again',

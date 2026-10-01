@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:cloud_functions/cloud_functions.dart';
+import 'package:dashboard/core/env.dart';
+import 'package:dashboard/core/event_environment/event_admin_client.dart';
 import 'package:dashboard/feature/auth/data/provider/auth_state.dart';
 import 'package:dashboard/feature/support_lt/data/provider/support_lt_state.dart';
 import 'package:dashboard/feature/support_lt/ui/page/support_lt_page.dart';
@@ -11,6 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 void main() {
   final issuedAt = DateTime(2099, 9, 11, 10);
@@ -117,6 +120,41 @@ void main() {
     expect(find.text('登録コードを発行しました'), findsOneWidget);
   });
 
+  testWidgets('shows the QR code on a white background with the six-digit code as a fallback', (tester) async {
+    await showPage(tester);
+    expect(find.byType(QrImageView), findsNothing);
+
+    await tester.tap(find.text('登録コードを発行'));
+    await tester.pumpAndSettle();
+
+    // A dark theme must not make the code unreadable for QR readers.
+    final qrCode = tester.widget<QrImageView>(find.byType(QrImageView));
+    expect(qrCode.backgroundColor, Colors.white);
+    expect(qrCode.semanticsLabel, '応援LT参加登録用のQRコード');
+    expect(find.text('654321'), findsOneWidget);
+    expect(find.text('QRコードを読み取れない参加者には、6桁のコードを案内してください。'), findsOneWidget);
+  });
+
+  test('links the QR code only to the attendee app of the operated environment', () {
+    String? originFor(Flavor? environment) {
+      final client = environment == null
+          ? null
+          : EventAdminClient(environment: environment, view: const {}, request: (_) async => const {});
+      final container = ProviderContainer(overrides: [eventAdminClientProvider.overrideWithValue(client)]);
+      addTearDown(() {
+        container.dispose();
+        client?.dispose();
+      });
+      return container.read(supportLtAppOriginProvider);
+    }
+
+    expect(originFor(Flavor.prod), productionAppOrigin);
+    expect(originFor(Flavor.stg), stagingAppOrigin);
+    // Neither the emulator nor an unknown environment may link to a live app.
+    expect(originFor(Flavor.dev), isNull);
+    expect(originFor(null), isNull);
+  });
+
   testWidgets('prevents duplicate issuance while the request is pending', (tester) async {
     final pending = Completer<void>();
     repository.onIssue = (_) => pending.future;
@@ -142,7 +180,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('登録コードを再発行しますか？'), findsOneWidget);
-    expect(find.textContaining('現在のコードは使えなくなります'), findsOneWidget);
+    expect(find.textContaining('現在のQRコードと6桁のコードは使えなくなります'), findsOneWidget);
     await tester.tap(find.text('キャンセル'));
     await tester.pumpAndSettle();
     expect(repository.issueCalls, isEmpty);
