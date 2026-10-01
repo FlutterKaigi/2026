@@ -18,9 +18,9 @@ class LoginPage extends HookConsumerWidget {
       try {
         await ref.read(authRepositoryProvider).signInWithGoogle();
       } catch (e) {
-        errorMessage.value = 'サインインに失敗しました';
+        if (context.mounted) errorMessage.value = 'サインインに失敗しました';
       } finally {
-        isLoading.value = false;
+        if (context.mounted) isLoading.value = false;
       }
     }
 
