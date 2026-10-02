@@ -356,6 +356,60 @@ mission:
   profileRequired: Add your country or region to your profile
   snsTitle: Share a photo on SNS
   snsDescription: Post a photo with an eligible attendee and register its URL and category
+  stampRallyTitle: Stamp Rally
+  stampRallyDescription: Collect stamps at sponsor booths and redeem prizes
+
+stampRally:
+  title: Stamp Rally
+  signInRequired: Sign in to collect stamps
+  description: Scan the QR codes at sponsor booths to collect stamps
+  scanButton: Scan QR code
+  closed: Stamps are not available right now. Prizes and the thanks card can still be redeemed
+  stampCount: "$n / $total"
+  stampCountSemantic: $n of $total stamps collected
+  nextCheckpoint: "$n more for prize #$number"
+  allCheckpoints: You have reached every prize
+  checkpointsTitle: Prizes
+  checkpointLabel: "#$number ($required stamps)"
+  checkpointLocked: Not yet
+  checkpointAchieved: Ready to redeem
+  checkpointRedeemed: Redeemed $date
+  thanksCardTitle: Thanks card
+  thanksCardDescription: Scan the dedicated QR code at the prize counter
+  thanksCardNotRedeemed: Not redeemed
+  thanksCardRedeemed: Redeemed $date
+  sponsorsTitle: Sponsors
+  sponsorsEmpty: Participating sponsors have not been announced yet
+  acquired: Collected
+  notAcquired: Not collected
+  sponsorSemantic: $name, $status
+  scanTitle: Scan QR code
+  scanHint: Fit the QR code at a sponsor booth or the prize counter inside the frame
+  scanInvalid: This is not a stamp rally QR code
+  scanCameraError: The camera is unavailable. Allow camera access in Settings
+  resultTitle: Stamp Rally
+  processing: Checking…
+  stampAcquiredTitle: Stamp collected!
+  stampAlreadyTitle: You already have this stamp
+  checkpointReached: "You reached prize #$number!"
+  rewardTitle: Prize redemption
+  rewardRedeemedTitle: "You can receive prize $numbers"
+  rewardNoneTitle: No new prizes to redeem
+  rewardNoneBody: You have $n stamps
+  rewardStaffNote: Show this screen to the staff
+  rewardRedeemedAt: "#$number redeemed $date"
+  thanksCardResultTitle: You can receive the thanks card
+  thanksCardAlreadyTitle: The thanks card has already been redeemed
+  thanksCardResultAt: Redeemed $date
+  invalidTitle: Invalid QR code
+  invalidBody: Check that this is a stamp rally QR code
+  closedTitle: Stamps are not available right now
+  networkError: Could not connect. Try again somewhere with a better signal
+  failed: Something went wrong
+  sessionExpired: Please sign in again
+  permissionDenied: This account cannot take part
+  retry: Try again
+  viewCard: View stamp rally
 
 exchange:
   title: Profile Exchange

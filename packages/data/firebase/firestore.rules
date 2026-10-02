@@ -295,6 +295,48 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    // スタンプラリーの対象スポンサー。アプリが一覧表示に使うため誰でも読める。
+    // sponsors とは独立して管理し、ダッシュボードの管理者が追加・削除する。
+    match /stampRallySponsors/{sponsorId} {
+      allow read: if true;
+      allow create: if hasAdminAccess()
+        && request.resource.data.keys().hasOnly(['createdAt'])
+        && request.resource.data.createdAt == request.time;
+      allow delete: if hasAdminAccess();
+      allow update: if false;
+    }
+
+    // チェックポイントは正の整数の昇順で 1〜5 件。並び順が景品の番号になる。
+    // rules は list の要素を反復できないため、各要素を個別に検証する。
+    function isValidStampRallyCheckpoints(checkpoints) {
+      return checkpoints is list && checkpoints.size() >= 1 && checkpoints.size() <= 5
+        && checkpoints[0] is int && checkpoints[0] > 0
+        && (checkpoints.size() < 2 || (checkpoints[1] is int && checkpoints[1] > checkpoints[0]))
+        && (checkpoints.size() < 3 || (checkpoints[2] is int && checkpoints[2] > checkpoints[1]))
+        && (checkpoints.size() < 4 || (checkpoints[3] is int && checkpoints[3] > checkpoints[2]))
+        && (checkpoints.size() < 5 || (checkpoints[4] is int && checkpoints[4] > checkpoints[3]));
+    }
+
+    // スタンプラリーの設定（current のみ）。アプリが進捗表示に使うため誰でも読める。
+    match /stampRallySettings/{settingId} {
+      allow read: if true;
+      allow create, update: if hasAdminAccess()
+        && settingId == 'current'
+        && request.resource.data.keys().hasOnly(['checkpoints', 'isOpen', 'updatedAt'])
+        && isValidStampRallyCheckpoints(request.resource.data.checkpoints)
+        && request.resource.data.isOpen is bool
+        && request.resource.data.updatedAt == request.time;
+      allow delete: if false;
+    }
+
+    // 参加者ごとのスタンプ・景品・サンクスカードの記録。署名の検証が必要なため、
+    // 書き込みは scanStampRallyCode が Admin SDK で行う。
+    match /stampRallyCards/{uid} {
+      allow get: if isOwner(uid) || hasAdminAccess();
+      allow list: if hasAdminAccess();
+      allow write: if false;
+    }
+
     // 6桁コードのフォールバック交換で使う短命ドキュメント。issueExchangeCode /
     // redeemExchangeCode コールが Admin SDK 経由で読み書きする。read を許すと
     // 総当たりでコードを引き当てられるため、クライアントからは read/write とも

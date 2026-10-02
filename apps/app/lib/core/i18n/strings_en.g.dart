@@ -16,22 +16,22 @@ class TranslationsEn extends Translations with BaseTranslations<AppLocale, Trans
 	/// Constructing via the enum [AppLocale.build] is preferred.
 	TranslationsEn({Map<String, Node>? overrides, PluralResolver? cardinalResolver, PluralResolver? ordinalResolver, TranslationMetadata<AppLocale, Translations>? meta})
 		: assert(overrides == null, 'Set "translation_overrides: true" in order to enable this feature.'),
-		  _meta = meta ?? TranslationMetadata(
+		  $meta = meta ?? TranslationMetadata(
 		    locale: AppLocale.en,
 		    overrides: overrides ?? {},
 		    cardinalResolver: cardinalResolver,
 		    ordinalResolver: ordinalResolver,
 		  ),
 		  super(cardinalResolver: cardinalResolver, ordinalResolver: ordinalResolver) {
-		_meta.setFlatMapFunction(_flatMapFunction);
+		super.$meta.setFlatMapFunction($meta.getTranslation); // copy base translations to super.$meta
+		$meta.setFlatMapFunction(_flatMapFunction);
 	}
 
 	/// Metadata for the translations of <en>.
-	final TranslationMetadata<AppLocale, Translations> _meta;
-	@override TranslationMetadata<AppLocale, Translations> get $meta => _meta;
+	@override final TranslationMetadata<AppLocale, Translations> $meta;
 
 	/// Access flat map
-	@override dynamic operator[](String key) => _meta.getTranslation(key) ?? super[key];
+	@override dynamic operator[](String key) => $meta.getTranslation(key) ?? super.$meta.getTranslation(key);
 
 	late final TranslationsEn _root = this; // ignore: unused_field
 
@@ -59,6 +59,7 @@ class TranslationsEn extends Translations with BaseTranslations<AppLocale, Trans
 	@override late final _Translations$profile$en profile = _Translations$profile$en._(_root);
 	@override late final _Translations$snsPost$en snsPost = _Translations$snsPost$en._(_root);
 	@override late final _Translations$mission$en mission = _Translations$mission$en._(_root);
+	@override late final _Translations$stampRally$en stampRally = _Translations$stampRally$en._(_root);
 	@override late final _Translations$exchange$en exchange = _Translations$exchange$en._(_root);
 	@override late final _Translations$supportLt$en supportLt = _Translations$supportLt$en._(_root);
 	@override late final _Translations$countryRegion$en countryRegion = _Translations$countryRegion$en._(_root);
@@ -494,6 +495,67 @@ class _Translations$mission$en extends Translations$mission$ja {
 	@override String get profileRequired => 'Add your country or region to your profile';
 	@override String get snsTitle => 'Share a photo on SNS';
 	@override String get snsDescription => 'Post a photo with an eligible attendee and register its URL and category';
+	@override String get stampRallyTitle => 'Stamp Rally';
+	@override String get stampRallyDescription => 'Collect stamps at sponsor booths and redeem prizes';
+}
+
+// Path: stampRally
+class _Translations$stampRally$en extends Translations$stampRally$ja {
+	_Translations$stampRally$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Stamp Rally';
+	@override String get signInRequired => 'Sign in to collect stamps';
+	@override String get description => 'Scan the QR codes at sponsor booths to collect stamps';
+	@override String get scanButton => 'Scan QR code';
+	@override String get closed => 'Stamps are not available right now. Prizes and the thanks card can still be redeemed';
+	@override String stampCount({required Object n, required Object total}) => '${n} / ${total}';
+	@override String stampCountSemantic({required Object n, required Object total}) => '${n} of ${total} stamps collected';
+	@override String nextCheckpoint({required Object n, required Object number}) => '${n} more for prize #${number}';
+	@override String get allCheckpoints => 'You have reached every prize';
+	@override String get checkpointsTitle => 'Prizes';
+	@override String checkpointLabel({required Object number, required Object required}) => '#${number} (${required} stamps)';
+	@override String get checkpointLocked => 'Not yet';
+	@override String get checkpointAchieved => 'Ready to redeem';
+	@override String checkpointRedeemed({required Object date}) => 'Redeemed ${date}';
+	@override String get thanksCardTitle => 'Thanks card';
+	@override String get thanksCardDescription => 'Scan the dedicated QR code at the prize counter';
+	@override String get thanksCardNotRedeemed => 'Not redeemed';
+	@override String thanksCardRedeemed({required Object date}) => 'Redeemed ${date}';
+	@override String get sponsorsTitle => 'Sponsors';
+	@override String get sponsorsEmpty => 'Participating sponsors have not been announced yet';
+	@override String get acquired => 'Collected';
+	@override String get notAcquired => 'Not collected';
+	@override String sponsorSemantic({required Object name, required Object status}) => '${name}, ${status}';
+	@override String get scanTitle => 'Scan QR code';
+	@override String get scanHint => 'Fit the QR code at a sponsor booth or the prize counter inside the frame';
+	@override String get scanInvalid => 'This is not a stamp rally QR code';
+	@override String get scanCameraError => 'The camera is unavailable. Allow camera access in Settings';
+	@override String get resultTitle => 'Stamp Rally';
+	@override String get processing => 'Checking…';
+	@override String get stampAcquiredTitle => 'Stamp collected!';
+	@override String get stampAlreadyTitle => 'You already have this stamp';
+	@override String checkpointReached({required Object number}) => 'You reached prize #${number}!';
+	@override String get rewardTitle => 'Prize redemption';
+	@override String rewardRedeemedTitle({required Object numbers}) => 'You can receive prize ${numbers}';
+	@override String get rewardNoneTitle => 'No new prizes to redeem';
+	@override String rewardNoneBody({required Object n}) => 'You have ${n} stamps';
+	@override String get rewardStaffNote => 'Show this screen to the staff';
+	@override String rewardRedeemedAt({required Object number, required Object date}) => '#${number} redeemed ${date}';
+	@override String get thanksCardResultTitle => 'You can receive the thanks card';
+	@override String get thanksCardAlreadyTitle => 'The thanks card has already been redeemed';
+	@override String thanksCardResultAt({required Object date}) => 'Redeemed ${date}';
+	@override String get invalidTitle => 'Invalid QR code';
+	@override String get invalidBody => 'Check that this is a stamp rally QR code';
+	@override String get closedTitle => 'Stamps are not available right now';
+	@override String get networkError => 'Could not connect. Try again somewhere with a better signal';
+	@override String get failed => 'Something went wrong';
+	@override String get sessionExpired => 'Please sign in again';
+	@override String get permissionDenied => 'This account cannot take part';
+	@override String get retry => 'Try again';
+	@override String get viewCard => 'View stamp rally';
 }
 
 // Path: exchange
@@ -1314,7 +1376,7 @@ extension on TranslationsEn {
 			'contributors.title' => 'Contributors',
 			'contributors.openRepository' => 'Open the FlutterKaigi/2026 repository',
 			'contributors.empty' => 'No contributors found',
-			'contributors.contributionsCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} contribution', other: '${n} contributions', ),
+			'contributors.contributionsCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} contribution', other: '${n} contributions', ), 
 			'auth.signIn.required' => 'Sign in required',
 			'auth.signIn.description' => 'Choose how you want to sign in to the FlutterKaigi 2026 app',
 			'auth.signIn.withGoogle' => 'Sign in with Google',
@@ -1452,6 +1514,58 @@ extension on TranslationsEn {
 			'mission.profileRequired' => 'Add your country or region to your profile',
 			'mission.snsTitle' => 'Share a photo on SNS',
 			'mission.snsDescription' => 'Post a photo with an eligible attendee and register its URL and category',
+			'mission.stampRallyTitle' => 'Stamp Rally',
+			'mission.stampRallyDescription' => 'Collect stamps at sponsor booths and redeem prizes',
+			'stampRally.title' => 'Stamp Rally',
+			'stampRally.signInRequired' => 'Sign in to collect stamps',
+			'stampRally.description' => 'Scan the QR codes at sponsor booths to collect stamps',
+			'stampRally.scanButton' => 'Scan QR code',
+			'stampRally.closed' => 'Stamps are not available right now. Prizes and the thanks card can still be redeemed',
+			'stampRally.stampCount' => ({required Object n, required Object total}) => '${n} / ${total}',
+			'stampRally.stampCountSemantic' => ({required Object n, required Object total}) => '${n} of ${total} stamps collected',
+			'stampRally.nextCheckpoint' => ({required Object n, required Object number}) => '${n} more for prize #${number}',
+			'stampRally.allCheckpoints' => 'You have reached every prize',
+			'stampRally.checkpointsTitle' => 'Prizes',
+			'stampRally.checkpointLabel' => ({required Object number, required Object required}) => '#${number} (${required} stamps)',
+			'stampRally.checkpointLocked' => 'Not yet',
+			'stampRally.checkpointAchieved' => 'Ready to redeem',
+			'stampRally.checkpointRedeemed' => ({required Object date}) => 'Redeemed ${date}',
+			'stampRally.thanksCardTitle' => 'Thanks card',
+			'stampRally.thanksCardDescription' => 'Scan the dedicated QR code at the prize counter',
+			'stampRally.thanksCardNotRedeemed' => 'Not redeemed',
+			'stampRally.thanksCardRedeemed' => ({required Object date}) => 'Redeemed ${date}',
+			'stampRally.sponsorsTitle' => 'Sponsors',
+			'stampRally.sponsorsEmpty' => 'Participating sponsors have not been announced yet',
+			'stampRally.acquired' => 'Collected',
+			'stampRally.notAcquired' => 'Not collected',
+			'stampRally.sponsorSemantic' => ({required Object name, required Object status}) => '${name}, ${status}',
+			'stampRally.scanTitle' => 'Scan QR code',
+			'stampRally.scanHint' => 'Fit the QR code at a sponsor booth or the prize counter inside the frame',
+			'stampRally.scanInvalid' => 'This is not a stamp rally QR code',
+			'stampRally.scanCameraError' => 'The camera is unavailable. Allow camera access in Settings',
+			'stampRally.resultTitle' => 'Stamp Rally',
+			'stampRally.processing' => 'Checking…',
+			'stampRally.stampAcquiredTitle' => 'Stamp collected!',
+			'stampRally.stampAlreadyTitle' => 'You already have this stamp',
+			'stampRally.checkpointReached' => ({required Object number}) => 'You reached prize #${number}!',
+			'stampRally.rewardTitle' => 'Prize redemption',
+			'stampRally.rewardRedeemedTitle' => ({required Object numbers}) => 'You can receive prize ${numbers}',
+			'stampRally.rewardNoneTitle' => 'No new prizes to redeem',
+			'stampRally.rewardNoneBody' => ({required Object n}) => 'You have ${n} stamps',
+			'stampRally.rewardStaffNote' => 'Show this screen to the staff',
+			'stampRally.rewardRedeemedAt' => ({required Object number, required Object date}) => '#${number} redeemed ${date}',
+			'stampRally.thanksCardResultTitle' => 'You can receive the thanks card',
+			'stampRally.thanksCardAlreadyTitle' => 'The thanks card has already been redeemed',
+			'stampRally.thanksCardResultAt' => ({required Object date}) => 'Redeemed ${date}',
+			'stampRally.invalidTitle' => 'Invalid QR code',
+			'stampRally.invalidBody' => 'Check that this is a stamp rally QR code',
+			'stampRally.closedTitle' => 'Stamps are not available right now',
+			'stampRally.networkError' => 'Could not connect. Try again somewhere with a better signal',
+			'stampRally.failed' => 'Something went wrong',
+			'stampRally.sessionExpired' => 'Please sign in again',
+			'stampRally.permissionDenied' => 'This account cannot take part',
+			'stampRally.retry' => 'Try again',
+			'stampRally.viewCard' => 'View stamp rally',
 			'exchange.title' => 'Profile Exchange',
 			'exchange.qrDescription' => 'Show this QR code to another attendee and have them scan it to exchange profiles',
 			'exchange.qrSemanticLabel' => 'Profile exchange QR code',
@@ -1592,6 +1706,8 @@ extension on TranslationsEn {
 			'quiz.registration.codeMismatch' => 'Could not register. Please check the entry code.',
 			'quiz.registration.alreadyParticipated' => 'You have already registered for another round and cannot join this one.',
 			'quiz.registration.closed' => 'Registration for this round has closed.',
+			_ => null,
+		} ?? switch (path) {
 			'quiz.registration.unavailable' => 'Registration could not be confirmed. Check your connection and try again.',
 			'quiz.registration.rateLimited' => 'Too many attempts. Wait one minute, check the entry code, and try again.',
 			'quiz.registration.accountUnavailable' => 'This account cannot join. Please contact event staff.',

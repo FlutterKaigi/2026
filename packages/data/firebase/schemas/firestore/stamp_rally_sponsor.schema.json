@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/FlutterKaigi/2026/packages/data/firebase/schemas/firestore/stamp_rally_sponsor.schema.json",
+  "title": "StampRallySponsor",
+  "description": "A stamp rally target at stampRallySponsors/{sponsorId}, where sponsorId is a sponsors document id. Managed independently of sponsors. Anyone can read; only admins create or delete.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["createdAt"],
+  "properties": {
+    "createdAt": { "type": "string", "format": "date-time" }
+  }
+}

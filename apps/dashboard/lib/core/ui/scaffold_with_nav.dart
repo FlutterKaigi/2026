@@ -96,6 +96,7 @@ const _navItems = [
   _NavItem(label: 'スポンサー', icon: Icons.business, path: AppPaths.sponsors),
   _NavItem(label: '応援LT', icon: Icons.record_voice_over, path: AppPaths.supportLt),
   _NavItem(label: 'クイズ', icon: Icons.quiz, path: AppPaths.quiz),
+  _NavItem(label: 'スタンプラリー', icon: Icons.approval, path: AppPaths.stampRally),
 ];
 
 int _selectedNavIndex(String location) {

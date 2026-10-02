@@ -9,3 +9,7 @@
 /x/*
   Referrer-Policy: no-referrer
   Cache-Control: no-store
+
+/s/*
+  Referrer-Policy: no-referrer
+  Cache-Control: no-store

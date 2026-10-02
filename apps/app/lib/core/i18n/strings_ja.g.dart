@@ -20,21 +20,20 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	/// Constructing via the enum [AppLocale.build] is preferred.
 	Translations({Map<String, Node>? overrides, PluralResolver? cardinalResolver, PluralResolver? ordinalResolver, TranslationMetadata<AppLocale, Translations>? meta})
 		: assert(overrides == null, 'Set "translation_overrides: true" in order to enable this feature.'),
-		  _meta = meta ?? TranslationMetadata(
+		  $meta = meta ?? TranslationMetadata(
 		    locale: AppLocale.ja,
 		    overrides: overrides ?? {},
 		    cardinalResolver: cardinalResolver,
 		    ordinalResolver: ordinalResolver,
 		  ) {
-		_meta.setFlatMapFunction(_flatMapFunction);
+		$meta.setFlatMapFunction(_flatMapFunction);
 	}
 
 	/// Metadata for the translations of <ja>.
-	final TranslationMetadata<AppLocale, Translations> _meta;
-	@override TranslationMetadata<AppLocale, Translations> get $meta => _meta;
+	@override final TranslationMetadata<AppLocale, Translations> $meta;
 
 	/// Access flat map
-	dynamic operator[](String key) => _meta.getTranslation(key);
+	dynamic operator[](String key) => $meta.getTranslation(key);
 
 	late final Translations _root = this; // ignore: unused_field
 
@@ -61,6 +60,7 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	late final Translations$profile$ja profile = Translations$profile$ja.internal(_root);
 	late final Translations$snsPost$ja snsPost = Translations$snsPost$ja.internal(_root);
 	late final Translations$mission$ja mission = Translations$mission$ja.internal(_root);
+	late final Translations$stampRally$ja stampRally = Translations$stampRally$ja.internal(_root);
 	late final Translations$exchange$ja exchange = Translations$exchange$ja.internal(_root);
 	late final Translations$supportLt$ja supportLt = Translations$supportLt$ja.internal(_root);
 	late final Translations$countryRegion$ja countryRegion = Translations$countryRegion$ja.internal(_root);
@@ -956,6 +956,171 @@ class Translations$mission$ja {
 
 	/// ja: '対象の相手との写真を投稿し、URLとタグを登録'
 	String get snsDescription => '対象の相手との写真を投稿し、URLとタグを登録';
+
+	/// ja: 'スタンプラリー'
+	String get stampRallyTitle => 'スタンプラリー';
+
+	/// ja: 'スポンサーブースでスタンプを集めて景品と交換'
+	String get stampRallyDescription => 'スポンサーブースでスタンプを集めて景品と交換';
+}
+
+// Path: stampRally
+class Translations$stampRally$ja {
+	Translations$stampRally$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'スタンプラリー'
+	String get title => 'スタンプラリー';
+
+	/// ja: 'スタンプを集めるにはサインインしてください'
+	String get signInRequired => 'スタンプを集めるにはサインインしてください';
+
+	/// ja: 'スポンサーブースでQRコードを読み取ってスタンプを集めましょう'
+	String get description => 'スポンサーブースでQRコードを読み取ってスタンプを集めましょう';
+
+	/// ja: 'QRコードを読み取る'
+	String get scanButton => 'QRコードを読み取る';
+
+	/// ja: '現在スタンプは獲得できません。景品・サンクスカードの交換は利用できます'
+	String get closed => '現在スタンプは獲得できません。景品・サンクスカードの交換は利用できます';
+
+	/// ja: '$n / $total'
+	String stampCount({required Object n, required Object total}) => '${n} / ${total}';
+
+	/// ja: '$total個中$n個のスタンプを獲得'
+	String stampCountSemantic({required Object total, required Object n}) => '${total}個中${n}個のスタンプを獲得';
+
+	/// ja: 'あと$n個で景品#$number'
+	String nextCheckpoint({required Object n, required Object number}) => 'あと${n}個で景品#${number}';
+
+	/// ja: 'すべての景品の条件を達成しました'
+	String get allCheckpoints => 'すべての景品の条件を達成しました';
+
+	/// ja: '景品'
+	String get checkpointsTitle => '景品';
+
+	/// ja: '#$number（$required個）'
+	String checkpointLabel({required Object number, required Object required}) => '#${number}（${required}個）';
+
+	/// ja: '未達成'
+	String get checkpointLocked => '未達成';
+
+	/// ja: '交換できます'
+	String get checkpointAchieved => '交換できます';
+
+	/// ja: '交換済み $date'
+	String checkpointRedeemed({required Object date}) => '交換済み ${date}';
+
+	/// ja: 'サンクスカード'
+	String get thanksCardTitle => 'サンクスカード';
+
+	/// ja: '景品交換所で専用のQRコードを読み取ると交換できます'
+	String get thanksCardDescription => '景品交換所で専用のQRコードを読み取ると交換できます';
+
+	/// ja: '未交換'
+	String get thanksCardNotRedeemed => '未交換';
+
+	/// ja: '交換済み $date'
+	String thanksCardRedeemed({required Object date}) => '交換済み ${date}';
+
+	/// ja: '対象スポンサー'
+	String get sponsorsTitle => '対象スポンサー';
+
+	/// ja: '対象スポンサーはまだ発表されていません'
+	String get sponsorsEmpty => '対象スポンサーはまだ発表されていません';
+
+	/// ja: '獲得済み'
+	String get acquired => '獲得済み';
+
+	/// ja: '未獲得'
+	String get notAcquired => '未獲得';
+
+	/// ja: '$name、$status'
+	String sponsorSemantic({required Object name, required Object status}) => '${name}、${status}';
+
+	/// ja: 'QRコードを読み取る'
+	String get scanTitle => 'QRコードを読み取る';
+
+	/// ja: 'スポンサーブースや景品交換所のQRコードを枠内に収めてください'
+	String get scanHint => 'スポンサーブースや景品交換所のQRコードを枠内に収めてください';
+
+	/// ja: 'スタンプラリーのQRコードではありません'
+	String get scanInvalid => 'スタンプラリーのQRコードではありません';
+
+	/// ja: 'カメラを利用できません。設定でカメラへのアクセスを許可してください'
+	String get scanCameraError => 'カメラを利用できません。設定でカメラへのアクセスを許可してください';
+
+	/// ja: 'スタンプラリー'
+	String get resultTitle => 'スタンプラリー';
+
+	/// ja: '確認しています…'
+	String get processing => '確認しています…';
+
+	/// ja: 'スタンプを獲得しました！'
+	String get stampAcquiredTitle => 'スタンプを獲得しました！';
+
+	/// ja: '獲得済みのスタンプです'
+	String get stampAlreadyTitle => '獲得済みのスタンプです';
+
+	/// ja: '景品#$number の条件を達成しました！'
+	String checkpointReached({required Object number}) => '景品#${number} の条件を達成しました！';
+
+	/// ja: '景品の交換'
+	String get rewardTitle => '景品の交換';
+
+	/// ja: '$numbers の景品を受け取れます'
+	String rewardRedeemedTitle({required Object numbers}) => '${numbers} の景品を受け取れます';
+
+	/// ja: '新たに交換できる景品はありません'
+	String get rewardNoneTitle => '新たに交換できる景品はありません';
+
+	/// ja: '現在のスタンプは$n個です'
+	String rewardNoneBody({required Object n}) => '現在のスタンプは${n}個です';
+
+	/// ja: 'この画面をスタッフに見せてください'
+	String get rewardStaffNote => 'この画面をスタッフに見せてください';
+
+	/// ja: '#$number 交換日時 $date'
+	String rewardRedeemedAt({required Object number, required Object date}) => '#${number} 交換日時 ${date}';
+
+	/// ja: 'サンクスカードを受け取れます'
+	String get thanksCardResultTitle => 'サンクスカードを受け取れます';
+
+	/// ja: 'サンクスカードは交換済みです'
+	String get thanksCardAlreadyTitle => 'サンクスカードは交換済みです';
+
+	/// ja: '交換日時 $date'
+	String thanksCardResultAt({required Object date}) => '交換日時 ${date}';
+
+	/// ja: '無効なQRコードです'
+	String get invalidTitle => '無効なQRコードです';
+
+	/// ja: 'スタンプラリーのQRコードか確認してください'
+	String get invalidBody => 'スタンプラリーのQRコードか確認してください';
+
+	/// ja: '現在スタンプは獲得できません'
+	String get closedTitle => '現在スタンプは獲得できません';
+
+	/// ja: '通信できませんでした。電波の良い場所でもう一度お試しください'
+	String get networkError => '通信できませんでした。電波の良い場所でもう一度お試しください';
+
+	/// ja: '処理できませんでした'
+	String get failed => '処理できませんでした';
+
+	/// ja: 'サインインし直してください'
+	String get sessionExpired => 'サインインし直してください';
+
+	/// ja: 'このアカウントでは参加できません'
+	String get permissionDenied => 'このアカウントでは参加できません';
+
+	/// ja: 'もう一度試す'
+	String get retry => 'もう一度試す';
+
+	/// ja: 'スタンプラリーを見る'
+	String get viewCard => 'スタンプラリーを見る';
 }
 
 // Path: exchange
@@ -2332,7 +2497,7 @@ extension on Translations {
 			'contributors.title' => 'コントリビューター',
 			'contributors.openRepository' => 'FlutterKaigi/2026 のリポジトリを開く',
 			'contributors.empty' => 'コントリビューターが見つかりませんでした',
-			'contributors.contributionsCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(n, one: '${n} contributions', other: '${n} contributions', ),
+			'contributors.contributionsCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(n, one: '${n} contributions', other: '${n} contributions', ), 
 			'auth.signIn.required' => 'サインインが必要です',
 			'auth.signIn.description' => 'FlutterKaigi 2026 アプリで利用するサインイン方法を選択してください',
 			'auth.signIn.withGoogle' => 'Google でサインイン',
@@ -2470,6 +2635,58 @@ extension on Translations {
 			'mission.profileRequired' => 'プロフィールで出身国・地域を登録する',
 			'mission.snsTitle' => '写真をSNSに投稿',
 			'mission.snsDescription' => '対象の相手との写真を投稿し、URLとタグを登録',
+			'mission.stampRallyTitle' => 'スタンプラリー',
+			'mission.stampRallyDescription' => 'スポンサーブースでスタンプを集めて景品と交換',
+			'stampRally.title' => 'スタンプラリー',
+			'stampRally.signInRequired' => 'スタンプを集めるにはサインインしてください',
+			'stampRally.description' => 'スポンサーブースでQRコードを読み取ってスタンプを集めましょう',
+			'stampRally.scanButton' => 'QRコードを読み取る',
+			'stampRally.closed' => '現在スタンプは獲得できません。景品・サンクスカードの交換は利用できます',
+			'stampRally.stampCount' => ({required Object n, required Object total}) => '${n} / ${total}',
+			'stampRally.stampCountSemantic' => ({required Object total, required Object n}) => '${total}個中${n}個のスタンプを獲得',
+			'stampRally.nextCheckpoint' => ({required Object n, required Object number}) => 'あと${n}個で景品#${number}',
+			'stampRally.allCheckpoints' => 'すべての景品の条件を達成しました',
+			'stampRally.checkpointsTitle' => '景品',
+			'stampRally.checkpointLabel' => ({required Object number, required Object required}) => '#${number}（${required}個）',
+			'stampRally.checkpointLocked' => '未達成',
+			'stampRally.checkpointAchieved' => '交換できます',
+			'stampRally.checkpointRedeemed' => ({required Object date}) => '交換済み ${date}',
+			'stampRally.thanksCardTitle' => 'サンクスカード',
+			'stampRally.thanksCardDescription' => '景品交換所で専用のQRコードを読み取ると交換できます',
+			'stampRally.thanksCardNotRedeemed' => '未交換',
+			'stampRally.thanksCardRedeemed' => ({required Object date}) => '交換済み ${date}',
+			'stampRally.sponsorsTitle' => '対象スポンサー',
+			'stampRally.sponsorsEmpty' => '対象スポンサーはまだ発表されていません',
+			'stampRally.acquired' => '獲得済み',
+			'stampRally.notAcquired' => '未獲得',
+			'stampRally.sponsorSemantic' => ({required Object name, required Object status}) => '${name}、${status}',
+			'stampRally.scanTitle' => 'QRコードを読み取る',
+			'stampRally.scanHint' => 'スポンサーブースや景品交換所のQRコードを枠内に収めてください',
+			'stampRally.scanInvalid' => 'スタンプラリーのQRコードではありません',
+			'stampRally.scanCameraError' => 'カメラを利用できません。設定でカメラへのアクセスを許可してください',
+			'stampRally.resultTitle' => 'スタンプラリー',
+			'stampRally.processing' => '確認しています…',
+			'stampRally.stampAcquiredTitle' => 'スタンプを獲得しました！',
+			'stampRally.stampAlreadyTitle' => '獲得済みのスタンプです',
+			'stampRally.checkpointReached' => ({required Object number}) => '景品#${number} の条件を達成しました！',
+			'stampRally.rewardTitle' => '景品の交換',
+			'stampRally.rewardRedeemedTitle' => ({required Object numbers}) => '${numbers} の景品を受け取れます',
+			'stampRally.rewardNoneTitle' => '新たに交換できる景品はありません',
+			'stampRally.rewardNoneBody' => ({required Object n}) => '現在のスタンプは${n}個です',
+			'stampRally.rewardStaffNote' => 'この画面をスタッフに見せてください',
+			'stampRally.rewardRedeemedAt' => ({required Object number, required Object date}) => '#${number} 交換日時 ${date}',
+			'stampRally.thanksCardResultTitle' => 'サンクスカードを受け取れます',
+			'stampRally.thanksCardAlreadyTitle' => 'サンクスカードは交換済みです',
+			'stampRally.thanksCardResultAt' => ({required Object date}) => '交換日時 ${date}',
+			'stampRally.invalidTitle' => '無効なQRコードです',
+			'stampRally.invalidBody' => 'スタンプラリーのQRコードか確認してください',
+			'stampRally.closedTitle' => '現在スタンプは獲得できません',
+			'stampRally.networkError' => '通信できませんでした。電波の良い場所でもう一度お試しください',
+			'stampRally.failed' => '処理できませんでした',
+			'stampRally.sessionExpired' => 'サインインし直してください',
+			'stampRally.permissionDenied' => 'このアカウントでは参加できません',
+			'stampRally.retry' => 'もう一度試す',
+			'stampRally.viewCard' => 'スタンプラリーを見る',
 			'exchange.title' => 'プロフィール交換',
 			'exchange.qrDescription' => 'このQRコードを相手に見せて読み取ってもらうと、お互いのプロフィールを交換できます',
 			'exchange.qrSemanticLabel' => 'プロフィール交換用のQRコード',
@@ -2610,6 +2827,8 @@ extension on Translations {
 			'quiz.registration.codeMismatch' => '登録できませんでした。受付コードが正しいか確認してください。',
 			'quiz.registration.alreadyParticipated' => '別の回に参加登録済みのため、この回には登録できません。',
 			'quiz.registration.closed' => 'この回の参加受付は終了しました。',
+			_ => null,
+		} ?? switch (path) {
 			'quiz.registration.unavailable' => '登録を確認できませんでした。通信状況を確認して再試行してください。',
 			'quiz.registration.rateLimited' => '入力回数が多すぎます。1分待ってから、受付コードを確認して再試行してください。',
 			'quiz.registration.accountUnavailable' => 'このアカウントでは参加できません。運営にお問い合わせください。',

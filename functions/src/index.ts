@@ -24,6 +24,8 @@ export {
   registerSupportLt,
 } from "./support_lt";
 
+export { getStampRallyQrCodes, scanStampRallyCode } from "./stamp_rally";
+
 export { getQuizServerTime, quizEventOperation, registerQuizParticipant, submitQuizAnswer } from "./quiz";
 
 // デプロイ先（= 同期元）と同期先のリージョン・プロジェクト設定。

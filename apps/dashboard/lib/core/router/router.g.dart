@@ -146,6 +146,11 @@ RouteBase get $appShellRoute => ShellRouteData.$route(
       hasOverriddenOnExit: false,
       factory: $SupportLtRoute._fromState,
     ),
+    GoRouteData.$route(
+      path: '/stamp-rally',
+      hasOverriddenOnExit: false,
+      factory: $StampRallyRoute._fromState,
+    ),
   ],
 );
 
@@ -508,6 +513,25 @@ mixin $SupportLtRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/support-lt');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) => context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $StampRallyRoute on GoRouteData {
+  static StampRallyRoute _fromState(GoRouterState state) => const StampRallyRoute();
+
+  @override
+  String get location => GoRouteData.$location('/stamp-rally');
 
   @override
   void go(BuildContext context) => context.go(location);

@@ -74,6 +74,7 @@ flutter:
     - assets/venue_map/THREE_LICENSE.txt
     - assets/venue_map/walk_artwork/
     - res/assets/dashumaru_magao.webp
+    - res/assets/stamps/
     - res/assets/fonts/NotoSansJP/OFL.txt
     # Google 公式の Sign in with Google ボタン素材。
     - res/assets/google_sign_in/
