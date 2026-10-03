@@ -356,8 +356,6 @@ mission:
   profileRequired: Add your country or region to your profile
   snsTitle: Share a photo on SNS
   snsDescription: Post a photo with an eligible attendee and register its URL and category
-  stampRallyTitle: Stamp Rally
-  stampRallyDescription: Collect stamps at sponsor booths and redeem prizes
 
 stampRally:
   title: Stamp Rally

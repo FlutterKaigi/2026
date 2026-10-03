@@ -396,6 +396,12 @@ class _SignedInView extends ConsumerWidget {
                           title: t.auth.account.snsPost,
                           onTap: () => const SnsPostRoute().push<void>(context),
                         ),
+                        const Divider(height: 1),
+                        _NavigationTile(
+                          icon: Icons.approval_outlined,
+                          title: t.stampRally.title,
+                          onTap: () => const StampRallyRoute().push<void>(context),
+                        ),
                       ],
                     ),
                   ),

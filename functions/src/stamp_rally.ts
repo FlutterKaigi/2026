@@ -18,7 +18,9 @@ export const getStampRallyQrCodes = onCall(
 );
 
 function dependencies() {
-  const secret = stampRallyTokenSecret.value();
+  // `openssl rand -hex 32 | firebase functions:secrets:set --data-file -` stores the
+  // trailing newline, which would otherwise become part of the HMAC key.
+  const secret = stampRallyTokenSecret.value().trim();
   if (secret.length === 0) {
     // An empty HMAC key would let anyone forge every QR code.
     logger.error("STAMP_RALLY_TOKEN_SECRET is not configured");

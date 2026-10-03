@@ -956,12 +956,6 @@ class Translations$mission$ja {
 
 	/// ja: '対象の相手との写真を投稿し、URLとタグを登録'
 	String get snsDescription => '対象の相手との写真を投稿し、URLとタグを登録';
-
-	/// ja: 'スタンプラリー'
-	String get stampRallyTitle => 'スタンプラリー';
-
-	/// ja: 'スポンサーブースでスタンプを集めて景品と交換'
-	String get stampRallyDescription => 'スポンサーブースでスタンプを集めて景品と交換';
 }
 
 // Path: stampRally
@@ -2635,8 +2629,6 @@ extension on Translations {
 			'mission.profileRequired' => 'プロフィールで出身国・地域を登録する',
 			'mission.snsTitle' => '写真をSNSに投稿',
 			'mission.snsDescription' => '対象の相手との写真を投稿し、URLとタグを登録',
-			'mission.stampRallyTitle' => 'スタンプラリー',
-			'mission.stampRallyDescription' => 'スポンサーブースでスタンプを集めて景品と交換',
 			'stampRally.title' => 'スタンプラリー',
 			'stampRally.signInRequired' => 'スタンプを集めるにはサインインしてください',
 			'stampRally.description' => 'スポンサーブースでQRコードを読み取ってスタンプを集めましょう',
@@ -2827,10 +2819,10 @@ extension on Translations {
 			'quiz.registration.codeMismatch' => '登録できませんでした。受付コードが正しいか確認してください。',
 			'quiz.registration.alreadyParticipated' => '別の回に参加登録済みのため、この回には登録できません。',
 			'quiz.registration.closed' => 'この回の参加受付は終了しました。',
-			_ => null,
-		} ?? switch (path) {
 			'quiz.registration.unavailable' => '登録を確認できませんでした。通信状況を確認して再試行してください。',
 			'quiz.registration.rateLimited' => '入力回数が多すぎます。1分待ってから、受付コードを確認して再試行してください。',
+			_ => null,
+		} ?? switch (path) {
 			'quiz.registration.accountUnavailable' => 'このアカウントでは参加できません。運営にお問い合わせください。',
 			'quiz.waiting.title' => '登録完了！',
 			'quiz.waiting.description' => 'チーム発表までしばらくお待ちください',

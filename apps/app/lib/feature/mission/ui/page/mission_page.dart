@@ -9,7 +9,6 @@ import 'package:app/feature/mission/data/mission_provider.dart';
 import 'package:app/feature/mission/data/profile_exchange_progress.dart';
 import 'package:app/feature/sns_post/data/sns_post_provider.dart';
 import 'package:app/feature/sns_post/ui/sns_post_companion_label.dart';
-import 'package:app/feature/stamp_rally/data/stamp_rally_provider.dart';
 import 'package:app/feature/support_lt/data/provider/support_lt_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -142,49 +141,7 @@ class _MissionBody extends ConsumerWidget {
             onTap: () => const SnsPostRoute().push<void>(context),
             onRetry: () => ref.invalidate(snsPostRegistrationProvider(uid)),
           ),
-          const SizedBox(height: 24),
-          _StampRallyEntry(uid: uid),
         ],
-      ),
-    );
-  }
-}
-
-/// The stamp rally has its own prizes, so it stays out of the mission count.
-class _StampRallyEntry extends ConsumerWidget {
-  const _StampRallyEntry({required this.uid});
-
-  final String uid;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final t = Translations.of(context);
-    final theme = Theme.of(context);
-    final count = ref.watch(stampRallyCardProvider(uid)).value?.stampCount;
-    final total = ref.watch(stampRallySponsorIdsProvider).value?.length;
-    return Card.outlined(
-      key: const ValueKey('mission-stamp-rally'),
-      margin: EdgeInsets.zero,
-      clipBehavior: Clip.antiAlias,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-        side: BorderSide(color: theme.colorScheme.outlineVariant),
-      ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-        leading: Icon(Icons.approval_outlined, color: theme.colorScheme.primary),
-        title: Text(
-          t.mission.stampRallyTitle,
-          style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
-        ),
-        subtitle: Text(t.mission.stampRallyDescription),
-        trailing: count == null || total == null
-            ? const Icon(Icons.chevron_right)
-            : Text(
-                t.stampRally.stampCount(n: count, total: total),
-                style: theme.textTheme.titleMedium,
-              ),
-        onTap: () => const StampRallyRoute().push<void>(context),
       ),
     );
   }

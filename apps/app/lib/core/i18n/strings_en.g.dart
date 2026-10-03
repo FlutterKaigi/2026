@@ -495,8 +495,6 @@ class _Translations$mission$en extends Translations$mission$ja {
 	@override String get profileRequired => 'Add your country or region to your profile';
 	@override String get snsTitle => 'Share a photo on SNS';
 	@override String get snsDescription => 'Post a photo with an eligible attendee and register its URL and category';
-	@override String get stampRallyTitle => 'Stamp Rally';
-	@override String get stampRallyDescription => 'Collect stamps at sponsor booths and redeem prizes';
 }
 
 // Path: stampRally
@@ -1514,8 +1512,6 @@ extension on TranslationsEn {
 			'mission.profileRequired' => 'Add your country or region to your profile',
 			'mission.snsTitle' => 'Share a photo on SNS',
 			'mission.snsDescription' => 'Post a photo with an eligible attendee and register its URL and category',
-			'mission.stampRallyTitle' => 'Stamp Rally',
-			'mission.stampRallyDescription' => 'Collect stamps at sponsor booths and redeem prizes',
 			'stampRally.title' => 'Stamp Rally',
 			'stampRally.signInRequired' => 'Sign in to collect stamps',
 			'stampRally.description' => 'Scan the QR codes at sponsor booths to collect stamps',
@@ -1706,10 +1702,10 @@ extension on TranslationsEn {
 			'quiz.registration.codeMismatch' => 'Could not register. Please check the entry code.',
 			'quiz.registration.alreadyParticipated' => 'You have already registered for another round and cannot join this one.',
 			'quiz.registration.closed' => 'Registration for this round has closed.',
-			_ => null,
-		} ?? switch (path) {
 			'quiz.registration.unavailable' => 'Registration could not be confirmed. Check your connection and try again.',
 			'quiz.registration.rateLimited' => 'Too many attempts. Wait one minute, check the entry code, and try again.',
+			_ => null,
+		} ?? switch (path) {
 			'quiz.registration.accountUnavailable' => 'This account cannot join. Please contact event staff.',
 			'quiz.waiting.title' => 'You\'re in!',
 			'quiz.waiting.description' => 'Please wait for the team announcement',

@@ -210,11 +210,11 @@ QR コードは `<ドメイン>/s/<token>` 形式で、トークンは
 カードの読み取りロックを保持して行う。削除済みアカウントはロック解放後に共通の Auth 削除処理で
 データを削除する。`onSupportLtUserDeleted` も `stampRallyCards/{uid}` を削除する。
 
-署名鍵は Firebase Functions のシークレット `STAMP_RALLY_TOKEN_SECRET` から読む。
-シークレットを変更すると印刷済みのすべての QR コードが無効になる。
+署名鍵は Firebase Functions のシークレット `STAMP_RALLY_TOKEN_SECRET` から読み、前後の空白・改行を除いて使う。
+値は環境ごとに別の乱数にする。シークレットを変更すると印刷済みのすべての QR コードが無効になる。
 
 ```bash
-firebase functions:secrets:set STAMP_RALLY_TOKEN_SECRET --project flutterkaigi-2026-stg
+openssl rand -hex 32 | tr -d '\n' | firebase functions:secrets:set STAMP_RALLY_TOKEN_SECRET --project flutterkaigi-2026-stg --data-file -
 ```
 
 エミュレータでは `functions/.secret.local` に `STAMP_RALLY_TOKEN_SECRET=<任意の値>` を追加する。

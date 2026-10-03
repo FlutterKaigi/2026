@@ -6,7 +6,6 @@ import 'package:app/feature/exchange/data/provider/profile_exchange_repository.d
 import 'package:app/feature/mission/ui/page/mission_page.dart';
 import 'package:app/feature/profile/data/provider/user_profile_repository.dart';
 import 'package:app/feature/sns_post/data/sns_post_provider.dart';
-import 'package:app/feature/stamp_rally/data/stamp_rally_provider.dart';
 import 'package:app/feature/support_lt/data/provider/support_lt_provider.dart';
 import 'package:data/data.dart';
 import 'package:flutter/material.dart';
@@ -18,7 +17,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'fake_auth_repository.dart';
 import 'fake_profile_exchange_repository.dart';
 import 'fake_sns_post_repository.dart';
-import 'fake_stamp_rally_repository.dart';
 import 'fake_support_lt_repository.dart';
 import 'fake_user_profile_repository.dart';
 import 'test_profiles.dart';
@@ -55,7 +53,7 @@ void main() {
       initialLocation: '/account/missions',
       routes: [
         GoRoute(path: '/account/missions', builder: (_, _) => const MissionPage()),
-        for (final path in ['support-lt', 'exchange', 'sns-post', 'profile', 'stamp-rally'])
+        for (final path in ['support-lt', 'exchange', 'sns-post', 'profile'])
           GoRoute(
             path: '/account/$path',
             builder: (_, _) => Scaffold(body: Text('$path destination')),
@@ -79,7 +77,6 @@ void main() {
         profileExchangeRepositoryProvider.overrideWithValue(exchanges),
         supportLtRepositoryProvider.overrideWithValue(lt),
         snsPostRepositoryProvider.overrideWithValue(sns),
-        stampRallyRepositoryProvider.overrideWithValue(FakeStampRallyRepository(sponsorIds: {'s1', 's2'})),
         appleSignInAvailabilityProvider.overrideWithValue(false),
       ],
       child: MaterialApp.router(
@@ -197,12 +194,7 @@ void main() {
     expect(lt.watchedUids, isEmpty);
   });
 
-  for (final entry in [
-    ('mission-lt', 'support-lt'),
-    ('mission-exchange', 'exchange'),
-    ('mission-sns', 'sns-post'),
-    ('mission-stamp-rally', 'stamp-rally'),
-  ]) {
+  for (final entry in [('mission-lt', 'support-lt'), ('mission-exchange', 'exchange'), ('mission-sns', 'sns-post')]) {
     testWidgets('${entry.$1} opens its registration flow', (tester) async {
       await tester.pumpWidget(subject());
       await tester.pumpAndSettle();

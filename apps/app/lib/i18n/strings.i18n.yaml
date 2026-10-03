@@ -357,8 +357,6 @@ mission:
   profileRequired: プロフィールで出身国・地域を登録する
   snsTitle: 写真をSNSに投稿
   snsDescription: 対象の相手との写真を投稿し、URLとタグを登録
-  stampRallyTitle: スタンプラリー
-  stampRallyDescription: スポンサーブースでスタンプを集めて景品と交換
 
 stampRally:
   title: スタンプラリー
