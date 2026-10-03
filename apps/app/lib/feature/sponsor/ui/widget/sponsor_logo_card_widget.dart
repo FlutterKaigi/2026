@@ -65,7 +65,7 @@ class SponsorLogoCardWidget extends StatelessWidget {
               child: SizedBox.square(
                 dimension: effectiveSide,
                 child: Center(
-                  child: SponsorLogoImage(
+                  child: _SponsorLogoImage(
                     sponsor: sponsor,
                     name: effectiveName,
                     side: effectiveSide,
@@ -295,13 +295,11 @@ _IndividualLink? _parseIndividualLink(String? rawUrl) {
   return _IndividualLink(uri: uri, type: type);
 }
 
-/// A sponsor's primary logo sized to [side], or its name when there is none.
-class SponsorLogoImage extends StatelessWidget {
-  const SponsorLogoImage({
+class _SponsorLogoImage extends StatelessWidget {
+  const _SponsorLogoImage({
     required this.sponsor,
     required this.name,
     required this.side,
-    super.key,
   });
 
   final Sponsor sponsor;

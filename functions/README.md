@@ -187,7 +187,7 @@ Firestore トランザクションを実装する。リージョンは `asia-nor
 
 QR コードは `<ドメイン>/s/<token>` 形式で、トークンは
 `HMAC-SHA256(STAMP_RALLY_TOKEN_SECRET, <用途>)` の16進表記。用途はスポンサーのスタンプが
-`stamp.v1.<sponsorId>`、景品の交換が `reward.v1`、サンクスカードの交換が `thanks.v1`。
+`stamp.v1.<sponsorId>`、景品の交換が `reward.v1`、クレーンゲームの挑戦（サンクスカード）が `thanks.v1`。
 有効期限はなく、印刷して使う。
 
 - `scanStampRallyCode({ token })` は匿名認証以外のサインイン済みユーザーが利用できる。
@@ -199,7 +199,7 @@ QR コードは `<ドメイン>/s/<token>` 形式で、トークンは
   - 景品: `{ kind: "reward", redeemedCheckpoints, redeemedAt, stampCount, checkpoints, rewardsRedeemedAt }`。
     達成済みで未交換のチェックポイントをすべて交換済みにする。交換できるものがなければ
     `redeemedCheckpoints` は空、`redeemedAt` は null。
-  - サンクスカード: `{ kind: "thanksCard", alreadyRedeemed, redeemedAt }`。スタンプ数は条件にしない。
+  - クレーンゲーム: `{ kind: "thanksCard", alreadyRedeemed, redeemedAt }`。スタンプ数は条件にせず、1人1回のみ記録する。挑戦の条件となるサンクスカードは会場で物理のカードとして集める。
   - いずれの署名とも一致しなければ `not-found`、形式不正は `invalid-argument`。
 - `getStampRallyQrCodes()` は管理者のみ呼び出せる。`{ sponsors: [{ sponsorId, token }], reward, thanksCard }`
   を返す。ドメインはダッシュボードが自身の Flavor に合わせて付ける。

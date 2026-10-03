@@ -1,5 +1,6 @@
+import 'dart:math' as math;
+
 import 'package:app/core/designsystem/theme/app_gradients.dart';
-import 'package:app/core/extension/locale_map_extension.dart';
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/router/router.dart';
 import 'package:app/core/ui/widget/app_error_view.dart';
@@ -7,7 +8,6 @@ import 'package:app/core/ui/widget/app_page_content.dart';
 import 'package:app/feature/auth/ui/widget/authenticated_body.dart';
 import 'package:app/feature/auth/ui/widget/sign_in_card.dart';
 import 'package:app/feature/sponsor/data/provider/sponsor_list_provider.dart';
-import 'package:app/feature/sponsor/ui/widget/sponsor_logo_card_widget.dart';
 import 'package:app/feature/stamp_rally/data/stamp_rally_provider.dart';
 import 'package:data/data.dart';
 import 'package:flutter/material.dart';
@@ -77,21 +77,21 @@ class _StampRallyBody extends ConsumerWidget {
       return const Center(child: CircularProgressIndicator.adaptive());
     }
 
-    final ids = sponsorIds.requireValue;
-    final targets = [
-      for (final group in buildSponsorWallData(sponsors.requireValue).groups)
-        for (final sponsor in group.sponsors)
-          if (ids.contains(sponsor.id)) sponsor,
-    ];
     final currentSettings = settings.requireValue;
     final currentCard = card.requireValue;
+    final sponsorsById = {for (final sponsor in sponsors.requireValue) sponsor.id: sponsor};
+    // Stamps fill the road in the order they were collected; which sponsor
+    // gave each one is deliberately not shown.
+    final collected = (currentCard.stamps.entries.toList()..sort((a, b) => a.value.compareTo(b.value)))
+        .map((entry) => sponsorsById[entry.key])
+        .toList();
 
     return AppPageContent(
       maxWidth: 640,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _ProgressCard(settings: currentSettings, card: currentCard, total: ids.length),
+          _ProgressCard(settings: currentSettings, card: currentCard, total: sponsorIds.requireValue.length),
           const SizedBox(height: 16),
           FilledButton.icon(
             onPressed: () => const StampRallyScanRoute().push<void>(context),
@@ -104,35 +104,290 @@ class _StampRallyBody extends ConsumerWidget {
             _Notice(text: t.stampRally.closed),
           ],
           const SizedBox(height: 24),
-          _SectionTitle(t.stampRally.checkpointsTitle),
-          for (final (index, required) in currentSettings.checkpoints.indexed)
-            _CheckpointTile(
-              number: index + 1,
-              required: required,
-              achieved: currentCard.stampCount >= required,
-              redeemedAt: currentCard.rewardsRedeemedAt[index + 1],
-            ),
-          const SizedBox(height: 16),
           _SectionTitle(t.stampRally.thanksCardTitle),
           _ThanksCardTile(redeemedAt: currentCard.thanksCardRedeemedAt),
           const SizedBox(height: 24),
-          _SectionTitle(t.stampRally.sponsorsTitle),
-          if (targets.isEmpty)
-            Text(t.stampRally.sponsorsEmpty)
-          else
-            GridView.extent(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              maxCrossAxisExtent: 200,
-              mainAxisSpacing: 12,
-              crossAxisSpacing: 12,
-              childAspectRatio: 0.82,
+          _SectionTitle(t.stampRally.roadmapTitle),
+          _Roadmap(
+            nodes: _roadmapNodes(
+              settings: currentSettings,
+              card: currentCard,
+              collected: collected,
+              slots: sponsorIds.requireValue.length,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+sealed class _RoadmapNode {
+  const _RoadmapNode({required this.reached});
+
+  final bool reached;
+}
+
+final class _StampNode extends _RoadmapNode {
+  const _StampNode({required this.number, required this.sponsor, required super.reached, required this.isNext});
+
+  final int number;
+
+  /// The sponsor whose stamp fills this slot, for its artwork only.
+  final Sponsor? sponsor;
+  final bool isNext;
+}
+
+final class _CheckpointNode extends _RoadmapNode {
+  const _CheckpointNode({required this.number, required this.required, required super.reached, this.redeemedAt});
+
+  final int number;
+  final int required;
+  final DateTime? redeemedAt;
+}
+
+/// One slot per stamp sponsor, with each prize placed right after the stamp
+/// that reaches it.
+List<_RoadmapNode> _roadmapNodes({
+  required StampRallySettings settings,
+  required StampRallyCard card,
+  required List<Sponsor?> collected,
+  required int slots,
+}) {
+  final count = card.stampCount;
+  final total = [slots, count, ...settings.checkpoints].reduce(math.max);
+  return [
+    for (var number = 1; number <= total; number++) ...[
+      _StampNode(
+        number: number,
+        sponsor: number <= collected.length ? collected[number - 1] : null,
+        reached: number <= count,
+        isNext: number == count + 1,
+      ),
+      for (final (index, required) in settings.checkpoints.indexed)
+        if (required == number)
+          _CheckpointNode(
+            number: index + 1,
+            required: required,
+            reached: count >= required,
+            redeemedAt: card.rewardsRedeemedAt[index + 1],
+          ),
+    ],
+  ];
+}
+
+// The stamp artwork is 4:3, so slots share its shape instead of cropping it.
+const _stampWidth = 104.0;
+const _stampHeight = 78.0;
+const _stampRowHeight = 92.0;
+const _checkpointRowHeight = 128.0;
+
+/// Horizontal positions the stamps cycle through, as fractions of the width,
+/// so the road winds left and right down the page.
+const _zigzag = [0.2, 0.5, 0.8, 0.5];
+
+class _Roadmap extends StatelessWidget {
+  const _Roadmap({required this.nodes});
+
+  final List<_RoadmapNode> nodes;
+
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, constraints) {
+      final width = constraints.maxWidth;
+      final centers = <Offset>[];
+      var top = 0.0;
+      var stampIndex = 0;
+      for (final node in nodes) {
+        final height = node is _CheckpointNode ? _checkpointRowHeight : _stampRowHeight;
+        final x = node is _CheckpointNode ? 0.5 : _zigzag[stampIndex++ % _zigzag.length];
+        centers.add(Offset(width * x, top + height / 2));
+        top += height;
+      }
+      final colors = Theme.of(context).colorScheme;
+      return SizedBox(
+        height: top,
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: CustomPaint(
+                painter: _RoadPainter(
+                  centers: centers,
+                  reached: [for (final node in nodes) node.reached],
+                  reachedColor: colors.primary,
+                  pendingColor: colors.outlineVariant,
+                ),
+              ),
+            ),
+            for (final (index, node) in nodes.indexed)
+              switch (node) {
+                _StampNode() => Positioned(
+                  left: centers[index].dx - _stampWidth / 2,
+                  top: centers[index].dy - _stampHeight / 2,
+                  child: _StampSlot(node: node),
+                ),
+                _CheckpointNode() => Positioned(
+                  left: 0,
+                  right: 0,
+                  top: centers[index].dy - _checkpointRowHeight / 2 + 8,
+                  height: _checkpointRowHeight - 16,
+                  child: Center(child: _CheckpointMarker(node: node)),
+                ),
+              },
+          ],
+        ),
+      );
+    },
+  );
+}
+
+class _RoadPainter extends CustomPainter {
+  const _RoadPainter({
+    required this.centers,
+    required this.reached,
+    required this.reachedColor,
+    required this.pendingColor,
+  });
+
+  final List<Offset> centers;
+  final List<bool> reached;
+  final Color reachedColor;
+  final Color pendingColor;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
+    for (var index = 1; index < centers.length; index++) {
+      final from = centers[index - 1];
+      final to = centers[index];
+      final middle = (from.dy + to.dy) / 2;
+      final segment = Path()
+        ..moveTo(from.dx, from.dy)
+        ..cubicTo(from.dx, middle, to.dx, middle, to.dx, to.dy);
+      paint
+        ..color = reached[index] ? reachedColor : pendingColor
+        ..strokeWidth = reached[index] ? 6 : 4;
+      canvas.drawPath(segment, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(_RoadPainter oldDelegate) =>
+      oldDelegate.centers != centers ||
+      oldDelegate.reached != reached ||
+      oldDelegate.reachedColor != reachedColor ||
+      oldDelegate.pendingColor != pendingColor;
+}
+
+class _StampSlot extends StatelessWidget {
+  const _StampSlot({required this.node});
+
+  final _StampNode node;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = Translations.of(context);
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final sponsor = node.sponsor;
+    final number = Center(
+      child: Text(
+        '${node.number}',
+        style: theme.textTheme.titleMedium?.copyWith(
+          color: node.isNext ? colors.primary : colors.onSurfaceVariant,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+    final collectedMark = Icon(Icons.approval, size: 36, color: colors.onPrimaryContainer);
+    final radius = BorderRadius.circular(16);
+    return Semantics(
+      label: t.stampRally.stampSlotSemantic(
+        n: node.number,
+        status: node.reached ? t.stampRally.acquired : t.stampRally.notAcquired,
+      ),
+      child: ExcludeSemantics(
+        child: Container(
+          width: _stampWidth,
+          height: _stampHeight,
+          clipBehavior: Clip.antiAlias,
+          decoration: BoxDecoration(
+            borderRadius: radius,
+            color: node.reached ? colors.primaryContainer : colors.surfaceContainerHighest,
+            boxShadow: node.reached
+                ? [BoxShadow(color: colors.shadow.withValues(alpha: 0.18), blurRadius: 8, offset: const Offset(0, 3))]
+                : null,
+          ),
+          // Drawn in front so the artwork does not cover the frame.
+          foregroundDecoration: BoxDecoration(
+            borderRadius: radius,
+            border: Border.all(
+              color: node.reached || node.isNext ? colors.primary : colors.outlineVariant,
+              width: node.reached ? 3 : 2,
+            ),
+          ),
+          child: !node.reached
+              ? number
+              : sponsor == null
+              ? collectedMark
+              : StampImage(sponsor: sponsor, fit: BoxFit.cover, fallback: collectedMark),
+        ),
+      ),
+    );
+  }
+}
+
+class _CheckpointMarker extends StatelessWidget {
+  const _CheckpointMarker({required this.node});
+
+  final _CheckpointNode node;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = Translations.of(context);
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final redeemedAt = node.redeemedAt;
+    final (background, foreground, icon, status) = redeemedAt != null
+        ? (
+            colors.secondaryContainer,
+            colors.onSecondaryContainer,
+            Icons.check_circle,
+            t.stampRally.checkpointRedeemed(date: formatStampRallyTime(context, redeemedAt)),
+          )
+        : node.reached
+        ? (colors.primaryContainer, colors.onPrimaryContainer, Icons.redeem, t.stampRally.checkpointAchieved)
+        : (colors.surfaceContainerHigh, colors.onSurfaceVariant, Icons.lock_outline, t.stampRally.checkpointLocked);
+    return Semantics(
+      container: true,
+      child: Container(
+        constraints: const BoxConstraints(minWidth: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        decoration: BoxDecoration(
+          color: background,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: node.reached ? colors.primary : colors.outlineVariant, width: 2),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                for (final sponsor in targets)
-                  _SponsorStamp(sponsor: sponsor, acquired: currentCard.stamps.containsKey(sponsor.id)),
+                Icon(icon, color: foreground),
+                const SizedBox(width: 8),
+                Text(
+                  t.stampRally.checkpointLabel(number: node.number, required: node.required),
+                  style: theme.textTheme.titleMedium?.copyWith(color: foreground, fontWeight: FontWeight.w800),
+                ),
               ],
             ),
-        ],
+            const SizedBox(height: 4),
+            Text(status, style: theme.textTheme.labelLarge?.copyWith(color: foreground)),
+          ],
+        ),
       ),
     );
   }
@@ -232,58 +487,6 @@ class _SectionTitle extends StatelessWidget {
   );
 }
 
-class _StatusTile extends StatelessWidget {
-  const _StatusTile({required this.icon, required this.title, required this.status, required this.highlighted});
-
-  final IconData icon;
-  final String title;
-  final String status;
-  final bool highlighted;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-    return Card.outlined(
-      margin: const EdgeInsets.only(bottom: 8),
-      color: highlighted ? colors.primaryContainer : null,
-      child: ListTile(
-        leading: Icon(icon, color: highlighted ? colors.onPrimaryContainer : colors.onSurfaceVariant),
-        title: Text(title),
-        trailing: Text(status, style: Theme.of(context).textTheme.labelLarge),
-      ),
-    );
-  }
-}
-
-class _CheckpointTile extends StatelessWidget {
-  const _CheckpointTile({required this.number, required this.required, required this.achieved, this.redeemedAt});
-
-  final int number;
-  final int required;
-  final bool achieved;
-  final DateTime? redeemedAt;
-
-  @override
-  Widget build(BuildContext context) {
-    final t = Translations.of(context);
-    final redeemed = redeemedAt;
-    return _StatusTile(
-      icon: redeemed != null
-          ? Icons.check_circle
-          : achieved
-          ? Icons.redeem
-          : Icons.lock_outline,
-      title: t.stampRally.checkpointLabel(number: number, required: required),
-      status: redeemed != null
-          ? t.stampRally.checkpointRedeemed(date: formatStampRallyTime(context, redeemed))
-          : achieved
-          ? t.stampRally.checkpointAchieved
-          : t.stampRally.checkpointLocked,
-      highlighted: achieved && redeemed == null,
-    );
-  }
-}
-
 class _ThanksCardTile extends StatelessWidget {
   const _ThanksCardTile({required this.redeemedAt});
 
@@ -293,94 +496,35 @@ class _ThanksCardTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = Translations.of(context);
     final redeemed = redeemedAt;
-    return _StatusTile(
-      icon: redeemed == null ? Icons.mail_outline : Icons.mark_email_read_outlined,
-      title: t.stampRally.thanksCardDescription,
-      status: redeemed == null
-          ? t.stampRally.thanksCardNotRedeemed
-          : t.stampRally.thanksCardRedeemed(date: formatStampRallyTime(context, redeemed)),
-      highlighted: false,
+    return Card.outlined(
+      margin: EdgeInsets.zero,
+      child: ListTile(
+        leading: Icon(redeemed == null ? Icons.mail_outline : Icons.mark_email_read_outlined),
+        title: Text(t.stampRally.thanksCardDescription),
+        trailing: Text(
+          redeemed == null
+              ? t.stampRally.thanksCardNotRedeemed
+              : t.stampRally.thanksCardRedeemed(date: formatStampRallyTime(context, redeemed)),
+          style: Theme.of(context).textTheme.labelLarge,
+        ),
+      ),
     );
   }
 }
 
 /// The stamp artwork for [sponsor], bundled under its website slug.
 class StampImage extends StatelessWidget {
-  const StampImage({required this.sponsor, required this.fallback, super.key});
+  const StampImage({required this.sponsor, required this.fallback, this.fit = BoxFit.contain, super.key});
 
   final Sponsor sponsor;
   final Widget fallback;
+  final BoxFit fit;
 
   @override
   Widget build(BuildContext context) => Image.asset(
     'res/assets/stamps/${sponsor.slug}.webp',
-    fit: BoxFit.contain,
+    fit: fit,
     excludeFromSemantics: true,
     errorBuilder: (_, _, _) => fallback,
   );
-}
-
-class _SponsorStamp extends StatelessWidget {
-  const _SponsorStamp({required this.sponsor, required this.acquired});
-
-  final Sponsor sponsor;
-  final bool acquired;
-
-  @override
-  Widget build(BuildContext context) {
-    final t = Translations.of(context);
-    final theme = Theme.of(context);
-    final name = sponsor.name.resolve(Localizations.localeOf(context)).trim();
-    final logo = LayoutBuilder(
-      builder: (context, constraints) => ColoredBox(
-        color: Colors.white,
-        child: SponsorLogoImage(sponsor: sponsor, name: name, side: constraints.biggest.shortestSide),
-      ),
-    );
-    return Semantics(
-      container: true,
-      label: t.stampRally.sponsorSemantic(
-        name: name,
-        status: acquired ? t.stampRally.acquired : t.stampRally.notAcquired,
-      ),
-      child: ExcludeSemantics(
-        child: Card.outlined(
-          margin: EdgeInsets.zero,
-          clipBehavior: Clip.antiAlias,
-          color: acquired ? theme.colorScheme.primaryContainer : null,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Expanded(
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    if (acquired) StampImage(sponsor: sponsor, fallback: logo) else Opacity(opacity: 0.4, child: logo),
-                    if (acquired)
-                      Align(
-                        alignment: Alignment.topRight,
-                        child: Padding(
-                          padding: const EdgeInsets.all(6),
-                          child: Icon(Icons.verified, color: theme.colorScheme.primary),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8),
-                child: Text(
-                  name,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.labelMedium,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 }

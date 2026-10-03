@@ -80,7 +80,7 @@ void main() {
     );
   }
 
-  testWidgets('the card shows progress, prizes, and which sponsors were stamped', (tester) async {
+  testWidgets('the roadmap shows collected stamps and prizes without naming sponsors', (tester) async {
     stamps.card = StampRallyCard(
       stamps: {'s1': DateTime.utc(2026, 11, 13, 1)},
       rewardsRedeemedAt: {1: DateTime.utc(2026, 11, 13, 2)},
@@ -91,8 +91,12 @@ void main() {
     expect(find.text('1 / 2'), findsOneWidget);
     expect(find.text('あと1個で景品#2'), findsOneWidget);
     expect(find.textContaining('交換済み'), findsOneWidget);
-    expect(find.bySemanticsLabel('スポンサーA、獲得済み'), findsOneWidget);
-    expect(find.bySemanticsLabel('スポンサーB、未獲得'), findsOneWidget);
+    expect(find.bySemanticsLabel('1個目のスタンプ、獲得済み'), findsOneWidget);
+    expect(find.bySemanticsLabel('2個目のスタンプ、未獲得'), findsOneWidget);
+    expect(find.text('#1（1個）'), findsOneWidget);
+    expect(find.text('#2（2個）'), findsOneWidget);
+    expect(find.text('未達成'), findsOneWidget);
+    expect(find.textContaining('スポンサーA'), findsNothing);
   });
 
   testWidgets('a stamp link scans once and announces a new checkpoint', (tester) async {
@@ -166,7 +170,7 @@ void main() {
     await auth.signInWithGoogle();
     await tester.pumpAndSettle();
 
-    expect(find.text('サンクスカードを受け取れます'), findsOneWidget);
+    expect(find.text('クレーンゲームに挑戦できます'), findsOneWidget);
     expect(stamps.scannedTokens, [_token]);
     expect(container.read(pendingStampRallyTokenProvider), isNull);
   });

@@ -362,25 +362,23 @@ stampRally:
   signInRequired: Sign in to collect stamps
   description: Scan the QR codes at sponsor booths to collect stamps
   scanButton: Scan QR code
-  closed: Stamps are not available right now. Prizes and the thanks card can still be redeemed
+  closed: Stamps are not available right now. Prizes and the crane game are still available
   stampCount: "$n / $total"
   stampCountSemantic: $n of $total stamps collected
   nextCheckpoint: "$n more for prize #$number"
   allCheckpoints: You have reached every prize
-  checkpointsTitle: Prizes
   checkpointLabel: "#$number ($required stamps)"
   checkpointLocked: Not yet
   checkpointAchieved: Ready to redeem
   checkpointRedeemed: Redeemed $date
-  thanksCardTitle: Thanks card
-  thanksCardDescription: Scan the dedicated QR code at the prize counter
-  thanksCardNotRedeemed: Not redeemed
-  thanksCardRedeemed: Redeemed $date
-  sponsorsTitle: Sponsors
-  sponsorsEmpty: Participating sponsors have not been announced yet
+  thanksCardTitle: Crane game
+  thanksCardDescription: Collect thanks cards at the venue to play the crane game once
+  thanksCardNotRedeemed: Not played
+  thanksCardRedeemed: Played $date
+  roadmapTitle: Stamps
+  stampSlotSemantic: Stamp $n, $status
   acquired: Collected
   notAcquired: Not collected
-  sponsorSemantic: $name, $status
   scanTitle: Scan QR code
   scanHint: Fit the QR code at a sponsor booth or the prize counter inside the frame
   scanInvalid: This is not a stamp rally QR code
@@ -396,9 +394,9 @@ stampRally:
   rewardNoneBody: You have $n stamps
   rewardStaffNote: Show this screen to the staff
   rewardRedeemedAt: "#$number redeemed $date"
-  thanksCardResultTitle: You can receive the thanks card
-  thanksCardAlreadyTitle: The thanks card has already been redeemed
-  thanksCardResultAt: Redeemed $date
+  thanksCardResultTitle: You can play the crane game
+  thanksCardAlreadyTitle: You have already played the crane game
+  thanksCardResultAt: Checked in $date
   invalidTitle: Invalid QR code
   invalidBody: Check that this is a stamp rally QR code
   closedTitle: Stamps are not available right now

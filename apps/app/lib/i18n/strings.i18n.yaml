@@ -363,25 +363,23 @@ stampRally:
   signInRequired: スタンプを集めるにはサインインしてください
   description: スポンサーブースでQRコードを読み取ってスタンプを集めましょう
   scanButton: QRコードを読み取る
-  closed: 現在スタンプは獲得できません。景品・サンクスカードの交換は利用できます
+  closed: 現在スタンプは獲得できません。景品の交換とクレーンゲームは利用できます
   stampCount: "$n / $total"
   stampCountSemantic: $total個中$n個のスタンプを獲得
   nextCheckpoint: あと$n個で景品#$number
   allCheckpoints: すべての景品の条件を達成しました
-  checkpointsTitle: 景品
   checkpointLabel: "#$number（$required個）"
   checkpointLocked: 未達成
   checkpointAchieved: 交換できます
   checkpointRedeemed: 交換済み $date
-  thanksCardTitle: サンクスカード
-  thanksCardDescription: 景品交換所で専用のQRコードを読み取ると交換できます
-  thanksCardNotRedeemed: 未交換
-  thanksCardRedeemed: 交換済み $date
-  sponsorsTitle: 対象スポンサー
-  sponsorsEmpty: 対象スポンサーはまだ発表されていません
+  thanksCardTitle: クレーンゲーム
+  thanksCardDescription: 会場でサンクスカードを集めると、クレーンゲームに1回挑戦できます
+  thanksCardNotRedeemed: 未挑戦
+  thanksCardRedeemed: 挑戦済み $date
+  roadmapTitle: スタンプ
+  stampSlotSemantic: $n個目のスタンプ、$status
   acquired: 獲得済み
   notAcquired: 未獲得
-  sponsorSemantic: $name、$status
   scanTitle: QRコードを読み取る
   scanHint: スポンサーブースや景品交換所のQRコードを枠内に収めてください
   scanInvalid: スタンプラリーのQRコードではありません
@@ -397,9 +395,9 @@ stampRally:
   rewardNoneBody: 現在のスタンプは$n個です
   rewardStaffNote: この画面をスタッフに見せてください
   rewardRedeemedAt: "#$number 交換日時 $date"
-  thanksCardResultTitle: サンクスカードを受け取れます
-  thanksCardAlreadyTitle: サンクスカードは交換済みです
-  thanksCardResultAt: 交換日時 $date
+  thanksCardResultTitle: クレーンゲームに挑戦できます
+  thanksCardAlreadyTitle: クレーンゲームは挑戦済みです
+  thanksCardResultAt: 受付日時 $date
   invalidTitle: 無効なQRコードです
   invalidBody: スタンプラリーのQRコードか確認してください
   closedTitle: 現在スタンプは獲得できません

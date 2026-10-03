@@ -78,7 +78,7 @@ class _SettingsCard extends ConsumerWidget {
     final settings = ref.watch(stampRallySettingsProvider);
     return _SectionCard(
       title: '設定',
-      description: '受付中のみスタンプを獲得できます。景品・サンクスカードの交換は受付状態に関係なく行えます。',
+      description: '受付中のみスタンプを獲得できます。景品の交換とクレーンゲームの受付は受付状態に関係なく行えます。',
       child: settings.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => SupportLtLoadError(
@@ -241,7 +241,7 @@ class _QrCodesCard extends HookConsumerWidget {
             url: '$origin/s/${sponsor.token}',
           ),
         (label: '景品交換', url: '$origin/s/${value.reward}'),
-        (label: 'サンクスカード', url: '$origin/s/${value.thanksCard}'),
+        (label: 'クレーンゲーム（サンクスカード）', url: '$origin/s/${value.thanksCard}'),
       ],
       _ => const <({String label, String url})>[],
     };

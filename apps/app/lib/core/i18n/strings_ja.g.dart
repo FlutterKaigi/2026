@@ -978,8 +978,8 @@ class Translations$stampRally$ja {
 	/// ja: 'QRコードを読み取る'
 	String get scanButton => 'QRコードを読み取る';
 
-	/// ja: '現在スタンプは獲得できません。景品・サンクスカードの交換は利用できます'
-	String get closed => '現在スタンプは獲得できません。景品・サンクスカードの交換は利用できます';
+	/// ja: '現在スタンプは獲得できません。景品の交換とクレーンゲームは利用できます'
+	String get closed => '現在スタンプは獲得できません。景品の交換とクレーンゲームは利用できます';
 
 	/// ja: '$n / $total'
 	String stampCount({required Object n, required Object total}) => '${n} / ${total}';
@@ -993,9 +993,6 @@ class Translations$stampRally$ja {
 	/// ja: 'すべての景品の条件を達成しました'
 	String get allCheckpoints => 'すべての景品の条件を達成しました';
 
-	/// ja: '景品'
-	String get checkpointsTitle => '景品';
-
 	/// ja: '#$number（$required個）'
 	String checkpointLabel({required Object number, required Object required}) => '#${number}（${required}個）';
 
@@ -1008,32 +1005,29 @@ class Translations$stampRally$ja {
 	/// ja: '交換済み $date'
 	String checkpointRedeemed({required Object date}) => '交換済み ${date}';
 
-	/// ja: 'サンクスカード'
-	String get thanksCardTitle => 'サンクスカード';
+	/// ja: 'クレーンゲーム'
+	String get thanksCardTitle => 'クレーンゲーム';
 
-	/// ja: '景品交換所で専用のQRコードを読み取ると交換できます'
-	String get thanksCardDescription => '景品交換所で専用のQRコードを読み取ると交換できます';
+	/// ja: '会場でサンクスカードを集めると、クレーンゲームに1回挑戦できます'
+	String get thanksCardDescription => '会場でサンクスカードを集めると、クレーンゲームに1回挑戦できます';
 
-	/// ja: '未交換'
-	String get thanksCardNotRedeemed => '未交換';
+	/// ja: '未挑戦'
+	String get thanksCardNotRedeemed => '未挑戦';
 
-	/// ja: '交換済み $date'
-	String thanksCardRedeemed({required Object date}) => '交換済み ${date}';
+	/// ja: '挑戦済み $date'
+	String thanksCardRedeemed({required Object date}) => '挑戦済み ${date}';
 
-	/// ja: '対象スポンサー'
-	String get sponsorsTitle => '対象スポンサー';
+	/// ja: 'スタンプ'
+	String get roadmapTitle => 'スタンプ';
 
-	/// ja: '対象スポンサーはまだ発表されていません'
-	String get sponsorsEmpty => '対象スポンサーはまだ発表されていません';
+	/// ja: '$n個目のスタンプ、$status'
+	String stampSlotSemantic({required Object n, required Object status}) => '${n}個目のスタンプ、${status}';
 
 	/// ja: '獲得済み'
 	String get acquired => '獲得済み';
 
 	/// ja: '未獲得'
 	String get notAcquired => '未獲得';
-
-	/// ja: '$name、$status'
-	String sponsorSemantic({required Object name, required Object status}) => '${name}、${status}';
 
 	/// ja: 'QRコードを読み取る'
 	String get scanTitle => 'QRコードを読み取る';
@@ -1080,14 +1074,14 @@ class Translations$stampRally$ja {
 	/// ja: '#$number 交換日時 $date'
 	String rewardRedeemedAt({required Object number, required Object date}) => '#${number} 交換日時 ${date}';
 
-	/// ja: 'サンクスカードを受け取れます'
-	String get thanksCardResultTitle => 'サンクスカードを受け取れます';
+	/// ja: 'クレーンゲームに挑戦できます'
+	String get thanksCardResultTitle => 'クレーンゲームに挑戦できます';
 
-	/// ja: 'サンクスカードは交換済みです'
-	String get thanksCardAlreadyTitle => 'サンクスカードは交換済みです';
+	/// ja: 'クレーンゲームは挑戦済みです'
+	String get thanksCardAlreadyTitle => 'クレーンゲームは挑戦済みです';
 
-	/// ja: '交換日時 $date'
-	String thanksCardResultAt({required Object date}) => '交換日時 ${date}';
+	/// ja: '受付日時 $date'
+	String thanksCardResultAt({required Object date}) => '受付日時 ${date}';
 
 	/// ja: '無効なQRコードです'
 	String get invalidTitle => '無効なQRコードです';
@@ -2633,25 +2627,23 @@ extension on Translations {
 			'stampRally.signInRequired' => 'スタンプを集めるにはサインインしてください',
 			'stampRally.description' => 'スポンサーブースでQRコードを読み取ってスタンプを集めましょう',
 			'stampRally.scanButton' => 'QRコードを読み取る',
-			'stampRally.closed' => '現在スタンプは獲得できません。景品・サンクスカードの交換は利用できます',
+			'stampRally.closed' => '現在スタンプは獲得できません。景品の交換とクレーンゲームは利用できます',
 			'stampRally.stampCount' => ({required Object n, required Object total}) => '${n} / ${total}',
 			'stampRally.stampCountSemantic' => ({required Object total, required Object n}) => '${total}個中${n}個のスタンプを獲得',
 			'stampRally.nextCheckpoint' => ({required Object n, required Object number}) => 'あと${n}個で景品#${number}',
 			'stampRally.allCheckpoints' => 'すべての景品の条件を達成しました',
-			'stampRally.checkpointsTitle' => '景品',
 			'stampRally.checkpointLabel' => ({required Object number, required Object required}) => '#${number}（${required}個）',
 			'stampRally.checkpointLocked' => '未達成',
 			'stampRally.checkpointAchieved' => '交換できます',
 			'stampRally.checkpointRedeemed' => ({required Object date}) => '交換済み ${date}',
-			'stampRally.thanksCardTitle' => 'サンクスカード',
-			'stampRally.thanksCardDescription' => '景品交換所で専用のQRコードを読み取ると交換できます',
-			'stampRally.thanksCardNotRedeemed' => '未交換',
-			'stampRally.thanksCardRedeemed' => ({required Object date}) => '交換済み ${date}',
-			'stampRally.sponsorsTitle' => '対象スポンサー',
-			'stampRally.sponsorsEmpty' => '対象スポンサーはまだ発表されていません',
+			'stampRally.thanksCardTitle' => 'クレーンゲーム',
+			'stampRally.thanksCardDescription' => '会場でサンクスカードを集めると、クレーンゲームに1回挑戦できます',
+			'stampRally.thanksCardNotRedeemed' => '未挑戦',
+			'stampRally.thanksCardRedeemed' => ({required Object date}) => '挑戦済み ${date}',
+			'stampRally.roadmapTitle' => 'スタンプ',
+			'stampRally.stampSlotSemantic' => ({required Object n, required Object status}) => '${n}個目のスタンプ、${status}',
 			'stampRally.acquired' => '獲得済み',
 			'stampRally.notAcquired' => '未獲得',
-			'stampRally.sponsorSemantic' => ({required Object name, required Object status}) => '${name}、${status}',
 			'stampRally.scanTitle' => 'QRコードを読み取る',
 			'stampRally.scanHint' => 'スポンサーブースや景品交換所のQRコードを枠内に収めてください',
 			'stampRally.scanInvalid' => 'スタンプラリーのQRコードではありません',
@@ -2667,9 +2659,9 @@ extension on Translations {
 			'stampRally.rewardNoneBody' => ({required Object n}) => '現在のスタンプは${n}個です',
 			'stampRally.rewardStaffNote' => 'この画面をスタッフに見せてください',
 			'stampRally.rewardRedeemedAt' => ({required Object number, required Object date}) => '#${number} 交換日時 ${date}',
-			'stampRally.thanksCardResultTitle' => 'サンクスカードを受け取れます',
-			'stampRally.thanksCardAlreadyTitle' => 'サンクスカードは交換済みです',
-			'stampRally.thanksCardResultAt' => ({required Object date}) => '交換日時 ${date}',
+			'stampRally.thanksCardResultTitle' => 'クレーンゲームに挑戦できます',
+			'stampRally.thanksCardAlreadyTitle' => 'クレーンゲームは挑戦済みです',
+			'stampRally.thanksCardResultAt' => ({required Object date}) => '受付日時 ${date}',
 			'stampRally.invalidTitle' => '無効なQRコードです',
 			'stampRally.invalidBody' => 'スタンプラリーのQRコードか確認してください',
 			'stampRally.closedTitle' => '現在スタンプは獲得できません',
@@ -2821,10 +2813,10 @@ extension on Translations {
 			'quiz.registration.closed' => 'この回の参加受付は終了しました。',
 			'quiz.registration.unavailable' => '登録を確認できませんでした。通信状況を確認して再試行してください。',
 			'quiz.registration.rateLimited' => '入力回数が多すぎます。1分待ってから、受付コードを確認して再試行してください。',
-			_ => null,
-		} ?? switch (path) {
 			'quiz.registration.accountUnavailable' => 'このアカウントでは参加できません。運営にお問い合わせください。',
 			'quiz.waiting.title' => '登録完了！',
+			_ => null,
+		} ?? switch (path) {
 			'quiz.waiting.description' => 'チーム発表までしばらくお待ちください',
 			'quiz.team.yourTable' => 'あなたのテーブルは',
 			'quiz.team.table' => 'テーブル',
