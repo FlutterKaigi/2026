@@ -126,19 +126,23 @@ class AccountPage extends HookConsumerWidget {
         return;
       }
       isProcessing.value = true;
+      // 処理中に画面が破棄されると `ref` も状態も使えなくなるため、先に読んでおく。
+      final talker = ref.read(talkerProvider);
       try {
         await action(ref.read(authRepositoryProvider));
         if (successMessage != null && context.mounted) {
           showMessage(successMessage);
         }
       } on FirebaseAuthException catch (exception, stackTrace) {
-        ref.read(talkerProvider).handle(exception, stackTrace);
+        talker.handle(exception, stackTrace);
         final message = authErrorMessage(t, exception);
         if (message != null && context.mounted) {
           showMessage(message);
         }
       } finally {
-        isProcessing.value = false;
+        if (context.mounted) {
+          isProcessing.value = false;
+        }
       }
     }
 

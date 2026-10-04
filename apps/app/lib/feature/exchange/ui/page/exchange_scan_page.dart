@@ -49,6 +49,10 @@ class _ScannerBody extends HookConsumerWidget {
       [controller],
     );
     final isProcessing = useState(false);
+    final route = ModalRoute.of(context);
+    // The camera still reports codes, and a started exchange still completes,
+    // while this route is leaving after a back navigation.
+    bool isCurrentRoute() => route?.isCurrent ?? false;
 
     void showMessage(String message) {
       ScaffoldMessenger.of(context)
@@ -57,7 +61,7 @@ class _ScannerBody extends HookConsumerWidget {
     }
 
     Future<void> handleDetect(BarcodeCapture capture) async {
-      if (isProcessing.value || myUid == null) {
+      if (isProcessing.value || myUid == null || !isCurrentRoute()) {
         return;
       }
       final barcodes = capture.barcodes;
@@ -86,7 +90,10 @@ class _ScannerBody extends HookConsumerWidget {
         case ExchangeCreated():
           if (context.mounted) {
             showMessage(t.exchange.scanSucceeded);
-            Navigator.of(context).pop();
+            // Popping a leaving route would close the page underneath instead.
+            if (isCurrentRoute()) {
+              Navigator.of(context).pop();
+            }
             return;
           }
         case ExchangeAlreadyExists():
