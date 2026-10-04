@@ -16,6 +16,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 const _timeColumnWidth = 64.0;
 const _minimumRoomColumnWidth = 216.0;
+// The cell and card paddings on both sides of a band's label.
+const _bandLabelInset = 2 * (6 + 8);
 
 /// A room-oriented schedule grid.
 ///
@@ -65,6 +67,7 @@ class SessionTimetableRoomTimelineWidget extends HookWidget {
             _minimumRoomColumnWidth,
             availableRoomWidth / columns.length,
           );
+          final visibleRoomWidth = math.min(availableRoomWidth, roomColumnWidth * columns.length);
 
           return NotificationListener<ScrollMetricsNotification>(
             onNotification: (notification) {
@@ -111,7 +114,27 @@ class SessionTimetableRoomTimelineWidget extends HookWidget {
                         child: _RoomHeaderCellWidget(label: columns[index].label),
                       ),
                     ),
-                  for (var row = 0; row < schedule.rowStarts.length; row++) ...[
+                  // Bands go before the rooms: an entry overlapping a band from
+                  // its very start, which the band cannot stop short of, is then
+                  // drawn on top of it, as on the website.
+                  for (final band in schedule.bands)
+                    _RowSpanGridCell(
+                      key: ValueKey(('room-schedule-band', band.startRow)),
+                      column: 1,
+                      columnSpan: columns.length,
+                      startRow: band.startRow + 1,
+                      endRow: band.endRow + 1,
+                      child: _ClippedRoomCellWidget(
+                        scrollOffset: scrollOffset,
+                        roomOffset: 0,
+                        child: _ScheduleCellWidget(
+                          entries: band.entries,
+                          followScrollOffset: scrollOffset,
+                          visibleWidth: visibleRoomWidth,
+                        ),
+                      ),
+                    ),
+                  for (var row = 0; row < schedule.rowStarts.length; row++)
                     _RowSpanGridCell(
                       key: ValueKey(('room-schedule-time', row)),
                       column: 0,
@@ -123,19 +146,19 @@ class SessionTimetableRoomTimelineWidget extends HookWidget {
                         child: _TimeCellWidget(startsAt: schedule.rowStarts[row]),
                       ),
                     ),
-                    for (final cell in schedule.cellsByStartRow[row])
+                  for (var roomIndex = 0; roomIndex < columns.length; roomIndex++)
+                    for (final block in schedule.roomBlocks[roomIndex])
                       _RowSpanGridCell(
-                        key: ValueKey(('room-schedule-cell', cell.roomIndex, row)),
-                        column: cell.roomIndex + 1,
-                        startRow: cell.startRow + 1,
-                        endRow: cell.endRow + 1,
+                        key: ValueKey(('room-schedule-cell', roomIndex, block.startRow)),
+                        column: roomIndex + 1,
+                        startRow: block.startRow + 1,
+                        endRow: block.endRow + 1,
                         child: _ClippedRoomCellWidget(
                           scrollOffset: scrollOffset,
-                          roomOffset: cell.roomIndex * roomColumnWidth,
-                          child: _ScheduleCellWidget(entries: cell.entries),
+                          roomOffset: roomIndex * roomColumnWidth,
+                          child: _ScheduleCellWidget(entries: block.entries),
                         ),
                       ),
-                  ],
                 ],
               ),
             ),
@@ -300,9 +323,18 @@ class _TimeCellWidget extends StatelessWidget {
 }
 
 class _ScheduleCellWidget extends StatelessWidget {
-  const _ScheduleCellWidget({required this.entries});
+  const _ScheduleCellWidget({
+    required this.entries,
+    this.followScrollOffset,
+    this.visibleWidth = double.infinity,
+  });
 
   final List<SessionTimetableEntry> entries;
+
+  /// Set for a band, to keep each card's details within the [visibleWidth] of
+  /// the rooms on screen however far they are scrolled.
+  final ValueListenable<double>? followScrollOffset;
+  final double visibleWidth;
 
   @override
   Widget build(BuildContext context) {
@@ -311,6 +343,7 @@ class _ScheduleCellWidget extends StatelessWidget {
     }
 
     final locale = Localizations.localeOf(context);
+    final maxContentWidth = math.max<double>(0, visibleWidth - _bandLabelInset);
     return Padding(
       padding: const EdgeInsets.all(6),
       // A lone entry stretches over the rows it spans. Entries overlapping in
@@ -319,6 +352,8 @@ class _ScheduleCellWidget extends StatelessWidget {
           ? _RoomScheduleEntryWidget(
               entry: entries.single,
               locale: locale,
+              followScrollOffset: followScrollOffset,
+              maxContentWidth: maxContentWidth,
             )
           : Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -327,6 +362,8 @@ class _ScheduleCellWidget extends StatelessWidget {
                   _RoomScheduleEntryWidget(
                     entry: entries[index],
                     locale: locale,
+                    followScrollOffset: followScrollOffset,
+                    maxContentWidth: maxContentWidth,
                   ),
                   if (index < entries.length - 1) const SizedBox(height: 8),
                 ],
@@ -340,10 +377,14 @@ class _RoomScheduleEntryWidget extends ConsumerWidget {
   const _RoomScheduleEntryWidget({
     required this.entry,
     required this.locale,
+    this.followScrollOffset,
+    this.maxContentWidth = double.infinity,
   });
 
   final SessionTimetableEntry entry;
   final Locale locale;
+  final ValueListenable<double>? followScrollOffset;
+  final double maxContentWidth;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -355,6 +396,56 @@ class _RoomScheduleEntryWidget extends ConsumerWidget {
       AsyncData(:final value) when session != null => value.contains(session.id),
       _ => false,
     };
+    final details = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                formatEventTimeRange(
+                  entry.startsAt,
+                  entry.endsAt,
+                  EventTimeFormat.twentyFourHour,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.labelSmall,
+              ),
+            ),
+            if (languageLabel != null) _TinyLanguageTagWidget(label: languageLabel),
+            if (bookmarked) ...[
+              const SizedBox(width: 4),
+              Icon(
+                Icons.bookmark,
+                size: 14,
+                color: colorScheme.primary,
+              ),
+            ],
+          ],
+        ),
+        const SizedBox(height: 4),
+        Text(
+          key: ValueKey('room-session-title-${entry.id}'),
+          title,
+          style: Theme.of(context).textTheme.labelLarge?.copyWith(
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        if (entry.speakers.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          for (var index = 0; index < entry.speakers.length; index++) ...[
+            SessionSpeakerLabelWidget(
+              speaker: entry.speakers[index],
+              textStyle: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+            if (index < entry.speakers.length - 1) const SizedBox(height: 6),
+          ],
+        ],
+      ],
+    );
 
     return Material(
       key: ValueKey('room-timeline-entry-${entry.id}'),
@@ -370,56 +461,46 @@ class _RoomScheduleEntryWidget extends ConsumerWidget {
         onTap: session == null ? null : () => SessionDetailsRoute(sessionId: session.id).push<void>(context),
         child: Padding(
           padding: const EdgeInsets.all(8),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      formatEventTimeRange(
-                        entry.startsAt,
-                        entry.endsAt,
-                        EventTimeFormat.twentyFourHour,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.labelSmall,
-                    ),
-                  ),
-                  if (languageLabel != null) _TinyLanguageTagWidget(label: languageLabel),
-                  if (bookmarked) ...[
-                    const SizedBox(width: 4),
-                    Icon(
-                      Icons.bookmark,
-                      size: 14,
-                      color: colorScheme.primary,
-                    ),
-                  ],
-                ],
-              ),
-              const SizedBox(height: 4),
-              Text(
-                key: ValueKey('room-session-title-${entry.id}'),
-                title,
-                style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              if (entry.speakers.isNotEmpty) ...[
-                const SizedBox(height: 8),
-                for (var index = 0; index < entry.speakers.length; index++) ...[
-                  SessionSpeakerLabelWidget(
-                    speaker: entry.speakers[index],
-                    textStyle: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  if (index < entry.speakers.length - 1) const SizedBox(height: 6),
-                ],
-              ],
-            ],
-          ),
+          child: switch (followScrollOffset) {
+            final scrollOffset? => _ScrollFollowingWidget(
+              scrollOffset: scrollOffset,
+              maxWidth: maxContentWidth,
+              child: details,
+            ),
+            null => details,
+          },
+        ),
+      ),
+    );
+  }
+}
+
+/// Keeps [child] at the left edge of the rooms on screen while a band wider
+/// than the screen scrolls past, so the band's label stays readable.
+class _ScrollFollowingWidget extends StatelessWidget {
+  const _ScrollFollowingWidget({
+    required this.scrollOffset,
+    required this.maxWidth,
+    required this.child,
+  });
+
+  final ValueListenable<double> scrollOffset;
+  final double maxWidth;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.topLeft,
+      child: AnimatedBuilder(
+        animation: scrollOffset,
+        builder: (context, child) => Transform.translate(
+          offset: Offset(scrollOffset.value, 0),
+          child: child,
+        ),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: maxWidth),
+          child: child,
         ),
       ),
     );
@@ -461,40 +542,44 @@ final class _RoomColumn {
   final String label;
 }
 
-/// A day's room schedule on a grid whose rows run between consecutive start
-/// and end times.
+/// A day's schedule on a grid whose rows run between consecutive start and end
+/// times.
 final class _RoomSchedule {
   const _RoomSchedule({
     required this.rowStarts,
-    required this.cellsByStartRow,
+    required this.roomBlocks,
+    required this.bands,
   });
 
   /// The event-local time each row starts at. A row ends where the next one
   /// starts; the last row ends with the day's last entry.
   final List<DateTime> rowStarts;
 
-  /// Room cells indexed by the row they start in, in room order. Together
-  /// they cover every row of every room exactly once.
-  final List<List<_RoomScheduleCell>> cellsByStartRow;
+  /// Each room's column split into blocks. Together they cover every row of
+  /// the room that no band covers.
+  final List<List<_ScheduleBlock>> roomBlocks;
+
+  /// Entries without a room (the lunch break, the party), each drawn across
+  /// every room column as on the website.
+  final List<_ScheduleBlock> bands;
 }
 
-/// Rows [startRow] up to but not including [endRow] of one room, with the
+/// Rows [startRow] up to but not including [endRow] of a column, with the
 /// entries scheduled there, or none for an empty slot.
-final class _RoomScheduleCell {
-  const _RoomScheduleCell({
-    required this.roomIndex,
+final class _ScheduleBlock {
+  const _ScheduleBlock({
     required this.startRow,
     required this.endRow,
     this.entries = const [],
   });
 
-  final int roomIndex;
   final int startRow;
   final int endRow;
   final List<SessionTimetableEntry> entries;
 }
 
-typedef _EntryPlacement = ({int order, int roomIndex, int startRow, int endRow, SessionTimetableEntry entry});
+/// Where an entry sits on the grid; `roomIndex` is null for a band.
+typedef _EntryPlacement = ({int order, int? roomIndex, int startRow, int endRow, SessionTimetableEntry entry});
 
 List<_RoomColumn> _buildRoomColumns(
   BuildContext context,
@@ -502,10 +587,17 @@ List<_RoomColumn> _buildRoomColumns(
 ) {
   final t = Translations.of(context);
   final locale = Localizations.localeOf(context);
-  final entriesByVenueId = <String?, List<SessionTimetableEntry>>{};
+  final entriesByVenueId = <String, List<SessionTimetableEntry>>{};
 
   for (final entry in entries) {
-    entriesByVenueId.putIfAbsent(entry.venueId, () => []).add(entry);
+    if (entry.venueId case final venueId?) {
+      entriesByVenueId.putIfAbsent(venueId, () => []).add(entry);
+    }
+  }
+  // Entries without a room run across the room columns, so a day with no room
+  // at all still needs one column for them.
+  if (entriesByVenueId.isEmpty) {
+    return [_RoomColumn(venueId: null, label: t.sessionTimetable.view.shared)];
   }
   final venueGroups = entriesByVenueId.entries.toList()..sort(_compareVenueGroups);
 
@@ -513,47 +605,46 @@ List<_RoomColumn> _buildRoomColumns(
     for (final venueGroup in venueGroups)
       _RoomColumn(
         venueId: venueGroup.key,
-        label: switch ((venueGroup.value.first.venueId, venueGroup.value.first.venue)) {
-          (null, _) => t.sessionTimetable.view.shared,
-          (_, final venue?) => venue.name.resolve(locale),
-          _ => t.sessionTimetable.venue.unknown,
+        label: switch (venueGroup.value.first.venue) {
+          final venue? => venue.name.resolve(locale),
+          null => t.sessionTimetable.venue.unknown,
         },
       ),
   ];
 }
 
 int _compareVenueGroups(
-  MapEntry<String?, List<SessionTimetableEntry>> a,
-  MapEntry<String?, List<SessionTimetableEntry>> b,
+  MapEntry<String, List<SessionTimetableEntry>> a,
+  MapEntry<String, List<SessionTimetableEntry>> b,
 ) {
-  if (a.key == null) {
-    return b.key == null ? 0 : -1;
-  }
-  if (b.key == null) {
-    return 1;
-  }
-
   final orderCompare = (a.value.first.venue?.order ?? 1 << 30).compareTo(
     b.value.first.venue?.order ?? 1 << 30,
   );
-  return orderCompare != 0 ? orderCompare : a.key!.compareTo(b.key!);
+  return orderCompare != 0 ? orderCompare : a.key.compareTo(b.key);
 }
 
 _RoomSchedule _buildRoomSchedule(
   List<SessionTimetableEntry> entries,
   List<_RoomColumn> columns,
 ) {
+  final roomIndexByVenueId = {for (final (index, column) in columns.indexed) column.venueId: index};
+  final roomStarts = [
+    for (final entry in entries)
+      if (roomIndexByVenueId.containsKey(entry.venueId)) toEventTime(entry.startsAt),
+  ];
   final spans = [
     for (final (order, entry) in entries.indexed)
       (
         order: order,
         entry: entry,
+        // Entries without a column of their own become bands across every room.
+        roomIndex: roomIndexByVenueId[entry.venueId],
         startsAt: toEventTime(entry.startsAt),
-        // An end at or before the start is no end at all.
-        endsAt: switch (entry.endsAt) {
-          final endsAt? when endsAt.isAfter(entry.startsAt) => toEventTime(endsAt),
-          _ => null,
-        },
+        endsAt: _layoutEnd(
+          entry,
+          isBand: !roomIndexByVenueId.containsKey(entry.venueId),
+          roomStarts: roomStarts,
+        ),
       ),
   ];
   // Every start and end is a row boundary, so entries share a time axis
@@ -568,30 +659,62 @@ _RoomSchedule _buildRoomSchedule(
       if (tick != ticks.last || spans.any((span) => span.startsAt == tick)) tick,
   ];
   final rowByStart = {for (final (row, startsAt) in rowStarts.indexed) startsAt: row};
-  final roomIndexByVenueId = {for (final (index, column) in columns.indexed) column.venueId: index};
 
   final placements = <_EntryPlacement>[
     for (final span in spans)
       (
         order: span.order,
-        roomIndex: roomIndexByVenueId[span.entry.venueId]!,
+        roomIndex: span.roomIndex,
         startRow: rowByStart[span.startsAt]!,
         endRow: _endRow(rowStarts, rowByStart[span.startsAt]!, span.endsAt),
         entry: span.entry,
       ),
   ];
-  final cellsByStartRow = List.generate(rowStarts.length, (_) => <_RoomScheduleCell>[]);
-  for (var roomIndex = 0; roomIndex < columns.length; roomIndex++) {
-    final roomPlacements = [
+  List<_ScheduleBlock> blocksOf(int? roomIndex) => _mergeOverlapping(
+    [
       for (final placement in placements)
         if (placement.roomIndex == roomIndex) placement,
-    ]..sort(_comparePlacements);
-    for (final cell in _buildRoomCells(roomIndex, roomPlacements, rowStarts.length)) {
-      cellsByStartRow[cell.startRow].add(cell);
-    }
-  }
+    ]..sort(_comparePlacements),
+  );
 
-  return _RoomSchedule(rowStarts: rowStarts, cellsByStartRow: cellsByStartRow);
+  final bands = blocksOf(null);
+  final bandRows = {
+    for (final band in bands)
+      for (var row = band.startRow; row < band.endRow; row++) row,
+  };
+  return _RoomSchedule(
+    rowStarts: rowStarts,
+    roomBlocks: [
+      for (var roomIndex = 0; roomIndex < columns.length; roomIndex++)
+        _withEmptyRows(blocksOf(roomIndex), rowCount: rowStarts.length, bandRows: bandRows),
+    ],
+    bands: bands,
+  );
+}
+
+/// Where an entry stops on the grid: its end, or none for an end at or before
+/// its start.
+///
+/// A band is one block across every room, so where a room entry starts during
+/// it (the lunch stage opens before the lunch break is over) it stops there, as
+/// on the website. Its card still shows the real end time.
+DateTime? _layoutEnd(
+  SessionTimetableEntry entry, {
+  required bool isBand,
+  required List<DateTime> roomStarts,
+}) {
+  final startsAt = toEventTime(entry.startsAt);
+  final endsAt = switch (entry.endsAt) {
+    final endsAt? when endsAt.isAfter(entry.startsAt) => toEventTime(endsAt),
+    _ => null,
+  };
+  if (!isBand || endsAt == null) {
+    return endsAt;
+  }
+  return roomStarts.fold<DateTime>(
+    endsAt,
+    (end, roomStart) => roomStart.isAfter(startsAt) && roomStart.isBefore(end) ? roomStart : end,
+  );
 }
 
 /// The row an entry stops before: the first one starting at or after its end.
@@ -609,45 +732,43 @@ int _comparePlacements(_EntryPlacement a, _EntryPlacement b) {
   return startCompare != 0 ? startCompare : a.order.compareTo(b.order);
 }
 
-/// Splits one room's column into cells: one spanning the rows of each entry
-/// (or of overlapping entries together), and a single-row empty cell for every
-/// row nothing is scheduled in.
-List<_RoomScheduleCell> _buildRoomCells(
-  int roomIndex,
-  List<_EntryPlacement> placements,
-  int rowCount,
-) {
-  List<_RoomScheduleCell> emptyCells(int fromRow, int toRow) => [
-    for (var row = fromRow; row < toRow; row++) _RoomScheduleCell(roomIndex: roomIndex, startRow: row, endRow: row + 1),
-  ];
-
-  final cells = <_RoomScheduleCell>[];
-  var nextRow = 0;
+/// Turns one column's placements, in row order, into blocks spanning their
+/// rows. A column cannot show two entries at once, so entries overlapping there
+/// share one block spanning all of them instead of painting over each other.
+List<_ScheduleBlock> _mergeOverlapping(List<_EntryPlacement> placements) {
+  final blocks = <_ScheduleBlock>[];
   var index = 0;
   while (index < placements.length) {
     final startRow = placements[index].startRow;
     var endRow = startRow + 1;
     final entries = <SessionTimetableEntry>[];
-    // A room cannot host two entries at once, so entries overlapping there
-    // share one cell spanning all of them instead of painting over each other.
     while (index < placements.length && placements[index].startRow < endRow) {
       entries.add(placements[index].entry);
       endRow = math.max(endRow, placements[index].endRow);
       index++;
     }
-    cells
-      ..addAll(emptyCells(nextRow, startRow))
-      ..add(
-        _RoomScheduleCell(
-          roomIndex: roomIndex,
-          startRow: startRow,
-          endRow: endRow,
-          entries: entries,
-        ),
-      );
-    nextRow = endRow;
+    blocks.add(_ScheduleBlock(startRow: startRow, endRow: endRow, entries: entries));
   }
-  return cells..addAll(emptyCells(nextRow, rowCount));
+  return blocks;
+}
+
+/// Adds a single-row empty block for every row of a room that neither its
+/// entries nor a band cover, so the grid keeps a line between all rows.
+List<_ScheduleBlock> _withEmptyRows(
+  List<_ScheduleBlock> blocks, {
+  required int rowCount,
+  required Set<int> bandRows,
+}) {
+  final coveredRows = {
+    ...bandRows,
+    for (final block in blocks)
+      for (var row = block.startRow; row < block.endRow; row++) row,
+  };
+  return [
+    ...blocks,
+    for (var row = 0; row < rowCount; row++)
+      if (!coveredRows.contains(row)) _ScheduleBlock(startRow: row, endRow: row + 1),
+  ];
 }
 
 /// Lays cells out on a grid whose rows size to their content, like [Table],
@@ -675,29 +796,35 @@ class _RowSpanGrid extends MultiChildRenderObjectWidget {
   }
 }
 
-/// Places [child] in [column] of the enclosing [_RowSpanGrid], covering rows
-/// [startRow] up to but not including [endRow].
+/// Places [child] in the enclosing [_RowSpanGrid], covering [columnSpan]
+/// columns from [column] and rows [startRow] up to but not including [endRow].
 class _RowSpanGridCell extends ParentDataWidget<_RowSpanGridParentData> {
   const _RowSpanGridCell({
     required this.column,
     required this.startRow,
     required this.endRow,
     required super.child,
+    this.columnSpan = 1,
     super.key,
   });
 
   final int column;
+  final int columnSpan;
   final int startRow;
   final int endRow;
 
   @override
   void applyParentData(RenderObject renderObject) {
     final parentData = renderObject.parentData! as _RowSpanGridParentData;
-    if (parentData.column == column && parentData.startRow == startRow && parentData.endRow == endRow) {
+    if (parentData.column == column &&
+        parentData.columnSpan == columnSpan &&
+        parentData.startRow == startRow &&
+        parentData.endRow == endRow) {
       return;
     }
     parentData
       ..column = column
+      ..columnSpan = columnSpan
       ..startRow = startRow
       ..endRow = endRow;
     renderObject.parent?.markNeedsLayout();
@@ -709,6 +836,7 @@ class _RowSpanGridCell extends ParentDataWidget<_RowSpanGridParentData> {
 
 class _RowSpanGridParentData extends ContainerBoxParentData<RenderBox> {
   int column = 0;
+  int columnSpan = 1;
   int startRow = 0;
   int endRow = 1;
 }
@@ -744,6 +872,10 @@ class _RenderRowSpanGrid extends RenderBox
 
   double get _width => _sum(_columnWidths);
 
+  double _cellWidth(_RowSpanGridParentData parentData) {
+    return _sum(_columnWidths.getRange(parentData.column, parentData.column + parentData.columnSpan));
+  }
+
   @override
   void setupParentData(RenderBox child) {
     if (child.parentData is! _RowSpanGridParentData) {
@@ -763,7 +895,7 @@ class _RenderRowSpanGrid extends RenderBox
     var child = firstChild;
     while (child != null) {
       final parentData = child.parentData! as _RowSpanGridParentData;
-      final height = measure(child, _columnWidths[parentData.column]);
+      final height = measure(child, _cellWidth(parentData));
       if (parentData.endRow - parentData.startRow == 1) {
         heights[parentData.startRow] = math.max(heights[parentData.startRow], height);
       } else {
@@ -834,10 +966,11 @@ class _RenderRowSpanGrid extends RenderBox
       // A minimum height instead of a tight one keeps the cell from becoming a
       // relayout boundary, so content that grows later (a larger text scale)
       // runs this layout again and resizes the rows.
+      final width = _cellWidth(parentData);
       child.layout(
         BoxConstraints(
-          minWidth: _columnWidths[parentData.column],
-          maxWidth: _columnWidths[parentData.column],
+          minWidth: width,
+          maxWidth: width,
           minHeight: rowTops[parentData.endRow] - rowTops[parentData.startRow],
         ),
         parentUsesSize: true,
