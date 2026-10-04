@@ -7,6 +7,7 @@ import 'package:app/core/provider/shared_preferences.dart';
 import 'package:app/core/remote_config/remote_config_provider.dart';
 import 'package:app/core/remote_config/remote_config_repository.dart';
 import 'package:app/core/router/app_url_strategy.dart';
+import 'package:app/core/router/launch_route.dart';
 import 'package:app/core/ui/app.dart';
 import 'package:data/data.dart';
 import 'package:flutter/foundation.dart';
@@ -19,6 +20,15 @@ import 'package:talker_flutter/talker_flutter.dart';
 Future<void> main() async {
   configureAppUrlStrategy();
   WidgetsFlutterBinding.ensureInitialized();
+
+  // 以下の初期化を待つ間に届く Universal Link を取りこぼさないための準備。
+  // iOS はリンクを Flutter の最初のフレーム描画後にしか渡さず、3 秒以内に
+  // 描画されなければリンクを捨てて Safari に投げ返すため、iOS では先に
+  // 1 フレーム(起動画面と同じ白)を描画しておく(`LaunchRouteObserver` 参照)。
+  final launchRoute = LaunchRouteObserver()..attach();
+  if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
+    runApp(const ColoredBox(color: Color(0xFFFFFFFF)));
+  }
 
   // バンドルした Noto Sans JP の OFL ライセンスをアプリのライセンス一覧に登録。
   LicenseRegistry.addLicense(() async* {
@@ -65,6 +75,7 @@ Future<void> main() async {
       child: ProviderScope(
         overrides: [
           environmentProvider.overrideWithValue(environment),
+          launchRouteProvider.overrideWithValue(launchRoute.route),
           sharedPreferencesProvider.overrideWithValue(sharedPreferences),
           talkerProvider.overrideWithValue(talker),
           remoteConfigRepositoryProvider.overrideWithValue(remoteConfigRepository),
@@ -73,4 +84,6 @@ Future<void> main() async {
       ),
     ),
   );
+  // 以降のリンクは本体ツリーの Router が受け取る。
+  launchRoute.detach();
 }

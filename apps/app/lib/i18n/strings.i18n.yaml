@@ -40,8 +40,9 @@ sessionTimetable:
   title: タイムテーブル
   dayButtonLabel: $day日目 ($date)
   view:
-    openRooms: 会場別タイムラインに切り替え
-    openList: リスト表示に切り替え
+    list: リスト
+    rooms: 会場別
+    saveFailed: 表示方法を保存できませんでした
     shared: 共通
   empty: タイムテーブルはまだ公開されていません
   emptyFiltered: この日の予定はありません

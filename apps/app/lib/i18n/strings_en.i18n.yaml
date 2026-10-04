@@ -40,8 +40,9 @@ sessionTimetable:
   title: Timetable
   dayButtonLabel: Day $day ($date)
   view:
-    openRooms: Switch to room timeline
-    openList: Switch to list view
+    list: List
+    rooms: By room
+    saveFailed: Could not save the view preference
     shared: Shared
   empty: The timetable has not been published yet
   emptyFiltered: There are no items for this day

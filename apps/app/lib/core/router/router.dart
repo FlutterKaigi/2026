@@ -1,6 +1,7 @@
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/log/talker.dart';
 import 'package:app/core/remote_config/event_features_provider.dart';
+import 'package:app/core/router/launch_route.dart';
 import 'package:app/core/ui/not_found_page.dart';
 import 'package:app/core/ui/root_scaffold.dart';
 import 'package:app/feature/auth/ui/page/account_page.dart';
@@ -51,6 +52,10 @@ bool _isFirebaseAuthCallback(Uri uri) =>
     uri.host == 'firebaseauth' &&
     uri.path == '/link';
 
+/// `https://2026-app.flutterkaigi.jp/`, `https://2026-app.flutterkaigi.jp`
+/// (path なし)、および `/` そのもの。
+bool _isRootPath(Uri uri) => uri.path.isEmpty || uri.path == '/';
+
 /// Provides the application [GoRouter].
 ///
 /// Routes are declared with `go_router_builder` typed routes in `routes.dart`;
@@ -88,8 +93,14 @@ final routerProvider = Provider<GoRouter>((ref) {
     _shareLinkBasePath,
   ];
 
+  // iOS のコールドスタートで、本体のツリーより先に届いた Universal Link
+  // (`LaunchRouteObserver` 参照)。プラットフォームの初期ルートは `/` の
+  // ままなので、そちらではなくこのリンクから開始する。
+  final launchRoute = ref.watch(launchRouteProvider);
+
   return GoRouter(
-    initialLocation: const EventInfoRoute().location,
+    initialLocation: launchRoute?.toString() ?? const EventInfoRoute().location,
+    overridePlatformDefaultLocation: launchRoute != null,
     routes: $appRoutes,
     observers: [TalkerRouteObserver(talker)],
     errorBuilder: (context, state) => const NotFoundPage(),
@@ -108,6 +119,13 @@ final routerProvider = Provider<GoRouter>((ref) {
       // redirect rather than blocking without a previous route (also a 404).
       if (_isFirebaseAuthCallback(state.uri)) {
         return const AccountRoute().location;
+      }
+      // `/` はルートとして宣言していない。`initialLocation` が効くのは
+      // プラットフォームの初期ルートがちょうど `/` のときだけで、Universal
+      // Link / App Link で開いた `https://2026-app.flutterkaigi.jp/` は
+      // 絶対 URL のまま渡ってくるため、ここで拾わないと NotFoundPage になる。
+      if (_isRootPath(state.uri)) {
+        return const EventInfoRoute().location;
       }
       if (eventFeaturesEnabled.value) {
         return null;
