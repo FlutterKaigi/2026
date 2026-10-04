@@ -90,24 +90,29 @@ class SessionTimetableListWidget extends HookConsumerWidget {
             },
             itemBuilder: (context, index) {
               final day = data.days[index];
-              final content = switch (viewMode) {
-                SessionTimetableViewMode.list => SessionTimetableDayContentWidget(
-                  day: day,
-                  key: ValueKey(('list', day.date)),
+              final scrollStorageKey = PageStorageKey(('timetable-day', viewMode, day.date));
+
+              return switch (viewMode) {
+                SessionTimetableViewMode.list => CustomScrollView(
+                  key: scrollStorageKey,
+                  slivers: [
+                    SliverToBoxAdapter(
+                      child: SessionTimetableDayContentWidget(
+                        day: day,
+                        key: ValueKey(('list', day.date)),
+                      ),
+                    ),
+                    const SliverToBoxAdapter(child: SizedBox(height: 24)),
+                  ],
                 ),
+                // The room grid scrolls the day itself to keep the hall names
+                // pinned above it.
                 SessionTimetableViewMode.rooms => SessionTimetableRoomTimelineWidget(
                   day: day,
+                  scrollStorageKey: scrollStorageKey,
                   key: ValueKey(('rooms', day.date)),
                 ),
               };
-
-              return CustomScrollView(
-                key: PageStorageKey(('timetable-day', viewMode, day.date)),
-                slivers: [
-                  SliverToBoxAdapter(child: content),
-                  const SliverToBoxAdapter(child: SizedBox(height: 24)),
-                ],
-              );
             },
           ),
         ),

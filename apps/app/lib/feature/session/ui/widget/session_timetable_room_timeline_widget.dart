@@ -9,11 +9,13 @@ import 'package:app/feature/session/ui/widget/session_speaker_widget.dart';
 import 'package:app/feature/session/util/event_time.dart';
 import 'package:app/feature/session/util/session_language.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+const _sidePadding = 8.0;
 const _timeColumnWidth = 64.0;
 const _minimumRoomColumnWidth = 216.0;
 // The cell and card paddings on both sides of a band's label.
@@ -28,18 +30,27 @@ const _bandLabelInset = 2 * (6 + 8);
 /// Rows size themselves to their content rather than to a pixel-per-minute
 /// scale, which keeps every title and speaker readable without letting short
 /// or overlapping sessions paint over each other.
+///
+/// The widget scrolls the day itself so the hall names stay pinned above the
+/// grid, while the time column stays pinned as the rooms scroll sideways.
 class SessionTimetableRoomTimelineWidget extends HookWidget {
   const SessionTimetableRoomTimelineWidget({
     required this.day,
+    this.scrollStorageKey,
     super.key,
   });
 
   final SessionTimetableDay day;
 
+  /// Keys the vertical scroll view, so its position comes back when the
+  /// attendee returns to this day.
+  final Key? scrollStorageKey;
+
   @override
   Widget build(BuildContext context) {
     final scrollController = useScrollController();
     final scrollOffset = useValueNotifier<double>(0);
+    final headerDrag = useRef<Drag?>(null);
     useEffect(
       () {
         void updateScrollOffset() => scrollOffset.value = scrollController.offset;
@@ -56,114 +67,188 @@ class SessionTimetableRoomTimelineWidget extends HookWidget {
     final schedule = _buildRoomSchedule(day.entries, columns);
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(8, 0, 8, 24),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final availableRoomWidth = constraints.maxWidth.isFinite
-              ? math.max<double>(0, constraints.maxWidth - _timeColumnWidth)
-              : _minimumRoomColumnWidth * columns.length;
-          final roomColumnWidth = math.max<double>(
-            _minimumRoomColumnWidth,
-            availableRoomWidth / columns.length,
-          );
-          final visibleRoomWidth = math.min(availableRoomWidth, roomColumnWidth * columns.length);
+    // Measured outside the vertical scroll view, so scrolling the day does not
+    // rebuild the grid.
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final availableRoomWidth = constraints.maxWidth.isFinite
+            ? math.max<double>(0, constraints.maxWidth - 2 * _sidePadding - _timeColumnWidth)
+            : _minimumRoomColumnWidth * columns.length;
+        final roomColumnWidth = math.max<double>(
+          _minimumRoomColumnWidth,
+          availableRoomWidth / columns.length,
+        );
+        final visibleRoomWidth = math.min(availableRoomWidth, roomColumnWidth * columns.length);
+        final columnWidths = [
+          _timeColumnWidth,
+          for (var index = 0; index < columns.length; index++) roomColumnWidth,
+        ];
 
-          return NotificationListener<ScrollMetricsNotification>(
-            onNotification: (notification) {
-              // Resizing can clamp the offset without notifying the controller.
-              scrollOffset.value = notification.metrics.pixels;
-              return false;
-            },
-            child: SingleChildScrollView(
-              key: ValueKey(('room-schedule-scroll', day.date)),
-              controller: scrollController,
-              scrollDirection: Axis.horizontal,
-              physics: const ClampingScrollPhysics(),
-              // Grid row 0 is the header; schedule row `n` is grid row `n + 1`.
-              child: _RowSpanGrid(
-                columnWidths: [
-                  _timeColumnWidth,
-                  for (var index = 0; index < columns.length; index++) roomColumnWidth,
-                ],
-                rowCount: schedule.rowStarts.length + 1,
-                children: [
-                  _RowSpanGridCell(
-                    key: const ValueKey('room-schedule-time-header'),
-                    column: 0,
-                    startRow: 0,
-                    endRow: 1,
-                    child: _PinnedTimeCellWidget(
+        return CustomScrollView(
+          key: scrollStorageKey,
+          slivers: [
+            PinnedHeaderSliver(
+              child: ColoredBox(
+                color: colorScheme.surface,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: _sidePadding),
+                  // The hall names sit outside the rooms' horizontal scroll
+                  // view, so they follow its offset and hand sideways drags to
+                  // it.
+                  child: GestureDetector(
+                    onHorizontalDragStart: (details) {
+                      if (scrollController.hasClients) {
+                        headerDrag.value = scrollController.position.drag(details, () => headerDrag.value = null);
+                      }
+                    },
+                    onHorizontalDragUpdate: (details) => headerDrag.value?.update(details),
+                    onHorizontalDragEnd: (details) => headerDrag.value?.end(details),
+                    onHorizontalDragCancel: () => headerDrag.value?.cancel(),
+                    child: _ScrollMirrorWidget(
                       scrollOffset: scrollOffset,
-                      backgroundColor: colorScheme.surfaceContainerHigh,
-                      isHeader: true,
-                      child: const _TimeHeaderCellWidget(),
+                      width: _sum(columnWidths),
+                      child: _RowSpanGrid(
+                        columnWidths: columnWidths,
+                        rowCount: 1,
+                        children: [
+                          _RowSpanGridCell(
+                            key: const ValueKey('room-schedule-time-header'),
+                            column: 0,
+                            startRow: 0,
+                            endRow: 1,
+                            child: _PinnedTimeCellWidget(
+                              scrollOffset: scrollOffset,
+                              backgroundColor: colorScheme.surfaceContainerHigh,
+                              isHeader: true,
+                              child: const _TimeHeaderCellWidget(),
+                            ),
+                          ),
+                          for (var index = 0; index < columns.length; index++)
+                            _RowSpanGridCell(
+                              key: ValueKey(('room-schedule-room-header', index)),
+                              column: index + 1,
+                              startRow: 0,
+                              endRow: 1,
+                              child: _ClippedRoomCellWidget(
+                                scrollOffset: scrollOffset,
+                                roomOffset: index * roomColumnWidth,
+                                backgroundColor: colorScheme.surfaceContainerHigh,
+                                isHeader: true,
+                                child: _RoomHeaderCellWidget(label: columns[index].label),
+                              ),
+                            ),
+                        ],
+                      ),
                     ),
                   ),
-                  for (var index = 0; index < columns.length; index++)
-                    _RowSpanGridCell(
-                      key: ValueKey(('room-schedule-room-header', index)),
-                      column: index + 1,
-                      startRow: 0,
-                      endRow: 1,
-                      child: _ClippedRoomCellWidget(
-                        scrollOffset: scrollOffset,
-                        roomOffset: index * roomColumnWidth,
-                        backgroundColor: colorScheme.surfaceContainerHigh,
-                        isHeader: true,
-                        child: _RoomHeaderCellWidget(label: columns[index].label),
-                      ),
-                    ),
-                  // Bands go before the rooms: an entry overlapping a band from
-                  // its very start, which the band cannot stop short of, is then
-                  // drawn on top of it, as on the website.
-                  for (final band in schedule.bands)
-                    _RowSpanGridCell(
-                      key: ValueKey(('room-schedule-band', band.startRow)),
-                      column: 1,
-                      columnSpan: columns.length,
-                      startRow: band.startRow + 1,
-                      endRow: band.endRow + 1,
-                      child: _ClippedRoomCellWidget(
-                        scrollOffset: scrollOffset,
-                        roomOffset: 0,
-                        child: _ScheduleCellWidget(
-                          entries: band.entries,
-                          followScrollOffset: scrollOffset,
-                          visibleWidth: visibleRoomWidth,
-                        ),
-                      ),
-                    ),
-                  for (var row = 0; row < schedule.rowStarts.length; row++)
-                    _RowSpanGridCell(
-                      key: ValueKey(('room-schedule-time', row)),
-                      column: 0,
-                      startRow: row + 1,
-                      endRow: row + 2,
-                      child: _PinnedTimeCellWidget(
-                        scrollOffset: scrollOffset,
-                        backgroundColor: colorScheme.surface,
-                        child: _TimeCellWidget(startsAt: schedule.rowStarts[row]),
-                      ),
-                    ),
-                  for (var roomIndex = 0; roomIndex < columns.length; roomIndex++)
-                    for (final block in schedule.roomBlocks[roomIndex])
-                      _RowSpanGridCell(
-                        key: ValueKey(('room-schedule-cell', roomIndex, block.startRow)),
-                        column: roomIndex + 1,
-                        startRow: block.startRow + 1,
-                        endRow: block.endRow + 1,
-                        child: _ClippedRoomCellWidget(
-                          scrollOffset: scrollOffset,
-                          roomOffset: roomIndex * roomColumnWidth,
-                          child: _ScheduleCellWidget(entries: block.entries),
-                        ),
-                      ),
-                ],
+                ),
               ),
             ),
-          );
-        },
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(_sidePadding, 0, _sidePadding, 48),
+              sliver: SliverToBoxAdapter(
+                child: NotificationListener<ScrollMetricsNotification>(
+                  onNotification: (notification) {
+                    // Resizing can clamp the offset without notifying the controller.
+                    scrollOffset.value = notification.metrics.pixels;
+                    return false;
+                  },
+                  child: SingleChildScrollView(
+                    key: ValueKey(('room-schedule-scroll', day.date)),
+                    controller: scrollController,
+                    scrollDirection: Axis.horizontal,
+                    physics: const ClampingScrollPhysics(),
+                    child: _RowSpanGrid(
+                      columnWidths: columnWidths,
+                      rowCount: schedule.rowStarts.length,
+                      children: [
+                        // Bands go before the rooms: an entry overlapping a band
+                        // from its very start, which the band cannot stop short
+                        // of, is then drawn on top of it, as on the website.
+                        for (final band in schedule.bands)
+                          _RowSpanGridCell(
+                            key: ValueKey(('room-schedule-band', band.startRow)),
+                            column: 1,
+                            columnSpan: columns.length,
+                            startRow: band.startRow,
+                            endRow: band.endRow,
+                            child: _ClippedRoomCellWidget(
+                              scrollOffset: scrollOffset,
+                              roomOffset: 0,
+                              child: _ScheduleCellWidget(
+                                entries: band.entries,
+                                followScrollOffset: scrollOffset,
+                                visibleWidth: visibleRoomWidth,
+                              ),
+                            ),
+                          ),
+                        for (var row = 0; row < schedule.rowStarts.length; row++)
+                          _RowSpanGridCell(
+                            key: ValueKey(('room-schedule-time', row)),
+                            column: 0,
+                            startRow: row,
+                            endRow: row + 1,
+                            child: _PinnedTimeCellWidget(
+                              scrollOffset: scrollOffset,
+                              backgroundColor: colorScheme.surface,
+                              child: _TimeCellWidget(startsAt: schedule.rowStarts[row]),
+                            ),
+                          ),
+                        for (var roomIndex = 0; roomIndex < columns.length; roomIndex++)
+                          for (final block in schedule.roomBlocks[roomIndex])
+                            _RowSpanGridCell(
+                              key: ValueKey(('room-schedule-cell', roomIndex, block.startRow)),
+                              column: roomIndex + 1,
+                              startRow: block.startRow,
+                              endRow: block.endRow,
+                              child: _ClippedRoomCellWidget(
+                                scrollOffset: scrollOffset,
+                                roomOffset: roomIndex * roomColumnWidth,
+                                child: _ScheduleCellWidget(entries: block.entries),
+                              ),
+                            ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+/// Shows [child], laid out [width] wide, scrolled sideways by [scrollOffset]
+/// in step with the rooms' scroll view below it.
+class _ScrollMirrorWidget extends StatelessWidget {
+  const _ScrollMirrorWidget({
+    required this.scrollOffset,
+    required this.width,
+    required this.child,
+  });
+
+  final ValueListenable<double> scrollOffset;
+  final double width;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRect(
+      child: OverflowBox(
+        alignment: Alignment.topLeft,
+        minWidth: width,
+        maxWidth: width,
+        fit: OverflowBoxFit.deferToChild,
+        child: AnimatedBuilder(
+          animation: scrollOffset,
+          builder: (context, child) => Transform.translate(
+            offset: Offset(-scrollOffset.value, 0),
+            child: child,
+          ),
+          child: child,
+        ),
       ),
     );
   }
@@ -275,7 +360,7 @@ class _TimeHeaderCellWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Padding(
-      padding: EdgeInsets.symmetric(vertical: 14),
+      padding: EdgeInsets.symmetric(vertical: 9),
       child: Icon(Icons.schedule, size: 18),
     );
   }
@@ -289,7 +374,7 @@ class _RoomHeaderCellWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       child: Text(
         label,
         textAlign: TextAlign.center,

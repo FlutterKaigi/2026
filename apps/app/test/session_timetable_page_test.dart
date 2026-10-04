@@ -465,6 +465,58 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('keeps the hall names on screen while the day scrolls down', (tester) async {
+    await _pumpTimetableState(
+      tester,
+      AsyncData(_stressRoomTimetable),
+      viewportSize: const Size(390, 844),
+    );
+
+    await _switchToRooms(tester);
+
+    final hallName = find.text('Stress Room 0');
+    final hallNameTop = tester.getTopLeft(hallName).dy;
+    final timeLabel = find.text('10:00');
+    final timeLabelTop = tester.getTopLeft(timeLabel).dy;
+
+    await tester.dragFrom(tester.getCenter(find.text('10:20')), const Offset(0, -500));
+    await tester.pumpAndSettle();
+
+    expect(tester.getTopLeft(timeLabel).dy, lessThan(timeLabelTop - 400));
+    expect(tester.getTopLeft(hallName).dy, hallNameTop);
+    expect(
+      tester.hitTestOnBinding(tester.getCenter(hallName)).path.map((entry) => entry.target),
+      contains(tester.renderObject(hallName)),
+    );
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('scrolls the rooms when the hall names are dragged sideways', (tester) async {
+    await _pumpTimetableState(
+      tester,
+      AsyncData(_stressRoomTimetable),
+      viewportSize: const Size(390, 844),
+    );
+
+    await _switchToRooms(tester);
+
+    final scrollable = tester.state<ScrollableState>(
+      find.descendant(
+        of: find.byKey(ValueKey(('room-schedule-scroll', _stressRoomDay.date))),
+        matching: find.byType(Scrollable),
+      ),
+    );
+    final hallName = find.text('Stress Room 0');
+    final hallNameLeft = tester.getTopLeft(hallName).dx;
+
+    await tester.drag(hallName, const Offset(-200, 0));
+    await tester.pumpAndSettle();
+
+    expect(scrollable.position.pixels, greaterThan(0));
+    expect(tester.getTopLeft(hallName).dx, closeTo(hallNameLeft - scrollable.position.pixels, 0.01));
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('stacks simultaneous list entries vertically', (tester) async {
     await _pumpTimetableState(
       tester,
