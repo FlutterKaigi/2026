@@ -1399,11 +1399,14 @@ class Translations$sessionTimetable$view$ja {
 
 	// Translations
 
-	/// ja: '会場別タイムラインに切り替え'
-	String get openRooms => '会場別タイムラインに切り替え';
+	/// ja: 'リスト'
+	String get list => 'リスト';
 
-	/// ja: 'リスト表示に切り替え'
-	String get openList => 'リスト表示に切り替え';
+	/// ja: '会場別'
+	String get rooms => '会場別';
+
+	/// ja: '表示方法を保存できませんでした'
+	String get saveFailed => '表示方法を保存できませんでした';
 
 	/// ja: '共通'
 	String get shared => '共通';
@@ -2182,8 +2185,9 @@ extension on Translations {
 			'trademarks.revComm' => 'RevCommは、株式会社 RevComm の登録商標または商標です。',
 			'sessionTimetable.title' => 'タイムテーブル',
 			'sessionTimetable.dayButtonLabel' => ({required Object day, required Object date}) => '${day}日目 (${date})',
-			'sessionTimetable.view.openRooms' => '会場別タイムラインに切り替え',
-			'sessionTimetable.view.openList' => 'リスト表示に切り替え',
+			'sessionTimetable.view.list' => 'リスト',
+			'sessionTimetable.view.rooms' => '会場別',
+			'sessionTimetable.view.saveFailed' => '表示方法を保存できませんでした',
 			'sessionTimetable.view.shared' => '共通',
 			'sessionTimetable.empty' => 'タイムテーブルはまだ公開されていません',
 			'sessionTimetable.emptyFiltered' => 'この日の予定はありません',

@@ -718,8 +718,9 @@ class _Translations$sessionTimetable$view$en extends Translations$sessionTimetab
 	final TranslationsEn _root; // ignore: unused_field
 
 	// Translations
-	@override String get openRooms => 'Switch to room timeline';
-	@override String get openList => 'Switch to list view';
+	@override String get list => 'List';
+	@override String get rooms => 'By room';
+	@override String get saveFailed => 'Could not save the view preference';
 	@override String get shared => 'Shared';
 }
 
@@ -1164,8 +1165,9 @@ extension on TranslationsEn {
 			'trademarks.revComm' => 'RevComm is a registered trademark or trademark of RevComm Inc.',
 			'sessionTimetable.title' => 'Timetable',
 			'sessionTimetable.dayButtonLabel' => ({required Object day, required Object date}) => 'Day ${day} (${date})',
-			'sessionTimetable.view.openRooms' => 'Switch to room timeline',
-			'sessionTimetable.view.openList' => 'Switch to list view',
+			'sessionTimetable.view.list' => 'List',
+			'sessionTimetable.view.rooms' => 'By room',
+			'sessionTimetable.view.saveFailed' => 'Could not save the view preference',
 			'sessionTimetable.view.shared' => 'Shared',
 			'sessionTimetable.empty' => 'The timetable has not been published yet',
 			'sessionTimetable.emptyFiltered' => 'There are no items for this day',

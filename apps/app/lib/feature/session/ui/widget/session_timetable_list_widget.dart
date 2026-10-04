@@ -1,17 +1,13 @@
 import 'dart:async';
 
 import 'package:app/feature/session/data/provider/session_timetable_provider.dart';
+import 'package:app/feature/session/data/provider/session_timetable_view_mode_provider.dart';
 import 'package:app/feature/session/ui/widget/session_timetable_day_content_widget.dart';
 import 'package:app/feature/session/ui/widget/session_timetable_filter_bar_widget.dart';
 import 'package:app/feature/session/ui/widget/session_timetable_room_timeline_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-
-enum SessionTimetableViewMode {
-  list,
-  rooms,
-}
 
 class SessionTimetableListWidget extends HookConsumerWidget {
   const SessionTimetableListWidget({

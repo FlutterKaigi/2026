@@ -7,6 +7,7 @@ import 'package:app/core/ui/widget/app_network_image.dart';
 import 'package:app/feature/session/data/provider/session_repository.dart';
 import 'package:app/feature/session/data/provider/session_timetable_provider.dart';
 import 'package:app/feature/session/data/provider/session_timetable_repository.dart';
+import 'package:app/feature/session/data/provider/session_timetable_view_mode_provider.dart';
 import 'package:app/feature/session/ui/page/session_timetable_page.dart';
 import 'package:data/data.dart';
 import 'package:flutter/material.dart';
@@ -24,8 +25,7 @@ void main() {
         viewportSize: Size(viewport.value, 1000),
       );
 
-      await tester.tap(find.byTooltip('会場別タイムラインに切り替え'));
-      await tester.pumpAndSettle();
+      await _switchToRooms(tester);
 
       final roomScroll = find.byKey(
         ValueKey(('room-schedule-scroll', _stressRoomDay.date)),
@@ -182,18 +182,58 @@ void main() {
       AsyncData(_loadedTimetable),
     );
 
-    expect(find.byTooltip('会場別タイムラインに切り替え'), findsOneWidget);
+    expect(_selectedViewMode(tester), SessionTimetableViewMode.list);
 
-    await tester.tap(find.byTooltip('会場別タイムラインに切り替え'));
-    await tester.pumpAndSettle();
+    await _switchToRooms(tester);
 
-    expect(find.byTooltip('リスト表示に切り替え'), findsOneWidget);
+    expect(_selectedViewMode(tester), SessionTimetableViewMode.rooms);
     expect(find.text('10:15'), findsOneWidget);
     expect(find.text('10:15-11:00'), findsOneWidget);
     expect(find.text('Room A'), findsOneWidget);
     expect(find.text('JA'), findsOneWidget);
     expect(find.text('Speaker A'), findsOneWidget);
     expect(find.text('Speaker B'), findsOneWidget);
+  });
+
+  testWidgets('opens the layout chosen last time on this device', (tester) async {
+    await _pumpTimetableState(
+      tester,
+      AsyncData(_loadedTimetable),
+      preferences: const {SessionTimetableViewModeNotifier.preferencesKey: 'rooms'},
+    );
+
+    expect(_selectedViewMode(tester), SessionTimetableViewMode.rooms);
+    expect(find.text('Room A'), findsOneWidget);
+  });
+
+  testWidgets('remembers the layout the attendee switches to', (tester) async {
+    await _pumpTimetableState(
+      tester,
+      AsyncData(_loadedTimetable),
+    );
+
+    await _switchToRooms(tester);
+
+    final preferences = await SharedPreferences.getInstance();
+    expect(preferences.getString(SessionTimetableViewModeNotifier.preferencesKey), 'rooms');
+  });
+
+  testWidgets('names the layouts on the switcher where they fit', (tester) async {
+    await _pumpTimetableState(
+      tester,
+      AsyncData(_loadedTimetable),
+      viewportSize: const Size(390, 844),
+    );
+
+    expect(find.byTooltip('リスト'), findsOneWidget);
+    expect(find.byTooltip('会場別'), findsOneWidget);
+    expect(find.text('会場別'), findsNothing);
+
+    tester.view.physicalSize = const Size(1200, 900);
+    await tester.pumpAndSettle();
+
+    expect(find.text('リスト'), findsOneWidget);
+    expect(find.text('会場別'), findsOneWidget);
   });
 
   testWidgets('shows every speaker and full titles without overlapping consecutive LTs', (tester) async {
@@ -210,8 +250,7 @@ void main() {
     expect(find.text('LT'), findsOneWidget);
     expect(find.text('初心者向けLT'), findsOneWidget);
 
-    await tester.tap(find.byTooltip('会場別タイムラインに切り替え'));
-    await tester.pumpAndSettle();
+    await _switchToRooms(tester);
 
     final firstTitle = tester.widget<Text>(
       find.byKey(const ValueKey('room-session-title-short-lt-a')),
@@ -243,8 +282,7 @@ void main() {
       AsyncData(_venueOrderTimetable),
     );
 
-    await tester.tap(find.byTooltip('会場別タイムラインに切り替え'));
-    await tester.pumpAndSettle();
+    await _switchToRooms(tester);
 
     final roomAHeader = tester.getCenter(find.text('Room A'));
     final roomBHeader = tester.getCenter(find.text('Room B'));
@@ -260,8 +298,7 @@ void main() {
       AsyncData(_equalVenueOrderTimetable),
     );
 
-    await tester.tap(find.byTooltip('会場別タイムラインに切り替え'));
-    await tester.pumpAndSettle();
+    await _switchToRooms(tester);
 
     final roomAHeader = tester.getCenter(find.text('Room A'));
     final roomBHeader = tester.getCenter(find.text('Room B'));
@@ -275,8 +312,7 @@ void main() {
       AsyncData(_overlappingTimetable),
     );
 
-    await tester.tap(find.byTooltip('会場別タイムラインに切り替え'));
-    await tester.pumpAndSettle();
+    await _switchToRooms(tester);
 
     final sessionRect = tester.getRect(
       find.byKey(const ValueKey('room-timeline-entry-compact-session')),
@@ -295,8 +331,7 @@ void main() {
       AsyncData(_sameRoomAndTimeTimetable),
     );
 
-    await tester.tap(find.byTooltip('会場別タイムラインに切り替え'));
-    await tester.pumpAndSettle();
+    await _switchToRooms(tester);
 
     final firstRect = tester.getRect(
       find.byKey(const ValueKey('room-timeline-entry-compact-session')),
@@ -317,8 +352,7 @@ void main() {
       viewportSize: const Size(1200, 1600),
     );
 
-    await tester.tap(find.byTooltip('会場別タイムラインに切り替え'));
-    await tester.pumpAndSettle();
+    await _switchToRooms(tester);
 
     final talk = tester.getRect(find.byKey(const ValueKey('room-timeline-entry-talk')));
     final firstLt = tester.getRect(find.byKey(const ValueKey('room-timeline-entry-lt-1')));
@@ -339,8 +373,7 @@ void main() {
       viewportSize: const Size(1200, 1600),
     );
 
-    await tester.tap(find.byTooltip('会場別タイムラインに切り替え'));
-    await tester.pumpAndSettle();
+    await _switchToRooms(tester);
 
     final workshop = tester.getRect(find.byKey(const ValueKey('room-timeline-entry-workshop')));
     final firstTalk = tester.getRect(find.byKey(const ValueKey('room-timeline-entry-talk-1')));
@@ -363,8 +396,7 @@ void main() {
       viewportSize: const Size(1200, 1600),
     );
 
-    await tester.tap(find.byTooltip('会場別タイムラインに切り替え'));
-    await tester.pumpAndSettle();
+    await _switchToRooms(tester);
 
     final lunchBreak = tester.getRect(find.byKey(const ValueKey('room-timeline-entry-lunch-break')));
     final lunchStage = tester.getRect(find.byKey(const ValueKey('room-timeline-entry-lunch-stage')));
@@ -426,8 +458,7 @@ void main() {
       AsyncData(_twoDayRoomTimetable),
     );
 
-    await tester.tap(find.byTooltip('会場別タイムラインに切り替え'));
-    await tester.pumpAndSettle();
+    await _switchToRooms(tester);
 
     final pageView = tester.widget<PageView>(find.byType(PageView));
     expect(pageView.physics, isA<NeverScrollableScrollPhysics>());
@@ -580,6 +611,18 @@ void main() {
     expect(find.text('Compact Session'), findsOneWidget);
     expect(find.byType(RefreshIndicator), findsNothing);
   });
+}
+
+Future<void> _switchToRooms(WidgetTester tester) async {
+  await tester.tap(find.byTooltip('会場別'));
+  await tester.pumpAndSettle();
+}
+
+SessionTimetableViewMode _selectedViewMode(WidgetTester tester) {
+  return tester
+      .widget<SegmentedButton<SessionTimetableViewMode>>(find.byType(SegmentedButton<SessionTimetableViewMode>))
+      .selected
+      .single;
 }
 
 Future<void> _pumpTimetableState(
