@@ -46,13 +46,17 @@ class SessionTimetableFilterBarWidget extends ConsumerWidget {
                 for (var index = 0; index < dates.length; index++)
                   ButtonSegment(
                     value: index,
-                    label: Text(
-                      t.sessionTimetable.dayButtonLabel(
-                        day: index + 1,
-                        date: '${dates[index].month}/${dates[index].day}',
+                    // On the narrowest phones the label shrinks a little
+                    // rather than cutting off the date.
+                    label: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        t.sessionTimetable.dayButtonLabel(
+                          day: index + 1,
+                          date: '${dates[index].month}/${dates[index].day}',
+                        ),
+                        maxLines: 1,
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
               ],
@@ -66,8 +70,9 @@ class SessionTimetableFilterBarWidget extends ConsumerWidget {
                 }
                 ref.read(sessionTimetableDayFilterProvider.notifier).select(date);
               },
-              style: const ButtonStyle(
-                minimumSize: WidgetStatePropertyAll(Size(0, 48)),
+              style: ButtonStyle(
+                minimumSize: const WidgetStatePropertyAll(Size(0, 48)),
+                padding: showViewLabels ? null : const WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 8)),
               ),
             ),
           ),
@@ -92,7 +97,9 @@ class SessionTimetableFilterBarWidget extends ConsumerWidget {
             onSelectionChanged: (selection) => unawaited(_selectViewMode(context, ref, selection.single)),
             style: ButtonStyle(
               minimumSize: const WidgetStatePropertyAll(Size(0, 48)),
-              padding: showViewLabels ? null : const WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 10)),
+              // Segments are text buttons, at least 64px wide by default. The
+              // icon-only ones need no more than their 48px tap target.
+              visualDensity: showViewLabels ? null : const VisualDensity(horizontal: VisualDensity.minimumDensity),
             ),
           ),
         ],
