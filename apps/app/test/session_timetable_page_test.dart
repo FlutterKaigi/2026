@@ -310,6 +310,72 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('stretches a talk over the short LTs running beside it', (tester) async {
+    await _pumpTimetableState(
+      tester,
+      AsyncData(_talkBesideLtsTimetable),
+      viewportSize: const Size(1200, 1600),
+    );
+
+    await tester.tap(find.byTooltip('会場別タイムラインに切り替え'));
+    await tester.pumpAndSettle();
+
+    final talk = tester.getRect(find.byKey(const ValueKey('room-timeline-entry-talk')));
+    final firstLt = tester.getRect(find.byKey(const ValueKey('room-timeline-entry-lt-1')));
+    final lastLt = tester.getRect(find.byKey(const ValueKey('room-timeline-entry-lt-3')));
+
+    expect(find.text('13:25'), findsOneWidget);
+    expect(find.text('13:35'), findsOneWidget);
+    expect(find.text('13:45'), findsOneWidget);
+    expect(talk.top, closeTo(firstLt.top, 0.01));
+    expect(talk.bottom, closeTo(lastLt.bottom, 0.01));
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('keeps a long room entry running through the breaks beside it', (tester) async {
+    await _pumpTimetableState(
+      tester,
+      AsyncData(_workshopTimetable),
+      viewportSize: const Size(1200, 1600),
+    );
+
+    await tester.tap(find.byTooltip('会場別タイムラインに切り替え'));
+    await tester.pumpAndSettle();
+
+    final workshop = tester.getRect(find.byKey(const ValueKey('room-timeline-entry-workshop')));
+    final firstTalk = tester.getRect(find.byKey(const ValueKey('room-timeline-entry-talk-1')));
+    final lastTalk = tester.getRect(find.byKey(const ValueKey('room-timeline-entry-talk-3')));
+    final breakLabel = tester.getRect(find.text('10:30'));
+
+    expect(workshop.top, closeTo(firstTalk.top, 0.01));
+    expect(workshop.bottom, closeTo(lastTalk.bottom, 0.01));
+    expect(firstTalk.bottom, lessThan(breakLabel.top));
+    expect(breakLabel.top, greaterThan(workshop.top));
+    expect(breakLabel.bottom, lessThan(workshop.bottom));
+    expect(find.text('11:15'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('runs a shared break into the row where a room event starts', (tester) async {
+    await _pumpTimetableState(
+      tester,
+      AsyncData(_lunchStageTimetable),
+      viewportSize: const Size(1200, 1600),
+    );
+
+    await tester.tap(find.byTooltip('会場別タイムラインに切り替え'));
+    await tester.pumpAndSettle();
+
+    final lunchBreak = tester.getRect(find.byKey(const ValueKey('room-timeline-entry-lunch-break')));
+    final lunchStage = tester.getRect(find.byKey(const ValueKey('room-timeline-entry-lunch-stage')));
+
+    expect(find.text('13:05'), findsOneWidget);
+    expect(find.text('13:10'), findsOneWidget);
+    expect(lunchBreak.bottom, greaterThan(lunchStage.top));
+    expect(lunchBreak.bottom, lessThan(lunchStage.bottom));
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('stacks simultaneous list entries vertically', (tester) async {
     await _pumpTimetableState(
       tester,
@@ -948,6 +1014,84 @@ final _overlappingTimetable = SessionTimetableData(
   ),
   hasAnyEntries: true,
 );
+
+final _talkBesideLtsTimetable = _singleDayTimetable([
+  _roomSessionEntry('talk', _venue, startsAt: _jst(13, 25), endsAt: _jst(13, 55)),
+  _roomSessionEntry('lt-1', _venueB, startsAt: _jst(13, 25), endsAt: _jst(13, 35)),
+  _roomSessionEntry('lt-2', _venueB, startsAt: _jst(13, 35), endsAt: _jst(13, 45)),
+  _roomSessionEntry('lt-3', _venueB, startsAt: _jst(13, 45), endsAt: _jst(13, 55)),
+]);
+
+final _workshopTimetable = _singleDayTimetable([
+  _roomSessionEntry('talk-1', _venue, startsAt: _jst(10, 0), endsAt: _jst(10, 30)),
+  _roomSessionEntry('workshop', _venueB, startsAt: _jst(10, 0), endsAt: _jst(12, 0)),
+  _roomSessionEntry('talk-2', _venue, startsAt: _jst(10, 45), endsAt: _jst(11, 15)),
+  _roomSessionEntry('talk-3', _venue, startsAt: _jst(11, 30), endsAt: _jst(12, 0)),
+]);
+
+final _lunchStageTimetable = _singleDayTimetable([
+  SessionTimetableEntry.timelineEvent(
+    timelineEvent: TimelineEvent(
+      id: 'lunch-break',
+      title: const LocaleMap(ja: '昼休憩', en: 'Lunch break'),
+      startsAt: _jst(12, 10),
+      endsAt: _jst(13, 10),
+      createdAt: DateTime.utc(2026),
+      updatedAt: DateTime.utc(2026),
+    ),
+    venue: null,
+  ),
+  SessionTimetableEntry.timelineEvent(
+    timelineEvent: TimelineEvent(
+      id: 'lunch-stage',
+      title: const LocaleMap(ja: 'ランチステージ', en: 'Lunch stage'),
+      startsAt: _jst(13, 5),
+      endsAt: _jst(13, 25),
+      venueId: 'room-a',
+      createdAt: DateTime.utc(2026),
+      updatedAt: DateTime.utc(2026),
+    ),
+    venue: _venue,
+  ),
+  _roomSessionEntry('afternoon-talk', _venue, startsAt: _jst(13, 25), endsAt: _jst(13, 55)),
+]);
+
+/// [hour]:[minute] JST on the first event day, as the stored UTC instant.
+DateTime _jst(int hour, int minute) => DateTime.utc(2026, 10, 31, hour - 9, minute);
+
+SessionTimetableEntry _roomSessionEntry(
+  String id,
+  Venue venue, {
+  required DateTime startsAt,
+  required DateTime endsAt,
+}) {
+  return SessionTimetableEntry.session(
+    session: Session(
+      id: id,
+      title: LocaleMap(ja: id, en: id),
+      description: const LocaleMap(ja: '', en: ''),
+      primaryLocale: 'ja',
+      startsAt: startsAt,
+      endsAt: endsAt,
+      venueId: venue.id,
+      createdAt: DateTime.utc(2026),
+      updatedAt: DateTime.utc(2026),
+    ),
+    venue: venue,
+    speakers: const [],
+  );
+}
+
+SessionTimetableData _singleDayTimetable(List<SessionTimetableEntry> entries) {
+  final day = SessionTimetableDay(date: DateTime(2026, 10, 31), entries: entries);
+  return SessionTimetableData(
+    days: [day],
+    availableDates: [day.date],
+    selectedDate: day.date,
+    selectedDay: day,
+    hasAnyEntries: true,
+  );
+}
 
 const _responsiveRoomViewports = <String, double>{
   '320px phone': 320,
