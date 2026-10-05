@@ -24,6 +24,19 @@ class ShareLinkRoute extends GoRouteData with $ShareLinkRoute {
   Widget build(BuildContext context, GoRouterState state) => ExchangeShareLinkPage(token: token);
 }
 
+/// `/s/:token` — a stamp rally QR code, opened from the OS camera as a
+/// Universal Link / App Link, in the web app, or from
+/// [StampRallyScanRoute]. Top-level for the same reason as [ShareLinkRoute].
+@TypedGoRoute<StampRallyLinkRoute>(path: '/s/:token')
+class StampRallyLinkRoute extends GoRouteData with $StampRallyLinkRoute {
+  const StampRallyLinkRoute({required this.token});
+
+  final String token;
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => StampRallyLinkPage(token: token);
+}
+
 /// Shell hosting the main bottom/rail navigation destinations.
 ///
 /// Uses [StatefulShellRoute.indexedStack] so switching tabs swaps branches
@@ -84,6 +97,10 @@ class ShareLinkRoute extends GoRouteData with $ShareLinkRoute {
             TypedGoRoute<SupportLtRoute>(path: 'support-lt'),
             TypedGoRoute<SupportLtLinkRoute>(path: 'support-lt/:code'),
             TypedGoRoute<MissionRoute>(path: 'missions'),
+            TypedGoRoute<StampRallyRoute>(
+              path: 'stamp-rally',
+              routes: [TypedGoRoute<StampRallyScanRoute>(path: 'scan')],
+            ),
             TypedGoRoute<SnsPostRoute>(path: 'sns-post'),
             TypedGoRoute<ExchangeHomeRoute>(
               path: 'exchange',
@@ -237,6 +254,22 @@ class MissionRoute extends GoRouteData with $MissionRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) => const MissionPage();
+}
+
+/// `/account/stamp-rally` — collected stamps, prizes and the thanks card.
+class StampRallyRoute extends GoRouteData with $StampRallyRoute {
+  const StampRallyRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const StampRallyPage();
+}
+
+/// `/account/stamp-rally/scan` — reads a stamp rally QR code in-app.
+class StampRallyScanRoute extends GoRouteData with $StampRallyScanRoute {
+  const StampRallyScanRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const StampRallyScanPage();
 }
 
 /// `/account/sns-post` — register a photo post URL and one companion category.

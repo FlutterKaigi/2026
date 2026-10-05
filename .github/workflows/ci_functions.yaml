@@ -65,7 +65,10 @@ jobs:
           const fs = require('node:fs');
           const { randomBytes } = require('node:crypto');
           fs.writeFileSync('functions/.env', 'SYNC_TARGET_PROJECT_ID=demo-flutterkaigi-601-sync\n');
-          fs.writeFileSync('functions/.secret.local', `EXCHANGE_TOKEN_SECRET=${randomBytes(32).toString('hex')}\n`);
+          fs.writeFileSync('functions/.secret.local', [
+            `EXCHANGE_TOKEN_SECRET=${randomBytes(32).toString('hex')}`,
+            `STAMP_RALLY_TOKEN_SECRET=${randomBytes(32).toString('hex')}`,
+          ].join('\n') + '\n');
           JS
           npx -y firebase-tools@13.35.1 emulators:exec \
             --project "$SUPPORT_LT_TEST_PROJECT_ID" \

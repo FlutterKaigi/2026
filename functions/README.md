@@ -180,6 +180,48 @@ firebase functions:secrets:set EXCHANGE_TOKEN_SECRET --project flutterkaigi-2026
 `SYNC_TARGET_PROJECT_ID` が未設定だとエミュレータ起動時に対話プロンプトで
 停止し、関数が 1 つも登録されない。
 
+## スタンプラリー
+
+`src/stamp_rally.ts` が callable を公開し、`src/stamp_rally_service.ts` が署名の判定と
+Firestore トランザクションを実装する。リージョンは `asia-northeast1`、本番は App Check 必須。
+
+QR コードは `<ドメイン>/s/<token>` 形式で、トークンは
+`HMAC-SHA256(STAMP_RALLY_TOKEN_SECRET, <用途>)` の16進表記。用途はスポンサーのスタンプが
+`stamp.v1.<sponsorId>`、景品の交換が `reward.v1`、クレーンゲームの挑戦（サンクスカード）が `thanks.v1`。
+有効期限はなく、印刷して使う。
+
+- `scanStampRallyCode({ token })` は匿名認証以外のサインイン済みユーザーが利用できる。
+  トークンを景品・サンクスカード・`stampRallySponsors` の各スポンサーの署名と突き合わせて用途を判定する。
+  カード・設定・対象スポンサーを同じトランザクションで読み、獲得・交換日時にはサーバー時刻を使う。
+  - スタンプ: `{ kind: "stamp", sponsorId, alreadyAcquired, acquiredAt, stampCount, newCheckpoints, checkpoints }`。
+    獲得済みなら `alreadyAcquired: true` を返す。未獲得で `stampRallySettings/current.isOpen` が
+    true でなければ `failed-precondition`。
+  - 景品: `{ kind: "reward", redeemedCheckpoints, redeemedAt, stampCount, checkpoints, rewardsRedeemedAt }`。
+    達成済みで未交換のチェックポイントをすべて交換済みにする。交換できるものがなければ
+    `redeemedCheckpoints` は空、`redeemedAt` は null。
+  - クレーンゲーム: `{ kind: "thanksCard", alreadyRedeemed, redeemedAt }`。スタンプ数は条件にせず、1人1回のみ記録する。挑戦の条件となるサンクスカードは会場で物理のカードとして集める。
+  - いずれの署名とも一致しなければ `not-found`、形式不正は `invalid-argument`。
+- `getStampRallyQrCodes()` は管理者のみ呼び出せる。`{ sponsors: [{ sponsorId, token }], reward, thanksCard }`
+  を返す。ドメインはダッシュボードが自身の Flavor に合わせて付ける。
+
+チェックポイント番号は `checkpoints`（既定値 `[7, 14, 22]`）の並び順に 1 から数える。
+スタンプ数は `stampRallyCards/{uid}.stamps` の件数で、スタンプ・景品の交換はいずれも1回のみ記録する。
+時刻は epoch ミリ秒で返す。Auth アカウントの確認は応援 LT 参加登録と同じく、
+カードの読み取りロックを保持して行う。削除済みアカウントはロック解放後に共通の Auth 削除処理で
+データを削除する。`onSupportLtUserDeleted` も `stampRallyCards/{uid}` を削除する。
+
+署名鍵は Firebase Functions のシークレット `STAMP_RALLY_TOKEN_SECRET` から読み、前後の空白・改行を除いて使う。
+値は環境ごとに別の乱数にする。シークレットを変更すると印刷済みのすべての QR コードが無効になる。
+
+```bash
+openssl rand -hex 32 | tr -d '\n' | firebase functions:secrets:set STAMP_RALLY_TOKEN_SECRET --project flutterkaigi-2026-stg --data-file -
+```
+
+エミュレータでは `functions/.secret.local` に `STAMP_RALLY_TOKEN_SECRET=<任意の値>` を追加する。
+`test/stamp_rally.test.cjs` で認可、署名検証、チェックポイント判定、二重交換を、
+`test/stamp_rally.emulator.test.cjs` で callable と Firestore ルールを検証する。
+`stampRallyCards` は `syncCollectionsToProd` の同期対象に含めない。
+
 ## eventAdministration
 
 ダッシュボードの1回のログインで、STG / 本番の応援LT・クイズを管理する callable。

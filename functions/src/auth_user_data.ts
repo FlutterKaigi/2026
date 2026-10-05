@@ -8,6 +8,7 @@ export async function deleteAuthUserData(uid: string, db: Firestore): Promise<vo
     "supportLtRegistrationAttempts",
     "snsPostRegistrations",
     "exchangeCodeAttempts",
+    "stampRallyCards",
   ]) {
     batch.delete(db.doc(`${collection}/${uid}`));
   }

@@ -59,6 +59,7 @@ class TranslationsEn extends Translations with BaseTranslations<AppLocale, Trans
 	@override late final _Translations$profile$en profile = _Translations$profile$en._(_root);
 	@override late final _Translations$snsPost$en snsPost = _Translations$snsPost$en._(_root);
 	@override late final _Translations$mission$en mission = _Translations$mission$en._(_root);
+	@override late final _Translations$stampRally$en stampRally = _Translations$stampRally$en._(_root);
 	@override late final _Translations$exchange$en exchange = _Translations$exchange$en._(_root);
 	@override late final _Translations$supportLt$en supportLt = _Translations$supportLt$en._(_root);
 	@override late final _Translations$countryRegion$en countryRegion = _Translations$countryRegion$en._(_root);
@@ -494,6 +495,63 @@ class _Translations$mission$en extends Translations$mission$ja {
 	@override String get profileRequired => 'Add your country or region to your profile';
 	@override String get snsTitle => 'Share a photo on SNS';
 	@override String get snsDescription => 'Post a photo with an eligible attendee and register its URL and category';
+}
+
+// Path: stampRally
+class _Translations$stampRally$en extends Translations$stampRally$ja {
+	_Translations$stampRally$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Stamp Rally';
+	@override String get signInRequired => 'Sign in to collect stamps';
+	@override String get description => 'Scan the QR codes at sponsor booths to collect stamps';
+	@override String get scanButton => 'Scan QR code';
+	@override String get closed => 'Stamps are not available right now. Prizes and the crane game are still available';
+	@override String stampCount({required Object n, required Object total}) => '${n} / ${total}';
+	@override String stampCountSemantic({required Object n, required Object total}) => '${n} of ${total} stamps collected';
+	@override String nextCheckpoint({required Object n, required Object number}) => '${n} more for prize #${number}';
+	@override String get allCheckpoints => 'You have reached every prize';
+	@override String checkpointLabel({required Object number, required Object required}) => '#${number} (${required} stamps)';
+	@override String get checkpointLocked => 'Not yet';
+	@override String get checkpointAchieved => 'Ready to redeem';
+	@override String checkpointRedeemed({required Object date}) => 'Redeemed ${date}';
+	@override String get thanksCardTitle => 'Crane game';
+	@override String get thanksCardDescription => 'Collect thanks cards at the venue to play the crane game once';
+	@override String get thanksCardNotRedeemed => 'Not played';
+	@override String thanksCardRedeemed({required Object date}) => 'Played ${date}';
+	@override String get roadmapTitle => 'Stamps';
+	@override String stampSlotSemantic({required Object n, required Object status}) => 'Stamp ${n}, ${status}';
+	@override String get acquired => 'Collected';
+	@override String get notAcquired => 'Not collected';
+	@override String get scanTitle => 'Scan QR code';
+	@override String get scanHint => 'Fit the QR code at a sponsor booth or the prize counter inside the frame';
+	@override String get scanInvalid => 'This is not a stamp rally QR code';
+	@override String get scanCameraError => 'The camera is unavailable. Allow camera access in Settings';
+	@override String get resultTitle => 'Stamp Rally';
+	@override String get processing => 'Checking…';
+	@override String get stampAcquiredTitle => 'Stamp collected!';
+	@override String get stampAlreadyTitle => 'You already have this stamp';
+	@override String checkpointReached({required Object number}) => 'You reached prize #${number}!';
+	@override String get rewardTitle => 'Prize redemption';
+	@override String rewardRedeemedTitle({required Object numbers}) => 'You can receive prize ${numbers}';
+	@override String get rewardNoneTitle => 'No new prizes to redeem';
+	@override String rewardNoneBody({required Object n}) => 'You have ${n} stamps';
+	@override String get rewardStaffNote => 'Show this screen to the staff';
+	@override String rewardRedeemedAt({required Object number, required Object date}) => '#${number} redeemed ${date}';
+	@override String get thanksCardResultTitle => 'You can play the crane game';
+	@override String get thanksCardAlreadyTitle => 'You have already played the crane game';
+	@override String thanksCardResultAt({required Object date}) => 'Checked in ${date}';
+	@override String get invalidTitle => 'Invalid QR code';
+	@override String get invalidBody => 'Check that this is a stamp rally QR code';
+	@override String get closedTitle => 'Stamps are not available right now';
+	@override String get networkError => 'Could not connect. Try again somewhere with a better signal';
+	@override String get failed => 'Something went wrong';
+	@override String get sessionExpired => 'Please sign in again';
+	@override String get permissionDenied => 'This account cannot take part';
+	@override String get retry => 'Try again';
+	@override String get viewCard => 'View stamp rally';
 }
 
 // Path: exchange
@@ -1462,6 +1520,54 @@ extension on TranslationsEn {
 			'mission.profileRequired' => 'Add your country or region to your profile',
 			'mission.snsTitle' => 'Share a photo on SNS',
 			'mission.snsDescription' => 'Post a photo with an eligible attendee and register its URL and category',
+			'stampRally.title' => 'Stamp Rally',
+			'stampRally.signInRequired' => 'Sign in to collect stamps',
+			'stampRally.description' => 'Scan the QR codes at sponsor booths to collect stamps',
+			'stampRally.scanButton' => 'Scan QR code',
+			'stampRally.closed' => 'Stamps are not available right now. Prizes and the crane game are still available',
+			'stampRally.stampCount' => ({required Object n, required Object total}) => '${n} / ${total}',
+			'stampRally.stampCountSemantic' => ({required Object n, required Object total}) => '${n} of ${total} stamps collected',
+			'stampRally.nextCheckpoint' => ({required Object n, required Object number}) => '${n} more for prize #${number}',
+			'stampRally.allCheckpoints' => 'You have reached every prize',
+			'stampRally.checkpointLabel' => ({required Object number, required Object required}) => '#${number} (${required} stamps)',
+			'stampRally.checkpointLocked' => 'Not yet',
+			'stampRally.checkpointAchieved' => 'Ready to redeem',
+			'stampRally.checkpointRedeemed' => ({required Object date}) => 'Redeemed ${date}',
+			'stampRally.thanksCardTitle' => 'Crane game',
+			'stampRally.thanksCardDescription' => 'Collect thanks cards at the venue to play the crane game once',
+			'stampRally.thanksCardNotRedeemed' => 'Not played',
+			'stampRally.thanksCardRedeemed' => ({required Object date}) => 'Played ${date}',
+			'stampRally.roadmapTitle' => 'Stamps',
+			'stampRally.stampSlotSemantic' => ({required Object n, required Object status}) => 'Stamp ${n}, ${status}',
+			'stampRally.acquired' => 'Collected',
+			'stampRally.notAcquired' => 'Not collected',
+			'stampRally.scanTitle' => 'Scan QR code',
+			'stampRally.scanHint' => 'Fit the QR code at a sponsor booth or the prize counter inside the frame',
+			'stampRally.scanInvalid' => 'This is not a stamp rally QR code',
+			'stampRally.scanCameraError' => 'The camera is unavailable. Allow camera access in Settings',
+			'stampRally.resultTitle' => 'Stamp Rally',
+			'stampRally.processing' => 'Checking…',
+			'stampRally.stampAcquiredTitle' => 'Stamp collected!',
+			'stampRally.stampAlreadyTitle' => 'You already have this stamp',
+			'stampRally.checkpointReached' => ({required Object number}) => 'You reached prize #${number}!',
+			'stampRally.rewardTitle' => 'Prize redemption',
+			'stampRally.rewardRedeemedTitle' => ({required Object numbers}) => 'You can receive prize ${numbers}',
+			'stampRally.rewardNoneTitle' => 'No new prizes to redeem',
+			'stampRally.rewardNoneBody' => ({required Object n}) => 'You have ${n} stamps',
+			'stampRally.rewardStaffNote' => 'Show this screen to the staff',
+			'stampRally.rewardRedeemedAt' => ({required Object number, required Object date}) => '#${number} redeemed ${date}',
+			'stampRally.thanksCardResultTitle' => 'You can play the crane game',
+			'stampRally.thanksCardAlreadyTitle' => 'You have already played the crane game',
+			'stampRally.thanksCardResultAt' => ({required Object date}) => 'Checked in ${date}',
+			'stampRally.invalidTitle' => 'Invalid QR code',
+			'stampRally.invalidBody' => 'Check that this is a stamp rally QR code',
+			'stampRally.closedTitle' => 'Stamps are not available right now',
+			'stampRally.networkError' => 'Could not connect. Try again somewhere with a better signal',
+			'stampRally.failed' => 'Something went wrong',
+			'stampRally.sessionExpired' => 'Please sign in again',
+			'stampRally.permissionDenied' => 'This account cannot take part',
+			'stampRally.retry' => 'Try again',
+			'stampRally.viewCard' => 'View stamp rally',
 			'exchange.title' => 'Profile Exchange',
 			'exchange.qrDescription' => 'Show this QR code to another attendee and have them scan it to exchange profiles',
 			'exchange.qrSemanticLabel' => 'Profile exchange QR code',
@@ -1605,6 +1711,8 @@ extension on TranslationsEn {
 			'quiz.registration.entryCodeHint' => '6-digit number',
 			'quiz.registration.entryCodeHelper' => 'Enter the code shown at the on-site reception desk',
 			'quiz.registration.join' => 'Join',
+			_ => null,
+		} ?? switch (path) {
 			'quiz.registration.full' => ({required Object max}) => 'Full capacity (${max} participants) reached',
 			'quiz.registration.failed' => 'Could not register. Please try again later.',
 			'quiz.registration.codeMismatch' => 'Could not register. Please check the entry code.',

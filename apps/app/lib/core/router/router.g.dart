@@ -9,14 +9,11 @@ part of 'router.dart';
 List<RouteBase> get $appRoutes => [
   $settingsRoute,
   $shareLinkRoute,
+  $stampRallyLinkRoute,
   $appShellRoute,
 ];
 
-RouteBase get $settingsRoute => GoRouteData.$route(
-  path: '/settings',
-  hasOverriddenOnExit: false,
-  factory: $SettingsRoute._fromState,
-);
+RouteBase get $settingsRoute => GoRouteData.$route(path: '/settings', factory: $SettingsRoute._fromState);
 
 mixin $SettingsRoute on GoRouteData {
   static SettingsRoute _fromState(GoRouterState state) => const SettingsRoute();
@@ -37,11 +34,7 @@ mixin $SettingsRoute on GoRouteData {
   void replace(BuildContext context) => context.replace(location);
 }
 
-RouteBase get $shareLinkRoute => GoRouteData.$route(
-  path: '/x/:token',
-  hasOverriddenOnExit: false,
-  factory: $ShareLinkRoute._fromState,
-);
+RouteBase get $shareLinkRoute => GoRouteData.$route(path: '/x/:token', factory: $ShareLinkRoute._fromState);
 
 mixin $ShareLinkRoute on GoRouteData {
   static ShareLinkRoute _fromState(GoRouterState state) => ShareLinkRoute(token: state.pathParameters['token']!);
@@ -64,6 +57,33 @@ mixin $ShareLinkRoute on GoRouteData {
   void replace(BuildContext context) => context.replace(location);
 }
 
+RouteBase get $stampRallyLinkRoute => GoRouteData.$route(
+  path: '/s/:token',
+  factory: $StampRallyLinkRoute._fromState,
+);
+
+mixin $StampRallyLinkRoute on GoRouteData {
+  static StampRallyLinkRoute _fromState(GoRouterState state) =>
+      StampRallyLinkRoute(token: state.pathParameters['token']!);
+
+  StampRallyLinkRoute get _self => this as StampRallyLinkRoute;
+
+  @override
+  String get location => GoRouteData.$location('/s/${Uri.encodeComponent(_self.token)}');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) => context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
 RouteBase get $appShellRoute => StatefulShellRouteData.$route(
   factory: $AppShellRouteExtension._fromState,
   branches: [
@@ -71,36 +91,27 @@ RouteBase get $appShellRoute => StatefulShellRouteData.$route(
       routes: [
         GoRouteData.$route(
           path: '/info',
-          hasOverriddenOnExit: false,
           factory: $EventInfoRoute._fromState,
           routes: [
             GoRouteData.$route(
               path: 'staff',
-              hasOverriddenOnExit: false,
               factory: $StaffMemberListRoute._fromState,
             ),
           ],
         ),
-        GoRouteData.$route(
-          path: '/news',
-          hasOverriddenOnExit: false,
-          factory: $NewsRoute._fromState,
-        ),
+        GoRouteData.$route(path: '/news', factory: $NewsRoute._fromState),
         GoRouteData.$route(
           path: '/licenses',
-          hasOverriddenOnExit: false,
           factory: $LicenseRoute._fromState,
           routes: [
             GoRouteData.$route(
               path: ':packageName',
-              hasOverriddenOnExit: false,
               factory: $LicenseDetailRoute._fromState,
             ),
           ],
         ),
         GoRouteData.$route(
           path: '/contributors',
-          hasOverriddenOnExit: false,
           factory: $ContributorsRoute._fromState,
         ),
       ],
@@ -109,22 +120,18 @@ RouteBase get $appShellRoute => StatefulShellRouteData.$route(
       routes: [
         GoRouteData.$route(
           path: '/sessions',
-          hasOverriddenOnExit: false,
           factory: $SessionTimetableRoute._fromState,
           routes: [
             GoRouteData.$route(
               path: 'search',
-              hasOverriddenOnExit: false,
               factory: $SessionSearchRoute._fromState,
             ),
             GoRouteData.$route(
               path: 'bookmarked',
-              hasOverriddenOnExit: false,
               factory: $BookmarkedSessionsRoute._fromState,
             ),
             GoRouteData.$route(
               path: ':sessionId',
-              hasOverriddenOnExit: false,
               factory: $SessionDetailsRoute._fromState,
             ),
           ],
@@ -135,7 +142,6 @@ RouteBase get $appShellRoute => StatefulShellRouteData.$route(
       routes: [
         GoRouteData.$route(
           path: '/venue-map',
-          hasOverriddenOnExit: false,
           factory: $VenueMapRoute._fromState,
         ),
       ],
@@ -144,12 +150,10 @@ RouteBase get $appShellRoute => StatefulShellRouteData.$route(
       routes: [
         GoRouteData.$route(
           path: '/sponsors',
-          hasOverriddenOnExit: false,
           factory: $SponsorRoute._fromState,
           routes: [
             GoRouteData.$route(
               path: ':sponsorKey',
-              hasOverriddenOnExit: false,
               factory: $SponsorDetailsRoute._fromState,
             ),
           ],
@@ -160,34 +164,28 @@ RouteBase get $appShellRoute => StatefulShellRouteData.$route(
       routes: [
         GoRouteData.$route(
           path: '/account',
-          hasOverriddenOnExit: false,
           factory: $AccountRoute._fromState,
           routes: [
             GoRouteData.$route(
               path: 'email',
-              hasOverriddenOnExit: false,
               factory: $EmailSignInRoute._fromState,
             ),
             GoRouteData.$route(
               path: 'profile',
-              hasOverriddenOnExit: false,
               factory: $ProfileEditRoute._fromState,
             ),
             GoRouteData.$route(
               path: 'quiz',
-              hasOverriddenOnExit: false,
               factory: $QuizListRoute._fromState,
               routes: [
                 GoRouteData.$route(
                   path: ':eventId',
-                  hasOverriddenOnExit: false,
                   factory: $QuizRoute._fromState,
                 ),
               ],
             ),
             GoRouteData.$route(
               path: 'support-lt',
-              hasOverriddenOnExit: false,
               factory: $SupportLtRoute._fromState,
             ),
             GoRouteData.$route(
@@ -197,27 +195,32 @@ RouteBase get $appShellRoute => StatefulShellRouteData.$route(
             ),
             GoRouteData.$route(
               path: 'missions',
-              hasOverriddenOnExit: false,
               factory: $MissionRoute._fromState,
             ),
             GoRouteData.$route(
+              path: 'stamp-rally',
+              factory: $StampRallyRoute._fromState,
+              routes: [
+                GoRouteData.$route(
+                  path: 'scan',
+                  factory: $StampRallyScanRoute._fromState,
+                ),
+              ],
+            ),
+            GoRouteData.$route(
               path: 'sns-post',
-              hasOverriddenOnExit: false,
               factory: $SnsPostRoute._fromState,
             ),
             GoRouteData.$route(
               path: 'exchange',
-              hasOverriddenOnExit: false,
               factory: $ExchangeHomeRoute._fromState,
               routes: [
                 GoRouteData.$route(
                   path: 'scan',
-                  hasOverriddenOnExit: false,
                   factory: $ExchangeScanRoute._fromState,
                 ),
                 GoRouteData.$route(
                   path: 'list',
-                  hasOverriddenOnExit: false,
                   factory: $ExchangeListRoute._fromState,
                 ),
               ],
@@ -641,6 +644,44 @@ mixin $MissionRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/account/missions');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) => context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $StampRallyRoute on GoRouteData {
+  static StampRallyRoute _fromState(GoRouterState state) => const StampRallyRoute();
+
+  @override
+  String get location => GoRouteData.$location('/account/stamp-rally');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) => context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $StampRallyScanRoute on GoRouteData {
+  static StampRallyScanRoute _fromState(GoRouterState state) => const StampRallyScanRoute();
+
+  @override
+  String get location => GoRouteData.$location('/account/stamp-rally/scan');
 
   @override
   void go(BuildContext context) => context.go(location);

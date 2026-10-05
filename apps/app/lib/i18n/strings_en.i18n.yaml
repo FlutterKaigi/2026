@@ -358,6 +358,56 @@ mission:
   snsTitle: Share a photo on SNS
   snsDescription: Post a photo with an eligible attendee and register its URL and category
 
+stampRally:
+  title: Stamp Rally
+  signInRequired: Sign in to collect stamps
+  description: Scan the QR codes at sponsor booths to collect stamps
+  scanButton: Scan QR code
+  closed: Stamps are not available right now. Prizes and the crane game are still available
+  stampCount: "$n / $total"
+  stampCountSemantic: $n of $total stamps collected
+  nextCheckpoint: "$n more for prize #$number"
+  allCheckpoints: You have reached every prize
+  checkpointLabel: "#$number ($required stamps)"
+  checkpointLocked: Not yet
+  checkpointAchieved: Ready to redeem
+  checkpointRedeemed: Redeemed $date
+  thanksCardTitle: Crane game
+  thanksCardDescription: Collect thanks cards at the venue to play the crane game once
+  thanksCardNotRedeemed: Not played
+  thanksCardRedeemed: Played $date
+  roadmapTitle: Stamps
+  stampSlotSemantic: Stamp $n, $status
+  acquired: Collected
+  notAcquired: Not collected
+  scanTitle: Scan QR code
+  scanHint: Fit the QR code at a sponsor booth or the prize counter inside the frame
+  scanInvalid: This is not a stamp rally QR code
+  scanCameraError: The camera is unavailable. Allow camera access in Settings
+  resultTitle: Stamp Rally
+  processing: Checking…
+  stampAcquiredTitle: Stamp collected!
+  stampAlreadyTitle: You already have this stamp
+  checkpointReached: "You reached prize #$number!"
+  rewardTitle: Prize redemption
+  rewardRedeemedTitle: "You can receive prize $numbers"
+  rewardNoneTitle: No new prizes to redeem
+  rewardNoneBody: You have $n stamps
+  rewardStaffNote: Show this screen to the staff
+  rewardRedeemedAt: "#$number redeemed $date"
+  thanksCardResultTitle: You can play the crane game
+  thanksCardAlreadyTitle: You have already played the crane game
+  thanksCardResultAt: Checked in $date
+  invalidTitle: Invalid QR code
+  invalidBody: Check that this is a stamp rally QR code
+  closedTitle: Stamps are not available right now
+  networkError: Could not connect. Try again somewhere with a better signal
+  failed: Something went wrong
+  sessionExpired: Please sign in again
+  permissionDenied: This account cannot take part
+  retry: Try again
+  viewCard: View stamp rally
+
 exchange:
   title: Profile Exchange
   qrDescription: Show this QR code to another attendee and have them scan it to exchange profiles

@@ -345,8 +345,11 @@ void main() {
         '/account/exchange/scan',
         '/account/exchange/list',
         '/account/sns-post',
-        // プロフィール交換のシェアリンクも塞ぐ。
+        '/account/stamp-rally',
+        '/account/stamp-rally/scan',
+        // プロフィール交換・スタンプラリーのリンクも塞ぐ。
         '/x/v1.other-uid.9999999999.deadbeef',
+        '/s/abababababababababababababababababababababababababababababababab',
       ]) {
         router.go(location);
         await tester.pumpAndSettle();
@@ -366,7 +369,9 @@ void main() {
         '/account/support-lt/123456',
         '/account/exchange',
         '/account/sns-post',
+        '/account/stamp-rally',
         '/x/v1.other-uid.9999999999.deadbeef',
+        '/s/abababababababababababababababababababababababababababababababab',
       ]) {
         router.go(location);
         await tester.pumpAndSettle();

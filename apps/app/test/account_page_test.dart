@@ -730,6 +730,7 @@ void main() {
     expect(find.text('ミッション'), findsOneWidget);
     expect(find.text('イベントに参加'), findsOneWidget);
     expect(find.text(t.auth.account.quiz), findsOneWidget);
+    expect(find.text(t.stampRally.title), findsOneWidget);
   });
 
   testWidgets('hides the mission entry and join-event section when event_features_enabled is false', (
@@ -752,6 +753,7 @@ void main() {
     expect(find.text('ミッション'), findsNothing);
     expect(find.text('イベントに参加'), findsNothing);
     expect(find.text(t.auth.account.quiz), findsNothing);
+    expect(find.text(t.stampRally.title), findsNothing);
     // 削除・サインアウトなどアカウント自体の操作は引き続き表示される。
     expect(find.text('サインアウト'), findsOneWidget);
   });

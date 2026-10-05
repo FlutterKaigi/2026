@@ -52,6 +52,7 @@ part of 'router.dart';
       ],
     ),
     TypedGoRoute<SupportLtRoute>(path: AppPaths.supportLt),
+    TypedGoRoute<StampRallyRoute>(path: AppPaths.stampRally),
   ],
 )
 class AppShellRoute extends ShellRouteData {

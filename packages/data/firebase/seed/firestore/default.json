@@ -746,6 +746,47 @@
       }
     },
     {
+      "path": "stampRallySettings/current",
+      "schema": "stamp_rally_settings",
+      "data": {
+        "checkpoints": [
+          7,
+          14,
+          22
+        ],
+        "isOpen": true,
+        "updatedAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "stampRallySponsors/flutter",
+      "schema": "stamp_rally_sponsor",
+      "data": {
+        "createdAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "stampRallySponsors/japan-toreca",
+      "schema": "stamp_rally_sponsor",
+      "data": {
+        "createdAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "stampRallySponsors/up-sider",
+      "schema": "stamp_rally_sponsor",
+      "data": {
+        "createdAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
+      "path": "stampRallySponsors/hacomono",
+      "schema": "stamp_rally_sponsor",
+      "data": {
+        "createdAt": "2026-06-02T00:00:00Z"
+      }
+    },
+    {
       "path": "staffMembers/staff-001",
       "schema": "staff_member",
       "data": {

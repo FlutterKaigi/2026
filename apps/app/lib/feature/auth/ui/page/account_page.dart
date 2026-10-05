@@ -19,11 +19,13 @@ import 'package:app/feature/exchange/data/provider/profile_exchange_repository.d
 import 'package:app/feature/profile/data/provider/user_profile_provider.dart';
 import 'package:app/feature/profile/data/provider/user_profile_repository.dart';
 import 'package:app/feature/profile/ui/widget/profile_summary_card_widget.dart';
+import 'package:app/feature/stamp_rally/data/stamp_rally_provider.dart';
 import 'package:app/feature/support_lt/data/provider/support_lt_provider.dart';
 import 'package:data/data.dart';
 import 'package:data/user.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 /// The account tab: sign-in options while signed out, account info while
@@ -118,6 +120,35 @@ class AccountPage extends HookConsumerWidget {
       return null;
     }, [pending, myUid, profile]);
 
+    // Fallback consumer for `pendingStampRallyTokenProvider`: a `/s/<token>`
+    // link opened signed out and left before signing in. Reopening the link
+    // page shows the result staff need to see, unlike a snack bar. While that
+    // page is still open it resolves the token itself, and a second scan would
+    // turn a prize redemption into "nothing left to redeem".
+    final pendingStamp = ref.watch(pendingStampRallyTokenProvider);
+    useEffect(() {
+      if (pendingStamp == null || myUid == null) {
+        return null;
+      }
+      // Deferred to a microtask: Riverpod disallows modifying a provider
+      // synchronously from a widget life-cycle callback.
+      unawaited(
+        Future.microtask(() {
+          final notifier = ref.read(pendingStampRallyTokenProvider.notifier);
+          if (pendingStamp.uid != null && pendingStamp.uid != myUid) {
+            notifier.clear();
+            return;
+          }
+          if (!context.mounted || GoRouter.of(context).routerDelegate.currentConfiguration.uri.path.startsWith('/s/')) {
+            return;
+          }
+          notifier.clearIfCurrent(pendingStamp.token);
+          unawaited(StampRallyLinkRoute(token: pendingStamp.token).push<void>(context));
+        }),
+      );
+      return null;
+    }, [pendingStamp, myUid]);
+
     Future<void> runAuthAction(
       Future<void> Function(AuthRepository repository) action, {
       String? successMessage,
@@ -195,6 +226,7 @@ class AccountPage extends HookConsumerWidget {
             await ref.read(exchangeTokenCacheRepositoryProvider).clear(user.uid);
             await ref.read(exchangeCodeCacheRepositoryProvider).clear(user.uid);
             ref.read(pendingExchangeTokenProvider.notifier).clear();
+            ref.read(pendingStampRallyTokenProvider.notifier).clear();
           },
         ),
         successMessage: t.auth.account.deleted,
@@ -225,6 +257,8 @@ class AccountPage extends HookConsumerWidget {
                     await ref.read(exchangeTokenCacheRepositoryProvider).clear(value.uid);
                     await ref.read(exchangeCodeCacheRepositoryProvider).clear(value.uid);
                     ref.read(pendingExchangeTokenProvider.notifier).clear();
+                    ref.read(pendingStampRallyTokenProvider.notifier).clear();
+                    ref.read(pendingStampRallyTokenProvider.notifier).clear();
                     await repository.signOut();
                   }),
                   onDeleteAccount: () => deleteAccount(value),
@@ -365,6 +399,12 @@ class _SignedInView extends ConsumerWidget {
                           icon: Icons.image_outlined,
                           title: t.auth.account.snsPost,
                           onTap: () => const SnsPostRoute().push<void>(context),
+                        ),
+                        const Divider(height: 1),
+                        _NavigationTile(
+                          icon: Icons.approval_outlined,
+                          title: t.stampRally.title,
+                          onTap: () => const StampRallyRoute().push<void>(context),
                         ),
                       ],
                     ),

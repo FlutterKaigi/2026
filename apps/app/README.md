@@ -121,6 +121,19 @@ fvm dart run melos run firebase:start:functions
 開く場合は `fvm flutter run -d web-server --web-port 8780 --dart-define-from-file=environments/.env.dev` を実行し、
 `http://localhost:8780/account/missions` を開きます（旧 `/#/account/missions` 形式も起動時に変換します）。
 
+## スタンプラリー
+
+アカウントタブの「参加する」から「スタンプラリー」(`/account/stamp-rally`)を開きます。対象スポンサーのロゴと名前を一覧し、
+獲得済みのスポンサーには `res/assets/stamps/<スポンサーのslug>.webp` のスタンプ画像を表示します。画像がないスポンサーはロゴで表示します。
+スタンプ数、景品のチェックポイントの達成・交換状況、クレーンゲームの挑戦状況は `stampRallyCards/{uid}` の購読結果から表示します。
+このため、読み取り時に通信エラーになっても、サーバーで記録された結果が画面に反映されます。
+
+QRコードは `<アプリのドメイン>/s/<token>` 形式です。OSのカメラからはUniversal Links / App Linksでアプリ(未インストールならWeb版)が開き、
+アプリ内のスキャナー(`/account/stamp-rally/scan`)も同じ `/s/:token` 画面に遷移します。ドメインは照合せず、用途はサーバーが署名で判定します。
+結果画面にはスタンプの獲得、受け取れる景品の番号と交換日時、クレーンゲームの受付日時を表示し、スタッフが確認します。
+クレーンゲームは会場で物理のサンクスカードを集めた人が1回挑戦でき、アプリは挑戦の記録だけを扱います。
+サインイン前に開いたリンクは、その画面でサインインすると続けて処理します。別の画面でサインインした場合はアカウントタブが結果画面を開き直します。
+
 ## 配布
 
 GitHub Actionsによる配布先、Repository Variables／Secretsの設定は[App delivery setup](../../.github/APP_DELIVERY.md)を参照してください。

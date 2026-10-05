@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/FlutterKaigi/2026/packages/data/firebase/schemas/firestore/stamp_rally_settings.schema.json",
+  "title": "StampRallySettings",
+  "description": "Stamp rally settings at stampRallySettings/current. Anyone can read; only admins write. Stamps are accepted only while isOpen is true; reward and thanks card redemption ignore it. checkpoints lists the stamp counts required for each prize in ascending order, and its order is the prize number (#1, #2, ...). Without this document the rally is closed and checkpoints default to [7, 14, 22].",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["checkpoints", "isOpen", "updatedAt"],
+  "properties": {
+    "checkpoints": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 5,
+      "uniqueItems": true,
+      "items": { "type": "integer", "minimum": 1 }
+    },
+    "isOpen": { "type": "boolean" },
+    "updatedAt": { "type": "string", "format": "date-time" }
+  }
+}
