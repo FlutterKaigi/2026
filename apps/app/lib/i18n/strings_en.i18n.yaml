@@ -40,8 +40,9 @@ sessionTimetable:
   title: Timetable
   dayButtonLabel: Day $day ($date)
   view:
-    openRooms: Switch to room timeline
-    openList: Switch to list view
+    list: List
+    rooms: By room
+    saveFailed: Could not save the view preference
     shared: Shared
   empty: The timetable has not been published yet
   emptyFiltered: There are no items for this day
@@ -471,7 +472,15 @@ exchange:
   shareLinkViewList: View exchanged profiles
 supportLt:
   title: Support LT Registration
-  description: Enter the 6-digit code provided by the organizers to register your participation in Support LT
+  description: Scan the QR code shown at the venue to register your participation in Support LT
+  scanButton: Scan the QR code
+  scanTitle: Scan the QR code
+  scanHint: Line up the QR code shown at the venue within the frame
+  scanCameraError: Camera unavailable. Allow camera access in Settings, or enter the 6-digit code on the previous screen
+  scanInvalid: Could not read this code. Make sure it's the Support LT registration QR code
+  linkInvalid: This link isn't valid. Scan the QR code at the venue again
+  codeSectionTitle: If you can't scan the QR code
+  codeSectionDescription: Enter the 6-digit code provided by the organizers
   codeLabel: Registration code
   register: Register participation
   submitting: Registering…
@@ -481,7 +490,7 @@ supportLt:
   backToAccount: Back to account
   signInRequired: Sign in to register your participation in Support LT
   invalidFormat: Enter a 6-digit code
-  invalidCode: This code is incorrect. Check the code provided by the organizers
+  invalidCode: This code is incorrect. Scan the QR code at the venue again or ask the organizers
   rateLimited: Too many attempts. Please try again in a few minutes
   networkError: A network error occurred. Check your connection and try again
   sessionExpired: Your sign-in session has expired. Please sign in again

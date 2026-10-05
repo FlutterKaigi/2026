@@ -632,7 +632,15 @@ class _Translations$supportLt$en extends Translations$supportLt$ja {
 
 	// Translations
 	@override String get title => 'Support LT Registration';
-	@override String get description => 'Enter the 6-digit code provided by the organizers to register your participation in Support LT';
+	@override String get description => 'Scan the QR code shown at the venue to register your participation in Support LT';
+	@override String get scanButton => 'Scan the QR code';
+	@override String get scanTitle => 'Scan the QR code';
+	@override String get scanHint => 'Line up the QR code shown at the venue within the frame';
+	@override String get scanCameraError => 'Camera unavailable. Allow camera access in Settings, or enter the 6-digit code on the previous screen';
+	@override String get scanInvalid => 'Could not read this code. Make sure it\'s the Support LT registration QR code';
+	@override String get linkInvalid => 'This link isn\'t valid. Scan the QR code at the venue again';
+	@override String get codeSectionTitle => 'If you can\'t scan the QR code';
+	@override String get codeSectionDescription => 'Enter the 6-digit code provided by the organizers';
 	@override String get codeLabel => 'Registration code';
 	@override String get register => 'Register participation';
 	@override String get submitting => 'Registering…';
@@ -642,7 +650,7 @@ class _Translations$supportLt$en extends Translations$supportLt$ja {
 	@override String get backToAccount => 'Back to account';
 	@override String get signInRequired => 'Sign in to register your participation in Support LT';
 	@override String get invalidFormat => 'Enter a 6-digit code';
-	@override String get invalidCode => 'This code is incorrect. Check the code provided by the organizers';
+	@override String get invalidCode => 'This code is incorrect. Scan the QR code at the venue again or ask the organizers';
 	@override String get rateLimited => 'Too many attempts. Please try again in a few minutes';
 	@override String get networkError => 'A network error occurred. Check your connection and try again';
 	@override String get sessionExpired => 'Your sign-in session has expired. Please sign in again';
@@ -776,8 +784,9 @@ class _Translations$sessionTimetable$view$en extends Translations$sessionTimetab
 	final TranslationsEn _root; // ignore: unused_field
 
 	// Translations
-	@override String get openRooms => 'Switch to room timeline';
-	@override String get openList => 'Switch to list view';
+	@override String get list => 'List';
+	@override String get rooms => 'By room';
+	@override String get saveFailed => 'Could not save the view preference';
 	@override String get shared => 'Shared';
 }
 
@@ -1222,8 +1231,9 @@ extension on TranslationsEn {
 			'trademarks.revComm' => 'RevComm is a registered trademark or trademark of RevComm Inc.',
 			'sessionTimetable.title' => 'Timetable',
 			'sessionTimetable.dayButtonLabel' => ({required Object day, required Object date}) => 'Day ${day} (${date})',
-			'sessionTimetable.view.openRooms' => 'Switch to room timeline',
-			'sessionTimetable.view.openList' => 'Switch to list view',
+			'sessionTimetable.view.list' => 'List',
+			'sessionTimetable.view.rooms' => 'By room',
+			'sessionTimetable.view.saveFailed' => 'Could not save the view preference',
 			'sessionTimetable.view.shared' => 'Shared',
 			'sessionTimetable.empty' => 'The timetable has not been published yet',
 			'sessionTimetable.emptyFiltered' => 'There are no items for this day',
@@ -1620,7 +1630,15 @@ extension on TranslationsEn {
 			'exchange.shareLinkGoHome' => 'Back to home',
 			'exchange.shareLinkViewList' => 'View exchanged profiles',
 			'supportLt.title' => 'Support LT Registration',
-			'supportLt.description' => 'Enter the 6-digit code provided by the organizers to register your participation in Support LT',
+			'supportLt.description' => 'Scan the QR code shown at the venue to register your participation in Support LT',
+			'supportLt.scanButton' => 'Scan the QR code',
+			'supportLt.scanTitle' => 'Scan the QR code',
+			'supportLt.scanHint' => 'Line up the QR code shown at the venue within the frame',
+			'supportLt.scanCameraError' => 'Camera unavailable. Allow camera access in Settings, or enter the 6-digit code on the previous screen',
+			'supportLt.scanInvalid' => 'Could not read this code. Make sure it\'s the Support LT registration QR code',
+			'supportLt.linkInvalid' => 'This link isn\'t valid. Scan the QR code at the venue again',
+			'supportLt.codeSectionTitle' => 'If you can\'t scan the QR code',
+			'supportLt.codeSectionDescription' => 'Enter the 6-digit code provided by the organizers',
 			'supportLt.codeLabel' => 'Registration code',
 			'supportLt.register' => 'Register participation',
 			'supportLt.submitting' => 'Registering…',
@@ -1630,7 +1648,7 @@ extension on TranslationsEn {
 			'supportLt.backToAccount' => 'Back to account',
 			'supportLt.signInRequired' => 'Sign in to register your participation in Support LT',
 			'supportLt.invalidFormat' => 'Enter a 6-digit code',
-			'supportLt.invalidCode' => 'This code is incorrect. Check the code provided by the organizers',
+			'supportLt.invalidCode' => 'This code is incorrect. Scan the QR code at the venue again or ask the organizers',
 			'supportLt.rateLimited' => 'Too many attempts. Please try again in a few minutes',
 			'supportLt.networkError' => 'A network error occurred. Check your connection and try again',
 			'supportLt.sessionExpired' => 'Your sign-in session has expired. Please sign in again',
@@ -1693,6 +1711,8 @@ extension on TranslationsEn {
 			'quiz.registration.entryCodeHint' => '6-digit number',
 			'quiz.registration.entryCodeHelper' => 'Enter the code shown at the on-site reception desk',
 			'quiz.registration.join' => 'Join',
+			_ => null,
+		} ?? switch (path) {
 			'quiz.registration.full' => ({required Object max}) => 'Full capacity (${max} participants) reached',
 			'quiz.registration.failed' => 'Could not register. Please try again later.',
 			'quiz.registration.codeMismatch' => 'Could not register. Please check the entry code.',
@@ -1702,8 +1722,6 @@ extension on TranslationsEn {
 			'quiz.registration.rateLimited' => 'Too many attempts. Wait one minute, check the entry code, and try again.',
 			'quiz.registration.accountUnavailable' => 'This account cannot join. Please contact event staff.',
 			'quiz.waiting.title' => 'You\'re in!',
-			_ => null,
-		} ?? switch (path) {
 			'quiz.waiting.description' => 'Please wait for the team announcement',
 			'quiz.team.yourTable' => 'Your table is',
 			'quiz.team.table' => 'Table',

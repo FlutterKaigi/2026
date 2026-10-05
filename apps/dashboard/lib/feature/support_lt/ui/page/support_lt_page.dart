@@ -23,7 +23,7 @@ class SupportLtPage extends ConsumerWidget {
       children: [
         Text('応援LT', style: Theme.of(context).textTheme.headlineMedium),
         const SizedBox(height: 8),
-        const Text('参加者に登録コードを案内し、アプリのアカウントページから参加登録してもらってください。'),
+        const Text('QRコードを会場に表示し、参加者にアプリで読み取って参加登録してもらってください。'),
         const SizedBox(height: 24),
         const SupportLtCodeCard(),
         const SizedBox(height: 16),

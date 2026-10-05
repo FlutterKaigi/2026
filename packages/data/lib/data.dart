@@ -27,7 +27,16 @@ export 'src/model/stamp_rally.dart'
 export 'src/model/staff_member.dart' show StaffMember;
 export 'src/model/session.dart' show Session;
 export 'src/model/sponsor.dart' show Sponsor, SponsorTier;
-export 'src/model/support_lt.dart' show SupportLtCode, SupportLtRegistration;
+export 'src/model/support_lt.dart'
+    show
+        SupportLtCode,
+        SupportLtRegistration,
+        isSupportLtCode,
+        parseSupportLtQrPayload,
+        productionAppOrigin,
+        stagingAppOrigin,
+        supportLtLinkPath,
+        supportLtQrPayload;
 export 'src/model/timeline_event.dart' show TimelineEvent;
 export 'src/model/user_profile.dart' show UserProfile;
 export 'src/model/venue.dart' show Venue;

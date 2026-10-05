@@ -40,8 +40,9 @@ sessionTimetable:
   title: タイムテーブル
   dayButtonLabel: $day日目 ($date)
   view:
-    openRooms: 会場別タイムラインに切り替え
-    openList: リスト表示に切り替え
+    list: リスト
+    rooms: 会場別
+    saveFailed: 表示方法を保存できませんでした
     shared: 共通
   empty: タイムテーブルはまだ公開されていません
   emptyFiltered: この日の予定はありません
@@ -472,7 +473,15 @@ exchange:
   shareLinkViewList: 交換した人を見る
 supportLt:
   title: 応援LT参加登録
-  description: 運営から案内された6桁のコードを入力して、応援LTへの参加を登録してください
+  description: 会場に表示されたQRコードを読み取って、応援LTへの参加を登録してください
+  scanButton: QRコードを読み取る
+  scanTitle: QRコードを読み取る
+  scanHint: 会場に表示されたQRコードを枠内に収めてください
+  scanCameraError: カメラを利用できません。設定でカメラへのアクセスを許可するか、前の画面で6桁のコードを入力してください
+  scanInvalid: 読み取れませんでした。応援LT参加登録用のQRコードか確認してください
+  linkInvalid: このリンクは無効です。会場のQRコードを読み取り直してください
+  codeSectionTitle: QRコードを読み取れない場合
+  codeSectionDescription: 運営から案内された6桁のコードを入力してください
   codeLabel: 参加登録コード
   register: 参加登録する
   submitting: 登録中…
@@ -482,7 +491,7 @@ supportLt:
   backToAccount: アカウントに戻る
   signInRequired: "応援LTに参加登録するには\nサインインしてください"
   invalidFormat: 6桁の数字を入力してください
-  invalidCode: コードが正しくありません。運営から案内されたコードを確認してください
+  invalidCode: コードが正しくありません。会場のQRコードを読み取り直すか、運営に確認してください
   rateLimited: 試行回数が多すぎます。しばらくしてからもう一度お試しください
   networkError: 通信に失敗しました。通信状況を確認してもう一度お試しください
   sessionExpired: サインインの有効期限が切れました。もう一度サインインしてください

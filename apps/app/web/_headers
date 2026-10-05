@@ -13,3 +13,7 @@
 /s/*
   Referrer-Policy: no-referrer
   Cache-Control: no-store
+
+/account/support-lt/*
+  Referrer-Policy: no-referrer
+  Cache-Control: no-store

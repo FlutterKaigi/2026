@@ -1314,8 +1314,32 @@ class Translations$supportLt$ja {
 	/// ja: '応援LT参加登録'
 	String get title => '応援LT参加登録';
 
-	/// ja: '運営から案内された6桁のコードを入力して、応援LTへの参加を登録してください'
-	String get description => '運営から案内された6桁のコードを入力して、応援LTへの参加を登録してください';
+	/// ja: '会場に表示されたQRコードを読み取って、応援LTへの参加を登録してください'
+	String get description => '会場に表示されたQRコードを読み取って、応援LTへの参加を登録してください';
+
+	/// ja: 'QRコードを読み取る'
+	String get scanButton => 'QRコードを読み取る';
+
+	/// ja: 'QRコードを読み取る'
+	String get scanTitle => 'QRコードを読み取る';
+
+	/// ja: '会場に表示されたQRコードを枠内に収めてください'
+	String get scanHint => '会場に表示されたQRコードを枠内に収めてください';
+
+	/// ja: 'カメラを利用できません。設定でカメラへのアクセスを許可するか、前の画面で6桁のコードを入力してください'
+	String get scanCameraError => 'カメラを利用できません。設定でカメラへのアクセスを許可するか、前の画面で6桁のコードを入力してください';
+
+	/// ja: '読み取れませんでした。応援LT参加登録用のQRコードか確認してください'
+	String get scanInvalid => '読み取れませんでした。応援LT参加登録用のQRコードか確認してください';
+
+	/// ja: 'このリンクは無効です。会場のQRコードを読み取り直してください'
+	String get linkInvalid => 'このリンクは無効です。会場のQRコードを読み取り直してください';
+
+	/// ja: 'QRコードを読み取れない場合'
+	String get codeSectionTitle => 'QRコードを読み取れない場合';
+
+	/// ja: '運営から案内された6桁のコードを入力してください'
+	String get codeSectionDescription => '運営から案内された6桁のコードを入力してください';
 
 	/// ja: '参加登録コード'
 	String get codeLabel => '参加登録コード';
@@ -1344,8 +1368,8 @@ class Translations$supportLt$ja {
 	/// ja: '6桁の数字を入力してください'
 	String get invalidFormat => '6桁の数字を入力してください';
 
-	/// ja: 'コードが正しくありません。運営から案内されたコードを確認してください'
-	String get invalidCode => 'コードが正しくありません。運営から案内されたコードを確認してください';
+	/// ja: 'コードが正しくありません。会場のQRコードを読み取り直すか、運営に確認してください'
+	String get invalidCode => 'コードが正しくありません。会場のQRコードを読み取り直すか、運営に確認してください';
 
 	/// ja: '試行回数が多すぎます。しばらくしてからもう一度お試しください'
 	String get rateLimited => '試行回数が多すぎます。しばらくしてからもう一度お試しください';
@@ -1552,11 +1576,14 @@ class Translations$sessionTimetable$view$ja {
 
 	// Translations
 
-	/// ja: '会場別タイムラインに切り替え'
-	String get openRooms => '会場別タイムラインに切り替え';
+	/// ja: 'リスト'
+	String get list => 'リスト';
 
-	/// ja: 'リスト表示に切り替え'
-	String get openList => 'リスト表示に切り替え';
+	/// ja: '会場別'
+	String get rooms => '会場別';
+
+	/// ja: '表示方法を保存できませんでした'
+	String get saveFailed => '表示方法を保存できませんでした';
 
 	/// ja: '共通'
 	String get shared => '共通';
@@ -2335,8 +2362,9 @@ extension on Translations {
 			'trademarks.revComm' => 'RevCommは、株式会社 RevComm の登録商標または商標です。',
 			'sessionTimetable.title' => 'タイムテーブル',
 			'sessionTimetable.dayButtonLabel' => ({required Object day, required Object date}) => '${day}日目 (${date})',
-			'sessionTimetable.view.openRooms' => '会場別タイムラインに切り替え',
-			'sessionTimetable.view.openList' => 'リスト表示に切り替え',
+			'sessionTimetable.view.list' => 'リスト',
+			'sessionTimetable.view.rooms' => '会場別',
+			'sessionTimetable.view.saveFailed' => '表示方法を保存できませんでした',
 			'sessionTimetable.view.shared' => '共通',
 			'sessionTimetable.empty' => 'タイムテーブルはまだ公開されていません',
 			'sessionTimetable.emptyFiltered' => 'この日の予定はありません',
@@ -2733,7 +2761,15 @@ extension on Translations {
 			'exchange.shareLinkGoHome' => 'ホームに戻る',
 			'exchange.shareLinkViewList' => '交換した人を見る',
 			'supportLt.title' => '応援LT参加登録',
-			'supportLt.description' => '運営から案内された6桁のコードを入力して、応援LTへの参加を登録してください',
+			'supportLt.description' => '会場に表示されたQRコードを読み取って、応援LTへの参加を登録してください',
+			'supportLt.scanButton' => 'QRコードを読み取る',
+			'supportLt.scanTitle' => 'QRコードを読み取る',
+			'supportLt.scanHint' => '会場に表示されたQRコードを枠内に収めてください',
+			'supportLt.scanCameraError' => 'カメラを利用できません。設定でカメラへのアクセスを許可するか、前の画面で6桁のコードを入力してください',
+			'supportLt.scanInvalid' => '読み取れませんでした。応援LT参加登録用のQRコードか確認してください',
+			'supportLt.linkInvalid' => 'このリンクは無効です。会場のQRコードを読み取り直してください',
+			'supportLt.codeSectionTitle' => 'QRコードを読み取れない場合',
+			'supportLt.codeSectionDescription' => '運営から案内された6桁のコードを入力してください',
 			'supportLt.codeLabel' => '参加登録コード',
 			'supportLt.register' => '参加登録する',
 			'supportLt.submitting' => '登録中…',
@@ -2743,7 +2779,7 @@ extension on Translations {
 			'supportLt.backToAccount' => 'アカウントに戻る',
 			'supportLt.signInRequired' => '応援LTに参加登録するには\nサインインしてください',
 			'supportLt.invalidFormat' => '6桁の数字を入力してください',
-			'supportLt.invalidCode' => 'コードが正しくありません。運営から案内されたコードを確認してください',
+			'supportLt.invalidCode' => 'コードが正しくありません。会場のQRコードを読み取り直すか、運営に確認してください',
 			'supportLt.rateLimited' => '試行回数が多すぎます。しばらくしてからもう一度お試しください',
 			'supportLt.networkError' => '通信に失敗しました。通信状況を確認してもう一度お試しください',
 			'supportLt.sessionExpired' => 'サインインの有効期限が切れました。もう一度サインインしてください',
@@ -2806,6 +2842,8 @@ extension on Translations {
 			'quiz.registration.entryCodeHint' => '6桁の数字',
 			'quiz.registration.entryCodeHelper' => '会場の受付で案内しているコードを入力してください',
 			'quiz.registration.join' => '参加する',
+			_ => null,
+		} ?? switch (path) {
 			'quiz.registration.full' => ({required Object max}) => '定員（${max} 人）に達しました',
 			'quiz.registration.failed' => '登録できませんでした。時間をおいて再度お試しください。',
 			'quiz.registration.codeMismatch' => '登録できませんでした。受付コードが正しいか確認してください。',
@@ -2815,8 +2853,6 @@ extension on Translations {
 			'quiz.registration.rateLimited' => '入力回数が多すぎます。1分待ってから、受付コードを確認して再試行してください。',
 			'quiz.registration.accountUnavailable' => 'このアカウントでは参加できません。運営にお問い合わせください。',
 			'quiz.waiting.title' => '登録完了！',
-			_ => null,
-		} ?? switch (path) {
 			'quiz.waiting.description' => 'チーム発表までしばらくお待ちください',
 			'quiz.team.yourTable' => 'あなたのテーブルは',
 			'quiz.team.table' => 'テーブル',

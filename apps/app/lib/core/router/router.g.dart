@@ -189,6 +189,11 @@ RouteBase get $appShellRoute => StatefulShellRouteData.$route(
               factory: $SupportLtRoute._fromState,
             ),
             GoRouteData.$route(
+              path: 'support-lt/:code',
+              hasOverriddenOnExit: false,
+              factory: $SupportLtLinkRoute._fromState,
+            ),
+            GoRouteData.$route(
               path: 'missions',
               factory: $MissionRoute._fromState,
             ),
@@ -597,6 +602,29 @@ mixin $SupportLtRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/account/support-lt');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) => context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $SupportLtLinkRoute on GoRouteData {
+  static SupportLtLinkRoute _fromState(GoRouterState state) => SupportLtLinkRoute(code: state.pathParameters['code']!);
+
+  SupportLtLinkRoute get _self => this as SupportLtLinkRoute;
+
+  @override
+  String get location => GoRouteData.$location(
+    '/account/support-lt/${Uri.encodeComponent(_self.code)}',
+  );
 
   @override
   void go(BuildContext context) => context.go(location);

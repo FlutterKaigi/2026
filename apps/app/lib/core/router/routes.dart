@@ -95,6 +95,7 @@ class StampRallyLinkRoute extends GoRouteData with $StampRallyLinkRoute {
               routes: [TypedGoRoute<QuizRoute>(path: ':eventId')],
             ),
             TypedGoRoute<SupportLtRoute>(path: 'support-lt'),
+            TypedGoRoute<SupportLtLinkRoute>(path: 'support-lt/:code'),
             TypedGoRoute<MissionRoute>(path: 'missions'),
             TypedGoRoute<StampRallyRoute>(
               path: 'stamp-rally',
@@ -225,12 +226,26 @@ class QuizRoute extends GoRouteData with $QuizRoute {
   Widget build(BuildContext context, GoRouterState state) => QuizPage(eventId: eventId);
 }
 
-/// `/account/support-lt` — register attendance with an organizer-issued code.
+/// `/account/support-lt` — register attendance by scanning the venue's QR code
+/// or entering the organizer-issued code.
 class SupportLtRoute extends GoRouteData with $SupportLtRoute {
   const SupportLtRoute();
 
   @override
   Widget build(BuildContext context, GoRouterState state) => const SupportLtPage();
+}
+
+/// `/account/support-lt/:code` — the attendance QR code's link
+/// (`supportLtQrPayload`), opened as a Universal Link / App Link or on the
+/// web. Declared beside [SupportLtRoute] rather than under it so going back
+/// returns to the account page instead of a second registration page.
+class SupportLtLinkRoute extends GoRouteData with $SupportLtLinkRoute {
+  const SupportLtLinkRoute({required this.code});
+
+  final String code;
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => SupportLtPage(linkCode: code);
 }
 
 /// `/account/missions` — at-a-glance event eligibility and mission progress.
