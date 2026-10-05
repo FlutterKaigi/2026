@@ -13,6 +13,9 @@ final class FakeUserProfileRepository implements UserProfileRepository {
   /// When set, the next [save] or [delete] throws this error once.
   Exception? nextError;
 
+  /// When set, [save] completes only after this does.
+  Completer<void>? pendingSave;
+
   /// Profiles passed to [save], in call order.
   final savedProfiles = <UserProfile>[];
 
@@ -55,6 +58,7 @@ final class FakeUserProfileRepository implements UserProfileRepository {
   @override
   Future<void> save(UserProfile profile) async {
     _throwIfConfigured();
+    await pendingSave?.future;
     savedProfiles.add(profile);
     _profiles[profile.id] = profile;
     _controller.add(null);

@@ -1,12 +1,13 @@
 import 'package:clock/clock.dart';
+import 'package:data/data.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'exchange_token.freezed.dart';
 
 /// Origins hosting exchange links. The website origin remains scan-compatible
 /// with QR codes issued before the app received its own canonical origin.
-const productionExchangeOrigin = 'https://2026-app.flutterkaigi.jp';
-const stagingExchangeOrigin = 'https://stg-flutterkaigi-2026-conference-app.flutterkaigi.workers.dev';
+const productionExchangeOrigin = productionAppOrigin;
+const stagingExchangeOrigin = stagingAppOrigin;
 const legacyExchangeOrigin = 'https://2026.flutterkaigi.jp';
 
 /// A signed, time-limited token for displaying the signed-in user's QR code.

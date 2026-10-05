@@ -32,6 +32,7 @@ dependencies:
 
   # UI
   two_dimensional_scrollables: ^0.5.3
+  qr_flutter: ^4.1.0
 
 dev_dependencies:
   flutter_test:

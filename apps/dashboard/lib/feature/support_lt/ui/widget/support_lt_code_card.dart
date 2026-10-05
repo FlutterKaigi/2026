@@ -6,6 +6,10 @@ import 'package:data/data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:qr_flutter/qr_flutter.dart';
+
+/// Widest the attendance QR code is drawn; it shrinks to fit a narrow card.
+const _qrMaxSize = 280.0;
 
 class SupportLtCodeCard extends ConsumerStatefulWidget {
   const SupportLtCodeCard({super.key});
@@ -25,7 +29,7 @@ class _SupportLtCodeCardState extends ConsumerState<SupportLtCodeCard> {
         context: context,
         builder: (context) => AlertDialog(
           title: const Text('登録コードを再発行しますか？'),
-          content: const Text('現在のコードは使えなくなります。新しいコードを参加者に案内してください。登録済みの参加者には影響しません。'),
+          content: const Text('現在のQRコードと6桁のコードは使えなくなります。新しいQRコードを参加者に案内してください。登録済みの参加者には影響しません。'),
           actions: [
             TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('キャンセル')),
             FilledButton(onPressed: () => Navigator.of(context).pop(true), child: const Text('再発行する')),
@@ -62,9 +66,9 @@ class _SupportLtCodeCardState extends ConsumerState<SupportLtCodeCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('参加登録コード', style: Theme.of(context).textTheme.titleLarge),
+            Text('参加登録QRコード', style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 8),
-            const Text('6桁の共通コードです。再発行するまで有効で、何人でも利用できます。'),
+            const Text('共通のQRコードと6桁のコードです。再発行するまで有効で、何人でも利用できます。'),
             const SizedBox(height: 16),
             code.when(
               skipLoadingOnRefresh: false,
@@ -90,7 +94,14 @@ class _SupportLtCodeCardState extends ConsumerState<SupportLtCodeCard> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (code == null) const Text('登録コードはまだ発行されていません') else _CodeDetails(code: code, isIssuing: _isIssuing),
+        if (code == null)
+          const Text('登録コードはまだ発行されていません')
+        else
+          _CodeDetails(
+            code: code,
+            qrPayload: supportLtQrPayload(code.code, origin: ref.watch(supportLtAppOriginProvider)),
+            isIssuing: _isIssuing,
+          ),
         const SizedBox(height: 16),
         if (_issueError case final error?) ...[
           Text(error, style: TextStyle(color: Theme.of(context).colorScheme.error)),
@@ -109,9 +120,10 @@ class _SupportLtCodeCardState extends ConsumerState<SupportLtCodeCard> {
 }
 
 class _CodeDetails extends StatelessWidget {
-  const _CodeDetails({required this.code, required this.isIssuing});
+  const _CodeDetails({required this.code, required this.qrPayload, required this.isIssuing});
 
   final SupportLtCode code;
+  final String qrPayload;
   final bool isIssuing;
 
   Future<void> _copy(BuildContext context) async {
@@ -130,6 +142,25 @@ class _CodeDetails extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // QR readers expect dark modules on a light background, so the code
+        // stays on white whatever the dashboard theme is.
+        ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: _qrMaxSize, maxHeight: _qrMaxSize),
+          child: AspectRatio(
+            aspectRatio: 1,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: QrImageView(
+                data: qrPayload,
+                backgroundColor: Colors.white,
+                semanticsLabel: '応援LT参加登録用のQRコード',
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        const Text('QRコードを読み取れない参加者には、6桁のコードを案内してください。'),
+        const SizedBox(height: 4),
         Wrap(
           spacing: 8,
           crossAxisAlignment: WrapCrossAlignment.center,

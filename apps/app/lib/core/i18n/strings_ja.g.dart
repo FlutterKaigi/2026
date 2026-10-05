@@ -20,21 +20,20 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	/// Constructing via the enum [AppLocale.build] is preferred.
 	Translations({Map<String, Node>? overrides, PluralResolver? cardinalResolver, PluralResolver? ordinalResolver, TranslationMetadata<AppLocale, Translations>? meta})
 		: assert(overrides == null, 'Set "translation_overrides: true" in order to enable this feature.'),
-		  _meta = meta ?? TranslationMetadata(
+		  $meta = meta ?? TranslationMetadata(
 		    locale: AppLocale.ja,
 		    overrides: overrides ?? {},
 		    cardinalResolver: cardinalResolver,
 		    ordinalResolver: ordinalResolver,
 		  ) {
-		_meta.setFlatMapFunction(_flatMapFunction);
+		$meta.setFlatMapFunction(_flatMapFunction);
 	}
 
 	/// Metadata for the translations of <ja>.
-	final TranslationMetadata<AppLocale, Translations> _meta;
-	@override TranslationMetadata<AppLocale, Translations> get $meta => _meta;
+	@override final TranslationMetadata<AppLocale, Translations> $meta;
 
 	/// Access flat map
-	dynamic operator[](String key) => _meta.getTranslation(key);
+	dynamic operator[](String key) => $meta.getTranslation(key);
 
 	late final Translations _root = this; // ignore: unused_field
 
@@ -1161,8 +1160,32 @@ class Translations$supportLt$ja {
 	/// ja: '応援LT参加登録'
 	String get title => '応援LT参加登録';
 
-	/// ja: '運営から案内された6桁のコードを入力して、応援LTへの参加を登録してください'
-	String get description => '運営から案内された6桁のコードを入力して、応援LTへの参加を登録してください';
+	/// ja: '会場に表示されたQRコードを読み取って、応援LTへの参加を登録してください'
+	String get description => '会場に表示されたQRコードを読み取って、応援LTへの参加を登録してください';
+
+	/// ja: 'QRコードを読み取る'
+	String get scanButton => 'QRコードを読み取る';
+
+	/// ja: 'QRコードを読み取る'
+	String get scanTitle => 'QRコードを読み取る';
+
+	/// ja: '会場に表示されたQRコードを枠内に収めてください'
+	String get scanHint => '会場に表示されたQRコードを枠内に収めてください';
+
+	/// ja: 'カメラを利用できません。設定でカメラへのアクセスを許可するか、前の画面で6桁のコードを入力してください'
+	String get scanCameraError => 'カメラを利用できません。設定でカメラへのアクセスを許可するか、前の画面で6桁のコードを入力してください';
+
+	/// ja: '読み取れませんでした。応援LT参加登録用のQRコードか確認してください'
+	String get scanInvalid => '読み取れませんでした。応援LT参加登録用のQRコードか確認してください';
+
+	/// ja: 'このリンクは無効です。会場のQRコードを読み取り直してください'
+	String get linkInvalid => 'このリンクは無効です。会場のQRコードを読み取り直してください';
+
+	/// ja: 'QRコードを読み取れない場合'
+	String get codeSectionTitle => 'QRコードを読み取れない場合';
+
+	/// ja: '運営から案内された6桁のコードを入力してください'
+	String get codeSectionDescription => '運営から案内された6桁のコードを入力してください';
 
 	/// ja: '参加登録コード'
 	String get codeLabel => '参加登録コード';
@@ -1191,8 +1214,8 @@ class Translations$supportLt$ja {
 	/// ja: '6桁の数字を入力してください'
 	String get invalidFormat => '6桁の数字を入力してください';
 
-	/// ja: 'コードが正しくありません。運営から案内されたコードを確認してください'
-	String get invalidCode => 'コードが正しくありません。運営から案内されたコードを確認してください';
+	/// ja: 'コードが正しくありません。会場のQRコードを読み取り直すか、運営に確認してください'
+	String get invalidCode => 'コードが正しくありません。会場のQRコードを読み取り直すか、運営に確認してください';
 
 	/// ja: '試行回数が多すぎます。しばらくしてからもう一度お試しください'
 	String get rateLimited => '試行回数が多すぎます。しばらくしてからもう一度お試しください';
@@ -2336,7 +2359,7 @@ extension on Translations {
 			'contributors.title' => 'コントリビューター',
 			'contributors.openRepository' => 'FlutterKaigi/2026 のリポジトリを開く',
 			'contributors.empty' => 'コントリビューターが見つかりませんでした',
-			'contributors.contributionsCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(n, one: '${n} contributions', other: '${n} contributions', ),
+			'contributors.contributionsCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(n, one: '${n} contributions', other: '${n} contributions', ), 
 			'auth.signIn.required' => 'サインインが必要です',
 			'auth.signIn.description' => 'FlutterKaigi 2026 アプリで利用するサインイン方法を選択してください',
 			'auth.signIn.withGoogle' => 'Google でサインイン',
@@ -2536,7 +2559,15 @@ extension on Translations {
 			'exchange.shareLinkGoHome' => 'ホームに戻る',
 			'exchange.shareLinkViewList' => '交換した人を見る',
 			'supportLt.title' => '応援LT参加登録',
-			'supportLt.description' => '運営から案内された6桁のコードを入力して、応援LTへの参加を登録してください',
+			'supportLt.description' => '会場に表示されたQRコードを読み取って、応援LTへの参加を登録してください',
+			'supportLt.scanButton' => 'QRコードを読み取る',
+			'supportLt.scanTitle' => 'QRコードを読み取る',
+			'supportLt.scanHint' => '会場に表示されたQRコードを枠内に収めてください',
+			'supportLt.scanCameraError' => 'カメラを利用できません。設定でカメラへのアクセスを許可するか、前の画面で6桁のコードを入力してください',
+			'supportLt.scanInvalid' => '読み取れませんでした。応援LT参加登録用のQRコードか確認してください',
+			'supportLt.linkInvalid' => 'このリンクは無効です。会場のQRコードを読み取り直してください',
+			'supportLt.codeSectionTitle' => 'QRコードを読み取れない場合',
+			'supportLt.codeSectionDescription' => '運営から案内された6桁のコードを入力してください',
 			'supportLt.codeLabel' => '参加登録コード',
 			'supportLt.register' => '参加登録する',
 			'supportLt.submitting' => '登録中…',
@@ -2546,7 +2577,7 @@ extension on Translations {
 			'supportLt.backToAccount' => 'アカウントに戻る',
 			'supportLt.signInRequired' => '応援LTに参加登録するには\nサインインしてください',
 			'supportLt.invalidFormat' => '6桁の数字を入力してください',
-			'supportLt.invalidCode' => 'コードが正しくありません。運営から案内されたコードを確認してください',
+			'supportLt.invalidCode' => 'コードが正しくありません。会場のQRコードを読み取り直すか、運営に確認してください',
 			'supportLt.rateLimited' => '試行回数が多すぎます。しばらくしてからもう一度お試しください',
 			'supportLt.networkError' => '通信に失敗しました。通信状況を確認してもう一度お試しください',
 			'supportLt.sessionExpired' => 'サインインの有効期限が切れました。もう一度サインインしてください',
