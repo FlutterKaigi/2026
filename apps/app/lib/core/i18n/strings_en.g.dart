@@ -357,6 +357,7 @@ class _Translations$eventInfo$en extends Translations$eventInfo$ja {
 	@override String get sourceCode => 'View Source Code';
 	@override String get staffMembers => 'Staff';
 	@override String get ossLicenses => 'OSS Licenses';
+	@override late final _Translations$eventInfo$survey$en survey = _Translations$eventInfo$survey$en._(_root);
 }
 
 // Path: contributors
@@ -863,6 +864,18 @@ class _Translations$venueWalk$photo$en extends Translations$venueWalk$photo$ja {
 	@override String get removeFrame => 'Remove frame';
 	@override String get addFrame => 'Add frame';
 	@override late final _Translations$venueWalk$photo$poses$en poses = _Translations$venueWalk$photo$poses$en._(_root);
+}
+
+// Path: eventInfo.survey
+class _Translations$eventInfo$survey$en extends Translations$eventInfo$survey$ja {
+	_Translations$eventInfo$survey$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Survey Request';
+	@override String get description => 'We would like to hear your opinions to make future FlutterKaigi events better.';
+	@override String get button => 'Answer the General Survey';
 }
 
 // Path: auth.signIn
@@ -1379,6 +1392,9 @@ extension on TranslationsEn {
 			'eventInfo.sourceCode' => 'View Source Code',
 			'eventInfo.staffMembers' => 'Staff',
 			'eventInfo.ossLicenses' => 'OSS Licenses',
+			'eventInfo.survey.title' => 'Survey Request',
+			'eventInfo.survey.description' => 'We would like to hear your opinions to make future FlutterKaigi events better.',
+			'eventInfo.survey.button' => 'Answer the General Survey',
 			'contributors.title' => 'Contributors',
 			'contributors.openRepository' => 'Open the FlutterKaigi/2026 repository',
 			'contributors.empty' => 'No contributors found',
@@ -1708,11 +1724,11 @@ extension on TranslationsEn {
 			'quiz.registration.nickname' => 'Nickname',
 			'quiz.registration.nicknameHint' => '1–20 characters',
 			'quiz.registration.entryCode' => 'Entry code',
+			_ => null,
+		} ?? switch (path) {
 			'quiz.registration.entryCodeHint' => '6-digit number',
 			'quiz.registration.entryCodeHelper' => 'Enter the code shown at the on-site reception desk',
 			'quiz.registration.join' => 'Join',
-			_ => null,
-		} ?? switch (path) {
 			'quiz.registration.full' => ({required Object max}) => 'Full capacity (${max} participants) reached',
 			'quiz.registration.failed' => 'Could not register. Please try again later.',
 			'quiz.registration.codeMismatch' => 'Could not register. Please check the entry code.',
