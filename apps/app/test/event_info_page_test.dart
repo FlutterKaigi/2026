@@ -1,6 +1,7 @@
 import 'package:app/core/constants/app_links.dart';
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/i18n/strings_en.g.dart';
+import 'package:app/core/provider/clock.dart';
 import 'package:app/core/provider/package_info.dart';
 import 'package:app/core/provider/shared_preferences.dart';
 import 'package:app/core/ui/launch_external_url.dart';
@@ -164,6 +165,78 @@ void main() {
     expect(find.text('license destination'), findsOneWidget);
   });
 
+  testWidgets('hides the survey card before the survey starts', (
+    tester,
+  ) async {
+    await _pumpEventInfoPage(
+      tester,
+      clock: () => DateTime.utc(2026, 10, 30, 5, 59),
+    );
+
+    expect(find.text('アンケート協力のお願い'), findsNothing);
+    expect(find.text('全体アンケートに回答する'), findsNothing);
+  });
+
+  testWidgets('shows the survey card and opens the shared survey URL', (
+    tester,
+  ) async {
+    final openedUris = <Uri>[];
+
+    await _pumpEventInfoPage(
+      tester,
+      clock: () => DateTime.utc(2026, 10, 30, 6),
+      externalUrlLauncher: (uri) async {
+        openedUris.add(uri);
+        return true;
+      },
+    );
+
+    expect(find.text('アンケート協力のお願い'), findsOneWidget);
+    expect(
+      find.text('今後のFlutterKaigiをより良いイベントにするため、皆様のご意見をお聞かせください。'),
+      findsOneWidget,
+    );
+
+    final button = find.text('全体アンケートに回答する');
+    await tester.scrollUntilVisible(button, 200);
+    await tester.pumpAndSettle();
+    await tester.tap(button);
+    await tester.pump();
+
+    expect(openedUris, [Uri.parse(AppLinks.survey)]);
+  });
+
+  testWidgets('shows the English survey strings', (tester) async {
+    await _pumpEventInfoPage(
+      tester,
+      locale: AppLocale.en,
+      clock: () => DateTime.utc(2026, 10, 30, 6),
+    );
+
+    expect(find.text('Survey Request'), findsOneWidget);
+    expect(
+      find.text('We would like to hear your opinions to make future FlutterKaigi events better.'),
+      findsOneWidget,
+    );
+    expect(find.text('Answer the General Survey'), findsOneWidget);
+  });
+
+  testWidgets('shows the survey card when time passes while the page is open', (
+    tester,
+  ) async {
+    var now = DateTime.utc(2026, 10, 30, 5, 59);
+
+    await _pumpEventInfoPage(tester, clock: () => now);
+
+    expect(find.text('アンケート協力のお願い'), findsNothing);
+
+    now = DateTime.utc(2026, 10, 30, 6);
+    await tester.pump(const Duration(minutes: 1));
+    await tester.pump();
+
+    expect(find.text('アンケート協力のお願い'), findsOneWidget);
+  });
+
   testWidgets('opens Japanese docs links when Japanese is selected', (
     tester,
   ) async {
@@ -224,6 +297,7 @@ Future<void> _pumpEventInfoPage(
   GoRouter? router,
   AppLocale locale = AppLocale.ja,
   ExternalUrlLauncher? externalUrlLauncher,
+  Clock? clock,
 }) async {
   if (locale == AppLocale.en) {
     // The English strings are deferred in production, but Flutter's test VM
@@ -250,6 +324,7 @@ Future<void> _pumpEventInfoPage(
               ),
             ),
           ),
+          if (clock != null) clockProvider.overrideWithValue(clock),
         ],
         child: router == null
             ? MaterialApp(
