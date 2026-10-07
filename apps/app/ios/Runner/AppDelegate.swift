@@ -7,6 +7,8 @@ import UIKit
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
+    // UIScene ではプラグインの登録がこのメソッドの後になるが、通知センターの delegate は起動完了前に設定する必要がある。
+    FLTFirebaseMessagingPlugin.configureNotificationCenterDelegate()
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 
