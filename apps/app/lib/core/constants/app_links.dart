@@ -16,4 +16,7 @@ abstract final class AppLinks {
       '1FAIpQLSdXjVagTv38Co0A0nwjm5V3k5V3FZZCsB7F-wFQbJxonp5pFg/viewform'
       '?usp=publish-editor';
   static const repository = 'https://github.com/FlutterKaigi/2026';
+
+  // TODO: Replace with the real survey form URL once it is available.
+  static const survey = 'https://example.com/survey';
 }

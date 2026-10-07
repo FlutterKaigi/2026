@@ -203,6 +203,10 @@ eventInfo:
   sourceCode: ソースコードを見る
   staffMembers: スタッフ
   ossLicenses: OSSライセンス
+  survey:
+    title: アンケート協力のお願い
+    description: 今後のFlutterKaigiをより良いイベントにするため、皆様のご意見をお聞かせください。
+    button: 全体アンケートに回答する
 contributors:
   title: コントリビューター
   openRepository: FlutterKaigi/2026 のリポジトリを開く

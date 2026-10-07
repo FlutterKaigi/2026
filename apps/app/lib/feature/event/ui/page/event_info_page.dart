@@ -4,11 +4,22 @@ import 'package:app/core/constants/app_links.dart';
 import 'package:app/core/designsystem/theme/app_gradients.dart';
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/provider/app_locale.dart';
+import 'package:app/core/provider/clock.dart';
 import 'package:app/core/router/router.dart';
 import 'package:app/core/ui/launch_external_url.dart';
 import 'package:app/core/ui/widget/settings_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+
+final _surveyStartsAt = DateTime.utc(2026, 10, 30, 6);
+
+final _surveyClockTickProvider = StreamProvider.autoDispose<DateTime>((ref) async* {
+  final clock = ref.watch(clockProvider);
+  yield clock();
+  yield* Stream<DateTime>.periodic(const Duration(minutes: 1), (_) => clock());
+});
+
+bool _isSurveyVisible(DateTime now) => !now.toUtc().isBefore(_surveyStartsAt);
 
 /// Shows the FlutterKaigi 2026 overview, related links, and app settings.
 class EventInfoPage extends ConsumerWidget {
@@ -22,6 +33,11 @@ class EventInfoPage extends ConsumerWidget {
     final t = Translations.of(context);
     final appLocale = ref.watch(appLocaleProvider);
     final localizedLinks = _LocalizedEventLinks.fromLocale(appLocale);
+    final now = switch (ref.watch(_surveyClockTickProvider)) {
+      AsyncData(:final value) => value,
+      _ => ref.watch(clockProvider)(),
+    };
+    final showSurvey = _isSurveyVisible(now);
 
     return Scaffold(
       appBar: AppBar(
@@ -64,6 +80,18 @@ class EventInfoPage extends ConsumerWidget {
                           ),
                         ),
                       ),
+                      if (showSurvey) ...[
+                        const SizedBox(height: 8),
+                        _SurveyCard(
+                          onOpenSurvey: () => unawaited(
+                            _openExternalUrl(
+                              context,
+                              url: AppLinks.survey,
+                              failureMessage: t.links.openError,
+                            ),
+                          ),
+                        ),
+                      ],
                       const SizedBox(height: 24),
                       _SectionHeading(title: t.eventInfo.credits),
                       const SizedBox(height: 8),
@@ -224,6 +252,66 @@ class _LocalizedEventLinks {
   final String codeOfConduct;
   final String privacyPolicy;
   final String exclusionPolicy;
+}
+
+class _SurveyCard extends StatelessWidget {
+  const _SurveyCard({required this.onOpenSurvey});
+
+  final VoidCallback onOpenSurvey;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = Translations.of(context);
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Card.outlined(
+      margin: EdgeInsets.zero,
+      color: colorScheme.surface,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.assignment_outlined,
+                  color: colorScheme.onSurface,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    t.eventInfo.survey.title,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: colorScheme.onSurface,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              t.eventInfo.survey.description,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurface,
+                height: 1.5,
+              ),
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                onPressed: onOpenSurvey,
+                child: Text(t.eventInfo.survey.button),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class _EventOverviewCard extends StatelessWidget {
