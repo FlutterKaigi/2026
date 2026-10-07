@@ -8,6 +8,13 @@
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <meta-data android:name="io.flutter.embedding.android.EnableFlutterGPU" android:value="true" />
+        <!-- FCM がバックグラウンド・終了中に表示する通知の小アイコンとチャンネル。チャンネルは MainActivity が作成する。 -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_stat_notification" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="@string/default_notification_channel_id" />
         <activity
             android:name=".MainActivity"
             android:exported="true"
