@@ -647,6 +647,8 @@ class Translations$eventInfo$ja {
 
 	/// ja: 'OSSライセンス'
 	String get ossLicenses => 'OSSライセンス';
+
+	late final Translations$eventInfo$survey$ja survey = Translations$eventInfo$survey$ja.internal(_root);
 }
 
 // Path: contributors
@@ -1723,6 +1725,24 @@ class Translations$venueWalk$photo$ja {
 	late final Translations$venueWalk$photo$poses$ja poses = Translations$venueWalk$photo$poses$ja.internal(_root);
 }
 
+// Path: eventInfo.survey
+class Translations$eventInfo$survey$ja {
+	Translations$eventInfo$survey$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'アンケート協力のお願い'
+	String get title => 'アンケート協力のお願い';
+
+	/// ja: '今後のFlutterKaigiをより良いイベントにするため、皆様のご意見をお聞かせください。'
+	String get description => '今後のFlutterKaigiをより良いイベントにするため、皆様のご意見をお聞かせください。';
+
+	/// ja: '全体アンケートに回答する'
+	String get button => '全体アンケートに回答する';
+}
+
 // Path: auth.signIn
 class Translations$auth$signIn$ja {
 	Translations$auth$signIn$ja.internal(this._root);
@@ -2510,6 +2530,9 @@ extension on Translations {
 			'eventInfo.sourceCode' => 'ソースコードを見る',
 			'eventInfo.staffMembers' => 'スタッフ',
 			'eventInfo.ossLicenses' => 'OSSライセンス',
+			'eventInfo.survey.title' => 'アンケート協力のお願い',
+			'eventInfo.survey.description' => '今後のFlutterKaigiをより良いイベントにするため、皆様のご意見をお聞かせください。',
+			'eventInfo.survey.button' => '全体アンケートに回答する',
 			'contributors.title' => 'コントリビューター',
 			'contributors.openRepository' => 'FlutterKaigi/2026 のリポジトリを開く',
 			'contributors.empty' => 'コントリビューターが見つかりませんでした',
@@ -2839,11 +2862,11 @@ extension on Translations {
 			'quiz.registration.nickname' => 'ニックネーム',
 			'quiz.registration.nicknameHint' => '1〜20文字',
 			'quiz.registration.entryCode' => '受付コード',
+			_ => null,
+		} ?? switch (path) {
 			'quiz.registration.entryCodeHint' => '6桁の数字',
 			'quiz.registration.entryCodeHelper' => '会場の受付で案内しているコードを入力してください',
 			'quiz.registration.join' => '参加する',
-			_ => null,
-		} ?? switch (path) {
 			'quiz.registration.full' => ({required Object max}) => '定員（${max} 人）に達しました',
 			'quiz.registration.failed' => '登録できませんでした。時間をおいて再度お試しください。',
 			'quiz.registration.codeMismatch' => '登録できませんでした。受付コードが正しいか確認してください。',
