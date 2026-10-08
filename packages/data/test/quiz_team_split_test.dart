@@ -8,12 +8,11 @@ void main() {
       expect(splitIntoTeamSizes(-3), isEmpty);
     });
 
-    test('n <= 5 は 1 チームにまとめる', () {
+    test('n <= 4 は 1 チームにまとめる', () {
       expect(splitIntoTeamSizes(1), [1]);
       expect(splitIntoTeamSizes(2), [2]);
       expect(splitIntoTeamSizes(3), [3]);
       expect(splitIntoTeamSizes(4), [4]);
-      expect(splitIntoTeamSizes(5), [5]);
     });
 
     test('n % 4 == 0 はすべて 4 人チーム', () {
@@ -22,10 +21,12 @@ void main() {
       expect(splitIntoTeamSizes(80), List<int>.filled(20, 4));
     });
 
-    test('n % 4 == 1 (n >= 6) は 4 人チームを 1 つ減らして 5 人チーム 1 つ', () {
-      expect(splitIntoTeamSizes(9), [4, 5]);
-      expect(splitIntoTeamSizes(13), [4, 4, 5]);
-      expect(splitIntoTeamSizes(17), [4, 4, 4, 5]);
+    test('n % 4 == 1 (n >= 5) は 4 人チームを 1 つ減らして 3 人 + 2 人', () {
+      expect(splitIntoTeamSizes(5), [3, 2]);
+      expect(splitIntoTeamSizes(9), [4, 3, 2]);
+      expect(splitIntoTeamSizes(13), [4, 4, 3, 2]);
+      expect(splitIntoTeamSizes(17), [4, 4, 4, 3, 2]);
+      expect(splitIntoTeamSizes(77), [...List<int>.filled(18, 4), 3, 2]);
     });
 
     test('n % 4 == 2 (n >= 6) は 4 人チームを 1 つ減らして 3 人 + 3 人', () {
@@ -40,12 +41,18 @@ void main() {
       expect(splitIntoTeamSizes(15), [4, 4, 4, 3]);
     });
 
-    test('各チームは常に 3〜5 人（n >= 6 のとき）', () {
-      for (var n = 6; n <= 100; n++) {
+    test('各チームは常に 2〜4 人（n >= 3 のとき）', () {
+      for (var n = 3; n <= 100; n++) {
         final sizes = splitIntoTeamSizes(n);
         for (final size in sizes) {
-          expect(size, inInclusiveRange(3, 5), reason: 'n=$n で $size 人チームが発生した');
+          expect(size, inInclusiveRange(2, 4), reason: 'n=$n で $size 人チームが発生した');
         }
+      }
+    });
+
+    test('定員内の参加者は最大 20 テーブルに収まる', () {
+      for (var n = 3; n <= 80; n++) {
+        expect(splitIntoTeamSizes(n).length, lessThanOrEqualTo(20), reason: 'n=$n で 20 テーブルを超えた');
       }
     });
 

@@ -6,7 +6,19 @@ const {
   submitQuizAnswerForUser,
 } = require("../lib/quiz_service.js");
 
-test("every supported roster partitions into 3-5 people with no losses and at most 20 tables", () => {
+test("five-person remainders become three- and two-person teams", () => {
+  for (const [count, expected] of [
+    [5, [3, 2]],
+    [9, [4, 3, 2]],
+    [13, [4, 4, 3, 2]],
+    [17, [4, 4, 4, 3, 2]],
+    [77, [...Array(18).fill(4), 3, 2]],
+  ]) {
+    assert.deepEqual(splitQuizTeamSizes(count), expected);
+  }
+});
+
+test("every supported roster partitions into 2-4 people with no losses and at most 20 tables", () => {
   for (let count = 3; count <= 80; count++) {
     const sizes = splitQuizTeamSizes(count);
     assert.equal(
@@ -14,7 +26,7 @@ test("every supported roster partitions into 3-5 people with no losses and at mo
       count,
     );
     assert.ok(
-      sizes.every((size) => size >= 3 && size <= 5),
+      sizes.every((size) => size >= 2 && size <= 4),
       `Invalid partition for ${count}`,
     );
     assert.ok(sizes.length <= 20);

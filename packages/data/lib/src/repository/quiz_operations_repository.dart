@@ -29,19 +29,19 @@ const quizTeamWidgetNames = <String>[
 
 /// 参加者数 [n] を各チームの人数リストへ分割する純粋関数。
 ///
-/// 4 人 1 チームを基本とし、端数は 3〜5 人チームで吸収する:
+/// 4 人 1 チームを基本とし、端数は 2〜3 人チームで吸収する:
 /// - `n % 4 == 0`: すべて 4 人
-/// - `n % 4 == 1` (n >= 5): 4 人チームを 1 つ減らして 5 人チーム 1 つ
+/// - `n % 4 == 1` (n >= 5): 4 人チームを 1 つ減らして 3 人 + 2 人
 /// - `n % 4 == 2` (n >= 6): 4 人チームを 1 つ減らして 3 人 + 3 人
 /// - `n % 4 == 3`: 3 人チームを 1 つ追加
 ///
-/// 分割ルールを適用できない小規模（`n <= 5`）は 1 チームにまとめる。
+/// 分割ルールを適用できない小規模（`n <= 4`）は 1 チームにまとめる。
 /// `n == 0` の場合は空リストを返す。
 ///
 /// 返すリストの合計は常に [n] に一致する。
 List<int> splitIntoTeamSizes(int n) {
   if (n <= 0) return const [];
-  if (n <= 5) return [n];
+  if (n <= 4) return [n];
 
   final base = n ~/ 4;
   final remainder = n % 4;
@@ -50,8 +50,8 @@ List<int> splitIntoTeamSizes(int n) {
     case 0:
       return List<int>.filled(base, 4);
     case 1:
-      // 4 人チームを 1 つ減らして 5 人チーム 1 つ。
-      return [...List<int>.filled(base - 1, 4), 5];
+      // 4 人チームを 1 つ減らして 3 人 + 2 人。
+      return [...List<int>.filled(base - 1, 4), 3, 2];
     case 2:
       // 4 人チームを 1 つ減らして 3 人 + 3 人。
       return [...List<int>.filled(base - 1, 4), 3, 3];
