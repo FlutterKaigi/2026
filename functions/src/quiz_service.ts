@@ -123,13 +123,13 @@ function eventUpdate(
 }
 export function splitQuizTeamSizes(n: number): number[] {
   if (n <= 0) return [];
-  if (n <= 5) return [n];
+  if (n <= 4) return [n];
   const base = Math.floor(n / 4);
   switch (n % 4) {
     case 0:
       return Array<number>(base).fill(4);
     case 1:
-      return [...Array<number>(base - 1).fill(4), 5];
+      return [...Array<number>(base - 1).fill(4), 3, 2];
     case 2:
       return [...Array<number>(base - 1).fill(4), 3, 3];
     default:
