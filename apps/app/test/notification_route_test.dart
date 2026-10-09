@@ -27,6 +27,7 @@ void main() {
         ('  /venue-map\n', '/venue-map'),
         ('/account/support-lt', '/account/support-lt'),
         ('/sessions/../news', '/news'),
+        ('/sessions/%E6%97%A5%E6%9C%AC%E8%AA%9E', '/sessions/日本語'),
       ]) {
         expect(parseNotificationRoute(raw)?.location, Uri(path: path), reason: raw);
       }
@@ -52,6 +53,18 @@ void main() {
         expect(parseNotificationRoute(raw), isNull, reason: '$raw');
       }
     });
+
+    for (final raw in [
+      '/sessions/%FF',
+      '/news/%E9',
+      '/sessions/%C0%AF',
+      '/sessions/%ED%A0%80',
+      '/sessions/%F4%90%80%80',
+    ]) {
+      test('rejects invalid UTF-8 in $raw without throwing', () {
+        expect(parseNotificationRoute(raw), isNull);
+      });
+    }
 
     test('rejects links that act on the attendee as soon as they open', () {
       for (final raw in [..._actingLinks, '/x', '/s']) {

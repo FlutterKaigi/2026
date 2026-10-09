@@ -46,7 +46,13 @@ NotificationRoute? parseNotificationRoute(Object? raw) {
       !uri.path.startsWith('/')) {
     return null;
   }
-  final segments = uri.pathSegments;
+  final List<String> segments;
+  try {
+    // Uri.tryParse accepts percent escapes whose bytes are not valid UTF-8.
+    segments = uri.pathSegments;
+  } on FormatException {
+    return null;
+  }
   if (segments.any((segment) => segment.isEmpty) || _actsWhenOpened(segments)) {
     return null;
   }

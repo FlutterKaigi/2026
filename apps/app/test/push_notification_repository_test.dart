@@ -240,6 +240,14 @@ void main() {
       expect(subject.logsAt(LogLevel.warning), [contains('https://example.com/news')]);
     });
 
+    test('finishes startup when the launch route contains invalid UTF-8', () async {
+      final subject = _Subject();
+      subject.messaging.initialMessage = () async => _tap('m1', route: '/sessions/%FF');
+
+      expect(await subject.repository.initialize(), isNull);
+      expect(subject.logsAt(LogLevel.warning), [contains('/sessions/%FF')]);
+    });
+
     test('returns no route when the launching notification cannot be read', () async {
       for (final (description, answer) in <(String, Future<RemoteMessage?> Function())>[
         ('synchronously', () => throw Exception('channel-error')),
@@ -325,9 +333,36 @@ void main() {
       expect(opened, isEmpty);
       expect(subject.logsAt(LogLevel.warning), [contains('/x/v1.other-uid.9999999999.deadbeef')]);
     });
+
+    test('ignores a malformed tap and still opens the following valid notification', () async {
+      final subject = _Subject();
+      await subject.repository.initialize();
+      final opened = subject.collectOpened();
+
+      subject.onMessageOpenedApp
+        ..add(_tap('malformed', route: '/news/%E9'))
+        ..add(_tap('valid', route: '/news'));
+      await pumpEventQueue();
+
+      expect(opened, [_route('/news')]);
+      expect(subject.logsAt(LogLevel.warning), [contains('/news/%E9')]);
+    });
   });
 
   group('onForeground', () {
+    test('shows notification content without an action when its route contains invalid UTF-8', () async {
+      final subject = _Subject();
+      await subject.repository.initialize();
+      final shown = subject.collectForeground();
+
+      subject.onMessage.add(_tap('malformed', route: '/sessions/%C0%AF'));
+      await pumpEventQueue();
+
+      expect(shown, hasLength(1));
+      expect((shown.single.title, shown.single.body, shown.single.route), ('お知らせ', '本文', null));
+      expect(subject.logsAt(LogLevel.warning), [contains('/sessions/%C0%AF')]);
+    });
+
     test('emits Android notification messages with their route and skips data-only messages', () async {
       final subject = _Subject();
       await subject.repository.initialize();
