@@ -32,7 +32,7 @@ class QuizTeamBadge extends StatelessWidget {
             ),
             const SizedBox(width: 6),
             Text(
-              Translations.of(context).quiz.team.badge(table: '${team.tableNumber}', name: team.name),
+              Translations.of(context).quiz.team.badge(name: team.name),
               style: theme.textTheme.labelLarge?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
                 fontWeight: FontWeight.bold,

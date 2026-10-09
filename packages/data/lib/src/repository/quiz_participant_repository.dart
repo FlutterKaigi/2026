@@ -5,19 +5,10 @@ import '../model/quiz_participant.dart';
 import '../model/quiz_participant_account.dart';
 
 abstract interface class QuizParticipantRepository {
-  /// サーバーで受付コード・定員・他の回への参加を検証して登録する。
-  /// アカウント情報は認証トークンから取得し、端末が渡す情報は信用しない。
-  /// 同じイベントへの再送は登録済みとして成功する。
-  Future<void> register(
-    String eventId, {
-    String? uid,
-    required String displayName,
-    required String entryCode,
-    String? signInProvider,
-    String? email,
-    String? accountName,
-    String? photoUrl,
-  });
+  /// 認証アカウントの公開プロフィールで参加表明する。
+  Future<void> register(String eventId);
+
+  Future<void> selectTeam(String eventId, String teamId, {required String? expectedTeamId});
 
   Stream<List<QuizParticipant>> watchAll(String eventId);
 
@@ -46,26 +37,22 @@ final class FirestoreQuizParticipantRepository implements QuizParticipantReposit
       _event(eventId).collection('participantAccounts');
 
   @override
-  Future<void> register(
-    String eventId, {
-    String? uid,
-    required String displayName,
-    required String entryCode,
-    String? signInProvider,
-    String? email,
-    String? accountName,
-    String? photoUrl,
-  }) async {
+  Future<void> register(String eventId) async {
     await _functions
         .httpsCallable(
           'registerQuizParticipant',
           options: HttpsCallableOptions(timeout: const Duration(seconds: 30)),
         )
-        .call<void>(<String, dynamic>{
-          'eventId': eventId,
-          'displayName': displayName,
-          'entryCode': entryCode,
-        });
+        .call<void>({'eventId': eventId});
+  }
+
+  @override
+  Future<void> selectTeam(String eventId, String teamId, {required String? expectedTeamId}) async {
+    await _functions.httpsCallable('selectQuizTeam').call<void>({
+      'eventId': eventId,
+      'teamId': teamId,
+      'expectedTeamId': expectedTeamId,
+    });
   }
 
   @override

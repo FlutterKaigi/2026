@@ -6,12 +6,13 @@ export 'src/model/locale_map.dart' show LocaleMap;
 export 'src/model/news.dart' show News;
 export 'src/model/profile_exchange.dart' show ProfileExchange, ProfileExchangeOrigin;
 export 'src/model/quiz_answer.dart' show QuizAnswer;
-export 'src/model/quiz_event.dart' show QuizEvent, QuizEventStatus;
+export 'src/model/quiz_event.dart' show QuizEvent, QuizEventStatus, QuizTeamSelectionStatus;
 export 'src/model/quiz_participant.dart' show QuizParticipant;
 export 'src/model/quiz_participant_account.dart' show QuizParticipantAccount;
 export 'src/model/quiz_question.dart' show QuizQuestion, QuizQuestionStatus;
 export 'src/model/quiz_question_secret.dart' show QuizQuestionSecret;
 export 'src/model/quiz_team.dart' show QuizTeam, QuizTeamMember;
+export 'src/model/quiz_team_selection.dart' show quizTeamIds, quizTeamsFromParticipants;
 export 'src/model/sns_link.dart' show SnsLink;
 export 'src/model/sns_post.dart' show SnsPostCompanion, SnsPostRegistration;
 export 'src/model/speaker.dart' show Speaker;
@@ -49,7 +50,7 @@ export 'src/repository/quiz_answer_repository.dart' show FirestoreQuizAnswerRepo
 export 'src/repository/quiz_clock_repository.dart' show FirebaseQuizClockRepository, QuizClock, QuizClockRepository;
 export 'src/repository/quiz_event_repository.dart' show FirestoreQuizEventRepository, QuizEventRepository;
 export 'src/repository/quiz_operations_repository.dart'
-    show FirestoreQuizOperationsRepository, QuizOperationsRepository, quizTeamWidgetNames, splitIntoTeamSizes;
+    show FirestoreQuizOperationsRepository, QuizOperationsRepository;
 export 'src/repository/quiz_participant_repository.dart'
     show FirestoreQuizParticipantRepository, QuizParticipantRepository;
 export 'src/repository/quiz_question_repository.dart' show FirestoreQuizQuestionRepository, QuizQuestionRepository;

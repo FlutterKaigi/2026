@@ -161,8 +161,8 @@ class _PromotionDialogState extends State<_PromotionDialog> {
                     const SizedBox(height: 16),
                     const Text(
                       'このイベントの設定・問題・正解・解説を本番に下書きとして作成します。\n'
-                      '参加者・回答・得点・受付コード・進行状態は引き継ぎません。\n'
-                      '反映後に本番側で内容を確認し、受付コードの発行と公開を行ってください。',
+                      '参加者・回答・得点・チーム選択・進行状態は引き継ぎません。\n'
+                      '反映後に本番側で内容を確認して公開し、参加受付を開始してください。',
                     ),
                     if (existing != null) ...[
                       const SizedBox(height: 12),

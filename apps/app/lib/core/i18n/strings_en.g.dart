@@ -757,6 +757,7 @@ class _Translations$quiz$en extends Translations$quiz$ja {
 	@override late final _Translations$quiz$preparing$en preparing = _Translations$quiz$preparing$en._(_root);
 	@override late final _Translations$quiz$registration$en registration = _Translations$quiz$registration$en._(_root);
 	@override late final _Translations$quiz$waiting$en waiting = _Translations$quiz$waiting$en._(_root);
+	@override late final _Translations$quiz$selection$en selection = _Translations$quiz$selection$en._(_root);
 	@override late final _Translations$quiz$team$en team = _Translations$quiz$team$en._(_root);
 	@override late final _Translations$quiz$entryClosed$en entryClosed = _Translations$quiz$entryClosed$en._(_root);
 	@override late final _Translations$quiz$question$en question = _Translations$quiz$question$en._(_root);
@@ -1044,22 +1045,15 @@ class _Translations$quiz$registration$en extends Translations$quiz$registration$
 	final TranslationsEn _root; // ignore: unused_field
 
 	// Translations
-	@override String get subtitle => 'A table-versus-table team battle. Join with a nickname!';
+	@override String get subtitle => 'Confirm your round to join. You may join either the first or the second round.';
 	@override String get participantCount => 'Participants:';
 	@override String get participantUnit => '';
-	@override String get nickname => 'Nickname';
-	@override String get nicknameHint => '1–20 characters';
-	@override String get entryCode => 'Entry code';
-	@override String get entryCodeHint => '6-digit number';
-	@override String get entryCodeHelper => 'Enter the code shown at the on-site reception desk';
 	@override String get join => 'Join';
 	@override String full({required Object max}) => 'Full capacity (${max} participants) reached';
 	@override String get failed => 'Could not register. Please try again later.';
-	@override String get codeMismatch => 'Could not register. Please check the entry code.';
 	@override String get alreadyParticipated => 'You have already registered for another round and cannot join this one.';
 	@override String get closed => 'Registration for this round has closed.';
 	@override String get unavailable => 'Registration could not be confirmed. Check your connection and try again.';
-	@override String get rateLimited => 'Too many attempts. Wait one minute, check the entry code, and try again.';
 	@override String get accountUnavailable => 'This account cannot join. Please contact event staff.';
 }
 
@@ -1070,8 +1064,29 @@ class _Translations$quiz$waiting$en extends Translations$quiz$waiting$ja {
 	final TranslationsEn _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'You\'re in!';
-	@override String get description => 'Please wait for the team announcement';
+	@override String get title => 'Registration confirmed';
+	@override String get description => 'Staff will assign your table at the venue. Please wait for team selection to open.';
+}
+
+// Path: quiz.selection
+class _Translations$quiz$selection$en extends Translations$quiz$selection$ja {
+	_Translations$quiz$selection$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Select your team';
+	@override String get instructions => 'Sit at the table assigned by staff, then select its team (A–T).';
+	@override String get unselected => 'No team selected';
+	@override String current({required Object team}) => 'Your team is ${team}';
+	@override String option({required Object team, required Object count}) => '${team} (${count} people)';
+	@override String get confirm => 'Confirm this team';
+	@override String get sending => 'Sending…';
+	@override String get changeHint => 'You can change teams while selection is open.';
+	@override String get closed => 'Team selection has closed. Please wait for the questions.';
+	@override String get closedUnselected => 'Team selection has closed. Please contact event staff.';
+	@override String get changed => 'Your membership changed. Check your current team and select again.';
+	@override String get failed => 'Could not confirm your selection. Check your connection and current team. Contact staff if selection has closed or your registration was cancelled.';
 }
 
 // Path: quiz.team
@@ -1081,11 +1096,11 @@ class _Translations$quiz$team$en extends Translations$quiz$team$ja {
 	final TranslationsEn _root; // ignore: unused_field
 
 	// Translations
-	@override String get yourTable => 'Your table is';
-	@override String get table => 'Table';
+	@override String get yourTable => 'Your team is';
+	@override String get table => 'Team';
 	@override String get teamLabel => 'Team';
 	@override String get gatherHint => 'Gather at your table and wait for the next question!';
-	@override String badge({required Object table, required Object name}) => 'Table ${table}・${name}';
+	@override String badge({required Object name}) => 'Team ${name}';
 }
 
 // Path: quiz.entryClosed
@@ -1155,7 +1170,7 @@ class _Translations$quiz$result$en extends Translations$quiz$result$ja {
 
 	// Translations
 	@override String get title => 'Final results';
-	@override String table({required Object table}) => 'Table ${table}';
+	@override String table({required Object name}) => 'Team ${name}';
 	@override String points({required Object score}) => '${score} pts';
 	@override String get yourTeam => 'Your team';
 	@override String yourTeamRanked({required Object rank, required Object name, required Object score}) => '#${rank} / ${name} (${score} pts)';
@@ -1702,32 +1717,37 @@ extension on TranslationsEn {
 			'quiz.errors.eventLoadFailed' => 'Failed to load the event',
 			'quiz.preparing.title' => 'The quiz is being prepared',
 			'quiz.preparing.description' => 'Once it is announced, you can join from this screen.',
-			'quiz.registration.subtitle' => 'A table-versus-table team battle. Join with a nickname!',
+			'quiz.registration.subtitle' => 'Confirm your round to join. You may join either the first or the second round.',
 			'quiz.registration.participantCount' => 'Participants:',
 			'quiz.registration.participantUnit' => '',
-			'quiz.registration.nickname' => 'Nickname',
-			'quiz.registration.nicknameHint' => '1–20 characters',
-			'quiz.registration.entryCode' => 'Entry code',
-			'quiz.registration.entryCodeHint' => '6-digit number',
-			'quiz.registration.entryCodeHelper' => 'Enter the code shown at the on-site reception desk',
 			'quiz.registration.join' => 'Join',
-			_ => null,
-		} ?? switch (path) {
 			'quiz.registration.full' => ({required Object max}) => 'Full capacity (${max} participants) reached',
 			'quiz.registration.failed' => 'Could not register. Please try again later.',
-			'quiz.registration.codeMismatch' => 'Could not register. Please check the entry code.',
 			'quiz.registration.alreadyParticipated' => 'You have already registered for another round and cannot join this one.',
 			'quiz.registration.closed' => 'Registration for this round has closed.',
 			'quiz.registration.unavailable' => 'Registration could not be confirmed. Check your connection and try again.',
-			'quiz.registration.rateLimited' => 'Too many attempts. Wait one minute, check the entry code, and try again.',
+			_ => null,
+		} ?? switch (path) {
 			'quiz.registration.accountUnavailable' => 'This account cannot join. Please contact event staff.',
-			'quiz.waiting.title' => 'You\'re in!',
-			'quiz.waiting.description' => 'Please wait for the team announcement',
-			'quiz.team.yourTable' => 'Your table is',
-			'quiz.team.table' => 'Table',
+			'quiz.waiting.title' => 'Registration confirmed',
+			'quiz.waiting.description' => 'Staff will assign your table at the venue. Please wait for team selection to open.',
+			'quiz.selection.title' => 'Select your team',
+			'quiz.selection.instructions' => 'Sit at the table assigned by staff, then select its team (A–T).',
+			'quiz.selection.unselected' => 'No team selected',
+			'quiz.selection.current' => ({required Object team}) => 'Your team is ${team}',
+			'quiz.selection.option' => ({required Object team, required Object count}) => '${team} (${count} people)',
+			'quiz.selection.confirm' => 'Confirm this team',
+			'quiz.selection.sending' => 'Sending…',
+			'quiz.selection.changeHint' => 'You can change teams while selection is open.',
+			'quiz.selection.closed' => 'Team selection has closed. Please wait for the questions.',
+			'quiz.selection.closedUnselected' => 'Team selection has closed. Please contact event staff.',
+			'quiz.selection.changed' => 'Your membership changed. Check your current team and select again.',
+			'quiz.selection.failed' => 'Could not confirm your selection. Check your connection and current team. Contact staff if selection has closed or your registration was cancelled.',
+			'quiz.team.yourTable' => 'Your team is',
+			'quiz.team.table' => 'Team',
 			'quiz.team.teamLabel' => 'Team',
 			'quiz.team.gatherHint' => 'Gather at your table and wait for the next question!',
-			'quiz.team.badge' => ({required Object table, required Object name}) => 'Table ${table}・${name}',
+			'quiz.team.badge' => ({required Object name}) => 'Team ${name}',
 			'quiz.entryClosed.title' => 'Entry is closed',
 			'quiz.entryClosed.description' => 'The quiz is in progress. Results will be shown on this screen.',
 			'quiz.question.sponsoredBy' => ({required Object name}) => 'Sponsored by ${name}',
@@ -1752,7 +1772,7 @@ extension on TranslationsEn {
 			'quiz.revealed.yourAnswer' => 'Your team\'s answer',
 			'quiz.revealed.teamScore' => ({required Object score}) => 'Current team score: ${score} pts',
 			'quiz.result.title' => 'Final results',
-			'quiz.result.table' => ({required Object table}) => 'Table ${table}',
+			'quiz.result.table' => ({required Object name}) => 'Team ${name}',
 			'quiz.result.points' => ({required Object score}) => '${score} pts',
 			'quiz.result.yourTeam' => 'Your team',
 			'quiz.result.yourTeamRanked' => ({required Object rank, required Object name, required Object score}) => '#${rank} / ${name} (${score} pts)',

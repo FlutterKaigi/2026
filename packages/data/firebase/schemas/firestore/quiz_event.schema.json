@@ -88,6 +88,15 @@
     "admissionSlotsReady": {
       "type": "boolean",
       "description": "Server-only marker: existing participants have been assigned capacity reservations."
+    },
+    "teamSelectionStatus": {
+      "type": "string",
+      "enum": [
+        "notStarted",
+        "open",
+        "closed"
+      ],
+      "description": "Server-owned team selection window. Missing means notStarted."
     }
   }
 }

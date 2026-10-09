@@ -59,6 +59,8 @@ void main() {
                 options: const [
                   LocaleMap(ja: '選択肢1', en: 'First'),
                   LocaleMap(ja: '選択肢2', en: 'Second'),
+                  LocaleMap(ja: '選択肢3', en: 'Third'),
+                  LocaleMap(ja: '選択肢4', en: 'Fourth'),
                 ],
                 status: status,
                 closesAt: status == QuizQuestionStatus.reading ? null : serverNow.add(const Duration(seconds: 90)),
@@ -82,6 +84,12 @@ void main() {
   testWidgets('reading shows question and options without a countdown or accepting answers', (tester) async {
     await show(tester, subject(status: QuizQuestionStatus.reading));
     expect(find.text('問題'), findsOneWidget);
+    for (final number in ['1', '2', '3', '4']) {
+      expect(find.text(number), findsOneWidget);
+    }
+    for (final letter in ['A', 'B', 'C', 'D']) {
+      expect(find.text(letter), findsNothing);
+    }
     expect(find.text(t.quiz.question.reading), findsOneWidget);
     expect(find.byIcon(Icons.timer_outlined), findsNothing);
     expect(tester.widgetList<QuizOptionCard>(find.byType(QuizOptionCard)).every((card) => !card.enabled), isTrue);

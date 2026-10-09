@@ -844,13 +844,6 @@
       }
     },
     {
-      "path": "quizEvents/half-1/secret/entry",
-      "schema": "quiz_entry_secret",
-      "data": {
-        "code": "123456"
-      }
-    },
-    {
       "path": "quizEvents/half-1/questions/q1",
       "schema": "quiz_question",
       "data": {
