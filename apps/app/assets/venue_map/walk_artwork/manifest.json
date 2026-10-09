@@ -1,6 +1,6 @@
 {
   "inputs": {
-    "assets/venue_map/floor_plan.json": "0505c1d7ec0eb05cf710117885992d6c6327367642258b310aa6c43cd0355f8e",
+    "assets/venue_map/floor_plan.json": "db5d667868dd4c3b5b6286059458526d6aa1fec73175b218e41421f50acd97dd",
     "res/assets/fonts/NotoSansJP/NotoSansJP-VariableFont.ttf": "522e50bd93d30ca91266bf06e4dcf2051b926a01f027f794754d735aa7186b1f",
     "lib/feature/venue_map/data/venue_walk_architecture.dart": "eb3f83988e014673235c9f2366ea4355db266dbb591b45157f395d2eba045a29",
     "lib/feature/venue_map/data/venue_walk_decorations.dart": "3c745c2a0d0cb49081c34786a5a16eb05390bc9ea22f7507047ce8df1f36d108",
@@ -186,25 +186,20 @@
     },
     "sponsor_18_ja.png": {
       "width": 768,
-      "height": 406,
-      "sha256": "9c27ad14b60ae2e1ce0c8b7657a6c0fff872f5ff279c1e0f5c76cab74a290f55"
-    },
-    "sponsor_19_ja.png": {
-      "width": 768,
       "height": 404,
       "sha256": "888c162ea10d090906689b332a7c9cae267afaae79be4911fcbdcbf0967203da"
     },
-    "sponsor_20_ja.png": {
+    "sponsor_19_ja.png": {
       "width": 768,
       "height": 405,
       "sha256": "90ab8f39566aff1bda7d759de4f4768467ca381934dc490fff1d4fb907e26674"
     },
-    "sponsor_21_ja.png": {
+    "sponsor_20_ja.png": {
       "width": 768,
       "height": 405,
       "sha256": "e643eb4814518ff4d1a849967f5eda022eec628a1913afa7f5794be225bb6a47"
     },
-    "sponsor_22_ja.png": {
+    "sponsor_21_ja.png": {
       "width": 768,
       "height": 404,
       "sha256": "14ce622841c164f38ce6d45c3340bf9fd87b6d095b7df7379c7e514c784e91da"
@@ -381,25 +376,20 @@
     },
     "sponsor_18_en.png": {
       "width": 768,
-      "height": 406,
-      "sha256": "568cbed1a42f51271c2d457eb02b34f3ffc97592937851a0bfc490b893cdf6ea"
-    },
-    "sponsor_19_en.png": {
-      "width": 768,
       "height": 404,
       "sha256": "22b445a81044321c5c9eccdc7c3d194bcd5120090bb3f79b881e49b011a3df04"
     },
-    "sponsor_20_en.png": {
+    "sponsor_19_en.png": {
       "width": 768,
       "height": 405,
       "sha256": "c9b89903172c05422a4b9455e950e63f22cc11fa1090c6b535367f90982b1e92"
     },
-    "sponsor_21_en.png": {
+    "sponsor_20_en.png": {
       "width": 768,
       "height": 405,
       "sha256": "d7bca230945e6d2d0285cd074a3da9391275a4a841ef52ba67eb026dc10bda3b"
     },
-    "sponsor_22_en.png": {
+    "sponsor_21_en.png": {
       "width": 768,
       "height": 404,
       "sha256": "eaba338938eb2066e164e14c988379b6db178ab4ecb7e41188f027457b7fe506"

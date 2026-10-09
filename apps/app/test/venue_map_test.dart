@@ -69,7 +69,7 @@ void main() {
 
   test('reviewed map contains every numbered sponsor and visitor facility without sponsor ranks', () {
     final sponsors = plan.places.where((p) => p.type == VenuePlaceType.sponsor).toList();
-    expect(sponsors.map((p) => p.boothNumber), List.generate(22, (i) => i + 1));
+    expect(sponsors.map((p) => p.boothNumber), List.generate(21, (i) => i + 1));
     expect(sponsors.first.name('ja'), 'Flutter(Google Inc.)');
     expect(sponsors.map((p) => p.markerColor).toSet(), hasLength(1));
     expect((sourcePlan['booths']! as List).map((b) => (b as Map)['color']).toSet(), hasLength(1));
@@ -110,7 +110,7 @@ void main() {
   test('search accepts exact booth numbers, circled numbers, names and both languages', () {
     expect(plan.places.where((p) => p.matches('1')).map((p) => p.id), ['sponsor_1']);
     expect(plan.places.where((p) => p.matches('#15')).map((p) => p.id), ['sponsor_15']);
-    expect(plan.find('sponsor_22')!.matches('㉒'), isTrue);
+    expect(plan.find('sponsor_21')!.matches('㉑'), isTrue);
     expect(plan.find('sponsor_2')!.matches('日本トレカ'), isTrue);
     expect(plan.find('sponsor_6')!.matches('HACOMONO'), isTrue);
     expect(plan.find('accessible_wc')!.matches('accessible'), isTrue);
@@ -401,7 +401,7 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
     await pumpMap(tester);
-    await tester.tap(find.widgetWithText(FilterChip, 'スポンサー 22'));
+    await tester.tap(find.widgetWithText(FilterChip, 'スポンサー 21'));
     await tester.enterText(find.byType(TextField), '15');
     await tester.pumpAndSettle();
     expect(find.widgetWithText(ListTile, '株式会社GENDA'), findsOneWidget);

@@ -24,7 +24,7 @@ void main() {
         locale.languageCode: (await locale.build()).venueWalk.entranceSign,
     });
     final images = (manifest['images'] as Map<String, dynamic>).cast<String, Map<String, dynamic>>();
-    expect(images.length, 82);
+    expect(images.length, 80);
     for (final entry in images.entries) {
       // Read the actual application bundle, catching omitted pubspec assets too.
       final data = await rootBundle.load('$venueArtworkDirectory/${entry.key}');
