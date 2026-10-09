@@ -70,7 +70,7 @@ jobs:
             `STAMP_RALLY_TOKEN_SECRET=${randomBytes(32).toString('hex')}`,
           ].join('\n') + '\n');
           JS
-          npx -y firebase-tools@13.35.1 emulators:exec \
+          npx -y firebase-tools@14.23.0 emulators:exec \
             --project "$SUPPORT_LT_TEST_PROJECT_ID" \
             --only auth,firestore,functions \
             "npm --prefix functions run test:emulator"
