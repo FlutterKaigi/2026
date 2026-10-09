@@ -4,7 +4,7 @@ import { AdminAuth, assertAdmin } from "./admin_auth";
 import { operateQuizEvent } from "./quiz_service";
 import { assertActiveSupportLtUser, SupportLtGetUser } from "./support_lt_auth";
 import { issueSupportLtCodeForUser } from "./support_lt_service";
-import { Data, eventDefinition, id, invalid, object, questionDefinition, strings, text } from "./event_admin_validation";
+import { Data, eventDefinition, id, invalid, object, questionDefinition } from "./event_admin_validation";
 import { previewQuizPromotion, promoteQuizEvent, withdrawQuizPromotion } from "./quiz_promotion_service";
 
 const PROJECTS = { stg: "flutterkaigi-2026-stg", prod: "flutterkaigi-2026-283db" } as const;
@@ -82,13 +82,15 @@ async function readSnapshot(db: Firestore, input: Data): Promise<Data> {
     // Projection never reads entry codes, unpublished questions or answer secrets.
     const question = event?.currentQuestionId
       ? document(await db.doc(`${path}/questions/${id(event.currentQuestionId)}`).get()) : null;
-    return { event, teams, question: question?.status === "draft" ? null : question };
+    const participants = event?.status === "registration" || event?.status === "entryClosed"
+      ? await list(`${path}/participants`, "registeredAt") : [];
+    return { event, teams, participants, question: question?.status === "draft" ? null : question };
   }
-  const [participants, questions, entry, answers, sponsors] = await Promise.all([
+  const [participants, questions, answers, sponsors] = await Promise.all([
     list(`${path}/participants`, "registeredAt"), list(`${path}/questions`, "order"),
-    db.doc(`${path}/secret/entry`).get(), list(`${path}/answers`), list("sponsors"),
+    list(`${path}/answers`), list("sponsors"),
   ]);
-  return { event, teams, participants, questions, entryCode: entry.get("code") ?? null, answers, sponsors };
+  return { event, teams, participants, questions, answers, sponsors };
 }
 
 async function saveEvent(db: Firestore, input: Data): Promise<Data> {
@@ -171,16 +173,6 @@ export async function administerEvent(auth: AdminAuth | undefined, raw: unknown,
     case "saveEvent": return saveEvent(db, payload);
     case "saveQuestion": return saveQuestion(db, payload);
     case "deleteQuestion": return saveQuestion(db, payload, true);
-    case "updateTeamNamePool": {
-      const names = strings(payload.names, 100, (value) => text(value, 80));
-      await db.doc(`quizEvents/${id(payload.eventId)}`).update({ teamNamePool: names, updatedAt: Timestamp.now() });
-      return {};
-    }
-    case "renameTeam": {
-      const name = text(payload.name, 80);
-      await db.doc(`quizEvents/${id(payload.eventId)}/teams/${id(payload.teamId)}`).update({ name });
-      return {};
-    }
     default: return invalid("操作");
   }
 }

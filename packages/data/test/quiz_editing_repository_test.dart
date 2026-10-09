@@ -67,19 +67,10 @@ void main() {
     expect((await firestore.doc('quizEvents/event').get()).data()!['currentQuestionId'], 'question');
   });
 
-  test('team name pool changes preserve live progress and other settings', () async {
-    await firestore.doc('quizEvents/event').update({
-      'status': 'inProgress',
-      'currentQuestionId': 'question',
-      'isPublic': true,
-      'capacity': 40,
-    });
-    await events.updateTeamNamePool('event', ['Scaffold', 'Hero']);
-    final saved = (await firestore.doc('quizEvents/event').get()).data()!;
-    expect(saved['status'], 'inProgress');
-    expect(saved['currentQuestionId'], 'question');
-    expect(saved['capacity'], 40);
-    expect(saved['teamNamePool'], ['Scaffold', 'Hero']);
+  test('stale event saves cannot change team selection status', () async {
+    await firestore.doc('quizEvents/event').update({'teamSelectionStatus': 'open'});
+    await events.save(staleEvent.copyWith(teamSelectionStatus: QuizTeamSelectionStatus.closed));
+    expect((await firestore.doc('quizEvents/event').get()).get('teamSelectionStatus'), 'open');
   });
 
   test('rejects capacity exceeding venue capacity or already registered count', () async {

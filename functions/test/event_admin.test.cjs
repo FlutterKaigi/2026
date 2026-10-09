@@ -88,3 +88,25 @@ test("nested timestamps have a consistent callable wire format", () => {
     array: [{ at: "1970-01-01T00:00:00.000Z" }], empty: null,
   });
 });
+
+test("projection reads participants only before questions begin", async () => {
+  for (const status of ["draft", "published", "registration", "entryClosed", "inProgress", "finished"]) {
+    const reads = [];
+    const result = await administerEvent(admin, { environment: "prod", action: "read", payload: { view: "quizProjection", eventId: "event" } }, {
+      adminDb, getUser: async () => ({ disabled: false }),
+      target: () => ({
+        doc: (path) => ({ get: async () => {
+          assert.equal(path, "quizEvents/event");
+          return { id: "event", exists: true, data: () => ({ status, currentQuestionId: null }) };
+        } }),
+        collection: (path) => ({ orderBy: () => ({ get: async () => {
+          reads.push(path);
+          return { docs: path.endsWith("/participants") ? [{ id: "person", exists: true, data: () => ({ displayName: "Member", teamId: "A" }) }] : [] };
+        } }) }),
+      }),
+    });
+    const prestart = ["registration", "entryClosed"].includes(status);
+    assert.equal(reads.includes("quizEvents/event/participants"), prestart);
+    assert.equal(result.participants.length, prestart ? 1 : 0);
+  }
+});

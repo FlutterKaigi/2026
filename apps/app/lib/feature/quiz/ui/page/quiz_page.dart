@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:app/core/extension/locale_map_extension.dart';
 import 'package:app/core/i18n/strings.g.dart';
-import 'package:app/feature/profile/data/provider/user_profile_provider.dart';
 import 'package:app/feature/quiz/data/provider/quiz_providers.dart';
 import 'package:app/feature/quiz/data/provider/quiz_repositories.dart';
 import 'package:app/feature/quiz/ui/component/quiz_motion.dart';
@@ -11,6 +10,7 @@ import 'package:app/feature/quiz/ui/component/quiz_question_view.dart';
 import 'package:app/feature/quiz/ui/component/quiz_result_view.dart';
 import 'package:app/feature/quiz/ui/component/quiz_sign_in_required_view.dart';
 import 'package:app/feature/quiz/ui/component/quiz_team_badge.dart';
+import 'package:app/feature/quiz/ui/component/quiz_team_selection_view.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:data/data.dart';
 import 'package:flutter/material.dart';
@@ -84,21 +84,19 @@ class _QuizBody extends ConsumerWidget {
     final participantLoaded = participantAsync is AsyncData<QuizParticipant?>;
     final participant = participantAsync.value;
 
-    // 登録済みでチームが割り当てられていれば、イベントの status に依らず
-    // チーム発表以降を優先して表示する（遅刻者もチームと進行中の問題を
-    // 見続けられる）。
-    final hasTeam = participant?.teamId != null;
-
     // AnimatedSwitcher が状態の切り替わりを検知するためのキー。
     final (child, stateKey) = switch (event.status) {
       // 公開済み・受付開始前。開催準備中の案内を出す。
       // draft は一覧に出ず、ルール上も読めないため通常ここへは来ない。
       QuizEventStatus.draft || QuizEventStatus.published => (const _PreparingView(), 'preparing'),
       _ when !participantLoaded => (const _Loading(), 'loading'),
-      QuizEventStatus.registration when hasTeam => (_TeamAnnouncement(team: team), 'team'),
       QuizEventStatus.registration when participant == null => (
         _RegistrationForm(event: event),
         'registration',
+      ),
+      QuizEventStatus.registration when event.teamSelectionStatus != QuizTeamSelectionStatus.notStarted => (
+        QuizTeamSelectionView(event: event, participant: participant!),
+        'selection',
       ),
       QuizEventStatus.registration => (const _Waiting(), 'waiting'),
       // 受付終了後に未登録のまま開いた場合の案内。従来はチーム発表画面の
@@ -107,7 +105,10 @@ class _QuizBody extends ConsumerWidget {
         const _EntryClosed(),
         'entry-closed',
       ),
-      QuizEventStatus.entryClosed when hasTeam => (_TeamAnnouncement(team: team), 'team'),
+      QuizEventStatus.entryClosed when event.teamSelectionStatus != QuizTeamSelectionStatus.notStarted => (
+        QuizTeamSelectionView(event: event, participant: participant!),
+        'selection',
+      ),
       QuizEventStatus.entryClosed => (const _Waiting(), 'waiting'),
       QuizEventStatus.inProgress => _inProgress(ref, team),
       // 終了後は未参加者にもランキングを見せる（自チームカードは非表示）。
@@ -164,43 +165,10 @@ class _QuizBody extends ConsumerWidget {
   }
 }
 
-/// 参加登録フォーム。イベント名・参加人数のリアルタイム表示と
-/// ニックネーム・現地受付コードの入力。
-///
-/// 受付コードは会場の受付で案内される 6 桁の数字。コードの照合は
-/// サーバーが行い、不一致・定員・重複参加・受付終了を区別して返す。
-class _RegistrationForm extends ConsumerWidget {
+/// 参加する回を確認し、コードや追加入力なしで参加表明する。
+class _RegistrationForm extends HookConsumerWidget {
   const _RegistrationForm({required this.event});
-
   final QuizEvent event;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final user = ref.watch(quizUserProvider).value;
-    // ニックネームの初期値はプロフィールの表示名（未作成ならアカウントの
-    // 表示名）。TextEditingController の初期値は初回 build で確定するため、
-    // プロフィールの読み込みが済んでからフォーム本体を構築する。
-    return switch (ref.watch(userProfileProvider)) {
-      AsyncLoading() => const _Loading(),
-      AsyncData(:final value) => _RegistrationFormBody(
-        event: event,
-        initialNickname: value?.displayName ?? user?.displayName ?? '',
-      ),
-      // プロフィールが読めなくても登録は妨げず、従来どおりアカウントの
-      // 表示名へフォールバックする。
-      AsyncError() => _RegistrationFormBody(
-        event: event,
-        initialNickname: user?.displayName ?? '',
-      ),
-    };
-  }
-}
-
-class _RegistrationFormBody extends HookConsumerWidget {
-  const _RegistrationFormBody({required this.event, required this.initialNickname});
-
-  final QuizEvent event;
-  final String initialNickname;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -208,25 +176,6 @@ class _RegistrationFormBody extends HookConsumerWidget {
     final t = Translations.of(context);
     final locale = Localizations.localeOf(context);
     final user = ref.watch(quizUserProvider).value;
-    // 会場で名乗りたい名前に変えられるよう編集は可能なままにする。
-    final controller = useTextEditingController(
-      text: initialNickname.characters.take(20).toString(),
-    );
-    final codeController = useTextEditingController();
-    // TextField の入力に追従して参加ボタンの活性を更新する。
-    final text = useState(controller.text);
-    final codeText = useState('');
-    useEffect(() {
-      void listener() => text.value = controller.text;
-      controller.addListener(listener);
-      return () => controller.removeListener(listener);
-    }, [controller]);
-    useEffect(() {
-      void listener() => codeText.value = codeController.text;
-      codeController.addListener(listener);
-      return () => codeController.removeListener(listener);
-    }, [codeController]);
-
     final submitting = useState(false);
     final errorMessage = useState<String?>(null);
     final participants = ref.watch(quizParticipantsProvider).value;
@@ -234,34 +183,20 @@ class _RegistrationFormBody extends HookConsumerWidget {
     // 定員はイベントごとの設定値。到達したら新規登録を締め切る。
     final isFull = count >= event.capacity;
 
-    final trimmed = text.value.trim();
-    final code = codeText.value.trim();
-    final isValid = trimmed.isNotEmpty && trimmed.characters.length <= 20 && RegExp(r'^\d{6}$').hasMatch(code);
-
     Future<void> register() async {
-      if (!isValid || user == null || submitting.value) {
+      if (isFull || user == null || submitting.value) {
         return;
       }
       submitting.value = true;
       errorMessage.value = null;
       try {
-        await ref
-            .read(quizParticipantRepositoryProvider)
-            .register(
-              ref.read(quizEventIdProvider),
-              displayName: trimmed,
-              entryCode: code,
-            );
+        await ref.read(quizParticipantRepositoryProvider).register(ref.read(quizEventIdProvider));
       } on FirebaseFunctionsException catch (error) {
         if (!context.mounted) {
           return;
         }
-        final details = error.details;
-        final reason = details is Map ? details['reason'] : null;
         errorMessage.value = switch (error.code) {
-          'resource-exhausted' when reason == 'rate-limited' => t.quiz.registration.rateLimited,
-          'permission-denied' when reason == 'disabled-account' => t.quiz.registration.accountUnavailable,
-          'permission-denied' => t.quiz.registration.codeMismatch,
+          'permission-denied' => t.quiz.registration.accountUnavailable,
           'resource-exhausted' => t.quiz.registration.full(max: '${event.capacity}'),
           'already-exists' => t.quiz.registration.alreadyParticipated,
           'failed-precondition' || 'not-found' => t.quiz.registration.closed,
@@ -326,43 +261,9 @@ class _RegistrationFormBody extends HookConsumerWidget {
           ),
           const SizedBox(height: 24),
           Entrance(
-            delay: const Duration(milliseconds: 160),
-            child: TextField(
-              controller: controller,
-              maxLength: 20,
-              enabled: !isFull && !submitting.value,
-              decoration: InputDecoration(
-                labelText: t.quiz.registration.nickname,
-                hintText: t.quiz.registration.nicknameHint,
-                prefixIcon: const Icon(Icons.badge_outlined),
-                border: const OutlineInputBorder(),
-              ),
-            ),
-          ),
-          const SizedBox(height: 8),
-          Entrance(
-            delay: const Duration(milliseconds: 180),
-            child: TextField(
-              controller: codeController,
-              maxLength: 6,
-              keyboardType: TextInputType.number,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              enabled: !isFull && !submitting.value,
-              decoration: InputDecoration(
-                labelText: t.quiz.registration.entryCode,
-                hintText: t.quiz.registration.entryCodeHint,
-                helperText: t.quiz.registration.entryCodeHelper,
-                helperMaxLines: 2,
-                prefixIcon: const Icon(Icons.pin_outlined),
-                border: const OutlineInputBorder(),
-              ),
-            ),
-          ),
-          const SizedBox(height: 8),
-          Entrance(
             delay: const Duration(milliseconds: 200),
             child: FilledButton.icon(
-              onPressed: (isValid && !isFull && !submitting.value) ? () => unawaited(register()) : null,
+              onPressed: (!isFull && !submitting.value) ? () => unawaited(register()) : null,
               style: FilledButton.styleFrom(
                 minimumSize: const Size.fromHeight(56),
                 textStyle: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
@@ -491,10 +392,7 @@ class _Waiting extends ConsumerWidget {
   }
 }
 
-/// チーム発表画面。物理テーブル番号を主役に、チーム名・メンバーを表示する。
-///
-/// 「あなたのテーブルは」→ テーブル番号 → チーム名 → メンバーの順に
-/// 段階的に登場させ、会場でのチーム発表の高揚感を演出する。
+/// 確定したチームとメンバーを表示する。
 class _TeamAnnouncement extends HookWidget {
   const _TeamAnnouncement({required this.team});
 
@@ -556,12 +454,18 @@ class _TeamAnnouncement extends HookWidget {
                         color: theme.colorScheme.onPrimaryContainer,
                       ),
                     ),
-                    Text(
-                      '${team.tableNumber}',
-                      style: theme.textTheme.displayLarge?.copyWith(
-                        color: theme.colorScheme.primary,
-                        fontWeight: FontWeight.bold,
-                        height: 1,
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          team.name,
+                          style: theme.textTheme.displayLarge?.copyWith(
+                            color: theme.colorScheme.primary,
+                            fontWeight: FontWeight.bold,
+                            height: 1,
+                          ),
+                        ),
                       ),
                     ),
                   ],

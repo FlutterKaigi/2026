@@ -563,32 +563,38 @@ quiz:
     description: Once it is announced,
       you can join from this screen.
   registration:
-    subtitle: A table-versus-table team battle. Join with a nickname!
+    subtitle: Confirm your round to join. You may join either the first or the second round.
     participantCount: "Participants:"
     participantUnit: ""
-    nickname: Nickname
-    nicknameHint: 1–20 characters
-    entryCode: Entry code
-    entryCodeHint: 6-digit number
-    entryCodeHelper: Enter the code shown at the on-site reception desk
     join: Join
     full: Full capacity ($max participants) reached
     failed: Could not register. Please try again later.
-    codeMismatch: Could not register. Please check the entry code.
     alreadyParticipated: You have already registered for another round and cannot join this one.
     closed: Registration for this round has closed.
     unavailable: Registration could not be confirmed. Check your connection and try again.
-    rateLimited: Too many attempts. Wait one minute, check the entry code, and try again.
     accountUnavailable: This account cannot join. Please contact event staff.
   waiting:
-    title: You're in!
-    description: Please wait for the team announcement
+    title: Registration confirmed
+    description: Staff will assign your table at the venue. Please wait for team selection to open.
+  selection:
+    title: Select your team
+    instructions: Sit at the table assigned by staff, then select its team (A–T).
+    unselected: No team selected
+    current: Your team is $team
+    option: $team ($count people)
+    confirm: Confirm this team
+    sending: Sending…
+    changeHint: You can change teams while selection is open.
+    closed: Team selection has closed. Please wait for the questions.
+    closedUnselected: Team selection has closed. Please contact event staff.
+    changed: Your membership changed. Check your current team and select again.
+    failed: Could not confirm your selection. Check your connection and current team. Contact staff if selection has closed or your registration was cancelled.
   team:
-    yourTable: Your table is
-    table: Table
+    yourTable: Your team is
+    table: Team
     teamLabel: Team
     gatherHint: Gather at your table and wait for the next question!
-    badge: Table $table・$name
+    badge: Team $name
   entryClosed:
     title: Entry is closed
     description: The quiz is in progress.
@@ -619,7 +625,7 @@ quiz:
     teamScore: "Current team score: $score pts"
   result:
     title: Final results
-    table: Table $table
+    table: Team $name
     points: $score pts
     yourTeam: Your team
     yourTeamRanked: "#$rank / $name ($score pts)"

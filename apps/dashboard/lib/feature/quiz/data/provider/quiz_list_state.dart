@@ -20,7 +20,21 @@ final quizParticipantListProvider = StreamProvider.family<List<QuizParticipant>,
 
 /// イベント配下のチーム一覧（tableNumber 昇順）。
 final quizTeamListProvider = StreamProvider.family<List<QuizTeam>, String>(
-  (ref, eventId) => ref.watch(quizTeamRepositoryProvider).watchAll(eventId),
+  (ref, eventId) {
+    final event = ref.watch(quizEventProvider(eventId)).value;
+    if (event != null &&
+        (event.status == QuizEventStatus.registration || event.status == QuizEventStatus.entryClosed) &&
+        event.teamSelectionStatus != QuizTeamSelectionStatus.notStarted) {
+      return ref
+          .watch(quizParticipantListProvider(eventId))
+          .when(
+            data: (participants) => Stream.value(quizTeamsFromParticipants(participants)),
+            error: (error, stack) => Stream.error(error, stack),
+            loading: () => const Stream<List<QuizTeam>>.empty(),
+          );
+    }
+    return ref.watch(quizTeamRepositoryProvider).watchAll(eventId);
+  },
 );
 
 /// イベント配下の問題一覧（order 昇順）。
@@ -39,11 +53,6 @@ final quizAnswersByQuestionProvider = StreamProvider.family<List<QuizAnswer>, ({
 /// スポンサー名の解決に使う一覧。スポンサー feature の repository を再利用する。
 final quizSponsorListProvider = StreamProvider<List<Sponsor>>(
   (ref) => ref.watch(sponsorRepositoryProvider).watchAll(),
-);
-
-/// 現地受付コードのリアルタイム購読（運営のみ読める）。
-final quizEntryCodeProvider = StreamProvider.family<String?, String>(
-  (ref, eventId) => ref.watch(quizOperationsRepositoryProvider).watchEntryCode(eventId),
 );
 
 final quizQuestionProvider = StreamProvider.family<QuizQuestion?, ({String eventId, String questionId})>(

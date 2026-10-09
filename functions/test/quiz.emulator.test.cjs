@@ -128,7 +128,6 @@ async function seedEvent(label, status = "registration", members = []) {
     createdAt: Timestamp.now(),
     updatedAt: Timestamp.now(),
   });
-  batch.set(ref.collection("secret").doc("entry"), { code: "123456" });
   for (const uid of members)
     batch.set(ref.collection("participants").doc(uid), {
       displayName: uid,
@@ -137,6 +136,17 @@ async function seedEvent(label, status = "registration", members = []) {
   await batch.commit();
   if (status === "registration") await op(eventId, "openRegistration");
   return eventId;
+}
+async function prepareTeams(eventId) {
+  await op(eventId, "openTeamSelection");
+  const participants = await db.collection(`quizEvents/${eventId}/participants`).get();
+  const batch = db.batch();
+  for (const participant of participants.docs) batch.update(participant.ref, { teamId: "A" });
+  await batch.commit();
+  await op(eventId, "closeTeamSelection");
+}
+function select(eventId, user, teamId, expectedTeamId = null) {
+  return success("selectQuizTeam", user, { eventId, teamId, expectedTeamId });
 }
 async function seedQuestion(eventId, questionId = "q1", status = "draft") {
   const ref = db.doc(`quizEvents/${eventId}/questions/${questionId}`);
@@ -215,10 +225,10 @@ test("callables enforce auth and admin privileges", async () => {
     "PERMISSION_DENIED",
   );
   await error(
-    "registerQuizParticipant",
+    "selectQuizTeam",
     stranger,
-    { eventId, displayName: "A", entryCode: "000000" },
-    "PERMISSION_DENIED",
+    { eventId, teamId: "A", expectedTeamId: null },
+    "FAILED_PRECONDITION",
   );
   const clock = await success("getQuizServerTime", attendee, {});
   assert.ok(Math.abs(clock.serverNowMs - Date.now()) < 5000);
@@ -305,79 +315,117 @@ test("global lock rejects concurrent registration for both rounds and detects le
   await db.doc(`quizEvents/${legacy}/participants/${attendee.uid}`).delete();
 });
 
-test("rotated code invalidates stale claims and wrong-code guesses are rate limited", async () => {
-  const eventId = await seedEvent("rotation");
-  await db
-    .doc(`quizEvents/${eventId}/entryClaims/${attendee.uid}`)
-    .set({ code: "123456" });
-  const rotated = await op(eventId, "regenerateEntryCode");
-  assert.match(rotated.code, /^\d{6}$/);
-  assert.notEqual(rotated.code, "123456");
-  await error(
-    "registerQuizParticipant",
-    attendee,
-    { eventId, displayName: "A", entryCode: "123456" },
-    "PERMISSION_DENIED",
-  );
-  for (let i = 0; i < 5; i++)
-    await error(
-      "registerQuizParticipant",
-      stranger,
-      { eventId, displayName: "A", entryCode: "000000" },
-      "PERMISSION_DENIED",
-    );
-  await error(
-    "registerQuizParticipant",
-    stranger,
-    { eventId, displayName: "A", entryCode: rotated.code },
-    "RESOURCE_EXHAUSTED",
-  );
-  await register(eventId, attendee, rotated.code);
-  await op(eventId, "removeParticipant", { uid: attendee.uid });
+test("registration needs no code, normalizes public names and ignores old codes", async () => {
+  const eventId = await seedEvent("code-free");
+  const person = await newUser("code-free");
+  await success("registerQuizParticipant", person, { eventId });
+  const participant = db.doc(`quizEvents/${eventId}/participants/${person.uid}`);
+  assert.equal((await participant.get()).get("displayName"), "参加者");
+  await op(eventId, "removeParticipant", { uid: person.uid });
+  await db.doc(`users/${person.uid}`).set({ displayName: "  " + "あ".repeat(30) + "  " });
+  await success("registerQuizParticipant", person, { eventId });
+  assert.equal((await participant.get()).get("displayName"), "あ".repeat(20));
+  await op(eventId, "removeParticipant", { uid: person.uid });
+  await db.doc(`users/${person.uid}`).delete();
+  await success("registerQuizParticipant", person, { eventId, entryCode: "wrong", displayName: "  Legacy  " });
+  assert.equal((await participant.get()).get("displayName"), "Legacy");
 });
 
-test("team construction races preserve one assignment; explicit rebuild retries do not reshuffle", async () => {
-  const eventId = await seedEvent(
-    "teams",
-    "entryClosed",
-    Array.from({ length: 8 }, (_, i) => `${prefix}-team-${i}`),
-  );
-  await Promise.all([op(eventId, "buildTeams"), op(eventId, "buildTeams")]);
-  const first = await db.collection(`quizEvents/${eventId}/teams`).get();
-  assert.equal(first.size, 2);
-  assert.equal(
-    new Set(first.docs.flatMap((doc) => doc.get("memberUids"))).size,
-    8,
-  );
-  const roster = Object.fromEntries(
-    first.docs.map((doc) => [doc.id, doc.get("memberUids")]),
-  );
-  await op(eventId, "buildTeams");
-  assert.deepEqual(
-    Object.fromEntries(
-      (await db.collection(`quizEvents/${eventId}/teams`).get()).docs.map(
-        (doc) => [doc.id, doc.get("memberUids")],
-      ),
-    ),
-    roster,
-  );
-  await Promise.all([
-    op(eventId, "rebuildTeams", { operationId: "rebuild1" }),
-    op(eventId, "rebuildTeams", { operationId: "rebuild1" }),
-  ]);
-  const rebuilt = await db.collection(`quizEvents/${eventId}/teams`).get();
-  assert.equal(rebuilt.size, 2);
-  assert.ok(rebuilt.docs.every((doc) => !(doc.id in roster)));
+test("selection is authenticated, compares membership, survives reopening, and freezes at first question", async () => {
+  const eventId = await seedEvent("selection");
+  const person = await newUser("selector");
+  await register(eventId, person);
+  await error("selectQuizTeam", undefined, { eventId, teamId: "A", expectedTeamId: null }, "UNAUTHENTICATED");
+  await error("selectQuizTeam", person, { eventId, teamId: "A", expectedTeamId: null }, "FAILED_PRECONDITION");
+  await op(eventId, "openTeamSelection");
+  await error("selectQuizTeam", person, { eventId, teamId: "U", expectedTeamId: null }, "INVALID_ARGUMENT");
+  await select(eventId, person, "A");
+  await select(eventId, person, "A");
+  await select(eventId, person, "T", "A");
+  await error("selectQuizTeam", person, { eventId, teamId: "B", expectedTeamId: "A" }, "FAILED_PRECONDITION");
+  await op(eventId, "closeRegistration");
+  await op(eventId, "closeTeamSelection");
+  await select(eventId, person, "T");
+  await error("selectQuizTeam", person, { eventId, teamId: "B", expectedTeamId: "T" }, "FAILED_PRECONDITION");
   await op(eventId, "reopenRegistration");
-  assert.equal(
-    (await db.collection(`quizEvents/${eventId}/teams`).get()).size,
-    0,
-  );
-  assert.ok(
-    (
-      await db.collection(`quizEvents/${eventId}/participants`).get()
-    ).docs.every((doc) => doc.get("teamId") === undefined),
-  );
+  assert.equal((await db.doc(`quizEvents/${eventId}/participants/${person.uid}`).get()).get("teamId"), "T");
+  await op(eventId, "closeRegistration");
+  await seedQuestion(eventId);
+  await op(eventId, "openQuestion", { questionId: "q1" });
+  const teams = await db.collection(`quizEvents/${eventId}/teams`).get();
+  assert.deepEqual(teams.docs.map((team) => team.id), ["T"]);
+  assert.equal(teams.docs[0].get("tableNumber"), 20);
+  assert.equal((await db.collection(`quizEvents/${eventId}/answers`).get()).size, 1);
+  await select(eventId, person, "T");
+  for (const operation of ["openTeamSelection", "closeTeamSelection", "reopenRegistration", "removeUnselectedParticipants", "removeParticipant"]) {
+    await error("quizEventOperation", admin, { eventId, operation, uid: person.uid }, "FAILED_PRECONDITION");
+  }
+});
+
+test("initial selection removes legacy assignments; no-shows block starting and cancellation restores capacity", async () => {
+  const person = await newUser("checkin");
+  const missing = await newUser("missing");
+  const nullTeam = await newUser("null-team");
+  const deleted = await newUser("deleted-roster");
+  const eventId = await seedEvent("checkin");
+  for (const user of [person, missing, nullTeam, deleted]) await register(eventId, user);
+  const ref = db.doc(`quizEvents/${eventId}`);
+  await ref.collection("teams").doc("old").set({ name: "Old", memberUids: [person.uid] });
+  await ref.collection("participants").doc(person.uid).update({ teamId: "old" });
+  await error("quizEventOperation", admin, { eventId, operation: "removeUnselectedParticipants" }, "FAILED_PRECONDITION");
+  await op(eventId, "closeRegistration");
+  await error("quizEventOperation", admin, { eventId, operation: "removeUnselectedParticipants" }, "FAILED_PRECONDITION");
+  await op(eventId, "openTeamSelection");
+  assert.equal((await ref.collection("teams").get()).empty, true);
+  assert.equal((await ref.collection("participants").doc(person.uid).get()).get("teamId"), undefined);
+  await ref.collection("participants").doc(nullTeam.uid).update({ teamId: null });
+  await db.doc(`quizParticipation/${deleted.uid}`).update({ accountDeleted: true });
+  await select(eventId, person, "A");
+  await seedQuestion(eventId);
+  await error("quizEventOperation", admin, { eventId, operation: "presentQuestion", questionId: "q1" }, "FAILED_PRECONDITION");
+  await op(eventId, "closeTeamSelection");
+  await error("quizEventOperation", admin, { eventId, operation: "presentQuestion", questionId: "q1" }, "FAILED_PRECONDITION");
+  assert.deepEqual(await op(eventId, "removeUnselectedParticipants"), { removedCount: 3 });
+  assert.equal((await ref.collection("admissionSlots").get()).size, 1);
+  assert.equal((await ref.collection("participantAccounts").get()).size, 1);
+  assert.equal((await db.doc(`quizParticipation/${missing.uid}`).get()).exists, false);
+  assert.equal((await db.doc(`quizParticipation/${deleted.uid}`).get()).get("accountDeleted"), true);
+  const otherRound = await seedEvent("walk-in-other");
+  await register(otherRound, missing);
+  await op(eventId, "reopenRegistration");
+  await register(eventId, nullTeam);
+  await error("quizEventOperation", admin, { eventId, operation: "removeUnselectedParticipants" }, "FAILED_PRECONDITION");
+  await op(eventId, "openTeamSelection");
+  await select(eventId, nullTeam, "A");
+  assert.equal((await ref.collection("participants").doc(person.uid).get()).get("teamId"), "A");
+  await op(eventId, "closeRegistration");
+  await op(eventId, "removeParticipant", { uid: nullTeam.uid });
+  await op(eventId, "closeTeamSelection");
+  await ref.collection("teams").doc("stray").set({ name: "Stray" });
+  await error("quizEventOperation", admin, { eventId, operation: "presentQuestion", questionId: "q1" }, "FAILED_PRECONDITION");
+  await ref.collection("teams").doc("stray").delete();
+  await op(eventId, "presentQuestion", { questionId: "q1" });
+  assert.deepEqual((await ref.collection("teams").get()).docs.map((doc) => doc.id), ["A"]);
+});
+
+test("concurrent selections and no-show cancellation leave one consistent roster", async () => {
+  const eventId = await seedEvent("select-race");
+  const people = await Promise.all([newUser("race-a"), newUser("race-b")]);
+  for (const person of people) await register(eventId, person);
+  await op(eventId, "openTeamSelection");
+  const first = await Promise.all(["A", "B"].map((teamId) => call("selectQuizTeam", people[0], { eventId, teamId, expectedTeamId: null })));
+  assert.equal(first.filter((result) => !result.error).length, 1);
+  await op(eventId, "closeRegistration");
+  const [selection] = await Promise.all([
+    call("selectQuizTeam", people[1], { eventId, teamId: "T", expectedTeamId: null }),
+    op(eventId, "removeUnselectedParticipants"),
+  ]);
+  const participant = await db.doc(`quizEvents/${eventId}/participants/${people[1].uid}`).get();
+  assert.equal(participant.exists, !selection.error);
+  if (participant.exists) assert.equal(participant.get("teamId"), "T");
+  const roster = await db.collection(`quizEvents/${eventId}/participants`).get();
+  const slots = await db.collection(`quizEvents/${eventId}/admissionSlots`).get();
+  assert.equal(roster.size, slots.size);
 });
 
 test("reading has no timer, team answers overwrite, opening retries preserve answers, deadlines use server clock", async () => {
@@ -388,9 +436,8 @@ test("reading has no timer, team answers overwrite, opening retries preserve ans
   ]);
   await seedQuestion(eventId);
   await seedQuestion(eventId, "q2");
-  await op(eventId, "buildTeams");
-  const teamId = (await db.collection(`quizEvents/${eventId}/teams`).get())
-    .docs[0].id;
+  await prepareTeams(eventId);
+  const teamId = "A";
   await op(eventId, "presentQuestion", { questionId: "q1" });
   const reading = (
     await db.doc(`quizEvents/${eventId}/questions/q1`).get()
@@ -471,7 +518,7 @@ test("reading has no timer, team answers overwrite, opening retries preserve ans
   await error(
     "quizEventOperation",
     admin,
-    { eventId, operation: "rebuildTeams", operationId: "after" },
+    { eventId, operation: "openTeamSelection", operationId: "after" },
     "FAILED_PRECONDITION",
   );
 });
@@ -483,9 +530,8 @@ test("security rules deny participant registration bypass and stale admin runtim
     `${prefix}-r3`,
   ]);
   await seedQuestion(eventId);
-  await op(eventId, "buildTeams");
-  const teamId = (await db.collection(`quizEvents/${eventId}/teams`).get())
-    .docs[0].id;
+  await prepareTeams(eventId);
+  const teamId = "A";
   for (const [path, user, fields] of [
     [
       `quizEvents/${eventId}/participants/${attendee.uid}`,
@@ -515,6 +561,8 @@ test("security rules deny participant registration bypass and stale admin runtim
       admin,
       { score: { integerValue: "999" } },
     ],
+    [`quizEvents/${eventId}`, admin, { teamSelectionStatus: { stringValue: "open" } }],
+    [`quizEvents/${eventId}/teams/${teamId}`, admin, { name: { stringValue: "Changed" } }],
     [
       `quizEvents/${eventId}/secret/entry`,
       admin,
@@ -624,27 +672,12 @@ test("security rules still allow dashboard draft creation and content-only confi
   await db
     .doc(eventPath)
     .update({ status: "inProgress", isPublic: true, currentQuestionId: "q1" });
-  await commit([
-    {
-      update: {
-        name: documentName(eventPath),
-        fields: {
-          teamNamePool: {
-            arrayValue: { values: [{ stringValue: "Changed team" }] },
-          },
-        },
-      },
-      updateMask: { fieldPaths: ["teamNamePool"] },
-      updateTransforms: [
-        { fieldPath: "updatedAt", setToServerValue: "REQUEST_TIME" },
-      ],
-    },
-  ]);
+  assert.equal((await clientPatch(eventPath, admin, { teamNamePool: { arrayValue: { values: [{ stringValue: "Changed" }] } } })).status, 403);
   assert.equal((await db.doc(eventPath).get()).get("currentQuestionId"), "q1");
   assert.equal((await db.doc(eventPath).get()).get("status"), "inProgress");
 });
 
-test("receipts prevent delayed close and rotation retries undoing later operations", async () => {
+test("receipts prevent delayed close and selection retries undoing later operations", async () => {
   const eventId = await seedEvent("receipts", "registration", [
     attendee.uid,
     teammate.uid,
@@ -657,30 +690,14 @@ test("receipts prevent delayed close and rotation retries undoing later operatio
     (await db.doc(`quizEvents/${eventId}`).get()).get("status"),
     "registration",
   );
-  const first = await op(eventId, "regenerateEntryCode", {
-    operationId: "rotation-a",
-  });
-  const second = await op(eventId, "regenerateEntryCode", {
-    operationId: "rotation-b",
-  });
-  assert.notEqual(first.code, second.code);
-  assert.deepEqual(
-    await op(eventId, "regenerateEntryCode", { operationId: "rotation-a" }),
-    first,
-  );
-  assert.equal(
-    (await db.doc(`quizEvents/${eventId}/secret/entry`).get()).get("code"),
-    second.code,
-  );
-  await error(
-    "quizEventOperation",
-    admin,
-    { eventId, operation: "closeRegistration", operationId: "rotation-a" },
-    "FAILED_PRECONDITION",
-  );
+  await op(eventId, "openTeamSelection", { operationId: "select-open" });
+  await op(eventId, "closeTeamSelection");
+  await op(eventId, "openTeamSelection", { operationId: "select-open" });
+  assert.equal((await db.doc(`quizEvents/${eventId}`).get()).get("teamSelectionStatus"), "closed");
+  await error("quizEventOperation", admin, { eventId, operation: "closeTeamSelection", operationId: "select-open" }, "FAILED_PRECONDITION");
   await op(eventId, "closeRegistration");
   await seedQuestion(eventId);
-  await op(eventId, "buildTeams");
+  await prepareTeams(eventId);
   await op(eventId, "openQuestion", { questionId: "q1" });
   await op(eventId, "closeQuestion", {
     questionId: "q1",
@@ -737,9 +754,8 @@ test("early finalization counts only revealed questions and never awards an unas
   await db
     .doc(`quizEvents/${eventId}/questions/q3`)
     .update({ sponsorId: "unasked-sponsor" });
-  await op(eventId, "buildTeams");
-  const teamId = (await db.collection(`quizEvents/${eventId}/teams`).get())
-    .docs[0].id;
+  await prepareTeams(eventId);
+  const teamId = "A";
   await op(eventId, "presentQuestion", { questionId: "q1" });
   await error(
     "quizEventOperation",
@@ -792,7 +808,7 @@ test("finalization racing the next presentation commits exactly one transition",
   ]);
   await seedQuestion(eventId);
   await seedQuestion(eventId, "q2");
-  await op(eventId, "buildTeams");
+  await prepareTeams(eventId);
   await op(eventId, "openQuestion", { questionId: "q1" });
   await op(eventId, "closeQuestion", { questionId: "q1" });
   await op(eventId, "revealQuestion", { questionId: "q1" });

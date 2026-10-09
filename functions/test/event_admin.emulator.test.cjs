@@ -50,8 +50,6 @@ test("source authentication manages STG and production independently through the
   assert.equal((await stg.doc(`quizEvents/${eventId}/questions/q1`).get()).exists, false);
   assert.equal((await prod.doc(`admins/${actor.uid}`).get()).exists, false);
 
-  const entry = await op("regenerateEntryCode");
-  assert.match(entry.code, /^\d{6}$/);
   await op("publish");
   await op("openRegistration");
   for (let i = 0; i < 3; i++) {
@@ -59,15 +57,18 @@ test("source authentication manages STG and production independently through the
   }
   await prod.doc(`quizEvents/${eventId}`).update({ participantCount: 3 });
   await op("closeRegistration");
-  await op("buildTeams");
-
+  await op("openTeamSelection");
+  for (let i = 0; i < 3; i++) await prod.doc(`quizEvents/${eventId}/participants/member-${i}`).update({ teamId: "A" });
+  await op("closeTeamSelection");
   let snapshot = await call("prod", "read", { view: "quizConsole", eventId });
-  assert.equal(snapshot.teams.length, 1);
+  assert.equal(snapshot.teams.length, 0);
   assert.equal(snapshot.participants.length, 3);
-  assert.equal(snapshot.entryCode, entry.code);
-  const teamId = snapshot.teams[0].id;
-  await call("prod", "renameTeam", { eventId, teamId, name: "Selected production team" });
-  await call("prod", "updateTeamNamePool", { eventId, names: ["One", "Two"] });
+  assert.equal("entryCode" in snapshot, false);
+  for (const action of ["renameTeam", "updateTeamNamePool"]) {
+    await assert.rejects(call("prod", action, { eventId, teamId: "A", name: "Changed", names: ["Changed"] }), { code: "invalid-argument" });
+  }
+  await call("prod", "saveEvent", { ...eventPayload, teamSelectionStatus: "open" });
+  assert.equal((await prod.doc(`quizEvents/${eventId}`).get()).get("teamSelectionStatus"), "closed");
   await op("presentQuestion", { questionId: "q1" });
 
   const projection = await call("prod", "read", { view: "quizProjection", eventId });
@@ -90,7 +91,7 @@ test("source authentication manages STG and production independently through the
   await op("finalizeEvent");
   snapshot = await call("prod", "read", { view: "quizProjection", eventId });
   assert.equal(snapshot.event.status, "finished");
-  assert.equal(snapshot.teams[0].name, "Selected production team");
+  assert.equal(snapshot.teams[0].name, "A");
   assert.equal(snapshot.teams[0].rank, 1);
   assert.equal((await stg.doc(`quizEvents/${eventId}`).get()).get("status"), "draft");
   assert.equal((await source.collection("quizEvents").get()).empty, true);
@@ -125,7 +126,7 @@ async function rehearsal(label) {
   const id = `rehearsal-${label}-${randomUUID().slice(0, 8)}`;
   await call("stg", "saveEvent", { ...eventPayload, eventId: id });
   await call("stg", "saveQuestion", { ...questionPayload, eventId: id });
-  await stg.doc(`quizEvents/${id}`).update({ status: "finished", isPublic: true, currentQuestionId: "q1", participantCount: 3 });
+  await stg.doc(`quizEvents/${id}`).update({ status: "finished", isPublic: true, currentQuestionId: "q1", participantCount: 3, teamSelectionStatus: "closed" });
   await stg.doc(`quizEvents/${id}/questions/q1`).update({
     status: "revealed", correctOptionIndex: 0, explanation: { ja: "公開された解説", en: "Revealed" },
     openedAt: Timestamp.now(), closesAt: Timestamp.now(),
@@ -155,6 +156,7 @@ test("promotes only the reviewed event definition, with fresh private production
 
   const copied = (await prod.doc(`quizEvents/${targetId}`).get()).data();
   assert.equal(copied.status, "draft");
+  assert.equal(copied.teamSelectionStatus, undefined);
   assert.equal(copied.isPublic, false);
   assert.equal(copied.currentQuestionId, null);
   assert.equal(copied.participantCount, 0);
@@ -224,7 +226,6 @@ test("published imports can be withdrawn, but registration or attendee data prev
     const operate = (operation) => call("prod", "quizOperation", { eventId: id, operation, operationId: randomUUID() });
     await operate("publish");
     if (activity === "registration") {
-      await operate("regenerateEntryCode");
       await operate("openRegistration");
     }
     if (activity === "participant") await prod.doc(`quizEvents/${id}/participants/person`).set({ displayName: "Real attendee" });
@@ -245,7 +246,6 @@ test("withdrawal racing registration cannot hide an event that has begun admitti
   await call("stg", "promoteQuizEvent", { eventId: sourceEventId, revision: preview.revision, operationId: id });
   const operate = (operation) => call("prod", "quizOperation", { eventId: id, operation, operationId: randomUUID() });
   await operate("publish");
-  await operate("regenerateEntryCode");
   const results = await Promise.allSettled([
     call("prod", "withdrawQuizPromotion", { eventId: id }), operate("openRegistration"),
   ]);

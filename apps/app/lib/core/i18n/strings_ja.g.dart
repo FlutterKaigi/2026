@@ -1542,6 +1542,7 @@ class Translations$quiz$ja {
 	late final Translations$quiz$preparing$ja preparing = Translations$quiz$preparing$ja.internal(_root);
 	late final Translations$quiz$registration$ja registration = Translations$quiz$registration$ja.internal(_root);
 	late final Translations$quiz$waiting$ja waiting = Translations$quiz$waiting$ja.internal(_root);
+	late final Translations$quiz$selection$ja selection = Translations$quiz$selection$ja.internal(_root);
 	late final Translations$quiz$team$ja team = Translations$quiz$team$ja.internal(_root);
 	late final Translations$quiz$entryClosed$ja entryClosed = Translations$quiz$entryClosed$ja.internal(_root);
 	late final Translations$quiz$question$ja question = Translations$quiz$question$ja.internal(_root);
@@ -2048,29 +2049,14 @@ class Translations$quiz$registration$ja {
 
 	// Translations
 
-	/// ja: 'テーブル対抗のチーム戦。ニックネームで参加しよう！'
-	String get subtitle => 'テーブル対抗のチーム戦。ニックネームで参加しよう！';
+	/// ja: '参加する回を確認して参加表明してください。前半戦・後半戦のどちらか一方に参加できます。'
+	String get subtitle => '参加する回を確認して参加表明してください。前半戦・後半戦のどちらか一方に参加できます。';
 
 	/// ja: '現在の参加人数'
 	String get participantCount => '現在の参加人数';
 
 	/// ja: '人'
 	String get participantUnit => '人';
-
-	/// ja: 'ニックネーム'
-	String get nickname => 'ニックネーム';
-
-	/// ja: '1〜20文字'
-	String get nicknameHint => '1〜20文字';
-
-	/// ja: '受付コード'
-	String get entryCode => '受付コード';
-
-	/// ja: '6桁の数字'
-	String get entryCodeHint => '6桁の数字';
-
-	/// ja: '会場の受付で案内しているコードを入力してください'
-	String get entryCodeHelper => '会場の受付で案内しているコードを入力してください';
 
 	/// ja: '参加する'
 	String get join => '参加する';
@@ -2081,9 +2067,6 @@ class Translations$quiz$registration$ja {
 	/// ja: '登録できませんでした。時間をおいて再度お試しください。'
 	String get failed => '登録できませんでした。時間をおいて再度お試しください。';
 
-	/// ja: '登録できませんでした。受付コードが正しいか確認してください。'
-	String get codeMismatch => '登録できませんでした。受付コードが正しいか確認してください。';
-
 	/// ja: '別の回に参加登録済みのため、この回には登録できません。'
 	String get alreadyParticipated => '別の回に参加登録済みのため、この回には登録できません。';
 
@@ -2092,9 +2075,6 @@ class Translations$quiz$registration$ja {
 
 	/// ja: '登録を確認できませんでした。通信状況を確認して再試行してください。'
 	String get unavailable => '登録を確認できませんでした。通信状況を確認して再試行してください。';
-
-	/// ja: '入力回数が多すぎます。1分待ってから、受付コードを確認して再試行してください。'
-	String get rateLimited => '入力回数が多すぎます。1分待ってから、受付コードを確認して再試行してください。';
 
 	/// ja: 'このアカウントでは参加できません。運営にお問い合わせください。'
 	String get accountUnavailable => 'このアカウントでは参加できません。運営にお問い合わせください。';
@@ -2108,11 +2088,56 @@ class Translations$quiz$waiting$ja {
 
 	// Translations
 
-	/// ja: '登録完了！'
-	String get title => '登録完了！';
+	/// ja: '参加表明済み'
+	String get title => '参加表明済み';
 
-	/// ja: 'チーム発表までしばらくお待ちください'
-	String get description => 'チーム発表までしばらくお待ちください';
+	/// ja: '当日は会場でスタッフがテーブルをご案内します。チーム選択の開始をお待ちください。'
+	String get description => '当日は会場でスタッフがテーブルをご案内します。チーム選択の開始をお待ちください。';
+}
+
+// Path: quiz.selection
+class Translations$quiz$selection$ja {
+	Translations$quiz$selection$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'チームを選択'
+	String get title => 'チームを選択';
+
+	/// ja: 'スタッフに案内されたテーブルに着席してから、そのテーブルのチーム（A〜T）を選んでください。'
+	String get instructions => 'スタッフに案内されたテーブルに着席してから、そのテーブルのチーム（A〜T）を選んでください。';
+
+	/// ja: 'チーム未選択'
+	String get unselected => 'チーム未選択';
+
+	/// ja: 'あなたのチームは $team です'
+	String current({required Object team}) => 'あなたのチームは ${team} です';
+
+	/// ja: '$team（$count 人）'
+	String option({required Object team, required Object count}) => '${team}（${count} 人）';
+
+	/// ja: 'このチームに決定'
+	String get confirm => 'このチームに決定';
+
+	/// ja: '送信中…'
+	String get sending => '送信中…';
+
+	/// ja: '受付中はチームを選び直せます。'
+	String get changeHint => '受付中はチームを選び直せます。';
+
+	/// ja: 'チーム選択は終了しました。出題をお待ちください。'
+	String get closed => 'チーム選択は終了しました。出題をお待ちください。';
+
+	/// ja: 'チーム選択は終了しました。運営スタッフにお声がけください。'
+	String get closedUnselected => 'チーム選択は終了しました。運営スタッフにお声がけください。';
+
+	/// ja: '所属が変更されました。現在のチームを確認して選び直してください。'
+	String get changed => '所属が変更されました。現在のチームを確認して選び直してください。';
+
+	/// ja: '選択の完了を確認できませんでした。通信状況と現在の所属を確認してください。受付終了や参加取消の場合はスタッフにお声がけください。'
+	String get failed => '選択の完了を確認できませんでした。通信状況と現在の所属を確認してください。受付終了や参加取消の場合はスタッフにお声がけください。';
 }
 
 // Path: quiz.team
@@ -2123,11 +2148,11 @@ class Translations$quiz$team$ja {
 
 	// Translations
 
-	/// ja: 'あなたのテーブルは'
-	String get yourTable => 'あなたのテーブルは';
+	/// ja: 'あなたのチームは'
+	String get yourTable => 'あなたのチームは';
 
-	/// ja: 'テーブル'
-	String get table => 'テーブル';
+	/// ja: 'チーム'
+	String get table => 'チーム';
 
 	/// ja: 'チーム'
 	String get teamLabel => 'チーム';
@@ -2135,8 +2160,8 @@ class Translations$quiz$team$ja {
 	/// ja: 'テーブルに集まって次の出題を待とう！'
 	String get gatherHint => 'テーブルに集まって次の出題を待とう！';
 
-	/// ja: 'テーブル $table・$name'
-	String badge({required Object table, required Object name}) => 'テーブル ${table}・${name}';
+	/// ja: 'チーム $name'
+	String badge({required Object name}) => 'チーム ${name}';
 }
 
 // Path: quiz.entryClosed
@@ -2255,8 +2280,8 @@ class Translations$quiz$result$ja {
 	/// ja: '最終結果'
 	String get title => '最終結果';
 
-	/// ja: 'テーブル $table'
-	String table({required Object table}) => 'テーブル ${table}';
+	/// ja: 'チーム $name'
+	String table({required Object name}) => 'チーム ${name}';
 
 	/// ja: '$score 点'
 	String points({required Object score}) => '${score} 点';
@@ -2833,32 +2858,37 @@ extension on Translations {
 			'quiz.errors.eventLoadFailed' => 'イベント情報の取得に失敗しました',
 			'quiz.preparing.title' => 'クイズは開催準備中です',
 			'quiz.preparing.description' => '開始のアナウンスがあったら この画面から参加できます。',
-			'quiz.registration.subtitle' => 'テーブル対抗のチーム戦。ニックネームで参加しよう！',
+			'quiz.registration.subtitle' => '参加する回を確認して参加表明してください。前半戦・後半戦のどちらか一方に参加できます。',
 			'quiz.registration.participantCount' => '現在の参加人数',
 			'quiz.registration.participantUnit' => '人',
-			'quiz.registration.nickname' => 'ニックネーム',
-			'quiz.registration.nicknameHint' => '1〜20文字',
-			'quiz.registration.entryCode' => '受付コード',
-			'quiz.registration.entryCodeHint' => '6桁の数字',
-			'quiz.registration.entryCodeHelper' => '会場の受付で案内しているコードを入力してください',
 			'quiz.registration.join' => '参加する',
-			_ => null,
-		} ?? switch (path) {
 			'quiz.registration.full' => ({required Object max}) => '定員（${max} 人）に達しました',
 			'quiz.registration.failed' => '登録できませんでした。時間をおいて再度お試しください。',
-			'quiz.registration.codeMismatch' => '登録できませんでした。受付コードが正しいか確認してください。',
 			'quiz.registration.alreadyParticipated' => '別の回に参加登録済みのため、この回には登録できません。',
 			'quiz.registration.closed' => 'この回の参加受付は終了しました。',
 			'quiz.registration.unavailable' => '登録を確認できませんでした。通信状況を確認して再試行してください。',
-			'quiz.registration.rateLimited' => '入力回数が多すぎます。1分待ってから、受付コードを確認して再試行してください。',
+			_ => null,
+		} ?? switch (path) {
 			'quiz.registration.accountUnavailable' => 'このアカウントでは参加できません。運営にお問い合わせください。',
-			'quiz.waiting.title' => '登録完了！',
-			'quiz.waiting.description' => 'チーム発表までしばらくお待ちください',
-			'quiz.team.yourTable' => 'あなたのテーブルは',
-			'quiz.team.table' => 'テーブル',
+			'quiz.waiting.title' => '参加表明済み',
+			'quiz.waiting.description' => '当日は会場でスタッフがテーブルをご案内します。チーム選択の開始をお待ちください。',
+			'quiz.selection.title' => 'チームを選択',
+			'quiz.selection.instructions' => 'スタッフに案内されたテーブルに着席してから、そのテーブルのチーム（A〜T）を選んでください。',
+			'quiz.selection.unselected' => 'チーム未選択',
+			'quiz.selection.current' => ({required Object team}) => 'あなたのチームは ${team} です',
+			'quiz.selection.option' => ({required Object team, required Object count}) => '${team}（${count} 人）',
+			'quiz.selection.confirm' => 'このチームに決定',
+			'quiz.selection.sending' => '送信中…',
+			'quiz.selection.changeHint' => '受付中はチームを選び直せます。',
+			'quiz.selection.closed' => 'チーム選択は終了しました。出題をお待ちください。',
+			'quiz.selection.closedUnselected' => 'チーム選択は終了しました。運営スタッフにお声がけください。',
+			'quiz.selection.changed' => '所属が変更されました。現在のチームを確認して選び直してください。',
+			'quiz.selection.failed' => '選択の完了を確認できませんでした。通信状況と現在の所属を確認してください。受付終了や参加取消の場合はスタッフにお声がけください。',
+			'quiz.team.yourTable' => 'あなたのチームは',
+			'quiz.team.table' => 'チーム',
 			'quiz.team.teamLabel' => 'チーム',
 			'quiz.team.gatherHint' => 'テーブルに集まって次の出題を待とう！',
-			'quiz.team.badge' => ({required Object table, required Object name}) => 'テーブル ${table}・${name}',
+			'quiz.team.badge' => ({required Object name}) => 'チーム ${name}',
 			'quiz.entryClosed.title' => '参加受付は終了しました',
 			'quiz.entryClosed.description' => 'クイズ大会は進行中です。 結果発表はこの画面でご覧いただけます。',
 			'quiz.question.sponsoredBy' => ({required Object name}) => '提供: ${name}',
@@ -2883,7 +2913,7 @@ extension on Translations {
 			'quiz.revealed.yourAnswer' => 'あなたのチームの回答',
 			'quiz.revealed.teamScore' => ({required Object score}) => '現在のチームスコア: ${score} 点',
 			'quiz.result.title' => '最終結果',
-			'quiz.result.table' => ({required Object table}) => 'テーブル ${table}',
+			'quiz.result.table' => ({required Object name}) => 'チーム ${name}',
 			'quiz.result.points' => ({required Object score}) => '${score} 点',
 			'quiz.result.yourTeam' => 'あなたのチーム',
 			'quiz.result.yourTeamRanked' => ({required Object rank, required Object name, required Object score}) => '${rank} 位 / ${name}（${score} 点）',

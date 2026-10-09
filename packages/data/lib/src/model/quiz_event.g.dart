@@ -10,6 +10,13 @@ _QuizEvent _$QuizEventFromJson(Map<String, dynamic> json) => _QuizEvent(
   id: json['id'] as String,
   title: LocaleMap.fromJson(json['title'] as Map<String, dynamic>),
   status: $enumDecode(_$QuizEventStatusEnumMap, json['status']),
+  teamSelectionStatus:
+      $enumDecodeNullable(
+        _$QuizTeamSelectionStatusEnumMap,
+        json['teamSelectionStatus'],
+        unknownValue: QuizTeamSelectionStatus.notStarted,
+      ) ??
+      QuizTeamSelectionStatus.notStarted,
   isPublic: json['isPublic'] as bool? ?? false,
   currentQuestionId: json['currentQuestionId'] as String?,
   sponsorIds: (json['sponsorIds'] as List<dynamic>?)?.map((e) => e as String).toList() ?? const [],
@@ -25,6 +32,7 @@ Map<String, dynamic> _$QuizEventToJson(
   'id': instance.id,
   'title': instance.title.toJson(),
   'status': _$QuizEventStatusEnumMap[instance.status]!,
+  'teamSelectionStatus': _$QuizTeamSelectionStatusEnumMap[instance.teamSelectionStatus]!,
   'isPublic': instance.isPublic,
   'currentQuestionId': instance.currentQuestionId,
   'sponsorIds': instance.sponsorIds,
@@ -41,4 +49,10 @@ const _$QuizEventStatusEnumMap = {
   QuizEventStatus.entryClosed: 'entryClosed',
   QuizEventStatus.inProgress: 'inProgress',
   QuizEventStatus.finished: 'finished',
+};
+
+const _$QuizTeamSelectionStatusEnumMap = {
+  QuizTeamSelectionStatus.notStarted: 'notStarted',
+  QuizTeamSelectionStatus.open: 'open',
+  QuizTeamSelectionStatus.closed: 'closed',
 };

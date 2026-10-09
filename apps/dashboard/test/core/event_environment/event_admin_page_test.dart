@@ -163,7 +163,7 @@ void main() {
     await tester.tap(find.widgetWithText(FilledButton, '作成'));
     await tester.pumpAndSettle();
     expect(requests.where((request) => request['action'] == 'saveEvent').single['environment'], 'prod');
-    expect(requests.where((request) => request['action'] == 'quizOperation').single['environment'], 'prod');
+    expect(requests.where((request) => request['action'] == 'quizOperation'), isEmpty);
     // Reading and saving in the dialog must not initialize the default Firestore.
     expect(requests.every((request) => request['environment'] == 'prod'), isTrue);
     await tester.pumpWidget(const SizedBox());
