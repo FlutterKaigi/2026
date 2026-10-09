@@ -10,11 +10,13 @@ Firestoreトランザクションで処理する。リージョンは `asia-nort
 管理者認可は既存の `assertAdmin` と共通。詳細は
 [設計](../docs/quiz-event/DESIGN.md)・[当日手順](../docs/quiz-event/RUNBOOK.md)を参照。
 
-- `registerQuizParticipant({eventId, displayName, entryCode})`: 非匿名アカウントの登録。
-  コード、定員、前後半の重複参加をサーバーで検証する。
+- `registerQuizParticipant({eventId})`: 非匿名アカウントのコードなし参加表明。
+  定員・前後半の重複参加を検証し、公開プロフィールの表示名を使う。
+- `selectQuizTeam({eventId, teamId, expectedTeamId})`: A〜T の所属を比較更新する。
 - `submitQuizAnswer({eventId, questionId, teamId, selectedOptionIndex})`: 所属とサーバー期限を検証する。
 - `quizEventOperation({eventId, operation, questionId?, uid?, seconds?, operationId?})`: 管理者の進行操作。
-  すべての操作で操作IDを再利用して再試行する。
+  チーム選択の開始・終了、個別取消・未選択者の一括取消にも使う。
+  再試行では操作IDを再利用する。一括取消だけは押下ごとに新しいIDで現在の対象を判定する。
 - `getQuizServerTime({})`: `serverNowMs`（epochミリ秒）を返す。
 
 Functions・Rules・アプリ・ダッシュボードを受付開始前に揃える。
@@ -257,13 +259,13 @@ Auth アカウントの有効性、App Check を検証する。読取も毎回�
 ```
 
 `action` は `read`、`clock`、`issueSupportLtCode`、`quizOperation`、`saveEvent`、
-`saveQuestion`、`deleteQuestion`、`updateTeamNamePool`、`renameTeam`、
+`saveQuestion`、`deleteQuestion`、
 `previewQuizPromotion`、`promoteQuizEvent`、`withdrawQuizPromotion` のみ。
 読取の `view` は `supportLt` / `quizEvents` / `quizConsole` / `quizQuestion` / `quizProjection`。
 投影用の取得では受付コードや非公開の正解を取得しない。
 画面全体で1回の取得を共有し、2秒間隔と操作直後に更新する。
 
-出題・採点・受付・再編成は既存のトランザクション処理を使う。問題編集は開始前かつ未出題に
+出題・採点・受付・チーム選択・取消はトランザクション処理を使う。問題編集は開始前かつ未出題に
 制限し、正解を公開データへ混ぜない。操作ログには操作環境・実行者・操作名・イベントIDを記録する。
 
 STGダッシュボードで利用する場合は STG にこの関数をデプロイし、その**実行サービスアカウント**に
@@ -277,7 +279,7 @@ STGダッシュボードで利用する場合は STG にこの関数をデプロ
   戻り値の `revision` は設定・問題・正解を含む内容のハッシュ。確認画面と異なる版の反映を防ぐ。
 - `promoteQuizEvent` は同じ `eventId`・`revision` と、再試行でも維持する `operationId` を受け取る。
   本番に別 ID (`operationId`) の非公開・下書きイベントを作り、問題をすべて未出題に戻す。
-  正解は `questions/{id}/secret/answer` にのみ格納する。参加者、チーム、回答、得点、受付コード、
+  正解は `questions/{id}/secret/answer` にのみ格納する。参加者、チーム、回答、得点、チーム選択、
   進行状態、過去の操作履歴はコピーしない。スポンサー本体の同期も行わず、本番側の存在を検証する。
 - 問題数は1〜100問、定義は4 MB以下。本番のイベント・問題・正解・反映履歴を1トランザクションで
   作成するため、途中まで反映されたイベントは残らない。反映済みイベントの上書きは行わない。

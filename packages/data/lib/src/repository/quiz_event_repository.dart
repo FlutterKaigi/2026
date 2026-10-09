@@ -16,8 +16,6 @@ abstract interface class QuizEventRepository {
 
   /// イベントを保存し、ドキュメント ID を返す（新規作成時は採番された ID）。
   Future<String> save(QuizEvent event);
-
-  Future<void> updateTeamNamePool(String eventId, List<String> names);
 }
 
 final class FirestoreQuizEventRepository implements QuizEventRepository {
@@ -103,10 +101,4 @@ final class FirestoreQuizEventRepository implements QuizEventRepository {
     });
     return event.id;
   }
-
-  @override
-  Future<void> updateTeamNamePool(String eventId, List<String> names) => _collection.doc(eventId).update({
-    'teamNamePool': names,
-    'updatedAt': FieldValue.serverTimestamp(),
-  });
 }

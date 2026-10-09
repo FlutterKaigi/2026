@@ -78,10 +78,6 @@ class AdminQuizEventRepository implements QuizEventRepository {
     _newId = null;
     return eventId;
   }
-
-  @override
-  Future<void> updateTeamNamePool(String eventId, List<String> names) async =>
-      client.mutate('updateTeamNamePool', {'eventId': eventId, 'names': names});
 }
 
 class AdminQuizQuestionRepository implements QuizQuestionRepository {
@@ -131,9 +127,6 @@ class AdminQuizTeamRepository implements QuizTeamRepository {
   @override
   Stream<QuizTeam?> watchById(String eventId, String teamId) =>
       watchAll(eventId).map((teams) => teams.where((team) => team.id == teamId).firstOrNull);
-  @override
-  Future<void> updateName(String eventId, String teamId, String name) async =>
-      client.mutate('renameTeam', {'eventId': eventId, 'teamId': teamId, 'name': name});
 }
 
 class AdminQuizParticipantRepository implements QuizParticipantRepository {
@@ -148,16 +141,9 @@ class AdminQuizParticipantRepository implements QuizParticipantRepository {
   @override
   Future<QuizParticipantAccount?> findAccount(String eventId, String uid) async => _attendeeOnly();
   @override
-  Future<void> register(
-    String eventId, {
-    String? uid,
-    required String displayName,
-    required String entryCode,
-    String? signInProvider,
-    String? email,
-    String? accountName,
-    String? photoUrl,
-  }) async => _attendeeOnly();
+  Future<void> register(String eventId) async => _attendeeOnly();
+  @override
+  Future<void> selectTeam(String eventId, String teamId, {required String? expectedTeamId}) async => _attendeeOnly();
 }
 
 class AdminQuizAnswerRepository implements QuizAnswerRepository {
@@ -194,6 +180,7 @@ class AdminQuizOperationsRepository implements QuizOperationsRepository {
   ]) async {
     final payload = {'eventId': eventId, 'operation': operation, ...args};
     final key = jsonEncode(payload);
+    if (operation == 'removeUnselectedParticipants') _pendingIds.remove(key);
     payload['operationId'] = _pendingIds.putIfAbsent(key, newEventOperationId);
     try {
       final result = await client.mutate('quizOperation', payload);
@@ -225,17 +212,15 @@ class AdminQuizOperationsRepository implements QuizOperationsRepository {
   @override
   Future<void> reopenRegistration(String eventId) async => _operate(eventId, 'reopenRegistration');
   @override
-  Future<void> buildTeams(String eventId) async => _operate(eventId, 'buildTeams');
+  Future<void> openTeamSelection(String eventId) async => _operate(eventId, 'openTeamSelection');
   @override
-  Future<void> rebuildTeams(String eventId) async => _operate(eventId, 'rebuildTeams');
+  Future<void> closeTeamSelection(String eventId) async => _operate(eventId, 'closeTeamSelection');
   @override
   Future<void> removeParticipant(String eventId, String uid) async =>
       _operate(eventId, 'removeParticipant', {'uid': uid});
   @override
-  Stream<String?> watchEntryCode(String eventId) => client.watch().map((data) => data['entryCode'] as String?);
-  @override
-  Future<String> regenerateEntryCode(String eventId) async =>
-      (await _operate(eventId, 'regenerateEntryCode'))['code'] as String;
+  Future<int> removeUnselectedParticipants(String eventId) async =>
+      ((await _operate(eventId, 'removeUnselectedParticipants'))['removedCount'] as num).toInt();
   @override
   Future<void> presentQuestion(String eventId, String questionId) async =>
       _operate(eventId, 'presentQuestion', {'questionId': questionId});

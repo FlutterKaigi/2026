@@ -564,32 +564,38 @@ quiz:
     description: 開始のアナウンスがあったら
       この画面から参加できます。
   registration:
-    subtitle: テーブル対抗のチーム戦。ニックネームで参加しよう！
+    subtitle: 参加する回を確認して参加表明してください。前半戦・後半戦のどちらか一方に参加できます。
     participantCount: 現在の参加人数
     participantUnit: 人
-    nickname: ニックネーム
-    nicknameHint: 1〜20文字
-    entryCode: 受付コード
-    entryCodeHint: 6桁の数字
-    entryCodeHelper: 会場の受付で案内しているコードを入力してください
     join: 参加する
     full: 定員（$max 人）に達しました
     failed: 登録できませんでした。時間をおいて再度お試しください。
-    codeMismatch: 登録できませんでした。受付コードが正しいか確認してください。
     alreadyParticipated: 別の回に参加登録済みのため、この回には登録できません。
     closed: この回の参加受付は終了しました。
     unavailable: 登録を確認できませんでした。通信状況を確認して再試行してください。
-    rateLimited: 入力回数が多すぎます。1分待ってから、受付コードを確認して再試行してください。
     accountUnavailable: このアカウントでは参加できません。運営にお問い合わせください。
   waiting:
-    title: 登録完了！
-    description: チーム発表までしばらくお待ちください
+    title: 参加表明済み
+    description: 当日は会場でスタッフがテーブルをご案内します。チーム選択の開始をお待ちください。
+  selection:
+    title: チームを選択
+    instructions: スタッフに案内されたテーブルに着席してから、そのテーブルのチーム（A〜T）を選んでください。
+    unselected: チーム未選択
+    current: あなたのチームは $team です
+    option: $team（$count 人）
+    confirm: このチームに決定
+    sending: 送信中…
+    changeHint: 受付中はチームを選び直せます。
+    closed: チーム選択は終了しました。出題をお待ちください。
+    closedUnselected: チーム選択は終了しました。運営スタッフにお声がけください。
+    changed: 所属が変更されました。現在のチームを確認して選び直してください。
+    failed: 選択の完了を確認できませんでした。通信状況と現在の所属を確認してください。受付終了や参加取消の場合はスタッフにお声がけください。
   team:
-    yourTable: あなたのテーブルは
-    table: テーブル
+    yourTable: あなたのチームは
+    table: チーム
     teamLabel: チーム
     gatherHint: テーブルに集まって次の出題を待とう！
-    badge: テーブル $table・$name
+    badge: チーム $name
   entryClosed:
     title: 参加受付は終了しました
     description: クイズ大会は進行中です。
@@ -620,7 +626,7 @@ quiz:
     teamScore: "現在のチームスコア: $score 点"
   result:
     title: 最終結果
-    table: テーブル $table
+    table: チーム $name
     points: $score 点
     yourTeam: あなたのチーム
     yourTeamRanked: $rank 位 / $name（$score 点）

@@ -20,28 +20,6 @@ export interface QuizAuth {
     firebase?: { sign_in_provider?: string };
   };
 }
-const TEAM_NAMES = [
-  "Scaffold",
-  "Hero",
-  "Column",
-  "Row",
-  "Stack",
-  "Center",
-  "Padding",
-  "Align",
-  "Expanded",
-  "Flexible",
-  "Container",
-  "SizedBox",
-  "ListView",
-  "GridView",
-  "AppBar",
-  "Drawer",
-  "Card",
-  "Chip",
-  "Badge",
-  "Banner",
-];
 const PRESTART = ["draft", "published", "registration", "entryClosed"];
 function dataObject(data: unknown): Record<string, unknown> {
   if (data === null || typeof data !== "object" || Array.isArray(data))
@@ -121,20 +99,14 @@ function eventUpdate(
     updatedAt: Timestamp.now(),
   });
 }
-export function splitQuizTeamSizes(n: number): number[] {
-  if (n <= 0) return [];
-  if (n <= 5) return [n];
-  const base = Math.floor(n / 4);
-  switch (n % 4) {
-    case 0:
-      return Array<number>(base).fill(4);
-    case 1:
-      return [...Array<number>(base - 1).fill(4), 5];
-    case 2:
-      return [...Array<number>(base - 1).fill(4), 3, 3];
-    default:
-      return [...Array<number>(base).fill(4), 3];
-  }
+export function quizDisplayName(value: unknown): string {
+  const name = typeof value === "string" ? value.trim() : "";
+  return [...new Intl.Segmenter("ja", { granularity: "grapheme" }).segment(name)]
+    .slice(0, 20).map((part) => part.segment).join("") || "参加者";
+}
+
+function isQuizTeamId(value: unknown): value is string {
+  return typeof value === "string" && /^[A-T]$/.test(value);
 }
 
 export async function getActiveQuizUser(
@@ -220,27 +192,14 @@ export async function registerQuizParticipantForUser(
   const auth = account(rawAuth);
   const data = dataObject(rawData);
   const eventId = id(data.eventId, "eventId");
-  const displayName =
-    typeof data.displayName === "string" ? data.displayName.trim() : "";
-  if (
-    !displayName ||
-    [
-      ...new Intl.Segmenter("ja", { granularity: "grapheme" }).segment(
-        displayName,
-      ),
-    ].length > 20 ||
-    typeof data.entryCode !== "string" ||
-    !/^\d{6}$/.test(data.entryCode)
-  )
-    throw new HttpsError(
-      "invalid-argument",
-      "ニックネーム（20文字以内）と6桁の受付コードを入力してください。",
-    );
   const db = dependencies.db;
   const ref = db.doc(`quizEvents/${eventId}`);
   const lockRef = db.doc(`quizParticipation/${auth.uid}`);
   const participantRef = ref.collection("participants").doc(auth.uid);
-  const attemptRef = ref.collection("entryAttempts").doc(auth.uid);
+  const profile = await db.doc(`users/${auth.uid}`).get();
+  const displayName = quizDisplayName(
+    typeof data.displayName === "string" ? data.displayName : profile.get("displayName"),
+  );
   // Legacy rosters predate the global participation lock. Reading them before
   // locking the event keeps 80 arrivals from holding every event while waiting.
   // Rules prohibit old clients adding roster documents; all new admissions
@@ -287,15 +246,13 @@ export async function registerQuizParticipantForUser(
         );
       }
       const user = await getActiveQuizUser(auth.uid, dependencies.getUser);
-      const [event, participant, secret, attempt, slot] = await tx.getAll(
+      const [event, participant, slot] = await tx.getAll(
         ref,
         participantRef,
-        ref.collection("secret").doc("entry"),
-        attemptRef,
         slotRef,
       );
       requireState(event.exists, "イベントが見つかりません。");
-      // Lost acknowledgements remain retryable after reception closes or rotates.
+      // Lost acknowledgements remain retryable after reception closes.
       if (participant.exists) return "registered";
       if (
         (lock.exists && lock.get("eventId") !== eventId) ||
@@ -307,19 +264,6 @@ export async function registerQuizParticipantForUser(
         "参加受付は終了しています。",
       );
       const now = Timestamp.now();
-      const attemptData = attempt.data();
-      const recent =
-        attemptData?.windowStartedAt instanceof Timestamp &&
-        now.toMillis() - attemptData.windowStartedAt.toMillis() < 60_000;
-      const count = recent ? Number(attemptData?.count ?? 0) : 0;
-      if (count >= 5) return "rate-limited";
-      if (secret.get("code") !== data.entryCode) {
-        tx.set(attemptRef, {
-          count: count + 1,
-          windowStartedAt: recent ? attemptData?.windowStartedAt : now,
-        });
-        return "wrong-code";
-      }
       requireState(
         event.get("admissionSlotsReady") === true,
         "参加受付の準備中です。",
@@ -337,7 +281,6 @@ export async function registerQuizParticipantForUser(
         linkedAt: now,
       });
       tx.set(lockRef, { eventId, registeredAt: now });
-      tx.delete(attemptRef);
       tx.create(slotRef, { uid: auth.uid, registeredAt: now });
       return "registered";
     });
@@ -347,19 +290,44 @@ export async function registerQuizParticipantForUser(
       "already-exists",
       "別のクイズ大会に参加登録済みです。前後半への重複参加はできません。",
     );
-  if (result === "rate-limited")
-    throw new HttpsError(
-      "resource-exhausted",
-      "受付コードの確認回数が上限に達しました。1分後にお試しください。",
-      { reason: "rate-limited" },
-    );
-  if (result === "wrong-code")
-    throw new HttpsError("permission-denied", "受付コードが正しくありません。");
   if (result === "full")
     throw new HttpsError("resource-exhausted", "参加定員に達しました。", {
       reason: "full",
     });
   return { registered: true };
+}
+
+export async function selectQuizTeamForUser(
+  rawAuth: QuizAuth | undefined,
+  rawData: unknown,
+  db: Firestore,
+): Promise<{ selected: true }> {
+  const auth = account(rawAuth);
+  const data = dataObject(rawData);
+  const eventId = id(data.eventId, "eventId");
+  if (!isQuizTeamId(data.teamId) ||
+      !(data.expectedTeamId === null || isQuizTeamId(data.expectedTeamId))) {
+    throw new HttpsError("invalid-argument", "チームは A〜T から選んでください。");
+  }
+  const ref = db.doc(`quizEvents/${eventId}`);
+  return runQuizTransaction(db, async (tx) => {
+    const [event, participant] = await tx.getAll(ref, ref.collection("participants").doc(auth.uid));
+    requireState(participant.exists, "先に参加表明してください。取り消された場合は再登録が必要です。");
+    const currentTeamId = participant.get("teamId") ?? null;
+    if (currentTeamId === data.teamId) return { selected: true };
+    if (currentTeamId !== data.expectedTeamId) {
+      throw new HttpsError("failed-precondition", "所属が変わりました。現在のチームを確認して選び直してください。", {
+        reason: "team-changed",
+      });
+    }
+    requireState(
+      ["registration", "entryClosed"].includes(event.get("status")) &&
+        event.get("teamSelectionStatus") === "open",
+      "チーム選択の受付は終了しているか、まだ開始されていません。",
+    );
+    tx.update(participant.ref, { teamId: data.teamId });
+    return { selected: true };
+  });
 }
 
 export async function submitQuizAnswerForUser(
@@ -494,153 +462,63 @@ export async function operateQuizEvent(
         eventData.status === transition[0],
         "イベントの状態が変わりました。画面を更新してください。",
       );
-      if (operation === "openRegistration") {
-        const secret = await tx.get(ref.collection("secret").doc("entry"));
-        requireState(
-          /^\d{6}$/.test(secret.get("code") ?? ""),
-          "受付コードを発行してください。",
-        );
-      }
       return finish({
         status: transition[1],
         isPublic: transition[1] !== "draft",
       });
     }
-    if (operation === "regenerateEntryCode") {
+    if (["openTeamSelection", "closeTeamSelection"].includes(operation)) {
       requireState(
-        PRESTART.includes(eventData.status),
-        "出題開始後は受付コードを変更できません。",
+        ["registration", "entryClosed"].includes(eventData.status),
+        "参加受付開始後、初出題前にチーム選択を操作してください。",
       );
-      const secret = await tx.get(ref.collection("secret").doc("entry"));
-      let code: string;
-      do {
-        code = randomInt(100000, 1000000).toString();
-      } while (code === secret.get("code"));
-      tx.set(secret.ref, { code, updatedAt: Timestamp.now() });
-      return finish({}, { code });
-    }
-    if (
-      [
-        "reopenRegistration",
-        "removeParticipant",
-        "buildTeams",
-        "rebuildTeams",
-      ].includes(operation)
-    ) {
-      requireState(
-        PRESTART.includes(eventData.status),
-        "出題開始後は参加者・チームを変更できません。",
-      );
-      const participants = await tx.get(ref.collection("participants"));
-      const teams = await tx.get(ref.collection("teams"));
-      const questions = await tx.get(ref.collection("questions"));
-      requireState(
-        questions.docs.every((doc) => doc.get("status") === "draft"),
-        "出題済みの問題があります。",
-      );
-      if (operation === "reopenRegistration") {
-        if (eventData.status === "registration") return finish();
-        requireState(
-          eventData.status === "entryClosed",
-          "受付終了後のみ再開できます。",
-        );
+      const selectionStatus = eventData.teamSelectionStatus ?? "notStarted";
+      if (operation === "closeTeamSelection") {
+        requireState(selectionStatus !== "notStarted", "先にチーム選択を開始してください。");
+        return finish({ teamSelectionStatus: "closed" });
       }
-      if (operation === "buildTeams" || operation === "rebuildTeams") {
-        requireState(
-          eventData.status === "entryClosed",
-          "参加受付を終了してからチーム編成してください。",
-        );
-        requireState(
-          participants.size >= 3 && participants.size <= 80,
-          "チーム編成には3〜80人の参加者が必要です。",
-        );
-        if (operation === "buildTeams" && !teams.empty) {
-          const members = teams.docs.flatMap(
-            (doc) => doc.get("memberUids") as string[],
-          );
-          requireState(
-            members.length === participants.size &&
-              new Set(members).size === participants.size &&
-              participants.docs.every((doc) =>
-                teams.docs.some(
-                  (team) =>
-                    team.id === doc.get("teamId") &&
-                    (team.get("memberUids") as string[]).includes(doc.id),
-                ),
-              ),
-            "既存チームが参加者と一致しません。チームを再編成してください。",
-          );
-          return finish();
-        }
-        const shuffled = [...participants.docs];
-        for (let i = shuffled.length - 1; i > 0; i--) {
-          const j = randomInt(i + 1);
-          [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-        }
-        const pool = (
-          Array.isArray(eventData.teamNamePool) ? eventData.teamNamePool : []
-        )
-          .filter(
-            (name: unknown): name is string =>
-              typeof name === "string" && name.trim().length > 0,
-          )
-          .map((name: string) => name.trim());
+      if (selectionStatus === "notStarted") {
+        const participants = await tx.get(ref.collection("participants"));
+        const teams = await tx.get(ref.collection("teams"));
+        const questions = await tx.get(ref.collection("questions"));
+        requireState(questions.docs.every((doc) => doc.get("status") === "draft"), "出題済みの問題があります。");
         for (const team of teams.docs) tx.delete(team.ref);
-        let offset = 0;
-        for (const [index, size] of splitQuizTeamSizes(
-          shuffled.length,
-        ).entries()) {
-          const teamRef = ref.collection("teams").doc();
-          const members = shuffled.slice(offset, offset + size);
-          offset += size;
-          for (const member of members)
-            tx.update(member.ref, { teamId: teamRef.id });
-          tx.create(teamRef, {
-            tableNumber: index + 1,
-            name: pool[index] ?? TEAM_NAMES[index] ?? `Team ${index + 1}`,
-            memberUids: members.map((doc) => doc.id),
-            members: members.map((doc) => ({
-              uid: doc.id,
-              displayName: doc.get("displayName"),
-            })),
-            score: 0,
-            rank: null,
-            perfectSponsorIds: [],
-          });
-        }
-        return finish({ participantCount: FieldValue.delete() });
+        for (const participant of participants.docs) tx.update(participant.ref, { teamId: FieldValue.delete() });
       }
-      let removedUid: string | undefined;
-      if (operation === "removeParticipant") {
-        removedUid = id(data.uid, "uid");
-        const lock = await tx.get(db.doc(`quizParticipation/${removedUid}`));
-        const reservations = await tx.get(
-          ref.collection("admissionSlots").where("uid", "==", removedUid),
+      return finish({ teamSelectionStatus: "open" });
+    }
+    if (["reopenRegistration", "removeParticipant", "removeUnselectedParticipants"].includes(operation)) {
+      requireState(PRESTART.includes(eventData.status), "出題開始後は参加者・チームを変更できません。");
+      const questions = await tx.get(ref.collection("questions"));
+      requireState(questions.docs.every((doc) => doc.get("status") === "draft"), "出題済みの問題があります。");
+      if (operation === "reopenRegistration") {
+        requireState(["entryClosed", "registration"].includes(eventData.status), "受付終了後のみ再開できます。");
+        return finish({ status: "registration" });
+      }
+      if (operation === "removeUnselectedParticipants") {
+        requireState(
+          eventData.status === "entryClosed" && ["open", "closed"].includes(eventData.teamSelectionStatus),
+          "チーム選択開始後、参加受付を終了してから未選択者を取り消してください。",
         );
-        const participant = participants.docs.find(
-          (doc) => doc.id === removedUid,
-        );
-        if (!participant) return finish();
+      }
+      const participants = await tx.get(ref.collection("participants"));
+      const removedUid = operation === "removeParticipant" ? id(data.uid, "uid") : null;
+      const targets = participants.docs.filter((doc) =>
+        removedUid === null ? doc.get("teamId") == null : doc.id === removedUid,
+      );
+      const slots = await tx.get(ref.collection("admissionSlots"));
+      const locks = targets.length ? await tx.getAll(...targets.map((doc) => db.doc(`quizParticipation/${doc.id}`))) : [];
+      const targetIds = new Set(targets.map((doc) => doc.id));
+      for (const participant of targets) {
         tx.delete(participant.ref);
-        for (const reservation of reservations.docs) tx.delete(reservation.ref);
-        tx.delete(ref.collection("participantAccounts").doc(removedUid));
-        tx.delete(ref.collection("entryClaims").doc(removedUid));
-        if (
-          lock.get("eventId") === eventId &&
-          lock.get("accountDeleted") !== true
-        )
-          tx.delete(lock.ref);
+        tx.delete(ref.collection("participantAccounts").doc(participant.id));
+        tx.delete(ref.collection("entryClaims").doc(participant.id));
       }
-      for (const team of teams.docs) tx.delete(team.ref);
-      for (const participant of participants.docs)
-        if (participant.id !== removedUid)
-          tx.update(participant.ref, { teamId: FieldValue.delete() });
-      return finish({
-        ...(operation === "reopenRegistration"
-          ? { status: "registration" }
-          : {}),
-        participantCount: FieldValue.delete(),
-      });
+      for (const slot of slots.docs) if (targetIds.has(slot.get("uid"))) tx.delete(slot.ref);
+      for (const lock of locks) {
+        if (lock.get("eventId") === eventId && lock.get("accountDeleted") !== true) tx.delete(lock.ref);
+      }
+      return finish({}, { removedCount: targets.length });
     }
     if (operation === "finalizeEvent") {
       if (eventData.status === "finished") return finish();
@@ -724,7 +602,7 @@ export async function operateQuizEvent(
     ) {
       requireState(
         ["entryClosed", "inProgress"].includes(eventData.status),
-        "チーム編成後、結果確定前のみ出題を操作できます。",
+        "参加受付終了後、結果確定前のみ出題を操作できます。",
       );
       const questionId = id(data.questionId, "questionId");
       const questionRef = ref.collection("questions").doc(questionId);
@@ -751,7 +629,6 @@ export async function operateQuizEvent(
           active.every((doc) => doc.id === questionId),
           "現在の問題の正解を発表してから次の問題を出題してください。",
         );
-        requireState(!teams.empty, "先にチーム編成を行ってください。");
         requireState(
           q.status === "draft" ||
             (operation === "openQuestion" && q.status === "reading"),
@@ -776,6 +653,37 @@ export async function operateQuizEvent(
             secret.get("correctOptionIndex") < q.options.length,
           "正解を設定してください。",
         );
+        let teamIds = teams.docs.map((team) => team.id);
+        if (eventData.status === "entryClosed") {
+          requireState(eventData.teamSelectionStatus === "closed", "チーム選択を終了してから出題してください。");
+          requireState(teams.empty, "旧チームが残っています。チーム選択の準備状態を確認してください。");
+          const participants = await tx.get(ref.collection("participants"));
+          requireState(!participants.empty, "選択済みの参加者が1人以上必要です。");
+          requireState(
+            participants.docs.every((doc) => isQuizTeamId(doc.get("teamId"))),
+            "未選択の参加者がいます。チームを選択するか、参加を取り消してください。",
+          );
+          const groups = new Map<string, { uid: string; displayName: string }[]>();
+          for (const participant of participants.docs) {
+            const teamId: string = participant.get("teamId");
+            const members = groups.get(teamId) ?? [];
+            members.push({ uid: participant.id, displayName: quizDisplayName(participant.get("displayName")) });
+            groups.set(teamId, members);
+          }
+          teamIds = [...groups.keys()];
+          for (const [teamId, members] of groups) {
+            tx.create(ref.collection("teams").doc(teamId), {
+              tableNumber: teamId.charCodeAt(0) - 64,
+              name: teamId,
+              memberUids: members.map((member) => member.uid),
+              members,
+              score: 0,
+              rank: null,
+              perfectSponsorIds: [],
+            });
+          }
+        }
+        requireState(teamIds.length > 0, "選択済みのチームがありません。");
         if (operation === "presentQuestion")
           tx.update(questionRef, {
             status: "reading",
@@ -791,12 +699,12 @@ export async function operateQuizEvent(
               now.toMillis() + q.durationSeconds * 1000,
             ),
           });
-          for (const team of teams.docs)
+          for (const teamId of teamIds)
             tx.create(
-              ref.collection("answers").doc(`${questionId}_${team.id}`),
+              ref.collection("answers").doc(`${questionId}_${teamId}`),
               {
                 questionId,
-                teamId: team.id,
+                teamId,
                 selectedOptionIndex: null,
                 answeredBy: null,
                 submittedAt: null,

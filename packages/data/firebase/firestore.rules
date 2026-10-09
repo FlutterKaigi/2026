@@ -184,8 +184,7 @@ service cloud.firestore {
         && (request.resource.data.capacity == resource.data.capacity
           || (resource.data.status in ['draft', 'published']
             && resource.data.get('admissionSlotsReady', false) != true))
-        && (resource.data.status in ['draft', 'published', 'registration', 'entryClosed']
-          || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['teamNamePool', 'updatedAt']))
+        && resource.data.status in ['draft', 'published', 'registration', 'entryClosed']
         && request.resource.data.updatedAt == request.time;
       allow delete: if false;
 
@@ -211,11 +210,7 @@ service cloud.firestore {
       }
       match /teams/{teamId} {
         allow read: if hasAdminAccess() || signedInWithAccount();
-        allow update: if hasAdminAccess()
-          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name'])
-          && request.resource.data.name is string
-          && request.resource.data.name.size() > 0 && request.resource.data.name.size() <= 80;
-        allow create, delete: if false;
+        allow write: if false;
       }
       match /questions/{questionId} {
         allow get: if hasAdminAccess() || (signedInWithAccount() && resource.data.status != 'draft');

@@ -15,12 +15,11 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$QuizEvent {
 
- String get id; LocaleMap get title; QuizEventStatus get status;/// 参加者アプリに公開中かどうか。`status != draft` と常に同値になるよう
+ String get id; LocaleMap get title; QuizEventStatus get status;@JsonKey(unknownEnumValue: QuizTeamSelectionStatus.notStarted) QuizTeamSelectionStatus get teamSelectionStatus;/// 参加者アプリに公開中かどうか。`status != draft` と常に同値になるよう
 /// 遷移時に更新する。アプリの一覧クエリはこのフラグの等価条件で絞り込む
 /// （ルールが単純な等価条件しかクエリから証明できないため）。
  bool get isPublic; String? get currentQuestionId; List<String> get sponsorIds;/// 参加人数の上限。到達すると新規登録を締め切る。
- int get capacity;/// チーム編成時にテーブル番号順で割り当てるチーム名の候補。
-/// 空の場合は既定の Flutter Widget 名リストを使う。
+ int get capacity;/// 旧大会の設定を読み取るために保持する。新規のチーム名は A〜T 固定。
  List<String> get teamNamePool;@FirestoreDateTimeConverter() DateTime get createdAt;@FirestoreDateTimeConverter() DateTime get updatedAt;
 /// Create a copy of QuizEvent
 /// with the given fields replaced by the non-null parameter values.
@@ -34,16 +33,16 @@ $QuizEventCopyWith<QuizEvent> get copyWith => _$QuizEventCopyWithImpl<QuizEvent>
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is QuizEvent&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.status, status) || other.status == status)&&(identical(other.isPublic, isPublic) || other.isPublic == isPublic)&&(identical(other.currentQuestionId, currentQuestionId) || other.currentQuestionId == currentQuestionId)&&const DeepCollectionEquality().equals(other.sponsorIds, sponsorIds)&&(identical(other.capacity, capacity) || other.capacity == capacity)&&const DeepCollectionEquality().equals(other.teamNamePool, teamNamePool)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is QuizEvent&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.status, status) || other.status == status)&&(identical(other.teamSelectionStatus, teamSelectionStatus) || other.teamSelectionStatus == teamSelectionStatus)&&(identical(other.isPublic, isPublic) || other.isPublic == isPublic)&&(identical(other.currentQuestionId, currentQuestionId) || other.currentQuestionId == currentQuestionId)&&const DeepCollectionEquality().equals(other.sponsorIds, sponsorIds)&&(identical(other.capacity, capacity) || other.capacity == capacity)&&const DeepCollectionEquality().equals(other.teamNamePool, teamNamePool)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,title,status,isPublic,currentQuestionId,const DeepCollectionEquality().hash(sponsorIds),capacity,const DeepCollectionEquality().hash(teamNamePool),createdAt,updatedAt);
+int get hashCode => Object.hash(runtimeType,id,title,status,teamSelectionStatus,isPublic,currentQuestionId,const DeepCollectionEquality().hash(sponsorIds),capacity,const DeepCollectionEquality().hash(teamNamePool),createdAt,updatedAt);
 
 @override
 String toString() {
-  return 'QuizEvent(id: $id, title: $title, status: $status, isPublic: $isPublic, currentQuestionId: $currentQuestionId, sponsorIds: $sponsorIds, capacity: $capacity, teamNamePool: $teamNamePool, createdAt: $createdAt, updatedAt: $updatedAt)';
+  return 'QuizEvent(id: $id, title: $title, status: $status, teamSelectionStatus: $teamSelectionStatus, isPublic: $isPublic, currentQuestionId: $currentQuestionId, sponsorIds: $sponsorIds, capacity: $capacity, teamNamePool: $teamNamePool, createdAt: $createdAt, updatedAt: $updatedAt)';
 }
 
 
@@ -54,7 +53,7 @@ abstract mixin class $QuizEventCopyWith<$Res>  {
   factory $QuizEventCopyWith(QuizEvent value, $Res Function(QuizEvent) _then) = _$QuizEventCopyWithImpl;
 @useResult
 $Res call({
- String id, LocaleMap title, QuizEventStatus status, bool isPublic, String? currentQuestionId, List<String> sponsorIds, int capacity, List<String> teamNamePool,@FirestoreDateTimeConverter() DateTime createdAt,@FirestoreDateTimeConverter() DateTime updatedAt
+ String id, LocaleMap title, QuizEventStatus status,@JsonKey(unknownEnumValue: QuizTeamSelectionStatus.notStarted) QuizTeamSelectionStatus teamSelectionStatus, bool isPublic, String? currentQuestionId, List<String> sponsorIds, int capacity, List<String> teamNamePool,@FirestoreDateTimeConverter() DateTime createdAt,@FirestoreDateTimeConverter() DateTime updatedAt
 });
 
 
@@ -71,12 +70,13 @@ class _$QuizEventCopyWithImpl<$Res>
 
 /// Create a copy of QuizEvent
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? title = null,Object? status = null,Object? isPublic = null,Object? currentQuestionId = freezed,Object? sponsorIds = null,Object? capacity = null,Object? teamNamePool = null,Object? createdAt = null,Object? updatedAt = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? title = null,Object? status = null,Object? teamSelectionStatus = null,Object? isPublic = null,Object? currentQuestionId = freezed,Object? sponsorIds = null,Object? capacity = null,Object? teamNamePool = null,Object? createdAt = null,Object? updatedAt = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
 as LocaleMap,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
-as QuizEventStatus,isPublic: null == isPublic ? _self.isPublic : isPublic // ignore: cast_nullable_to_non_nullable
+as QuizEventStatus,teamSelectionStatus: null == teamSelectionStatus ? _self.teamSelectionStatus : teamSelectionStatus // ignore: cast_nullable_to_non_nullable
+as QuizTeamSelectionStatus,isPublic: null == isPublic ? _self.isPublic : isPublic // ignore: cast_nullable_to_non_nullable
 as bool,currentQuestionId: freezed == currentQuestionId ? _self.currentQuestionId : currentQuestionId // ignore: cast_nullable_to_non_nullable
 as String?,sponsorIds: null == sponsorIds ? _self.sponsorIds : sponsorIds // ignore: cast_nullable_to_non_nullable
 as List<String>,capacity: null == capacity ? _self.capacity : capacity // ignore: cast_nullable_to_non_nullable
@@ -177,10 +177,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  LocaleMap title,  QuizEventStatus status,  bool isPublic,  String? currentQuestionId,  List<String> sponsorIds,  int capacity,  List<String> teamNamePool, @FirestoreDateTimeConverter()  DateTime createdAt, @FirestoreDateTimeConverter()  DateTime updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  LocaleMap title,  QuizEventStatus status, @JsonKey(unknownEnumValue: QuizTeamSelectionStatus.notStarted)  QuizTeamSelectionStatus teamSelectionStatus,  bool isPublic,  String? currentQuestionId,  List<String> sponsorIds,  int capacity,  List<String> teamNamePool, @FirestoreDateTimeConverter()  DateTime createdAt, @FirestoreDateTimeConverter()  DateTime updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _QuizEvent() when $default != null:
-return $default(_that.id,_that.title,_that.status,_that.isPublic,_that.currentQuestionId,_that.sponsorIds,_that.capacity,_that.teamNamePool,_that.createdAt,_that.updatedAt);case _:
+return $default(_that.id,_that.title,_that.status,_that.teamSelectionStatus,_that.isPublic,_that.currentQuestionId,_that.sponsorIds,_that.capacity,_that.teamNamePool,_that.createdAt,_that.updatedAt);case _:
   return orElse();
 
 }
@@ -198,10 +198,10 @@ return $default(_that.id,_that.title,_that.status,_that.isPublic,_that.currentQu
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  LocaleMap title,  QuizEventStatus status,  bool isPublic,  String? currentQuestionId,  List<String> sponsorIds,  int capacity,  List<String> teamNamePool, @FirestoreDateTimeConverter()  DateTime createdAt, @FirestoreDateTimeConverter()  DateTime updatedAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  LocaleMap title,  QuizEventStatus status, @JsonKey(unknownEnumValue: QuizTeamSelectionStatus.notStarted)  QuizTeamSelectionStatus teamSelectionStatus,  bool isPublic,  String? currentQuestionId,  List<String> sponsorIds,  int capacity,  List<String> teamNamePool, @FirestoreDateTimeConverter()  DateTime createdAt, @FirestoreDateTimeConverter()  DateTime updatedAt)  $default,) {final _that = this;
 switch (_that) {
 case _QuizEvent():
-return $default(_that.id,_that.title,_that.status,_that.isPublic,_that.currentQuestionId,_that.sponsorIds,_that.capacity,_that.teamNamePool,_that.createdAt,_that.updatedAt);case _:
+return $default(_that.id,_that.title,_that.status,_that.teamSelectionStatus,_that.isPublic,_that.currentQuestionId,_that.sponsorIds,_that.capacity,_that.teamNamePool,_that.createdAt,_that.updatedAt);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -218,10 +218,10 @@ return $default(_that.id,_that.title,_that.status,_that.isPublic,_that.currentQu
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  LocaleMap title,  QuizEventStatus status,  bool isPublic,  String? currentQuestionId,  List<String> sponsorIds,  int capacity,  List<String> teamNamePool, @FirestoreDateTimeConverter()  DateTime createdAt, @FirestoreDateTimeConverter()  DateTime updatedAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  LocaleMap title,  QuizEventStatus status, @JsonKey(unknownEnumValue: QuizTeamSelectionStatus.notStarted)  QuizTeamSelectionStatus teamSelectionStatus,  bool isPublic,  String? currentQuestionId,  List<String> sponsorIds,  int capacity,  List<String> teamNamePool, @FirestoreDateTimeConverter()  DateTime createdAt, @FirestoreDateTimeConverter()  DateTime updatedAt)?  $default,) {final _that = this;
 switch (_that) {
 case _QuizEvent() when $default != null:
-return $default(_that.id,_that.title,_that.status,_that.isPublic,_that.currentQuestionId,_that.sponsorIds,_that.capacity,_that.teamNamePool,_that.createdAt,_that.updatedAt);case _:
+return $default(_that.id,_that.title,_that.status,_that.teamSelectionStatus,_that.isPublic,_that.currentQuestionId,_that.sponsorIds,_that.capacity,_that.teamNamePool,_that.createdAt,_that.updatedAt);case _:
   return null;
 
 }
@@ -233,12 +233,13 @@ return $default(_that.id,_that.title,_that.status,_that.isPublic,_that.currentQu
 @JsonSerializable()
 
 class _QuizEvent extends QuizEvent {
-  const _QuizEvent({required this.id, required this.title, required this.status, this.isPublic = false, this.currentQuestionId, final  List<String> sponsorIds = const [], this.capacity = 80, final  List<String> teamNamePool = const [], @FirestoreDateTimeConverter() required this.createdAt, @FirestoreDateTimeConverter() required this.updatedAt}): _sponsorIds = sponsorIds,_teamNamePool = teamNamePool,super._();
+  const _QuizEvent({required this.id, required this.title, required this.status, @JsonKey(unknownEnumValue: QuizTeamSelectionStatus.notStarted) this.teamSelectionStatus = QuizTeamSelectionStatus.notStarted, this.isPublic = false, this.currentQuestionId, final  List<String> sponsorIds = const [], this.capacity = 80, final  List<String> teamNamePool = const [], @FirestoreDateTimeConverter() required this.createdAt, @FirestoreDateTimeConverter() required this.updatedAt}): _sponsorIds = sponsorIds,_teamNamePool = teamNamePool,super._();
   factory _QuizEvent.fromJson(Map<String, dynamic> json) => _$QuizEventFromJson(json);
 
 @override final  String id;
 @override final  LocaleMap title;
 @override final  QuizEventStatus status;
+@override@JsonKey(unknownEnumValue: QuizTeamSelectionStatus.notStarted) final  QuizTeamSelectionStatus teamSelectionStatus;
 /// 参加者アプリに公開中かどうか。`status != draft` と常に同値になるよう
 /// 遷移時に更新する。アプリの一覧クエリはこのフラグの等価条件で絞り込む
 /// （ルールが単純な等価条件しかクエリから証明できないため）。
@@ -253,11 +254,9 @@ class _QuizEvent extends QuizEvent {
 
 /// 参加人数の上限。到達すると新規登録を締め切る。
 @override@JsonKey() final  int capacity;
-/// チーム編成時にテーブル番号順で割り当てるチーム名の候補。
-/// 空の場合は既定の Flutter Widget 名リストを使う。
+/// 旧大会の設定を読み取るために保持する。新規のチーム名は A〜T 固定。
  final  List<String> _teamNamePool;
-/// チーム編成時にテーブル番号順で割り当てるチーム名の候補。
-/// 空の場合は既定の Flutter Widget 名リストを使う。
+/// 旧大会の設定を読み取るために保持する。新規のチーム名は A〜T 固定。
 @override@JsonKey() List<String> get teamNamePool {
   if (_teamNamePool is EqualUnmodifiableListView) return _teamNamePool;
   // ignore: implicit_dynamic_type
@@ -280,16 +279,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _QuizEvent&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.status, status) || other.status == status)&&(identical(other.isPublic, isPublic) || other.isPublic == isPublic)&&(identical(other.currentQuestionId, currentQuestionId) || other.currentQuestionId == currentQuestionId)&&const DeepCollectionEquality().equals(other._sponsorIds, _sponsorIds)&&(identical(other.capacity, capacity) || other.capacity == capacity)&&const DeepCollectionEquality().equals(other._teamNamePool, _teamNamePool)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _QuizEvent&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.status, status) || other.status == status)&&(identical(other.teamSelectionStatus, teamSelectionStatus) || other.teamSelectionStatus == teamSelectionStatus)&&(identical(other.isPublic, isPublic) || other.isPublic == isPublic)&&(identical(other.currentQuestionId, currentQuestionId) || other.currentQuestionId == currentQuestionId)&&const DeepCollectionEquality().equals(other._sponsorIds, _sponsorIds)&&(identical(other.capacity, capacity) || other.capacity == capacity)&&const DeepCollectionEquality().equals(other._teamNamePool, _teamNamePool)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,title,status,isPublic,currentQuestionId,const DeepCollectionEquality().hash(_sponsorIds),capacity,const DeepCollectionEquality().hash(_teamNamePool),createdAt,updatedAt);
+int get hashCode => Object.hash(runtimeType,id,title,status,teamSelectionStatus,isPublic,currentQuestionId,const DeepCollectionEquality().hash(_sponsorIds),capacity,const DeepCollectionEquality().hash(_teamNamePool),createdAt,updatedAt);
 
 @override
 String toString() {
-  return 'QuizEvent(id: $id, title: $title, status: $status, isPublic: $isPublic, currentQuestionId: $currentQuestionId, sponsorIds: $sponsorIds, capacity: $capacity, teamNamePool: $teamNamePool, createdAt: $createdAt, updatedAt: $updatedAt)';
+  return 'QuizEvent(id: $id, title: $title, status: $status, teamSelectionStatus: $teamSelectionStatus, isPublic: $isPublic, currentQuestionId: $currentQuestionId, sponsorIds: $sponsorIds, capacity: $capacity, teamNamePool: $teamNamePool, createdAt: $createdAt, updatedAt: $updatedAt)';
 }
 
 
@@ -300,7 +299,7 @@ abstract mixin class _$QuizEventCopyWith<$Res> implements $QuizEventCopyWith<$Re
   factory _$QuizEventCopyWith(_QuizEvent value, $Res Function(_QuizEvent) _then) = __$QuizEventCopyWithImpl;
 @override @useResult
 $Res call({
- String id, LocaleMap title, QuizEventStatus status, bool isPublic, String? currentQuestionId, List<String> sponsorIds, int capacity, List<String> teamNamePool,@FirestoreDateTimeConverter() DateTime createdAt,@FirestoreDateTimeConverter() DateTime updatedAt
+ String id, LocaleMap title, QuizEventStatus status,@JsonKey(unknownEnumValue: QuizTeamSelectionStatus.notStarted) QuizTeamSelectionStatus teamSelectionStatus, bool isPublic, String? currentQuestionId, List<String> sponsorIds, int capacity, List<String> teamNamePool,@FirestoreDateTimeConverter() DateTime createdAt,@FirestoreDateTimeConverter() DateTime updatedAt
 });
 
 
@@ -317,12 +316,13 @@ class __$QuizEventCopyWithImpl<$Res>
 
 /// Create a copy of QuizEvent
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? title = null,Object? status = null,Object? isPublic = null,Object? currentQuestionId = freezed,Object? sponsorIds = null,Object? capacity = null,Object? teamNamePool = null,Object? createdAt = null,Object? updatedAt = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? title = null,Object? status = null,Object? teamSelectionStatus = null,Object? isPublic = null,Object? currentQuestionId = freezed,Object? sponsorIds = null,Object? capacity = null,Object? teamNamePool = null,Object? createdAt = null,Object? updatedAt = null,}) {
   return _then(_QuizEvent(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
 as LocaleMap,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
-as QuizEventStatus,isPublic: null == isPublic ? _self.isPublic : isPublic // ignore: cast_nullable_to_non_nullable
+as QuizEventStatus,teamSelectionStatus: null == teamSelectionStatus ? _self.teamSelectionStatus : teamSelectionStatus // ignore: cast_nullable_to_non_nullable
+as QuizTeamSelectionStatus,isPublic: null == isPublic ? _self.isPublic : isPublic // ignore: cast_nullable_to_non_nullable
 as bool,currentQuestionId: freezed == currentQuestionId ? _self.currentQuestionId : currentQuestionId // ignore: cast_nullable_to_non_nullable
 as String?,sponsorIds: null == sponsorIds ? _self._sponsorIds : sponsorIds // ignore: cast_nullable_to_non_nullable
 as List<String>,capacity: null == capacity ? _self.capacity : capacity // ignore: cast_nullable_to_non_nullable

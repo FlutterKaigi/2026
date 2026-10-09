@@ -36,12 +36,12 @@ void main() {
     expect(functions.calls[0]['seconds'], 30);
   });
 
-  test('rebuild retry reuses receipt after unavailable error', () async {
+  test('team selection opening retry reuses receipt after unavailable error', () async {
     final functions = _Functions()..error = FirebaseFunctionsException(code: 'unavailable', message: 'Test failure');
     final repository = FirestoreQuizOperationsRepository(firestore: FakeFirebaseFirestore(), functions: functions);
-    await expectLater(repository.rebuildTeams('event'), throwsA(isA<FirebaseFunctionsException>()));
+    await expectLater(repository.openTeamSelection('event'), throwsA(isA<FirebaseFunctionsException>()));
     functions.error = null;
-    await repository.rebuildTeams('event');
+    await repository.openTeamSelection('event');
     expect(functions.calls[0]['operationId'], functions.calls[1]['operationId']);
   });
 
@@ -57,18 +57,14 @@ void main() {
     expect(functions.calls[0]['operationId'], isNot(functions.calls[3]['operationId']));
   });
 
-  test('entry code retry preserves receipt and returns the saved code', () async {
-    final functions = _Functions()
-      ..error = FirebaseFunctionsException(code: 'deadline-exceeded', message: 'Test failure');
+  test('bulk cancellation counts current no-shows with a fresh operation after an uncertain response', () async {
+    final functions = _Functions()..error = FirebaseFunctionsException(code: 'deadline-exceeded', message: 'timeout');
     final repository = FirestoreQuizOperationsRepository(firestore: FakeFirebaseFirestore(), functions: functions);
-    await expectLater(repository.regenerateEntryCode('event'), throwsA(isA<FirebaseFunctionsException>()));
+    await expectLater(repository.removeUnselectedParticipants('event'), throwsA(isA<FirebaseFunctionsException>()));
     functions.error = null;
-    functions.result = {'code': '123456'};
-    expect(await repository.regenerateEntryCode('event'), '123456');
-    expect(functions.calls[0]['operationId'], functions.calls[1]['operationId']);
-    functions.result = {'code': '654321'};
-    expect(await repository.regenerateEntryCode('event'), '654321');
-    expect(functions.calls[1]['operationId'], isNot(functions.calls[2]['operationId']));
+    functions.result = {'removedCount': 3};
+    expect(await repository.removeUnselectedParticipants('event'), 3);
+    expect(functions.calls[0]['operationId'], isNot(functions.calls[1]['operationId']));
   });
 
   test('definitive rejection starts the next attempt with a new receipt', () async {

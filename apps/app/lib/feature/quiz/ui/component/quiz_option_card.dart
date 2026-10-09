@@ -18,11 +18,9 @@ enum QuizOptionState {
   dimmed,
 }
 
-/// A〜D のレターバッジ付き選択肢カード。
+/// 1〜4 の番号付き選択肢カード。
 ///
 /// 出題中の回答ボタンと正解発表の結果表示を同じ見た目で提供する。
-/// バッジの配色は Material 3 スキームのコンテナ色をローテーションし、
-/// テーブル内での「A だと思う！」といった声掛けの手掛かりにする。
 class QuizOptionCard extends StatelessWidget {
   const QuizOptionCard({
     required this.index,
@@ -35,7 +33,7 @@ class QuizOptionCard extends StatelessWidget {
     super.key,
   });
 
-  /// 選択肢の添字。レターバッジ（A〜D）と配色の決定に使う。
+  /// 選択肢の添字。番号（1〜4）と配色の決定に使う。
   final int index;
 
   final String label;
@@ -47,8 +45,6 @@ class QuizOptionCard extends StatelessWidget {
   final double minHeight;
   final bool enabled;
   final VoidCallback? onTap;
-
-  static const _letters = ['A', 'B', 'C', 'D', 'E', 'F'];
 
   @override
   Widget build(BuildContext context) {
@@ -112,7 +108,7 @@ class QuizOptionCard extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               child: Row(
                 children: [
-                  // レターバッジ。
+                  // 選択肢の番号。
                   AnimatedScale(
                     duration: const Duration(milliseconds: 250),
                     scale: emphasized ? 1.08 : 1,
@@ -125,7 +121,7 @@ class QuizOptionCard extends StatelessWidget {
                         shape: BoxShape.circle,
                       ),
                       child: Text(
-                        _letters[index % _letters.length],
+                        '${index + 1}',
                         style: theme.textTheme.titleMedium?.copyWith(
                           color: badgeForeground,
                           fontWeight: FontWeight.bold,

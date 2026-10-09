@@ -1,24 +1,18 @@
 const assert = require("node:assert/strict");
 const { test } = require("node:test");
 const {
-  splitQuizTeamSizes,
+  quizDisplayName,
+  selectQuizTeamForUser,
   registerQuizParticipantForUser,
   submitQuizAnswerForUser,
 } = require("../lib/quiz_service.js");
 
-test("every supported roster partitions into 3-5 people with no losses and at most 20 tables", () => {
-  for (let count = 3; count <= 80; count++) {
-    const sizes = splitQuizTeamSizes(count);
-    assert.equal(
-      sizes.reduce((total, size) => total + size, 0),
-      count,
-    );
-    assert.ok(
-      sizes.every((size) => size >= 3 && size <= 5),
-      `Invalid partition for ${count}`,
-    );
-    assert.ok(sizes.length <= 20);
-  }
+test("public names trim, truncate by grapheme, and always have a fallback", () => {
+  assert.equal(quizDisplayName(undefined), "参加者");
+  assert.equal(quizDisplayName("   "), "参加者");
+  assert.equal(quizDisplayName("  Alice  "), "Alice");
+  const emoji = "👨‍👩‍👦";
+  assert.equal(quizDisplayName(emoji.repeat(30)), emoji.repeat(20));
 });
 test("missing and anonymous accounts cannot register or answer", async () => {
   const anonymous = {
@@ -33,9 +27,10 @@ test("missing and anonymous accounts cannot register or answer", async () => {
       code,
     });
     await assert.rejects(submitQuizAnswerForUser(auth, {}, {}), { code });
+    await assert.rejects(selectQuizTeamForUser(auth, {}, {}), { code });
   }
 });
-test("malformed code and participant names are rejected before database access", async () => {
+test("malformed event requests are rejected before database access", async () => {
   const auth = {
     uid: "member",
     token: { firebase: { sign_in_provider: "password" } },
@@ -44,9 +39,6 @@ test("malformed code and participant names are rejected before database access",
     null,
     {},
     { eventId: "bad/id" },
-    { eventId: "one", displayName: " ", entryCode: "123456" },
-    { eventId: "one", displayName: "x".repeat(21), entryCode: "123456" },
-    { eventId: "one", displayName: "Name", entryCode: "12345" },
   ]) {
     await assert.rejects(registerQuizParticipantForUser(auth, data, {}), {
       code: "invalid-argument",

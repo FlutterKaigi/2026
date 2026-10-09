@@ -207,7 +207,7 @@ class _PodiumColumn extends StatelessWidget {
             style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
           ),
           Text(
-            Translations.of(context).quiz.result.table(table: '${team.tableNumber}'),
+            Translations.of(context).quiz.result.table(name: team.name),
             style: theme.textTheme.labelSmall?.copyWith(color: scheme.onSurfaceVariant),
           ),
           const SizedBox(height: 4),
@@ -278,7 +278,7 @@ class _RankTile extends StatelessWidget {
             fontWeight: isMine ? FontWeight.bold : FontWeight.normal,
           ),
         ),
-        subtitle: Text(Translations.of(context).quiz.result.table(table: '${team.tableNumber}')),
+        subtitle: Text(Translations.of(context).quiz.result.table(name: team.name)),
         trailing: Text(
           Translations.of(context).quiz.result.points(score: '${team.score}'),
           style: theme.textTheme.titleMedium?.copyWith(
