@@ -32,7 +32,7 @@ class LaunchRouteObserver with WidgetsBindingObserver {
   }
 }
 
-/// 起動処理中に [LaunchRouteObserver] が受け取ったリンク。`main` が
-/// `ProviderScope` の override で渡し、`routerProvider` が初期ロケーションに
-/// 使う。通常起動では `null`。
+/// 起動処理中に [LaunchRouteObserver] が受け取ったリンク、またはアプリを起動
+/// した通知タップの遷移先。`main` が `ProviderScope` の override で渡し、
+/// `routerProvider` が初期ロケーションに使う。通常起動では `null`。
 final launchRouteProvider = Provider<Uri?>((_) => null);

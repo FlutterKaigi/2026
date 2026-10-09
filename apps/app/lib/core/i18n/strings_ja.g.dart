@@ -71,6 +71,7 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	late final Translations$common$ja common = Translations$common$ja.internal(_root);
 	late final Translations$quiz$ja quiz = Translations$quiz$ja.internal(_root);
 	late final Translations$forceUpdate$ja forceUpdate = Translations$forceUpdate$ja.internal(_root);
+	late final Translations$pushNotification$ja pushNotification = Translations$pushNotification$ja.internal(_root);
 }
 
 // Path: app
@@ -1569,6 +1570,18 @@ class Translations$forceUpdate$ja {
 	String get updateButton => 'アップデート';
 }
 
+// Path: pushNotification
+class Translations$pushNotification$ja {
+	Translations$pushNotification$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: '開く'
+	String get open => '開く';
+}
+
 // Path: sessionTimetable.view
 class Translations$sessionTimetable$view$ja {
 	Translations$sessionTimetable$view$ja.internal(this._root);
@@ -2923,6 +2936,7 @@ extension on Translations {
 			'forceUpdate.title' => 'アップデートが必要です',
 			'forceUpdate.message' => '新しいバージョンのアプリが利用可能です。最新バージョンにアップデートしてください。',
 			'forceUpdate.updateButton' => 'アップデート',
+			'pushNotification.open' => '開く',
 			_ => null,
 		};
 	}

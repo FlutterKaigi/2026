@@ -637,3 +637,5 @@ forceUpdate:
   title: アップデートが必要です
   message: 新しいバージョンのアプリが利用可能です。最新バージョンにアップデートしてください。
   updateButton: アップデート
+pushNotification:
+  open: 開く

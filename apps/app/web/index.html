@@ -35,6 +35,9 @@
 
   <title>FlutterKaigi 2026</title>
   <link rel="manifest" href="manifest.json">
+
+  <!-- Push notifications are native only: keep firebase_core_web from loading firebase-messaging.js. -->
+  <script>window.flutterfire_ignore_scripts = ['messaging'];</script>
 </head>
 <body>
   <!--

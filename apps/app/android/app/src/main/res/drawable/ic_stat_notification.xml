@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Status-bar icon of notifications, from web/flutterkaigi-favicon.svg. Android uses only its alpha channel. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="512"
+    android:viewportHeight="512">
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M332.906 240.411L225.199 346.247L286.728 406.706L456.007 240.411H332.906Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M456 58.9941L194.406 316.013L132.845 255.534L332.9 58.9941H456Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M348.282 346.249L286.71 406.707L332.889 452.075H455.989L348.282 346.249Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M286.725 285.778L225.174 346.249L286.725 406.719L348.277 346.249L286.725 285.778Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M123.805 451.953C161.253 451.953 191.61 422.129 191.61 385.339C191.61 348.549 161.253 318.725 123.805 318.725C86.3574 318.725 56 348.549 56 385.339C56 422.129 86.3574 451.953 123.805 451.953Z" />
+</vector>

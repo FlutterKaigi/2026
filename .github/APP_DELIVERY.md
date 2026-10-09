@@ -174,6 +174,7 @@ PRマージ前にApp Store Connectへのアップロードまで確認する場�
 2. `Explicit App ID`を選び、本番は`jp.flutterkaigi.conf2026`、stg実機を使う場合は`jp.flutterkaigi.conf2026.stg`を登録します。XcodeのBundle IDと完全一致させます。[AppleのApp ID登録手順](https://developer.apple.com/help/account/identifiers/register-an-app-id/)を参照してください。
 3. App Store Connectの`Apps > + > New App`を開き、Bundle IDに`jp.flutterkaigi.conf2026`を選んでアプリレコードを作成します。
 4. Sign in with Appleは環境に関係なくiOSアプリで使用します。本番・stgを含む署名対象の各App IDでCapabilityを有効化し、対応するProvisioning Profileを用意します。Firebase Authenticationでも対象プロジェクトのAppleプロバイダを有効化します。Web OAuthを提供しないため、Services IDの作成は不要です。
+5. プッシュ通知のため、本番・stgの両App IDでPush Notificationsを有効化し、両方の配布用Provisioning Profileを再生成します。
 
 ### `APPLE_TEAM_ID`
 
@@ -243,6 +244,7 @@ Archive・IPA書き出しのどちらでも自動プロビジョニングを許�
 配布が実行されていない間に`.p12`・パスワード・両方のプロファイルのSecretsをまとめて差し替え、
 stg → prodの順で配布を確認します。証明書だけを変更すると、旧証明書に紐づくプロファイルでは署名できません。
 App IDのCapabilityを変更した場合も、対応するプロファイルを再生成します。
+`Runner.entitlements`の`aps-environment`には、ローカルのDebugビルドに合わせて`development`をコミットしています。配布Workflowは署名検証の前に`production`へ書き換えます。
 不要になった旧証明書は、他の配布処理で使用していないことを確認してから整理します。
 
 ## Android署名
@@ -417,6 +419,16 @@ FirestoreではApp Check enforcementが有効なため、公式Appを各Platform
 
 Site KeyとDebug Tokenは別物です。Site KeyはWeb配布物に含まれる公開値なのでRepository Variableで管理します。Debug Tokenは開発端末を信頼するための値なのでGitHubやRepositoryへ登録しません。App Checkの設定方法は[Flutter向けApp Check](https://firebase.google.com/docs/app-check/flutter/default-providers)と[Debug Provider](https://firebase.google.com/docs/app-check/flutter/debug-provider)を参照してください。
 
+### APNs認証キー
+
+iOSへのプッシュ通知は、FCMがAPNs認証キーを使ってAppleへ送信します。App Store Connect APIの`.p8`とは別のキーです。
+
+1. Apple Developerの`Certificates, Identifiers & Profiles > Keys > +`で、`Apple Push Notifications service (APNs)`を有効にしたKeyを作成します。
+2. `.p8`をダウンロードし、Key IDとTeam ID（`APPLE_TEAM_ID`と同じ値）を控えます。
+3. stg／prodそれぞれのFirebase Consoleで`Project settings > Cloud Messaging > Apple app configuration`を開き、対象のApple Appへ`.p8`・Key ID・Team IDをアップロードします。
+
+`.p8`はRepositoryやGitHubへ登録せず、安全なPassword Managerへ保管します。`main`の更新はiOSを自動配布するため、このキーの登録と、[App IDとApp Store Connectアプリ](#app-idとapp-store-connectアプリ)のPush Notifications有効化・プロファイル再生成（Secretsの差し替えを含む）は、プッシュ通知の変更をマージする前に行います。プロファイルがPush Notificationsを許可していないと、配布Workflowの署名検証が失敗します。
+
 ### CI認証
 
 Firebase CLIは、既存Website Workflowと同じWorkload Identity Federationを使用します。`gcloud`コマンドやService Account JSON Keyは使用しません。`google-github-actions/auth`がGitHub OIDCからApplication Default Credentialsを作成し、Firebase CLIがその認証を自動検出します。[Firebase CLIのCI認証](https://firebase.google.com/docs/cli#use_the_cli_with_ci_systems)を参照してください。
@@ -454,6 +466,8 @@ OptionsをGit管理外にしても、それだけをデータ保護の境界に�
 - Google Play Service AccountへTesting Trackだけの権限を付与している
 - Firebaseへstg/prodそれぞれ3プラットフォームのAppを登録している
 - Firebase App Checkへstg/prodの公式Appを登録し、WebのSite Keyと許可Domainを設定している
+- iOSの両App IDでPush Notificationsを有効にし、再生成したstg/prodのプロファイルへSecretsを差し替えている
+- APNs認証キーをstg/prodのFirebaseのCloud Messagingへ登録し、`.p8`原本を安全に保管している
 - stg/prodのCI Service AccountへFirebase ViewerとAPI Keys Viewerを付与している
 - `firebase_options.dart`、`google-services.json`、`GoogleService-Info.plist`がGit管理外であることを確認している
 - Firestore／Storage Rules、API Key restrictions、App Check enforcementを確認している
