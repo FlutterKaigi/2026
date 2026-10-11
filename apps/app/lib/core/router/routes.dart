@@ -92,7 +92,10 @@ class StampRallyLinkRoute extends GoRouteData with $StampRallyLinkRoute {
             TypedGoRoute<ProfileEditRoute>(path: 'profile'),
             TypedGoRoute<QuizListRoute>(
               path: 'quiz',
-              routes: [TypedGoRoute<QuizRoute>(path: ':eventId')],
+              routes: [
+                TypedGoRoute<QuizRoute>(path: ':eventId'),
+                TypedGoRoute<QuizCheckInLinkRoute>(path: ':eventId/check-in/:code'),
+              ],
             ),
             TypedGoRoute<SupportLtRoute>(path: 'support-lt'),
             TypedGoRoute<SupportLtLinkRoute>(path: 'support-lt/:code'),
@@ -224,6 +227,20 @@ class QuizRoute extends GoRouteData with $QuizRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) => QuizPage(eventId: eventId);
+}
+
+/// `/account/quiz/:eventId/check-in/:code` — the venue check-in QR code's link
+/// (`quizCheckInQrPayload`), opened as a Universal Link / App Link or on the
+/// web. Declared beside [QuizRoute] rather than under it so going back returns
+/// to the quiz list instead of a second page for the same event.
+class QuizCheckInLinkRoute extends GoRouteData with $QuizCheckInLinkRoute {
+  const QuizCheckInLinkRoute({required this.eventId, required this.code});
+
+  final String eventId;
+  final String code;
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => QuizPage(eventId: eventId, checkInCode: code);
 }
 
 /// `/account/support-lt` — register attendance by scanning the venue's QR code

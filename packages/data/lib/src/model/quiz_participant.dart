@@ -14,6 +14,9 @@ abstract class QuizParticipant with _$QuizParticipant {
     required String displayName,
     @FirestoreDateTimeConverter() required DateTime registeredAt,
     String? teamId,
+
+    /// 会場の参加コードでチェックインした時刻。チーム選択にはチェックインが必要。
+    @FirestoreNullableDateTimeConverter() DateTime? checkedInAt,
   }) = _QuizParticipant;
 
   factory QuizParticipant.fromJson(Map<String, dynamic> json) => _$QuizParticipantFromJson(json);

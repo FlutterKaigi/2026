@@ -1542,6 +1542,7 @@ class Translations$quiz$ja {
 	late final Translations$quiz$preparing$ja preparing = Translations$quiz$preparing$ja.internal(_root);
 	late final Translations$quiz$registration$ja registration = Translations$quiz$registration$ja.internal(_root);
 	late final Translations$quiz$waiting$ja waiting = Translations$quiz$waiting$ja.internal(_root);
+	late final Translations$quiz$checkIn$ja checkIn = Translations$quiz$checkIn$ja.internal(_root);
 	late final Translations$quiz$selection$ja selection = Translations$quiz$selection$ja.internal(_root);
 	late final Translations$quiz$team$ja team = Translations$quiz$team$ja.internal(_root);
 	late final Translations$quiz$entryClosed$ja entryClosed = Translations$quiz$entryClosed$ja.internal(_root);
@@ -2009,6 +2010,9 @@ class Translations$quiz$signInRequired$ja {
 
 	/// ja: 'アカウントへ'
 	String get button => 'アカウントへ';
+
+	/// ja: 'クイズ大会に参加するにはサインインしてください'
+	String get inPage => 'クイズ大会に参加するにはサインインしてください';
 }
 
 // Path: quiz.errors
@@ -2091,8 +2095,74 @@ class Translations$quiz$waiting$ja {
 	/// ja: '参加表明済み'
 	String get title => '参加表明済み';
 
-	/// ja: '当日は会場でスタッフがテーブルをご案内します。チーム選択の開始をお待ちください。'
-	String get description => '当日は会場でスタッフがテーブルをご案内します。チーム選択の開始をお待ちください。';
+	/// ja: '参加登録の終了後、会場でチェックインを開始します。スクリーンの QR コードを読み取ってチェックインし、スタッフに案内されたチームを選んでください。'
+	String get description => '参加登録の終了後、会場でチェックインを開始します。スクリーンの QR コードを読み取ってチェックインし、スタッフに案内されたチームを選んでください。';
+}
+
+// Path: quiz.checkIn
+class Translations$quiz$checkIn$ja {
+	Translations$quiz$checkIn$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'チェックイン'
+	String get title => 'チェックイン';
+
+	/// ja: '会場のスクリーンに表示された QR コードを読み取るか、6桁の参加コードを入力してください。チェックイン後にチームを選べます。'
+	String get instructions => '会場のスクリーンに表示された QR コードを読み取るか、6桁の参加コードを入力してください。チェックイン後にチームを選べます。';
+
+	/// ja: 'QR コードを読み取る'
+	String get scanButton => 'QR コードを読み取る';
+
+	/// ja: 'QR コードを読み取る'
+	String get scanTitle => 'QR コードを読み取る';
+
+	/// ja: '会場のスクリーンに表示された QR コードを枠内に合わせてください'
+	String get scanHint => '会場のスクリーンに表示された QR コードを枠内に合わせてください';
+
+	/// ja: 'カメラを利用できません。設定でカメラへのアクセスを許可するか、前の画面で6桁の参加コードを入力してください'
+	String get scanCameraError => 'カメラを利用できません。設定でカメラへのアクセスを許可するか、前の画面で6桁の参加コードを入力してください';
+
+	/// ja: '読み取れませんでした。クイズ大会のチェックイン用 QR コードか確認してください'
+	String get scanInvalid => '読み取れませんでした。クイズ大会のチェックイン用 QR コードか確認してください';
+
+	/// ja: '別の回の QR コードです。参加登録した回の QR コードを読み取ってください'
+	String get scanOtherEvent => '別の回の QR コードです。参加登録した回の QR コードを読み取ってください';
+
+	/// ja: 'QR コードを読み取れない場合'
+	String get codeSectionTitle => 'QR コードを読み取れない場合';
+
+	/// ja: '参加コード'
+	String get codeLabel => '参加コード';
+
+	/// ja: 'チェックインする'
+	String get submit => 'チェックインする';
+
+	/// ja: '確認中…'
+	String get submitting => '確認中…';
+
+	/// ja: '6桁の参加コードを入力してください'
+	String get invalidFormat => '6桁の参加コードを入力してください';
+
+	/// ja: 'このリンクは無効です。会場の QR コードを読み取り直してください'
+	String get linkInvalid => 'このリンクは無効です。会場の QR コードを読み取り直してください';
+
+	/// ja: '参加コードが正しくありません。スクリーンの QR コードを読み取り直すか、スタッフにお声がけください'
+	String get wrongCode => '参加コードが正しくありません。スクリーンの QR コードを読み取り直すか、スタッフにお声がけください';
+
+	/// ja: '確認回数の上限に達しました。1分ほど待ってから再度お試しください'
+	String get rateLimited => '確認回数の上限に達しました。1分ほど待ってから再度お試しください';
+
+	/// ja: 'チェックインの受付は終了しました。スタッフにお声がけください。'
+	String get closed => 'チェックインの受付は終了しました。スタッフにお声がけください。';
+
+	/// ja: 'チェックインを確認できませんでした。通信状況を確認して再試行してください。'
+	String get unavailable => 'チェックインを確認できませんでした。通信状況を確認して再試行してください。';
+
+	/// ja: 'チェックインできませんでした。スタッフにお声がけください。'
+	String get failed => 'チェックインできませんでした。スタッフにお声がけください。';
 }
 
 // Path: quiz.selection
@@ -2854,6 +2924,7 @@ extension on Translations {
 			'quiz.signInRequired.title' => 'サインインが必要です',
 			'quiz.signInRequired.description' => 'クイズ大会は参加と回答の記録をアカウントに紐づけます。 アカウントタブからサインインしてご参加ください。',
 			'quiz.signInRequired.button' => 'アカウントへ',
+			'quiz.signInRequired.inPage' => 'クイズ大会に参加するにはサインインしてください',
 			'quiz.errors.signInFailed' => 'サインインに失敗しました',
 			'quiz.errors.eventLoadFailed' => 'イベント情報の取得に失敗しました',
 			'quiz.preparing.title' => 'クイズは開催準備中です',
@@ -2866,12 +2937,31 @@ extension on Translations {
 			'quiz.registration.failed' => '登録できませんでした。時間をおいて再度お試しください。',
 			'quiz.registration.alreadyParticipated' => '別の回に参加登録済みのため、この回には登録できません。',
 			'quiz.registration.closed' => 'この回の参加受付は終了しました。',
-			'quiz.registration.unavailable' => '登録を確認できませんでした。通信状況を確認して再試行してください。',
 			_ => null,
 		} ?? switch (path) {
+			'quiz.registration.unavailable' => '登録を確認できませんでした。通信状況を確認して再試行してください。',
 			'quiz.registration.accountUnavailable' => 'このアカウントでは参加できません。運営にお問い合わせください。',
 			'quiz.waiting.title' => '参加表明済み',
-			'quiz.waiting.description' => '当日は会場でスタッフがテーブルをご案内します。チーム選択の開始をお待ちください。',
+			'quiz.waiting.description' => '参加登録の終了後、会場でチェックインを開始します。スクリーンの QR コードを読み取ってチェックインし、スタッフに案内されたチームを選んでください。',
+			'quiz.checkIn.title' => 'チェックイン',
+			'quiz.checkIn.instructions' => '会場のスクリーンに表示された QR コードを読み取るか、6桁の参加コードを入力してください。チェックイン後にチームを選べます。',
+			'quiz.checkIn.scanButton' => 'QR コードを読み取る',
+			'quiz.checkIn.scanTitle' => 'QR コードを読み取る',
+			'quiz.checkIn.scanHint' => '会場のスクリーンに表示された QR コードを枠内に合わせてください',
+			'quiz.checkIn.scanCameraError' => 'カメラを利用できません。設定でカメラへのアクセスを許可するか、前の画面で6桁の参加コードを入力してください',
+			'quiz.checkIn.scanInvalid' => '読み取れませんでした。クイズ大会のチェックイン用 QR コードか確認してください',
+			'quiz.checkIn.scanOtherEvent' => '別の回の QR コードです。参加登録した回の QR コードを読み取ってください',
+			'quiz.checkIn.codeSectionTitle' => 'QR コードを読み取れない場合',
+			'quiz.checkIn.codeLabel' => '参加コード',
+			'quiz.checkIn.submit' => 'チェックインする',
+			'quiz.checkIn.submitting' => '確認中…',
+			'quiz.checkIn.invalidFormat' => '6桁の参加コードを入力してください',
+			'quiz.checkIn.linkInvalid' => 'このリンクは無効です。会場の QR コードを読み取り直してください',
+			'quiz.checkIn.wrongCode' => '参加コードが正しくありません。スクリーンの QR コードを読み取り直すか、スタッフにお声がけください',
+			'quiz.checkIn.rateLimited' => '確認回数の上限に達しました。1分ほど待ってから再度お試しください',
+			'quiz.checkIn.closed' => 'チェックインの受付は終了しました。スタッフにお声がけください。',
+			'quiz.checkIn.unavailable' => 'チェックインを確認できませんでした。通信状況を確認して再試行してください。',
+			'quiz.checkIn.failed' => 'チェックインできませんでした。スタッフにお声がけください。',
 			'quiz.selection.title' => 'チームを選択',
 			'quiz.selection.instructions' => 'スタッフに案内されたテーブルに着席してから、そのテーブルのチーム（A〜T）を選んでください。',
 			'quiz.selection.unselected' => 'チーム未選択',

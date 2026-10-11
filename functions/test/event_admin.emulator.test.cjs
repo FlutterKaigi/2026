@@ -58,11 +58,15 @@ test("source authentication manages STG and production independently through the
   await prod.doc(`quizEvents/${eventId}`).update({ participantCount: 3 });
   await op("closeRegistration");
   await op("openTeamSelection");
+  const checkInProjection = await call("prod", "read", { view: "quizProjection", eventId });
+  assert.match(checkInProjection.checkInCode, /^\d{6}$/);
   for (let i = 0; i < 3; i++) await prod.doc(`quizEvents/${eventId}/participants/member-${i}`).update({ teamId: "A" });
   await op("closeTeamSelection");
+  assert.equal((await call("prod", "read", { view: "quizProjection", eventId })).checkInCode, null);
   let snapshot = await call("prod", "read", { view: "quizConsole", eventId });
   assert.equal(snapshot.teams.length, 0);
   assert.equal(snapshot.participants.length, 3);
+  assert.equal(snapshot.checkInCode, checkInProjection.checkInCode);
   assert.equal("entryCode" in snapshot, false);
   for (const action of ["renameTeam", "updateTeamNamePool"]) {
     await assert.rejects(call("prod", action, { eventId, teamId: "A", name: "Changed", names: ["Changed"] }), { code: "invalid-argument" });
@@ -73,6 +77,7 @@ test("source authentication manages STG and production independently through the
 
   const projection = await call("prod", "read", { view: "quizProjection", eventId });
   assert.equal(projection.question.status, "reading");
+  assert.equal(projection.checkInCode, null);
   assert.equal("entryCode" in projection, false);
   assert.equal("secret" in projection, false);
   assert.equal(projection.question.correctOptionIndex, undefined);

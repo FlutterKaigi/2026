@@ -64,6 +64,8 @@ class AdminQuizEventRepository implements QuizEventRepository {
   @override
   Stream<QuizEvent?> watchById(String eventId) =>
       client.watch().map((data) => _document(data, 'event', QuizEvent.fromJson));
+  @override
+  Stream<String?> watchCheckInCode(String eventId) => client.watch().map((data) => data['checkInCode'] as String?);
 
   @override
   Future<String> save(QuizEvent event) async {
@@ -143,6 +145,8 @@ class AdminQuizParticipantRepository implements QuizParticipantRepository {
   @override
   Future<void> register(String eventId) async => _attendeeOnly();
   @override
+  Future<void> checkIn(String eventId, String code) async => _attendeeOnly();
+  @override
   Future<void> selectTeam(String eventId, String teamId, {required String? expectedTeamId}) async => _attendeeOnly();
 }
 
@@ -215,6 +219,8 @@ class AdminQuizOperationsRepository implements QuizOperationsRepository {
   Future<void> openTeamSelection(String eventId) async => _operate(eventId, 'openTeamSelection');
   @override
   Future<void> closeTeamSelection(String eventId) async => _operate(eventId, 'closeTeamSelection');
+  @override
+  Future<void> regenerateCheckInCode(String eventId) async => _operate(eventId, 'regenerateCheckInCode');
   @override
   Future<void> removeParticipant(String eventId, String uid) async =>
       _operate(eventId, 'removeParticipant', {'uid': uid});

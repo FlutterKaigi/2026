@@ -1,20 +1,20 @@
-import 'package:app/core/i18n/strings.g.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
-/// Number of digits in a Support LT registration code.
-const supportLtCodeLength = 6;
+/// Number of digits in a venue code (Support LT registration, quiz check-in).
+const _codeLength = 6;
 
 /// Height of each digit box.
 const _boxHeight = 56.0;
 
-/// Six-digit registration code entry drawn as one box per digit.
+/// Six-digit venue code entry drawn as one box per digit.
 ///
 /// A single transparent [TextFormField] lies over the boxes and receives taps,
 /// typing and paste, so the boxes only mirror its text and focus.
-class SupportLtCodeField extends HookWidget {
-  const SupportLtCodeField({
+class DigitCodeField extends HookWidget {
+  const DigitCodeField({
+    required this.label,
     required this.controller,
     required this.enabled,
     required this.onChanged,
@@ -24,6 +24,8 @@ class SupportLtCodeField extends HookWidget {
     super.key,
   });
 
+  /// Label above the boxes, also read out as the field's hint.
+  final String label;
   final TextEditingController controller;
   final bool enabled;
   final ValueChanged<String> onChanged;
@@ -38,13 +40,12 @@ class SupportLtCodeField extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final t = Translations.of(context);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final focusNode = useFocusNode();
     final hasFocus = useListenableSelector(focusNode, () => focusNode.hasFocus);
     final text = useValueListenable(controller).text;
-    final activeIndex = enabled && hasFocus ? text.length.clamp(0, supportLtCodeLength - 1) : null;
+    final activeIndex = enabled && hasFocus ? text.length.clamp(0, _codeLength - 1) : null;
     final labelColor = switch ((enabled, highlightsError)) {
       (false, _) => colorScheme.onSurface.withValues(alpha: 0.38),
       (true, true) => colorScheme.error,
@@ -56,7 +57,7 @@ class SupportLtCodeField extends HookWidget {
       children: [
         // 読み上げは入力欄のヒントで行うため、見出しは重ねて読ませない。
         ExcludeSemantics(
-          child: Text(t.supportLt.codeLabel, style: theme.textTheme.labelLarge?.copyWith(color: labelColor)),
+          child: Text(label, style: theme.textTheme.labelLarge?.copyWith(color: labelColor)),
         ),
         const SizedBox(height: 8),
         SizedBox(
@@ -67,7 +68,7 @@ class SupportLtCodeField extends HookWidget {
               ExcludeSemantics(
                 child: Row(
                   children: [
-                    for (var index = 0; index < supportLtCodeLength; index++) ...[
+                    for (var index = 0; index < _codeLength; index++) ...[
                       if (index > 0) const SizedBox(width: 8),
                       Expanded(
                         child: _DigitBox(
@@ -93,12 +94,12 @@ class SupportLtCodeField extends HookWidget {
                   textInputAction: TextInputAction.done,
                   inputFormatters: [
                     FilteringTextInputFormatter.digitsOnly,
-                    LengthLimitingTextInputFormatter(supportLtCodeLength),
+                    LengthLimitingTextInputFormatter(_codeLength),
                   ],
                   showCursor: false,
                   style: const TextStyle(color: Colors.transparent),
                   decoration: InputDecoration.collapsed(
-                    hintText: t.supportLt.codeLabel,
+                    hintText: label,
                     hintStyle: const TextStyle(color: Colors.transparent),
                   ),
                   onChanged: onChanged,

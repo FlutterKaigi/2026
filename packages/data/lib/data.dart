@@ -6,6 +6,8 @@ export 'src/model/locale_map.dart' show LocaleMap;
 export 'src/model/news.dart' show News;
 export 'src/model/profile_exchange.dart' show ProfileExchange, ProfileExchangeOrigin;
 export 'src/model/quiz_answer.dart' show QuizAnswer;
+export 'src/model/quiz_check_in.dart'
+    show isQuizCheckInCode, parseQuizCheckInQrPayload, quizCheckInLinkPath, quizCheckInQrPayload;
 export 'src/model/quiz_event.dart' show QuizEvent, QuizEventStatus, QuizTeamSelectionStatus;
 export 'src/model/quiz_participant.dart' show QuizParticipant;
 export 'src/model/quiz_participant_account.dart' show QuizParticipantAccount;

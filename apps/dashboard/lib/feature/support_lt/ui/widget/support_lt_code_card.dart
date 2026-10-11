@@ -1,3 +1,4 @@
+import 'package:dashboard/core/attendee_app_origin.dart';
 import 'package:dashboard/core/extension/build_context_extension.dart';
 import 'package:dashboard/core/extension/date_time_extension.dart';
 import 'package:dashboard/feature/support_lt/data/provider/support_lt_state.dart';
@@ -99,7 +100,7 @@ class _SupportLtCodeCardState extends ConsumerState<SupportLtCodeCard> {
         else
           _CodeDetails(
             code: code,
-            qrPayload: supportLtQrPayload(code.code, origin: ref.watch(supportLtAppOriginProvider)),
+            qrPayload: supportLtQrPayload(code.code, origin: ref.watch(attendeeAppOriginProvider)),
             isIssuing: _isIssuing,
           ),
         const SizedBox(height: 16),

@@ -2,6 +2,7 @@ import { HttpsError, onCall } from "firebase-functions/v2/https";
 import { FUNCTIONS_REGION, isEmulator } from "./environment";
 import { defaultAuth, defaultFirestore } from "./firebase_admin";
 import {
+  checkInQuizParticipantForUser,
   getActiveQuizUser,
   operateQuizEvent,
   registerQuizParticipantForUser,
@@ -11,6 +12,12 @@ import {
 const options = { region: FUNCTIONS_REGION, enforceAppCheck: !isEmulator };
 export const registerQuizParticipant = onCall(options, (request) =>
   registerQuizParticipantForUser(request.auth, request.data, {
+    db: defaultFirestore(),
+    getUser: (uid) => defaultAuth().getUser(uid),
+  }),
+);
+export const checkInQuizParticipant = onCall(options, (request) =>
+  checkInQuizParticipantForUser(request.auth, request.data, {
     db: defaultFirestore(),
     getUser: (uid) => defaultAuth().getUser(uid),
   }),

@@ -62,3 +62,8 @@ final quizQuestionProvider = StreamProvider.family<QuizQuestion?, ({String event
 final quizQuestionSecretProvider = StreamProvider.family<QuizQuestionSecret?, ({String eventId, String questionId})>(
   (ref, args) => ref.watch(quizQuestionRepositoryProvider).watchSecret(args.eventId, args.questionId),
 );
+
+/// 会場で配る6桁の参加コード。未発行の間は `null`。
+final quizCheckInCodeProvider = StreamProvider.family<String?, String>(
+  (ref, eventId) => ref.watch(quizEventRepositoryProvider).watchCheckInCode(eventId),
+);

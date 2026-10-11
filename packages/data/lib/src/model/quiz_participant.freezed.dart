@@ -15,7 +15,8 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$QuizParticipant {
 
- String get id; String get displayName;@FirestoreDateTimeConverter() DateTime get registeredAt; String? get teamId;
+ String get id; String get displayName;@FirestoreDateTimeConverter() DateTime get registeredAt; String? get teamId;/// 会場の参加コードでチェックインした時刻。チーム選択にはチェックインが必要。
+@FirestoreNullableDateTimeConverter() DateTime? get checkedInAt;
 /// Create a copy of QuizParticipant
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +29,16 @@ $QuizParticipantCopyWith<QuizParticipant> get copyWith => _$QuizParticipantCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is QuizParticipant&&(identical(other.id, id) || other.id == id)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.registeredAt, registeredAt) || other.registeredAt == registeredAt)&&(identical(other.teamId, teamId) || other.teamId == teamId));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is QuizParticipant&&(identical(other.id, id) || other.id == id)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.registeredAt, registeredAt) || other.registeredAt == registeredAt)&&(identical(other.teamId, teamId) || other.teamId == teamId)&&(identical(other.checkedInAt, checkedInAt) || other.checkedInAt == checkedInAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,displayName,registeredAt,teamId);
+int get hashCode => Object.hash(runtimeType,id,displayName,registeredAt,teamId,checkedInAt);
 
 @override
 String toString() {
-  return 'QuizParticipant(id: $id, displayName: $displayName, registeredAt: $registeredAt, teamId: $teamId)';
+  return 'QuizParticipant(id: $id, displayName: $displayName, registeredAt: $registeredAt, teamId: $teamId, checkedInAt: $checkedInAt)';
 }
 
 
@@ -48,7 +49,7 @@ abstract mixin class $QuizParticipantCopyWith<$Res>  {
   factory $QuizParticipantCopyWith(QuizParticipant value, $Res Function(QuizParticipant) _then) = _$QuizParticipantCopyWithImpl;
 @useResult
 $Res call({
- String id, String displayName,@FirestoreDateTimeConverter() DateTime registeredAt, String? teamId
+ String id, String displayName,@FirestoreDateTimeConverter() DateTime registeredAt, String? teamId,@FirestoreNullableDateTimeConverter() DateTime? checkedInAt
 });
 
 
@@ -65,13 +66,14 @@ class _$QuizParticipantCopyWithImpl<$Res>
 
 /// Create a copy of QuizParticipant
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? displayName = null,Object? registeredAt = null,Object? teamId = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? displayName = null,Object? registeredAt = null,Object? teamId = freezed,Object? checkedInAt = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,displayName: null == displayName ? _self.displayName : displayName // ignore: cast_nullable_to_non_nullable
 as String,registeredAt: null == registeredAt ? _self.registeredAt : registeredAt // ignore: cast_nullable_to_non_nullable
 as DateTime,teamId: freezed == teamId ? _self.teamId : teamId // ignore: cast_nullable_to_non_nullable
-as String?,
+as String?,checkedInAt: freezed == checkedInAt ? _self.checkedInAt : checkedInAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,
   ));
 }
 
@@ -156,10 +158,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String displayName, @FirestoreDateTimeConverter()  DateTime registeredAt,  String? teamId)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String displayName, @FirestoreDateTimeConverter()  DateTime registeredAt,  String? teamId, @FirestoreNullableDateTimeConverter()  DateTime? checkedInAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _QuizParticipant() when $default != null:
-return $default(_that.id,_that.displayName,_that.registeredAt,_that.teamId);case _:
+return $default(_that.id,_that.displayName,_that.registeredAt,_that.teamId,_that.checkedInAt);case _:
   return orElse();
 
 }
@@ -177,10 +179,10 @@ return $default(_that.id,_that.displayName,_that.registeredAt,_that.teamId);case
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String displayName, @FirestoreDateTimeConverter()  DateTime registeredAt,  String? teamId)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String displayName, @FirestoreDateTimeConverter()  DateTime registeredAt,  String? teamId, @FirestoreNullableDateTimeConverter()  DateTime? checkedInAt)  $default,) {final _that = this;
 switch (_that) {
 case _QuizParticipant():
-return $default(_that.id,_that.displayName,_that.registeredAt,_that.teamId);case _:
+return $default(_that.id,_that.displayName,_that.registeredAt,_that.teamId,_that.checkedInAt);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -197,10 +199,10 @@ return $default(_that.id,_that.displayName,_that.registeredAt,_that.teamId);case
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String displayName, @FirestoreDateTimeConverter()  DateTime registeredAt,  String? teamId)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String displayName, @FirestoreDateTimeConverter()  DateTime registeredAt,  String? teamId, @FirestoreNullableDateTimeConverter()  DateTime? checkedInAt)?  $default,) {final _that = this;
 switch (_that) {
 case _QuizParticipant() when $default != null:
-return $default(_that.id,_that.displayName,_that.registeredAt,_that.teamId);case _:
+return $default(_that.id,_that.displayName,_that.registeredAt,_that.teamId,_that.checkedInAt);case _:
   return null;
 
 }
@@ -212,13 +214,15 @@ return $default(_that.id,_that.displayName,_that.registeredAt,_that.teamId);case
 @JsonSerializable()
 
 class _QuizParticipant extends QuizParticipant {
-  const _QuizParticipant({required this.id, required this.displayName, @FirestoreDateTimeConverter() required this.registeredAt, this.teamId}): super._();
+  const _QuizParticipant({required this.id, required this.displayName, @FirestoreDateTimeConverter() required this.registeredAt, this.teamId, @FirestoreNullableDateTimeConverter() this.checkedInAt}): super._();
   factory _QuizParticipant.fromJson(Map<String, dynamic> json) => _$QuizParticipantFromJson(json);
 
 @override final  String id;
 @override final  String displayName;
 @override@FirestoreDateTimeConverter() final  DateTime registeredAt;
 @override final  String? teamId;
+/// 会場の参加コードでチェックインした時刻。チーム選択にはチェックインが必要。
+@override@FirestoreNullableDateTimeConverter() final  DateTime? checkedInAt;
 
 /// Create a copy of QuizParticipant
 /// with the given fields replaced by the non-null parameter values.
@@ -233,16 +237,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _QuizParticipant&&(identical(other.id, id) || other.id == id)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.registeredAt, registeredAt) || other.registeredAt == registeredAt)&&(identical(other.teamId, teamId) || other.teamId == teamId));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _QuizParticipant&&(identical(other.id, id) || other.id == id)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.registeredAt, registeredAt) || other.registeredAt == registeredAt)&&(identical(other.teamId, teamId) || other.teamId == teamId)&&(identical(other.checkedInAt, checkedInAt) || other.checkedInAt == checkedInAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,displayName,registeredAt,teamId);
+int get hashCode => Object.hash(runtimeType,id,displayName,registeredAt,teamId,checkedInAt);
 
 @override
 String toString() {
-  return 'QuizParticipant(id: $id, displayName: $displayName, registeredAt: $registeredAt, teamId: $teamId)';
+  return 'QuizParticipant(id: $id, displayName: $displayName, registeredAt: $registeredAt, teamId: $teamId, checkedInAt: $checkedInAt)';
 }
 
 
@@ -253,7 +257,7 @@ abstract mixin class _$QuizParticipantCopyWith<$Res> implements $QuizParticipant
   factory _$QuizParticipantCopyWith(_QuizParticipant value, $Res Function(_QuizParticipant) _then) = __$QuizParticipantCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String displayName,@FirestoreDateTimeConverter() DateTime registeredAt, String? teamId
+ String id, String displayName,@FirestoreDateTimeConverter() DateTime registeredAt, String? teamId,@FirestoreNullableDateTimeConverter() DateTime? checkedInAt
 });
 
 
@@ -270,13 +274,14 @@ class __$QuizParticipantCopyWithImpl<$Res>
 
 /// Create a copy of QuizParticipant
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? displayName = null,Object? registeredAt = null,Object? teamId = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? displayName = null,Object? registeredAt = null,Object? teamId = freezed,Object? checkedInAt = freezed,}) {
   return _then(_QuizParticipant(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,displayName: null == displayName ? _self.displayName : displayName // ignore: cast_nullable_to_non_nullable
 as String,registeredAt: null == registeredAt ? _self.registeredAt : registeredAt // ignore: cast_nullable_to_non_nullable
 as DateTime,teamId: freezed == teamId ? _self.teamId : teamId // ignore: cast_nullable_to_non_nullable
-as String?,
+as String?,checkedInAt: freezed == checkedInAt ? _self.checkedInAt : checkedInAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,
   ));
 }
 

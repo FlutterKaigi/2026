@@ -1,6 +1,7 @@
 const assert = require("node:assert/strict");
 const { test } = require("node:test");
 const {
+  checkInQuizParticipantForUser,
   quizDisplayName,
   selectQuizTeamForUser,
   registerQuizParticipantForUser,
@@ -28,6 +29,7 @@ test("missing and anonymous accounts cannot register or answer", async () => {
     });
     await assert.rejects(submitQuizAnswerForUser(auth, {}, {}), { code });
     await assert.rejects(selectQuizTeamForUser(auth, {}, {}), { code });
+    await assert.rejects(checkInQuizParticipantForUser(auth, {}, {}), { code });
   }
 });
 test("malformed event requests are rejected before database access", async () => {
@@ -44,6 +46,49 @@ test("malformed event requests are rejected before database access", async () =>
       code: "invalid-argument",
     });
   }
+  for (const data of [
+    { eventId: "event" },
+    { eventId: "event", code: 123456 },
+    { eventId: "event", code: "12345" },
+    { eventId: "event", code: "１２３４５６" },
+    { eventId: "bad/id", code: "123456" },
+  ]) {
+    await assert.rejects(checkInQuizParticipantForUser(auth, data, {}), {
+      code: "invalid-argument",
+    });
+  }
+});
+
+test("an account deletion tombstone blocks check-in before attempts can be recreated", async () => {
+  const auth = {
+    uid: "deleted",
+    token: { firebase: { sign_in_provider: "password" } },
+  };
+  const ref = { collection: () => ({ doc: () => ref }) };
+  const db = {
+    doc: () => ref,
+    runTransaction: async (callback) =>
+      callback({
+        get: async () => ({
+          get: (field) => (field === "accountDeleted" ? true : undefined),
+        }),
+        getAll: async () => assert.fail("A tombstone should reject before reading the event"),
+        set: () => assert.fail("A tombstone should not record an attempt"),
+      }),
+  };
+  await assert.rejects(
+    checkInQuizParticipantForUser(
+      auth,
+      { eventId: "event", code: "123456" },
+      {
+        db,
+        getUser: async () => {
+          assert.fail("A tombstone should reject before Auth lookup");
+        },
+      },
+    ),
+    { code: "unauthenticated" },
+  );
 });
 
 test("an account deletion tombstone blocks registration even if Auth lookup would still succeed", async () => {

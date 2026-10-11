@@ -78,19 +78,24 @@ async function readSnapshot(db: Firestore, input: Data): Promise<Data> {
     return { event, sponsors, question, secret };
   }
   const teams = await list(`${path}/teams`, "tableNumber");
+  const beforeStart = event?.status === "registration" || event?.status === "entryClosed";
+  const checkInCode = async () => (await db.doc(`${path}/secret/checkIn`).get()).get("code") ?? null;
   if (input.view === "quizProjection") {
-    // Projection never reads entry codes, unpublished questions or answer secrets.
+    // Projection never reads unpublished questions or answer secrets. The
+    // check-in code is shown at the venue only while check-in is open.
     const question = event?.currentQuestionId
       ? document(await db.doc(`${path}/questions/${id(event.currentQuestionId)}`).get()) : null;
-    const participants = event?.status === "registration" || event?.status === "entryClosed"
-      ? await list(`${path}/participants`, "registeredAt") : [];
-    return { event, teams, participants, question: question?.status === "draft" ? null : question };
+    const participants = beforeStart ? await list(`${path}/participants`, "registeredAt") : [];
+    return {
+      event, teams, participants, question: question?.status === "draft" ? null : question,
+      checkInCode: beforeStart && event?.teamSelectionStatus === "open" ? await checkInCode() : null,
+    };
   }
-  const [participants, questions, answers, sponsors] = await Promise.all([
+  const [participants, questions, answers, sponsors, code] = await Promise.all([
     list(`${path}/participants`, "registeredAt"), list(`${path}/questions`, "order"),
-    list(`${path}/answers`), list("sponsors"),
+    list(`${path}/answers`), list("sponsors"), beforeStart ? checkInCode() : null,
   ]);
-  return { event, teams, participants, questions, answers, sponsors };
+  return { event, teams, participants, questions, answers, sponsors, checkInCode: code };
 }
 
 async function saveEvent(db: Firestore, input: Data): Promise<Data> {

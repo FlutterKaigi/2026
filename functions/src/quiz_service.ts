@@ -109,6 +109,18 @@ function isQuizTeamId(value: unknown): value is string {
   return typeof value === "string" && /^[A-T]$/.test(value);
 }
 
+function isCheckInCode(value: unknown): value is string {
+  return typeof value === "string" && /^\d{6}$/.test(value);
+}
+
+function newCheckInCode(previous: unknown): string {
+  let code: string;
+  do {
+    code = randomInt(100000, 1000000).toString();
+  } while (code === previous);
+  return code;
+}
+
 export async function getActiveQuizUser(
   uid: string,
   getUser: (uid: string) => Promise<UserRecord>,
@@ -297,6 +309,80 @@ export async function registerQuizParticipantForUser(
   return { registered: true };
 }
 
+export async function checkInQuizParticipantForUser(
+  rawAuth: QuizAuth | undefined,
+  rawData: unknown,
+  dependencies: {
+    db: Firestore;
+    getUser: (uid: string) => Promise<UserRecord>;
+  },
+): Promise<{ checkedIn: true }> {
+  const auth = account(rawAuth);
+  const data = dataObject(rawData);
+  const eventId = id(data.eventId, "eventId");
+  if (!isCheckInCode(data.code))
+    throw new HttpsError("invalid-argument", "6桁の参加コードを入力してください。");
+  const db = dependencies.db;
+  const ref = db.doc(`quizEvents/${eventId}`);
+  const participantRef = ref.collection("participants").doc(auth.uid);
+  const attemptRef = ref.collection("checkInAttempts").doc(auth.uid);
+  const result = await runQuizTransaction(db, async (tx) => {
+    // Auth deletion writes this marker before removing private attempt records,
+    // so a request racing the deletion retries here instead of recreating them.
+    const lock = await tx.get(db.doc(`quizParticipation/${auth.uid}`));
+    if (lock.get("accountDeleted") === true) {
+      throw new HttpsError(
+        "unauthenticated",
+        "アカウントが削除されています。サインインし直してください。",
+      );
+    }
+    await getActiveQuizUser(auth.uid, dependencies.getUser);
+    const [event, participant, secret, attempt] = await tx.getAll(
+      ref,
+      participantRef,
+      ref.collection("secret").doc("checkIn"),
+      attemptRef,
+    );
+    requireState(event.exists, "イベントが見つかりません。");
+    requireState(participant.exists, "先に参加表明してください。取り消された場合は再登録が必要です。");
+    // Lost acknowledgements remain retryable after check-in closes.
+    if (participant.get("checkedInAt") instanceof Timestamp) return "checked-in";
+    requireState(
+      ["registration", "entryClosed"].includes(event.get("status")) &&
+        event.get("teamSelectionStatus") === "open",
+      "チェックインの受付は終了しているか、まだ開始されていません。",
+    );
+    const now = Timestamp.now();
+    const attemptData = attempt.data();
+    const recent =
+      attemptData?.windowStartedAt instanceof Timestamp &&
+      now.toMillis() - attemptData.windowStartedAt.toMillis() < 60_000;
+    const count = recent ? Number(attemptData?.count ?? 0) : 0;
+    if (count >= 5) return "rate-limited";
+    if (secret.get("code") !== data.code) {
+      tx.set(attemptRef, {
+        count: count + 1,
+        windowStartedAt: recent ? attemptData?.windowStartedAt : now,
+      });
+      return "wrong-code";
+    }
+    tx.update(participantRef, { checkedInAt: now });
+    tx.delete(attemptRef);
+    return "checked-in";
+  });
+  if (result === "rate-limited")
+    throw new HttpsError(
+      "resource-exhausted",
+      "参加コードの確認回数が上限に達しました。1分後にお試しください。",
+      { reason: "rate-limited" },
+    );
+  if (result === "wrong-code")
+    throw new HttpsError("permission-denied", "参加コードが正しくありません。", {
+      reason: "wrong-code",
+    });
+  return { checkedIn: true };
+}
+
 export async function selectQuizTeamForUser(
   rawAuth: QuizAuth | undefined,
   rawData: unknown,
@@ -315,6 +401,11 @@ export async function selectQuizTeamForUser(
     requireState(participant.exists, "先に参加表明してください。取り消された場合は再登録が必要です。");
     const currentTeamId = participant.get("teamId") ?? null;
     if (currentTeamId === data.teamId) return { selected: true };
+    if (!(participant.get("checkedInAt") instanceof Timestamp)) {
+      throw new HttpsError("failed-precondition", "先にチェックインしてください。", {
+        reason: "check-in-required",
+      });
+    }
     if (currentTeamId !== data.expectedTeamId) {
       throw new HttpsError("failed-precondition", "所属が変わりました。現在のチームを確認して選び直してください。", {
         reason: "team-changed",
@@ -467,16 +558,28 @@ export async function operateQuizEvent(
         isPublic: transition[1] !== "draft",
       });
     }
-    if (["openTeamSelection", "closeTeamSelection"].includes(operation)) {
+    const checkInSecretRef = ref.collection("secret").doc("checkIn");
+    if (["openTeamSelection", "closeTeamSelection", "regenerateCheckInCode"].includes(operation)) {
       requireState(
         ["registration", "entryClosed"].includes(eventData.status),
-        "参加受付開始後、初出題前にチーム選択を操作してください。",
+        "参加受付開始後、初出題前にチェックインを操作してください。",
       );
       const selectionStatus = eventData.teamSelectionStatus ?? "notStarted";
       if (operation === "closeTeamSelection") {
-        requireState(selectionStatus !== "notStarted", "先にチーム選択を開始してください。");
+        requireState(selectionStatus !== "notStarted", "先にチェックインを開始してください。");
         return finish({ teamSelectionStatus: "closed" });
       }
+      if (operation === "regenerateCheckInCode") {
+        requireState(selectionStatus !== "notStarted", "チェックインの開始時に参加コードを発行します。");
+        const secret = await tx.get(checkInSecretRef);
+        tx.set(checkInSecretRef, { code: newCheckInCode(secret.get("code")), updatedAt: Timestamp.now() });
+        return finish();
+      }
+      requireState(
+        selectionStatus !== "notStarted" || eventData.status === "entryClosed",
+        "参加登録を終了してからチェックインを開始してください。",
+      );
+      const secret = await tx.get(checkInSecretRef);
       if (selectionStatus === "notStarted") {
         const participants = await tx.get(ref.collection("participants"));
         const teams = await tx.get(ref.collection("teams"));
@@ -484,6 +587,9 @@ export async function operateQuizEvent(
         requireState(questions.docs.every((doc) => doc.get("status") === "draft"), "出題済みの問題があります。");
         for (const team of teams.docs) tx.delete(team.ref);
         for (const participant of participants.docs) tx.update(participant.ref, { teamId: FieldValue.delete() });
+      }
+      if (!isCheckInCode(secret.get("code"))) {
+        tx.set(checkInSecretRef, { code: newCheckInCode(null), updatedAt: Timestamp.now() });
       }
       return finish({ teamSelectionStatus: "open" });
     }
@@ -513,6 +619,7 @@ export async function operateQuizEvent(
         tx.delete(participant.ref);
         tx.delete(ref.collection("participantAccounts").doc(participant.id));
         tx.delete(ref.collection("entryClaims").doc(participant.id));
+        tx.delete(ref.collection("checkInAttempts").doc(participant.id));
       }
       for (const slot of slots.docs) if (targetIds.has(slot.get("uid"))) tx.delete(slot.ref);
       for (const lock of locks) {
