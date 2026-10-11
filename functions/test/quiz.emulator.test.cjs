@@ -5,6 +5,7 @@ const { initializeApp, deleteApp } = require("firebase-admin/app");
 const { getAuth } = require("firebase-admin/auth");
 const { getFirestore, Timestamp } = require("firebase-admin/firestore");
 const { registerQuizParticipantForUser } = require("../lib/quiz_service.js");
+const { deleteAuthUserData } = require("../lib/auth_user_data.js");
 
 function localHost(name, fallback) {
   const value = process.env[name] ?? fallback;
@@ -141,9 +142,15 @@ async function prepareTeams(eventId) {
   await op(eventId, "openTeamSelection");
   const participants = await db.collection(`quizEvents/${eventId}/participants`).get();
   const batch = db.batch();
-  for (const participant of participants.docs) batch.update(participant.ref, { teamId: "A" });
+  for (const participant of participants.docs) batch.update(participant.ref, { teamId: "A", checkedInAt: Timestamp.now() });
   await batch.commit();
   await op(eventId, "closeTeamSelection");
+}
+async function checkInCode(eventId) {
+  return (await db.doc(`quizEvents/${eventId}/secret/checkIn`).get()).get("code");
+}
+async function checkIn(eventId, user) {
+  return success("checkInQuizParticipant", user, { eventId, code: await checkInCode(eventId) });
 }
 function select(eventId, user, teamId, expectedTeamId = null) {
   return success("selectQuizTeam", user, { eventId, teamId, expectedTeamId });
@@ -331,18 +338,25 @@ test("registration needs no code, normalizes public names and ignores old codes"
   assert.equal((await participant.get()).get("displayName"), "Legacy");
 });
 
-test("selection is authenticated, compares membership, survives reopening, and freezes at first question", async () => {
+test("selection needs check-in after registration closes, compares membership, survives reopening, and freezes at first question", async () => {
   const eventId = await seedEvent("selection");
   const person = await newUser("selector");
   await register(eventId, person);
   await error("selectQuizTeam", undefined, { eventId, teamId: "A", expectedTeamId: null }, "UNAUTHENTICATED");
   await error("selectQuizTeam", person, { eventId, teamId: "A", expectedTeamId: null }, "FAILED_PRECONDITION");
+  await error("quizEventOperation", admin, { eventId, operation: "openTeamSelection" }, "FAILED_PRECONDITION");
+  await op(eventId, "closeRegistration");
   await op(eventId, "openTeamSelection");
+  const notCheckedIn = await call("selectQuizTeam", person, { eventId, teamId: "A", expectedTeamId: null });
+  assert.equal(notCheckedIn.error?.details?.reason, "check-in-required", JSON.stringify(notCheckedIn));
+  await checkIn(eventId, person);
   await error("selectQuizTeam", person, { eventId, teamId: "U", expectedTeamId: null }, "INVALID_ARGUMENT");
   await select(eventId, person, "A");
   await select(eventId, person, "A");
   await select(eventId, person, "T", "A");
   await error("selectQuizTeam", person, { eventId, teamId: "B", expectedTeamId: "A" }, "FAILED_PRECONDITION");
+  await op(eventId, "reopenRegistration");
+  await select(eventId, person, "T");
   await op(eventId, "closeRegistration");
   await op(eventId, "closeTeamSelection");
   await select(eventId, person, "T");
@@ -357,7 +371,7 @@ test("selection is authenticated, compares membership, survives reopening, and f
   assert.equal(teams.docs[0].get("tableNumber"), 20);
   assert.equal((await db.collection(`quizEvents/${eventId}/answers`).get()).size, 1);
   await select(eventId, person, "T");
-  for (const operation of ["openTeamSelection", "closeTeamSelection", "reopenRegistration", "removeUnselectedParticipants", "removeParticipant"]) {
+  for (const operation of ["openTeamSelection", "closeTeamSelection", "regenerateCheckInCode", "reopenRegistration", "removeUnselectedParticipants", "removeParticipant"]) {
     await error("quizEventOperation", admin, { eventId, operation, uid: person.uid }, "FAILED_PRECONDITION");
   }
 });
@@ -380,6 +394,7 @@ test("initial selection removes legacy assignments; no-shows block starting and 
   assert.equal((await ref.collection("participants").doc(person.uid).get()).get("teamId"), undefined);
   await ref.collection("participants").doc(nullTeam.uid).update({ teamId: null });
   await db.doc(`quizParticipation/${deleted.uid}`).update({ accountDeleted: true });
+  await checkIn(eventId, person);
   await select(eventId, person, "A");
   await seedQuestion(eventId);
   await error("quizEventOperation", admin, { eventId, operation: "presentQuestion", questionId: "q1" }, "FAILED_PRECONDITION");
@@ -396,6 +411,7 @@ test("initial selection removes legacy assignments; no-shows block starting and 
   await register(eventId, nullTeam);
   await error("quizEventOperation", admin, { eventId, operation: "removeUnselectedParticipants" }, "FAILED_PRECONDITION");
   await op(eventId, "openTeamSelection");
+  await checkIn(eventId, nullTeam);
   await select(eventId, nullTeam, "A");
   assert.equal((await ref.collection("participants").doc(person.uid).get()).get("teamId"), "A");
   await op(eventId, "closeRegistration");
@@ -408,14 +424,75 @@ test("initial selection removes legacy assignments; no-shows block starting and 
   assert.deepEqual((await ref.collection("teams").get()).docs.map((doc) => doc.id), ["A"]);
 });
 
+test("check-in needs the venue code, limits guesses, keeps the code on reopening, and survives retries and rotation", async () => {
+  const eventId = await seedEvent("check-in");
+  const [person, outsider, leaver] = await Promise.all([newUser("check-in"), newUser("check-in-outsider"), newUser("check-in-leaver")]);
+  await register(eventId, person);
+  await register(eventId, leaver);
+  await error("checkInQuizParticipant", undefined, { eventId, code: "123456" }, "UNAUTHENTICATED");
+  await error("checkInQuizParticipant", person, { eventId, code: "12345" }, "INVALID_ARGUMENT");
+  await error("checkInQuizParticipant", person, { eventId, code: "123456" }, "FAILED_PRECONDITION");
+  await op(eventId, "closeRegistration");
+  await error("quizEventOperation", admin, { eventId, operation: "regenerateCheckInCode" }, "FAILED_PRECONDITION");
+  assert.equal(await checkInCode(eventId), undefined);
+  await op(eventId, "openTeamSelection");
+  const code = await checkInCode(eventId);
+  assert.match(code, /^[1-9]\d{5}$/);
+  await error("checkInQuizParticipant", outsider, { eventId, code }, "FAILED_PRECONDITION");
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const wrong = await call("checkInQuizParticipant", person, { eventId, code: "000000" });
+    assert.equal(wrong.error?.details?.reason, "wrong-code", JSON.stringify(wrong));
+  }
+  const limited = await call("checkInQuizParticipant", person, { eventId, code });
+  assert.equal(limited.error?.details?.reason, "rate-limited", JSON.stringify(limited));
+  const attemptRef = db.doc(`quizEvents/${eventId}/checkInAttempts/${person.uid}`);
+  await attemptRef.update({ windowStartedAt: Timestamp.fromMillis(Date.now() - 61_000) });
+  await op(eventId, "closeTeamSelection");
+  await error("checkInQuizParticipant", person, { eventId, code }, "FAILED_PRECONDITION");
+  await op(eventId, "openTeamSelection");
+  assert.equal(await checkInCode(eventId), code);
+  await op(eventId, "regenerateCheckInCode");
+  const rotated = await checkInCode(eventId);
+  assert.notEqual(rotated, code);
+  await error("checkInQuizParticipant", person, { eventId, code }, "PERMISSION_DENIED");
+  await success("checkInQuizParticipant", person, { eventId, code: rotated });
+  const participantRef = db.doc(`quizEvents/${eventId}/participants/${person.uid}`);
+  assert.ok((await participantRef.get()).get("checkedInAt") instanceof Timestamp);
+  assert.equal((await attemptRef.get()).exists, false);
+  await op(eventId, "closeTeamSelection");
+  await success("checkInQuizParticipant", person, { eventId, code: "000000" });
+  await op(eventId, "openTeamSelection");
+  await error("checkInQuizParticipant", leaver, { eventId, code: "000000" }, "PERMISSION_DENIED");
+  await op(eventId, "removeParticipant", { uid: leaver.uid });
+  assert.equal((await db.doc(`quizEvents/${eventId}/checkInAttempts/${leaver.uid}`).get()).exists, false);
+});
+
+test("check-in racing account deletion leaves no attempt record and later requests are rejected", async () => {
+  const eventId = await seedEvent("check-in-deletion");
+  const person = await newUser("check-in-deleted");
+  await register(eventId, person);
+  await op(eventId, "closeRegistration");
+  await op(eventId, "openTeamSelection");
+  const attempts = Array.from({ length: 3 }, () => call("checkInQuizParticipant", person, { eventId, code: "000000" }));
+  const [results] = await Promise.all([Promise.all(attempts), deleteAuthUserData(person.uid, db)]);
+  for (const result of results) assert.ok(["PERMISSION_DENIED", "UNAUTHENTICATED"].includes(result.error?.status), JSON.stringify(result));
+  const attemptRef = db.doc(`quizEvents/${eventId}/checkInAttempts/${person.uid}`);
+  assert.equal((await attemptRef.get()).exists, false);
+  await error("checkInQuizParticipant", person, { eventId, code: "000000" }, "UNAUTHENTICATED");
+  await error("checkInQuizParticipant", person, { eventId, code: await checkInCode(eventId) }, "UNAUTHENTICATED");
+  assert.equal((await attemptRef.get()).exists, false);
+  assert.equal((await db.doc(`quizEvents/${eventId}/participants/${person.uid}`).get()).get("checkedInAt"), undefined);
+});
+
 test("concurrent selections and no-show cancellation leave one consistent roster", async () => {
   const eventId = await seedEvent("select-race");
   const people = await Promise.all([newUser("race-a"), newUser("race-b")]);
   for (const person of people) await register(eventId, person);
+  await op(eventId, "closeRegistration");
   await op(eventId, "openTeamSelection");
+  for (const person of people) await checkIn(eventId, person);
   const first = await Promise.all(["A", "B"].map((teamId) => call("selectQuizTeam", people[0], { eventId, teamId, expectedTeamId: null })));
   assert.equal(first.filter((result) => !result.error).length, 1);
-  await op(eventId, "closeRegistration");
   const [selection] = await Promise.all([
     call("selectQuizTeam", people[1], { eventId, teamId: "T", expectedTeamId: null }),
     op(eventId, "removeUnselectedParticipants"),
@@ -568,6 +645,9 @@ test("security rules deny participant registration bypass and stale admin runtim
       admin,
       { code: { stringValue: "654321" } },
     ],
+    [`quizEvents/${eventId}/secret/checkIn`, admin, { code: { stringValue: "654321" } }],
+    [`quizEvents/${eventId}/checkInAttempts/${attendee.uid}`, attendee, { count: { integerValue: "0" } }],
+    [`quizEvents/${eventId}/participants/${stranger.uid}`, stranger, { checkedInAt: { timestampValue: new Date().toISOString() } }],
   ])
     assert.equal((await clientPatch(path, user, fields)).status, 403, path);
   await op(eventId, "openQuestion", { questionId: "q1" });
@@ -690,6 +770,7 @@ test("receipts prevent delayed close and selection retries undoing later operati
     (await db.doc(`quizEvents/${eventId}`).get()).get("status"),
     "registration",
   );
+  await op(eventId, "closeRegistration");
   await op(eventId, "openTeamSelection", { operationId: "select-open" });
   await op(eventId, "closeTeamSelection");
   await op(eventId, "openTeamSelection", { operationId: "select-open" });

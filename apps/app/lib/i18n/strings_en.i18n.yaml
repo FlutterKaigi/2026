@@ -555,6 +555,7 @@ quiz:
     description: The quiz links your entry and answers to your account.
       Sign in from the Account tab to take part.
     button: Go to Account
+    inPage: Sign in to take part in the quiz
   errors:
     signInFailed: Failed to sign in
     eventLoadFailed: Failed to load the event
@@ -575,7 +576,27 @@ quiz:
     accountUnavailable: This account cannot join. Please contact event staff.
   waiting:
     title: Registration confirmed
-    description: Staff will assign your table at the venue. Please wait for team selection to open.
+    description: Check-in opens at the venue after registration closes. Scan the QR code on the screen to check in, then select the team assigned by staff.
+  checkIn:
+    title: Check-in
+    instructions: Scan the QR code shown on the venue screen, or enter the 6-digit check-in code. You can select your team after checking in.
+    scanButton: Scan the QR code
+    scanTitle: Scan the QR code
+    scanHint: Line up the QR code shown on the venue screen within the frame
+    scanCameraError: Camera unavailable. Allow camera access in Settings, or enter the 6-digit check-in code on the previous screen
+    scanInvalid: Could not read this code. Make sure it's the quiz check-in QR code
+    scanOtherEvent: This QR code is for another round. Scan the QR code for the round you registered for
+    codeSectionTitle: If you can't scan the QR code
+    codeLabel: Check-in code
+    submit: Check in
+    submitting: Checking…
+    invalidFormat: Enter a 6-digit code
+    linkInvalid: This link isn't valid. Scan the QR code at the venue again
+    wrongCode: This code is incorrect. Scan the QR code on the screen again or ask the staff
+    rateLimited: Too many attempts. Wait about a minute and try again
+    closed: Check-in has closed. Please contact event staff.
+    unavailable: Could not confirm your check-in. Check your connection and try again.
+    failed: Could not check in. Please contact event staff.
   selection:
     title: Select your team
     instructions: Sit at the table assigned by staff, then select its team (A–T).

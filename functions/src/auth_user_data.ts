@@ -21,7 +21,7 @@ export async function deleteAuthUserData(uid: string, db: Firestore): Promise<vo
   const events = await db.collection("quizEvents").get();
   const privatePaths: string[] = [];
   for (const event of events.docs) {
-    for (const collection of ["participantAccounts", "entryClaims", "entryAttempts"]) {
+    for (const collection of ["participantAccounts", "entryClaims", "entryAttempts", "checkInAttempts"]) {
       privatePaths.push(`quizEvents/${event.id}/${collection}/${uid}`);
     }
   }

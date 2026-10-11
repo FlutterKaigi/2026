@@ -24,6 +24,22 @@ void main() {
     expect(completed, isTrue);
   });
 
+  test('check-in sends only the event and code and never marks the attendee locally', () async {
+    final firestore = FakeFirebaseFirestore();
+    final participant = firestore.doc('quizEvents/event/participants/member');
+    await participant.set({'displayName': 'Member'});
+    final pending = Completer<Object?>();
+    final functions = _Functions((_) => pending.future);
+    final repository = FirestoreQuizParticipantRepository(firestore: firestore, functions: functions);
+    final checkIn = repository.checkIn('event', '123456');
+    await Future<void>.delayed(Duration.zero);
+    expect(functions.calls.single.$1, 'checkInQuizParticipant');
+    expect(functions.calls.single.$2, {'eventId': 'event', 'code': '123456'});
+    pending.complete(null);
+    await checkIn;
+    expect((await participant.get()).data()!.containsKey('checkedInAt'), isFalse);
+  });
+
   test('selection compares the previous membership without writing it optimistically', () async {
     final firestore = FakeFirebaseFirestore();
     final participant = firestore.doc('quizEvents/event/participants/member');

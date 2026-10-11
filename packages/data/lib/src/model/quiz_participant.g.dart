@@ -13,6 +13,9 @@ _QuizParticipant _$QuizParticipantFromJson(Map<String, dynamic> json) => _QuizPa
     json['registeredAt'],
   ),
   teamId: json['teamId'] as String?,
+  checkedInAt: const FirestoreNullableDateTimeConverter().fromJson(
+    json['checkedInAt'],
+  ),
 );
 
 Map<String, dynamic> _$QuizParticipantToJson(_QuizParticipant instance) => <String, dynamic>{
@@ -22,4 +25,7 @@ Map<String, dynamic> _$QuizParticipantToJson(_QuizParticipant instance) => <Stri
     instance.registeredAt,
   ),
   'teamId': instance.teamId,
+  'checkedInAt': const FirestoreNullableDateTimeConverter().toJson(
+    instance.checkedInAt,
+  ),
 };

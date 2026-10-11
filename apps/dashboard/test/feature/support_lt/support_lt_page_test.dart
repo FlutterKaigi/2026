@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:cloud_functions/cloud_functions.dart';
+import 'package:dashboard/core/attendee_app_origin.dart';
 import 'package:dashboard/core/env.dart';
 import 'package:dashboard/core/event_environment/event_admin_client.dart';
 import 'package:dashboard/feature/auth/data/provider/auth_state.dart';
@@ -145,7 +146,7 @@ void main() {
         container.dispose();
         client?.dispose();
       });
-      return container.read(supportLtAppOriginProvider);
+      return container.read(attendeeAppOriginProvider);
     }
 
     expect(originFor(Flavor.prod), productionAppOrigin);

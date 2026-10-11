@@ -58,11 +58,15 @@ void main() {
   });
 
   for (final (selection, message) in [
-    (QuizTeamSelectionStatus.notStarted, 'チーム選択の開始をお待ちください。'),
-    (QuizTeamSelectionStatus.open, 'スタッフに案内されたテーブルでチーム（A〜T）を選択してください。'),
-    (QuizTeamSelectionStatus.closed, 'チーム選択は終了しました。出題をお待ちください。'),
+    (QuizTeamSelectionStatus.notStarted, 'チェックインの開始をお待ちください。'),
+    (QuizTeamSelectionStatus.open, 'チェックイン後、スタッフに案内されたテーブルのチーム（A〜T）を選択してください。'),
+    (QuizTeamSelectionStatus.closed, 'チェックインとチーム選択は終了しました。出題をお待ちください。'),
   ]) {
-    testWidgets('prestart guidance follows team selection status: $selection', (tester) async {
+    testWidgets('prestart guidance follows check-in status and shows the code only while open: $selection', (
+      tester,
+    ) async {
+      await tester.binding.setSurfaceSize(const Size(1280, 1600));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
@@ -76,12 +80,14 @@ void main() {
               ),
             ),
             quizTeamListProvider('event').overrideWith((_) => Stream.value(<QuizTeam>[])),
+            quizCheckInCodeProvider('event').overrideWith((_) => Stream.value('123456')),
           ],
           child: const MaterialApp(home: QuizProjectionPage(eventId: 'event')),
         ),
       );
       await tester.pumpAndSettle();
       expect(find.text(message), findsOneWidget);
+      expect(find.text('123456'), selection == QuizTeamSelectionStatus.open ? findsOneWidget : findsNothing);
     });
   }
 

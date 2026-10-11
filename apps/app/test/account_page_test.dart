@@ -21,6 +21,7 @@ import 'package:app/feature/profile/ui/widget/country_flag_widget.dart';
 import 'package:app/feature/quiz/data/provider/quiz_repositories.dart';
 import 'package:app/feature/quiz/ui/component/quiz_sign_in_required_view.dart';
 import 'package:app/feature/quiz/ui/page/quiz_event_list_page.dart';
+import 'package:app/feature/quiz/ui/page/quiz_page.dart';
 import 'package:app/feature/support_lt/data/provider/support_lt_provider.dart';
 import 'package:data/data.dart';
 import 'package:data/user.dart';
@@ -454,6 +455,25 @@ void main() {
     await tester.tap(find.text(t.quiz.signInRequired.button));
     await tester.pumpAndSettle();
     expect(find.byType(AccountPage), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('a check-in link opens the quiz page with its code and offers sign-in there', (tester) async {
+    final repository = FakeAuthRepository();
+    final router = GoRouter(initialLocation: '/account', routes: app_router.$appRoutes);
+    addTearDown(repository.dispose);
+    addTearDown(router.dispose);
+    await tester.pumpWidget(
+      buildSubject(repository, preferences: preferences, router: router, quizRepository: _QuizEventRepository()),
+    );
+    await tester.pumpAndSettle();
+
+    router.go('/account/quiz/event/check-in/654321');
+    await tester.pumpAndSettle();
+
+    final page = tester.widget<QuizPage>(find.byType(QuizPage));
+    expect((page.eventId, page.checkInCode), ('event', '654321'));
+    expect(find.byType(SignInCard), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 

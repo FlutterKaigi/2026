@@ -12,10 +12,11 @@ Firestoreトランザクションで処理する。リージョンは `asia-nort
 
 - `registerQuizParticipant({eventId})`: 非匿名アカウントのコードなし参加表明。
   定員・前後半の重複参加を検証し、公開プロフィールの表示名を使う。
-- `selectQuizTeam({eventId, teamId, expectedTeamId})`: A〜T の所属を比較更新する。
+- `checkInQuizParticipant({eventId, code})`: 会場の6桁の参加コードでチェックインする。誤入力は1分5回まで。
+- `selectQuizTeam({eventId, teamId, expectedTeamId})`: チェックイン済みの参加者の A〜T の所属を比較更新する。
 - `submitQuizAnswer({eventId, questionId, teamId, selectedOptionIndex})`: 所属とサーバー期限を検証する。
 - `quizEventOperation({eventId, operation, questionId?, uid?, seconds?, operationId?})`: 管理者の進行操作。
-  チーム選択の開始・終了、個別取消・未選択者の一括取消にも使う。
+  チェックインの開始・終了、参加コードの再発行、個別取消・未選択者の一括取消にも使う。
   再試行では操作IDを再利用する。一括取消だけは押下ごとに新しいIDで現在の対象を判定する。
 - `getQuizServerTime({})`: `serverNowMs`（epochミリ秒）を返す。
 

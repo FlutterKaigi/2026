@@ -757,6 +757,7 @@ class _Translations$quiz$en extends Translations$quiz$ja {
 	@override late final _Translations$quiz$preparing$en preparing = _Translations$quiz$preparing$en._(_root);
 	@override late final _Translations$quiz$registration$en registration = _Translations$quiz$registration$en._(_root);
 	@override late final _Translations$quiz$waiting$en waiting = _Translations$quiz$waiting$en._(_root);
+	@override late final _Translations$quiz$checkIn$en checkIn = _Translations$quiz$checkIn$en._(_root);
 	@override late final _Translations$quiz$selection$en selection = _Translations$quiz$selection$en._(_root);
 	@override late final _Translations$quiz$team$en team = _Translations$quiz$team$en._(_root);
 	@override late final _Translations$quiz$entryClosed$en entryClosed = _Translations$quiz$entryClosed$en._(_root);
@@ -1014,6 +1015,7 @@ class _Translations$quiz$signInRequired$en extends Translations$quiz$signInRequi
 	@override String get title => 'Sign-in required';
 	@override String get description => 'The quiz links your entry and answers to your account. Sign in from the Account tab to take part.';
 	@override String get button => 'Go to Account';
+	@override String get inPage => 'Sign in to take part in the quiz';
 }
 
 // Path: quiz.errors
@@ -1065,7 +1067,35 @@ class _Translations$quiz$waiting$en extends Translations$quiz$waiting$ja {
 
 	// Translations
 	@override String get title => 'Registration confirmed';
-	@override String get description => 'Staff will assign your table at the venue. Please wait for team selection to open.';
+	@override String get description => 'Check-in opens at the venue after registration closes. Scan the QR code on the screen to check in, then select the team assigned by staff.';
+}
+
+// Path: quiz.checkIn
+class _Translations$quiz$checkIn$en extends Translations$quiz$checkIn$ja {
+	_Translations$quiz$checkIn$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Check-in';
+	@override String get instructions => 'Scan the QR code shown on the venue screen, or enter the 6-digit check-in code. You can select your team after checking in.';
+	@override String get scanButton => 'Scan the QR code';
+	@override String get scanTitle => 'Scan the QR code';
+	@override String get scanHint => 'Line up the QR code shown on the venue screen within the frame';
+	@override String get scanCameraError => 'Camera unavailable. Allow camera access in Settings, or enter the 6-digit check-in code on the previous screen';
+	@override String get scanInvalid => 'Could not read this code. Make sure it\'s the quiz check-in QR code';
+	@override String get scanOtherEvent => 'This QR code is for another round. Scan the QR code for the round you registered for';
+	@override String get codeSectionTitle => 'If you can\'t scan the QR code';
+	@override String get codeLabel => 'Check-in code';
+	@override String get submit => 'Check in';
+	@override String get submitting => 'Checking…';
+	@override String get invalidFormat => 'Enter a 6-digit code';
+	@override String get linkInvalid => 'This link isn\'t valid. Scan the QR code at the venue again';
+	@override String get wrongCode => 'This code is incorrect. Scan the QR code on the screen again or ask the staff';
+	@override String get rateLimited => 'Too many attempts. Wait about a minute and try again';
+	@override String get closed => 'Check-in has closed. Please contact event staff.';
+	@override String get unavailable => 'Could not confirm your check-in. Check your connection and try again.';
+	@override String get failed => 'Could not check in. Please contact event staff.';
 }
 
 // Path: quiz.selection
@@ -1713,6 +1743,7 @@ extension on TranslationsEn {
 			'quiz.signInRequired.title' => 'Sign-in required',
 			'quiz.signInRequired.description' => 'The quiz links your entry and answers to your account. Sign in from the Account tab to take part.',
 			'quiz.signInRequired.button' => 'Go to Account',
+			'quiz.signInRequired.inPage' => 'Sign in to take part in the quiz',
 			'quiz.errors.signInFailed' => 'Failed to sign in',
 			'quiz.errors.eventLoadFailed' => 'Failed to load the event',
 			'quiz.preparing.title' => 'The quiz is being prepared',
@@ -1725,12 +1756,31 @@ extension on TranslationsEn {
 			'quiz.registration.failed' => 'Could not register. Please try again later.',
 			'quiz.registration.alreadyParticipated' => 'You have already registered for another round and cannot join this one.',
 			'quiz.registration.closed' => 'Registration for this round has closed.',
-			'quiz.registration.unavailable' => 'Registration could not be confirmed. Check your connection and try again.',
 			_ => null,
 		} ?? switch (path) {
+			'quiz.registration.unavailable' => 'Registration could not be confirmed. Check your connection and try again.',
 			'quiz.registration.accountUnavailable' => 'This account cannot join. Please contact event staff.',
 			'quiz.waiting.title' => 'Registration confirmed',
-			'quiz.waiting.description' => 'Staff will assign your table at the venue. Please wait for team selection to open.',
+			'quiz.waiting.description' => 'Check-in opens at the venue after registration closes. Scan the QR code on the screen to check in, then select the team assigned by staff.',
+			'quiz.checkIn.title' => 'Check-in',
+			'quiz.checkIn.instructions' => 'Scan the QR code shown on the venue screen, or enter the 6-digit check-in code. You can select your team after checking in.',
+			'quiz.checkIn.scanButton' => 'Scan the QR code',
+			'quiz.checkIn.scanTitle' => 'Scan the QR code',
+			'quiz.checkIn.scanHint' => 'Line up the QR code shown on the venue screen within the frame',
+			'quiz.checkIn.scanCameraError' => 'Camera unavailable. Allow camera access in Settings, or enter the 6-digit check-in code on the previous screen',
+			'quiz.checkIn.scanInvalid' => 'Could not read this code. Make sure it\'s the quiz check-in QR code',
+			'quiz.checkIn.scanOtherEvent' => 'This QR code is for another round. Scan the QR code for the round you registered for',
+			'quiz.checkIn.codeSectionTitle' => 'If you can\'t scan the QR code',
+			'quiz.checkIn.codeLabel' => 'Check-in code',
+			'quiz.checkIn.submit' => 'Check in',
+			'quiz.checkIn.submitting' => 'Checking…',
+			'quiz.checkIn.invalidFormat' => 'Enter a 6-digit code',
+			'quiz.checkIn.linkInvalid' => 'This link isn\'t valid. Scan the QR code at the venue again',
+			'quiz.checkIn.wrongCode' => 'This code is incorrect. Scan the QR code on the screen again or ask the staff',
+			'quiz.checkIn.rateLimited' => 'Too many attempts. Wait about a minute and try again',
+			'quiz.checkIn.closed' => 'Check-in has closed. Please contact event staff.',
+			'quiz.checkIn.unavailable' => 'Could not confirm your check-in. Check your connection and try again.',
+			'quiz.checkIn.failed' => 'Could not check in. Please contact event staff.',
 			'quiz.selection.title' => 'Select your team',
 			'quiz.selection.instructions' => 'Sit at the table assigned by staff, then select its team (A–T).',
 			'quiz.selection.unselected' => 'No team selected',
