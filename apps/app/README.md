@@ -134,6 +134,18 @@ QRコードは `<アプリのドメイン>/s/<token>` 形式です。OSのカメ
 クレーンゲームは会場で物理のサンクスカードを集めた人が1回挑戦でき、アプリは挑戦の記録だけを扱います。
 サインイン前に開いたリンクは、その画面でサインインすると続けて処理します。別の画面でサインインした場合はアカウントタブが結果画面を開き直します。
 
+## プッシュ通知
+
+運営がFirebaseコンソールから手動で送るお知らせを、stg／prodのiOS・Androidアプリで受け取ります。devフレーバー(Emulator SuiteにFCMがない)とWeb(Service WorkerとVAPIDキーが必要)は対象外です。
+
+- アプリを開いている間: iOSはOSのバナー、Androidはアプリ内のバナーで表示します。Androidでは通知センターに残りません。
+- バックグラウンド・終了中: OSの通知として表示します。Androidは「お知らせ」チャンネルを使います。
+- 通知の許可: 起動して最初の画面を表示した後、未回答の場合だけOSのダイアログで求めます。拒否後はOSの設定から変更します。
+
+送信はFirebaseコンソールの`Messaging`で通知のキャンペーンを作成し、ターゲットにそのProjectのiOSアプリとAndroidアプリを指定します。タップで開く画面は、`Additional options > Custom data`のキー`route`にアプリ内のパス(`/news`、`/sessions/<セッションID>`など)で指定します。URLやクエリ付きの値、開くだけで処理が走るリンク(`/x/…`、`/s/…`、`/account/support-lt/<コード>`)は無視し、タップするとアプリをそのまま開きます。prodで送る前にstgで確認します。
+
+アプリは起動後にFCMの登録トークンをログへ出力します。Firebaseコンソールの`Send test message`に貼り付けると、その端末だけに送れます。iOSはDebugビルドの実機またはTestFlight版で確認します。Androidのアプリ終了中の受信は、google-servicesプラグインが入るCIのビルドで確認します(ローカルビルドには入りません)。APNsの設定は[App delivery setup](../../.github/APP_DELIVERY.md#apns認証キー)を参照してください。
+
 ## 配布
 
 GitHub Actionsによる配布先、Repository Variables／Secretsの設定は[App delivery setup](../../.github/APP_DELIVERY.md)を参照してください。

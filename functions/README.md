@@ -350,6 +350,10 @@ STG プロジェクトにデプロイする callable function。管理ダッシ�
 
 ## セットアップ
 
+Node.js 22.12以降の22系を使用する。Functions用のCI・配布・Melosコマンドは
+Firebase CLI 14.23.0に固定している。この版には[Functions SDK 7のエミュレータ起動の修正](https://firebase.google.com/support/release-notes/cli#version_14230_-_october_30_2025)が含まれる。
+エミュレータの実行にはJava 17も必要。
+
 ```bash
 cd functions
 npm install

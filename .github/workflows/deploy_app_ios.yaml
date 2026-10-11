@@ -130,6 +130,15 @@ jobs:
           /usr/libexec/PlistBuddy -c 'Print :CFBundleURLTypes:1:CFBundleURLSchemes:0' ios/Runner/Info.plist \
             | grep -Fx "$reversed_client_id"
 
+      # プッシュ通知の aps-environment は、ローカルの Debug ビルドに合わせて development を
+      # コミットしている。署名検証は App Store プロファイルの production と突き合わせるため、
+      # アーカイブ前に production へ書き換えて検証する。
+      - name: Use the production APNs environment
+        working-directory: apps/app
+        run: |
+          /usr/libexec/PlistBuddy -c 'Set :aps-environment production' ios/Runner/Runner.entitlements
+          test "$(/usr/libexec/PlistBuddy -c 'Print :aps-environment' ios/Runner/Runner.entitlements)" = production
+
       - name: App Store Connect CLI を準備
         run: |
           python3 -m venv "$RUNNER_TEMP/codemagic-cli"

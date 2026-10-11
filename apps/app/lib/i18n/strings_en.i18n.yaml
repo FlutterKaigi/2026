@@ -636,3 +636,5 @@ forceUpdate:
   title: Update Required
   message: A new version of the app is available. Please update to the latest version.
   updateButton: Update
+pushNotification:
+  open: Open

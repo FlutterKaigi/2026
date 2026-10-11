@@ -70,6 +70,7 @@ class TranslationsEn extends Translations with BaseTranslations<AppLocale, Trans
 	@override late final _Translations$common$en common = _Translations$common$en._(_root);
 	@override late final _Translations$quiz$en quiz = _Translations$quiz$en._(_root);
 	@override late final _Translations$forceUpdate$en forceUpdate = _Translations$forceUpdate$en._(_root);
+	@override late final _Translations$pushNotification$en pushNotification = _Translations$pushNotification$en._(_root);
 }
 
 // Path: app
@@ -776,6 +777,16 @@ class _Translations$forceUpdate$en extends Translations$forceUpdate$ja {
 	@override String get title => 'Update Required';
 	@override String get message => 'A new version of the app is available. Please update to the latest version.';
 	@override String get updateButton => 'Update';
+}
+
+// Path: pushNotification
+class _Translations$pushNotification$en extends Translations$pushNotification$ja {
+	_Translations$pushNotification$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get open => 'Open';
 }
 
 // Path: sessionTimetable.view
@@ -1782,6 +1793,7 @@ extension on TranslationsEn {
 			'forceUpdate.title' => 'Update Required',
 			'forceUpdate.message' => 'A new version of the app is available. Please update to the latest version.',
 			'forceUpdate.updateButton' => 'Update',
+			'pushNotification.open' => 'Open',
 			_ => null,
 		};
 	}
