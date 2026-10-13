@@ -8,7 +8,7 @@ void main() {
     test('links to the event check-in under the selected origin', () {
       expect(
         quizCheckInQrPayload('event1', '123456', origin: productionAppOrigin),
-        'https://app-2026.flutterkaigi.jp/account/quiz/event1/check-in/123456',
+        'https://2026-app.flutterkaigi.jp/account/quiz/event1/check-in/123456',
       );
       expect(
         quizCheckInQrPayload('event1', '123456', origin: stagingAppOrigin),
@@ -42,15 +42,16 @@ void main() {
     });
 
     for (final (description, raw) in [
-      ('http scheme', 'http://app-2026.flutterkaigi.jp/account/quiz/event1/check-in/123456'),
-      ('user info', 'https://user@app-2026.flutterkaigi.jp/account/quiz/event1/check-in/123456'),
-      ('a query', 'https://app-2026.flutterkaigi.jp/account/quiz/event1/check-in/123456?next=1'),
-      ('a fragment', 'https://app-2026.flutterkaigi.jp/account/quiz/event1/check-in/123456#top'),
-      ('an extra segment', 'https://app-2026.flutterkaigi.jp/account/quiz/event1/check-in/123456/extra'),
-      ('a missing event', 'https://app-2026.flutterkaigi.jp/account/quiz/check-in/123456'),
-      ('the event page itself', 'https://app-2026.flutterkaigi.jp/account/quiz/event1'),
-      ('a Support LT link', 'https://app-2026.flutterkaigi.jp/account/support-lt/123456'),
-      ('five digits', 'https://app-2026.flutterkaigi.jp/account/quiz/event1/check-in/12345'),
+      ('an obsolete production app link', 'https://app-2026.flutterkaigi.jp/account/quiz/event1/check-in/123456'),
+      ('http scheme', 'http://2026-app.flutterkaigi.jp/account/quiz/event1/check-in/123456'),
+      ('user info', 'https://user@2026-app.flutterkaigi.jp/account/quiz/event1/check-in/123456'),
+      ('a query', 'https://2026-app.flutterkaigi.jp/account/quiz/event1/check-in/123456?next=1'),
+      ('a fragment', 'https://2026-app.flutterkaigi.jp/account/quiz/event1/check-in/123456#top'),
+      ('an extra segment', 'https://2026-app.flutterkaigi.jp/account/quiz/event1/check-in/123456/extra'),
+      ('a missing event', 'https://2026-app.flutterkaigi.jp/account/quiz/check-in/123456'),
+      ('the event page itself', 'https://2026-app.flutterkaigi.jp/account/quiz/event1'),
+      ('a Support LT link', 'https://2026-app.flutterkaigi.jp/account/support-lt/123456'),
+      ('five digits', 'https://2026-app.flutterkaigi.jp/account/quiz/event1/check-in/12345'),
       ('full-width digits', '１２３４５６'),
       ('an empty value', ''),
     ]) {

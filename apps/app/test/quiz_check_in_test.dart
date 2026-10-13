@@ -306,11 +306,13 @@ void main() {
       expect(results, ['123456']);
     });
 
-    testWidgets('accepts an earlier production app link', (tester) async {
+    testWidgets('rejects an obsolete production app link', (tester) async {
       final results = await openScanPage(tester);
-      detect(tester, quizCheckInQrPayload('event', '654321', origin: legacyProductionAppOrigin));
+      detect(tester, quizCheckInQrPayload('event', '654321', origin: 'https://app-2026.flutterkaigi.jp'));
       await tester.pumpAndSettle();
-      expect(results, ['654321']);
+      expect(find.text(t.quiz.checkIn.scanInvalid), findsOneWidget);
+      expect(find.byType(QuizCheckInScanPage), findsOneWidget);
+      expect(results, isEmpty);
     });
 
     testWidgets('accepts a bare code', (tester) async {
