@@ -202,6 +202,9 @@
 							com.apple.AppAttest = {
 								enabled = 1;
 							};
+							com.apple.Push = {
+								enabled = 1;
+							};
 							com.apple.SignInWithApple = {
 								enabled = 1;
 							};

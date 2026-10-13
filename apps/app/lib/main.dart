@@ -9,6 +9,8 @@ import 'package:app/core/remote_config/remote_config_repository.dart';
 import 'package:app/core/router/app_url_strategy.dart';
 import 'package:app/core/router/launch_route.dart';
 import 'package:app/core/ui/app.dart';
+import 'package:app/feature/push_notification/data/push_notification_provider.dart';
+import 'package:app/feature/push_notification/data/push_notification_repository.dart';
 import 'package:data/data.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -63,6 +65,8 @@ Future<void> main() async {
 
   // Share one Talker with the app so startup logs land in the in-app viewer.
   final talker = TalkerFlutter.init();
+  final pushNotifications = createPushNotificationRepository(flavor: environment.flavor, talker: talker);
+  final notificationRoute = await pushNotifications.initialize();
   final remoteConfigRepository = FirebaseRemoteConfigRepository(flavor: environment.flavor, talker: talker);
   // Fails open and blocks startup for a few seconds at most: it logs and
   // returns instead of throwing, and a fetch that is still in flight keeps
@@ -75,10 +79,11 @@ Future<void> main() async {
       child: ProviderScope(
         overrides: [
           environmentProvider.overrideWithValue(environment),
-          launchRouteProvider.overrideWithValue(launchRoute.route),
+          launchRouteProvider.overrideWithValue(launchRoute.route ?? notificationRoute?.location),
           sharedPreferencesProvider.overrideWithValue(sharedPreferences),
           talkerProvider.overrideWithValue(talker),
           remoteConfigRepositoryProvider.overrideWithValue(remoteConfigRepository),
+          pushNotificationRepositoryProvider.overrideWithValue(pushNotifications),
         ],
         child: const App(),
       ),

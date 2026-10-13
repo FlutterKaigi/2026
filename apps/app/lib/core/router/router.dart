@@ -102,8 +102,9 @@ final routerProvider = Provider<GoRouter>((ref) {
   ];
 
   // iOS のコールドスタートで、本体のツリーより先に届いた Universal Link
-  // (`LaunchRouteObserver` 参照)。プラットフォームの初期ルートは `/` の
-  // ままなので、そちらではなくこのリンクから開始する。
+  // (`LaunchRouteObserver` 参照)、またはアプリを起動した通知タップの遷移先。
+  // プラットフォームの初期ルートは `/` のままなので、そちらではなくこのリンク
+  // から開始する。
   final launchRoute = ref.watch(launchRouteProvider);
 
   return GoRouter(

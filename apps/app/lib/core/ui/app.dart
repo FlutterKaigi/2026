@@ -6,6 +6,7 @@ import 'package:app/core/provider/theme_mode.dart';
 import 'package:app/core/router/router.dart';
 import 'package:app/feature/force_update/data/force_update_provider.dart';
 import 'package:app/feature/force_update/ui/force_update_blocker.dart';
+import 'package:app/feature/push_notification/ui/push_notification_listener.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -57,8 +58,10 @@ class App extends HookConsumerWidget {
                 ? Brightness.light
                 : Brightness.dark,
           ),
-          // 全ルートを一度に塞ぐため、Navigator の外側でブロッキング UI を重ねる。
-          child: ForceUpdateBlocker(child: child ?? const SizedBox.shrink()),
+          child: PushNotificationListener(
+            // 全ルートを一度に塞ぐため、Navigator の外側でブロッキング UI を重ねる。
+            child: ForceUpdateBlocker(child: child ?? const SizedBox.shrink()),
+          ),
         );
       },
     );

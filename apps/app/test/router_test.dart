@@ -12,6 +12,7 @@ import 'package:app/feature/auth/ui/page/account_page.dart';
 import 'package:app/feature/event/ui/page/event_info_page.dart';
 import 'package:app/feature/exchange/ui/page/exchange_share_link_page.dart';
 import 'package:app/feature/profile/data/provider/user_profile_repository.dart';
+import 'package:app/feature/settings/ui/page/settings_page.dart';
 import 'package:app/feature/support_lt/data/provider/support_lt_provider.dart';
 import 'package:app/feature/support_lt/ui/page/support_lt_page.dart';
 import 'package:data/data.dart';
@@ -305,6 +306,14 @@ void main() {
       expect(find.byType(NotFoundPage), findsNothing);
       expect(find.byType(EventInfoPage), findsOneWidget);
       expect(currentPath(router), '/info');
+    });
+
+    testWidgets('starts on the path-only route of the notification tap that launched the app', (tester) async {
+      final router = await pumpRouter(tester, launchRoute: Uri(path: '/settings'));
+
+      expect(find.byType(NotFoundPage), findsNothing);
+      expect(find.byType(SettingsPage), findsOneWidget);
+      expect(currentPath(router), '/settings');
     });
 
     testWidgets('continues to route universal links and report unrelated unknown URLs', (tester) async {

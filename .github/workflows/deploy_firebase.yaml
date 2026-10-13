@@ -94,7 +94,7 @@ jobs:
           token_format: access_token
 
       - name: Firebase CLI を準備
-        run: npm install --global firebase-tools@13.35.1
+        run: npm install --global firebase-tools@14.23.0
 
       - name: Functions の適用パラメータを設定
         if: ${{ env.DEPLOY_FUNCTIONS == 'true' }}
