@@ -4,6 +4,8 @@ import 'package:app/core/i18n/strings_en.g.dart';
 import 'package:app/core/provider/clock.dart';
 import 'package:app/core/provider/package_info.dart';
 import 'package:app/core/provider/shared_preferences.dart';
+import 'package:app/core/remote_config/remote_config_keys.dart';
+import 'package:app/core/remote_config/remote_config_provider.dart';
 import 'package:app/core/ui/launch_external_url.dart';
 import 'package:app/core/ui/widget/trademark_footer_widget.dart';
 import 'package:app/feature/event/ui/page/event_info_page.dart';
@@ -14,6 +16,10 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'fake_remote_config_repository.dart';
+
+const _surveyUrl = 'https://forms.example.com/flutterkaigi-2026';
 
 void main() {
   test('venue map link contains the exact venue name and address', () {
@@ -170,14 +176,15 @@ void main() {
   ) async {
     await _pumpEventInfoPage(
       tester,
-      clock: () => DateTime.utc(2026, 10, 30, 5, 59),
+      clock: () => DateTime.utc(2026, 10, 30, 5, 59, 59),
+      surveyUrl: _surveyUrl,
     );
 
     expect(find.text('アンケート協力のお願い'), findsNothing);
     expect(find.text('全体アンケートに回答する'), findsNothing);
   });
 
-  testWidgets('shows the survey card and opens the shared survey URL', (
+  testWidgets('shows the survey card and opens the configured survey URL', (
     tester,
   ) async {
     final openedUris = <Uri>[];
@@ -185,6 +192,7 @@ void main() {
     await _pumpEventInfoPage(
       tester,
       clock: () => DateTime.utc(2026, 10, 30, 6),
+      surveyUrl: _surveyUrl,
       externalUrlLauncher: (uri) async {
         openedUris.add(uri);
         return true;
@@ -203,7 +211,7 @@ void main() {
     await tester.tap(button);
     await tester.pump();
 
-    expect(openedUris, [Uri.parse(AppLinks.survey)]);
+    expect(openedUris, [Uri.parse(_surveyUrl)]);
   });
 
   testWidgets('shows the English survey strings', (tester) async {
@@ -211,6 +219,7 @@ void main() {
       tester,
       locale: AppLocale.en,
       clock: () => DateTime.utc(2026, 10, 30, 6),
+      surveyUrl: _surveyUrl,
     );
 
     expect(find.text('Survey Request'), findsOneWidget);
@@ -226,7 +235,7 @@ void main() {
   ) async {
     var now = DateTime.utc(2026, 10, 30, 5, 59);
 
-    await _pumpEventInfoPage(tester, clock: () => now);
+    await _pumpEventInfoPage(tester, clock: () => now, surveyUrl: _surveyUrl);
 
     expect(find.text('アンケート協力のお願い'), findsNothing);
 
@@ -235,6 +244,75 @@ void main() {
     await tester.pump();
 
     expect(find.text('アンケート協力のお願い'), findsOneWidget);
+  });
+
+  for (final (label, surveyUrl) in <(String, String?)>[
+    ('unset', null),
+    ('empty', ''),
+    ('whitespace only', ' \t\n '),
+    ('malformed', 'https://[invalid'),
+    ('spaces in the host', 'https://not a host/survey'),
+    ('without a host', 'https:///survey'),
+    ('HTTP', 'http://forms.example.com/survey'),
+    ('with credentials', 'https://user:password@forms.example.com/survey'),
+  ]) {
+    testWidgets('hides the entire survey card when the URL is $label', (
+      tester,
+    ) async {
+      await _pumpEventInfoPage(
+        tester,
+        clock: () => DateTime.utc(2026, 10, 30, 6),
+        surveyUrl: surveyUrl,
+      );
+
+      expect(find.text('アンケート協力のお願い'), findsNothing);
+      expect(
+        find.text('今後のFlutterKaigiをより良いイベントにするため、皆様のご意見をお聞かせください。'),
+        findsNothing,
+      );
+      expect(find.text('全体アンケートに回答する'), findsNothing);
+      expect(find.byIcon(Icons.assignment_outlined), findsNothing);
+    });
+  }
+
+  testWidgets('applies survey URL changes while the page stays open', (
+    tester,
+  ) async {
+    final repository = FakeRemoteConfigRepository();
+    final openedUris = <Uri>[];
+    const updatedUrl = 'https://forms.example.com/updated-survey';
+    await _pumpEventInfoPage(
+      tester,
+      clock: () => DateTime.utc(2026, 10, 30, 6),
+      remoteConfigRepository: repository,
+      externalUrlLauncher: (uri) async {
+        openedUris.add(uri);
+        return true;
+      },
+    );
+    expect(find.text('アンケート協力のお願い'), findsNothing);
+
+    repository.setValue(RemoteConfigKeys.surveyUrl, _surveyUrl);
+    await tester.pumpAndSettle();
+    expect(find.text('アンケート協力のお願い'), findsOneWidget);
+
+    final button = find.text('全体アンケートに回答する');
+    await tester.scrollUntilVisible(button, 200);
+    await tester.pumpAndSettle();
+    await tester.tap(button);
+    await tester.pump();
+    expect(openedUris, [Uri.parse(_surveyUrl)]);
+
+    repository.setValue(RemoteConfigKeys.surveyUrl, updatedUrl);
+    await tester.pumpAndSettle();
+    await tester.tap(button);
+    await tester.pump();
+    expect(openedUris, [Uri.parse(_surveyUrl), Uri.parse(updatedUrl)]);
+
+    repository.setValue(RemoteConfigKeys.surveyUrl, '');
+    await tester.pumpAndSettle();
+    expect(find.text('アンケート協力のお願い'), findsNothing);
+    expect(find.text('全体アンケートに回答する'), findsNothing);
   });
 
   testWidgets('opens Japanese docs links when Japanese is selected', (
@@ -298,7 +376,17 @@ Future<void> _pumpEventInfoPage(
   AppLocale locale = AppLocale.ja,
   ExternalUrlLauncher? externalUrlLauncher,
   Clock? clock,
+  String? surveyUrl,
+  FakeRemoteConfigRepository? remoteConfigRepository,
 }) async {
+  final repository =
+      remoteConfigRepository ??
+      FakeRemoteConfigRepository(
+        initialValues: {
+          if (surveyUrl != null) RemoteConfigKeys.surveyUrl: surveyUrl,
+        },
+      );
+  addTearDown(repository.dispose);
   if (locale == AppLocale.en) {
     // The English strings are deferred in production, but Flutter's test VM
     // cannot complete that load. Register them directly for widget tests.
@@ -313,6 +401,7 @@ Future<void> _pumpEventInfoPage(
     TranslationProvider(
       child: ProviderScope(
         overrides: [
+          remoteConfigRepositoryProvider.overrideWithValue(repository),
           sharedPreferencesProvider.overrideWithValue(preferences),
           packageInfoProvider.overrideWithValue(
             AsyncData(

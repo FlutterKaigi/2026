@@ -5,6 +5,7 @@ import 'package:app/core/designsystem/theme/app_gradients.dart';
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/provider/app_locale.dart';
 import 'package:app/core/provider/clock.dart';
+import 'package:app/core/remote_config/survey_url_provider.dart';
 import 'package:app/core/router/router.dart';
 import 'package:app/core/ui/launch_external_url.dart';
 import 'package:app/core/ui/widget/settings_icon_button.dart';
@@ -38,6 +39,7 @@ class EventInfoPage extends ConsumerWidget {
       _ => ref.watch(clockProvider)(),
     };
     final showSurvey = _isSurveyVisible(now);
+    final surveyUrl = ref.watch(surveyUrlProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -80,13 +82,13 @@ class EventInfoPage extends ConsumerWidget {
                           ),
                         ),
                       ),
-                      if (showSurvey) ...[
+                      if (showSurvey && surveyUrl != null) ...[
                         const SizedBox(height: 8),
                         _SurveyCard(
                           onOpenSurvey: () => unawaited(
                             _openExternalUrl(
                               context,
-                              url: AppLinks.survey,
+                              url: surveyUrl.toString(),
                               failureMessage: t.links.openError,
                             ),
                           ),
