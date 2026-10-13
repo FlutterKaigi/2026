@@ -6,6 +6,16 @@ on:
       - .github/workflows/**
       - .github/actions/**
       - .github/scripts/**
+      - tool/app_link_hosts.json
+      - tool/app_link_origins.mjs
+      - tool/generate_app_link_config*
+      - apps/app/**
+      - apps/website/wrangler.toml
+      - apps/website/worker.js
+      - apps/website/test/worker.test.mjs
+      - apps/website/lib/constants/site.dart
+      - apps/website/lib/constants/generated_link_origins.dart
+      - packages/data/lib/src/app_link_origins.dart
   workflow_dispatch:
 
 concurrency:
@@ -24,5 +34,9 @@ jobs:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - name: 配布スクリプトを検証
         run: python3 -m unittest discover -s .github/scripts -p 'test_*.py'
+      - name: 共通ドメイン定義と共有リンクを検証
+        run: |
+          node tool/generate_app_link_config.mjs --check
+          node --test tool/generate_app_link_config.test.mjs apps/website/test/worker.test.mjs
       - name: ワークフローと共通アクションを検証
         run: go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.12 -color

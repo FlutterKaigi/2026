@@ -1,6 +1,8 @@
+import 'package:data/data.dart';
+
 /// External destinations used throughout the app.
 abstract final class AppLinks {
-  static const officialWebsite = 'https://2026.flutterkaigi.jp/';
+  static const officialWebsite = '$officialWebsiteOrigin/';
   static const venueMap =
       'https://www.google.com/maps/search/?api=1&query='
       '%E6%B5%9C%E6%9D%BE%E7%94%BA%E3%82%B3%E3%83%B3%E3%83%99%E3%83%B3%E3%82%B7%E3%83%A7%E3%83%B3%E3%83%9B%E3%83%BC%E3%83%AB%20'

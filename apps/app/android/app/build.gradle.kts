@@ -59,6 +59,12 @@ android {
         manifestPlaceholders["appLabel"] = dartDefines["APP_NAME"] ?: "FlutterKaigi 2026"
         val appLinkHost = dartDefines["APP_LINK_HOST"] ?: "localhost"
         manifestPlaceholders["appLinkHost"] = appLinkHost
+        // Only production has a previous app host. Other environments reuse
+        // their own host so they never claim production app links.
+        manifestPlaceholders["legacyAppLinkHost"] =
+            if (dartDefines["FLAVOR"] == "prod") {
+                dartDefines["LEGACY_APP_LINK_HOST"] ?: appLinkHost
+            } else appLinkHost
         // Android 11 and earlier require every declared host to verify. Only
         // production owns the legacy website association; other environments
         // reuse their own host instead of declaring an unverifiable one.

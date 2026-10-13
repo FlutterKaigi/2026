@@ -7,6 +7,9 @@ on:
       - packages/data/**
       - packages/flutterkaigi_lints/**
       - tool/generate_app_links.dart
+      - tool/app_link_hosts.json
+      - tool/app_link_origins.mjs
+      - tool/generate_app_link_config*
       - test/generate_app_links_test.dart
       - apps/website/worker.js
       - apps/website/test/worker.test.mjs
@@ -81,8 +84,10 @@ jobs:
 
       - name: Test app association files and legacy share links
         run: |
+          node tool/generate_app_link_config.mjs --check
+          python3 -m unittest discover -s .github/scripts -p test_app_link_config.py
           dart test test/generate_app_links_test.dart
-          node --test apps/website/test/worker.test.mjs
+          node --test tool/generate_app_link_config.test.mjs apps/website/test/worker.test.mjs
 
       - name: Test venue map labels
         working-directory: apps/app

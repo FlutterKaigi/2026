@@ -1,0 +1,6 @@
+{
+  "officialWebsiteHost": "2026.flutterkaigi.jp",
+  "productionAppHost": "app-2026.flutterkaigi.jp",
+  "legacyProductionAppHost": "2026-app.flutterkaigi.jp",
+  "stagingAppHost": "stg-flutterkaigi-2026-conference-app.flutterkaigi.workers.dev"
+}

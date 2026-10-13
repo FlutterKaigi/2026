@@ -1,4 +1,5 @@
 import 'package:app/feature/exchange/data/exchange_token.dart';
+import 'package:data/data.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -32,7 +33,7 @@ void main() {
     });
 
     test('accepts the share URL form and extracts the token and uid', () {
-      for (final origin in [productionExchangeOrigin, legacyExchangeOrigin]) {
+      for (final origin in [productionExchangeOrigin, legacyProductionAppOrigin, legacyExchangeOrigin]) {
         final scanned = parseScannedExchangeToken('$origin/x/v1.other-uid.9999999999.deadbeef');
         expect(scanned, (token: 'v1.other-uid.9999999999.deadbeef', otherUid: 'other-uid'));
       }

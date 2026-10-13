@@ -1,8 +1,3 @@
-/// Origins hosting the attendee app. Links on these origins open the installed
-/// app talking to the matching backend, or the web app when it is not installed.
-const productionAppOrigin = 'https://2026-app.flutterkaigi.jp';
-const stagingAppOrigin = 'https://stg-flutterkaigi-2026-conference-app.flutterkaigi.workers.dev';
-
 /// App path of the Support LT registration page. The attendance QR code links
 /// to this path followed by the registration code.
 const supportLtLinkPath = '/account/support-lt';

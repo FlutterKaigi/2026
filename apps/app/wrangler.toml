@@ -7,6 +7,11 @@ preview_urls = true
 directory = "./build/web"
 not_found_handling = "single-page-application"
 
-[route]
+[[routes]]
+custom_domain = true
+pattern = "app-2026.flutterkaigi.jp"
+
+# Keep published links and native associations on the previous app host alive.
+[[routes]]
 custom_domain = true
 pattern = "2026-app.flutterkaigi.jp"
