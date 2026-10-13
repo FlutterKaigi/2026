@@ -223,7 +223,7 @@ roster += txt(64,1262,'スポンサー一覧',31,700);
 roster += rect(1410,1243,16,16,C.purple,3) + txt(1438,1258,'プラチナ ①–⑧',19,500,'start',C.muted);
 roster += rect(1640,1243,16,16,C.gold,3) + txt(1668,1258,'ゴールド ⑨–⑭',19,500,'start',C.muted);
 roster += rect(1880,1243,16,16,C.pink,3) + txt(1908,1258,'⑮',19,500,'start',C.muted);
-roster += rect(1990,1243,16,16,C.blue,3) + txt(2018,1258,'⑯–㉑',19,500,'start',C.muted);
+roster += rect(1990,1243,16,16,C.blue,3) + txt(2018,1258,'⑯・⑰・⑲–㉒',19,500,'start',C.muted);
 for (const [col,items] of [[0,sponsors.slice(0,8)],[1,sponsors.slice(8,14)],[2,sponsors.slice(14)]]) {
   const x=64+768*col;
   roster += txt(x+1,1313,'No.',17,600,'start',C.muted) + txt(x+63,1313,'スポンサー',17,600,'start',C.muted);

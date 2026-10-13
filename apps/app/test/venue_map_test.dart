@@ -69,7 +69,12 @@ void main() {
 
   test('reviewed map contains every numbered sponsor and visitor facility without sponsor ranks', () {
     final sponsors = plan.places.where((p) => p.type == VenuePlaceType.sponsor).toList();
-    expect(sponsors.map((p) => p.boothNumber), List.generate(21, (i) => i + 1));
+    final numbers = [...List.generate(17, (i) => i + 1), 19, 20, 21, 22];
+    expect(sponsors.map((p) => p.boothNumber), numbers);
+    expect(plan.find('sponsor_18'), isNull);
+    expect((sourcePlan['booths']! as List).map((b) => (b as Map)['number']), numbers);
+    final navigation = VenueNavigation(sourcePlan);
+    expect(navigation.places.where((p) => p.type == 'sponsor').map((p) => p.number), numbers);
     expect(sponsors.first.name('ja'), 'Flutter(Google Inc.)');
     expect(sponsors.map((p) => p.markerColor).toSet(), hasLength(1));
     expect((sourcePlan['booths']! as List).map((b) => (b as Map)['color']).toSet(), hasLength(1));
@@ -110,7 +115,17 @@ void main() {
   test('search accepts exact booth numbers, circled numbers, names and both languages', () {
     expect(plan.places.where((p) => p.matches('1')).map((p) => p.id), ['sponsor_1']);
     expect(plan.places.where((p) => p.matches('#15')).map((p) => p.id), ['sponsor_15']);
-    expect(plan.find('sponsor_21')!.matches('㉑'), isTrue);
+    for (final query in ['18', '#18', '⑱']) {
+      expect(plan.places.where((p) => p.matches(query)), isEmpty, reason: query);
+    }
+    for (final (number, queries) in [
+      (19, ['19', '#19', '⑲']),
+      (22, ['22', '#22', '㉒']),
+    ]) {
+      for (final query in queries) {
+        expect(plan.places.where((p) => p.matches(query)).map((p) => p.id), ['sponsor_$number']);
+      }
+    }
     expect(plan.find('sponsor_2')!.matches('日本トレカ'), isTrue);
     expect(plan.find('sponsor_6')!.matches('HACOMONO'), isTrue);
     expect(plan.find('accessible_wc')!.matches('accessible'), isTrue);
@@ -411,6 +426,22 @@ void main() {
     final map = tester.widget<VenueMap2DView>(find.byType(VenueMap2DView));
     expect(map.selected?.boothNumber, 15);
     expect(find.byTooltip('15 · 株式会社GENDA'), findsOneWidget);
+    await tester.enterText(find.byType(TextField), '18');
+    await tester.pumpAndSettle();
+    expect(find.text(LocaleSettings.currentLocale.translations.venueMap.noResults), findsOneWidget);
+    expect(
+      find.descendant(of: find.byType(VenuePlaceSearch), matching: find.byType(ListTile)),
+      findsNothing,
+    );
+    for (final number in [19, 22]) {
+      final place = plan.find('sponsor_$number')!;
+      await tester.enterText(find.byType(TextField), '$number');
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(ListTile, place.name('ja')));
+      await tester.pumpAndSettle();
+      expect(tester.widget<VenueMap2DView>(find.byType(VenueMap2DView)).selected?.boothNumber, number);
+      expect(find.byTooltip(place.semanticsLabel('ja')), findsOneWidget);
+    }
     await tester.tap(find.byTooltip('検索をクリア'));
     await tester.pumpAndSettle();
     expect(find.widgetWithText(ListTile, 'Flutter(Google Inc.)'), findsOneWidget);

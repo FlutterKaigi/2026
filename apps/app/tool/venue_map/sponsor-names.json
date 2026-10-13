@@ -31,9 +31,9 @@
     },
     { "number": 16, "ja": "TRUSTDOCK", "en": "TRUSTDOCK" },
     { "number": 17, "ja": "株式会社SODA", "en": "SODA inc." },
-    { "number": 18, "ja": "株式会社Linc'well", "en": "Linc'well Inc." },
-    { "number": 19, "ja": "株式会社エクストーン", "en": "Xtone Ltd." },
-    { "number": 20, "ja": "株式会社アンドパッド", "en": "ANDPAD Inc." },
-    { "number": 21, "ja": "クラスメソッド株式会社", "en": "Classmethod, Inc." }
+    { "number": 19, "ja": "株式会社Linc'well", "en": "Linc'well Inc." },
+    { "number": 20, "ja": "株式会社エクストーン", "en": "Xtone Ltd." },
+    { "number": 21, "ja": "株式会社アンドパッド", "en": "ANDPAD Inc." },
+    { "number": 22, "ja": "クラスメソッド株式会社", "en": "Classmethod, Inc." }
   ]
 }

@@ -3166,7 +3166,7 @@
       ]
     },
     {
-      "id": "sponsor_18",
+      "id": "sponsor_19",
       "name": {
         "ja": "株式会社Linc'well",
         "en": "Linc'well Inc."
@@ -3199,7 +3199,7 @@
         1116,
         529
       ],
-      "boothNumber": 18,
+      "boothNumber": 19,
       "table": [
         1101,
         522,
@@ -3207,14 +3207,14 @@
         14
       ],
       "keywords": [
-        "⑱",
-        "#18",
-        "18",
+        "⑲",
+        "#19",
+        "19",
         "Linc'well"
       ]
     },
     {
-      "id": "sponsor_19",
+      "id": "sponsor_20",
       "name": {
         "ja": "株式会社エクストーン",
         "en": "Xtone Ltd."
@@ -3247,7 +3247,7 @@
         1156,
         529
       ],
-      "boothNumber": 19,
+      "boothNumber": 20,
       "table": [
         1140,
         522,
@@ -3255,14 +3255,14 @@
         14
       ],
       "keywords": [
-        "⑲",
-        "#19",
-        "19",
+        "⑳",
+        "#20",
+        "20",
         "エクストーン"
       ]
     },
     {
-      "id": "sponsor_20",
+      "id": "sponsor_21",
       "name": {
         "ja": "株式会社アンドパッド",
         "en": "ANDPAD Inc."
@@ -3295,7 +3295,7 @@
         1195,
         529
       ],
-      "boothNumber": 20,
+      "boothNumber": 21,
       "table": [
         1179,
         522,
@@ -3303,14 +3303,14 @@
         14
       ],
       "keywords": [
-        "⑳",
-        "#20",
-        "20",
+        "㉑",
+        "#21",
+        "21",
         "アンドパッド"
       ]
     },
     {
-      "id": "sponsor_21",
+      "id": "sponsor_22",
       "name": {
         "ja": "クラスメソッド株式会社",
         "en": "Classmethod, Inc."
@@ -3343,7 +3343,7 @@
         1233.5,
         529
       ],
-      "boothNumber": 21,
+      "boothNumber": 22,
       "table": [
         1218,
         522,
@@ -3351,9 +3351,9 @@
         14
       ],
       "keywords": [
-        "㉑",
-        "#21",
-        "21",
+        "㉒",
+        "#22",
+        "22",
         "クラスメソッド"
       ]
     }
@@ -3759,8 +3759,8 @@
       "color": "#54788A"
     },
     {
-      "id": "sponsor_18",
-      "number": 18,
+      "id": "sponsor_19",
+      "number": 19,
       "rect": [
         1101,
         522,
@@ -3770,8 +3770,8 @@
       "color": "#54788A"
     },
     {
-      "id": "sponsor_19",
-      "number": 19,
+      "id": "sponsor_20",
+      "number": 20,
       "rect": [
         1140,
         522,
@@ -3781,8 +3781,8 @@
       "color": "#54788A"
     },
     {
-      "id": "sponsor_20",
-      "number": 20,
+      "id": "sponsor_21",
+      "number": 21,
       "rect": [
         1179,
         522,
@@ -3792,8 +3792,8 @@
       "color": "#54788A"
     },
     {
-      "id": "sponsor_21",
-      "number": 21,
+      "id": "sponsor_22",
+      "number": 22,
       "rect": [
         1218,
         522,
