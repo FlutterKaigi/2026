@@ -40,13 +40,13 @@ Webは `/account` や `/x/<token>` のパス形式を使用します。以前の
 
 | 環境              | QR / 共有リンクのホスト                                         | 関連付けるアプリ               |
 | ----------------- | --------------------------------------------------------------- | ------------------------------ |
-| prod              | `app-2026.flutterkaigi.jp`                                      | `jp.flutterkaigi.conf2026`     |
+| prod              | `2026-app.flutterkaigi.jp`                                      | `jp.flutterkaigi.conf2026`     |
 | stg・PRプレビュー | `stg-flutterkaigi-2026-conference-app.flutterkaigi.workers.dev` | `jp.flutterkaigi.conf2026.stg` |
 | dev               | URLを使わずEmulator用の生トークン                               | ローカル開発用                 |
 
 アプリのインストール・OSの関連付け状態に応じてネイティブまたはWebで開きます。PR固有のプレビューURLはWeb確認用で、そのURL自体からのネイティブ直接起動は対象外です。PRで表示する交換QRも固定stg版へのリンクを使います。固定stg版は `main` または手動配布で更新し、PR配布では更新しません。
 
-公式サイトは `2026.flutterkaigi.jp` のままです。セッションなどアプリの機能用リンクは `app-2026.flutterkaigi.jp` へ進みます。旧アプリホスト `2026-app.flutterkaigi.jp` は同じWebアプリと関連付けファイルを直接配信し続け、発行済みリンクを維持します。本番のプロフィール交換・応援LTscannerも新旧両アプリホストを受け付けます。
+公式サイトは `2026.flutterkaigi.jp` のままです。セッションなどアプリの機能用リンクは `2026-app.flutterkaigi.jp` へ進みます。本番のプロフィール交換・応援LTscannerもこのアプリホストを受け付けます。プロフィール交換は発行済みの旧websiteリンクも引き続き受け付けます。
 
 本番では旧 `2026.flutterkaigi.jp/x/<token>` の交換QRも読み取れます。この旧公式サイトリンクをブラウザで開くと、トークンを保って正規の本番Webアプリへ転送します。プロフィール交換と応援LTのscannerは本番とstgのURLを相互に拒否し、別環境のバックエンドへ誤って送らないようにしています。
 

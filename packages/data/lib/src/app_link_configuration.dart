@@ -2,13 +2,10 @@ import 'app_link_origins.dart';
 
 /// App origins belonging to one backend environment.
 ///
-/// Newly generated links use [origin]. Scanners accept [allowedOrigins],
-/// including an earlier production app domain while its links remain valid.
+/// Newly generated links use [origin]. Scanners accept [allowedOrigins].
 /// Individual features can add their own compatibility origins separately.
 final class AppLinkConfiguration {
-  const AppLinkConfiguration.production()
-    : origin = productionAppOrigin,
-      allowedOrigins = const {productionAppOrigin, legacyProductionAppOrigin};
+  const AppLinkConfiguration.production() : origin = productionAppOrigin, allowedOrigins = const {productionAppOrigin};
 
   const AppLinkConfiguration.staging() : origin = stagingAppOrigin, allowedOrigins = const {stagingAppOrigin};
 

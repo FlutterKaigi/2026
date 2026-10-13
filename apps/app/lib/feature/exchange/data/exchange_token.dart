@@ -49,7 +49,7 @@ final _tokenPattern = RegExp(r'^v1\.([^.]+)\.\d+\.[0-9a-f]+$');
 /// Returns `null` when [raw] matches neither shape.
 ScannedExchangeToken? parseScannedExchangeToken(
   String raw, {
-  Set<String> allowedOrigins = const {productionExchangeOrigin, legacyProductionAppOrigin, legacyExchangeOrigin},
+  Set<String> allowedOrigins = const {productionExchangeOrigin, legacyExchangeOrigin},
 }) {
   final trimmed = raw.trim();
   var candidate = trimmed;

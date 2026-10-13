@@ -5,7 +5,6 @@ import { fileURLToPath } from "node:url";
 const originNames = {
   officialWebsiteHost: "officialWebsiteOrigin",
   productionAppHost: "productionAppOrigin",
-  legacyProductionAppHost: "legacyProductionAppOrigin",
   stagingAppHost: "stagingAppOrigin",
 };
 const hostnamePattern = /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/;
@@ -21,7 +20,7 @@ function readHosts(root) {
     }
   }
   if (new Set(Object.values(hosts)).size !== Object.keys(hosts).length) {
-    throw new Error("Website, production, legacy and staging hosts must be distinct");
+    throw new Error("Website, production and staging hosts must be distinct");
   }
   return hosts;
 }

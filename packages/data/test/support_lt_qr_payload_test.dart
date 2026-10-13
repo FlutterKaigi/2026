@@ -8,7 +8,7 @@ void main() {
     test('links to the registration page under the selected origin', () {
       expect(
         supportLtQrPayload('123456', origin: productionAppOrigin),
-        'https://app-2026.flutterkaigi.jp/account/support-lt/123456',
+        'https://2026-app.flutterkaigi.jp/account/support-lt/123456',
       );
       expect(supportLtQrPayload('123456', origin: stagingAppOrigin), '$stagingAppOrigin/account/support-lt/123456');
     });
@@ -26,10 +26,10 @@ void main() {
       }
     });
 
-    test('accepts the previous production app domain without admitting website links', () {
+    test('accepts the production app domain without admitting website links', () {
       expect(
         parseSupportLtQrPayload(
-          '$legacyProductionAppOrigin/account/support-lt/000042',
+          '$productionAppOrigin/account/support-lt/000042',
           allowedOrigins: production,
         ),
         '000042',

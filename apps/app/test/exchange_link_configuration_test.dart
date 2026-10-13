@@ -1,7 +1,6 @@
 import 'package:app/core/provider/environment.dart';
 import 'package:app/feature/exchange/data/exchange_token.dart';
 import 'package:app/feature/exchange/data/provider/exchange_link_configuration.dart';
-import 'package:data/data.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -19,10 +18,10 @@ void main() {
     return container.read(exchangeLinkConfigurationProvider);
   }
 
-  test('production issues the app URL and accepts both production URL generations', () {
+  test('production issues the app URL and accepts existing website links', () {
     final config = configuration(Flavor.production);
-    expect(token.qrPayload(origin: config.origin), 'https://app-2026.flutterkaigi.jp/x/$tokenValue');
-    for (final origin in [productionExchangeOrigin, legacyProductionAppOrigin, legacyExchangeOrigin]) {
+    expect(token.qrPayload(origin: config.origin), 'https://2026-app.flutterkaigi.jp/x/$tokenValue');
+    for (final origin in [productionExchangeOrigin, legacyExchangeOrigin]) {
       expect(parseScannedExchangeToken('$origin/x/$tokenValue', allowedOrigins: config.allowedOrigins), isNotNull);
     }
     expect(
@@ -41,7 +40,7 @@ void main() {
       parseScannedExchangeToken('$stagingExchangeOrigin/x/$tokenValue', allowedOrigins: config.allowedOrigins),
       isNotNull,
     );
-    for (final origin in [productionExchangeOrigin, legacyProductionAppOrigin, legacyExchangeOrigin]) {
+    for (final origin in [productionExchangeOrigin, legacyExchangeOrigin]) {
       expect(parseScannedExchangeToken('$origin/x/$tokenValue', allowedOrigins: config.allowedOrigins), isNull);
     }
   });
@@ -52,7 +51,6 @@ void main() {
     expect(parseScannedExchangeToken(tokenValue, allowedOrigins: config.allowedOrigins), isNotNull);
     for (final origin in [
       productionExchangeOrigin,
-      legacyProductionAppOrigin,
       legacyExchangeOrigin,
       stagingExchangeOrigin,
     ]) {

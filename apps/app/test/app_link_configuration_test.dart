@@ -6,7 +6,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 void main() {
   for (final (flavor, expectedOrigin, expectedOrigins) in [
-    (Flavor.production, productionAppOrigin, {productionAppOrigin, legacyProductionAppOrigin}),
+    (Flavor.production, productionAppOrigin, {productionAppOrigin}),
     (Flavor.staging, stagingAppOrigin, {stagingAppOrigin}),
     (Flavor.develop, null, <String>{}),
   ]) {

@@ -34,7 +34,7 @@ void main() {
   });
 
   for (final (flavor, expectedOrigin) in [
-    (Flavor.production, 'https://app-2026.flutterkaigi.jp'),
+    (Flavor.production, 'https://2026-app.flutterkaigi.jp'),
     (Flavor.staging, 'https://stg-flutterkaigi-2026-conference-app.flutterkaigi.workers.dev'),
   ]) {
     testWidgets('shares the $flavor app session URL in the X intent', (tester) async {
@@ -68,7 +68,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final sharedUrl = Uri.parse(launched.single.queryParameters['text']!.split('\n').last);
-    expect(sharedUrl.origin, 'https://app-2026.flutterkaigi.jp');
+    expect(sharedUrl.origin, 'https://2026-app.flutterkaigi.jp');
     expect(sharedUrl.pathSegments, ['sessions', sessionId]);
     expect(sharedUrl.hasQuery, isFalse);
     expect(sharedUrl.hasFragment, isFalse);

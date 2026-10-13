@@ -15,7 +15,7 @@ void main() {
   setUp(() => repository = _FakeStampRallyRepository());
 
   test('stamp links use shared origins and retain the development staging fallback', () {
-    expect(stampRallyOrigin(Flavor.prod), 'https://app-2026.flutterkaigi.jp');
+    expect(stampRallyOrigin(Flavor.prod), 'https://2026-app.flutterkaigi.jp');
     expect(stampRallyOrigin(Flavor.stg), stagingAppOrigin);
     expect(stampRallyOrigin(Flavor.dev), stagingAppOrigin);
   });
@@ -79,9 +79,9 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('スポンサーA（sponsor-a）'), findsOneWidget);
-    expect(find.text('https://app-2026.flutterkaigi.jp/s/${'a' * 64}'), findsOneWidget);
-    expect(find.text('https://app-2026.flutterkaigi.jp/s/${'b' * 64}'), findsOneWidget);
-    expect(find.text('https://app-2026.flutterkaigi.jp/s/${'c' * 64}'), findsOneWidget);
+    expect(find.text('https://2026-app.flutterkaigi.jp/s/${'a' * 64}'), findsOneWidget);
+    expect(find.text('https://2026-app.flutterkaigi.jp/s/${'b' * 64}'), findsOneWidget);
+    expect(find.text('https://2026-app.flutterkaigi.jp/s/${'c' * 64}'), findsOneWidget);
   });
 
   test('print document escapes labels and embeds an SVG per code', () {

@@ -42,7 +42,7 @@ test("fetch redirects legacy share links without changing the signed token", asy
     const response = await worker.fetch(new Request(`https://2026.flutterkaigi.jp${prefix}${token}`), { ASSETS: assets });
 
     assert.equal(response.status, 302);
-    assert.equal(response.headers.get("Location"), `https://app-2026.flutterkaigi.jp/x/${token}`);
+    assert.equal(response.headers.get("Location"), `https://2026-app.flutterkaigi.jp/x/${token}`);
     assert.equal(response.headers.get("Cache-Control"), "no-store");
     assert.equal(response.headers.get("Referrer-Policy"), "no-referrer");
     assert.equal(await response.text(), "");
@@ -59,9 +59,9 @@ test("redirect destination keeps its fixed origin and drops unrelated query para
     );
 
     assert.equal(response.status, 302);
-    assert.equal(response.headers.get("Location"), `https://app-2026.flutterkaigi.jp/x/${token}`);
+    assert.equal(response.headers.get("Location"), `https://2026-app.flutterkaigi.jp/x/${token}`);
     const location = new URL(response.headers.get("Location"));
-    assert.equal(location.origin, "https://app-2026.flutterkaigi.jp");
+    assert.equal(location.origin, "https://2026-app.flutterkaigi.jp");
     assert.equal(location.search, "");
   }
 });
@@ -76,7 +76,7 @@ test("fetch redirects legacy session detail links to the attendee app", async ()
     );
 
     assert.equal(response.status, 302);
-    assert.equal(response.headers.get("Location"), `https://app-2026.flutterkaigi.jp/sessions/${sessionId}`);
+    assert.equal(response.headers.get("Location"), `https://2026-app.flutterkaigi.jp/sessions/${sessionId}`);
     assert.equal(response.headers.get("Cache-Control"), "no-store");
     assert.equal(response.headers.get("Referrer-Policy"), "no-referrer");
     assert.equal(await response.text(), "");
@@ -94,8 +94,8 @@ test("session redirects preserve encoded IDs under a fixed origin and omit query
     const location = new URL(response.headers.get("Location"));
 
     assert.equal(response.status, 302);
-    assert.equal(location.href, `https://app-2026.flutterkaigi.jp/sessions/${sessionId}`);
-    assert.equal(location.origin, "https://app-2026.flutterkaigi.jp");
+    assert.equal(location.href, `https://2026-app.flutterkaigi.jp/sessions/${sessionId}`);
+    assert.equal(location.origin, "https://2026-app.flutterkaigi.jp");
     assert.equal(location.search, "");
     assert.equal(location.hash, "");
   }

@@ -2,11 +2,10 @@ import 'package:data/data.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('production generates canonical app links and accepts the previous app domain', () {
+  test('production generates and accepts links on its canonical app domain', () {
     const configuration = AppLinkConfiguration.production();
-    expect(configuration.origin, 'https://app-2026.flutterkaigi.jp');
+    expect(configuration.origin, 'https://2026-app.flutterkaigi.jp');
     expect(configuration.allowedOrigins, {
-      'https://app-2026.flutterkaigi.jp',
       'https://2026-app.flutterkaigi.jp',
     });
     expect(configuration.allowedOrigins, isNot(contains(officialWebsiteOrigin)));
