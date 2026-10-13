@@ -14,10 +14,11 @@ abstract interface class QuizEventRepository {
 
   Stream<QuizEvent?> watchById(String eventId);
 
+  /// 会場で配る6桁の参加コードを購読する（運営のみ）。未発行の間は `null`。
+  Stream<String?> watchCheckInCode(String eventId);
+
   /// イベントを保存し、ドキュメント ID を返す（新規作成時は採番された ID）。
   Future<String> save(QuizEvent event);
-
-  Future<void> updateTeamNamePool(String eventId, List<String> names);
 }
 
 final class FirestoreQuizEventRepository implements QuizEventRepository {
@@ -63,6 +64,14 @@ final class FirestoreQuizEventRepository implements QuizEventRepository {
   }
 
   @override
+  Stream<String?> watchCheckInCode(String eventId) => _collection
+      .doc(eventId)
+      .collection('secret')
+      .doc('checkIn')
+      .snapshots()
+      .map((snapshot) => snapshot.data()?['code'] as String?);
+
+  @override
   Future<String> save(QuizEvent event) async {
     if (event.capacity < 3 || event.capacity > 80) {
       throw ArgumentError('定員は 3〜80 人で設定してください。');
@@ -103,10 +112,4 @@ final class FirestoreQuizEventRepository implements QuizEventRepository {
     });
     return event.id;
   }
-
-  @override
-  Future<void> updateTeamNamePool(String eventId, List<String> names) => _collection.doc(eventId).update({
-    'teamNamePool': names,
-    'updatedAt': FieldValue.serverTimestamp(),
-  });
 }

@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/FlutterKaigi/2026/packages/data/firebase/schemas/firestore/stamp_rally_card.schema.json",
+  "title": "StampRallyCard",
+  "description": "One attendee's stamp rally record at stampRallyCards/{uid}. Only the owner and admins can read it; scanStampRallyCode is the only writer and uses server time. The stamp count is the number of entries in stamps. Fields appear on first use. Auth account deletion removes the document.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["updatedAt"],
+  "properties": {
+    "stamps": {
+      "description": "Acquisition time keyed by sponsor id.",
+      "type": "object",
+      "additionalProperties": { "type": "string", "format": "date-time" }
+    },
+    "rewardsRedeemedAt": {
+      "description": "Redemption time keyed by the 1-based checkpoint number as a string.",
+      "type": "object",
+      "propertyNames": { "pattern": "^[1-9][0-9]*$" },
+      "additionalProperties": { "type": "string", "format": "date-time" }
+    },
+    "thanksCardRedeemedAt": {
+      "description": "Thanks card redemption time, independent of stamp progress.",
+      "type": "string",
+      "format": "date-time"
+    },
+    "updatedAt": { "type": "string", "format": "date-time" }
+  }
+}

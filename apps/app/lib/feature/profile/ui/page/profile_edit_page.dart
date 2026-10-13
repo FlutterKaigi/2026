@@ -116,6 +116,7 @@ class _ProfileForm extends HookConsumerWidget {
     ]);
     final isSaving = useState(false);
     final isDirty = useState(false);
+    final route = ModalRoute.of(context);
 
     // 入力の変更を追跡して、未保存のまま離脱しようとしたときに確認する。
     useEffect(() {
@@ -173,7 +174,10 @@ class _ProfileForm extends HookConsumerWidget {
         ScaffoldMessenger.of(context)
           ..hideCurrentSnackBar()
           ..showSnackBar(SnackBar(content: Text(t.profile.saved)));
-        context.pop();
+        // 保存中に戻る操作をしていたら、その下の画面まで閉じない。
+        if (route?.isCurrent ?? false) {
+          context.pop();
+        }
       } on Exception catch (exception, stackTrace) {
         ref.read(talkerProvider).handle(exception, stackTrace);
         if (context.mounted) {

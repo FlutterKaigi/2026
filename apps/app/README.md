@@ -46,7 +46,11 @@ Webは `/account` や `/x/<token>` のパス形式を使用します。以前の
 
 アプリのインストール・OSの関連付け状態に応じてネイティブまたはWebで開きます。PR固有のプレビューURLはWeb確認用で、そのURL自体からのネイティブ直接起動は対象外です。PRで表示する交換QRも固定stg版へのリンクを使います。固定stg版は `main` または手動配布で更新し、PR配布では更新しません。
 
-本番では旧 `2026.flutterkaigi.jp/x/<token>` のQRも読み取れます。旧リンクをブラウザで開くとトークンを保って本番Webアプリへ転送します。scannerは本番とstgのURLを相互に拒否し、別環境のバックエンドへ誤って交換を送らないようにしています。
+公式サイトは `2026.flutterkaigi.jp` のままです。セッションなどアプリの機能用リンクは `2026-app.flutterkaigi.jp` へ進みます。本番のプロフィール交換・応援LTscannerもこのアプリホストを受け付けます。プロフィール交換は発行済みの旧websiteリンクも引き続き受け付けます。
+
+本番では旧 `2026.flutterkaigi.jp/x/<token>` の交換QRも読み取れます。この旧公式サイトリンクをブラウザで開くと、トークンを保って正規の本番Webアプリへ転送します。プロフィール交換と応援LTのscannerは本番とstgのURLを相互に拒否し、別環境のバックエンドへ誤って送らないようにしています。
+
+ホストの正本は `tool/app_link_hosts.json` です。Repositoryルートで `node tool/generate_app_link_config.mjs` を実行してDart/JavaScript定数を再生成し、`node tool/generate_app_link_config.mjs --check` で更新漏れを確認します。ネイティブ・配布設定の更新と検証コマンドは[配布手順](../../.github/APP_DELIVERY.md#universal-links--app-links)を参照してください。変更時はネイティブ再配布と、新旧ホストのCloudflare / DNS / Firebase Auth / App Check設定の確認も必要です。
 
 未ログイン・プロフィール未作成の場合は、その画面へ移動した後に交換を再開します。待機中のトークンはメモリ内なので、再読み込み・アプリ終了をまたぐ場合は元のリンクを開き直してください。`event_features_enabled=false` のときは従来どおり交換機能を利用できません。Safariの同一ドメイン内リンクなど、アプリがあってもWebに残る操作があります。配布設定と実機確認は[Universal Links / App Links](../../.github/APP_DELIVERY.md#universal-links--app-links)を参照してください。
 
@@ -80,7 +84,9 @@ iOSのGoogleサインインはブラウザ経由(`signInWithProvider`)で行わ�
 
 ## 応援LT参加登録
 
-サインイン後、アカウントタブの「応援LT参加」(`/account/support-lt`)から、運営がダッシュボードで発行した6桁のコードを入力します。プロフィールは未作成でも登録できます。登録が完了すると画面とアカウントタブに登録状況が表示され、再起動後もFirestoreから復元されます。
+サインイン後、アカウントタブの「応援LT参加」(`/account/support-lt`)から、運営がダッシュボードに表示したQRコードを読み取ります。カメラを使えない場合は、同じ画面でQRコードと併記される6桁のコードを入力します。プロフィールは未作成でも登録できます。登録が完了すると画面とアカウントタブに登録状況が表示され、再起動後もFirestoreから復元されます。
+
+QRコードの中身は`https://<アプリのホスト>/account/support-lt/<6桁のコード>`です。OS標準のカメラで読み取るとアプリ(未インストールならWebアプリ)がこのリンクで開き、サインイン済みであればそのまま登録します。アプリ内の読み取りは自環境のホストのリンクだけを受け付け、devフレーバーではリンクではなく6桁のコードそのものをQRコードにします。
 
 参加登録にはFunctions Emulator(port 5001)も必要です。通常の`firebase:start`の代わりに、Repositoryルートで次を実行します。
 
@@ -89,7 +95,7 @@ fvm dart run melos run functions:install
 fvm dart run melos run firebase:start:functions
 ```
 
-別のTerminalから、上記の`fvm flutter run`でdevフレーバーのアプリを起動します。同じEmulatorへ接続したダッシュボードの「応援LT」でコードを発行し、アプリに入力すると、ダッシュボードの参加者一覧と参加人数に反映されます。発行したコードに有効期限はなく、複数の参加者が利用できます。再発行すると旧コードは利用できなくなります。
+別のTerminalから、上記の`fvm flutter run`でdevフレーバーのアプリを起動します。同じEmulatorへ接続したダッシュボードの「応援LT」でコードを発行し、表示されたQRコードをアプリで読み取る(または6桁のコードを入力する)と、ダッシュボードの参加者一覧と参加人数に反映されます。発行したコードに有効期限はなく、複数の参加者が利用できます。再発行すると旧QRコード・旧コードは利用できなくなります。
 
 ## SNS投稿登録・ミッション
 
@@ -105,7 +111,7 @@ fvm dart run melos run firebase:start:functions
 
 「ミッション」(`/account/missions`)では、以下の3項目と全体の達成数を一覧表示します。
 
-- 応援LT参加：既存の運営コードによる参加登録が完了していること（応援側・登壇者共通）。
+- 応援LT参加：運営のQRコード（または6桁のコード）による参加登録が完了していること（応援側・登壇者共通）。
 - プロフィール交換：異なる3人以上と交換し、そのうち1人以上の出身国／地域が自分と異なること。
   サーバーが検証済みの交換と、現在の登録プロフィールから判定します。未検証の交換・自分自身・
   重複・削除済みプロフィールは数えません。自分のプロフィールが未登録の場合は作成を案内します。
@@ -118,6 +124,31 @@ fvm dart run melos run firebase:start:functions
 ローカル確認は上記のFunctionsを含むEmulator起動手順を使用してください。Webサーバーをin-app browserで
 開く場合は `fvm flutter run -d web-server --web-port 8780 --dart-define-from-file=environments/.env.dev` を実行し、
 `http://localhost:8780/account/missions` を開きます（旧 `/#/account/missions` 形式も起動時に変換します）。
+
+## スタンプラリー
+
+アカウントタブの「参加する」から「スタンプラリー」(`/account/stamp-rally`)を開きます。対象スポンサーのロゴと名前を一覧し、
+獲得済みのスポンサーには `res/assets/stamps/<スポンサーのslug>.webp` のスタンプ画像を表示します。画像がないスポンサーはロゴで表示します。
+スタンプ数、景品のチェックポイントの達成・交換状況、クレーンゲームの挑戦状況は `stampRallyCards/{uid}` の購読結果から表示します。
+このため、読み取り時に通信エラーになっても、サーバーで記録された結果が画面に反映されます。
+
+QRコードは `<アプリのドメイン>/s/<token>` 形式です。OSのカメラからはUniversal Links / App Linksでアプリ(未インストールならWeb版)が開き、
+アプリ内のスキャナー(`/account/stamp-rally/scan`)も同じ `/s/:token` 画面に遷移します。ドメインは照合せず、用途はサーバーが署名で判定します。
+結果画面にはスタンプの獲得、受け取れる景品の番号と交換日時、クレーンゲームの受付日時を表示し、スタッフが確認します。
+クレーンゲームは会場で物理のサンクスカードを集めた人が1回挑戦でき、アプリは挑戦の記録だけを扱います。
+サインイン前に開いたリンクは、その画面でサインインすると続けて処理します。別の画面でサインインした場合はアカウントタブが結果画面を開き直します。
+
+## プッシュ通知
+
+運営がFirebaseコンソールから手動で送るお知らせを、stg／prodのiOS・Androidアプリで受け取ります。devフレーバー(Emulator SuiteにFCMがない)とWeb(Service WorkerとVAPIDキーが必要)は対象外です。
+
+- アプリを開いている間: iOSはOSのバナー、Androidはアプリ内のバナーで表示します。Androidでは通知センターに残りません。
+- バックグラウンド・終了中: OSの通知として表示します。Androidは「お知らせ」チャンネルを使います。
+- 通知の許可: 起動して最初の画面を表示した後、未回答の場合だけOSのダイアログで求めます。拒否後はOSの設定から変更します。
+
+送信はFirebaseコンソールの`Messaging`で通知のキャンペーンを作成し、ターゲットにそのProjectのiOSアプリとAndroidアプリを指定します。タップで開く画面は、`Additional options > Custom data`のキー`route`にアプリ内のパス(`/news`、`/sessions/<セッションID>`など)で指定します。URLやクエリ付きの値、開くだけで処理が走るリンク(`/x/…`、`/s/…`、`/account/support-lt/<コード>`)は無視し、タップするとアプリをそのまま開きます。prodで送る前にstgで確認します。
+
+アプリは起動後にFCMの登録トークンをログへ出力します。Firebaseコンソールの`Send test message`に貼り付けると、その端末だけに送れます。iOSはDebugビルドの実機またはTestFlight版で確認します。Androidのアプリ終了中の受信は、google-servicesプラグインが入るCIのビルドで確認します(ローカルビルドには入りません)。APNsの設定は[App delivery setup](../../.github/APP_DELIVERY.md#apns認証キー)を参照してください。
 
 ## 配布
 

@@ -11,7 +11,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 ///
 /// タイトル（日本語 / 英語）・定員・スポンサーの複数選択を受け取り、
 /// `status = draft`（非公開）の新規イベントとして保存する。
-/// 保存時に現地受付コードも自動生成する。
 class QuizEventCreateDialog extends HookConsumerWidget {
   const QuizEventCreateDialog._();
 
@@ -57,16 +56,9 @@ class QuizEventCreateDialog extends HookConsumerWidget {
           createdAt: now,
           updatedAt: now,
         );
-        final eventId = await ref.read(quizEventRepositoryProvider).save(event);
-        // 現地受付コードを自動生成しておく（コンソールで確認・再生成できる）。
-        var message = 'クイズイベントを作成しました（非公開）';
-        try {
-          await ref.read(quizOperationsRepositoryProvider).regenerateEntryCode(eventId);
-        } catch (_) {
-          message = 'イベントは作成済みです。受付コードの発行を確認できませんでした。進行コンソールで確認・再生成してください。';
-        }
+        await ref.read(quizEventRepositoryProvider).save(event);
         if (context.mounted) {
-          context.showSnackBar(message);
+          context.showSnackBar('クイズイベントを作成しました（非公開）');
           context.pop();
         }
       } catch (e) {

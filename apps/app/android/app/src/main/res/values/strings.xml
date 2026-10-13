@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="default_notification_channel_id" translatable="false">announcements</string>
+    <string name="notification_channel_name">Announcements</string>
+    <string name="notification_channel_description">Announcements from the FlutterKaigi 2026 organizers</string>
+</resources>

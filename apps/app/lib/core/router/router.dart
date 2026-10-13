@@ -28,6 +28,9 @@ import 'package:app/feature/sns_post/ui/page/sns_post_page.dart';
 import 'package:app/feature/sponsor/ui/page/sponsor_details_page.dart';
 import 'package:app/feature/sponsor/ui/page/sponsor_list_page.dart';
 import 'package:app/feature/staff/ui/page/staff_member_list_page.dart';
+import 'package:app/feature/stamp_rally/ui/page/stamp_rally_link_page.dart';
+import 'package:app/feature/stamp_rally/ui/page/stamp_rally_page.dart';
+import 'package:app/feature/stamp_rally/ui/page/stamp_rally_scan_page.dart';
 import 'package:app/feature/support_lt/ui/page/support_lt_page.dart';
 import 'package:app/feature/venue_map/ui/page/venue_map_page.dart';
 import 'package:flutter/material.dart';
@@ -44,6 +47,9 @@ part 'routes.dart';
 /// (`.location` は必ずトークン付きの値になる)、routes.dart の
 /// `@TypedGoRoute(path: '/x/:token')` と同じ値をここに定数で置く。
 const _shareLinkBasePath = '/x';
+
+/// Base path of [StampRallyLinkRoute] (`/s/:token`), for the same reason.
+const _stampRallyLinkBasePath = '/s';
 
 /// Native Firebase Auth callbacks belong to the SDK, not the app's pages.
 /// Supports the encoded Firebase app ID and reversed Google client ID schemes.
@@ -87,6 +93,8 @@ final routerProvider = Provider<GoRouter>((ref) {
     const SupportLtRoute().location,
     const ExchangeHomeRoute().location,
     const SnsPostRoute().location,
+    const StampRallyRoute().location,
+    _stampRallyLinkBasePath,
     // プロフィール交換のシェアリンク `/x/<token>` も塞ぐ。下の判定は完全一致か
     // `'$location/'` の前方一致だけなので、`/xyz` のような無関係なパスには
     // 当たらない。
@@ -94,8 +102,9 @@ final routerProvider = Provider<GoRouter>((ref) {
   ];
 
   // iOS のコールドスタートで、本体のツリーより先に届いた Universal Link
-  // (`LaunchRouteObserver` 参照)。プラットフォームの初期ルートは `/` の
-  // ままなので、そちらではなくこのリンクから開始する。
+  // (`LaunchRouteObserver` 参照)、またはアプリを起動した通知タップの遷移先。
+  // プラットフォームの初期ルートは `/` のままなので、そちらではなくこのリンク
+  // から開始する。
   final launchRoute = ref.watch(launchRouteProvider);
 
   return GoRouter(

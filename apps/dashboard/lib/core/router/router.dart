@@ -29,6 +29,7 @@ import 'package:dashboard/feature/timeline_event/ui/page/timeline_event_edit_pag
 import 'package:dashboard/feature/timeline_event/ui/page/timeline_event_list_page.dart';
 import 'package:data/timeline_event.dart';
 import 'package:dashboard/feature/venue/ui/page/venue_list_page.dart';
+import 'package:dashboard/feature/stamp_rally/ui/page/stamp_rally_page.dart';
 import 'package:dashboard/feature/support_lt/ui/page/support_lt_page.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -47,6 +48,7 @@ part 'session.dart';
 part 'sponsor.dart';
 part 'quiz.dart';
 part 'support_lt.dart';
+part 'stamp_rally.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   // Event detail/projection links must keep their environment on browser reload.

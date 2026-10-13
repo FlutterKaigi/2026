@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/feature/auth/data/provider/auth_repository.dart';
 import 'package:app/feature/auth/ui/page/email_sign_in_page.dart';
@@ -77,6 +79,70 @@ void main() {
     expect(repository.lastEmail, 'attendee@example.com');
     expect(repository.lastPassword, 'password123');
     expect(router.routeInformationProvider.value.uri.path, '/account');
+    expect(find.text('account destination'), findsOneWidget);
+  });
+
+  testWidgets('returns to the previous page only once when the visitor leaves while signing in', (tester) async {
+    final repository = FakeAuthRepository()..pendingAction = Completer<void>();
+    addTearDown(repository.dispose);
+    // サインインカードのある画面から push で開かれたときと同じスタックにする。
+    final router = GoRouter(
+      initialLocation: '/account/support-lt',
+      routes: [
+        GoRoute(
+          path: '/account',
+          builder: (_, _) => const Scaffold(body: Text('account destination')),
+          routes: [
+            GoRoute(
+              path: 'support-lt',
+              builder: (_, _) => const Scaffold(body: Text('sign-in card destination')),
+            ),
+            GoRoute(path: 'email', builder: (_, _) => const EmailSignInPage()),
+          ],
+        ),
+      ],
+    );
+    addTearDown(router.dispose);
+    await tester.pumpWidget(buildSubject(repository, router));
+    await tester.pumpAndSettle();
+    unawaited(router.push<void>('/account/email'));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextFormField).at(0), 'attendee@example.com');
+    await tester.enterText(find.byType(TextFormField).at(1), 'password123');
+    await tester.tap(find.text('サインイン'));
+    await tester.pump();
+
+    // サインインの完了が、戻る操作の画面遷移中に届く。
+    await tester.tap(find.byType(BackButtonIcon));
+    await tester.pump();
+    repository.pendingAction!.complete();
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(repository.currentUser, isNotNull);
+    expect(find.text('sign-in card destination'), findsOneWidget);
+  });
+
+  testWidgets('finishes quietly when sign-in completes after the visitor has left', (tester) async {
+    final repository = FakeAuthRepository()..pendingAction = Completer<void>();
+    addTearDown(repository.dispose);
+    final router = buildRouter();
+    await tester.pumpWidget(buildSubject(repository, router));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextFormField).at(0), 'attendee@example.com');
+    await tester.enterText(find.byType(TextFormField).at(1), 'password123');
+    await tester.tap(find.text('サインイン'));
+    await tester.pump();
+    await tester.tap(find.byType(BackButtonIcon));
+    await tester.pumpAndSettle();
+    expect(find.byType(EmailSignInPage), findsNothing);
+
+    repository.pendingAction!.complete();
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
     expect(find.text('account destination'), findsOneWidget);
   });
 

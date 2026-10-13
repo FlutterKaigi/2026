@@ -40,8 +40,9 @@ sessionTimetable:
   title: Timetable
   dayButtonLabel: Day $day ($date)
   view:
-    openRooms: Switch to room timeline
-    openList: Switch to list view
+    list: List
+    rooms: By room
+    saveFailed: Could not save the view preference
     shared: Shared
   empty: The timetable has not been published yet
   emptyFiltered: There are no items for this day
@@ -202,6 +203,10 @@ eventInfo:
   sourceCode: View Source Code
   staffMembers: Staff
   ossLicenses: OSS Licenses
+  survey:
+    title: Survey Request
+    description: We would like to hear your opinions to make future FlutterKaigi events better.
+    button: Answer the General Survey
 contributors:
   title: Contributors
   openRepository: Open the FlutterKaigi/2026 repository
@@ -357,6 +362,56 @@ mission:
   snsTitle: Share a photo on SNS
   snsDescription: Post a photo with an eligible attendee and register its URL and category
 
+stampRally:
+  title: Stamp Rally
+  signInRequired: Sign in to collect stamps
+  description: Scan the QR codes at sponsor booths to collect stamps
+  scanButton: Scan QR code
+  closed: Stamps are not available right now. Prizes and the crane game are still available
+  stampCount: "$n / $total"
+  stampCountSemantic: $n of $total stamps collected
+  nextCheckpoint: "$n more for prize #$number"
+  allCheckpoints: You have reached every prize
+  checkpointLabel: "#$number ($required stamps)"
+  checkpointLocked: Not yet
+  checkpointAchieved: Ready to redeem
+  checkpointRedeemed: Redeemed $date
+  thanksCardTitle: Crane game
+  thanksCardDescription: Collect thanks cards at the venue to play the crane game once
+  thanksCardNotRedeemed: Not played
+  thanksCardRedeemed: Played $date
+  roadmapTitle: Stamps
+  stampSlotSemantic: Stamp $n, $status
+  acquired: Collected
+  notAcquired: Not collected
+  scanTitle: Scan QR code
+  scanHint: Fit the QR code at a sponsor booth or the prize counter inside the frame
+  scanInvalid: This is not a stamp rally QR code
+  scanCameraError: The camera is unavailable. Allow camera access in Settings
+  resultTitle: Stamp Rally
+  processing: Checking…
+  stampAcquiredTitle: Stamp collected!
+  stampAlreadyTitle: You already have this stamp
+  checkpointReached: "You reached prize #$number!"
+  rewardTitle: Prize redemption
+  rewardRedeemedTitle: "You can receive prize $numbers"
+  rewardNoneTitle: No new prizes to redeem
+  rewardNoneBody: You have $n stamps
+  rewardStaffNote: Show this screen to the staff
+  rewardRedeemedAt: "#$number redeemed $date"
+  thanksCardResultTitle: You can play the crane game
+  thanksCardAlreadyTitle: You have already played the crane game
+  thanksCardResultAt: Checked in $date
+  invalidTitle: Invalid QR code
+  invalidBody: Check that this is a stamp rally QR code
+  closedTitle: Stamps are not available right now
+  networkError: Could not connect. Try again somewhere with a better signal
+  failed: Something went wrong
+  sessionExpired: Please sign in again
+  permissionDenied: This account cannot take part
+  retry: Try again
+  viewCard: View stamp rally
+
 exchange:
   title: Profile Exchange
   qrDescription: Show this QR code to another attendee and have them scan it to exchange profiles
@@ -421,7 +476,15 @@ exchange:
   shareLinkViewList: View exchanged profiles
 supportLt:
   title: Support LT Registration
-  description: Enter the 6-digit code provided by the organizers to register your participation in Support LT
+  description: Scan the QR code shown at the venue to register your participation in Support LT
+  scanButton: Scan the QR code
+  scanTitle: Scan the QR code
+  scanHint: Line up the QR code shown at the venue within the frame
+  scanCameraError: Camera unavailable. Allow camera access in Settings, or enter the 6-digit code on the previous screen
+  scanInvalid: Could not read this code. Make sure it's the Support LT registration QR code
+  linkInvalid: This link isn't valid. Scan the QR code at the venue again
+  codeSectionTitle: If you can't scan the QR code
+  codeSectionDescription: Enter the 6-digit code provided by the organizers
   codeLabel: Registration code
   register: Register participation
   submitting: Registering…
@@ -431,7 +494,7 @@ supportLt:
   backToAccount: Back to account
   signInRequired: Sign in to register your participation in Support LT
   invalidFormat: Enter a 6-digit code
-  invalidCode: This code is incorrect. Check the code provided by the organizers
+  invalidCode: This code is incorrect. Scan the QR code at the venue again or ask the organizers
   rateLimited: Too many attempts. Please try again in a few minutes
   networkError: A network error occurred. Check your connection and try again
   sessionExpired: Your sign-in session has expired. Please sign in again
@@ -496,6 +559,7 @@ quiz:
     description: The quiz links your entry and answers to your account.
       Sign in from the Account tab to take part.
     button: Go to Account
+    inPage: Sign in to take part in the quiz
   errors:
     signInFailed: Failed to sign in
     eventLoadFailed: Failed to load the event
@@ -504,32 +568,58 @@ quiz:
     description: Once it is announced,
       you can join from this screen.
   registration:
-    subtitle: A table-versus-table team battle. Join with a nickname!
+    subtitle: Confirm your round to join. You may join either the first or the second round.
     participantCount: "Participants:"
     participantUnit: ""
-    nickname: Nickname
-    nicknameHint: 1–20 characters
-    entryCode: Entry code
-    entryCodeHint: 6-digit number
-    entryCodeHelper: Enter the code shown at the on-site reception desk
     join: Join
     full: Full capacity ($max participants) reached
     failed: Could not register. Please try again later.
-    codeMismatch: Could not register. Please check the entry code.
     alreadyParticipated: You have already registered for another round and cannot join this one.
     closed: Registration for this round has closed.
     unavailable: Registration could not be confirmed. Check your connection and try again.
-    rateLimited: Too many attempts. Wait one minute, check the entry code, and try again.
     accountUnavailable: This account cannot join. Please contact event staff.
   waiting:
-    title: You're in!
-    description: Please wait for the team announcement
+    title: Registration confirmed
+    description: Check-in opens at the venue after registration closes. Scan the QR code on the screen to check in, then select the team assigned by staff.
+  checkIn:
+    title: Check-in
+    instructions: Scan the QR code shown on the venue screen, or enter the 6-digit check-in code. You can select your team after checking in.
+    scanButton: Scan the QR code
+    scanTitle: Scan the QR code
+    scanHint: Line up the QR code shown on the venue screen within the frame
+    scanCameraError: Camera unavailable. Allow camera access in Settings, or enter the 6-digit check-in code on the previous screen
+    scanInvalid: Could not read this code. Make sure it's the quiz check-in QR code
+    scanOtherEvent: This QR code is for another round. Scan the QR code for the round you registered for
+    codeSectionTitle: If you can't scan the QR code
+    codeLabel: Check-in code
+    submit: Check in
+    submitting: Checking…
+    invalidFormat: Enter a 6-digit code
+    linkInvalid: This link isn't valid. Scan the QR code at the venue again
+    wrongCode: This code is incorrect. Scan the QR code on the screen again or ask the staff
+    rateLimited: Too many attempts. Wait about a minute and try again
+    closed: Check-in has closed. Please contact event staff.
+    unavailable: Could not confirm your check-in. Check your connection and try again.
+    failed: Could not check in. Please contact event staff.
+  selection:
+    title: Select your team
+    instructions: Sit at the table assigned by staff, then select its team (A–T).
+    unselected: No team selected
+    current: Your team is $team
+    option: $team ($count people)
+    confirm: Confirm this team
+    sending: Sending…
+    changeHint: You can change teams while selection is open.
+    closed: Team selection has closed. Please wait for the questions.
+    closedUnselected: Team selection has closed. Please contact event staff.
+    changed: Your membership changed. Check your current team and select again.
+    failed: Could not confirm your selection. Check your connection and current team. Contact staff if selection has closed or your registration was cancelled.
   team:
-    yourTable: Your table is
-    table: Table
+    yourTable: Your team is
+    table: Team
     teamLabel: Team
     gatherHint: Gather at your table and wait for the next question!
-    badge: Table $table・$name
+    badge: Team $name
   entryClosed:
     title: Entry is closed
     description: The quiz is in progress.
@@ -560,7 +650,7 @@ quiz:
     teamScore: "Current team score: $score pts"
   result:
     title: Final results
-    table: Table $table
+    table: Team $name
     points: $score pts
     yourTeam: Your team
     yourTeamRanked: "#$rank / $name ($score pts)"
@@ -571,3 +661,5 @@ forceUpdate:
   title: Update Required
   message: A new version of the app is available. Please update to the latest version.
   updateButton: Update
+pushNotification:
+  open: Open

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/feature/auth/data/provider/auth_repository.dart';
 import 'package:app/feature/profile/data/provider/user_profile_repository.dart';
@@ -182,6 +184,53 @@ void main() {
     expect(saved.avatarUrl, 'https://example.com/saved.png');
     expect(saved.snsLinks, const [SnsLink(type: 'x', value: 'https://x.com/saved')]);
     expect(saved.createdAt, DateTime.utc(2026, 7));
+  });
+
+  testWidgets('returns to the previous page only once when the attendee leaves while saving', (tester) async {
+    final authRepository = FakeAuthRepository(
+      initialUser: FakeUser(uid: 'uid-1', displayName: 'Auth Name'),
+    );
+    addTearDown(authRepository.dispose);
+    final profileRepository = FakeUserProfileRepository(initialProfile: existingProfile())
+      ..pendingSave = Completer<void>();
+    addTearDown(profileRepository.dispose);
+    // プロフィール交換の画面から push で開かれたときと同じスタックにする。
+    final router = GoRouter(
+      initialLocation: '/account/exchange',
+      routes: [
+        GoRoute(
+          path: '/account',
+          builder: (_, _) => const Scaffold(body: Text('account destination')),
+          routes: [
+            GoRoute(
+              path: 'exchange',
+              builder: (_, _) => const Scaffold(body: Text('exchange destination')),
+            ),
+            GoRoute(path: 'profile', builder: (_, _) => const ProfileEditPage()),
+          ],
+        ),
+      ],
+    );
+    addTearDown(router.dispose);
+    await tester.pumpWidget(buildSubject(authRepository, profileRepository, router));
+    await tester.pumpAndSettle();
+    unawaited(router.push<void>('/account/profile'));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.widgetWithText(TextFormField, 'Saved Name'), 'Renamed');
+    await tester.ensureVisible(find.widgetWithText(FilledButton, '保存'));
+    await tester.tap(find.widgetWithText(FilledButton, '保存'));
+    await tester.pump();
+
+    // 保存の完了が、戻る操作の画面遷移中に届く。
+    router.pop();
+    await tester.pump();
+    profileRepository.pendingSave!.complete();
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(profileRepository.savedProfiles.single.displayName, 'Renamed');
+    expect(find.text('exchange destination'), findsOneWidget);
   });
 
   testWidgets('rejects invalid social IDs and URLs', (tester) async {

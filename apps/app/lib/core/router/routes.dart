@@ -24,6 +24,19 @@ class ShareLinkRoute extends GoRouteData with $ShareLinkRoute {
   Widget build(BuildContext context, GoRouterState state) => ExchangeShareLinkPage(token: token);
 }
 
+/// `/s/:token` — a stamp rally QR code, opened from the OS camera as a
+/// Universal Link / App Link, in the web app, or from
+/// [StampRallyScanRoute]. Top-level for the same reason as [ShareLinkRoute].
+@TypedGoRoute<StampRallyLinkRoute>(path: '/s/:token')
+class StampRallyLinkRoute extends GoRouteData with $StampRallyLinkRoute {
+  const StampRallyLinkRoute({required this.token});
+
+  final String token;
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => StampRallyLinkPage(token: token);
+}
+
 /// Shell hosting the main bottom/rail navigation destinations.
 ///
 /// Uses [StatefulShellRoute.indexedStack] so switching tabs swaps branches
@@ -79,10 +92,18 @@ class ShareLinkRoute extends GoRouteData with $ShareLinkRoute {
             TypedGoRoute<ProfileEditRoute>(path: 'profile'),
             TypedGoRoute<QuizListRoute>(
               path: 'quiz',
-              routes: [TypedGoRoute<QuizRoute>(path: ':eventId')],
+              routes: [
+                TypedGoRoute<QuizRoute>(path: ':eventId'),
+                TypedGoRoute<QuizCheckInLinkRoute>(path: ':eventId/check-in/:code'),
+              ],
             ),
             TypedGoRoute<SupportLtRoute>(path: 'support-lt'),
+            TypedGoRoute<SupportLtLinkRoute>(path: 'support-lt/:code'),
             TypedGoRoute<MissionRoute>(path: 'missions'),
+            TypedGoRoute<StampRallyRoute>(
+              path: 'stamp-rally',
+              routes: [TypedGoRoute<StampRallyScanRoute>(path: 'scan')],
+            ),
             TypedGoRoute<SnsPostRoute>(path: 'sns-post'),
             TypedGoRoute<ExchangeHomeRoute>(
               path: 'exchange',
@@ -208,12 +229,40 @@ class QuizRoute extends GoRouteData with $QuizRoute {
   Widget build(BuildContext context, GoRouterState state) => QuizPage(eventId: eventId);
 }
 
-/// `/account/support-lt` — register attendance with an organizer-issued code.
+/// `/account/quiz/:eventId/check-in/:code` — the venue check-in QR code's link
+/// (`quizCheckInQrPayload`), opened as a Universal Link / App Link or on the
+/// web. Declared beside [QuizRoute] rather than under it so going back returns
+/// to the quiz list instead of a second page for the same event.
+class QuizCheckInLinkRoute extends GoRouteData with $QuizCheckInLinkRoute {
+  const QuizCheckInLinkRoute({required this.eventId, required this.code});
+
+  final String eventId;
+  final String code;
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => QuizPage(eventId: eventId, checkInCode: code);
+}
+
+/// `/account/support-lt` — register attendance by scanning the venue's QR code
+/// or entering the organizer-issued code.
 class SupportLtRoute extends GoRouteData with $SupportLtRoute {
   const SupportLtRoute();
 
   @override
   Widget build(BuildContext context, GoRouterState state) => const SupportLtPage();
+}
+
+/// `/account/support-lt/:code` — the attendance QR code's link
+/// (`supportLtQrPayload`), opened as a Universal Link / App Link or on the
+/// web. Declared beside [SupportLtRoute] rather than under it so going back
+/// returns to the account page instead of a second registration page.
+class SupportLtLinkRoute extends GoRouteData with $SupportLtLinkRoute {
+  const SupportLtLinkRoute({required this.code});
+
+  final String code;
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => SupportLtPage(linkCode: code);
 }
 
 /// `/account/missions` — at-a-glance event eligibility and mission progress.
@@ -222,6 +271,22 @@ class MissionRoute extends GoRouteData with $MissionRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) => const MissionPage();
+}
+
+/// `/account/stamp-rally` — collected stamps, prizes and the thanks card.
+class StampRallyRoute extends GoRouteData with $StampRallyRoute {
+  const StampRallyRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const StampRallyPage();
+}
+
+/// `/account/stamp-rally/scan` — reads a stamp rally QR code in-app.
+class StampRallyScanRoute extends GoRouteData with $StampRallyScanRoute {
+  const StampRallyScanRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const StampRallyScanPage();
 }
 
 /// `/account/sns-post` — register a photo post URL and one companion category.

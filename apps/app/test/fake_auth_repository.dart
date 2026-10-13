@@ -52,6 +52,9 @@ final class FakeAuthRepository implements AuthRepository {
   /// When set, the next auth action throws this exception once.
   FirebaseAuthException? nextError;
 
+  /// When set, sign-in and sign-out complete only after this does.
+  Completer<void>? pendingAction;
+
   /// Auth actions invoked on this repository, in call order.
   final calledMethods = <String>[];
 
@@ -142,6 +145,7 @@ final class FakeAuthRepository implements AuthRepository {
   Future<void> _run(String method, User? signedInUser) async {
     calledMethods.add(method);
     _throwIfConfigured();
+    await pendingAction?.future;
     _user = signedInUser;
     _controller.add(signedInUser);
   }

@@ -1,11 +1,15 @@
 import 'package:dashboard/feature/quiz/data/provider/quiz_list_state.dart';
+import 'package:dashboard/feature/quiz/ui/component/quiz_check_in_code.dart';
 import 'package:dashboard/feature/quiz/ui/component/quiz_countdown.dart';
 import 'package:dashboard/feature/quiz/ui/component/quiz_status_label.dart';
 import 'package:data/data.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-/// 会場投影用の読み取り専用画面。受付コード・下書き・正解 secret を購読しない。
+/// 会場投影用の読み取り専用画面。下書き・正解 secret を購読しない。
+///
+/// チェックインの受付中だけ、会場で配る参加コードと QR コードを表示する。
+/// 会場外に出さないため、この画面は配信映像に映さない。
 class QuizProjectionPage extends ConsumerWidget {
   const QuizProjectionPage({super.key, required this.eventId});
 
@@ -45,7 +49,7 @@ class _Projection extends ConsumerWidget {
           Text(event.title.ja, style: Theme.of(context).textTheme.headlineLarge),
           const SizedBox(height: 24),
           if (event.status == QuizEventStatus.finished)
-            _ProjectionTeams(eventId: event.id, finished: true)
+            _ProjectionTeams(event: event)
           else if (questionData != null && questionData.status != QuizQuestionStatus.draft)
             _ProjectionQuestion(question: questionData)
           else if (question?.hasError ?? false)
@@ -55,7 +59,21 @@ class _Projection extends ConsumerWidget {
           else ...[
             Text(quizEventStatusLabel(event.status), style: Theme.of(context).textTheme.headlineMedium),
             const SizedBox(height: 24),
-            _ProjectionTeams(eventId: event.id, finished: false),
+            if ((event.status == QuizEventStatus.registration || event.status == QuizEventStatus.entryClosed) &&
+                event.teamSelectionStatus == QuizTeamSelectionStatus.open) ...[
+              Text(
+                'アプリのクイズ大会の画面で QR コードを読み取るか、参加コードを入力してチェックインしてください。',
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
+              const SizedBox(height: 16),
+              QuizCheckInCode(
+                eventId: event.id,
+                qrSize: 320,
+                codeStyle: Theme.of(context).textTheme.displayLarge,
+              ),
+              const SizedBox(height: 32),
+            ],
+            _ProjectionTeams(event: event),
           ],
         ],
       ),
@@ -96,7 +114,7 @@ class _ProjectionQuestion extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.all(20),
               child: Text(
-                '${String.fromCharCode(65 + i)}. ${question.options[i].ja}'
+                '${i + 1}. ${question.options[i].ja}'
                 '${question.status == QuizQuestionStatus.revealed && question.correctOptionIndex == i ? '  ✓ 正解' : ''}'
                 '${question.options[i].en.isEmpty ? '' : '\n${question.options[i].en}'}',
                 style: theme.textTheme.headlineMedium,
@@ -119,14 +137,21 @@ class _ProjectionQuestion extends StatelessWidget {
 }
 
 class _ProjectionTeams extends ConsumerWidget {
-  const _ProjectionTeams({required this.eventId, required this.finished});
+  const _ProjectionTeams({required this.event});
 
-  final String eventId;
-  final bool finished;
+  final QuizEvent event;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final teams = ref.watch(quizTeamListProvider(eventId));
+    final finished = event.status == QuizEventStatus.finished;
+    final heading = finished
+        ? '結果発表'
+        : switch (event.teamSelectionStatus) {
+            QuizTeamSelectionStatus.notStarted => 'チェックインの開始をお待ちください。',
+            QuizTeamSelectionStatus.open => 'チェックイン後、スタッフに案内されたテーブルのチーム（A〜T）を選択してください。',
+            QuizTeamSelectionStatus.closed => 'チェックインとチーム選択は終了しました。出題をお待ちください。',
+          };
+    final teams = ref.watch(quizTeamListProvider(event.id));
     return teams.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, _) => const Text('チームの読み込みに失敗しました。接続を確認してください。'),
@@ -136,20 +161,20 @@ class _ProjectionTeams extends ConsumerWidget {
             final scoreOrder = finished ? b.score.compareTo(a.score) : 0;
             return scoreOrder != 0 ? scoreOrder : a.tableNumber.compareTo(b.tableNumber);
           });
-        if (sorted.isEmpty) return const Text('チーム編成をお待ちください。');
+        if (sorted.isEmpty) return Text(heading);
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(finished ? '結果発表' : 'チームのテーブルへお集まりください', style: Theme.of(context).textTheme.headlineMedium),
+            Text(heading, style: Theme.of(context).textTheme.headlineMedium),
             if (finished) const Text('同点は同順位です。賞品対象チームの決定は司会の案内に従ってください。'),
             const SizedBox(height: 16),
             for (final team in sorted)
               Card.filled(
                 child: ListTile(
-                  leading: Text(finished ? '${team.rank ?? '-'} 位' : '卓 ${team.tableNumber}'),
+                  leading: Text(finished ? '${team.rank ?? '-'} 位' : '${team.memberUids.length} 人'),
                   title: Text(team.name, style: Theme.of(context).textTheme.titleLarge),
                   subtitle: Text(
-                    finished ? 'テーブル ${team.tableNumber}' : team.members.map((m) => m.displayName).join(' ・ '),
+                    finished ? 'チーム ${team.name}' : team.members.map((m) => m.displayName).join(' ・ '),
                   ),
                   trailing: finished ? Text('${team.score} 点', style: Theme.of(context).textTheme.headlineSmall) : null,
                 ),

@@ -72,7 +72,7 @@ export interface RegisterSupportLtResult {
   alreadyRegistered: boolean;
 }
 
-function requireUser(auth: SupportLtAuth | null | undefined): SupportLtAuth {
+export function requireUser(auth: SupportLtAuth | null | undefined): SupportLtAuth {
   if (auth == null) {
     throw new HttpsError("unauthenticated", "サインインが必要です。");
   }
@@ -82,7 +82,7 @@ function requireUser(auth: SupportLtAuth | null | undefined): SupportLtAuth {
   return auth;
 }
 
-function parseData(data: unknown, allowedKeys: string[]): Record<string, unknown> {
+export function parseData(data: unknown, allowedKeys: string[]): Record<string, unknown> {
   if (data == null || typeof data !== "object" || Array.isArray(data)
     || Object.keys(data).some((key) => !allowedKeys.includes(key))) {
     throw new HttpsError("invalid-argument", "リクエストの形式が正しくありません。");
@@ -168,7 +168,7 @@ function recordSharedFailure(db: Firestore, now: number): Promise<unknown> {
 }
 
 /** gRPC status 10 (ABORTED) is what Firestore reports after transaction retries are exhausted. */
-function isFirestoreAborted(error: unknown): boolean {
+export function isFirestoreAborted(error: unknown): boolean {
   return typeof error === "object" && error != null && "code" in error && error.code === 10;
 }
 

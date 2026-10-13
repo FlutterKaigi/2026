@@ -10,11 +10,14 @@ Firestoreトランザクションで処理する。リージョンは `asia-nort
 管理者認可は既存の `assertAdmin` と共通。詳細は
 [設計](../docs/quiz-event/DESIGN.md)・[当日手順](../docs/quiz-event/RUNBOOK.md)を参照。
 
-- `registerQuizParticipant({eventId, displayName, entryCode})`: 非匿名アカウントの登録。
-  コード、定員、前後半の重複参加をサーバーで検証する。
+- `registerQuizParticipant({eventId})`: 非匿名アカウントのコードなし参加表明。
+  定員・前後半の重複参加を検証し、公開プロフィールの表示名を使う。
+- `checkInQuizParticipant({eventId, code})`: 会場の6桁の参加コードでチェックインする。誤入力は1分5回まで。
+- `selectQuizTeam({eventId, teamId, expectedTeamId})`: チェックイン済みの参加者の A〜T の所属を比較更新する。
 - `submitQuizAnswer({eventId, questionId, teamId, selectedOptionIndex})`: 所属とサーバー期限を検証する。
 - `quizEventOperation({eventId, operation, questionId?, uid?, seconds?, operationId?})`: 管理者の進行操作。
-  すべての操作で操作IDを再利用して再試行する。
+  チェックインの開始・終了、参加コードの再発行、個別取消・未選択者の一括取消にも使う。
+  再試行では操作IDを再利用する。一括取消だけは押下ごとに新しいIDで現在の対象を判定する。
 - `getQuizServerTime({})`: `serverNowMs`（epochミリ秒）を返す。
 
 Functions・Rules・アプリ・ダッシュボードを受付開始前に揃える。
@@ -180,6 +183,48 @@ firebase functions:secrets:set EXCHANGE_TOKEN_SECRET --project flutterkaigi-2026
 `SYNC_TARGET_PROJECT_ID` が未設定だとエミュレータ起動時に対話プロンプトで
 停止し、関数が 1 つも登録されない。
 
+## スタンプラリー
+
+`src/stamp_rally.ts` が callable を公開し、`src/stamp_rally_service.ts` が署名の判定と
+Firestore トランザクションを実装する。リージョンは `asia-northeast1`、本番は App Check 必須。
+
+QR コードは `<ドメイン>/s/<token>` 形式で、トークンは
+`HMAC-SHA256(STAMP_RALLY_TOKEN_SECRET, <用途>)` の16進表記。用途はスポンサーのスタンプが
+`stamp.v1.<sponsorId>`、景品の交換が `reward.v1`、クレーンゲームの挑戦（サンクスカード）が `thanks.v1`。
+有効期限はなく、印刷して使う。
+
+- `scanStampRallyCode({ token })` は匿名認証以外のサインイン済みユーザーが利用できる。
+  トークンを景品・サンクスカード・`stampRallySponsors` の各スポンサーの署名と突き合わせて用途を判定する。
+  カード・設定・対象スポンサーを同じトランザクションで読み、獲得・交換日時にはサーバー時刻を使う。
+  - スタンプ: `{ kind: "stamp", sponsorId, alreadyAcquired, acquiredAt, stampCount, newCheckpoints, checkpoints }`。
+    獲得済みなら `alreadyAcquired: true` を返す。未獲得で `stampRallySettings/current.isOpen` が
+    true でなければ `failed-precondition`。
+  - 景品: `{ kind: "reward", redeemedCheckpoints, redeemedAt, stampCount, checkpoints, rewardsRedeemedAt }`。
+    達成済みで未交換のチェックポイントをすべて交換済みにする。交換できるものがなければ
+    `redeemedCheckpoints` は空、`redeemedAt` は null。
+  - クレーンゲーム: `{ kind: "thanksCard", alreadyRedeemed, redeemedAt }`。スタンプ数は条件にせず、1人1回のみ記録する。挑戦の条件となるサンクスカードは会場で物理のカードとして集める。
+  - いずれの署名とも一致しなければ `not-found`、形式不正は `invalid-argument`。
+- `getStampRallyQrCodes()` は管理者のみ呼び出せる。`{ sponsors: [{ sponsorId, token }], reward, thanksCard }`
+  を返す。ドメインはダッシュボードが自身の Flavor に合わせて付ける。
+
+チェックポイント番号は `checkpoints`（既定値 `[7, 14, 22]`）の並び順に 1 から数える。
+スタンプ数は `stampRallyCards/{uid}.stamps` の件数で、スタンプ・景品の交換はいずれも1回のみ記録する。
+時刻は epoch ミリ秒で返す。Auth アカウントの確認は応援 LT 参加登録と同じく、
+カードの読み取りロックを保持して行う。削除済みアカウントはロック解放後に共通の Auth 削除処理で
+データを削除する。`onSupportLtUserDeleted` も `stampRallyCards/{uid}` を削除する。
+
+署名鍵は Firebase Functions のシークレット `STAMP_RALLY_TOKEN_SECRET` から読み、前後の空白・改行を除いて使う。
+値は環境ごとに別の乱数にする。シークレットを変更すると印刷済みのすべての QR コードが無効になる。
+
+```bash
+openssl rand -hex 32 | tr -d '\n' | firebase functions:secrets:set STAMP_RALLY_TOKEN_SECRET --project flutterkaigi-2026-stg --data-file -
+```
+
+エミュレータでは `functions/.secret.local` に `STAMP_RALLY_TOKEN_SECRET=<任意の値>` を追加する。
+`test/stamp_rally.test.cjs` で認可、署名検証、チェックポイント判定、二重交換を、
+`test/stamp_rally.emulator.test.cjs` で callable と Firestore ルールを検証する。
+`stampRallyCards` は `syncCollectionsToProd` の同期対象に含めない。
+
 ## eventAdministration
 
 ダッシュボードの1回のログインで、STG / 本番の応援LT・クイズを管理する callable。
@@ -215,13 +260,13 @@ Auth アカウントの有効性、App Check を検証する。読取も毎回�
 ```
 
 `action` は `read`、`clock`、`issueSupportLtCode`、`quizOperation`、`saveEvent`、
-`saveQuestion`、`deleteQuestion`、`updateTeamNamePool`、`renameTeam`、
+`saveQuestion`、`deleteQuestion`、
 `previewQuizPromotion`、`promoteQuizEvent`、`withdrawQuizPromotion` のみ。
 読取の `view` は `supportLt` / `quizEvents` / `quizConsole` / `quizQuestion` / `quizProjection`。
 投影用の取得では受付コードや非公開の正解を取得しない。
 画面全体で1回の取得を共有し、2秒間隔と操作直後に更新する。
 
-出題・採点・受付・再編成は既存のトランザクション処理を使う。問題編集は開始前かつ未出題に
+出題・採点・受付・チーム選択・取消はトランザクション処理を使う。問題編集は開始前かつ未出題に
 制限し、正解を公開データへ混ぜない。操作ログには操作環境・実行者・操作名・イベントIDを記録する。
 
 STGダッシュボードで利用する場合は STG にこの関数をデプロイし、その**実行サービスアカウント**に
@@ -235,7 +280,7 @@ STGダッシュボードで利用する場合は STG にこの関数をデプロ
   戻り値の `revision` は設定・問題・正解を含む内容のハッシュ。確認画面と異なる版の反映を防ぐ。
 - `promoteQuizEvent` は同じ `eventId`・`revision` と、再試行でも維持する `operationId` を受け取る。
   本番に別 ID (`operationId`) の非公開・下書きイベントを作り、問題をすべて未出題に戻す。
-  正解は `questions/{id}/secret/answer` にのみ格納する。参加者、チーム、回答、得点、受付コード、
+  正解は `questions/{id}/secret/answer` にのみ格納する。参加者、チーム、回答、得点、チーム選択、
   進行状態、過去の操作履歴はコピーしない。スポンサー本体の同期も行わず、本番側の存在を検証する。
 - 問題数は1〜100問、定義は4 MB以下。本番のイベント・問題・正解・反映履歴を1トランザクションで
   作成するため、途中まで反映されたイベントは残らない。反映済みイベントの上書きは行わない。
@@ -305,6 +350,10 @@ STG プロジェクトにデプロイする callable function。管理ダッシ�
 > Firebase Console > App Check に登録しておくこと。
 
 ## セットアップ
+
+Node.js 22.12以降の22系を使用する。Functions用のCI・配布・Melosコマンドは
+Firebase CLI 14.23.0に固定している。この版には[Functions SDK 7のエミュレータ起動の修正](https://firebase.google.com/support/release-notes/cli#version_14230_-_october_30_2025)が含まれる。
+エミュレータの実行にはJava 17も必要。
 
 ```bash
 cd functions

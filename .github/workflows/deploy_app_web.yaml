@@ -61,6 +61,11 @@ jobs:
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
+      - name: Check shared link configuration
+        run: |
+          node tool/generate_app_link_config.mjs --check
+          python3 -m unittest discover -s .github/scripts -p test_app_link_config.py
+
       - uses: ./.github/actions/setup-flutter
 
       - name: Resolve dependencies

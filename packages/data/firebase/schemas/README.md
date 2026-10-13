@@ -15,13 +15,16 @@ Schemas committed so far, including server-managed collections:
 - `firestore/quiz_question.schema.json` / `quiz_question_secret.schema.json` (public questions and private answers)
 - `firestore/quiz_team.schema.json` / `quiz_answer.schema.json` (server-controlled teams and submissions)
 - `firestore/quiz_participant.schema.json` / `quiz_participant_account.schema.json` (roster and private account details)
-- `firestore/quiz_entry_secret.schema.json` (current six-digit entry code)
+- `firestore/quiz_entry_secret.schema.json` (legacy six-digit entry code)
+- `firestore/quiz_check_in_secret.schema.json` (current six-digit venue check-in code)
 - `firestore/quiz_admission_slot.schema.json` (`quizEvents/{eventId}/admissionSlots/{slot}`, server-only capacity reservations)
 - `firestore/quiz_participation.schema.json` (`quizParticipation/{uid}`, cross-round registration lock)
-- `firestore/quiz_entry_attempt.schema.json` / `quiz_operation.schema.json` (server-only attempts and retry receipts)
+- `firestore/quiz_entry_attempt.schema.json` / `quiz_check_in_attempt.schema.json` / `quiz_operation.schema.json` (server-only attempts and retry receipts)
 - `firestore/session.schema.json` (`sessions`)
 - `firestore/sns_post_registration.schema.json` (`snsPostRegistrations/{uid}`, one owner-only photo post URL and companion category)
 - `firestore/speaker.schema.json` (`speakers`)
+- `firestore/stamp_rally_sponsor.schema.json` / `stamp_rally_settings.schema.json` (`stampRallySponsors/{sponsorId}` and `stampRallySettings/current`, public and admin-written)
+- `firestore/stamp_rally_card.schema.json` (`stampRallyCards/{uid}`, written only by `scanStampRallyCode`)
 - `firestore/sponsor.schema.json` (`sponsors`)
 - `firestore/staff_member.schema.json` (`staffMembers`)
 - `firestore/support_lt_settings.schema.json` (`supportLtSettings/current`, written only by `issueSupportLtCode`)
@@ -39,6 +42,8 @@ in documents and epoch milliseconds in callable responses; its code is a string
 so leading zeroes survive. Registration does not require a user profile. Codes,
 registrations, and attempts have no seed data: issue and register through the
 local callables so code validation and attendee identity are exercised.
+Stamp rally cards likewise have no seed data; scan codes from `getStampRallyQrCodes`
+through `scanStampRallyCode`.
 
 When a new collection becomes necessary:
 

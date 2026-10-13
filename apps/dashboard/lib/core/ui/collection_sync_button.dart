@@ -40,7 +40,7 @@ class CollectionSyncButton extends HookConsumerWidget {
       } catch (e) {
         if (context.mounted) context.showSnackBar('本番環境への反映に失敗しました: $e');
       } finally {
-        isSyncing.value = false;
+        if (context.mounted) isSyncing.value = false;
       }
     }
 

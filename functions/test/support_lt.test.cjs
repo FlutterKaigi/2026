@@ -337,7 +337,7 @@ test("account cleanup deletes all account-scoped mission data and attempts witho
 });
 
 test("account cleanup removes quiz account details while preserving the active roster and score", async () => {
-  const privatePaths = ["participantAccounts", "entryClaims", "entryAttempts"]
+  const privatePaths = ["participantAccounts", "entryClaims", "entryAttempts", "checkInAttempts"]
     .map((collection) => `quizEvents/half-1/${collection}/${USER.uid}`);
   const { dependencies, documents } = fixture({
     "quizEvents/half-1": { status: "inProgress" },

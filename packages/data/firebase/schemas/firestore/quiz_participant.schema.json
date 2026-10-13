@@ -18,6 +18,11 @@
     },
     "teamId": {
       "type": ["string", "null"]
+    },
+    "checkedInAt": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "Set by the check-in service when the attendee enters the venue code. Team selection requires it."
     }
   }
 }

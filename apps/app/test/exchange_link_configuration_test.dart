@@ -18,7 +18,7 @@ void main() {
     return container.read(exchangeLinkConfigurationProvider);
   }
 
-  test('production issues the app URL and accepts both production URL generations', () {
+  test('production issues the app URL and accepts existing website links', () {
     final config = configuration(Flavor.production);
     expect(token.qrPayload(origin: config.origin), 'https://2026-app.flutterkaigi.jp/x/$tokenValue');
     for (final origin in [productionExchangeOrigin, legacyExchangeOrigin]) {
@@ -49,7 +49,11 @@ void main() {
     final config = configuration(Flavor.develop);
     expect(token.qrPayload(origin: config.origin), tokenValue);
     expect(parseScannedExchangeToken(tokenValue, allowedOrigins: config.allowedOrigins), isNotNull);
-    for (final origin in [productionExchangeOrigin, legacyExchangeOrigin, stagingExchangeOrigin]) {
+    for (final origin in [
+      productionExchangeOrigin,
+      legacyExchangeOrigin,
+      stagingExchangeOrigin,
+    ]) {
       expect(parseScannedExchangeToken('$origin/x/$tokenValue', allowedOrigins: config.allowedOrigins), isNull);
     }
   });

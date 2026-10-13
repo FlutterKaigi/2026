@@ -4,7 +4,7 @@ import { AdminAuth, assertAdmin } from "./admin_auth";
 import { operateQuizEvent } from "./quiz_service";
 import { assertActiveSupportLtUser, SupportLtGetUser } from "./support_lt_auth";
 import { issueSupportLtCodeForUser } from "./support_lt_service";
-import { Data, eventDefinition, id, invalid, object, questionDefinition, strings, text } from "./event_admin_validation";
+import { Data, eventDefinition, id, invalid, object, questionDefinition } from "./event_admin_validation";
 import { previewQuizPromotion, promoteQuizEvent, withdrawQuizPromotion } from "./quiz_promotion_service";
 
 const PROJECTS = { stg: "flutterkaigi-2026-stg", prod: "flutterkaigi-2026-283db" } as const;
@@ -78,17 +78,24 @@ async function readSnapshot(db: Firestore, input: Data): Promise<Data> {
     return { event, sponsors, question, secret };
   }
   const teams = await list(`${path}/teams`, "tableNumber");
+  const beforeStart = event?.status === "registration" || event?.status === "entryClosed";
+  const checkInCode = async () => (await db.doc(`${path}/secret/checkIn`).get()).get("code") ?? null;
   if (input.view === "quizProjection") {
-    // Projection never reads entry codes, unpublished questions or answer secrets.
+    // Projection never reads unpublished questions or answer secrets. The
+    // check-in code is shown at the venue only while check-in is open.
     const question = event?.currentQuestionId
       ? document(await db.doc(`${path}/questions/${id(event.currentQuestionId)}`).get()) : null;
-    return { event, teams, question: question?.status === "draft" ? null : question };
+    const participants = beforeStart ? await list(`${path}/participants`, "registeredAt") : [];
+    return {
+      event, teams, participants, question: question?.status === "draft" ? null : question,
+      checkInCode: beforeStart && event?.teamSelectionStatus === "open" ? await checkInCode() : null,
+    };
   }
-  const [participants, questions, entry, answers, sponsors] = await Promise.all([
+  const [participants, questions, answers, sponsors, code] = await Promise.all([
     list(`${path}/participants`, "registeredAt"), list(`${path}/questions`, "order"),
-    db.doc(`${path}/secret/entry`).get(), list(`${path}/answers`), list("sponsors"),
+    list(`${path}/answers`), list("sponsors"), beforeStart ? checkInCode() : null,
   ]);
-  return { event, teams, participants, questions, entryCode: entry.get("code") ?? null, answers, sponsors };
+  return { event, teams, participants, questions, answers, sponsors, checkInCode: code };
 }
 
 async function saveEvent(db: Firestore, input: Data): Promise<Data> {
@@ -171,16 +178,6 @@ export async function administerEvent(auth: AdminAuth | undefined, raw: unknown,
     case "saveEvent": return saveEvent(db, payload);
     case "saveQuestion": return saveQuestion(db, payload);
     case "deleteQuestion": return saveQuestion(db, payload, true);
-    case "updateTeamNamePool": {
-      const names = strings(payload.names, 100, (value) => text(value, 80));
-      await db.doc(`quizEvents/${id(payload.eventId)}`).update({ teamNamePool: names, updatedAt: Timestamp.now() });
-      return {};
-    }
-    case "renameTeam": {
-      const name = text(payload.name, 80);
-      await db.doc(`quizEvents/${id(payload.eventId)}/teams/${id(payload.teamId)}`).update({ name });
-      return {};
-    }
     default: return invalid("操作");
   }
 }

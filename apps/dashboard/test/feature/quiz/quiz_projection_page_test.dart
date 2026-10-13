@@ -37,7 +37,6 @@ void main() {
         overrides: [
           quizEventProvider('event').overrideWith((_) => Stream.value(event)),
           quizQuestionProvider((eventId: 'event', questionId: 'question')).overrideWith((_) => Stream.value(question)),
-          quizEntryCodeProvider('event').overrideWith((_) => throw StateError('Projection must not read entry code')),
           quizQuestionSecretProvider((
             eventId: 'event',
             questionId: 'question',
@@ -49,11 +48,48 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.text('公開の問題'), findsOneWidget);
+    expect(find.text('1. ○\nTrue'), findsOneWidget);
+    expect(find.text('2. ×\nFalse'), findsOneWidget);
+    expect(find.textContaining('A. ○'), findsNothing);
     expect(find.text('まだ秘密の解説'), findsNothing);
     expect(find.textContaining('✓ 正解'), findsNothing);
     expect(find.textContaining('残り'), findsNothing);
     expect(find.text('読み上げ後に回答受付を開始します。'), findsOneWidget);
   });
+
+  for (final (selection, message) in [
+    (QuizTeamSelectionStatus.notStarted, 'チェックインの開始をお待ちください。'),
+    (QuizTeamSelectionStatus.open, 'チェックイン後、スタッフに案内されたテーブルのチーム（A〜T）を選択してください。'),
+    (QuizTeamSelectionStatus.closed, 'チェックインとチーム選択は終了しました。出題をお待ちください。'),
+  ]) {
+    testWidgets('prestart guidance follows check-in status and shows the code only while open: $selection', (
+      tester,
+    ) async {
+      await tester.binding.setSurfaceSize(const Size(1280, 1600));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            quizEventProvider('event').overrideWith(
+              (_) => Stream.value(
+                event.copyWith(
+                  status: QuizEventStatus.entryClosed,
+                  currentQuestionId: null,
+                  teamSelectionStatus: selection,
+                ),
+              ),
+            ),
+            quizTeamListProvider('event').overrideWith((_) => Stream.value(<QuizTeam>[])),
+            quizCheckInCodeProvider('event').overrideWith((_) => Stream.value('123456')),
+          ],
+          child: const MaterialApp(home: QuizProjectionPage(eventId: 'event')),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text(message), findsOneWidget);
+      expect(find.text('123456'), selection == QuizTeamSelectionStatus.open ? findsOneWidget : findsNothing);
+    });
+  }
 
   testWidgets('final projection keeps every team tied for first place', (tester) async {
     await tester.binding.setSurfaceSize(const Size(1280, 900));

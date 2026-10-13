@@ -12,8 +12,10 @@ import 'package:app/feature/auth/ui/page/account_page.dart';
 import 'package:app/feature/event/ui/page/event_info_page.dart';
 import 'package:app/feature/exchange/ui/page/exchange_share_link_page.dart';
 import 'package:app/feature/profile/data/provider/user_profile_repository.dart';
+import 'package:app/feature/settings/ui/page/settings_page.dart';
 import 'package:app/feature/support_lt/data/provider/support_lt_provider.dart';
 import 'package:app/feature/support_lt/ui/page/support_lt_page.dart';
+import 'package:data/data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -60,6 +62,11 @@ void main() {
     expect(const AccountRoute().location, '/account');
     expect(const EmailSignInRoute().location, '/account/email');
     expect(const SupportLtRoute().location, '/account/support-lt');
+    // 応援LTのQRコードが指すリンクは、生成側(`supportLtQrPayload`)と同じパスで解決する。
+    expect(
+      const SupportLtLinkRoute(code: '123456').location,
+      Uri.parse(supportLtQrPayload('123456', origin: productionAppOrigin)).path,
+    );
     expect(const ExchangeHomeRoute().location, '/account/exchange');
     expect(const ExchangeScanRoute().location, '/account/exchange/scan');
     expect(const ExchangeListRoute().location, '/account/exchange/list');
@@ -301,6 +308,14 @@ void main() {
       expect(currentPath(router), '/info');
     });
 
+    testWidgets('starts on the path-only route of the notification tap that launched the app', (tester) async {
+      final router = await pumpRouter(tester, launchRoute: Uri(path: '/settings'));
+
+      expect(find.byType(NotFoundPage), findsNothing);
+      expect(find.byType(SettingsPage), findsOneWidget);
+      expect(currentPath(router), '/settings');
+    });
+
     testWidgets('continues to route universal links and report unrelated unknown URLs', (tester) async {
       final router = await pumpRouter(tester);
       await sendPlatformUrl(tester, 'https://2026.flutterkaigi.jp/x/v1.other-uid.9999999999.deadbeef');
@@ -334,12 +349,16 @@ void main() {
         '/account/quiz',
         '/account/quiz/some-event',
         '/account/support-lt',
+        '/account/support-lt/123456',
         '/account/exchange',
         '/account/exchange/scan',
         '/account/exchange/list',
         '/account/sns-post',
-        // プロフィール交換のシェアリンクも塞ぐ。
+        '/account/stamp-rally',
+        '/account/stamp-rally/scan',
+        // プロフィール交換・スタンプラリーのリンクも塞ぐ。
         '/x/v1.other-uid.9999999999.deadbeef',
+        '/s/abababababababababababababababababababababababababababababababab',
       ]) {
         router.go(location);
         await tester.pumpAndSettle();
@@ -356,15 +375,35 @@ void main() {
         '/account/missions',
         '/account/quiz',
         '/account/support-lt',
+        '/account/support-lt/123456',
         '/account/exchange',
         '/account/sns-post',
+        '/account/stamp-rally',
         '/x/v1.other-uid.9999999999.deadbeef',
+        '/s/abababababababababababababababababababababababababababababababab',
       ]) {
         router.go(location);
         await tester.pumpAndSettle();
 
         expect(currentPath(router), location);
       }
+    });
+
+    testWidgets('opens a Support LT QR code link on the registration page above the account page', (tester) async {
+      final router = await pumpRouter(tester);
+
+      await sendPlatformUrl(tester, '/account/support-lt/123456');
+
+      expect(find.byType(SupportLtPage), findsOneWidget);
+      expect(tester.widget<SupportLtPage>(find.byType(SupportLtPage)).linkCode, '123456');
+      expect(currentPath(router), '/account/support-lt/123456');
+      // サインイン前は登録を送信しない。
+      expect(supportLtRepository.submittedCodes, isEmpty);
+
+      router.pop();
+      await tester.pumpAndSettle();
+      expect(find.byType(AccountPage), findsOneWidget);
+      expect(currentPath(router), '/account');
     });
 
     testWidgets('leaves unrelated destinations untouched when the flag is false', (tester) async {

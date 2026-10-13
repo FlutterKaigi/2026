@@ -14,6 +14,9 @@ final class FakeSupportLtRepository implements SupportLtRepository {
   Exception? nextRegisterError;
   Exception? watchError;
 
+  /// Account that [register] registers.
+  String registeringUid = 'uid-1';
+
   @override
   Stream<SupportLtRegistration?> watchRegistration(String uid) {
     watchedUids = [...watchedUids, uid];
@@ -36,6 +39,9 @@ final class FakeSupportLtRepository implements SupportLtRepository {
     _controller.add(null);
   }
 
+  /// Fails every active registration subscription.
+  void emitWatchError(Object error) => _controller.addError(error);
+
   @override
   Future<void> register(String code) async {
     submittedCodes = [...submittedCodes, code];
@@ -46,7 +52,7 @@ final class FakeSupportLtRepository implements SupportLtRepository {
     await pendingRegistration?.future;
     setRegistration(
       SupportLtRegistration(
-        uid: 'uid-1',
+        uid: registeringUid,
         displayName: 'Attendee',
         registeredAt: DateTime.utc(2026, 11, 13, 7),
       ),

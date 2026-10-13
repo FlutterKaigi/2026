@@ -25,6 +25,7 @@ class EmailSignInPage extends HookConsumerWidget {
     final mode = useState(_EmailAuthMode.signIn);
     final obscurePassword = useState(true);
     final isProcessing = useState(false);
+    final route = ModalRoute.of(context);
 
     void showMessage(String message) {
       ScaffoldMessenger.of(context)
@@ -48,7 +49,9 @@ class EmailSignInPage extends HookConsumerWidget {
           showMessage(message);
         }
       } finally {
-        isProcessing.value = false;
+        if (context.mounted) {
+          isProcessing.value = false;
+        }
       }
     }
 
@@ -74,7 +77,12 @@ class EmailSignInPage extends HookConsumerWidget {
           _EmailAuthMode.signIn => repository.signInWithEmailAndPassword(email: email, password: password),
           _EmailAuthMode.createAccount => repository.createUserWithEmailAndPassword(email: email, password: password),
         },
-        onSuccess: backToAccount,
+        // 処理中に戻る操作をしていたら、その下の画面まで閉じない。
+        onSuccess: () {
+          if (route?.isCurrent ?? false) {
+            backToAccount();
+          }
+        },
       );
     }
 

@@ -16,22 +16,22 @@ class TranslationsEn extends Translations with BaseTranslations<AppLocale, Trans
 	/// Constructing via the enum [AppLocale.build] is preferred.
 	TranslationsEn({Map<String, Node>? overrides, PluralResolver? cardinalResolver, PluralResolver? ordinalResolver, TranslationMetadata<AppLocale, Translations>? meta})
 		: assert(overrides == null, 'Set "translation_overrides: true" in order to enable this feature.'),
-		  _meta = meta ?? TranslationMetadata(
+		  $meta = meta ?? TranslationMetadata(
 		    locale: AppLocale.en,
 		    overrides: overrides ?? {},
 		    cardinalResolver: cardinalResolver,
 		    ordinalResolver: ordinalResolver,
 		  ),
 		  super(cardinalResolver: cardinalResolver, ordinalResolver: ordinalResolver) {
-		_meta.setFlatMapFunction(_flatMapFunction);
+		super.$meta.setFlatMapFunction($meta.getTranslation); // copy base translations to super.$meta
+		$meta.setFlatMapFunction(_flatMapFunction);
 	}
 
 	/// Metadata for the translations of <en>.
-	final TranslationMetadata<AppLocale, Translations> _meta;
-	@override TranslationMetadata<AppLocale, Translations> get $meta => _meta;
+	@override final TranslationMetadata<AppLocale, Translations> $meta;
 
 	/// Access flat map
-	@override dynamic operator[](String key) => _meta.getTranslation(key) ?? super[key];
+	@override dynamic operator[](String key) => $meta.getTranslation(key) ?? super.$meta.getTranslation(key);
 
 	late final TranslationsEn _root = this; // ignore: unused_field
 
@@ -59,6 +59,7 @@ class TranslationsEn extends Translations with BaseTranslations<AppLocale, Trans
 	@override late final _Translations$profile$en profile = _Translations$profile$en._(_root);
 	@override late final _Translations$snsPost$en snsPost = _Translations$snsPost$en._(_root);
 	@override late final _Translations$mission$en mission = _Translations$mission$en._(_root);
+	@override late final _Translations$stampRally$en stampRally = _Translations$stampRally$en._(_root);
 	@override late final _Translations$exchange$en exchange = _Translations$exchange$en._(_root);
 	@override late final _Translations$supportLt$en supportLt = _Translations$supportLt$en._(_root);
 	@override late final _Translations$countryRegion$en countryRegion = _Translations$countryRegion$en._(_root);
@@ -69,6 +70,7 @@ class TranslationsEn extends Translations with BaseTranslations<AppLocale, Trans
 	@override late final _Translations$common$en common = _Translations$common$en._(_root);
 	@override late final _Translations$quiz$en quiz = _Translations$quiz$en._(_root);
 	@override late final _Translations$forceUpdate$en forceUpdate = _Translations$forceUpdate$en._(_root);
+	@override late final _Translations$pushNotification$en pushNotification = _Translations$pushNotification$en._(_root);
 }
 
 // Path: app
@@ -356,6 +358,7 @@ class _Translations$eventInfo$en extends Translations$eventInfo$ja {
 	@override String get sourceCode => 'View Source Code';
 	@override String get staffMembers => 'Staff';
 	@override String get ossLicenses => 'OSS Licenses';
+	@override late final _Translations$eventInfo$survey$en survey = _Translations$eventInfo$survey$en._(_root);
 }
 
 // Path: contributors
@@ -496,6 +499,63 @@ class _Translations$mission$en extends Translations$mission$ja {
 	@override String get snsDescription => 'Post a photo with an eligible attendee and register its URL and category';
 }
 
+// Path: stampRally
+class _Translations$stampRally$en extends Translations$stampRally$ja {
+	_Translations$stampRally$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Stamp Rally';
+	@override String get signInRequired => 'Sign in to collect stamps';
+	@override String get description => 'Scan the QR codes at sponsor booths to collect stamps';
+	@override String get scanButton => 'Scan QR code';
+	@override String get closed => 'Stamps are not available right now. Prizes and the crane game are still available';
+	@override String stampCount({required Object n, required Object total}) => '${n} / ${total}';
+	@override String stampCountSemantic({required Object n, required Object total}) => '${n} of ${total} stamps collected';
+	@override String nextCheckpoint({required Object n, required Object number}) => '${n} more for prize #${number}';
+	@override String get allCheckpoints => 'You have reached every prize';
+	@override String checkpointLabel({required Object number, required Object required}) => '#${number} (${required} stamps)';
+	@override String get checkpointLocked => 'Not yet';
+	@override String get checkpointAchieved => 'Ready to redeem';
+	@override String checkpointRedeemed({required Object date}) => 'Redeemed ${date}';
+	@override String get thanksCardTitle => 'Crane game';
+	@override String get thanksCardDescription => 'Collect thanks cards at the venue to play the crane game once';
+	@override String get thanksCardNotRedeemed => 'Not played';
+	@override String thanksCardRedeemed({required Object date}) => 'Played ${date}';
+	@override String get roadmapTitle => 'Stamps';
+	@override String stampSlotSemantic({required Object n, required Object status}) => 'Stamp ${n}, ${status}';
+	@override String get acquired => 'Collected';
+	@override String get notAcquired => 'Not collected';
+	@override String get scanTitle => 'Scan QR code';
+	@override String get scanHint => 'Fit the QR code at a sponsor booth or the prize counter inside the frame';
+	@override String get scanInvalid => 'This is not a stamp rally QR code';
+	@override String get scanCameraError => 'The camera is unavailable. Allow camera access in Settings';
+	@override String get resultTitle => 'Stamp Rally';
+	@override String get processing => 'Checking…';
+	@override String get stampAcquiredTitle => 'Stamp collected!';
+	@override String get stampAlreadyTitle => 'You already have this stamp';
+	@override String checkpointReached({required Object number}) => 'You reached prize #${number}!';
+	@override String get rewardTitle => 'Prize redemption';
+	@override String rewardRedeemedTitle({required Object numbers}) => 'You can receive prize ${numbers}';
+	@override String get rewardNoneTitle => 'No new prizes to redeem';
+	@override String rewardNoneBody({required Object n}) => 'You have ${n} stamps';
+	@override String get rewardStaffNote => 'Show this screen to the staff';
+	@override String rewardRedeemedAt({required Object number, required Object date}) => '#${number} redeemed ${date}';
+	@override String get thanksCardResultTitle => 'You can play the crane game';
+	@override String get thanksCardAlreadyTitle => 'You have already played the crane game';
+	@override String thanksCardResultAt({required Object date}) => 'Checked in ${date}';
+	@override String get invalidTitle => 'Invalid QR code';
+	@override String get invalidBody => 'Check that this is a stamp rally QR code';
+	@override String get closedTitle => 'Stamps are not available right now';
+	@override String get networkError => 'Could not connect. Try again somewhere with a better signal';
+	@override String get failed => 'Something went wrong';
+	@override String get sessionExpired => 'Please sign in again';
+	@override String get permissionDenied => 'This account cannot take part';
+	@override String get retry => 'Try again';
+	@override String get viewCard => 'View stamp rally';
+}
+
 // Path: exchange
 class _Translations$exchange$en extends Translations$exchange$ja {
 	_Translations$exchange$en._(TranslationsEn root) : this._root = root, super.internal(root);
@@ -574,7 +634,15 @@ class _Translations$supportLt$en extends Translations$supportLt$ja {
 
 	// Translations
 	@override String get title => 'Support LT Registration';
-	@override String get description => 'Enter the 6-digit code provided by the organizers to register your participation in Support LT';
+	@override String get description => 'Scan the QR code shown at the venue to register your participation in Support LT';
+	@override String get scanButton => 'Scan the QR code';
+	@override String get scanTitle => 'Scan the QR code';
+	@override String get scanHint => 'Line up the QR code shown at the venue within the frame';
+	@override String get scanCameraError => 'Camera unavailable. Allow camera access in Settings, or enter the 6-digit code on the previous screen';
+	@override String get scanInvalid => 'Could not read this code. Make sure it\'s the Support LT registration QR code';
+	@override String get linkInvalid => 'This link isn\'t valid. Scan the QR code at the venue again';
+	@override String get codeSectionTitle => 'If you can\'t scan the QR code';
+	@override String get codeSectionDescription => 'Enter the 6-digit code provided by the organizers';
 	@override String get codeLabel => 'Registration code';
 	@override String get register => 'Register participation';
 	@override String get submitting => 'Registering…';
@@ -584,7 +652,7 @@ class _Translations$supportLt$en extends Translations$supportLt$ja {
 	@override String get backToAccount => 'Back to account';
 	@override String get signInRequired => 'Sign in to register your participation in Support LT';
 	@override String get invalidFormat => 'Enter a 6-digit code';
-	@override String get invalidCode => 'This code is incorrect. Check the code provided by the organizers';
+	@override String get invalidCode => 'This code is incorrect. Scan the QR code at the venue again or ask the organizers';
 	@override String get rateLimited => 'Too many attempts. Please try again in a few minutes';
 	@override String get networkError => 'A network error occurred. Check your connection and try again';
 	@override String get sessionExpired => 'Your sign-in session has expired. Please sign in again';
@@ -691,6 +759,8 @@ class _Translations$quiz$en extends Translations$quiz$ja {
 	@override late final _Translations$quiz$preparing$en preparing = _Translations$quiz$preparing$en._(_root);
 	@override late final _Translations$quiz$registration$en registration = _Translations$quiz$registration$en._(_root);
 	@override late final _Translations$quiz$waiting$en waiting = _Translations$quiz$waiting$en._(_root);
+	@override late final _Translations$quiz$checkIn$en checkIn = _Translations$quiz$checkIn$en._(_root);
+	@override late final _Translations$quiz$selection$en selection = _Translations$quiz$selection$en._(_root);
 	@override late final _Translations$quiz$team$en team = _Translations$quiz$team$en._(_root);
 	@override late final _Translations$quiz$entryClosed$en entryClosed = _Translations$quiz$entryClosed$en._(_root);
 	@override late final _Translations$quiz$question$en question = _Translations$quiz$question$en._(_root);
@@ -711,6 +781,16 @@ class _Translations$forceUpdate$en extends Translations$forceUpdate$ja {
 	@override String get updateButton => 'Update';
 }
 
+// Path: pushNotification
+class _Translations$pushNotification$en extends Translations$pushNotification$ja {
+	_Translations$pushNotification$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get open => 'Open';
+}
+
 // Path: sessionTimetable.view
 class _Translations$sessionTimetable$view$en extends Translations$sessionTimetable$view$ja {
 	_Translations$sessionTimetable$view$en._(TranslationsEn root) : this._root = root, super.internal(root);
@@ -718,8 +798,9 @@ class _Translations$sessionTimetable$view$en extends Translations$sessionTimetab
 	final TranslationsEn _root; // ignore: unused_field
 
 	// Translations
-	@override String get openRooms => 'Switch to room timeline';
-	@override String get openList => 'Switch to list view';
+	@override String get list => 'List';
+	@override String get rooms => 'By room';
+	@override String get saveFailed => 'Could not save the view preference';
 	@override String get shared => 'Shared';
 }
 
@@ -796,6 +877,18 @@ class _Translations$venueWalk$photo$en extends Translations$venueWalk$photo$ja {
 	@override String get removeFrame => 'Remove frame';
 	@override String get addFrame => 'Add frame';
 	@override late final _Translations$venueWalk$photo$poses$en poses = _Translations$venueWalk$photo$poses$en._(_root);
+}
+
+// Path: eventInfo.survey
+class _Translations$eventInfo$survey$en extends Translations$eventInfo$survey$ja {
+	_Translations$eventInfo$survey$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Survey Request';
+	@override String get description => 'We would like to hear your opinions to make future FlutterKaigi events better.';
+	@override String get button => 'Answer the General Survey';
 }
 
 // Path: auth.signIn
@@ -946,6 +1039,7 @@ class _Translations$quiz$signInRequired$en extends Translations$quiz$signInRequi
 	@override String get title => 'Sign-in required';
 	@override String get description => 'The quiz links your entry and answers to your account. Sign in from the Account tab to take part.';
 	@override String get button => 'Go to Account';
+	@override String get inPage => 'Sign in to take part in the quiz';
 }
 
 // Path: quiz.errors
@@ -977,22 +1071,15 @@ class _Translations$quiz$registration$en extends Translations$quiz$registration$
 	final TranslationsEn _root; // ignore: unused_field
 
 	// Translations
-	@override String get subtitle => 'A table-versus-table team battle. Join with a nickname!';
+	@override String get subtitle => 'Confirm your round to join. You may join either the first or the second round.';
 	@override String get participantCount => 'Participants:';
 	@override String get participantUnit => '';
-	@override String get nickname => 'Nickname';
-	@override String get nicknameHint => '1–20 characters';
-	@override String get entryCode => 'Entry code';
-	@override String get entryCodeHint => '6-digit number';
-	@override String get entryCodeHelper => 'Enter the code shown at the on-site reception desk';
 	@override String get join => 'Join';
 	@override String full({required Object max}) => 'Full capacity (${max} participants) reached';
 	@override String get failed => 'Could not register. Please try again later.';
-	@override String get codeMismatch => 'Could not register. Please check the entry code.';
 	@override String get alreadyParticipated => 'You have already registered for another round and cannot join this one.';
 	@override String get closed => 'Registration for this round has closed.';
 	@override String get unavailable => 'Registration could not be confirmed. Check your connection and try again.';
-	@override String get rateLimited => 'Too many attempts. Wait one minute, check the entry code, and try again.';
 	@override String get accountUnavailable => 'This account cannot join. Please contact event staff.';
 }
 
@@ -1003,8 +1090,57 @@ class _Translations$quiz$waiting$en extends Translations$quiz$waiting$ja {
 	final TranslationsEn _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'You\'re in!';
-	@override String get description => 'Please wait for the team announcement';
+	@override String get title => 'Registration confirmed';
+	@override String get description => 'Check-in opens at the venue after registration closes. Scan the QR code on the screen to check in, then select the team assigned by staff.';
+}
+
+// Path: quiz.checkIn
+class _Translations$quiz$checkIn$en extends Translations$quiz$checkIn$ja {
+	_Translations$quiz$checkIn$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Check-in';
+	@override String get instructions => 'Scan the QR code shown on the venue screen, or enter the 6-digit check-in code. You can select your team after checking in.';
+	@override String get scanButton => 'Scan the QR code';
+	@override String get scanTitle => 'Scan the QR code';
+	@override String get scanHint => 'Line up the QR code shown on the venue screen within the frame';
+	@override String get scanCameraError => 'Camera unavailable. Allow camera access in Settings, or enter the 6-digit check-in code on the previous screen';
+	@override String get scanInvalid => 'Could not read this code. Make sure it\'s the quiz check-in QR code';
+	@override String get scanOtherEvent => 'This QR code is for another round. Scan the QR code for the round you registered for';
+	@override String get codeSectionTitle => 'If you can\'t scan the QR code';
+	@override String get codeLabel => 'Check-in code';
+	@override String get submit => 'Check in';
+	@override String get submitting => 'Checking…';
+	@override String get invalidFormat => 'Enter a 6-digit code';
+	@override String get linkInvalid => 'This link isn\'t valid. Scan the QR code at the venue again';
+	@override String get wrongCode => 'This code is incorrect. Scan the QR code on the screen again or ask the staff';
+	@override String get rateLimited => 'Too many attempts. Wait about a minute and try again';
+	@override String get closed => 'Check-in has closed. Please contact event staff.';
+	@override String get unavailable => 'Could not confirm your check-in. Check your connection and try again.';
+	@override String get failed => 'Could not check in. Please contact event staff.';
+}
+
+// Path: quiz.selection
+class _Translations$quiz$selection$en extends Translations$quiz$selection$ja {
+	_Translations$quiz$selection$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Select your team';
+	@override String get instructions => 'Sit at the table assigned by staff, then select its team (A–T).';
+	@override String get unselected => 'No team selected';
+	@override String current({required Object team}) => 'Your team is ${team}';
+	@override String option({required Object team, required Object count}) => '${team} (${count} people)';
+	@override String get confirm => 'Confirm this team';
+	@override String get sending => 'Sending…';
+	@override String get changeHint => 'You can change teams while selection is open.';
+	@override String get closed => 'Team selection has closed. Please wait for the questions.';
+	@override String get closedUnselected => 'Team selection has closed. Please contact event staff.';
+	@override String get changed => 'Your membership changed. Check your current team and select again.';
+	@override String get failed => 'Could not confirm your selection. Check your connection and current team. Contact staff if selection has closed or your registration was cancelled.';
 }
 
 // Path: quiz.team
@@ -1014,11 +1150,11 @@ class _Translations$quiz$team$en extends Translations$quiz$team$ja {
 	final TranslationsEn _root; // ignore: unused_field
 
 	// Translations
-	@override String get yourTable => 'Your table is';
-	@override String get table => 'Table';
+	@override String get yourTable => 'Your team is';
+	@override String get table => 'Team';
 	@override String get teamLabel => 'Team';
 	@override String get gatherHint => 'Gather at your table and wait for the next question!';
-	@override String badge({required Object table, required Object name}) => 'Table ${table}・${name}';
+	@override String badge({required Object name}) => 'Team ${name}';
 }
 
 // Path: quiz.entryClosed
@@ -1088,7 +1224,7 @@ class _Translations$quiz$result$en extends Translations$quiz$result$ja {
 
 	// Translations
 	@override String get title => 'Final results';
-	@override String table({required Object table}) => 'Table ${table}';
+	@override String table({required Object name}) => 'Team ${name}';
 	@override String points({required Object score}) => '${score} pts';
 	@override String get yourTeam => 'Your team';
 	@override String yourTeamRanked({required Object rank, required Object name, required Object score}) => '#${rank} / ${name} (${score} pts)';
@@ -1164,8 +1300,9 @@ extension on TranslationsEn {
 			'trademarks.revComm' => 'RevComm is a registered trademark or trademark of RevComm Inc.',
 			'sessionTimetable.title' => 'Timetable',
 			'sessionTimetable.dayButtonLabel' => ({required Object day, required Object date}) => 'Day ${day} (${date})',
-			'sessionTimetable.view.openRooms' => 'Switch to room timeline',
-			'sessionTimetable.view.openList' => 'Switch to list view',
+			'sessionTimetable.view.list' => 'List',
+			'sessionTimetable.view.rooms' => 'By room',
+			'sessionTimetable.view.saveFailed' => 'Could not save the view preference',
 			'sessionTimetable.view.shared' => 'Shared',
 			'sessionTimetable.empty' => 'The timetable has not been published yet',
 			'sessionTimetable.emptyFiltered' => 'There are no items for this day',
@@ -1311,10 +1448,13 @@ extension on TranslationsEn {
 			'eventInfo.sourceCode' => 'View Source Code',
 			'eventInfo.staffMembers' => 'Staff',
 			'eventInfo.ossLicenses' => 'OSS Licenses',
+			'eventInfo.survey.title' => 'Survey Request',
+			'eventInfo.survey.description' => 'We would like to hear your opinions to make future FlutterKaigi events better.',
+			'eventInfo.survey.button' => 'Answer the General Survey',
 			'contributors.title' => 'Contributors',
 			'contributors.openRepository' => 'Open the FlutterKaigi/2026 repository',
 			'contributors.empty' => 'No contributors found',
-			'contributors.contributionsCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} contribution', other: '${n} contributions', ),
+			'contributors.contributionsCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} contribution', other: '${n} contributions', ), 
 			'auth.signIn.required' => 'Sign in required',
 			'auth.signIn.description' => 'Choose how you want to sign in to the FlutterKaigi 2026 app',
 			'auth.signIn.withGoogle' => 'Sign in with Google',
@@ -1452,6 +1592,54 @@ extension on TranslationsEn {
 			'mission.profileRequired' => 'Add your country or region to your profile',
 			'mission.snsTitle' => 'Share a photo on SNS',
 			'mission.snsDescription' => 'Post a photo with an eligible attendee and register its URL and category',
+			'stampRally.title' => 'Stamp Rally',
+			'stampRally.signInRequired' => 'Sign in to collect stamps',
+			'stampRally.description' => 'Scan the QR codes at sponsor booths to collect stamps',
+			'stampRally.scanButton' => 'Scan QR code',
+			'stampRally.closed' => 'Stamps are not available right now. Prizes and the crane game are still available',
+			'stampRally.stampCount' => ({required Object n, required Object total}) => '${n} / ${total}',
+			'stampRally.stampCountSemantic' => ({required Object n, required Object total}) => '${n} of ${total} stamps collected',
+			'stampRally.nextCheckpoint' => ({required Object n, required Object number}) => '${n} more for prize #${number}',
+			'stampRally.allCheckpoints' => 'You have reached every prize',
+			'stampRally.checkpointLabel' => ({required Object number, required Object required}) => '#${number} (${required} stamps)',
+			'stampRally.checkpointLocked' => 'Not yet',
+			'stampRally.checkpointAchieved' => 'Ready to redeem',
+			'stampRally.checkpointRedeemed' => ({required Object date}) => 'Redeemed ${date}',
+			'stampRally.thanksCardTitle' => 'Crane game',
+			'stampRally.thanksCardDescription' => 'Collect thanks cards at the venue to play the crane game once',
+			'stampRally.thanksCardNotRedeemed' => 'Not played',
+			'stampRally.thanksCardRedeemed' => ({required Object date}) => 'Played ${date}',
+			'stampRally.roadmapTitle' => 'Stamps',
+			'stampRally.stampSlotSemantic' => ({required Object n, required Object status}) => 'Stamp ${n}, ${status}',
+			'stampRally.acquired' => 'Collected',
+			'stampRally.notAcquired' => 'Not collected',
+			'stampRally.scanTitle' => 'Scan QR code',
+			'stampRally.scanHint' => 'Fit the QR code at a sponsor booth or the prize counter inside the frame',
+			'stampRally.scanInvalid' => 'This is not a stamp rally QR code',
+			'stampRally.scanCameraError' => 'The camera is unavailable. Allow camera access in Settings',
+			'stampRally.resultTitle' => 'Stamp Rally',
+			'stampRally.processing' => 'Checking…',
+			'stampRally.stampAcquiredTitle' => 'Stamp collected!',
+			'stampRally.stampAlreadyTitle' => 'You already have this stamp',
+			'stampRally.checkpointReached' => ({required Object number}) => 'You reached prize #${number}!',
+			'stampRally.rewardTitle' => 'Prize redemption',
+			'stampRally.rewardRedeemedTitle' => ({required Object numbers}) => 'You can receive prize ${numbers}',
+			'stampRally.rewardNoneTitle' => 'No new prizes to redeem',
+			'stampRally.rewardNoneBody' => ({required Object n}) => 'You have ${n} stamps',
+			'stampRally.rewardStaffNote' => 'Show this screen to the staff',
+			'stampRally.rewardRedeemedAt' => ({required Object number, required Object date}) => '#${number} redeemed ${date}',
+			'stampRally.thanksCardResultTitle' => 'You can play the crane game',
+			'stampRally.thanksCardAlreadyTitle' => 'You have already played the crane game',
+			'stampRally.thanksCardResultAt' => ({required Object date}) => 'Checked in ${date}',
+			'stampRally.invalidTitle' => 'Invalid QR code',
+			'stampRally.invalidBody' => 'Check that this is a stamp rally QR code',
+			'stampRally.closedTitle' => 'Stamps are not available right now',
+			'stampRally.networkError' => 'Could not connect. Try again somewhere with a better signal',
+			'stampRally.failed' => 'Something went wrong',
+			'stampRally.sessionExpired' => 'Please sign in again',
+			'stampRally.permissionDenied' => 'This account cannot take part',
+			'stampRally.retry' => 'Try again',
+			'stampRally.viewCard' => 'View stamp rally',
 			'exchange.title' => 'Profile Exchange',
 			'exchange.qrDescription' => 'Show this QR code to another attendee and have them scan it to exchange profiles',
 			'exchange.qrSemanticLabel' => 'Profile exchange QR code',
@@ -1514,7 +1702,15 @@ extension on TranslationsEn {
 			'exchange.shareLinkGoHome' => 'Back to home',
 			'exchange.shareLinkViewList' => 'View exchanged profiles',
 			'supportLt.title' => 'Support LT Registration',
-			'supportLt.description' => 'Enter the 6-digit code provided by the organizers to register your participation in Support LT',
+			'supportLt.description' => 'Scan the QR code shown at the venue to register your participation in Support LT',
+			'supportLt.scanButton' => 'Scan the QR code',
+			'supportLt.scanTitle' => 'Scan the QR code',
+			'supportLt.scanHint' => 'Line up the QR code shown at the venue within the frame',
+			'supportLt.scanCameraError' => 'Camera unavailable. Allow camera access in Settings, or enter the 6-digit code on the previous screen',
+			'supportLt.scanInvalid' => 'Could not read this code. Make sure it\'s the Support LT registration QR code',
+			'supportLt.linkInvalid' => 'This link isn\'t valid. Scan the QR code at the venue again',
+			'supportLt.codeSectionTitle' => 'If you can\'t scan the QR code',
+			'supportLt.codeSectionDescription' => 'Enter the 6-digit code provided by the organizers',
 			'supportLt.codeLabel' => 'Registration code',
 			'supportLt.register' => 'Register participation',
 			'supportLt.submitting' => 'Registering…',
@@ -1524,7 +1720,7 @@ extension on TranslationsEn {
 			'supportLt.backToAccount' => 'Back to account',
 			'supportLt.signInRequired' => 'Sign in to register your participation in Support LT',
 			'supportLt.invalidFormat' => 'Enter a 6-digit code',
-			'supportLt.invalidCode' => 'This code is incorrect. Check the code provided by the organizers',
+			'supportLt.invalidCode' => 'This code is incorrect. Scan the QR code at the venue again or ask the organizers',
 			'supportLt.rateLimited' => 'Too many attempts. Please try again in a few minutes',
 			'supportLt.networkError' => 'A network error occurred. Check your connection and try again',
 			'supportLt.sessionExpired' => 'Your sign-in session has expired. Please sign in again',
@@ -1574,34 +1770,61 @@ extension on TranslationsEn {
 			'quiz.signInRequired.title' => 'Sign-in required',
 			'quiz.signInRequired.description' => 'The quiz links your entry and answers to your account. Sign in from the Account tab to take part.',
 			'quiz.signInRequired.button' => 'Go to Account',
+			'quiz.signInRequired.inPage' => 'Sign in to take part in the quiz',
 			'quiz.errors.signInFailed' => 'Failed to sign in',
 			'quiz.errors.eventLoadFailed' => 'Failed to load the event',
 			'quiz.preparing.title' => 'The quiz is being prepared',
 			'quiz.preparing.description' => 'Once it is announced, you can join from this screen.',
-			'quiz.registration.subtitle' => 'A table-versus-table team battle. Join with a nickname!',
+			'quiz.registration.subtitle' => 'Confirm your round to join. You may join either the first or the second round.',
 			'quiz.registration.participantCount' => 'Participants:',
 			'quiz.registration.participantUnit' => '',
-			'quiz.registration.nickname' => 'Nickname',
-			'quiz.registration.nicknameHint' => '1–20 characters',
-			'quiz.registration.entryCode' => 'Entry code',
-			'quiz.registration.entryCodeHint' => '6-digit number',
-			'quiz.registration.entryCodeHelper' => 'Enter the code shown at the on-site reception desk',
 			'quiz.registration.join' => 'Join',
 			'quiz.registration.full' => ({required Object max}) => 'Full capacity (${max} participants) reached',
+			_ => null,
+		} ?? switch (path) {
 			'quiz.registration.failed' => 'Could not register. Please try again later.',
-			'quiz.registration.codeMismatch' => 'Could not register. Please check the entry code.',
 			'quiz.registration.alreadyParticipated' => 'You have already registered for another round and cannot join this one.',
 			'quiz.registration.closed' => 'Registration for this round has closed.',
 			'quiz.registration.unavailable' => 'Registration could not be confirmed. Check your connection and try again.',
-			'quiz.registration.rateLimited' => 'Too many attempts. Wait one minute, check the entry code, and try again.',
 			'quiz.registration.accountUnavailable' => 'This account cannot join. Please contact event staff.',
-			'quiz.waiting.title' => 'You\'re in!',
-			'quiz.waiting.description' => 'Please wait for the team announcement',
-			'quiz.team.yourTable' => 'Your table is',
-			'quiz.team.table' => 'Table',
+			'quiz.waiting.title' => 'Registration confirmed',
+			'quiz.waiting.description' => 'Check-in opens at the venue after registration closes. Scan the QR code on the screen to check in, then select the team assigned by staff.',
+			'quiz.checkIn.title' => 'Check-in',
+			'quiz.checkIn.instructions' => 'Scan the QR code shown on the venue screen, or enter the 6-digit check-in code. You can select your team after checking in.',
+			'quiz.checkIn.scanButton' => 'Scan the QR code',
+			'quiz.checkIn.scanTitle' => 'Scan the QR code',
+			'quiz.checkIn.scanHint' => 'Line up the QR code shown on the venue screen within the frame',
+			'quiz.checkIn.scanCameraError' => 'Camera unavailable. Allow camera access in Settings, or enter the 6-digit check-in code on the previous screen',
+			'quiz.checkIn.scanInvalid' => 'Could not read this code. Make sure it\'s the quiz check-in QR code',
+			'quiz.checkIn.scanOtherEvent' => 'This QR code is for another round. Scan the QR code for the round you registered for',
+			'quiz.checkIn.codeSectionTitle' => 'If you can\'t scan the QR code',
+			'quiz.checkIn.codeLabel' => 'Check-in code',
+			'quiz.checkIn.submit' => 'Check in',
+			'quiz.checkIn.submitting' => 'Checking…',
+			'quiz.checkIn.invalidFormat' => 'Enter a 6-digit code',
+			'quiz.checkIn.linkInvalid' => 'This link isn\'t valid. Scan the QR code at the venue again',
+			'quiz.checkIn.wrongCode' => 'This code is incorrect. Scan the QR code on the screen again or ask the staff',
+			'quiz.checkIn.rateLimited' => 'Too many attempts. Wait about a minute and try again',
+			'quiz.checkIn.closed' => 'Check-in has closed. Please contact event staff.',
+			'quiz.checkIn.unavailable' => 'Could not confirm your check-in. Check your connection and try again.',
+			'quiz.checkIn.failed' => 'Could not check in. Please contact event staff.',
+			'quiz.selection.title' => 'Select your team',
+			'quiz.selection.instructions' => 'Sit at the table assigned by staff, then select its team (A–T).',
+			'quiz.selection.unselected' => 'No team selected',
+			'quiz.selection.current' => ({required Object team}) => 'Your team is ${team}',
+			'quiz.selection.option' => ({required Object team, required Object count}) => '${team} (${count} people)',
+			'quiz.selection.confirm' => 'Confirm this team',
+			'quiz.selection.sending' => 'Sending…',
+			'quiz.selection.changeHint' => 'You can change teams while selection is open.',
+			'quiz.selection.closed' => 'Team selection has closed. Please wait for the questions.',
+			'quiz.selection.closedUnselected' => 'Team selection has closed. Please contact event staff.',
+			'quiz.selection.changed' => 'Your membership changed. Check your current team and select again.',
+			'quiz.selection.failed' => 'Could not confirm your selection. Check your connection and current team. Contact staff if selection has closed or your registration was cancelled.',
+			'quiz.team.yourTable' => 'Your team is',
+			'quiz.team.table' => 'Team',
 			'quiz.team.teamLabel' => 'Team',
 			'quiz.team.gatherHint' => 'Gather at your table and wait for the next question!',
-			'quiz.team.badge' => ({required Object table, required Object name}) => 'Table ${table}・${name}',
+			'quiz.team.badge' => ({required Object name}) => 'Team ${name}',
 			'quiz.entryClosed.title' => 'Entry is closed',
 			'quiz.entryClosed.description' => 'The quiz is in progress. Results will be shown on this screen.',
 			'quiz.question.sponsoredBy' => ({required Object name}) => 'Sponsored by ${name}',
@@ -1626,7 +1849,7 @@ extension on TranslationsEn {
 			'quiz.revealed.yourAnswer' => 'Your team\'s answer',
 			'quiz.revealed.teamScore' => ({required Object score}) => 'Current team score: ${score} pts',
 			'quiz.result.title' => 'Final results',
-			'quiz.result.table' => ({required Object table}) => 'Table ${table}',
+			'quiz.result.table' => ({required Object name}) => 'Team ${name}',
 			'quiz.result.points' => ({required Object score}) => '${score} pts',
 			'quiz.result.yourTeam' => 'Your team',
 			'quiz.result.yourTeamRanked' => ({required Object rank, required Object name, required Object score}) => '#${rank} / ${name} (${score} pts)',
@@ -1636,6 +1859,7 @@ extension on TranslationsEn {
 			'forceUpdate.title' => 'Update Required',
 			'forceUpdate.message' => 'A new version of the app is available. Please update to the latest version.',
 			'forceUpdate.updateButton' => 'Update',
+			'pushNotification.open' => 'Open',
 			_ => null,
 		};
 	}

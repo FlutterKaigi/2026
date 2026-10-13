@@ -174,6 +174,7 @@ PRマージ前にApp Store Connectへのアップロードまで確認する場�
 2. `Explicit App ID`を選び、本番は`jp.flutterkaigi.conf2026`、stg実機を使う場合は`jp.flutterkaigi.conf2026.stg`を登録します。XcodeのBundle IDと完全一致させます。[AppleのApp ID登録手順](https://developer.apple.com/help/account/identifiers/register-an-app-id/)を参照してください。
 3. App Store Connectの`Apps > + > New App`を開き、Bundle IDに`jp.flutterkaigi.conf2026`を選んでアプリレコードを作成します。
 4. Sign in with Appleは環境に関係なくiOSアプリで使用します。本番・stgを含む署名対象の各App IDでCapabilityを有効化し、対応するProvisioning Profileを用意します。Firebase Authenticationでも対象プロジェクトのAppleプロバイダを有効化します。Web OAuthを提供しないため、Services IDの作成は不要です。
+5. プッシュ通知のため、本番・stgの両App IDでPush Notificationsを有効化し、両方の配布用Provisioning Profileを再生成します。
 
 ### `APPLE_TEAM_ID`
 
@@ -243,6 +244,7 @@ Archive・IPA書き出しのどちらでも自動プロビジョニングを許�
 配布が実行されていない間に`.p12`・パスワード・両方のプロファイルのSecretsをまとめて差し替え、
 stg → prodの順で配布を確認します。証明書だけを変更すると、旧証明書に紐づくプロファイルでは署名できません。
 App IDのCapabilityを変更した場合も、対応するプロファイルを再生成します。
+`Runner.entitlements`の`aps-environment`には、ローカルのDebugビルドに合わせて`development`をコミットしています。配布Workflowは署名検証の前に`production`へ書き換えます。
 不要になった旧証明書は、他の配布処理で使用していないことを確認してから整理します。
 
 ## Android署名
@@ -322,7 +324,11 @@ Webアプリとネイティブアプリは同じ `/account` や `/x/<token>` な
 | stg | `stg-flutterkaigi-2026-conference-app.flutterkaigi.workers.dev` | `jp.flutterkaigi.conf2026.stg` |
 | PRプレビュー | Webの確認にはPR固有URL、生成するQRには上記stg固定ホスト | `jp.flutterkaigi.conf2026.stg` |
 
-ネイティブ設定は `apps/app/environments/.env.*` の `APP_LINK_HOST` を使用します。ホストを追加・変更した場合はネイティブの再ビルド・再配布が必要です。iOSでは本番・stg両方のApp IDにAssociated Domains Capabilityを設定し、対応するProvisioning Profileを使用してください。[Flutter iOS設定](https://docs.flutter.dev/cookbook/navigation/set-up-universal-links)
+公式サイトは `2026.flutterkaigi.jp`、参加者アプリの正規ホストは2025年と同じ命名規則の `2026-app.flutterkaigi.jp` です。公式サイトのコンテンツは公式サイトに残し、セッション共有などアプリの機能用リンクだけをアプリへ転送します。
+
+ホストの正本は `tool/app_link_hosts.json` です。変更後はRepositoryルートで `node tool/generate_app_link_config.mjs` を実行して、アプリ・Dashboard・website・WorkerのDart/JavaScript定数を再生成します。`node tool/generate_app_link_config.mjs --check` は生成物の更新漏れを検出します。ネイティブの `.env.*`、Wrangler、Workflowの設定は手動で更新し、`python3 -m unittest discover -s .github/scripts -p test_app_link_config.py` で正本との一致を確認します。これらのチェックはCIと配布前にも実行します。
+
+ネイティブ設定は `apps/app/environments/.env.*` の `APP_LINK_HOST` を使用し、各環境のアプリホストを関連付けます。旧公式サイトの `/x/*` 関連付けも維持します。ホストを追加・変更した場合はネイティブの再ビルド・再配布が必要です。iOSでは本番・stg両方のApp IDにAssociated Domains Capabilityを設定し、対応するProvisioning Profileを使用してください。[Flutter iOS設定](https://docs.flutter.dev/cookbook/navigation/set-up-universal-links)
 
 PR固有の `workers.dev` URL自体はネイティブへの直接起動対象ではありません。各プレビューに `.stg` 用の検証ファイルを含めても、未登録のホストが自動で関連付けられるわけではありません。stg固定URLは最新stg版を表示し、PR固有版を表示するURLとは異なります。固定aliasは `main` または手動のstg Web配布で更新し、PRプレビューの配布では更新しません。[Cloudflare Preview URLs](https://developers.cloudflare.com/workers/versions-and-deployments/preview-urls/)
 
@@ -357,6 +363,8 @@ Google PlayのInternal TestingからインストールしたアプリはPlay App
 
 ### 初回の配布順序
 
+ホスト変更時は、コードの更新に加えて対象ホストのDNS / TLSとCloudflare Custom Domain、Firebase Authenticationの承認済みドメイン、reCAPTCHA Enterpriseの許可ドメインを確認してください。新規リンクを配布する前に、以前のアプリと更新版の混在時の挙動を実機で確認します。
+
 1. stg / prodの署名フィンガープリントを登録し、iOS両App IDのCapabilityとProvisioning Profileを準備します。
 2. `Deploy App` をWebのみ・両環境で実行し、本番ホストとstg固定aliasのアプリ・検証ファイルを先に公開します。PRプレビューの配布だけではstg固定aliasは更新されません。
 3. ネイティブをビルド・配布し、websiteの配布を実行します。先行して停止したwebsiteのジョブは、Webアプリ公開後に再実行します。
@@ -367,7 +375,7 @@ Google PlayのInternal TestingからインストールしたアプリはPlay App
 
 - iOS / Androidの関連付けと、インストール済み・未インストール、アプリ終了中・起動中を実機で確認します。実装変更だけで端末上の成功を確認したことにはなりません。
 - Safariの同一ドメイン内リンクやアドレスバーへの直入力はブラウザに残る場合があります。[Apple TN3155](https://developer.apple.com/documentation/technotes/tn3155-debugging-universal-links)
-- 旧 `/#/route` は起動時にパス形式へ変換します。本番scannerは新本番URLと旧website URL、stg scannerはstg固定URLを受け付け、他環境のURLを拒否します。devのQRはEmulator用の生トークンです。
+- 旧 `/#/route` は起動時にパス形式へ変換します。本番のプロフィール交換・応援LTscannerは本番アプリURLを受け付けます。プロフィール交換は旧website URLも引き続き受け付けます。stg scannerはstg固定URLを受け付け、他環境のURLを拒否します。devのQRはEmulator用の生トークンです。
 - 交換のpending状態はメモリ内です。Webからネイティブへの切り替えには `/x/<token>` 全体を渡し、ログイン途中の再読み込み・プロセス終了後は元リンクから再開します。`event_features_enabled=false` の交換機能制限は維持します。
 
 ## Firebase SDK settings
@@ -417,6 +425,16 @@ FirestoreではApp Check enforcementが有効なため、公式Appを各Platform
 
 Site KeyとDebug Tokenは別物です。Site KeyはWeb配布物に含まれる公開値なのでRepository Variableで管理します。Debug Tokenは開発端末を信頼するための値なのでGitHubやRepositoryへ登録しません。App Checkの設定方法は[Flutter向けApp Check](https://firebase.google.com/docs/app-check/flutter/default-providers)と[Debug Provider](https://firebase.google.com/docs/app-check/flutter/debug-provider)を参照してください。
 
+### APNs認証キー
+
+iOSへのプッシュ通知は、FCMがAPNs認証キーを使ってAppleへ送信します。App Store Connect APIの`.p8`とは別のキーです。
+
+1. Apple Developerの`Certificates, Identifiers & Profiles > Keys > +`で、`Apple Push Notifications service (APNs)`を有効にしたKeyを作成します。
+2. `.p8`をダウンロードし、Key IDとTeam ID（`APPLE_TEAM_ID`と同じ値）を控えます。
+3. stg／prodそれぞれのFirebase Consoleで`Project settings > Cloud Messaging > Apple app configuration`を開き、対象のApple Appへ`.p8`・Key ID・Team IDをアップロードします。
+
+`.p8`はRepositoryやGitHubへ登録せず、安全なPassword Managerへ保管します。`main`の更新はiOSを自動配布するため、このキーの登録と、[App IDとApp Store Connectアプリ](#app-idとapp-store-connectアプリ)のPush Notifications有効化・プロファイル再生成（Secretsの差し替えを含む）は、プッシュ通知の変更をマージする前に行います。プロファイルがPush Notificationsを許可していないと、配布Workflowの署名検証が失敗します。
+
 ### CI認証
 
 Firebase CLIは、既存Website Workflowと同じWorkload Identity Federationを使用します。`gcloud`コマンドやService Account JSON Keyは使用しません。`google-github-actions/auth`がGitHub OIDCからApplication Default Credentialsを作成し、Firebase CLIがその認証を自動検出します。[Firebase CLIのCI認証](https://firebase.google.com/docs/cli#use_the_cli_with_ci_systems)を参照してください。
@@ -454,6 +472,8 @@ OptionsをGit管理外にしても、それだけをデータ保護の境界に�
 - Google Play Service AccountへTesting Trackだけの権限を付与している
 - Firebaseへstg/prodそれぞれ3プラットフォームのAppを登録している
 - Firebase App Checkへstg/prodの公式Appを登録し、WebのSite Keyと許可Domainを設定している
+- iOSの両App IDでPush Notificationsを有効にし、再生成したstg/prodのプロファイルへSecretsを差し替えている
+- APNs認証キーをstg/prodのFirebaseのCloud Messagingへ登録し、`.p8`原本を安全に保管している
 - stg/prodのCI Service AccountへFirebase ViewerとAPI Keys Viewerを付与している
 - `firebase_options.dart`、`google-services.json`、`GoogleService-Info.plist`がGit管理外であることを確認している
 - Firestore／Storage Rules、API Key restrictions、App Check enforcementを確認している

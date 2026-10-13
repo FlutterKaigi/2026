@@ -4,6 +4,11 @@
     "valueType": "BOOLEAN",
     "description": "当日機能（ミッション・クイズ・応援LT・プロフィール交換・SNS投稿）の表示を切り替えます。"
   },
+  "survey_url": {
+    "defaultValue": { "value": "" },
+    "valueType": "STRING",
+    "description": "全体アンケートのHTTPS URL。空文字にすると非表示になります。表示開始日時以降のみ表示します。"
+  },
   "force_update": {
     "defaultValue": {
       "value": "{\"minimum_version\":{\"ios\":\"0.0.0\",\"android\":\"0.0.0\"},\"store_urls\":{\"ios\":\"\",\"android\":\"https://play.google.com/store/apps/details?id=jp.flutterkaigi.conf2026.stg\"},\"message\":{\"ja\":\"\",\"en\":\"\"}}"

@@ -24,7 +24,9 @@ export {
   registerSupportLt,
 } from "./support_lt";
 
-export { getQuizServerTime, quizEventOperation, registerQuizParticipant, submitQuizAnswer } from "./quiz";
+export { getStampRallyQrCodes, scanStampRallyCode } from "./stamp_rally";
+
+export { checkInQuizParticipant, getQuizServerTime, quizEventOperation, registerQuizParticipant, selectQuizTeam, submitQuizAnswer } from "./quiz";
 
 // デプロイ先（= 同期元）と同期先のリージョン・プロジェクト設定。
 // SYNC_TARGET_PROJECT_ID は functions/.env（Git 管理外）で指定する。

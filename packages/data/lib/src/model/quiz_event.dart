@@ -14,10 +14,10 @@ enum QuizEventStatus {
   /// 公開済みだが参加受付は未開始。アプリには「開催準備中」として表示される。
   published,
 
-  /// 参加受付中。現地の受付コードを入力して参加登録できる。
+  /// 参加受付中。コードなしで参加表明できる。
   registration,
 
-  /// 参加受付終了。新規の参加登録はできない。チーム編成はこの状態で行う。
+  /// 参加受付終了。新規の参加登録はできない。
   entryClosed,
 
   /// 出題進行中。
@@ -27,6 +27,9 @@ enum QuizEventStatus {
   finished,
 }
 
+@JsonEnum()
+enum QuizTeamSelectionStatus { notStarted, open, closed }
+
 @freezed
 abstract class QuizEvent with _$QuizEvent {
   const QuizEvent._();
@@ -35,6 +38,9 @@ abstract class QuizEvent with _$QuizEvent {
     required String id,
     required LocaleMap title,
     required QuizEventStatus status,
+    @JsonKey(unknownEnumValue: QuizTeamSelectionStatus.notStarted)
+    @Default(QuizTeamSelectionStatus.notStarted)
+    QuizTeamSelectionStatus teamSelectionStatus,
 
     /// 参加者アプリに公開中かどうか。`status != draft` と常に同値になるよう
     /// 遷移時に更新する。アプリの一覧クエリはこのフラグの等価条件で絞り込む
@@ -46,8 +52,7 @@ abstract class QuizEvent with _$QuizEvent {
     /// 参加人数の上限。到達すると新規登録を締め切る。
     @Default(80) int capacity,
 
-    /// チーム編成時にテーブル番号順で割り当てるチーム名の候補。
-    /// 空の場合は既定の Flutter Widget 名リストを使う。
+    /// 旧大会の設定を読み取るために保持する。新規のチーム名は A〜T 固定。
     @Default([]) List<String> teamNamePool,
     @FirestoreDateTimeConverter() required DateTime createdAt,
     @FirestoreDateTimeConverter() required DateTime updatedAt,

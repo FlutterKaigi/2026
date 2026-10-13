@@ -20,21 +20,20 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	/// Constructing via the enum [AppLocale.build] is preferred.
 	Translations({Map<String, Node>? overrides, PluralResolver? cardinalResolver, PluralResolver? ordinalResolver, TranslationMetadata<AppLocale, Translations>? meta})
 		: assert(overrides == null, 'Set "translation_overrides: true" in order to enable this feature.'),
-		  _meta = meta ?? TranslationMetadata(
+		  $meta = meta ?? TranslationMetadata(
 		    locale: AppLocale.ja,
 		    overrides: overrides ?? {},
 		    cardinalResolver: cardinalResolver,
 		    ordinalResolver: ordinalResolver,
 		  ) {
-		_meta.setFlatMapFunction(_flatMapFunction);
+		$meta.setFlatMapFunction(_flatMapFunction);
 	}
 
 	/// Metadata for the translations of <ja>.
-	final TranslationMetadata<AppLocale, Translations> _meta;
-	@override TranslationMetadata<AppLocale, Translations> get $meta => _meta;
+	@override final TranslationMetadata<AppLocale, Translations> $meta;
 
 	/// Access flat map
-	dynamic operator[](String key) => _meta.getTranslation(key);
+	dynamic operator[](String key) => $meta.getTranslation(key);
 
 	late final Translations _root = this; // ignore: unused_field
 
@@ -61,6 +60,7 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	late final Translations$profile$ja profile = Translations$profile$ja.internal(_root);
 	late final Translations$snsPost$ja snsPost = Translations$snsPost$ja.internal(_root);
 	late final Translations$mission$ja mission = Translations$mission$ja.internal(_root);
+	late final Translations$stampRally$ja stampRally = Translations$stampRally$ja.internal(_root);
 	late final Translations$exchange$ja exchange = Translations$exchange$ja.internal(_root);
 	late final Translations$supportLt$ja supportLt = Translations$supportLt$ja.internal(_root);
 	late final Translations$countryRegion$ja countryRegion = Translations$countryRegion$ja.internal(_root);
@@ -71,6 +71,7 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	late final Translations$common$ja common = Translations$common$ja.internal(_root);
 	late final Translations$quiz$ja quiz = Translations$quiz$ja.internal(_root);
 	late final Translations$forceUpdate$ja forceUpdate = Translations$forceUpdate$ja.internal(_root);
+	late final Translations$pushNotification$ja pushNotification = Translations$pushNotification$ja.internal(_root);
 }
 
 // Path: app
@@ -647,6 +648,8 @@ class Translations$eventInfo$ja {
 
 	/// ja: 'OSSライセンス'
 	String get ossLicenses => 'OSSライセンス';
+
+	late final Translations$eventInfo$survey$ja survey = Translations$eventInfo$survey$ja.internal(_root);
 }
 
 // Path: contributors
@@ -958,6 +961,159 @@ class Translations$mission$ja {
 	String get snsDescription => '対象の相手との写真を投稿し、URLとタグを登録';
 }
 
+// Path: stampRally
+class Translations$stampRally$ja {
+	Translations$stampRally$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'スタンプラリー'
+	String get title => 'スタンプラリー';
+
+	/// ja: 'スタンプを集めるにはサインインしてください'
+	String get signInRequired => 'スタンプを集めるにはサインインしてください';
+
+	/// ja: 'スポンサーブースでQRコードを読み取ってスタンプを集めましょう'
+	String get description => 'スポンサーブースでQRコードを読み取ってスタンプを集めましょう';
+
+	/// ja: 'QRコードを読み取る'
+	String get scanButton => 'QRコードを読み取る';
+
+	/// ja: '現在スタンプは獲得できません。景品の交換とクレーンゲームは利用できます'
+	String get closed => '現在スタンプは獲得できません。景品の交換とクレーンゲームは利用できます';
+
+	/// ja: '$n / $total'
+	String stampCount({required Object n, required Object total}) => '${n} / ${total}';
+
+	/// ja: '$total個中$n個のスタンプを獲得'
+	String stampCountSemantic({required Object total, required Object n}) => '${total}個中${n}個のスタンプを獲得';
+
+	/// ja: 'あと$n個で景品#$number'
+	String nextCheckpoint({required Object n, required Object number}) => 'あと${n}個で景品#${number}';
+
+	/// ja: 'すべての景品の条件を達成しました'
+	String get allCheckpoints => 'すべての景品の条件を達成しました';
+
+	/// ja: '#$number（$required個）'
+	String checkpointLabel({required Object number, required Object required}) => '#${number}（${required}個）';
+
+	/// ja: '未達成'
+	String get checkpointLocked => '未達成';
+
+	/// ja: '交換できます'
+	String get checkpointAchieved => '交換できます';
+
+	/// ja: '交換済み $date'
+	String checkpointRedeemed({required Object date}) => '交換済み ${date}';
+
+	/// ja: 'クレーンゲーム'
+	String get thanksCardTitle => 'クレーンゲーム';
+
+	/// ja: '会場でサンクスカードを集めると、クレーンゲームに1回挑戦できます'
+	String get thanksCardDescription => '会場でサンクスカードを集めると、クレーンゲームに1回挑戦できます';
+
+	/// ja: '未挑戦'
+	String get thanksCardNotRedeemed => '未挑戦';
+
+	/// ja: '挑戦済み $date'
+	String thanksCardRedeemed({required Object date}) => '挑戦済み ${date}';
+
+	/// ja: 'スタンプ'
+	String get roadmapTitle => 'スタンプ';
+
+	/// ja: '$n個目のスタンプ、$status'
+	String stampSlotSemantic({required Object n, required Object status}) => '${n}個目のスタンプ、${status}';
+
+	/// ja: '獲得済み'
+	String get acquired => '獲得済み';
+
+	/// ja: '未獲得'
+	String get notAcquired => '未獲得';
+
+	/// ja: 'QRコードを読み取る'
+	String get scanTitle => 'QRコードを読み取る';
+
+	/// ja: 'スポンサーブースや景品交換所のQRコードを枠内に収めてください'
+	String get scanHint => 'スポンサーブースや景品交換所のQRコードを枠内に収めてください';
+
+	/// ja: 'スタンプラリーのQRコードではありません'
+	String get scanInvalid => 'スタンプラリーのQRコードではありません';
+
+	/// ja: 'カメラを利用できません。設定でカメラへのアクセスを許可してください'
+	String get scanCameraError => 'カメラを利用できません。設定でカメラへのアクセスを許可してください';
+
+	/// ja: 'スタンプラリー'
+	String get resultTitle => 'スタンプラリー';
+
+	/// ja: '確認しています…'
+	String get processing => '確認しています…';
+
+	/// ja: 'スタンプを獲得しました！'
+	String get stampAcquiredTitle => 'スタンプを獲得しました！';
+
+	/// ja: '獲得済みのスタンプです'
+	String get stampAlreadyTitle => '獲得済みのスタンプです';
+
+	/// ja: '景品#$number の条件を達成しました！'
+	String checkpointReached({required Object number}) => '景品#${number} の条件を達成しました！';
+
+	/// ja: '景品の交換'
+	String get rewardTitle => '景品の交換';
+
+	/// ja: '$numbers の景品を受け取れます'
+	String rewardRedeemedTitle({required Object numbers}) => '${numbers} の景品を受け取れます';
+
+	/// ja: '新たに交換できる景品はありません'
+	String get rewardNoneTitle => '新たに交換できる景品はありません';
+
+	/// ja: '現在のスタンプは$n個です'
+	String rewardNoneBody({required Object n}) => '現在のスタンプは${n}個です';
+
+	/// ja: 'この画面をスタッフに見せてください'
+	String get rewardStaffNote => 'この画面をスタッフに見せてください';
+
+	/// ja: '#$number 交換日時 $date'
+	String rewardRedeemedAt({required Object number, required Object date}) => '#${number} 交換日時 ${date}';
+
+	/// ja: 'クレーンゲームに挑戦できます'
+	String get thanksCardResultTitle => 'クレーンゲームに挑戦できます';
+
+	/// ja: 'クレーンゲームは挑戦済みです'
+	String get thanksCardAlreadyTitle => 'クレーンゲームは挑戦済みです';
+
+	/// ja: '受付日時 $date'
+	String thanksCardResultAt({required Object date}) => '受付日時 ${date}';
+
+	/// ja: '無効なQRコードです'
+	String get invalidTitle => '無効なQRコードです';
+
+	/// ja: 'スタンプラリーのQRコードか確認してください'
+	String get invalidBody => 'スタンプラリーのQRコードか確認してください';
+
+	/// ja: '現在スタンプは獲得できません'
+	String get closedTitle => '現在スタンプは獲得できません';
+
+	/// ja: '通信できませんでした。電波の良い場所でもう一度お試しください'
+	String get networkError => '通信できませんでした。電波の良い場所でもう一度お試しください';
+
+	/// ja: '処理できませんでした'
+	String get failed => '処理できませんでした';
+
+	/// ja: 'サインインし直してください'
+	String get sessionExpired => 'サインインし直してください';
+
+	/// ja: 'このアカウントでは参加できません'
+	String get permissionDenied => 'このアカウントでは参加できません';
+
+	/// ja: 'もう一度試す'
+	String get retry => 'もう一度試す';
+
+	/// ja: 'スタンプラリーを見る'
+	String get viewCard => 'スタンプラリーを見る';
+}
+
 // Path: exchange
 class Translations$exchange$ja {
 	Translations$exchange$ja.internal(this._root);
@@ -1161,8 +1317,32 @@ class Translations$supportLt$ja {
 	/// ja: '応援LT参加登録'
 	String get title => '応援LT参加登録';
 
-	/// ja: '運営から案内された6桁のコードを入力して、応援LTへの参加を登録してください'
-	String get description => '運営から案内された6桁のコードを入力して、応援LTへの参加を登録してください';
+	/// ja: '会場に表示されたQRコードを読み取って、応援LTへの参加を登録してください'
+	String get description => '会場に表示されたQRコードを読み取って、応援LTへの参加を登録してください';
+
+	/// ja: 'QRコードを読み取る'
+	String get scanButton => 'QRコードを読み取る';
+
+	/// ja: 'QRコードを読み取る'
+	String get scanTitle => 'QRコードを読み取る';
+
+	/// ja: '会場に表示されたQRコードを枠内に収めてください'
+	String get scanHint => '会場に表示されたQRコードを枠内に収めてください';
+
+	/// ja: 'カメラを利用できません。設定でカメラへのアクセスを許可するか、前の画面で6桁のコードを入力してください'
+	String get scanCameraError => 'カメラを利用できません。設定でカメラへのアクセスを許可するか、前の画面で6桁のコードを入力してください';
+
+	/// ja: '読み取れませんでした。応援LT参加登録用のQRコードか確認してください'
+	String get scanInvalid => '読み取れませんでした。応援LT参加登録用のQRコードか確認してください';
+
+	/// ja: 'このリンクは無効です。会場のQRコードを読み取り直してください'
+	String get linkInvalid => 'このリンクは無効です。会場のQRコードを読み取り直してください';
+
+	/// ja: 'QRコードを読み取れない場合'
+	String get codeSectionTitle => 'QRコードを読み取れない場合';
+
+	/// ja: '運営から案内された6桁のコードを入力してください'
+	String get codeSectionDescription => '運営から案内された6桁のコードを入力してください';
 
 	/// ja: '参加登録コード'
 	String get codeLabel => '参加登録コード';
@@ -1191,8 +1371,8 @@ class Translations$supportLt$ja {
 	/// ja: '6桁の数字を入力してください'
 	String get invalidFormat => '6桁の数字を入力してください';
 
-	/// ja: 'コードが正しくありません。運営から案内されたコードを確認してください'
-	String get invalidCode => 'コードが正しくありません。運営から案内されたコードを確認してください';
+	/// ja: 'コードが正しくありません。会場のQRコードを読み取り直すか、運営に確認してください'
+	String get invalidCode => 'コードが正しくありません。会場のQRコードを読み取り直すか、運営に確認してください';
 
 	/// ja: '試行回数が多すぎます。しばらくしてからもう一度お試しください'
 	String get rateLimited => '試行回数が多すぎます。しばらくしてからもう一度お試しください';
@@ -1365,6 +1545,8 @@ class Translations$quiz$ja {
 	late final Translations$quiz$preparing$ja preparing = Translations$quiz$preparing$ja.internal(_root);
 	late final Translations$quiz$registration$ja registration = Translations$quiz$registration$ja.internal(_root);
 	late final Translations$quiz$waiting$ja waiting = Translations$quiz$waiting$ja.internal(_root);
+	late final Translations$quiz$checkIn$ja checkIn = Translations$quiz$checkIn$ja.internal(_root);
+	late final Translations$quiz$selection$ja selection = Translations$quiz$selection$ja.internal(_root);
 	late final Translations$quiz$team$ja team = Translations$quiz$team$ja.internal(_root);
 	late final Translations$quiz$entryClosed$ja entryClosed = Translations$quiz$entryClosed$ja.internal(_root);
 	late final Translations$quiz$question$ja question = Translations$quiz$question$ja.internal(_root);
@@ -1391,6 +1573,18 @@ class Translations$forceUpdate$ja {
 	String get updateButton => 'アップデート';
 }
 
+// Path: pushNotification
+class Translations$pushNotification$ja {
+	Translations$pushNotification$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: '開く'
+	String get open => '開く';
+}
+
 // Path: sessionTimetable.view
 class Translations$sessionTimetable$view$ja {
 	Translations$sessionTimetable$view$ja.internal(this._root);
@@ -1399,11 +1593,14 @@ class Translations$sessionTimetable$view$ja {
 
 	// Translations
 
-	/// ja: '会場別タイムラインに切り替え'
-	String get openRooms => '会場別タイムラインに切り替え';
+	/// ja: 'リスト'
+	String get list => 'リスト';
 
-	/// ja: 'リスト表示に切り替え'
-	String get openList => 'リスト表示に切り替え';
+	/// ja: '会場別'
+	String get rooms => '会場別';
+
+	/// ja: '表示方法を保存できませんでした'
+	String get saveFailed => '表示方法を保存できませんでした';
 
 	/// ja: '共通'
 	String get shared => '共通';
@@ -1541,6 +1738,24 @@ class Translations$venueWalk$photo$ja {
 	String get addFrame => 'フレームを付ける';
 
 	late final Translations$venueWalk$photo$poses$ja poses = Translations$venueWalk$photo$poses$ja.internal(_root);
+}
+
+// Path: eventInfo.survey
+class Translations$eventInfo$survey$ja {
+	Translations$eventInfo$survey$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'アンケート協力のお願い'
+	String get title => 'アンケート協力のお願い';
+
+	/// ja: '今後のFlutterKaigiをより良いイベントにするため、皆様のご意見をお聞かせください。'
+	String get description => '今後のFlutterKaigiをより良いイベントにするため、皆様のご意見をお聞かせください。';
+
+	/// ja: '全体アンケートに回答する'
+	String get button => '全体アンケートに回答する';
 }
 
 // Path: auth.signIn
@@ -1828,6 +2043,9 @@ class Translations$quiz$signInRequired$ja {
 
 	/// ja: 'アカウントへ'
 	String get button => 'アカウントへ';
+
+	/// ja: 'クイズ大会に参加するにはサインインしてください'
+	String get inPage => 'クイズ大会に参加するにはサインインしてください';
 }
 
 // Path: quiz.errors
@@ -1868,29 +2086,14 @@ class Translations$quiz$registration$ja {
 
 	// Translations
 
-	/// ja: 'テーブル対抗のチーム戦。ニックネームで参加しよう！'
-	String get subtitle => 'テーブル対抗のチーム戦。ニックネームで参加しよう！';
+	/// ja: '参加する回を確認して参加表明してください。前半戦・後半戦のどちらか一方に参加できます。'
+	String get subtitle => '参加する回を確認して参加表明してください。前半戦・後半戦のどちらか一方に参加できます。';
 
 	/// ja: '現在の参加人数'
 	String get participantCount => '現在の参加人数';
 
 	/// ja: '人'
 	String get participantUnit => '人';
-
-	/// ja: 'ニックネーム'
-	String get nickname => 'ニックネーム';
-
-	/// ja: '1〜20文字'
-	String get nicknameHint => '1〜20文字';
-
-	/// ja: '受付コード'
-	String get entryCode => '受付コード';
-
-	/// ja: '6桁の数字'
-	String get entryCodeHint => '6桁の数字';
-
-	/// ja: '会場の受付で案内しているコードを入力してください'
-	String get entryCodeHelper => '会場の受付で案内しているコードを入力してください';
 
 	/// ja: '参加する'
 	String get join => '参加する';
@@ -1901,9 +2104,6 @@ class Translations$quiz$registration$ja {
 	/// ja: '登録できませんでした。時間をおいて再度お試しください。'
 	String get failed => '登録できませんでした。時間をおいて再度お試しください。';
 
-	/// ja: '登録できませんでした。受付コードが正しいか確認してください。'
-	String get codeMismatch => '登録できませんでした。受付コードが正しいか確認してください。';
-
 	/// ja: '別の回に参加登録済みのため、この回には登録できません。'
 	String get alreadyParticipated => '別の回に参加登録済みのため、この回には登録できません。';
 
@@ -1912,9 +2112,6 @@ class Translations$quiz$registration$ja {
 
 	/// ja: '登録を確認できませんでした。通信状況を確認して再試行してください。'
 	String get unavailable => '登録を確認できませんでした。通信状況を確認して再試行してください。';
-
-	/// ja: '入力回数が多すぎます。1分待ってから、受付コードを確認して再試行してください。'
-	String get rateLimited => '入力回数が多すぎます。1分待ってから、受付コードを確認して再試行してください。';
 
 	/// ja: 'このアカウントでは参加できません。運営にお問い合わせください。'
 	String get accountUnavailable => 'このアカウントでは参加できません。運営にお問い合わせください。';
@@ -1928,11 +2125,122 @@ class Translations$quiz$waiting$ja {
 
 	// Translations
 
-	/// ja: '登録完了！'
-	String get title => '登録完了！';
+	/// ja: '参加表明済み'
+	String get title => '参加表明済み';
 
-	/// ja: 'チーム発表までしばらくお待ちください'
-	String get description => 'チーム発表までしばらくお待ちください';
+	/// ja: '参加登録の終了後、会場でチェックインを開始します。スクリーンの QR コードを読み取ってチェックインし、スタッフに案内されたチームを選んでください。'
+	String get description => '参加登録の終了後、会場でチェックインを開始します。スクリーンの QR コードを読み取ってチェックインし、スタッフに案内されたチームを選んでください。';
+}
+
+// Path: quiz.checkIn
+class Translations$quiz$checkIn$ja {
+	Translations$quiz$checkIn$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'チェックイン'
+	String get title => 'チェックイン';
+
+	/// ja: '会場のスクリーンに表示された QR コードを読み取るか、6桁の参加コードを入力してください。チェックイン後にチームを選べます。'
+	String get instructions => '会場のスクリーンに表示された QR コードを読み取るか、6桁の参加コードを入力してください。チェックイン後にチームを選べます。';
+
+	/// ja: 'QR コードを読み取る'
+	String get scanButton => 'QR コードを読み取る';
+
+	/// ja: 'QR コードを読み取る'
+	String get scanTitle => 'QR コードを読み取る';
+
+	/// ja: '会場のスクリーンに表示された QR コードを枠内に合わせてください'
+	String get scanHint => '会場のスクリーンに表示された QR コードを枠内に合わせてください';
+
+	/// ja: 'カメラを利用できません。設定でカメラへのアクセスを許可するか、前の画面で6桁の参加コードを入力してください'
+	String get scanCameraError => 'カメラを利用できません。設定でカメラへのアクセスを許可するか、前の画面で6桁の参加コードを入力してください';
+
+	/// ja: '読み取れませんでした。クイズ大会のチェックイン用 QR コードか確認してください'
+	String get scanInvalid => '読み取れませんでした。クイズ大会のチェックイン用 QR コードか確認してください';
+
+	/// ja: '別の回の QR コードです。参加登録した回の QR コードを読み取ってください'
+	String get scanOtherEvent => '別の回の QR コードです。参加登録した回の QR コードを読み取ってください';
+
+	/// ja: 'QR コードを読み取れない場合'
+	String get codeSectionTitle => 'QR コードを読み取れない場合';
+
+	/// ja: '参加コード'
+	String get codeLabel => '参加コード';
+
+	/// ja: 'チェックインする'
+	String get submit => 'チェックインする';
+
+	/// ja: '確認中…'
+	String get submitting => '確認中…';
+
+	/// ja: '6桁の参加コードを入力してください'
+	String get invalidFormat => '6桁の参加コードを入力してください';
+
+	/// ja: 'このリンクは無効です。会場の QR コードを読み取り直してください'
+	String get linkInvalid => 'このリンクは無効です。会場の QR コードを読み取り直してください';
+
+	/// ja: '参加コードが正しくありません。スクリーンの QR コードを読み取り直すか、スタッフにお声がけください'
+	String get wrongCode => '参加コードが正しくありません。スクリーンの QR コードを読み取り直すか、スタッフにお声がけください';
+
+	/// ja: '確認回数の上限に達しました。1分ほど待ってから再度お試しください'
+	String get rateLimited => '確認回数の上限に達しました。1分ほど待ってから再度お試しください';
+
+	/// ja: 'チェックインの受付は終了しました。スタッフにお声がけください。'
+	String get closed => 'チェックインの受付は終了しました。スタッフにお声がけください。';
+
+	/// ja: 'チェックインを確認できませんでした。通信状況を確認して再試行してください。'
+	String get unavailable => 'チェックインを確認できませんでした。通信状況を確認して再試行してください。';
+
+	/// ja: 'チェックインできませんでした。スタッフにお声がけください。'
+	String get failed => 'チェックインできませんでした。スタッフにお声がけください。';
+}
+
+// Path: quiz.selection
+class Translations$quiz$selection$ja {
+	Translations$quiz$selection$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'チームを選択'
+	String get title => 'チームを選択';
+
+	/// ja: 'スタッフに案内されたテーブルに着席してから、そのテーブルのチーム（A〜T）を選んでください。'
+	String get instructions => 'スタッフに案内されたテーブルに着席してから、そのテーブルのチーム（A〜T）を選んでください。';
+
+	/// ja: 'チーム未選択'
+	String get unselected => 'チーム未選択';
+
+	/// ja: 'あなたのチームは $team です'
+	String current({required Object team}) => 'あなたのチームは ${team} です';
+
+	/// ja: '$team（$count 人）'
+	String option({required Object team, required Object count}) => '${team}（${count} 人）';
+
+	/// ja: 'このチームに決定'
+	String get confirm => 'このチームに決定';
+
+	/// ja: '送信中…'
+	String get sending => '送信中…';
+
+	/// ja: '受付中はチームを選び直せます。'
+	String get changeHint => '受付中はチームを選び直せます。';
+
+	/// ja: 'チーム選択は終了しました。出題をお待ちください。'
+	String get closed => 'チーム選択は終了しました。出題をお待ちください。';
+
+	/// ja: 'チーム選択は終了しました。運営スタッフにお声がけください。'
+	String get closedUnselected => 'チーム選択は終了しました。運営スタッフにお声がけください。';
+
+	/// ja: '所属が変更されました。現在のチームを確認して選び直してください。'
+	String get changed => '所属が変更されました。現在のチームを確認して選び直してください。';
+
+	/// ja: '選択の完了を確認できませんでした。通信状況と現在の所属を確認してください。受付終了や参加取消の場合はスタッフにお声がけください。'
+	String get failed => '選択の完了を確認できませんでした。通信状況と現在の所属を確認してください。受付終了や参加取消の場合はスタッフにお声がけください。';
 }
 
 // Path: quiz.team
@@ -1943,11 +2251,11 @@ class Translations$quiz$team$ja {
 
 	// Translations
 
-	/// ja: 'あなたのテーブルは'
-	String get yourTable => 'あなたのテーブルは';
+	/// ja: 'あなたのチームは'
+	String get yourTable => 'あなたのチームは';
 
-	/// ja: 'テーブル'
-	String get table => 'テーブル';
+	/// ja: 'チーム'
+	String get table => 'チーム';
 
 	/// ja: 'チーム'
 	String get teamLabel => 'チーム';
@@ -1955,8 +2263,8 @@ class Translations$quiz$team$ja {
 	/// ja: 'テーブルに集まって次の出題を待とう！'
 	String get gatherHint => 'テーブルに集まって次の出題を待とう！';
 
-	/// ja: 'テーブル $table・$name'
-	String badge({required Object table, required Object name}) => 'テーブル ${table}・${name}';
+	/// ja: 'チーム $name'
+	String badge({required Object name}) => 'チーム ${name}';
 }
 
 // Path: quiz.entryClosed
@@ -2075,8 +2383,8 @@ class Translations$quiz$result$ja {
 	/// ja: '最終結果'
 	String get title => '最終結果';
 
-	/// ja: 'テーブル $table'
-	String table({required Object table}) => 'テーブル ${table}';
+	/// ja: 'チーム $name'
+	String table({required Object name}) => 'チーム ${name}';
 
 	/// ja: '$score 点'
 	String points({required Object score}) => '${score} 点';
@@ -2182,8 +2490,9 @@ extension on Translations {
 			'trademarks.revComm' => 'RevCommは、株式会社 RevComm の登録商標または商標です。',
 			'sessionTimetable.title' => 'タイムテーブル',
 			'sessionTimetable.dayButtonLabel' => ({required Object day, required Object date}) => '${day}日目 (${date})',
-			'sessionTimetable.view.openRooms' => '会場別タイムラインに切り替え',
-			'sessionTimetable.view.openList' => 'リスト表示に切り替え',
+			'sessionTimetable.view.list' => 'リスト',
+			'sessionTimetable.view.rooms' => '会場別',
+			'sessionTimetable.view.saveFailed' => '表示方法を保存できませんでした',
 			'sessionTimetable.view.shared' => '共通',
 			'sessionTimetable.empty' => 'タイムテーブルはまだ公開されていません',
 			'sessionTimetable.emptyFiltered' => 'この日の予定はありません',
@@ -2329,10 +2638,13 @@ extension on Translations {
 			'eventInfo.sourceCode' => 'ソースコードを見る',
 			'eventInfo.staffMembers' => 'スタッフ',
 			'eventInfo.ossLicenses' => 'OSSライセンス',
+			'eventInfo.survey.title' => 'アンケート協力のお願い',
+			'eventInfo.survey.description' => '今後のFlutterKaigiをより良いイベントにするため、皆様のご意見をお聞かせください。',
+			'eventInfo.survey.button' => '全体アンケートに回答する',
 			'contributors.title' => 'コントリビューター',
 			'contributors.openRepository' => 'FlutterKaigi/2026 のリポジトリを開く',
 			'contributors.empty' => 'コントリビューターが見つかりませんでした',
-			'contributors.contributionsCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(n, one: '${n} contributions', other: '${n} contributions', ),
+			'contributors.contributionsCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(n, one: '${n} contributions', other: '${n} contributions', ), 
 			'auth.signIn.required' => 'サインインが必要です',
 			'auth.signIn.description' => 'FlutterKaigi 2026 アプリで利用するサインイン方法を選択してください',
 			'auth.signIn.withGoogle' => 'Google でサインイン',
@@ -2470,6 +2782,54 @@ extension on Translations {
 			'mission.profileRequired' => 'プロフィールで出身国・地域を登録する',
 			'mission.snsTitle' => '写真をSNSに投稿',
 			'mission.snsDescription' => '対象の相手との写真を投稿し、URLとタグを登録',
+			'stampRally.title' => 'スタンプラリー',
+			'stampRally.signInRequired' => 'スタンプを集めるにはサインインしてください',
+			'stampRally.description' => 'スポンサーブースでQRコードを読み取ってスタンプを集めましょう',
+			'stampRally.scanButton' => 'QRコードを読み取る',
+			'stampRally.closed' => '現在スタンプは獲得できません。景品の交換とクレーンゲームは利用できます',
+			'stampRally.stampCount' => ({required Object n, required Object total}) => '${n} / ${total}',
+			'stampRally.stampCountSemantic' => ({required Object total, required Object n}) => '${total}個中${n}個のスタンプを獲得',
+			'stampRally.nextCheckpoint' => ({required Object n, required Object number}) => 'あと${n}個で景品#${number}',
+			'stampRally.allCheckpoints' => 'すべての景品の条件を達成しました',
+			'stampRally.checkpointLabel' => ({required Object number, required Object required}) => '#${number}（${required}個）',
+			'stampRally.checkpointLocked' => '未達成',
+			'stampRally.checkpointAchieved' => '交換できます',
+			'stampRally.checkpointRedeemed' => ({required Object date}) => '交換済み ${date}',
+			'stampRally.thanksCardTitle' => 'クレーンゲーム',
+			'stampRally.thanksCardDescription' => '会場でサンクスカードを集めると、クレーンゲームに1回挑戦できます',
+			'stampRally.thanksCardNotRedeemed' => '未挑戦',
+			'stampRally.thanksCardRedeemed' => ({required Object date}) => '挑戦済み ${date}',
+			'stampRally.roadmapTitle' => 'スタンプ',
+			'stampRally.stampSlotSemantic' => ({required Object n, required Object status}) => '${n}個目のスタンプ、${status}',
+			'stampRally.acquired' => '獲得済み',
+			'stampRally.notAcquired' => '未獲得',
+			'stampRally.scanTitle' => 'QRコードを読み取る',
+			'stampRally.scanHint' => 'スポンサーブースや景品交換所のQRコードを枠内に収めてください',
+			'stampRally.scanInvalid' => 'スタンプラリーのQRコードではありません',
+			'stampRally.scanCameraError' => 'カメラを利用できません。設定でカメラへのアクセスを許可してください',
+			'stampRally.resultTitle' => 'スタンプラリー',
+			'stampRally.processing' => '確認しています…',
+			'stampRally.stampAcquiredTitle' => 'スタンプを獲得しました！',
+			'stampRally.stampAlreadyTitle' => '獲得済みのスタンプです',
+			'stampRally.checkpointReached' => ({required Object number}) => '景品#${number} の条件を達成しました！',
+			'stampRally.rewardTitle' => '景品の交換',
+			'stampRally.rewardRedeemedTitle' => ({required Object numbers}) => '${numbers} の景品を受け取れます',
+			'stampRally.rewardNoneTitle' => '新たに交換できる景品はありません',
+			'stampRally.rewardNoneBody' => ({required Object n}) => '現在のスタンプは${n}個です',
+			'stampRally.rewardStaffNote' => 'この画面をスタッフに見せてください',
+			'stampRally.rewardRedeemedAt' => ({required Object number, required Object date}) => '#${number} 交換日時 ${date}',
+			'stampRally.thanksCardResultTitle' => 'クレーンゲームに挑戦できます',
+			'stampRally.thanksCardAlreadyTitle' => 'クレーンゲームは挑戦済みです',
+			'stampRally.thanksCardResultAt' => ({required Object date}) => '受付日時 ${date}',
+			'stampRally.invalidTitle' => '無効なQRコードです',
+			'stampRally.invalidBody' => 'スタンプラリーのQRコードか確認してください',
+			'stampRally.closedTitle' => '現在スタンプは獲得できません',
+			'stampRally.networkError' => '通信できませんでした。電波の良い場所でもう一度お試しください',
+			'stampRally.failed' => '処理できませんでした',
+			'stampRally.sessionExpired' => 'サインインし直してください',
+			'stampRally.permissionDenied' => 'このアカウントでは参加できません',
+			'stampRally.retry' => 'もう一度試す',
+			'stampRally.viewCard' => 'スタンプラリーを見る',
 			'exchange.title' => 'プロフィール交換',
 			'exchange.qrDescription' => 'このQRコードを相手に見せて読み取ってもらうと、お互いのプロフィールを交換できます',
 			'exchange.qrSemanticLabel' => 'プロフィール交換用のQRコード',
@@ -2532,7 +2892,15 @@ extension on Translations {
 			'exchange.shareLinkGoHome' => 'ホームに戻る',
 			'exchange.shareLinkViewList' => '交換した人を見る',
 			'supportLt.title' => '応援LT参加登録',
-			'supportLt.description' => '運営から案内された6桁のコードを入力して、応援LTへの参加を登録してください',
+			'supportLt.description' => '会場に表示されたQRコードを読み取って、応援LTへの参加を登録してください',
+			'supportLt.scanButton' => 'QRコードを読み取る',
+			'supportLt.scanTitle' => 'QRコードを読み取る',
+			'supportLt.scanHint' => '会場に表示されたQRコードを枠内に収めてください',
+			'supportLt.scanCameraError' => 'カメラを利用できません。設定でカメラへのアクセスを許可するか、前の画面で6桁のコードを入力してください',
+			'supportLt.scanInvalid' => '読み取れませんでした。応援LT参加登録用のQRコードか確認してください',
+			'supportLt.linkInvalid' => 'このリンクは無効です。会場のQRコードを読み取り直してください',
+			'supportLt.codeSectionTitle' => 'QRコードを読み取れない場合',
+			'supportLt.codeSectionDescription' => '運営から案内された6桁のコードを入力してください',
 			'supportLt.codeLabel' => '参加登録コード',
 			'supportLt.register' => '参加登録する',
 			'supportLt.submitting' => '登録中…',
@@ -2542,7 +2910,7 @@ extension on Translations {
 			'supportLt.backToAccount' => 'アカウントに戻る',
 			'supportLt.signInRequired' => '応援LTに参加登録するには\nサインインしてください',
 			'supportLt.invalidFormat' => '6桁の数字を入力してください',
-			'supportLt.invalidCode' => 'コードが正しくありません。運営から案内されたコードを確認してください',
+			'supportLt.invalidCode' => 'コードが正しくありません。会場のQRコードを読み取り直すか、運営に確認してください',
 			'supportLt.rateLimited' => '試行回数が多すぎます。しばらくしてからもう一度お試しください',
 			'supportLt.networkError' => '通信に失敗しました。通信状況を確認してもう一度お試しください',
 			'supportLt.sessionExpired' => 'サインインの有効期限が切れました。もう一度サインインしてください',
@@ -2592,34 +2960,61 @@ extension on Translations {
 			'quiz.signInRequired.title' => 'サインインが必要です',
 			'quiz.signInRequired.description' => 'クイズ大会は参加と回答の記録をアカウントに紐づけます。 アカウントタブからサインインしてご参加ください。',
 			'quiz.signInRequired.button' => 'アカウントへ',
+			'quiz.signInRequired.inPage' => 'クイズ大会に参加するにはサインインしてください',
 			'quiz.errors.signInFailed' => 'サインインに失敗しました',
 			'quiz.errors.eventLoadFailed' => 'イベント情報の取得に失敗しました',
 			'quiz.preparing.title' => 'クイズは開催準備中です',
 			'quiz.preparing.description' => '開始のアナウンスがあったら この画面から参加できます。',
-			'quiz.registration.subtitle' => 'テーブル対抗のチーム戦。ニックネームで参加しよう！',
+			'quiz.registration.subtitle' => '参加する回を確認して参加表明してください。前半戦・後半戦のどちらか一方に参加できます。',
 			'quiz.registration.participantCount' => '現在の参加人数',
 			'quiz.registration.participantUnit' => '人',
-			'quiz.registration.nickname' => 'ニックネーム',
-			'quiz.registration.nicknameHint' => '1〜20文字',
-			'quiz.registration.entryCode' => '受付コード',
-			'quiz.registration.entryCodeHint' => '6桁の数字',
-			'quiz.registration.entryCodeHelper' => '会場の受付で案内しているコードを入力してください',
 			'quiz.registration.join' => '参加する',
 			'quiz.registration.full' => ({required Object max}) => '定員（${max} 人）に達しました',
+			_ => null,
+		} ?? switch (path) {
 			'quiz.registration.failed' => '登録できませんでした。時間をおいて再度お試しください。',
-			'quiz.registration.codeMismatch' => '登録できませんでした。受付コードが正しいか確認してください。',
 			'quiz.registration.alreadyParticipated' => '別の回に参加登録済みのため、この回には登録できません。',
 			'quiz.registration.closed' => 'この回の参加受付は終了しました。',
 			'quiz.registration.unavailable' => '登録を確認できませんでした。通信状況を確認して再試行してください。',
-			'quiz.registration.rateLimited' => '入力回数が多すぎます。1分待ってから、受付コードを確認して再試行してください。',
 			'quiz.registration.accountUnavailable' => 'このアカウントでは参加できません。運営にお問い合わせください。',
-			'quiz.waiting.title' => '登録完了！',
-			'quiz.waiting.description' => 'チーム発表までしばらくお待ちください',
-			'quiz.team.yourTable' => 'あなたのテーブルは',
-			'quiz.team.table' => 'テーブル',
+			'quiz.waiting.title' => '参加表明済み',
+			'quiz.waiting.description' => '参加登録の終了後、会場でチェックインを開始します。スクリーンの QR コードを読み取ってチェックインし、スタッフに案内されたチームを選んでください。',
+			'quiz.checkIn.title' => 'チェックイン',
+			'quiz.checkIn.instructions' => '会場のスクリーンに表示された QR コードを読み取るか、6桁の参加コードを入力してください。チェックイン後にチームを選べます。',
+			'quiz.checkIn.scanButton' => 'QR コードを読み取る',
+			'quiz.checkIn.scanTitle' => 'QR コードを読み取る',
+			'quiz.checkIn.scanHint' => '会場のスクリーンに表示された QR コードを枠内に合わせてください',
+			'quiz.checkIn.scanCameraError' => 'カメラを利用できません。設定でカメラへのアクセスを許可するか、前の画面で6桁の参加コードを入力してください',
+			'quiz.checkIn.scanInvalid' => '読み取れませんでした。クイズ大会のチェックイン用 QR コードか確認してください',
+			'quiz.checkIn.scanOtherEvent' => '別の回の QR コードです。参加登録した回の QR コードを読み取ってください',
+			'quiz.checkIn.codeSectionTitle' => 'QR コードを読み取れない場合',
+			'quiz.checkIn.codeLabel' => '参加コード',
+			'quiz.checkIn.submit' => 'チェックインする',
+			'quiz.checkIn.submitting' => '確認中…',
+			'quiz.checkIn.invalidFormat' => '6桁の参加コードを入力してください',
+			'quiz.checkIn.linkInvalid' => 'このリンクは無効です。会場の QR コードを読み取り直してください',
+			'quiz.checkIn.wrongCode' => '参加コードが正しくありません。スクリーンの QR コードを読み取り直すか、スタッフにお声がけください',
+			'quiz.checkIn.rateLimited' => '確認回数の上限に達しました。1分ほど待ってから再度お試しください',
+			'quiz.checkIn.closed' => 'チェックインの受付は終了しました。スタッフにお声がけください。',
+			'quiz.checkIn.unavailable' => 'チェックインを確認できませんでした。通信状況を確認して再試行してください。',
+			'quiz.checkIn.failed' => 'チェックインできませんでした。スタッフにお声がけください。',
+			'quiz.selection.title' => 'チームを選択',
+			'quiz.selection.instructions' => 'スタッフに案内されたテーブルに着席してから、そのテーブルのチーム（A〜T）を選んでください。',
+			'quiz.selection.unselected' => 'チーム未選択',
+			'quiz.selection.current' => ({required Object team}) => 'あなたのチームは ${team} です',
+			'quiz.selection.option' => ({required Object team, required Object count}) => '${team}（${count} 人）',
+			'quiz.selection.confirm' => 'このチームに決定',
+			'quiz.selection.sending' => '送信中…',
+			'quiz.selection.changeHint' => '受付中はチームを選び直せます。',
+			'quiz.selection.closed' => 'チーム選択は終了しました。出題をお待ちください。',
+			'quiz.selection.closedUnselected' => 'チーム選択は終了しました。運営スタッフにお声がけください。',
+			'quiz.selection.changed' => '所属が変更されました。現在のチームを確認して選び直してください。',
+			'quiz.selection.failed' => '選択の完了を確認できませんでした。通信状況と現在の所属を確認してください。受付終了や参加取消の場合はスタッフにお声がけください。',
+			'quiz.team.yourTable' => 'あなたのチームは',
+			'quiz.team.table' => 'チーム',
 			'quiz.team.teamLabel' => 'チーム',
 			'quiz.team.gatherHint' => 'テーブルに集まって次の出題を待とう！',
-			'quiz.team.badge' => ({required Object table, required Object name}) => 'テーブル ${table}・${name}',
+			'quiz.team.badge' => ({required Object name}) => 'チーム ${name}',
 			'quiz.entryClosed.title' => '参加受付は終了しました',
 			'quiz.entryClosed.description' => 'クイズ大会は進行中です。 結果発表はこの画面でご覧いただけます。',
 			'quiz.question.sponsoredBy' => ({required Object name}) => '提供: ${name}',
@@ -2644,7 +3039,7 @@ extension on Translations {
 			'quiz.revealed.yourAnswer' => 'あなたのチームの回答',
 			'quiz.revealed.teamScore' => ({required Object score}) => '現在のチームスコア: ${score} 点',
 			'quiz.result.title' => '最終結果',
-			'quiz.result.table' => ({required Object table}) => 'テーブル ${table}',
+			'quiz.result.table' => ({required Object name}) => 'チーム ${name}',
 			'quiz.result.points' => ({required Object score}) => '${score} 点',
 			'quiz.result.yourTeam' => 'あなたのチーム',
 			'quiz.result.yourTeamRanked' => ({required Object rank, required Object name, required Object score}) => '${rank} 位 / ${name}（${score} 点）',
@@ -2654,6 +3049,7 @@ extension on Translations {
 			'forceUpdate.title' => 'アップデートが必要です',
 			'forceUpdate.message' => '新しいバージョンのアプリが利用可能です。最新バージョンにアップデートしてください。',
 			'forceUpdate.updateButton' => 'アップデート',
+			'pushNotification.open' => '開く',
 			_ => null,
 		};
 	}

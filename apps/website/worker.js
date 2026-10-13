@@ -1,14 +1,17 @@
 /**
- * Sends legacy profile-exchange links (`/x/<token>` and `/en/x/<token>`) to
- * the conference app, preserving the token for native or web handling.
- * Missing tokens and malformed paths still serve the locale's static
+ * Sends legacy profile-exchange links (`/x/<token>` and `/en/x/<token>`) and
+ * session-detail links (`/sessions/<id>`) to the conference app, preserving
+ * the encoded path segment for native or web handling.
+ * Missing tokens and malformed exchange paths still serve the locale's static
  * fallback page. All unrelated requests, including association files, pass
  * through to static assets unchanged.
  */
 
+import { productionAppOrigin } from "../../tool/app_link_origins.mjs";
+
 const SHARE_LINK_FALLBACK_PATTERN = /^\/(en\/)?x(\/|$)/;
 const SHARE_LINK_TOKEN_PATTERN = /^\/(?:en\/)?x\/([^/]+)$/;
-const APP_SHARE_LINK_BASE_URL = "https://2026-app.flutterkaigi.jp/x/";
+const SESSION_DETAIL_PATTERN = /^\/sessions\/([^/]+)$/;
 
 /** Whether `pathname` is a share-link request with no per-token page. */
 export function isShareLinkFallbackPath(pathname) {
@@ -34,22 +37,24 @@ export default {
     }
 
     const url = new URL(request.url);
-    if (!isShareLinkFallbackPath(url.pathname)) {
-      return assets.fetch(request);
-    }
-
     const shareLink = SHARE_LINK_TOKEN_PATTERN.exec(url.pathname);
-    if (shareLink) {
-      // Keep the encoded token as one path segment under a fixed origin.
-      // Query parameters do not belong to the exchange token and are omitted.
+    const sessionDetail = SESSION_DETAIL_PATTERN.exec(url.pathname);
+    const appPath = shareLink ? `/x/${shareLink[1]}` : sessionDetail ? `/sessions/${sessionDetail[1]}` : null;
+    if (appPath !== null) {
+      // Keep the encoded token or ID under a fixed origin. Query parameters
+      // and fragments are not part of the destination's identity.
       return new Response(null, {
         status: 302,
         headers: {
-          Location: `${APP_SHARE_LINK_BASE_URL}${shareLink[1]}`,
+          Location: `${productionAppOrigin}${appPath}`,
           "Cache-Control": "no-store",
           "Referrer-Policy": "no-referrer",
         },
       });
+    }
+
+    if (!isShareLinkFallbackPath(url.pathname)) {
+      return assets.fetch(request);
     }
 
     try {

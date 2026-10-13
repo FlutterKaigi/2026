@@ -66,6 +66,59 @@ test("redirect destination keeps its fixed origin and drops unrelated query para
   }
 });
 
+test("fetch redirects legacy session detail links to the attendee app", async () => {
+  const assets = fakeAssets(() => assert.fail("session redirect must not fetch assets"));
+
+  for (const sessionId of ["123456", "session-a", "abcDEF123xyz"]) {
+    const response = await worker.fetch(
+      new Request(`https://2026.flutterkaigi.jp/sessions/${sessionId}`),
+      { ASSETS: assets },
+    );
+
+    assert.equal(response.status, 302);
+    assert.equal(response.headers.get("Location"), `https://2026-app.flutterkaigi.jp/sessions/${sessionId}`);
+    assert.equal(response.headers.get("Cache-Control"), "no-store");
+    assert.equal(response.headers.get("Referrer-Policy"), "no-referrer");
+    assert.equal(await response.text(), "");
+  }
+});
+
+test("session redirects preserve encoded IDs under a fixed origin and omit query and fragment", async () => {
+  const assets = fakeAssets(() => assert.fail("session redirect must not fetch assets"));
+
+  for (const sessionId of ["session%2Da", "%E6%97%A5%E6%9C%AC%E8%AA%9E", "%2F%2Fevil.example", "%5C%5Cevil.example", "@evil.example", "id%3Fredirect%3Devil%23fragment"]) {
+    const response = await worker.fetch(
+      new Request(`https://2026.flutterkaigi.jp/sessions/${sessionId}?redirect=https://evil.example/&id=other#fragment`),
+      { ASSETS: assets },
+    );
+    const location = new URL(response.headers.get("Location"));
+
+    assert.equal(response.status, 302);
+    assert.equal(location.href, `https://2026-app.flutterkaigi.jp/sessions/${sessionId}`);
+    assert.equal(location.origin, "https://2026-app.flutterkaigi.jp");
+    assert.equal(location.search, "");
+    assert.equal(location.hash, "");
+  }
+});
+
+test("session redirects do not capture other website routes or malformed detail paths", async () => {
+  const paths = [
+    "/", "/en/", "/?source=app#timetable", "/sponsors/example", "/en/sponsors/example",
+    "/images/ogp.png", "/sessions", "/sessions/", "/sessions/id/", "/sessions/id/extra",
+    "/sessions//evil.example", "/sessions-other/id", "/en/sessions/id", "/Sessions/id",
+  ];
+  for (const path of paths) {
+    const request = new Request(`https://2026.flutterkaigi.jp${path}`);
+    const expected = new Response("website asset");
+    const assets = fakeAssets((actual) => {
+      assert.equal(actual, request);
+      return expected;
+    });
+
+    assert.equal(await worker.fetch(request, { ASSETS: assets }), expected, path);
+  }
+});
+
 test("fetch rewrites missing-token and malformed paths to the locale fallback page", async () => {
   const requestedUrls = [];
   const assets = fakeAssets((request) => {

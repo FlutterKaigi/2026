@@ -3,6 +3,7 @@ import 'package:dashboard/core/event_environment/event_environment.dart';
 import 'package:dashboard/feature/quiz/data/provider/quiz_list_state.dart';
 import 'package:dashboard/feature/quiz/data/provider/quiz_repository.dart';
 import 'package:dashboard/feature/quiz/ui/component/quiz_status_label.dart';
+import 'package:dashboard/feature/quiz/ui/component/quiz_check_in_code.dart';
 import 'package:dashboard/feature/quiz/ui/component/quiz_countdown.dart';
 import 'package:dashboard/feature/quiz/ui/component/quiz_promotion_controls.dart';
 import 'package:data/data.dart';
@@ -13,7 +14,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 /// 進行コンソール（当日のメイン画面）。
 ///
-/// イベント status・参加者数・チーム編成・チーム一覧・問題の出題/締切/発表・結果確定を
+/// イベント status・参加者数・チーム選択・チーム一覧・問題の出題/締切/発表・結果確定を
 /// 1 画面で操作する。進行状態の検証・更新はサーバーで行う。
 class QuizConsolePage extends HookConsumerWidget {
   const QuizConsolePage({super.key, required this.eventId});
@@ -83,7 +84,16 @@ class _ConsoleBody extends HookConsumerWidget {
     final ops = ref.read(quizOperationsRepositoryProvider);
     final isBusy = busyLabel.value != null;
 
-    final participantCount = participants.asData?.value.length;
+    final participantList = participants.asData?.value;
+    final participantCount = participantList?.length;
+    final unselectedCount = participantList?.where((person) => person.teamId == null).length;
+    final checkedInCount = participantList?.where((person) => person.checkedInAt != null).length;
+    final onlyUnselected = useState(false);
+    final canStart =
+        event.teamSelectionStatus == QuizTeamSelectionStatus.closed &&
+        participantList != null &&
+        participantList.isNotEmpty &&
+        participantList.every((person) => quizTeamIds.contains(person.teamId));
     final teamList = teams.asData?.value ?? const <QuizTeam>[];
     final questionList = questions.asData?.value ?? const <QuizQuestion>[];
 
@@ -116,7 +126,7 @@ class _ConsoleBody extends HookConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // --- ヘッダー: status + 参加者数 + チーム編成 ---
+          // --- ヘッダー: status + 参加者数 + チーム選択 ---
           Row(
             children: [
               Text(
@@ -160,7 +170,7 @@ class _ConsoleBody extends HookConsumerWidget {
                 ),
               ],
               const SizedBox(width: 24),
-              // ライフサイクル操作: 非公開 → 公開 → 受付開始 → 受付終了 → チーム編成。
+              // ライフサイクル操作: 非公開 → 公開 → 受付開始 → 受付終了 → チェックイン・チーム選択。
               // 各遷移は運営の明示操作で、リポジトリ側でも遷移元を検証する。
               if (event.status == QuizEventStatus.draft) ...[
                 FilledButton.icon(
@@ -183,7 +193,7 @@ class _ConsoleBody extends HookConsumerWidget {
                   onPressed: !isBusy
                       ? () => confirmAndRun(
                           title: '参加登録を開始',
-                          message: '参加受付を開始します。参加者のアプリに受付コード入力つきの受付画面が表示されるようになります。よろしいですか？',
+                          message: '参加受付を開始します。参加者はアプリでこの回を選んで参加表明できるようになります。よろしいですか？',
                           label: '参加登録を開始',
                           action: () => ops.openRegistration(eventId),
                         )
@@ -220,28 +230,12 @@ class _ConsoleBody extends HookConsumerWidget {
                 ),
               ],
               if (event.status == QuizEventStatus.entryClosed) ...[
-                FilledButton.icon(
-                  // 編成後も有効にして編成のやり直し（クラッシュ回復・誤操作の修正）を可能にする。
-                  onPressed: (!isBusy && participantCount != null && participantCount > 0)
-                      ? () => confirmAndRun(
-                          title: teamList.isNotEmpty ? 'チーム再編成' : 'チーム編成',
-                          message: teamList.isNotEmpty
-                              ? '既存のチームをすべて削除し、$participantCount 人を${_teamCountText(participantCount)}に編成し直します。よろしいですか？'
-                              : '$participantCount 人を${_teamCountText(participantCount)}に編成します。よろしいですか？',
-                          label: 'チーム編成',
-                          action: () => teamList.isEmpty ? ops.buildTeams(eventId) : ops.rebuildTeams(eventId),
-                        )
-                      : null,
-                  icon: const Icon(Icons.shuffle),
-                  label: Text(teamList.isNotEmpty ? 'チーム再編成' : 'チーム編成'),
-                ),
-                const SizedBox(width: 12),
                 OutlinedButton.icon(
                   onPressed: isBusy
                       ? null
                       : () => confirmAndRun(
                           title: '参加受付を再開',
-                          message: '受付を再開します。編成済みのチームは解除されます。受付終了後にチームを編成し直してください。',
+                          message: '受付を再開します。選択済みのチームは保持され、空き枠に新しい参加者を案内できます。',
                           label: '受付再開',
                           action: () => ops.reopenRegistration(eventId),
                         ),
@@ -252,7 +246,117 @@ class _ConsoleBody extends HookConsumerWidget {
             ],
           ),
           const SizedBox(height: 16),
-          _EntryCodePanel(eventId: eventId, isBusy: isBusy, onRegenerate: runOperation),
+          if (event.status == QuizEventStatus.registration || event.status == QuizEventStatus.entryClosed)
+            Card.filled(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'チェックイン・チーム選択: ${switch (event.teamSelectionStatus) {
+                        QuizTeamSelectionStatus.notStarted => '未開始',
+                        QuizTeamSelectionStatus.open => '受付中',
+                        QuizTeamSelectionStatus.closed => '終了',
+                      }}',
+                    ),
+                    Text(
+                      '参加表明 ${participantCount ?? '…'} 人 / チェックイン済み ${checkedInCount ?? '…'} 人 / '
+                      'チーム選択済み ${participantCount == null ? '…' : participantCount - unselectedCount!} 人 / '
+                      '未選択 ${unselectedCount ?? '…'} 人（未チェックインを含む）',
+                    ),
+                    const Text(
+                      '参加者は会場の QR コードまたは参加コードでチェックインしてからチームを選びます。'
+                      '着席人数とチーム別の一覧を照合してください。出題前に参加受付・チェックインを終了し、未選択者を確認してください。',
+                    ),
+                    if (event.teamSelectionStatus == QuizTeamSelectionStatus.notStarted &&
+                        event.status == QuizEventStatus.registration)
+                      const Text('チェックインは参加登録を終了してから開始できます。'),
+                    if (event.teamSelectionStatus != QuizTeamSelectionStatus.notStarted) ...[
+                      const SizedBox(height: 12),
+                      QuizCheckInCode(eventId: eventId, qrSize: 160),
+                      const SizedBox(height: 4),
+                      const Text('投影画面にも表示されます。配信映像には投影画面を映さないでください。'),
+                    ],
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 12,
+                      runSpacing: 8,
+                      children: [
+                        if (event.teamSelectionStatus != QuizTeamSelectionStatus.open)
+                          OutlinedButton(
+                            // 初回の開始は参加登録の終了後のみ。当日枠の受付再開中は再開だけできる。
+                            onPressed:
+                                isBusy ||
+                                    (event.teamSelectionStatus == QuizTeamSelectionStatus.notStarted &&
+                                        event.status != QuizEventStatus.entryClosed)
+                                ? null
+                                : () => confirmAndRun(
+                                    title: 'チェックインを開始',
+                                    message: event.teamSelectionStatus == QuizTeamSelectionStatus.notStarted
+                                        ? '参加コードを発行し、チェックインと A〜T のチーム選択を開始します。旧方式の割り当てがあれば解除し、'
+                                              '参加者にチェックイン後、座ったテーブルを選び直してもらいます。'
+                                        : 'チェックインとチーム選択を再開します。参加コード、チェックイン済みの記録、選択済みの所属は保持されます。',
+                                    label: 'チェックイン開始',
+                                    action: () => ops.openTeamSelection(eventId),
+                                  ),
+                            child: const Text('チェックインを開始'),
+                          ),
+                        if (event.teamSelectionStatus == QuizTeamSelectionStatus.open)
+                          OutlinedButton(
+                            onPressed: isBusy
+                                ? null
+                                : () => confirmAndRun(
+                                    title: 'チェックインを終了',
+                                    message: 'チェックインとチーム選択・変更を締め切ります。初出題前なら再開できます。',
+                                    label: 'チェックイン終了',
+                                    action: () => ops.closeTeamSelection(eventId),
+                                  ),
+                            child: const Text('チェックインを終了'),
+                          ),
+                        if (event.teamSelectionStatus != QuizTeamSelectionStatus.notStarted)
+                          OutlinedButton(
+                            onPressed: isBusy
+                                ? null
+                                : () => confirmAndRun(
+                                    title: '参加コードを再発行',
+                                    message:
+                                        '投影中の QR コードと現在の参加コードは使えなくなります。チェックイン済みの参加者はそのままです。'
+                                        'コードが会場外に広まった場合は、先に配信などでの露出を止めてから再発行してください。',
+                                    label: '参加コード再発行',
+                                    action: () => ops.regenerateCheckInCode(eventId),
+                                  ),
+                            child: const Text('コードを再発行'),
+                          ),
+                        OutlinedButton(
+                          onPressed:
+                              isBusy ||
+                                  event.status != QuizEventStatus.entryClosed ||
+                                  event.teamSelectionStatus == QuizTeamSelectionStatus.notStarted ||
+                                  unselectedCount == null ||
+                                  unselectedCount == 0
+                              ? null
+                              : () => confirmAndRun(
+                                  title: '未選択者を一括取消',
+                                  message: '現在未選択（未チェックインを含む）の $unselectedCount 人を取り消して枠を空けます。実行時に選択済みになった人は対象に含めません。',
+                                  label: '未選択者の取消',
+                                  action: () async {
+                                    final count = await ops.removeUnselectedParticipants(eventId);
+                                    if (context.mounted) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(content: Text('$count 人の参加を取り消しました')),
+                                      );
+                                    }
+                                  },
+                                ),
+                          child: const Text('未選択者を一括取消'),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
           if (busyLabel.value != null) ...[
             const SizedBox(height: 16),
             Row(
@@ -275,17 +379,27 @@ class _ConsoleBody extends HookConsumerWidget {
               data: (list) => ExpansionTile(
                 title: Text('参加者の確認・取消（${list.length} 人）'),
                 children: [
-                  for (final participant in list)
+                  CheckboxListTile(
+                    title: const Text('未選択者のみ表示'),
+                    value: onlyUnselected.value,
+                    onChanged: (value) => onlyUnselected.value = value ?? false,
+                  ),
+                  for (final participant in list.where((person) => !onlyUnselected.value || person.teamId == null))
                     ListTile(
                       title: Text(participant.displayName),
-                      subtitle: Text(participant.id),
+                      subtitle: Text(
+                        '${switch (participant) {
+                          QuizParticipant(:final teamId?) => 'チーム $teamId',
+                          QuizParticipant(checkedInAt: _?) => 'チェックイン済み・未選択',
+                          _ => '未チェックイン',
+                        }} / ${participant.id}',
+                      ),
                       trailing: TextButton(
                         onPressed: isBusy
                             ? null
                             : () => confirmAndRun(
                                 title: '参加登録を取消',
-                                message:
-                                    '「${participant.displayName}」の登録を取り消します。編成済みの全チームは解除されます。必要なら受付を再開し、チームを編成し直してください。',
+                                message: '「${participant.displayName}」の登録を取り消します。他の参加者の所属は保持されます。',
                                 label: '参加取消',
                                 action: () => ops.removeParticipant(eventId, participant.id),
                               ),
@@ -298,26 +412,19 @@ class _ConsoleBody extends HookConsumerWidget {
           const SizedBox(height: 24),
 
           // --- チーム一覧 ---
-          Row(
-            children: [
-              Text('チーム一覧', style: Theme.of(context).textTheme.titleLarge),
-              const SizedBox(width: 12),
-              OutlinedButton.icon(
-                onPressed: () => _showTeamNamePoolDialog(context, ref, event),
-                icon: const Icon(Icons.badge_outlined),
-                label: const Text('チーム名を管理'),
-              ),
-            ],
-          ),
+          Text('チーム一覧', style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 8),
           teams.when(
-            loading: () => const Padding(
-              padding: EdgeInsets.all(16),
-              child: Center(child: CircularProgressIndicator()),
-            ),
+            loading: () => const Center(child: CircularProgressIndicator()),
             error: (e, _) => Text('チームの取得に失敗しました: $e'),
-            data: (teams) =>
-                teams.isEmpty ? const Text('まだチームが編成されていません') : _TeamsTable(eventId: eventId, teams: teams),
+            data: (list) => _TeamsTable(
+              teams:
+                  isPrestart &&
+                      event.teamSelectionStatus != QuizTeamSelectionStatus.notStarted &&
+                      participantList != null
+                  ? quizTeamsFromParticipants(participantList, includeEmpty: true)
+                  : list,
+            ),
           ),
           const SizedBox(height: 32),
 
@@ -358,6 +465,7 @@ class _ConsoleBody extends HookConsumerWidget {
                           event: event,
                           question: question,
                           teamCount: teamList.length,
+                          canStart: canStart,
                           isBusy: isBusy,
                           hasOpenQuestion: hasOpenQuestion,
                           onPresent: () => confirmAndRun(
@@ -430,25 +538,25 @@ class _ConsoleBody extends HookConsumerWidget {
   }
 }
 
-/// チーム一覧テーブル。score 降順でソート、rank を表示する。
-/// チーム名は行の鉛筆アイコンから個別に変更できる。
-class _TeamsTable extends ConsumerWidget {
-  const _TeamsTable({required this.eventId, required this.teams});
-
-  final String eventId;
+class _TeamsTable extends StatelessWidget {
+  const _TeamsTable({required this.teams});
   final List<QuizTeam> teams;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final sorted = [...teams]..sort((a, b) => b.score.compareTo(a.score));
+  Widget build(BuildContext context) {
+    final sorted = [...teams]
+      ..sort((a, b) {
+        final score = b.score.compareTo(a.score);
+        return score == 0 ? a.tableNumber.compareTo(b.tableNumber) : score;
+      });
     return Card(
       margin: EdgeInsets.zero,
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: DataTable(
           columns: const [
-            DataColumn(label: Text('テーブル')),
-            DataColumn(label: Text('チーム名')),
+            DataColumn(label: Text('チーム')),
+            DataColumn(label: Text('人数'), numeric: true),
             DataColumn(label: Text('メンバー')),
             DataColumn(label: Text('スコア'), numeric: true),
             DataColumn(label: Text('順位'), numeric: true),
@@ -457,24 +565,9 @@ class _TeamsTable extends ConsumerWidget {
             for (final team in sorted)
               DataRow(
                 cells: [
-                  DataCell(Text('${team.tableNumber}')),
-                  DataCell(
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(team.name),
-                        const SizedBox(width: 4),
-                        IconButton(
-                          tooltip: 'チーム名を変更',
-                          visualDensity: VisualDensity.compact,
-                          iconSize: 18,
-                          icon: const Icon(Icons.edit_outlined),
-                          onPressed: () => _showRenameTeamDialog(context, ref, eventId, team),
-                        ),
-                      ],
-                    ),
-                  ),
-                  DataCell(Text(team.members.map((m) => m.displayName).join(', '))),
+                  DataCell(Text(team.name)),
+                  DataCell(Text('${team.memberUids.length}')),
+                  DataCell(Text(team.members.map((member) => member.displayName).join(', '))),
                   DataCell(Text('${team.score}')),
                   DataCell(Text(team.rank?.toString() ?? '-')),
                 ],
@@ -493,6 +586,7 @@ class _QuestionRow extends ConsumerWidget {
     required this.event,
     required this.question,
     required this.teamCount,
+    required this.canStart,
     required this.isBusy,
     required this.hasOpenQuestion,
     required this.onPresent,
@@ -506,6 +600,7 @@ class _QuestionRow extends ConsumerWidget {
   final QuizEvent event;
   final QuizQuestion question;
   final int teamCount;
+  final bool canStart;
   final bool isBusy;
   final bool hasOpenQuestion;
   final VoidCallback onPresent;
@@ -528,10 +623,10 @@ class _QuestionRow extends ConsumerWidget {
 
     final answeredCount = answers.asData?.value.where((a) => a.selectedOptionIndex != null).length;
 
-    // 出題可能条件: draft かつ 受付終了後（チーム編成済み）/進行中 かつ 他に open が無い。
+    // 出題可能条件: draft かつ 受付終了後（チーム選択済み）/進行中 かつ 他に open が無い。
     final canPresent =
         question.status == QuizQuestionStatus.draft &&
-        (event.status == QuizEventStatus.entryClosed || event.status == QuizEventStatus.inProgress) &&
+        ((event.status == QuizEventStatus.entryClosed && canStart) || event.status == QuizEventStatus.inProgress) &&
         teamCount > 0 &&
         !hasOpenQuestion &&
         !isBusy;
@@ -633,139 +728,6 @@ class _ErrorBanner extends StatelessWidget {
   }
 }
 
-String _teamCountText(int participantCount) {
-  final sizes = splitIntoTeamSizes(participantCount);
-  return '${sizes.length} チーム';
-}
-
-/// チーム名プール（テーブル番号順に使う名前リスト）の編集ダイアログ。
-///
-/// 1 行 1 チーム名で編集し、イベントドキュメントの `teamNamePool` に保存する。
-/// 反映は次回の「チーム編成 / チーム再編成」実行時。既存チームの名前だけを
-/// 直したい場合はチーム一覧の鉛筆アイコンを使う。
-Future<void> _showTeamNamePoolDialog(BuildContext context, WidgetRef ref, QuizEvent event) async {
-  final controller = TextEditingController(text: event.teamNamePool.join('\n'));
-  final saved = await showDialog<bool>(
-    context: context,
-    builder: (dialogContext) => AlertDialog(
-      title: const Text('チーム名を管理'),
-      content: SizedBox(
-        width: 440,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('1 行につき 1 チーム名。テーブル番号順に割り当てられます。'),
-            const SizedBox(height: 4),
-            Text(
-              '空のままにすると既定の Flutter Widget 名（${quizTeamWidgetNames.take(3).join(', ')}…）を使います。'
-              '変更の反映は次回の「チーム編成」実行時です。',
-              style: Theme.of(dialogContext).textTheme.bodySmall,
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: controller,
-              maxLines: 10,
-              decoration: InputDecoration(
-                border: const OutlineInputBorder(),
-                hintText: quizTeamWidgetNames.take(4).join('\n'),
-              ),
-            ),
-          ],
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(dialogContext).pop(false),
-          child: const Text('キャンセル'),
-        ),
-        FilledButton(
-          onPressed: () => Navigator.of(dialogContext).pop(true),
-          child: const Text('保存'),
-        ),
-      ],
-    ),
-  );
-  if (saved != true) {
-    controller.dispose();
-    return;
-  }
-
-  final pool = controller.text.split('\n').map((line) => line.trim()).where((line) => line.isNotEmpty).toList();
-  controller.dispose();
-  try {
-    await ref.read(quizEventRepositoryProvider).updateTeamNamePool(event.id, pool);
-    if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(pool.isEmpty ? 'チーム名を既定（Widget 名）に戻しました' : 'チーム名プールを保存しました（${pool.length} 件）')),
-      );
-    }
-  } catch (e) {
-    if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('チーム名プールの保存に失敗しました: $e')),
-      );
-    }
-  }
-}
-
-/// 編成済みチームの名前を個別に変更するダイアログ。
-Future<void> _showRenameTeamDialog(
-  BuildContext context,
-  WidgetRef ref,
-  String eventId,
-  QuizTeam team,
-) async {
-  final controller = TextEditingController(text: team.name);
-  final saved = await showDialog<bool>(
-    context: context,
-    builder: (dialogContext) => AlertDialog(
-      title: Text('チーム名を変更（テーブル ${team.tableNumber}）'),
-      content: SizedBox(
-        width: 360,
-        child: TextField(
-          controller: controller,
-          autofocus: true,
-          maxLength: 30,
-          decoration: const InputDecoration(
-            border: OutlineInputBorder(),
-            labelText: 'チーム名',
-          ),
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(dialogContext).pop(false),
-          child: const Text('キャンセル'),
-        ),
-        FilledButton(
-          onPressed: () => Navigator.of(dialogContext).pop(true),
-          child: const Text('保存'),
-        ),
-      ],
-    ),
-  );
-  final name = controller.text.trim();
-  controller.dispose();
-  if (saved != true || name.isEmpty || name == team.name) {
-    return;
-  }
-  try {
-    await ref.read(quizTeamRepositoryProvider).updateName(eventId, team.id, name);
-    if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('チーム名を「$name」に変更しました')),
-      );
-    }
-  } catch (e) {
-    if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('チーム名の変更に失敗しました: $e')),
-      );
-    }
-  }
-}
-
 Future<bool?> _confirm(BuildContext context, {required String title, required String message}) {
   return showDialog<bool>(
     context: context,
@@ -784,80 +746,4 @@ Future<bool?> _confirm(BuildContext context, {required String title, required St
       ],
     ),
   );
-}
-
-/// 現地受付コードの表示パネル。
-///
-/// 受付スタッフが会場掲示に使う 6 桁コードを大きく表示する。
-/// コードは `secret/entry` に保存され、運営のみ読める。
-/// 漏洩時は再生成できる（以降は新しいコードのみ有効）。
-class _EntryCodePanel extends ConsumerWidget {
-  const _EntryCodePanel({
-    required this.eventId,
-    required this.isBusy,
-    required this.onRegenerate,
-  });
-
-  final String eventId;
-  final bool isBusy;
-  final Future<void> Function(String label, Future<void> Function() action) onRegenerate;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-    final code = ref.watch(quizEntryCodeProvider(eventId)).value;
-    final ops = ref.read(quizOperationsRepositoryProvider);
-
-    return Card.filled(
-      color: theme.colorScheme.surfaceContainerLow,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.pin_outlined, color: theme.colorScheme.primary),
-            const SizedBox(width: 12),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('現地受付コード', style: theme.textTheme.labelMedium),
-                Text(
-                  code ?? '未生成',
-                  style: theme.textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 6,
-                    color: theme.colorScheme.primary,
-                    fontFeatures: const [FontFeature.tabularFigures()],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(width: 16),
-            IconButton(
-              tooltip: 'コードを再生成',
-              onPressed: !isBusy
-                  ? () async {
-                      final ok = await _confirm(
-                        context,
-                        title: '受付コードを再生成',
-                        message: '新しいコードを生成します。以前のコードでは登録できなくなります。よろしいですか？',
-                      );
-                      if (ok != true) return;
-                      await onRegenerate('受付コード再生成', () async {
-                        await ops.regenerateEntryCode(eventId);
-                      });
-                    }
-                  : null,
-              icon: const Icon(Icons.refresh),
-            ),
-            const SizedBox(width: 4),
-            Text(
-              '受付で参加者に案内するコード。\nアプリの参加登録で入力してもらう。',
-              style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 }

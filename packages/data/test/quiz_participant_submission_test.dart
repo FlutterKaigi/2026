@@ -12,25 +12,49 @@ void main() {
     final functions = _Functions((_) => pending.future);
     final repository = FirestoreQuizParticipantRepository(firestore: firestore, functions: functions);
     var completed = false;
-    final registration = repository
-        .register(
-          'event',
-          displayName: 'Alice',
-          entryCode: '123456',
-          uid: 'untrusted-client-uid',
-          email: 'untrusted@example.com',
-          signInProvider: 'untrusted-provider',
-        )
-        .then((_) => completed = true);
+    final registration = repository.register('event').then((_) => completed = true);
     await Future<void>.delayed(Duration.zero);
     expect(completed, isFalse);
     expect(functions.calls.single.$1, 'registerQuizParticipant');
-    expect(functions.calls.single.$2, {'eventId': 'event', 'displayName': 'Alice', 'entryCode': '123456'});
+    expect(functions.calls.single.$2, {'eventId': 'event'});
     expect((await firestore.collection('quizEvents/event/participants').get()).docs, isEmpty);
     expect((await firestore.collection('quizEvents/event/entryClaims').get()).docs, isEmpty);
     pending.complete(null);
     await registration;
     expect(completed, isTrue);
+  });
+
+  test('check-in sends only the event and code and never marks the attendee locally', () async {
+    final firestore = FakeFirebaseFirestore();
+    final participant = firestore.doc('quizEvents/event/participants/member');
+    await participant.set({'displayName': 'Member'});
+    final pending = Completer<Object?>();
+    final functions = _Functions((_) => pending.future);
+    final repository = FirestoreQuizParticipantRepository(firestore: firestore, functions: functions);
+    final checkIn = repository.checkIn('event', '123456');
+    await Future<void>.delayed(Duration.zero);
+    expect(functions.calls.single.$1, 'checkInQuizParticipant');
+    expect(functions.calls.single.$2, {'eventId': 'event', 'code': '123456'});
+    pending.complete(null);
+    await checkIn;
+    expect((await participant.get()).data()!.containsKey('checkedInAt'), isFalse);
+  });
+
+  test('selection compares the previous membership without writing it optimistically', () async {
+    final firestore = FakeFirebaseFirestore();
+    final participant = firestore.doc('quizEvents/event/participants/member');
+    await participant.set({'teamId': 'A'});
+    final pending = Completer<Object?>();
+    final functions = _Functions((_) => pending.future);
+    final repository = FirestoreQuizParticipantRepository(firestore: firestore, functions: functions);
+    final selection = repository.selectTeam('event', 'T', expectedTeamId: 'A');
+    await Future<void>.delayed(Duration.zero);
+    expect(functions.calls.single.$1, 'selectQuizTeam');
+    expect(functions.calls.single.$2, {'eventId': 'event', 'teamId': 'T', 'expectedTeamId': 'A'});
+    expect((await participant.get()).get('teamId'), 'A');
+    pending.complete(null);
+    await selection;
+    expect((await participant.get()).get('teamId'), 'A');
   });
 
   test('answer waits for server acceptance and never changes the cached answer optimistically', () async {
@@ -71,7 +95,7 @@ void main() {
         functions: _Functions((_) => Future.error(failure)),
       );
       await expectLater(
-        repository.register('event', displayName: 'Alice', entryCode: '123456'),
+        repository.register('event'),
         throwsA(same(failure)),
       );
     });

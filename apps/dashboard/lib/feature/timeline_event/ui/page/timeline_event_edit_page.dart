@@ -67,7 +67,7 @@ class TimelineEventEditPage extends HookConsumerWidget {
           context.showSnackBar('保存に失敗しました: $e');
         }
       } finally {
-        isSaving.value = false;
+        if (context.mounted) isSaving.value = false;
       }
     }
 
