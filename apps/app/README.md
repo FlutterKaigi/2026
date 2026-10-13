@@ -40,13 +40,17 @@ Webは `/account` や `/x/<token>` のパス形式を使用します。以前の
 
 | 環境              | QR / 共有リンクのホスト                                         | 関連付けるアプリ               |
 | ----------------- | --------------------------------------------------------------- | ------------------------------ |
-| prod              | `2026-app.flutterkaigi.jp`                                      | `jp.flutterkaigi.conf2026`     |
+| prod              | `app-2026.flutterkaigi.jp`                                      | `jp.flutterkaigi.conf2026`     |
 | stg・PRプレビュー | `stg-flutterkaigi-2026-conference-app.flutterkaigi.workers.dev` | `jp.flutterkaigi.conf2026.stg` |
 | dev               | URLを使わずEmulator用の生トークン                               | ローカル開発用                 |
 
 アプリのインストール・OSの関連付け状態に応じてネイティブまたはWebで開きます。PR固有のプレビューURLはWeb確認用で、そのURL自体からのネイティブ直接起動は対象外です。PRで表示する交換QRも固定stg版へのリンクを使います。固定stg版は `main` または手動配布で更新し、PR配布では更新しません。
 
-本番では旧 `2026.flutterkaigi.jp/x/<token>` のQRも読み取れます。旧リンクをブラウザで開くとトークンを保って本番Webアプリへ転送します。scannerは本番とstgのURLを相互に拒否し、別環境のバックエンドへ誤って交換を送らないようにしています。
+公式サイトは `2026.flutterkaigi.jp` のままです。セッションなどアプリの機能用リンクは `app-2026.flutterkaigi.jp` へ進みます。旧アプリホスト `2026-app.flutterkaigi.jp` は同じWebアプリと関連付けファイルを直接配信し続け、発行済みリンクを維持します。本番のプロフィール交換・応援LTscannerも新旧両アプリホストを受け付けます。
+
+本番では旧 `2026.flutterkaigi.jp/x/<token>` の交換QRも読み取れます。この旧公式サイトリンクをブラウザで開くと、トークンを保って正規の本番Webアプリへ転送します。プロフィール交換と応援LTのscannerは本番とstgのURLを相互に拒否し、別環境のバックエンドへ誤って送らないようにしています。
+
+ホストの正本は `tool/app_link_hosts.json` です。Repositoryルートで `node tool/generate_app_link_config.mjs` を実行してDart/JavaScript定数を再生成し、`node tool/generate_app_link_config.mjs --check` で更新漏れを確認します。ネイティブ・配布設定の更新と検証コマンドは[配布手順](../../.github/APP_DELIVERY.md#universal-links--app-links)を参照してください。変更時はネイティブ再配布と、新旧ホストのCloudflare / DNS / Firebase Auth / App Check設定の確認も必要です。
 
 未ログイン・プロフィール未作成の場合は、その画面へ移動した後に交換を再開します。待機中のトークンはメモリ内なので、再読み込み・アプリ終了をまたぐ場合は元のリンクを開き直してください。`event_features_enabled=false` のときは従来どおり交換機能を利用できません。Safariの同一ドメイン内リンクなど、アプリがあってもWebに残る操作があります。配布設定と実機確認は[Universal Links / App Links](../../.github/APP_DELIVERY.md#universal-links--app-links)を参照してください。
 

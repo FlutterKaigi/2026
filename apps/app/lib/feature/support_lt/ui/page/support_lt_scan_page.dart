@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:app/core/i18n/strings.g.dart';
+import 'package:app/core/provider/app_link_configuration.dart';
 import 'package:app/core/ui/widget/qr_scanner_view.dart';
-import 'package:app/feature/exchange/data/provider/exchange_link_configuration.dart';
 import 'package:data/data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -21,7 +21,7 @@ class SupportLtScanPage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final t = Translations.of(context);
-    final origin = ref.watch(exchangeLinkConfigurationProvider.select((configuration) => configuration.origin));
+    final configuration = ref.watch(appLinkConfigurationProvider);
     final controller = useMemoized(MobileScannerController.new);
     useEffect(
       () =>
@@ -41,7 +41,7 @@ class SupportLtScanPage extends HookConsumerWidget {
       if (raw == null) {
         return;
       }
-      final code = parseSupportLtQrPayload(raw, allowedOrigins: {?origin});
+      final code = parseSupportLtQrPayload(raw, allowedOrigins: configuration.allowedOrigins);
       if (code == null) {
         ScaffoldMessenger.of(context)
           ..hideCurrentSnackBar()

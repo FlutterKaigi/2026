@@ -197,5 +197,7 @@ News は**このダッシュボードが編集元**（外部の原本は無い�
 - チェックポイントは必要スタンプ数を昇順にカンマ区切りで入力する（1〜5個、例: `7, 14, 22`）。並び順が景品の番号になる
 - スポンサーごとのスイッチでスタンプの配布対象を選ぶ。スポンサーを削除した後も対象に残っているIDは「削除済みのスポンサー」として表示され、オフにできる
 - 「QRコードを表示」でスポンサー・景品交換・クレーンゲーム（サンクスカード）のQRコードを取得し、「印刷」で印刷用のページを開く
-- QRコードのURLは本番が `https://2026-app.flutterkaigi.jp/s/<token>`、STG・dev が STG のアプリのドメイン。トークンはプロジェクトごとの `STAMP_RALLY_TOKEN_SECRET` で署名される
+- QRコードのURLは本番が `https://app-2026.flutterkaigi.jp/s/<token>`、STG・dev が STG のアプリのドメイン。トークンはプロジェクトごとの `STAMP_RALLY_TOKEN_SECRET` で署名される。発行済みの旧 `2026-app.flutterkaigi.jp` リンクも同じアプリを配信して維持する
 - 操作にはメール確認済みの `@flutterkaigi.jp` アカウントと `admins/{uid}` の管理者登録が必要
+
+応援LTとスタンプQRが使うアプリホストは `tool/app_link_hosts.json` を正本とする。Repositoryルートで `node tool/generate_app_link_config.mjs` を実行してDart/JavaScript定数を再生成し、`node tool/generate_app_link_config.mjs --check` で更新漏れを確認する。公式サイト `2026.flutterkaigi.jp` と参加者アプリ `app-2026.flutterkaigi.jp` は用途が異なる。ネイティブ・配布設定の更新と検証手順は [APP_DELIVERY.md](../../.github/APP_DELIVERY.md#universal-links--app-links) を参照。

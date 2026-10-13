@@ -12,6 +12,9 @@ on:
       - tool/generate_news.dart
       - tool/generate_sessions.dart
       - tool/generate_well_known.dart
+      - tool/app_link_hosts.json
+      - tool/app_link_origins.mjs
+      - tool/generate_app_link_config.mjs
       - .fvmrc
       - pubspec.yaml
       - pubspec.lock
@@ -38,6 +41,11 @@ jobs:
       id-token: write # Workload Identity Federation (OIDC) for Firestore auth.
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Check shared link configuration
+        run: |
+          node tool/generate_app_link_config.mjs --check
+          python3 -m unittest discover -s .github/scripts -p test_app_link_config.py
 
       - uses: ./.github/actions/setup-flutter
 
@@ -136,7 +144,7 @@ jobs:
             fi
           done
           python3 .github/scripts/verify_app_links.py \
-            --base-url https://2026-app.flutterkaigi.jp \
+            --base-url https://app-2026.flutterkaigi.jp \
             --apple-app-id "$APPLE_TEAM_ID.$IOS_BUNDLE_ID" \
             --timeout-seconds 600 \
             --interval-seconds 10

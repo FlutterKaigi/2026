@@ -4,14 +4,15 @@
 
 ## 調査後の実装差分
 
-以下の対応をコードへ追加した。配布完了・OS実機での検証完了を示すものではない。現在の設定手順は [APP_DELIVERY.md](../../.github/APP_DELIVERY.md#universal-links--app-links) を参照。
+2026-10-13時点の実装方針を含む。以下は配布完了・OS実機での検証完了を示すものではない。現在の設定手順は [APP_DELIVERY.md](../../.github/APP_DELIVERY.md#universal-links--app-links) を参照。
 
-- 本番は `2026-app.flutterkaigi.jp` とsuffixなしアプリ、stgは固定alias `stg-flutterkaigi-2026-conference-app.flutterkaigi.workers.dev` と `.stg` アプリを関連付ける。ネイティブのホスト設定には `.env.*` の `APP_LINK_HOST` を使用する。
+- 公式サイトは `2026.flutterkaigi.jp`、参加者アプリの正規ホストは `app-2026.flutterkaigi.jp`。旧アプリホスト `2026-app.flutterkaigi.jp` は同じSPAと検証ファイルを直接配信し続ける。本番ネイティブは新旧両アプリホスト、stgは固定alias `stg-flutterkaigi-2026-conference-app.flutterkaigi.workers.dev` を関連付ける。`.env.*` の `APP_LINK_HOST` / `LEGACY_APP_LINK_HOST` を使い、stg / dev に本番アプリホストを含めない。
+- ホストの正本は `tool/app_link_hosts.json`。`node tool/generate_app_link_config.mjs` で設定を生成し、`node tool/generate_app_link_config.mjs --check` で不一致を確認する。今回のコード更新ではCloudflare・DNS・Firebase Auth・App Checkの本番変更や配布は実施していない。
 - PR固有URLはWeb確認用とし、生成する交換QRは固定stg URLを使用する。PR配布物の検証JSONも `.stg` 用だが、PR固有ホスト自体の直接起動には対応しない。
 - [generate_app_links.dart](../../tool/generate_app_links.dart) とWeb配布Workflowで環境別の検証ファイルを生成し、必須値の欠落・不正をアップロード前に検出する。Apple Team IDは登録済み。調査時に未登録だったstg / prod双方のAndroid SHA-256 Variablesも、2026-09-22にPlay Consoleで取得した値を登録した。本番は1件、stgは新旧の署名証明書3件を含む。
 - 配布は検証ファイルを含むWebアプリを先行させる。Web失敗時は同時指定のネイティブ配布を停止し、websiteも転送先の本番AASAを確認してから公開する。stg固定aliasはPR配布では更新しない。
 - Webをパス形式へ変更し、旧 `/#/route` を起動時に変換する。本番QR scannerは新旧本番URL、stg scannerは固定stg URLを受理し、他環境のURLは拒否する。devでは生トークンを表示する。
-- 旧websiteの `/x/<token>` と `/en/x/<token>` は本番Webアプリへ302転送する。tokenなし・余分な階層は従来の案内ページを維持する。
+- 旧websiteの `/x/<token>` と `/en/x/<token>`、セッション共有などのアプリ機能用リンクは正規の本番Webアプリへ転送する。公式サイトのコンテンツは同サイトに残し、交換のtokenなし・余分な階層は従来の案内ページを維持する。
 - ログイン・プロフィール作成をまたぐpending処理とイベント機能フラグは維持する。pendingは永続化しておらず、Web→ネイティブでは完全な共有URLを渡す必要がある。
 
 本番・stg両App IDのAssociated Domains / Provisioning Profileと、各PlayアプリのApp Signing SHA-256を設定し、ネイティブを再配布する必要がある。Safariの同一ドメイン制約も残る。実機・公開環境の検証結果は別途記録する。

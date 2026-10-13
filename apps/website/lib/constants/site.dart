@@ -1,5 +1,7 @@
+import 'generated_link_origins.dart';
+
 /// Canonical production origin, used to build absolute URLs such as the OGP
-/// `og:image` / `og:url`. Keep in sync with `web/CNAME` (the custom domain).
+/// `og:image` / `og:url`. Defined in `tool/app_link_hosts.json`.
 ///
 /// Overridable at build time via `--dart-define=SITE_ORIGIN=...`. The production
 /// deploy uses the default (the custom domain); PR previews pass an **empty**
@@ -10,5 +12,5 @@
 /// exist — so the card image 404s and the OGP appears broken.
 const String siteOrigin = String.fromEnvironment(
   'SITE_ORIGIN',
-  defaultValue: 'https://2026.flutterkaigi.jp',
+  defaultValue: officialWebsiteOrigin,
 );

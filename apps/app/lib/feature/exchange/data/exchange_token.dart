@@ -8,7 +8,7 @@ part 'exchange_token.freezed.dart';
 /// with QR codes issued before the app received its own canonical origin.
 const productionExchangeOrigin = productionAppOrigin;
 const stagingExchangeOrigin = stagingAppOrigin;
-const legacyExchangeOrigin = 'https://2026.flutterkaigi.jp';
+const legacyExchangeOrigin = officialWebsiteOrigin;
 
 /// A signed, time-limited token for displaying the signed-in user's QR code.
 ///
@@ -49,7 +49,7 @@ final _tokenPattern = RegExp(r'^v1\.([^.]+)\.\d+\.[0-9a-f]+$');
 /// Returns `null` when [raw] matches neither shape.
 ScannedExchangeToken? parseScannedExchangeToken(
   String raw, {
-  Set<String> allowedOrigins = const {productionExchangeOrigin, legacyExchangeOrigin},
+  Set<String> allowedOrigins = const {productionExchangeOrigin, legacyProductionAppOrigin, legacyExchangeOrigin},
 }) {
   final trimmed = raw.trim();
   var candidate = trimmed;

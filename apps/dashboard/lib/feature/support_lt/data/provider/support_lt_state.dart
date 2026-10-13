@@ -16,9 +16,9 @@ final supportLtRepositoryProvider = Provider<SupportLtRepository>(
 /// live app.
 final supportLtAppOriginProvider = Provider<String?>(
   (ref) => switch (ref.watch(eventAdminClientProvider)?.environment) {
-    Flavor.prod => productionAppOrigin,
-    Flavor.stg => stagingAppOrigin,
-    Flavor.dev || null => null,
+    Flavor.prod => const AppLinkConfiguration.production().origin,
+    Flavor.stg => const AppLinkConfiguration.staging().origin,
+    Flavor.dev || null => const AppLinkConfiguration.develop().origin,
   },
 );
 
