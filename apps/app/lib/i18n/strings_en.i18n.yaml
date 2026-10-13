@@ -203,6 +203,10 @@ eventInfo:
   sourceCode: View Source Code
   staffMembers: Staff
   ossLicenses: OSS Licenses
+  survey:
+    title: Survey Request
+    description: We would like to hear your opinions to make future FlutterKaigi events better.
+    button: Answer the General Survey
 contributors:
   title: Contributors
   openRepository: Open the FlutterKaigi/2026 repository

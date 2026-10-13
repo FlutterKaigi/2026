@@ -648,6 +648,8 @@ class Translations$eventInfo$ja {
 
 	/// ja: 'OSSライセンス'
 	String get ossLicenses => 'OSSライセンス';
+
+	late final Translations$eventInfo$survey$ja survey = Translations$eventInfo$survey$ja.internal(_root);
 }
 
 // Path: contributors
@@ -1737,6 +1739,24 @@ class Translations$venueWalk$photo$ja {
 	late final Translations$venueWalk$photo$poses$ja poses = Translations$venueWalk$photo$poses$ja.internal(_root);
 }
 
+// Path: eventInfo.survey
+class Translations$eventInfo$survey$ja {
+	Translations$eventInfo$survey$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'アンケート協力のお願い'
+	String get title => 'アンケート協力のお願い';
+
+	/// ja: '今後のFlutterKaigiをより良いイベントにするため、皆様のご意見をお聞かせください。'
+	String get description => '今後のFlutterKaigiをより良いイベントにするため、皆様のご意見をお聞かせください。';
+
+	/// ja: '全体アンケートに回答する'
+	String get button => '全体アンケートに回答する';
+}
+
 // Path: auth.signIn
 class Translations$auth$signIn$ja {
 	Translations$auth$signIn$ja.internal(this._root);
@@ -2548,6 +2568,9 @@ extension on Translations {
 			'eventInfo.sourceCode' => 'ソースコードを見る',
 			'eventInfo.staffMembers' => 'スタッフ',
 			'eventInfo.ossLicenses' => 'OSSライセンス',
+			'eventInfo.survey.title' => 'アンケート協力のお願い',
+			'eventInfo.survey.description' => '今後のFlutterKaigiをより良いイベントにするため、皆様のご意見をお聞かせください。',
+			'eventInfo.survey.button' => '全体アンケートに回答する',
 			'contributors.title' => 'コントリビューター',
 			'contributors.openRepository' => 'FlutterKaigi/2026 のリポジトリを開く',
 			'contributors.empty' => 'コントリビューターが見つかりませんでした',
@@ -2877,11 +2900,11 @@ extension on Translations {
 			'quiz.registration.join' => '参加する',
 			'quiz.registration.full' => ({required Object max}) => '定員（${max} 人）に達しました',
 			'quiz.registration.failed' => '登録できませんでした。時間をおいて再度お試しください。',
+			_ => null,
+		} ?? switch (path) {
 			'quiz.registration.alreadyParticipated' => '別の回に参加登録済みのため、この回には登録できません。',
 			'quiz.registration.closed' => 'この回の参加受付は終了しました。',
 			'quiz.registration.unavailable' => '登録を確認できませんでした。通信状況を確認して再試行してください。',
-			_ => null,
-		} ?? switch (path) {
 			'quiz.registration.accountUnavailable' => 'このアカウントでは参加できません。運営にお問い合わせください。',
 			'quiz.waiting.title' => '参加表明済み',
 			'quiz.waiting.description' => '当日は会場でスタッフがテーブルをご案内します。チーム選択の開始をお待ちください。',

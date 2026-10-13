@@ -85,12 +85,20 @@ void main() {
     test('covers every declared key', () {
       expect(
         remoteConfigDefaults.keys,
-        containsAll(<String>[RemoteConfigKeys.eventFeaturesEnabled, RemoteConfigKeys.forceUpdate]),
+        containsAll(<String>[
+          RemoteConfigKeys.eventFeaturesEnabled,
+          RemoteConfigKeys.forceUpdate,
+          RemoteConfigKeys.surveyUrl,
+        ]),
       );
     });
 
     test('shows the event features until a fetch says otherwise', () {
       expect(remoteConfigDefaults[RemoteConfigKeys.eventFeaturesEnabled], isTrue);
+    });
+
+    test('keeps the survey hidden until its URL is configured', () {
+      expect(remoteConfigDefaults[RemoteConfigKeys.surveyUrl], '');
     });
 
     test('ships a force update policy that never forces an update', () {
@@ -111,6 +119,7 @@ void main() {
 
       expect(repository.getBool(RemoteConfigKeys.eventFeaturesEnabled), isTrue);
       expect(repository.getString(RemoteConfigKeys.forceUpdate), defaultForceUpdateJson);
+      expect(repository.getString(RemoteConfigKeys.surveyUrl), '');
     });
 
     test('returns the values supplied at construction', () {

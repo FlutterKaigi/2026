@@ -5,6 +5,16 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { mergeDefaults, updateRemoteConfig } from './remote_config.mjs';
 
+for (const environment of ['stg', 'prod']) {
+  test(`${environment} keeps the survey hidden until its URL is configured`, async () => {
+    const defaults = JSON.parse(await readFile(
+      new URL(`../packages/data/firebase/remoteconfig.${environment}.json`, import.meta.url), 'utf8',
+    ));
+    assert.deepEqual(defaults.survey_url?.defaultValue, { value: '' });
+    assert.equal(defaults.survey_url?.valueType, 'STRING');
+  });
+}
+
 test('preserves unrelated parameters, groups and conditions without mutating the source', () => {
   const current = { version: { versionNumber: '8' }, conditions: [{ name: 'rollout' }],
     parameters: { unrelated: { conditionalValues: { rollout: { value: 'keep' } } } },
