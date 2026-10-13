@@ -34,7 +34,7 @@ jobs:
     environment:
       name: app-website
       deployment: ${{ inputs.environment == 'prod' && !inputs.preview }}
-      url: https://2026-app.flutterkaigi.jp
+      url: https://app-2026.flutterkaigi.jp
     concurrency:
       group: deploy-app-web-${{ inputs.preview && format('preview-{0}', github.event.pull_request.number || github.ref) || inputs.environment }}
       cancel-in-progress: ${{ inputs.preview }}
@@ -60,6 +60,11 @@ jobs:
       GCP_SERVICE_ACCOUNT: ${{ vars[format('GCP_SERVICE_ACCOUNT_{0}', inputs.environment == 'stg' && 'STG' || 'PROD')] }}
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Check shared link configuration
+        run: |
+          node tool/generate_app_link_config.mjs --check
+          python3 -m unittest discover -s .github/scripts -p test_app_link_config.py
 
       - uses: ./.github/actions/setup-flutter
 
@@ -165,6 +170,15 @@ jobs:
             --expected-dir "$RUNNER_TEMP/app-links" \
             --timeout-seconds 300 \
             --interval-seconds 10
+          if [ "$DEPLOY_ENVIRONMENT" = prod ] && [ "$IS_PREVIEW" != true ]; then
+            legacy_app_link_host="$(sed -n 's/^LEGACY_APP_LINK_HOST=//p' apps/app/environments/.env.prod)"
+            test -n "$legacy_app_link_host"
+            python3 .github/scripts/verify_app_links.py \
+              --base-url "https://$legacy_app_link_host" \
+              --expected-dir "$RUNNER_TEMP/app-links" \
+              --timeout-seconds 300 \
+              --interval-seconds 10
+          fi
 
       - name: 配布先を記録
         env:

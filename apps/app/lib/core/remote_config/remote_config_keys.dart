@@ -7,6 +7,9 @@ abstract final class RemoteConfigKeys {
   /// Whether the conference-day features are shown. Stored as a bool.
   static const eventFeaturesEnabled = 'event_features_enabled';
 
+  /// HTTPS URL of the general survey. Empty means the survey is hidden.
+  static const surveyUrl = 'survey_url';
+
   /// Forced-update policy encoded as a JSON object. Stored as a String.
   static const forceUpdate = 'force_update';
 }
@@ -26,5 +29,6 @@ const defaultForceUpdateJson =
 /// value.
 const remoteConfigDefaults = <String, Object>{
   RemoteConfigKeys.eventFeaturesEnabled: true,
+  RemoteConfigKeys.surveyUrl: '',
   RemoteConfigKeys.forceUpdate: defaultForceUpdateJson,
 };

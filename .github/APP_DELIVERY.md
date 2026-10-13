@@ -320,11 +320,15 @@ Webアプリとネイティブアプリは同じ `/account` や `/x/<token>` な
 
 | 環境 | アプリ起動用のホスト | iOS Bundle ID / Android Package Name |
 | --- | --- | --- |
-| prod | `2026-app.flutterkaigi.jp` | `jp.flutterkaigi.conf2026` |
+| prod | `app-2026.flutterkaigi.jp` | `jp.flutterkaigi.conf2026` |
 | stg | `stg-flutterkaigi-2026-conference-app.flutterkaigi.workers.dev` | `jp.flutterkaigi.conf2026.stg` |
 | PRプレビュー | Webの確認にはPR固有URL、生成するQRには上記stg固定ホスト | `jp.flutterkaigi.conf2026.stg` |
 
-ネイティブ設定は `apps/app/environments/.env.*` の `APP_LINK_HOST` を使用します。ホストを追加・変更した場合はネイティブの再ビルド・再配布が必要です。iOSでは本番・stg両方のApp IDにAssociated Domains Capabilityを設定し、対応するProvisioning Profileを使用してください。[Flutter iOS設定](https://docs.flutter.dev/cookbook/navigation/set-up-universal-links)
+公式サイトは `2026.flutterkaigi.jp`、参加者アプリの正規ホストは `app-2026.flutterkaigi.jp` です。旧アプリホスト `2026-app.flutterkaigi.jp` も同じWebアプリと検証ファイルを直接配信し、発行済みリンクを維持します。旧アプリホストからの転送は行いません。公式サイトのコンテンツは公式サイトに残し、セッション共有などアプリの機能用リンクだけをアプリへ転送します。
+
+ホストの正本は `tool/app_link_hosts.json` です。変更後はRepositoryルートで `node tool/generate_app_link_config.mjs` を実行して、アプリ・Dashboard・website・WorkerのDart/JavaScript定数を再生成します。`node tool/generate_app_link_config.mjs --check` は生成物の更新漏れを検出します。ネイティブの `.env.*`、Wrangler、Workflowの設定は手動で更新し、`python3 -m unittest discover -s .github/scripts -p test_app_link_config.py` で正本との一致を確認します。これらのチェックはCIと配布前にも実行します。
+
+ネイティブ設定は `apps/app/environments/.env.*` の `APP_LINK_HOST` と `LEGACY_APP_LINK_HOST` を使用します。本番は新旧両アプリホストを関連付け、stg / dev の旧ホスト欄は自身のホストを再使用して本番アプリホストを含めません。旧公式サイトの `/x/*` 関連付けも維持します。ホストを追加・変更した場合はネイティブの再ビルド・再配布が必要です。iOSでは本番・stg両方のApp IDにAssociated Domains Capabilityを設定し、対応するProvisioning Profileを使用してください。[Flutter iOS設定](https://docs.flutter.dev/cookbook/navigation/set-up-universal-links)
 
 PR固有の `workers.dev` URL自体はネイティブへの直接起動対象ではありません。各プレビューに `.stg` 用の検証ファイルを含めても、未登録のホストが自動で関連付けられるわけではありません。stg固定URLは最新stg版を表示し、PR固有版を表示するURLとは異なります。固定aliasは `main` または手動のstg Web配布で更新し、PRプレビューの配布では更新しません。[Cloudflare Preview URLs](https://developers.cloudflare.com/workers/versions-and-deployments/preview-urls/)
 
@@ -345,7 +349,7 @@ PR固有の `workers.dev` URL自体はネイティブへの直接起動対象で
 fvm dart tool/generate_app_links.dart --environment=stg --output-dir=/tmp/flutterkaigi-stg-app-links
 ```
 
-`--output-dir` を省略すると `apps/app/build/web/.well-known` へ出力するため、Webビルド後に実行します。Workflowは先に一時ディレクトリへ生成し、ビルド後にコピーします。配信後は対象URLの `/.well-known/apple-app-site-association` と `/.well-known/assetlinks.json` がredirectなしのHTTP 200・`application/json`で取得でき、内容が生成結果と一致することを確認します。
+`--output-dir` を省略すると `apps/app/build/web/.well-known` へ出力するため、Webビルド後に実行します。Workflowは先に一時ディレクトリへ生成し、ビルド後にコピーします。配信後は対象URLの `/.well-known/apple-app-site-association` と `/.well-known/assetlinks.json` がredirectなしのHTTP 200・`application/json`で取得でき、内容が生成結果と一致することを確認します。本番配布では正規ホストと旧アプリホストの両方を検証します。
 
 [配信確認スクリプト](scripts/verify_app_links.py) は、公開直後の反映を最大5分待ちます。HTTPエラーだけでなく、HTML応答・Content-Type不一致・古いJSON・redirectも10秒間隔で再検証し、期限まで一致しなければ配布を失敗にします。各試行のHTTPステータス・Content-Type・不一致理由をログへ記録し、レスポンス本文は出力しません。
 
@@ -359,6 +363,8 @@ Google PlayのInternal TestingからインストールしたアプリはPlay App
 
 ### 初回の配布順序
 
+ホスト変更時は、コードの更新に加えて新旧両アプリホストのDNS / TLSとCloudflare Custom Domain、Firebase Authenticationの承認済みドメイン、reCAPTCHA Enterpriseの許可ドメインを確認してください。旧ホストでWebを引き続き使うため、その許可設定も残します。新規リンクを配布する前に、以前のアプリと更新版の混在時の挙動を実機で確認します。
+
 1. stg / prodの署名フィンガープリントを登録し、iOS両App IDのCapabilityとProvisioning Profileを準備します。
 2. `Deploy App` をWebのみ・両環境で実行し、本番ホストとstg固定aliasのアプリ・検証ファイルを先に公開します。PRプレビューの配布だけではstg固定aliasは更新されません。
 3. ネイティブをビルド・配布し、websiteの配布を実行します。先行して停止したwebsiteのジョブは、Webアプリ公開後に再実行します。
@@ -369,7 +375,7 @@ Google PlayのInternal TestingからインストールしたアプリはPlay App
 
 - iOS / Androidの関連付けと、インストール済み・未インストール、アプリ終了中・起動中を実機で確認します。実装変更だけで端末上の成功を確認したことにはなりません。
 - Safariの同一ドメイン内リンクやアドレスバーへの直入力はブラウザに残る場合があります。[Apple TN3155](https://developer.apple.com/documentation/technotes/tn3155-debugging-universal-links)
-- 旧 `/#/route` は起動時にパス形式へ変換します。本番scannerは新本番URLと旧website URL、stg scannerはstg固定URLを受け付け、他環境のURLを拒否します。devのQRはEmulator用の生トークンです。
+- 旧 `/#/route` は起動時にパス形式へ変換します。本番のプロフィール交換・応援LTscannerは新旧両アプリURLを受け付けます。プロフィール交換は旧website URLも引き続き受け付けます。stg scannerはstg固定URLを受け付け、他環境のURLを拒否します。devのQRはEmulator用の生トークンです。
 - 交換のpending状態はメモリ内です。Webからネイティブへの切り替えには `/x/<token>` 全体を渡し、ログイン途中の再読み込み・プロセス終了後は元リンクから再開します。`event_features_enabled=false` の交換機能制限は維持します。
 
 ## Firebase SDK settings

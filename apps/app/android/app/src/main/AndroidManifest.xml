@@ -46,6 +46,15 @@
                 <data android:scheme="https"/>
                 <data android:host="${appLinkHost}"/>
             </intent-filter>
+            <!-- Preserve all paths on the previous production app host. -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="http"/>
+                <data android:scheme="https"/>
+                <data android:host="${legacyAppLinkHost}"/>
+            </intent-filter>
             <!-- Preserve production QR/share links on the website host. -->
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW"/>

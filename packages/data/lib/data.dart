@@ -1,3 +1,6 @@
+export 'src/app_link_configuration.dart' show AppLinkConfiguration;
+export 'src/app_link_origins.dart'
+    show officialWebsiteOrigin, productionAppOrigin, legacyProductionAppOrigin, stagingAppOrigin;
 export 'src/country/country.dart' show Country, CountryRegion, findCountry;
 export 'src/country/generated_countries.dart' show countries;
 export 'src/firebase/firebase_initializer.dart' show FirebaseInitializer;
@@ -36,8 +39,6 @@ export 'src/model/support_lt.dart'
         SupportLtRegistration,
         isSupportLtCode,
         parseSupportLtQrPayload,
-        productionAppOrigin,
-        stagingAppOrigin,
         supportLtLinkPath,
         supportLtQrPayload;
 export 'src/model/timeline_event.dart' show TimelineEvent;

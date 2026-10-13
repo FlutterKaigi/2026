@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:app/core/extension/locale_map_extension.dart';
 import 'package:app/core/i18n/strings.g.dart';
+import 'package:app/core/provider/app_link_configuration.dart';
 import 'package:app/core/provider/clock.dart';
 import 'package:app/core/ui/launch_external_url.dart';
 import 'package:app/core/ui/widget/app_scrollbar.dart';
@@ -15,7 +16,6 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 
-const _sessionOrigin = 'https://2026.flutterkaigi.jp';
 const _largeAppBarTitleBottomPadding = 32.0;
 const _largeAppBarMaxTitleScaleFactor = 1.34;
 const _largeAppBarTitleHorizontalPadding = 32.0;
@@ -39,6 +39,8 @@ class SessionDetailsContentWidget extends ConsumerWidget {
     const timeFormat = EventTimeFormat.twentyFourHour;
     final sessionizeUri = _externalUri(session.sessionizeUrl);
     final feedbackUri = _externalUri(session.feedbackUrl);
+    final appOrigin = ref.watch(appLinkConfigurationProvider).origin;
+    final sessionUrl = appOrigin == null ? null : Uri.parse(appOrigin).replace(pathSegments: ['sessions', session.id]);
     final now = ref.watch(clockProvider)();
     final showFeedback = feedbackUri != null && hasSessionEnded(endsAt: session.endsAt, now: now);
 
@@ -59,18 +61,20 @@ class SessionDetailsContentWidget extends ConsumerWidget {
                 ),
                 actions: [
                   SessionBookmarkButton(sessionId: session.id),
-                  IconButton(
-                    tooltip: t.sessionDetails.share,
-                    onPressed: () => unawaited(
-                      _shareSession(
-                        context,
-                        data,
-                        locale,
-                        t.links.openError,
+                  if (sessionUrl != null)
+                    IconButton(
+                      tooltip: t.sessionDetails.share,
+                      onPressed: () => unawaited(
+                        _shareSession(
+                          context,
+                          data,
+                          locale,
+                          sessionUrl,
+                          t.links.openError,
+                        ),
                       ),
+                      icon: const Icon(Icons.share_outlined),
                     ),
-                    icon: const Icon(Icons.share_outlined),
-                  ),
                 ],
               ),
             ),
@@ -390,10 +394,10 @@ Future<void> _shareSession(
   BuildContext context,
   SessionDetailData data,
   Locale locale,
+  Uri sessionUrl,
   String failureMessage,
 ) async {
   final session = data.session;
-  final sessionUrl = Uri.parse('$_sessionOrigin/sessions/${session.id}');
   final speakerNames = data.speakers.map((speaker) => speaker.name).join(', ');
   final text = [
     session.title.resolve(locale),

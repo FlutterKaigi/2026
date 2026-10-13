@@ -63,9 +63,11 @@ void main() {
 
   for (final scenario in [
     (flavor: Flavor.production, accepted: productionAppOrigin, rejected: stagingAppOrigin),
+    (flavor: Flavor.production, accepted: legacyProductionAppOrigin, rejected: officialWebsiteOrigin),
     (flavor: Flavor.staging, accepted: stagingAppOrigin, rejected: productionAppOrigin),
+    (flavor: Flavor.staging, accepted: stagingAppOrigin, rejected: legacyProductionAppOrigin),
   ]) {
-    testWidgets("${scenario.flavor.shortName} scanning returns the code from its own backend's link only", (
+    testWidgets('${scenario.flavor.shortName} accepts ${scenario.accepted} and rejects ${scenario.rejected}', (
       tester,
     ) async {
       final results = await openScanPage(tester, flavor: scenario.flavor);
@@ -86,7 +88,7 @@ void main() {
   testWidgets('develop scanning returns a bare code and rejects links to live apps', (tester) async {
     final results = await openScanPage(tester, flavor: Flavor.develop);
 
-    for (final origin in [productionAppOrigin, stagingAppOrigin]) {
+    for (final origin in [productionAppOrigin, legacyProductionAppOrigin, stagingAppOrigin, officialWebsiteOrigin]) {
       detect(tester, supportLtQrPayload('123456', origin: origin));
       await tester.pumpAndSettle();
       expect(find.byType(SupportLtScanPage), findsOneWidget);

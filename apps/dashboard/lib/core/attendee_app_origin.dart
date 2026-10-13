@@ -12,8 +12,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 /// live app.
 final attendeeAppOriginProvider = Provider<String?>(
   (ref) => switch (ref.watch(eventAdminClientProvider)?.environment) {
-    Flavor.prod => productionAppOrigin,
-    Flavor.stg => stagingAppOrigin,
-    Flavor.dev || null => null,
+    Flavor.prod => const AppLinkConfiguration.production().origin,
+    Flavor.stg => const AppLinkConfiguration.staging().origin,
+    Flavor.dev || null => const AppLinkConfiguration.develop().origin,
   },
 );

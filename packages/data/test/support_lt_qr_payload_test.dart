@@ -2,13 +2,13 @@ import 'package:data/data.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  const production = {productionAppOrigin};
+  final production = const AppLinkConfiguration.production().allowedOrigins;
 
   group('supportLtQrPayload', () {
     test('links to the registration page under the selected origin', () {
       expect(
         supportLtQrPayload('123456', origin: productionAppOrigin),
-        'https://2026-app.flutterkaigi.jp/account/support-lt/123456',
+        'https://app-2026.flutterkaigi.jp/account/support-lt/123456',
       );
       expect(supportLtQrPayload('123456', origin: stagingAppOrigin), '$stagingAppOrigin/account/support-lt/123456');
     });
@@ -24,6 +24,20 @@ void main() {
         final payload = supportLtQrPayload(code, origin: productionAppOrigin);
         expect(parseSupportLtQrPayload(payload, allowedOrigins: production), code);
       }
+    });
+
+    test('accepts the previous production app domain without admitting website links', () {
+      expect(
+        parseSupportLtQrPayload(
+          '$legacyProductionAppOrigin/account/support-lt/000042',
+          allowedOrigins: production,
+        ),
+        '000042',
+      );
+      expect(
+        parseSupportLtQrPayload('$officialWebsiteOrigin/account/support-lt/000042', allowedOrigins: production),
+        isNull,
+      );
     });
 
     test('accepts a bare code in every environment and trims whitespace', () {

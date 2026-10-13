@@ -149,7 +149,7 @@ void main() {
       return container.read(attendeeAppOriginProvider);
     }
 
-    expect(originFor(Flavor.prod), productionAppOrigin);
+    expect(originFor(Flavor.prod), 'https://app-2026.flutterkaigi.jp');
     expect(originFor(Flavor.stg), stagingAppOrigin);
     // Neither the emulator nor an unknown environment may link to a live app.
     expect(originFor(Flavor.dev), isNull);

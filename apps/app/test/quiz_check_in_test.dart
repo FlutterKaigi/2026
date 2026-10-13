@@ -295,10 +295,22 @@ void main() {
       expect(find.byType(QuizCheckInScanPage), findsOneWidget);
       expect(results, isEmpty);
 
+      detect(tester, quizCheckInQrPayload('event', '123456', origin: officialWebsiteOrigin));
+      await tester.pumpAndSettle();
+      expect(find.byType(QuizCheckInScanPage), findsOneWidget);
+      expect(results, isEmpty);
+
       detect(tester, quizCheckInQrPayload('event', '123456', origin: productionAppOrigin));
       await tester.pumpAndSettle();
       expect(find.byType(QuizCheckInScanPage), findsNothing);
       expect(results, ['123456']);
+    });
+
+    testWidgets('accepts an earlier production app link', (tester) async {
+      final results = await openScanPage(tester);
+      detect(tester, quizCheckInQrPayload('event', '654321', origin: legacyProductionAppOrigin));
+      await tester.pumpAndSettle();
+      expect(results, ['654321']);
     });
 
     testWidgets('accepts a bare code', (tester) async {
