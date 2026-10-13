@@ -6,7 +6,7 @@
 
 2026-10-13時点の実装方針を含む。以下は配布完了・OS実機での検証完了を示すものではない。現在の設定手順は [APP_DELIVERY.md](../../.github/APP_DELIVERY.md#universal-links--app-links) を参照。
 
-- 公式サイトは `2026.flutterkaigi.jp`、参加者アプリの正規ホストは `app-2026.flutterkaigi.jp`。旧アプリホスト `2026-app.flutterkaigi.jp` は同じSPAと検証ファイルを直接配信し続ける。本番ネイティブは新旧両アプリホスト、stgは固定alias `stg-flutterkaigi-2026-conference-app.flutterkaigi.workers.dev` を関連付ける。`.env.*` の `APP_LINK_HOST` / `LEGACY_APP_LINK_HOST` を使い、stg / dev に本番アプリホストを含めない。
+- 公式サイトは `2026.flutterkaigi.jp`、参加者アプリの正規ホストは2025年と同じ命名規則の `2026-app.flutterkaigi.jp`。本番ネイティブは本番アプリホスト、stgは固定alias `stg-flutterkaigi-2026-conference-app.flutterkaigi.workers.dev` を関連付ける。`.env.*` の `APP_LINK_HOST` を使い、stg / dev に本番アプリホストを含めない。
 - ホストの正本は `tool/app_link_hosts.json`。`node tool/generate_app_link_config.mjs` で設定を生成し、`node tool/generate_app_link_config.mjs --check` で不一致を確認する。今回のコード更新ではCloudflare・DNS・Firebase Auth・App Checkの本番変更や配布は実施していない。
 - PR固有URLはWeb確認用とし、生成する交換QRは固定stg URLを使用する。PR配布物の検証JSONも `.stg` 用だが、PR固有ホスト自体の直接起動には対応しない。
 - [generate_app_links.dart](../../tool/generate_app_links.dart) とWeb配布Workflowで環境別の検証ファイルを生成し、必須値の欠落・不正をアップロード前に検出する。Apple Team IDは登録済み。調査時に未登録だったstg / prod双方のAndroid SHA-256 Variablesも、2026-09-22にPlay Consoleで取得した値を登録した。本番は1件、stgは新旧の署名証明書3件を含む。

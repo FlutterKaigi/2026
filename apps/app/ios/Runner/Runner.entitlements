@@ -13,8 +13,6 @@
 	<key>com.apple.developer.associated-domains</key>
 	<array>
 		<string>applinks:$(APP_LINK_HOST)</string>
-		<!-- prod retains its previous app host; stg/dev repeat their own host. -->
-		<string>applinks:$(LEGACY_APP_LINK_HOST)</string>
 		<!-- Existing production exchange links remain valid. The website's
 		     AASA only associates the production app, never .stg or .dev. -->
 		<string>applinks:2026.flutterkaigi.jp</string>

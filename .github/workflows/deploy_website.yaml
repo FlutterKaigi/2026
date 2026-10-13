@@ -144,7 +144,7 @@ jobs:
             fi
           done
           python3 .github/scripts/verify_app_links.py \
-            --base-url https://app-2026.flutterkaigi.jp \
+            --base-url https://2026-app.flutterkaigi.jp \
             --apple-app-id "$APPLE_TEAM_ID.$IOS_BUNDLE_ID" \
             --timeout-seconds 600 \
             --interval-seconds 10

@@ -1,6 +1,5 @@
 export 'src/app_link_configuration.dart' show AppLinkConfiguration;
-export 'src/app_link_origins.dart'
-    show officialWebsiteOrigin, productionAppOrigin, legacyProductionAppOrigin, stagingAppOrigin;
+export 'src/app_link_origins.dart' show officialWebsiteOrigin, productionAppOrigin, stagingAppOrigin;
 export 'src/country/country.dart' show Country, CountryRegion, findCountry;
 export 'src/country/generated_countries.dart' show countries;
 export 'src/firebase/firebase_initializer.dart' show FirebaseInitializer;
