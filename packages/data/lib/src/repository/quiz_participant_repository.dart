@@ -8,6 +8,10 @@ abstract interface class QuizParticipantRepository {
   /// 認証アカウントの公開プロフィールで参加表明する。
   Future<void> register(String eventId);
 
+  /// 会場で配られた6桁の参加コードでチェックインする。
+  Future<void> checkIn(String eventId, String code);
+
+  /// チェックイン後にチームを選ぶ。
   Future<void> selectTeam(String eventId, String teamId, {required String? expectedTeamId});
 
   Stream<List<QuizParticipant>> watchAll(String eventId);
@@ -44,6 +48,11 @@ final class FirestoreQuizParticipantRepository implements QuizParticipantReposit
           options: HttpsCallableOptions(timeout: const Duration(seconds: 30)),
         )
         .call<void>({'eventId': eventId});
+  }
+
+  @override
+  Future<void> checkIn(String eventId, String code) async {
+    await _functions.httpsCallable('checkInQuizParticipant').call<void>({'eventId': eventId, 'code': code});
   }
 
   @override

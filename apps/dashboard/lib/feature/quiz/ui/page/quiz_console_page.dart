@@ -3,6 +3,7 @@ import 'package:dashboard/core/event_environment/event_environment.dart';
 import 'package:dashboard/feature/quiz/data/provider/quiz_list_state.dart';
 import 'package:dashboard/feature/quiz/data/provider/quiz_repository.dart';
 import 'package:dashboard/feature/quiz/ui/component/quiz_status_label.dart';
+import 'package:dashboard/feature/quiz/ui/component/quiz_check_in_code.dart';
 import 'package:dashboard/feature/quiz/ui/component/quiz_countdown.dart';
 import 'package:dashboard/feature/quiz/ui/component/quiz_promotion_controls.dart';
 import 'package:data/data.dart';
@@ -86,6 +87,7 @@ class _ConsoleBody extends HookConsumerWidget {
     final participantList = participants.asData?.value;
     final participantCount = participantList?.length;
     final unselectedCount = participantList?.where((person) => person.teamId == null).length;
+    final checkedInCount = participantList?.where((person) => person.checkedInAt != null).length;
     final onlyUnselected = useState(false);
     final canStart =
         event.teamSelectionStatus == QuizTeamSelectionStatus.closed &&
@@ -168,7 +170,7 @@ class _ConsoleBody extends HookConsumerWidget {
                 ),
               ],
               const SizedBox(width: 24),
-              // ライフサイクル操作: 非公開 → 公開 → 受付開始 → 受付終了 → チーム選択。
+              // ライフサイクル操作: 非公開 → 公開 → 受付開始 → 受付終了 → チェックイン・チーム選択。
               // 各遷移は運営の明示操作で、リポジトリ側でも遷移元を検証する。
               if (event.status == QuizEventStatus.draft) ...[
                 FilledButton.icon(
@@ -252,16 +254,30 @@ class _ConsoleBody extends HookConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'チーム選択: ${switch (event.teamSelectionStatus) {
+                      'チェックイン・チーム選択: ${switch (event.teamSelectionStatus) {
                         QuizTeamSelectionStatus.notStarted => '未開始',
                         QuizTeamSelectionStatus.open => '受付中',
                         QuizTeamSelectionStatus.closed => '終了',
                       }}',
                     ),
                     Text(
-                      '選択済み ${participantCount == null ? '…' : participantCount - unselectedCount!} 人 / 未選択 ${unselectedCount ?? '…'} 人',
+                      '参加表明 ${participantCount ?? '…'} 人 / チェックイン済み ${checkedInCount ?? '…'} 人 / '
+                      'チーム選択済み ${participantCount == null ? '…' : participantCount - unselectedCount!} 人 / '
+                      '未選択 ${unselectedCount ?? '…'} 人（未チェックインを含む）',
                     ),
-                    const Text('着席人数とチーム別の一覧を照合してください。出題前に参加受付・チーム選択を終了し、未選択者を確認してください。'),
+                    const Text(
+                      '参加者は会場の QR コードまたは参加コードでチェックインしてからチームを選びます。'
+                      '着席人数とチーム別の一覧を照合してください。出題前に参加受付・チェックインを終了し、未選択者を確認してください。',
+                    ),
+                    if (event.teamSelectionStatus == QuizTeamSelectionStatus.notStarted &&
+                        event.status == QuizEventStatus.registration)
+                      const Text('チェックインは参加登録を終了してから開始できます。'),
+                    if (event.teamSelectionStatus != QuizTeamSelectionStatus.notStarted) ...[
+                      const SizedBox(height: 12),
+                      QuizCheckInCode(eventId: eventId, qrSize: 160),
+                      const SizedBox(height: 4),
+                      const Text('投影画面にも表示されます。配信映像には投影画面を映さないでください。'),
+                    ],
                     const SizedBox(height: 12),
                     Wrap(
                       spacing: 12,
@@ -269,29 +285,48 @@ class _ConsoleBody extends HookConsumerWidget {
                       children: [
                         if (event.teamSelectionStatus != QuizTeamSelectionStatus.open)
                           OutlinedButton(
-                            onPressed: isBusy
+                            // 初回の開始は参加登録の終了後のみ。当日枠の受付再開中は再開だけできる。
+                            onPressed:
+                                isBusy ||
+                                    (event.teamSelectionStatus == QuizTeamSelectionStatus.notStarted &&
+                                        event.status != QuizEventStatus.entryClosed)
                                 ? null
                                 : () => confirmAndRun(
-                                    title: 'チーム選択を開始',
+                                    title: 'チェックインを開始',
                                     message: event.teamSelectionStatus == QuizTeamSelectionStatus.notStarted
-                                        ? 'A〜T のチーム選択を開始します。旧方式の割り当てがあれば解除し、参加者に座ったテーブルを選び直してもらいます。'
-                                        : 'チーム選択を再開します。選択済みの所属は保持されます。',
-                                    label: 'チーム選択開始',
+                                        ? '参加コードを発行し、チェックインと A〜T のチーム選択を開始します。旧方式の割り当てがあれば解除し、'
+                                              '参加者にチェックイン後、座ったテーブルを選び直してもらいます。'
+                                        : 'チェックインとチーム選択を再開します。参加コード、チェックイン済みの記録、選択済みの所属は保持されます。',
+                                    label: 'チェックイン開始',
                                     action: () => ops.openTeamSelection(eventId),
                                   ),
-                            child: const Text('チーム選択を開始'),
+                            child: const Text('チェックインを開始'),
                           ),
                         if (event.teamSelectionStatus == QuizTeamSelectionStatus.open)
                           OutlinedButton(
                             onPressed: isBusy
                                 ? null
                                 : () => confirmAndRun(
-                                    title: 'チーム選択を終了',
-                                    message: 'チーム選択と変更を締め切ります。初出題前なら再開できます。',
-                                    label: 'チーム選択終了',
+                                    title: 'チェックインを終了',
+                                    message: 'チェックインとチーム選択・変更を締め切ります。初出題前なら再開できます。',
+                                    label: 'チェックイン終了',
                                     action: () => ops.closeTeamSelection(eventId),
                                   ),
-                            child: const Text('チーム選択を終了'),
+                            child: const Text('チェックインを終了'),
+                          ),
+                        if (event.teamSelectionStatus != QuizTeamSelectionStatus.notStarted)
+                          OutlinedButton(
+                            onPressed: isBusy
+                                ? null
+                                : () => confirmAndRun(
+                                    title: '参加コードを再発行',
+                                    message:
+                                        '投影中の QR コードと現在の参加コードは使えなくなります。チェックイン済みの参加者はそのままです。'
+                                        'コードが会場外に広まった場合は、先に配信などでの露出を止めてから再発行してください。',
+                                    label: '参加コード再発行',
+                                    action: () => ops.regenerateCheckInCode(eventId),
+                                  ),
+                            child: const Text('コードを再発行'),
                           ),
                         OutlinedButton(
                           onPressed:
@@ -303,7 +338,7 @@ class _ConsoleBody extends HookConsumerWidget {
                               ? null
                               : () => confirmAndRun(
                                   title: '未選択者を一括取消',
-                                  message: '現在未選択の $unselectedCount 人を取り消して枠を空けます。実行時に選択済みになった人は対象に含めません。',
+                                  message: '現在未選択（未チェックインを含む）の $unselectedCount 人を取り消して枠を空けます。実行時に選択済みになった人は対象に含めません。',
                                   label: '未選択者の取消',
                                   action: () async {
                                     final count = await ops.removeUnselectedParticipants(eventId);
@@ -353,7 +388,11 @@ class _ConsoleBody extends HookConsumerWidget {
                     ListTile(
                       title: Text(participant.displayName),
                       subtitle: Text(
-                        '${participant.teamId == null ? '未選択' : 'チーム ${participant.teamId}'} / ${participant.id}',
+                        '${switch (participant) {
+                          QuizParticipant(:final teamId?) => 'チーム $teamId',
+                          QuizParticipant(checkedInAt: _?) => 'チェックイン済み・未選択',
+                          _ => '未チェックイン',
+                        }} / ${participant.id}',
                       ),
                       trailing: TextButton(
                         onPressed: isBusy

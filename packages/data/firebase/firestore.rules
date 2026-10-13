@@ -197,6 +197,7 @@ service cloud.firestore {
         allow write: if false;
       }
       match /entryAttempts/{uid} { allow read, write: if false; }
+      match /checkInAttempts/{uid} { allow read, write: if false; }
       match /admissionSlots/{slotId} { allow read, write: if false; }
       match /operations/{operationId} { allow read, write: if false; }
       match /participantAccounts/{uid} {

@@ -2,13 +2,15 @@ import 'dart:async';
 
 import 'package:app/core/extension/locale_map_extension.dart';
 import 'package:app/core/i18n/strings.g.dart';
+import 'package:app/core/ui/widget/app_page_content.dart';
+import 'package:app/feature/auth/ui/widget/sign_in_card.dart';
 import 'package:app/feature/quiz/data/provider/quiz_providers.dart';
 import 'package:app/feature/quiz/data/provider/quiz_repositories.dart';
+import 'package:app/feature/quiz/ui/component/quiz_check_in_view.dart';
 import 'package:app/feature/quiz/ui/component/quiz_motion.dart';
 import 'package:app/feature/quiz/ui/component/quiz_option_card.dart';
 import 'package:app/feature/quiz/ui/component/quiz_question_view.dart';
 import 'package:app/feature/quiz/ui/component/quiz_result_view.dart';
-import 'package:app/feature/quiz/ui/component/quiz_sign_in_required_view.dart';
 import 'package:app/feature/quiz/ui/component/quiz_team_badge.dart';
 import 'package:app/feature/quiz/ui/component/quiz_team_selection_view.dart';
 import 'package:cloud_functions/cloud_functions.dart';
@@ -23,25 +25,37 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 /// イベント一覧から `eventId` を受け取り、`ProviderScope` の override で
 /// 配下のプロバイダ群に対象イベントを供給する。
 /// `quizEvents.status` と自分の参加状態を組み合わせたステートマシンで、
-/// 参加登録・待機・チーム発表・出題・正解発表・最終結果を切り替える。
+/// 参加登録・待機・チェックイン・チーム選択・出題・正解発表・最終結果を切り替える。
 /// 状態の切り替えは [AnimatedSwitcher] でフェード + スライドさせ、
 /// 会場のライブ進行に合わせて画面が「切り替わった」ことを体感させる。
-class QuizPage extends StatelessWidget {
-  const QuizPage({required this.eventId, super.key});
+class QuizPage extends HookWidget {
+  const QuizPage({required this.eventId, this.checkInCode, super.key});
 
   final String eventId;
 
+  /// Code from the venue check-in QR code's link (`quizCheckInQrPayload`),
+  /// submitted once the attendee is signed in, registered and check-in is open.
+  final String? checkInCode;
+
   @override
   Widget build(BuildContext context) {
+    // 自動送信の記録は、サインインや状態の切り替わりで作り直される画面ではなく
+    // ページで持つ。送り直すと誤ったコードのリンク 1 つで試行上限に達してしまう。
+    final autoSubmissions = useRef(<QuizCheckInAutoSubmission>{});
     return ProviderScope(
       overrides: [quizEventIdProvider.overrideWithValue(eventId)],
-      child: const _QuizPageBody(),
+      child: _QuizPageBody(checkInLink: (code: checkInCode, autoSubmissions: autoSubmissions.value)),
     );
   }
 }
 
+/// The check-in link code and the page's record of codes already sent for it.
+typedef _CheckInLink = ({String? code, Set<QuizCheckInAutoSubmission> autoSubmissions});
+
 class _QuizPageBody extends ConsumerWidget {
-  const _QuizPageBody();
+  const _QuizPageBody({required this.checkInLink});
+
+  final _CheckInLink checkInLink;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -55,10 +69,16 @@ class _QuizPageBody extends ConsumerWidget {
       body: switch (user) {
         AsyncError() => _Centered(message: t.quiz.errors.signInFailed),
         AsyncLoading() => const _Loading(),
-        AsyncData(:final value) when value == null => const QuizSignInRequiredView(),
-        AsyncData() => switch (eventAsync) {
-          AsyncData(:final value) when value == null => const _PreparingView(),
-          AsyncData(:final value) => _QuizBody(event: value!),
+        // QR コードのリンクから開いた場合もコードを失わないよう、この画面でサインインする。
+        AsyncData(:final value) when value == null => AppPageContent(
+          maxWidth: signInCardMaxWidth,
+          padding: const EdgeInsets.all(24),
+          centerVertically: true,
+          child: SignInCard(title: t.auth.signIn.required, description: t.quiz.signInRequired.inPage),
+        ),
+        AsyncData(:final value) => switch (eventAsync) {
+          AsyncData(value: null) => const _PreparingView(),
+          AsyncData(value: final event?) => _QuizBody(event: event, uid: value!.uid, checkInLink: checkInLink),
           AsyncError() => _Centered(message: t.quiz.errors.eventLoadFailed),
           AsyncLoading() => const _Loading(),
         },
@@ -70,9 +90,11 @@ class _QuizPageBody extends ConsumerWidget {
 /// サインイン・イベント取得が完了した後の本体。イベントの状態と自分の
 /// 参加状態から表示すべきビューを決定する。
 class _QuizBody extends ConsumerWidget {
-  const _QuizBody({required this.event});
+  const _QuizBody({required this.event, required this.uid, required this.checkInLink});
 
   final QuizEvent event;
+  final String uid;
+  final _CheckInLink checkInLink;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -94,10 +116,8 @@ class _QuizBody extends ConsumerWidget {
         _RegistrationForm(event: event),
         'registration',
       ),
-      QuizEventStatus.registration when event.teamSelectionStatus != QuizTeamSelectionStatus.notStarted => (
-        QuizTeamSelectionView(event: event, participant: participant!),
-        'selection',
-      ),
+      QuizEventStatus.registration when event.teamSelectionStatus != QuizTeamSelectionStatus.notStarted =>
+        _checkInOrSelection(participant!),
       QuizEventStatus.registration => (const _Waiting(), 'waiting'),
       // 受付終了後に未登録のまま開いた場合の案内。従来はチーム発表画面の
       // ローディングが出続けていた。
@@ -105,10 +125,8 @@ class _QuizBody extends ConsumerWidget {
         const _EntryClosed(),
         'entry-closed',
       ),
-      QuizEventStatus.entryClosed when event.teamSelectionStatus != QuizTeamSelectionStatus.notStarted => (
-        QuizTeamSelectionView(event: event, participant: participant!),
-        'selection',
-      ),
+      QuizEventStatus.entryClosed when event.teamSelectionStatus != QuizTeamSelectionStatus.notStarted =>
+        _checkInOrSelection(participant!),
       QuizEventStatus.entryClosed => (const _Waiting(), 'waiting'),
       QuizEventStatus.inProgress => _inProgress(ref, team),
       // 終了後は未参加者にもランキングを見せる（自チームカードは非表示）。
@@ -135,6 +153,19 @@ class _QuizBody extends ConsumerWidget {
       child: KeyedSubtree(key: ValueKey(stateKey), child: child),
     );
   }
+
+  /// チェックインの受付開始後。チェックインが済むまではチームを選べない。
+  (Widget, String) _checkInOrSelection(QuizParticipant participant) => participant.checkedInAt == null
+      ? (
+          QuizCheckInView(
+            event: event,
+            uid: uid,
+            linkCode: checkInLink.code,
+            autoSubmissions: checkInLink.autoSubmissions,
+          ),
+          'check-in',
+        )
+      : (QuizTeamSelectionView(event: event, participant: participant), 'selection');
 
   /// 進行中（`status == inProgress`）の分岐。現在の問題の状態で切り替える。
   (Widget, String) _inProgress(WidgetRef ref, QuizTeam? team) {

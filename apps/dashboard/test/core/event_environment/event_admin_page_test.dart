@@ -1,12 +1,12 @@
 import 'dart:async';
 
 import 'package:cloud_functions/cloud_functions.dart';
+import 'package:dashboard/core/attendee_app_origin.dart';
 import 'package:dashboard/core/env.dart';
 import 'package:dashboard/core/event_environment/event_admin_client.dart';
 import 'package:dashboard/core/event_environment/event_environment.dart';
 import 'package:dashboard/core/router/router.dart';
 import 'package:dashboard/feature/auth/data/provider/auth_repository.dart';
-import 'package:dashboard/feature/support_lt/data/provider/support_lt_state.dart';
 import 'package:dashboard/feature/support_lt/ui/widget/support_lt_code_card.dart';
 import 'package:data/data.dart';
 import 'package:data/user.dart';
@@ -113,7 +113,7 @@ void main() {
     // The QR code must open the attendee app of the operated environment, not
     // of the environment this dashboard build signs in to.
     String? qrOrigin() =>
-        ProviderScope.containerOf(tester.element(find.byType(SupportLtCodeCard))).read(supportLtAppOriginProvider);
+        ProviderScope.containerOf(tester.element(find.byType(SupportLtCodeCard))).read(attendeeAppOriginProvider);
     expect(find.text('stg の参加者'), findsOneWidget);
     expect(find.text('123456'), findsOneWidget);
     expect(qrOrigin(), stagingAppOrigin);

@@ -182,6 +182,11 @@ RouteBase get $appShellRoute => StatefulShellRouteData.$route(
                   path: ':eventId',
                   factory: $QuizRoute._fromState,
                 ),
+                GoRouteData.$route(
+                  path: ':eventId/check-in/:code',
+                  hasOverriddenOnExit: false,
+                  factory: $QuizCheckInLinkRoute._fromState,
+                ),
               ],
             ),
             GoRouteData.$route(
@@ -582,6 +587,30 @@ mixin $QuizRoute on GoRouteData {
   @override
   String get location => GoRouteData.$location(
     '/account/quiz/${Uri.encodeComponent(_self.eventId)}',
+  );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) => context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $QuizCheckInLinkRoute on GoRouteData {
+  static QuizCheckInLinkRoute _fromState(GoRouterState state) =>
+      QuizCheckInLinkRoute(eventId: state.pathParameters['eventId']!, code: state.pathParameters['code']!);
+
+  QuizCheckInLinkRoute get _self => this as QuizCheckInLinkRoute;
+
+  @override
+  String get location => GoRouteData.$location(
+    '/account/quiz/${Uri.encodeComponent(_self.eventId)}/check-in/${Uri.encodeComponent(_self.code)}',
   );
 
   @override

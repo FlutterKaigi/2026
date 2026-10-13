@@ -116,7 +116,7 @@ export async function withdrawQuizPromotion(prod: Firestore, input: Data, uid: s
     const promotionRef = prod.doc(`quizPromotions/${sourceEventId}`);
     const [promotion, questions, ...activity] = await Promise.all([
       tx.get(promotionRef), tx.get(ref.collection("questions")),
-      ...["participants", "participantAccounts", "teams", "answers", "admissionSlots", "entryClaims", "entryAttempts"]
+      ...["participants", "participantAccounts", "teams", "answers", "admissionSlots", "entryClaims", "entryAttempts", "checkInAttempts"]
         .map((name) => tx.get(ref.collection(name).limit(1))),
     ]);
     requireState(promotion.get("eventId") === eventId && promotion.get("status") === "active", "反映履歴が一致しません。状態を確認してください。");

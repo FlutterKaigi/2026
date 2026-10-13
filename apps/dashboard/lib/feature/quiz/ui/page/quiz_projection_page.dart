@@ -1,11 +1,15 @@
 import 'package:dashboard/feature/quiz/data/provider/quiz_list_state.dart';
+import 'package:dashboard/feature/quiz/ui/component/quiz_check_in_code.dart';
 import 'package:dashboard/feature/quiz/ui/component/quiz_countdown.dart';
 import 'package:dashboard/feature/quiz/ui/component/quiz_status_label.dart';
 import 'package:data/data.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-/// 会場投影用の読み取り専用画面。受付コード・下書き・正解 secret を購読しない。
+/// 会場投影用の読み取り専用画面。下書き・正解 secret を購読しない。
+///
+/// チェックインの受付中だけ、会場で配る参加コードと QR コードを表示する。
+/// 会場外に出さないため、この画面は配信映像に映さない。
 class QuizProjectionPage extends ConsumerWidget {
   const QuizProjectionPage({super.key, required this.eventId});
 
@@ -55,6 +59,20 @@ class _Projection extends ConsumerWidget {
           else ...[
             Text(quizEventStatusLabel(event.status), style: Theme.of(context).textTheme.headlineMedium),
             const SizedBox(height: 24),
+            if ((event.status == QuizEventStatus.registration || event.status == QuizEventStatus.entryClosed) &&
+                event.teamSelectionStatus == QuizTeamSelectionStatus.open) ...[
+              Text(
+                'アプリのクイズ大会の画面で QR コードを読み取るか、参加コードを入力してチェックインしてください。',
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
+              const SizedBox(height: 16),
+              QuizCheckInCode(
+                eventId: event.id,
+                qrSize: 320,
+                codeStyle: Theme.of(context).textTheme.displayLarge,
+              ),
+              const SizedBox(height: 32),
+            ],
             _ProjectionTeams(event: event),
           ],
         ],
@@ -129,9 +147,9 @@ class _ProjectionTeams extends ConsumerWidget {
     final heading = finished
         ? '結果発表'
         : switch (event.teamSelectionStatus) {
-            QuizTeamSelectionStatus.notStarted => 'チーム選択の開始をお待ちください。',
-            QuizTeamSelectionStatus.open => 'スタッフに案内されたテーブルでチーム（A〜T）を選択してください。',
-            QuizTeamSelectionStatus.closed => 'チーム選択は終了しました。出題をお待ちください。',
+            QuizTeamSelectionStatus.notStarted => 'チェックインの開始をお待ちください。',
+            QuizTeamSelectionStatus.open => 'チェックイン後、スタッフに案内されたテーブルのチーム（A〜T）を選択してください。',
+            QuizTeamSelectionStatus.closed => 'チェックインとチーム選択は終了しました。出題をお待ちください。',
           };
     final teams = ref.watch(quizTeamListProvider(event.id));
     return teams.when(

@@ -6,13 +6,13 @@ import 'package:app/core/router/router.dart';
 import 'package:app/core/ui/widget/app_error_view.dart';
 import 'package:app/core/ui/widget/app_page_content.dart';
 import 'package:app/core/ui/widget/brand_header_card.dart';
+import 'package:app/core/ui/widget/digit_code_field.dart';
 import 'package:app/feature/auth/data/provider/auth_repository.dart';
 import 'package:app/feature/auth/ui/widget/authenticated_body.dart';
 import 'package:app/feature/auth/ui/widget/sign_in_card.dart';
 import 'package:app/feature/support_lt/data/provider/support_lt_provider.dart';
 import 'package:app/feature/support_lt/ui/page/support_lt_scan_page.dart';
 import 'package:app/feature/support_lt/ui/support_lt_error_message.dart';
-import 'package:app/feature/support_lt/ui/widget/support_lt_code_field.dart';
 import 'package:data/data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -200,7 +200,8 @@ class _RegistrationForm extends HookConsumerWidget {
               style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
             ),
             const SizedBox(height: 16),
-            SupportLtCodeField(
+            DigitCodeField(
+              label: t.supportLt.codeLabel,
               controller: controller,
               enabled: !isSubmitting.value,
               errorText: error.value?.message,

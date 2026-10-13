@@ -46,6 +46,7 @@ void main() {
           quizSponsorListProvider.overrideWith((_) => Stream.value([])),
           quizAnswersByQuestionProvider.overrideWith((_, _) => Stream.value([])),
           quizOperationsRepositoryProvider.overrideWithValue(operations),
+          quizCheckInCodeProvider('event').overrideWith((_) => Stream.value('123456')),
         ],
         child: const MaterialApp(
           home: Scaffold(body: QuizConsolePage(eventId: 'event')),
@@ -63,7 +64,8 @@ void main() {
       .first;
 
   final waiting = QuizParticipant(id: 'waiting', displayName: 'Waiting', registeredAt: DateTime(2026));
-  final checkedIn = waiting.copyWith(id: 'seated', displayName: 'Seated', teamId: 'A');
+  final checkedIn = waiting.copyWith(id: 'seated', displayName: 'Seated', teamId: 'A', checkedInAt: DateTime(2026));
+  final arrived = waiting.copyWith(id: 'arrived', displayName: 'Arrived', checkedInAt: DateTime(2026));
 
   testWidgets('no-show cancellation is confirmed and reports the actual count', (tester) async {
     final operations = _Operations();
@@ -77,7 +79,7 @@ void main() {
       ),
       people: [waiting, checkedIn],
     );
-    expect(find.text('選択済み 1 人 / 未選択 1 人'), findsOneWidget);
+    expect(find.text('参加表明 2 人 / チェックイン済み 1 人 / チーム選択済み 1 人 / 未選択 1 人（未チェックインを含む）'), findsOneWidget);
     final button = find.widgetWithText(OutlinedButton, '未選択者を一括取消');
     await tester.ensureVisible(button);
     await tester.tap(button);
@@ -107,6 +109,50 @@ void main() {
       expect(tester.widget<OutlinedButton>(find.widgetWithText(OutlinedButton, '未選択者を一括取消')).onPressed, isNull);
     });
   }
+
+  testWidgets('check-in starts only after registration closes', (tester) async {
+    for (final (status, enabled) in [(QuizEventStatus.registration, false), (QuizEventStatus.entryClosed, true)]) {
+      await showConsole(tester, _Operations(), [], eventValue: event.copyWith(status: status));
+      final button = tester.widget<OutlinedButton>(find.widgetWithText(OutlinedButton, 'チェックインを開始'));
+      expect(button.onPressed != null, enabled);
+      expect(find.text('チェックインは参加登録を終了してから開始できます。'), enabled ? findsNothing : findsOneWidget);
+      expect(find.text('123456'), findsNothing);
+      await tester.pumpWidget(const SizedBox());
+    }
+  });
+
+  testWidgets('during check-in the console shows the code, reissues it, and tells attendee states apart', (
+    tester,
+  ) async {
+    final operations = _Operations();
+    await showConsole(
+      tester,
+      operations,
+      [],
+      eventValue: event.copyWith(
+        status: QuizEventStatus.registration,
+        teamSelectionStatus: QuizTeamSelectionStatus.open,
+      ),
+      people: [waiting, arrived, checkedIn],
+    );
+    expect(find.text('123456'), findsOneWidget);
+    expect(find.text('参加表明 3 人 / チェックイン済み 2 人 / チーム選択済み 1 人 / 未選択 2 人（未チェックインを含む）'), findsOneWidget);
+    final reissue = find.widgetWithText(OutlinedButton, 'コードを再発行');
+    await tester.ensureVisible(reissue);
+    await tester.tap(reissue);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('実行'));
+    await tester.pumpAndSettle();
+    expect(operations.regenerated, 1);
+
+    final roster = find.textContaining('参加者の確認・取消');
+    await tester.ensureVisible(roster);
+    await tester.tap(roster);
+    await tester.pumpAndSettle();
+    expect(find.text('未チェックイン / waiting'), findsOneWidget);
+    expect(find.text('チェックイン済み・未選択 / arrived'), findsOneWidget);
+    expect(find.text('チーム A / seated'), findsOneWidget);
+  });
 
   testWidgets('first question needs closed selection and no unselected attendees', (tester) async {
     for (final people in [
@@ -160,6 +206,10 @@ void main() {
 class _Operations extends Fake implements QuizOperationsRepository {
   int finalized = 0;
   int cancelled = 0;
+  int regenerated = 0;
+
+  @override
+  Future<void> regenerateCheckInCode(String eventId) async => regenerated++;
 
   @override
   Future<int> removeUnselectedParticipants(String eventId) async {

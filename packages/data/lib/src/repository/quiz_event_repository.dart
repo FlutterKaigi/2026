@@ -14,6 +14,9 @@ abstract interface class QuizEventRepository {
 
   Stream<QuizEvent?> watchById(String eventId);
 
+  /// 会場で配る6桁の参加コードを購読する（運営のみ）。未発行の間は `null`。
+  Stream<String?> watchCheckInCode(String eventId);
+
   /// イベントを保存し、ドキュメント ID を返す（新規作成時は採番された ID）。
   Future<String> save(QuizEvent event);
 }
@@ -59,6 +62,14 @@ final class FirestoreQuizEventRepository implements QuizEventRepository {
       return QuizEvent.fromJson(<String, dynamic>{...data, 'id': snapshot.id});
     });
   }
+
+  @override
+  Stream<String?> watchCheckInCode(String eventId) => _collection
+      .doc(eventId)
+      .collection('secret')
+      .doc('checkIn')
+      .snapshots()
+      .map((snapshot) => snapshot.data()?['code'] as String?);
 
   @override
   Future<String> save(QuizEvent event) async {

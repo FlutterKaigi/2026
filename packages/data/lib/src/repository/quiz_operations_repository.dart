@@ -10,6 +10,9 @@ abstract interface class QuizOperationsRepository {
   Future<void> reopenRegistration(String eventId);
   Future<void> openTeamSelection(String eventId);
   Future<void> closeTeamSelection(String eventId);
+
+  /// 参加コードを作り直す。チェックイン済みの参加者には影響しない。
+  Future<void> regenerateCheckInCode(String eventId);
   Future<int> removeUnselectedParticipants(String eventId);
   Future<void> removeParticipant(String eventId, String uid);
 
@@ -87,6 +90,8 @@ final class FirestoreQuizOperationsRepository implements QuizOperationsRepositor
   Future<void> openTeamSelection(String eventId) async => _operate(eventId, 'openTeamSelection');
   @override
   Future<void> closeTeamSelection(String eventId) async => _operate(eventId, 'closeTeamSelection');
+  @override
+  Future<void> regenerateCheckInCode(String eventId) async => _operate(eventId, 'regenerateCheckInCode');
   @override
   Future<void> removeParticipant(String eventId, String uid) async => _operate(eventId, 'removeParticipant', uid: uid);
 
