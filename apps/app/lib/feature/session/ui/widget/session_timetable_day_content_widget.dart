@@ -4,6 +4,7 @@ import 'package:app/core/extension/locale_map_extension.dart';
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/feature/session/data/provider/session_timetable_provider.dart';
 import 'package:app/feature/session/ui/widget/session_card_widget.dart';
+import 'package:app/feature/session/ui/widget/timeline_event_details_dialog.dart';
 import 'package:app/feature/session/util/event_time.dart';
 import 'package:flutter/material.dart';
 
@@ -261,8 +262,12 @@ class _TimelineEventCardWidget extends StatelessWidget {
     final t = Translations.of(context);
     final locale = Localizations.localeOf(context);
     final timelineEvent = entry.timelineEvent!;
+    final description = timelineEvent.resolveDescription(locale);
 
     return _TimetableCardWidget(
+      onTap: description == null
+          ? null
+          : () => showTimelineEventDetailsDialog(context, entry: entry, description: description),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

@@ -720,6 +720,72 @@ void main() {
     expect(find.text('Compact Session'), findsOneWidget);
     expect(find.byType(RefreshIndicator), findsNothing);
   });
+
+  testWidgets('shows the details of an event with a description from the list until closed', (tester) async {
+    await _pumpTimetableState(
+      tester,
+      AsyncData(_describedEventTimetable),
+    );
+
+    await tester.tap(find.text('ランチステージ'));
+    await tester.pumpAndSettle();
+
+    final dialog = find.byKey(const ValueKey('timeline-event-details-dialog'));
+    expect(dialog, findsOneWidget);
+    for (final text in ['ランチステージ', '2026/10/31', '12:10-12:40', 'Room A', 'スポンサー企業によるランチタイムトーク']) {
+      expect(
+        find.descendant(of: dialog, matching: find.text(text)),
+        findsOneWidget,
+        reason: text,
+      );
+    }
+
+    await tester.tap(find.text('閉じる'));
+    await tester.pumpAndSettle();
+
+    expect(dialog, findsNothing);
+  });
+
+  testWidgets('keeps events without a description untappable in both layouts', (tester) async {
+    await _pumpTimetableState(
+      tester,
+      AsyncData(_undescribedEventTimetable),
+    );
+
+    for (final title in ['受付', '休憩']) {
+      await tester.tap(find.text(title));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const ValueKey('timeline-event-details-dialog')), findsNothing, reason: title);
+      expect(find.byType(AlertDialog), findsNothing, reason: title);
+    }
+
+    await _switchToRooms(tester);
+
+    for (final id in ['registration', 'blank-description-event']) {
+      await tester.tap(find.byKey(ValueKey('room-timeline-entry-$id')));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const ValueKey('timeline-event-details-dialog')), findsNothing, reason: id);
+      expect(find.byType(AlertDialog), findsNothing, reason: id);
+    }
+  });
+
+  testWidgets('shows the details of an event with a description from the room timeline', (tester) async {
+    await _pumpTimetableState(
+      tester,
+      AsyncData(_describedEventTimetable),
+    );
+
+    await _switchToRooms(tester);
+    await tester.tap(find.byKey(const ValueKey('room-timeline-entry-described-event')));
+    await tester.pumpAndSettle();
+
+    final dialog = find.byKey(const ValueKey('timeline-event-details-dialog'));
+    expect(dialog, findsOneWidget);
+    expect(find.descendant(of: dialog, matching: find.text('ランチステージ')), findsOneWidget);
+    expect(find.descendant(of: dialog, matching: find.text('スポンサー企業によるランチタイムトーク')), findsOneWidget);
+  });
 }
 
 Future<void> _switchToRooms(WidgetTester tester) async {
@@ -1207,6 +1273,49 @@ final _lunchStageTimetable = _singleDayTimetable([
   ),
   _roomSessionEntry('afternoon-talk', _venue, startsAt: _jst(13, 25), endsAt: _jst(13, 55)),
   _roomSessionEntry('afternoon-talk-b', _venueB, startsAt: _jst(13, 25), endsAt: _jst(13, 55)),
+]);
+
+final _describedEventTimetable = _singleDayTimetable([
+  SessionTimetableEntry.timelineEvent(
+    timelineEvent: TimelineEvent(
+      id: 'described-event',
+      title: const LocaleMap(ja: 'ランチステージ', en: 'Lunch stage'),
+      description: const LocaleMap(ja: 'スポンサー企業によるランチタイムトーク', en: 'Lunchtime talks by sponsors'),
+      startsAt: _jst(12, 10),
+      endsAt: _jst(12, 40),
+      venueId: 'room-a',
+      createdAt: DateTime.utc(2026),
+      updatedAt: DateTime.utc(2026),
+    ),
+    venue: _venue,
+  ),
+]);
+
+final _undescribedEventTimetable = _singleDayTimetable([
+  SessionTimetableEntry.timelineEvent(
+    timelineEvent: TimelineEvent(
+      id: 'registration',
+      title: const LocaleMap(ja: '受付', en: 'Registration'),
+      startsAt: _jst(9, 30),
+      endsAt: _jst(10, 0),
+      createdAt: DateTime.utc(2026),
+      updatedAt: DateTime.utc(2026),
+    ),
+    venue: null,
+  ),
+  SessionTimetableEntry.timelineEvent(
+    timelineEvent: TimelineEvent(
+      id: 'blank-description-event',
+      title: const LocaleMap(ja: '休憩', en: 'Break'),
+      description: const LocaleMap(ja: '   ', en: '\n'),
+      startsAt: _jst(10, 0),
+      endsAt: _jst(10, 15),
+      venueId: 'room-a',
+      createdAt: DateTime.utc(2026),
+      updatedAt: DateTime.utc(2026),
+    ),
+    venue: _venue,
+  ),
 ]);
 
 /// [hour]:[minute] JST on the first event day, as the stored UTC instant.
