@@ -5,6 +5,7 @@ import 'package:app/core/designsystem/theme/app_gradients.dart';
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/provider/app_locale.dart';
 import 'package:app/core/provider/clock.dart';
+import 'package:app/core/remote_config/event_features_provider.dart';
 import 'package:app/core/remote_config/survey_url_provider.dart';
 import 'package:app/core/router/router.dart';
 import 'package:app/core/ui/launch_external_url.dart';
@@ -13,12 +14,6 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 final _surveyStartsAt = DateTime.utc(2026, 10, 30, 6);
-
-final _surveyClockTickProvider = StreamProvider.autoDispose<DateTime>((ref) async* {
-  final clock = ref.watch(clockProvider);
-  yield clock();
-  yield* Stream<DateTime>.periodic(const Duration(minutes: 1), (_) => clock());
-});
 
 bool _isSurveyVisible(DateTime now) => !now.toUtc().isBefore(_surveyStartsAt);
 
@@ -34,12 +29,13 @@ class EventInfoPage extends ConsumerWidget {
     final t = Translations.of(context);
     final appLocale = ref.watch(appLocaleProvider);
     final localizedLinks = _LocalizedEventLinks.fromLocale(appLocale);
-    final now = switch (ref.watch(_surveyClockTickProvider)) {
+    final now = switch (ref.watch(clockTickProvider)) {
       AsyncData(:final value) => value,
       _ => ref.watch(clockProvider)(),
     };
     final showSurvey = _isSurveyVisible(now);
     final surveyUrl = ref.watch(surveyUrlProvider);
+    final eventFeaturesEnabled = ref.watch(eventFeaturesEnabledProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -69,7 +65,21 @@ class EventInfoPage extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      _NewsBanner(
+                      if (eventFeaturesEnabled) ...[
+                        _GradientBanner(
+                          icon: Icons.flag_outlined,
+                          title: t.venueEvents.title,
+                          subtitle: t.venueEvents.entrySubtitle,
+                          // `go` rather than `push`. The hub lives in the account
+                          // branch, and opening it moves to the account tab.
+                          onTap: () => const VenueEventsRoute().go(context),
+                        ),
+                        const SizedBox(height: 8),
+                      ],
+                      _GradientBanner(
+                        icon: Icons.notifications_outlined,
+                        title: t.eventInfo.newsTitle,
+                        subtitle: t.eventInfo.newsSubtitle,
                         onTap: () => const NewsRoute().push<void>(context),
                       ),
                       const SizedBox(height: 8),
@@ -406,14 +416,16 @@ class _EventOverviewCard extends StatelessWidget {
   }
 }
 
-class _NewsBanner extends StatelessWidget {
-  const _NewsBanner({required this.onTap});
+class _GradientBanner extends StatelessWidget {
+  const _GradientBanner({required this.icon, required this.title, required this.subtitle, required this.onTap});
 
+  final IconData icon;
+  final String title;
+  final String subtitle;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final t = Translations.of(context);
     const foreground = Colors.white;
     const textShadows = [
       Shadow(color: Color(0xCC000000), blurRadius: 3),
@@ -433,8 +445,8 @@ class _NewsBanner extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             child: Row(
               children: [
-                const Icon(
-                  Icons.notifications_outlined,
+                Icon(
+                  icon,
                   size: 22,
                   color: foreground,
                 ),
@@ -444,7 +456,7 @@ class _NewsBanner extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        t.eventInfo.newsTitle,
+                        title,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: foreground,
                           fontWeight: FontWeight.w700,
@@ -452,7 +464,7 @@ class _NewsBanner extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        t.eventInfo.newsSubtitle,
+                        subtitle,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: foreground,
                           shadows: textShadows,

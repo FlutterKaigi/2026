@@ -175,6 +175,10 @@ RouteBase get $appShellRoute => StatefulShellRouteData.$route(
               factory: $ProfileEditRoute._fromState,
             ),
             GoRouteData.$route(
+              path: 'venue-events',
+              factory: $VenueEventsRoute._fromState,
+            ),
+            GoRouteData.$route(
               path: 'quiz',
               factory: $QuizListRoute._fromState,
               routes: [
@@ -546,6 +550,25 @@ mixin $ProfileEditRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/account/profile');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) => context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $VenueEventsRoute on GoRouteData {
+  static VenueEventsRoute _fromState(GoRouterState state) => const VenueEventsRoute();
+
+  @override
+  String get location => GoRouteData.$location('/account/venue-events');
 
   @override
   void go(BuildContext context) => context.go(location);

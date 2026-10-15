@@ -26,16 +26,65 @@ final quizUserProvider = Provider<AsyncValue<User?>>((ref) {
       );
 });
 
-/// クイズイベントの一覧（作成の新しい順）。イベント一覧ページで使う。
+/// クイズイベントの一覧（作成の新しい順）。イベント一覧ページと会場イベントの
+/// ハブで使う。
 ///
 /// 非公開（draft）のイベントはセキュリティルールで読めないため、
 /// draft を除外した公開クエリで購読する。ログイン前に読むと read が
 /// 拒否されるので、サインイン確定までは購読しない。
-final quizEventsProvider = StreamProvider<List<QuizEvent>>((ref) {
+///
+/// 画面を閉じたら破棄する。残すとアカウントの切り替えを持ち越したまま、
+/// 次に開いた画面のビルド中に再計算され、再描画の要求がアサーションになる。
+final quizEventsProvider = StreamProvider.autoDispose<List<QuizEvent>>((ref) {
   if (ref.watch(quizUserProvider).value == null) {
     return const Stream<List<QuizEvent>>.empty();
   }
   return ref.watch(quizEventRepositoryProvider).watchPublished();
+});
+
+/// 参加登録した回と、その回の自分の参加者ドキュメント。
+typedef QuizRegistration = ({QuizEvent event, QuizParticipant participant});
+
+final _participantByUidProvider = StreamProvider.autoDispose.family<QuizParticipant?, ({String eventId, String uid})>(
+  (ref, key) => ref.watch(quizParticipantRepositoryProvider).watchByUid(key.eventId, key.uid),
+);
+
+/// アカウントが参加登録している公開中の回。どの回にも未登録なら `null`。
+///
+/// [quizEventIdProvider] を使わないので `QuizPage` の外からも読める。参加登録
+/// できるのは1つの回だけなので、登録が見つかった回で確定する。アカウントを
+/// 切り替えても前のアカウントの状態を出さないよう uid ごとに購読する。
+/// [quizEventsProvider] はサインインするまで値を流さないため、サインイン中の
+/// 画面からだけ読む。
+final quizRegistrationProvider = Provider.autoDispose.family<AsyncValue<QuizRegistration?>, String>((ref, uid) {
+  final events = ref.watch(quizEventsProvider);
+  if (events case AsyncValue(:final error?, :final stackTrace?)) {
+    return AsyncError(error, stackTrace);
+  }
+  final published = events.value;
+  if (published == null) {
+    return const AsyncLoading();
+  }
+  final participants = [
+    for (final event in published) ref.watch(_participantByUidProvider((eventId: event.id, uid: uid))),
+  ];
+  for (final (index, participant) in participants.indexed) {
+    if (participant.value case final registered?) {
+      // 失敗した購読も直前の値を持ち続ける。その値は古いチェックイン状態
+      // なので、登録として返さず失敗を返してログに残す。他の回の失敗は、
+      // 1つの回にしか登録できない以上この登録を否定しない。
+      if (participant case AsyncValue(:final error?, :final stackTrace?)) {
+        return AsyncError(error, stackTrace);
+      }
+      return AsyncData((event: published[index], participant: registered));
+    }
+  }
+  for (final participant in participants) {
+    if (participant case AsyncValue(:final error?, :final stackTrace?)) {
+      return AsyncError(error, stackTrace);
+    }
+  }
+  return participants.every((participant) => participant.hasValue) ? const AsyncData(null) : const AsyncLoading();
 });
 
 /// 対象イベントを購読する。

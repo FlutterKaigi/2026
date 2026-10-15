@@ -105,6 +105,54 @@ void main() {
     expect(find.text('news destination'), findsOneWidget);
   });
 
+  testWidgets('shows the venue events banner above the news only while event features are enabled', (
+    tester,
+  ) async {
+    final repository = FakeRemoteConfigRepository();
+    await _pumpEventInfoPage(tester, remoteConfigRepository: repository);
+
+    expect(find.text('会場イベントに参加'), findsOneWidget);
+    expect(find.text('スタンプラリー・プロフィール交換など'), findsOneWidget);
+    expect(
+      tester.getTopLeft(find.text('会場イベントに参加')).dy,
+      lessThan(tester.getTopLeft(find.text('最新のお知らせ')).dy),
+    );
+
+    repository.setValue(RemoteConfigKeys.eventFeaturesEnabled, false);
+    await tester.pumpAndSettle();
+
+    expect(find.text('会場イベントに参加'), findsNothing);
+    expect(find.text('最新のお知らせ'), findsOneWidget);
+  });
+
+  testWidgets('switches to the venue events hub from its banner', (tester) async {
+    final router = GoRouter(
+      initialLocation: '/info',
+      routes: [
+        GoRoute(
+          path: '/info',
+          builder: (context, state) => const EventInfoPage(),
+        ),
+        GoRoute(
+          path: '/account/venue-events',
+          builder: (context, state) => const Scaffold(
+            body: Text('venue events destination'),
+          ),
+        ),
+      ],
+    );
+    addTearDown(router.dispose);
+
+    await _pumpEventInfoPage(tester, router: router);
+    await tester.tap(find.text('会場イベントに参加'));
+    await tester.pumpAndSettle();
+
+    expect(router.routeInformationProvider.value.uri.path, '/account/venue-events');
+    expect(find.text('venue events destination'), findsOneWidget);
+    // `go` replaces the event tab's stack instead of stacking the hub on it.
+    expect(router.canPop(), isFalse);
+  });
+
   testWidgets('opens the contributor list from the event overview', (
     tester,
   ) async {

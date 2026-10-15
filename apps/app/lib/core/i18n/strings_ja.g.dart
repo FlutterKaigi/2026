@@ -60,6 +60,7 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	late final Translations$profile$ja profile = Translations$profile$ja.internal(_root);
 	late final Translations$snsPost$ja snsPost = Translations$snsPost$ja.internal(_root);
 	late final Translations$mission$ja mission = Translations$mission$ja.internal(_root);
+	late final Translations$venueEvents$ja venueEvents = Translations$venueEvents$ja.internal(_root);
 	late final Translations$stampRally$ja stampRally = Translations$stampRally$ja.internal(_root);
 	late final Translations$exchange$ja exchange = Translations$exchange$ja.internal(_root);
 	late final Translations$supportLt$ja supportLt = Translations$supportLt$ja.internal(_root);
@@ -961,6 +962,40 @@ class Translations$mission$ja {
 	String get snsDescription => '対象の相手との写真を投稿し、URLとタグを登録';
 }
 
+// Path: venueEvents
+class Translations$venueEvents$ja {
+	Translations$venueEvents$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: '会場イベントに参加'
+	String get title => '会場イベントに参加';
+
+	/// ja: 'スタンプラリー・プロフィール交換など'
+	String get entrySubtitle => 'スタンプラリー・プロフィール交換など';
+
+	/// ja: '10月29日(木) 1日目'
+	String get day1 => '10月29日(木) 1日目';
+
+	/// ja: '10月30日(金) 2日目'
+	String get day2 => '10月30日(金) 2日目';
+
+	/// ja: 'サインインして参加'
+	String get signInTitle => 'サインインして参加';
+
+	/// ja: 'スタンプやクイズの記録はアカウントに保存されます。'
+	String get signInDescription => 'スタンプやクイズの記録はアカウントに保存されます。';
+
+	/// ja: 'サインインすると参加できます'
+	String get previewHeading => 'サインインすると参加できます';
+
+	late final Translations$venueEvents$features$ja features = Translations$venueEvents$features$ja.internal(_root);
+	late final Translations$venueEvents$status$ja status = Translations$venueEvents$status$ja.internal(_root);
+	late final Translations$venueEvents$quizCheckIn$ja quizCheckIn = Translations$venueEvents$quizCheckIn$ja.internal(_root);
+}
+
 // Path: stampRally
 class Translations$stampRally$ja {
 	Translations$stampRally$ja.internal(this._root);
@@ -1358,9 +1393,6 @@ class Translations$supportLt$ja {
 
 	/// ja: '応援LTをお楽しみください'
 	String get registeredBody => '応援LTをお楽しみください';
-
-	/// ja: '参加登録済み'
-	String get registeredStatus => '参加登録済み';
 
 	/// ja: 'アカウントに戻る'
 	String get backToAccount => 'アカウントに戻る';
@@ -1772,6 +1804,12 @@ class Translations$auth$signIn$ja {
 	/// ja: 'FlutterKaigi 2026 アプリで利用するサインイン方法を選択してください'
 	String get description => 'FlutterKaigi 2026 アプリで利用するサインイン方法を選択してください';
 
+	/// ja: 'サインイン'
+	String get accountTitle => 'サインイン';
+
+	/// ja: 'プロフィールや会場イベントの記録は アカウントに保存されます'
+	String get accountDescription => 'プロフィールや会場イベントの記録は\nアカウントに保存されます';
+
 	/// ja: 'Google でサインイン'
 	String get withGoogle => 'Google でサインイン';
 
@@ -1841,17 +1879,11 @@ class Translations$auth$account$ja {
 	/// ja: 'アカウント'
 	String get title => 'アカウント';
 
-	/// ja: '参加する'
-	String get features => '参加する';
-
 	/// ja: 'サインイン中'
 	String get signedIn => 'サインイン中';
 
 	/// ja: 'サインアウト'
 	String get signOut => 'サインアウト';
-
-	/// ja: 'サインアウトできませんでした'
-	String get signOutError => 'サインアウトできませんでした';
 
 	/// ja: 'メールアドレス未設定'
 	String get noEmail => 'メールアドレス未設定';
@@ -1873,30 +1905,6 @@ class Translations$auth$account$ja {
 
 	/// ja: 'アカウントを削除するには、現在のパスワードを入力してください。'
 	String get deletePasswordBody => 'アカウントを削除するには、現在のパスワードを入力してください。';
-
-	/// ja: 'ミッション'
-	String get mission => 'ミッション';
-
-	/// ja: '応援LT参加・プロフィール交換・SNS投稿登録の参加状況で判定'
-	String get missionDescription => '応援LT参加・プロフィール交換・SNS投稿登録の参加状況で判定';
-
-	/// ja: 'イベントに参加'
-	String get joinEvent => 'イベントに参加';
-
-	/// ja: 'クイズ大会'
-	String get quiz => 'クイズ大会';
-
-	/// ja: '応援LT参加'
-	String get lightningTalks => '応援LT参加';
-
-	/// ja: 'プロフィール交換'
-	String get profileExchange => 'プロフィール交換';
-
-	/// ja: 'SNS投稿登録'
-	String get snsPost => 'SNS投稿登録';
-
-	/// ja: 'この機能は準備中です'
-	String get comingSoon => 'この機能は準備中です';
 
 	/// ja: 'アカウントを削除しました'
 	String get deleted => 'アカウントを削除しました';
@@ -1969,6 +1977,63 @@ class Translations$snsPost$companions$ja {
 
 	/// ja: '出身国・地域が異なる人'
 	String get differentCountry => '出身国・地域が異なる人';
+}
+
+// Path: venueEvents.features
+class Translations$venueEvents$features$ja {
+	Translations$venueEvents$features$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+	late final Translations$venueEvents$features$quiz$ja quiz = Translations$venueEvents$features$quiz$ja.internal(_root);
+	late final Translations$venueEvents$features$stampRally$ja stampRally = Translations$venueEvents$features$stampRally$ja.internal(_root);
+	late final Translations$venueEvents$features$profileExchange$ja profileExchange = Translations$venueEvents$features$profileExchange$ja.internal(_root);
+	late final Translations$venueEvents$features$supportLt$ja supportLt = Translations$venueEvents$features$supportLt$ja.internal(_root);
+	late final Translations$venueEvents$features$snsPost$ja snsPost = Translations$venueEvents$features$snsPost$ja.internal(_root);
+	late final Translations$venueEvents$features$mission$ja mission = Translations$venueEvents$features$mission$ja.internal(_root);
+}
+
+// Path: venueEvents.status
+class Translations$venueEvents$status$ja {
+	Translations$venueEvents$status$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: '登録済み'
+	String get registered => '登録済み';
+
+	/// ja: 'チェックイン済み'
+	String get checkedIn => 'チェックイン済み';
+
+	/// ja: 'チーム $team'
+	String team({required Object team}) => 'チーム ${team}';
+
+	/// ja: '$n / $total'
+	String stampCount({required Object n, required Object total}) => '${n} / ${total}';
+
+	/// ja: '(one) {$n人} (other) {$n人}'
+	String exchangeCount({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(n,
+		one: '${n}人',
+		other: '${n}人',
+	);
+}
+
+// Path: venueEvents.quizCheckIn
+class Translations$venueEvents$quizCheckIn$ja {
+	Translations$venueEvents$quizCheckIn$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'クイズ大会のチェックインを受付中です'
+	String get title => 'クイズ大会のチェックインを受付中です';
+
+	/// ja: '会場スクリーンのQRコードを読み取ってください'
+	String get body => '会場スクリーンのQRコードを読み取ってください';
 }
 
 // Path: settings.themeMode
@@ -2426,6 +2491,111 @@ class Translations$venueWalk$photo$poses$ja {
 	String get jumping => 'ジャンプ';
 }
 
+// Path: venueEvents.features.quiz
+class Translations$venueEvents$features$quiz$ja {
+	Translations$venueEvents$features$quiz$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'クイズ大会'
+	String get title => 'クイズ大会';
+
+	/// ja: 'スクリーンのQRコードでチェックインしてチームを選ぶ'
+	String get action => 'スクリーンのQRコードでチェックインしてチームを選ぶ';
+
+	/// ja: '2日目 15:30から'
+	String get preview => '2日目 15:30から';
+}
+
+// Path: venueEvents.features.stampRally
+class Translations$venueEvents$features$stampRally$ja {
+	Translations$venueEvents$features$stampRally$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'スタンプラリー'
+	String get title => 'スタンプラリー';
+
+	/// ja: 'スポンサーブースでQRコードを読み取る'
+	String get action => 'スポンサーブースでQRコードを読み取る';
+
+	/// ja: 'スポンサーブースを巡る'
+	String get preview => 'スポンサーブースを巡る';
+}
+
+// Path: venueEvents.features.profileExchange
+class Translations$venueEvents$features$profileExchange$ja {
+	Translations$venueEvents$features$profileExchange$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'プロフィール交換'
+	String get title => 'プロフィール交換';
+
+	/// ja: 'QRコードか6桁のコードで参加者と交換'
+	String get action => 'QRコードか6桁のコードで参加者と交換';
+
+	/// ja: '参加者とQRコードで交換'
+	String get preview => '参加者とQRコードで交換';
+}
+
+// Path: venueEvents.features.supportLt
+class Translations$venueEvents$features$supportLt$ja {
+	Translations$venueEvents$features$supportLt$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: '応援LT参加'
+	String get title => '応援LT参加';
+
+	/// ja: '会場のQRコードで参加登録'
+	String get action => '会場のQRコードで参加登録';
+
+	/// ja: '会場のQRコードで登録'
+	String get preview => '会場のQRコードで登録';
+}
+
+// Path: venueEvents.features.snsPost
+class Translations$venueEvents$features$snsPost$ja {
+	Translations$venueEvents$features$snsPost$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'SNS投稿登録'
+	String get title => 'SNS投稿登録';
+
+	/// ja: '写真を投稿してURLを登録'
+	String get action => '写真を投稿してURLを登録';
+
+	/// ja: '写真の投稿URLを登録'
+	String get preview => '写真の投稿URLを登録';
+}
+
+// Path: venueEvents.features.mission
+class Translations$venueEvents$features$mission$ja {
+	Translations$venueEvents$features$mission$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'ミッション'
+	String get title => 'ミッション';
+
+	/// ja: '応援LT・交換・SNS投稿'
+	String get preview => '応援LT・交換・SNS投稿';
+}
+
 // Path: quiz.list.status
 class Translations$quiz$list$status$ja {
 	Translations$quiz$list$status$ja.internal(this._root);
@@ -2647,6 +2817,8 @@ extension on Translations {
 			'contributors.contributionsCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(n, one: '${n} contributions', other: '${n} contributions', ), 
 			'auth.signIn.required' => 'サインインが必要です',
 			'auth.signIn.description' => 'FlutterKaigi 2026 アプリで利用するサインイン方法を選択してください',
+			'auth.signIn.accountTitle' => 'サインイン',
+			'auth.signIn.accountDescription' => 'プロフィールや会場イベントの記録は\nアカウントに保存されます',
 			'auth.signIn.withGoogle' => 'Google でサインイン',
 			'auth.signIn.withApple' => 'Appleでサインイン',
 			'auth.signIn.withEmail' => 'メールアドレスでサインイン',
@@ -2664,10 +2836,8 @@ extension on Translations {
 			'auth.email.forgotPassword' => 'パスワードを再設定する',
 			'auth.email.resetEmailSent' => 'パスワード再設定メールを送信しました',
 			'auth.account.title' => 'アカウント',
-			'auth.account.features' => '参加する',
 			'auth.account.signedIn' => 'サインイン中',
 			'auth.account.signOut' => 'サインアウト',
-			'auth.account.signOutError' => 'サインアウトできませんでした',
 			'auth.account.noEmail' => 'メールアドレス未設定',
 			'auth.account.delete' => 'アカウントを削除',
 			'auth.account.deleteConfirmTitle' => 'アカウントを削除しますか?',
@@ -2675,14 +2845,6 @@ extension on Translations {
 			'auth.account.deleteConfirmAction' => '削除する',
 			'auth.account.deletePasswordTitle' => 'パスワードの確認',
 			'auth.account.deletePasswordBody' => 'アカウントを削除するには、現在のパスワードを入力してください。',
-			'auth.account.mission' => 'ミッション',
-			'auth.account.missionDescription' => '応援LT参加・プロフィール交換・SNS投稿登録の参加状況で判定',
-			'auth.account.joinEvent' => 'イベントに参加',
-			'auth.account.quiz' => 'クイズ大会',
-			'auth.account.lightningTalks' => '応援LT参加',
-			'auth.account.profileExchange' => 'プロフィール交換',
-			'auth.account.snsPost' => 'SNS投稿登録',
-			'auth.account.comingSoon' => 'この機能は準備中です',
 			'auth.account.deleted' => 'アカウントを削除しました',
 			'auth.account.cancel' => 'キャンセル',
 			'auth.error.invalidEmail' => 'メールアドレスの形式が正しくありません',
@@ -2782,6 +2944,37 @@ extension on Translations {
 			'mission.profileRequired' => 'プロフィールで出身国・地域を登録する',
 			'mission.snsTitle' => '写真をSNSに投稿',
 			'mission.snsDescription' => '対象の相手との写真を投稿し、URLとタグを登録',
+			'venueEvents.title' => '会場イベントに参加',
+			'venueEvents.entrySubtitle' => 'スタンプラリー・プロフィール交換など',
+			'venueEvents.day1' => '10月29日(木) 1日目',
+			'venueEvents.day2' => '10月30日(金) 2日目',
+			'venueEvents.signInTitle' => 'サインインして参加',
+			'venueEvents.signInDescription' => 'スタンプやクイズの記録はアカウントに保存されます。',
+			'venueEvents.previewHeading' => 'サインインすると参加できます',
+			'venueEvents.features.quiz.title' => 'クイズ大会',
+			'venueEvents.features.quiz.action' => 'スクリーンのQRコードでチェックインしてチームを選ぶ',
+			'venueEvents.features.quiz.preview' => '2日目 15:30から',
+			'venueEvents.features.stampRally.title' => 'スタンプラリー',
+			'venueEvents.features.stampRally.action' => 'スポンサーブースでQRコードを読み取る',
+			'venueEvents.features.stampRally.preview' => 'スポンサーブースを巡る',
+			'venueEvents.features.profileExchange.title' => 'プロフィール交換',
+			'venueEvents.features.profileExchange.action' => 'QRコードか6桁のコードで参加者と交換',
+			'venueEvents.features.profileExchange.preview' => '参加者とQRコードで交換',
+			'venueEvents.features.supportLt.title' => '応援LT参加',
+			'venueEvents.features.supportLt.action' => '会場のQRコードで参加登録',
+			'venueEvents.features.supportLt.preview' => '会場のQRコードで登録',
+			'venueEvents.features.snsPost.title' => 'SNS投稿登録',
+			'venueEvents.features.snsPost.action' => '写真を投稿してURLを登録',
+			'venueEvents.features.snsPost.preview' => '写真の投稿URLを登録',
+			'venueEvents.features.mission.title' => 'ミッション',
+			'venueEvents.features.mission.preview' => '応援LT・交換・SNS投稿',
+			'venueEvents.status.registered' => '登録済み',
+			'venueEvents.status.checkedIn' => 'チェックイン済み',
+			'venueEvents.status.team' => ({required Object team}) => 'チーム ${team}',
+			'venueEvents.status.stampCount' => ({required Object n, required Object total}) => '${n} / ${total}',
+			'venueEvents.status.exchangeCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(n, one: '${n}人', other: '${n}人', ), 
+			'venueEvents.quizCheckIn.title' => 'クイズ大会のチェックインを受付中です',
+			'venueEvents.quizCheckIn.body' => '会場スクリーンのQRコードを読み取ってください',
 			'stampRally.title' => 'スタンプラリー',
 			'stampRally.signInRequired' => 'スタンプを集めるにはサインインしてください',
 			'stampRally.description' => 'スポンサーブースでQRコードを読み取ってスタンプを集めましょう',
@@ -2906,7 +3099,6 @@ extension on Translations {
 			'supportLt.submitting' => '登録中…',
 			'supportLt.registeredTitle' => '参加登録が完了しました',
 			'supportLt.registeredBody' => '応援LTをお楽しみください',
-			'supportLt.registeredStatus' => '参加登録済み',
 			'supportLt.backToAccount' => 'アカウントに戻る',
 			'supportLt.signInRequired' => '応援LTに参加登録するには\nサインインしてください',
 			'supportLt.invalidFormat' => '6桁の数字を入力してください',
@@ -2948,6 +3140,8 @@ extension on Translations {
 			'notFound.title' => 'ページが見つかりません',
 			'notFound.description' => 'お探しのページは存在しないか、移動した可能性があります。',
 			'common.retry' => '再試行',
+			_ => null,
+		} ?? switch (path) {
 			'quiz.title' => 'クイズ大会',
 			'quiz.entrySubtitle' => 'スポンサー提供のクイズに参加',
 			'quiz.list.empty' => 'クイズはまだありません',
@@ -2970,8 +3164,6 @@ extension on Translations {
 			'quiz.registration.participantUnit' => '人',
 			'quiz.registration.join' => '参加する',
 			'quiz.registration.full' => ({required Object max}) => '定員（${max} 人）に達しました',
-			_ => null,
-		} ?? switch (path) {
 			'quiz.registration.failed' => '登録できませんでした。時間をおいて再度お試しください。',
 			'quiz.registration.alreadyParticipated' => '別の回に参加登録済みのため、この回には登録できません。',
 			'quiz.registration.closed' => 'この回の参加受付は終了しました。',

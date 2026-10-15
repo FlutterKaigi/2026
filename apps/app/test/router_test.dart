@@ -61,6 +61,7 @@ void main() {
     );
     expect(const AccountRoute().location, '/account');
     expect(const EmailSignInRoute().location, '/account/email');
+    expect(const VenueEventsRoute().location, '/account/venue-events');
     expect(const SupportLtRoute().location, '/account/support-lt');
     // 応援LTのQRコードが指すリンクは、生成側(`supportLtQrPayload`)と同じパスで解決する。
     expect(
@@ -345,6 +346,7 @@ void main() {
       final router = await pumpRouter(tester);
 
       for (final location in <String>[
+        '/account/venue-events',
         '/account/missions',
         '/account/quiz',
         '/account/quiz/some-event',
@@ -372,6 +374,7 @@ void main() {
       final router = await pumpRouter(tester);
 
       for (final location in <String>[
+        '/account/venue-events',
         '/account/missions',
         '/account/quiz',
         '/account/support-lt',

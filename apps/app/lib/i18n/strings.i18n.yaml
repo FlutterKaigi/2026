@@ -218,6 +218,8 @@ auth:
   signIn:
     required: サインインが必要です
     description: FlutterKaigi 2026 アプリで利用するサインイン方法を選択してください
+    accountTitle: サインイン
+    accountDescription: "プロフィールや会場イベントの記録は\nアカウントに保存されます"
     withGoogle: Google でサインイン
     # NOTE: Apple 公式の日本語ボタン表記(スペースなし)に合わせる
     withApple: Appleでサインイン
@@ -238,10 +240,8 @@ auth:
     resetEmailSent: パスワード再設定メールを送信しました
   account:
     title: アカウント
-    features: 参加する
     signedIn: サインイン中
     signOut: サインアウト
-    signOutError: サインアウトできませんでした
     noEmail: メールアドレス未設定
     delete: アカウントを削除
     deleteConfirmTitle: アカウントを削除しますか?
@@ -249,14 +249,6 @@ auth:
     deleteConfirmAction: 削除する
     deletePasswordTitle: パスワードの確認
     deletePasswordBody: アカウントを削除するには、現在のパスワードを入力してください。
-    mission: ミッション
-    missionDescription: 応援LT参加・プロフィール交換・SNS投稿登録の参加状況で判定
-    joinEvent: イベントに参加
-    quiz: クイズ大会
-    lightningTalks: 応援LT参加
-    profileExchange: プロフィール交換
-    snsPost: SNS投稿登録
-    comingSoon: この機能は準備中です
     deleted: アカウントを削除しました
     cancel: キャンセル
   error:
@@ -362,6 +354,50 @@ mission:
   profileRequired: プロフィールで出身国・地域を登録する
   snsTitle: 写真をSNSに投稿
   snsDescription: 対象の相手との写真を投稿し、URLとタグを登録
+
+venueEvents:
+  title: 会場イベントに参加
+  entrySubtitle: スタンプラリー・プロフィール交換など
+  day1: 10月29日(木) 1日目
+  day2: 10月30日(金) 2日目
+  signInTitle: サインインして参加
+  signInDescription: スタンプやクイズの記録はアカウントに保存されます。
+  previewHeading: サインインすると参加できます
+  features:
+    quiz:
+      title: クイズ大会
+      action: スクリーンのQRコードでチェックインしてチームを選ぶ
+      preview: "2日目 15:30から"
+    stampRally:
+      title: スタンプラリー
+      action: スポンサーブースでQRコードを読み取る
+      preview: スポンサーブースを巡る
+    profileExchange:
+      title: プロフィール交換
+      action: QRコードか6桁のコードで参加者と交換
+      preview: 参加者とQRコードで交換
+    supportLt:
+      title: 応援LT参加
+      action: 会場のQRコードで参加登録
+      preview: 会場のQRコードで登録
+    snsPost:
+      title: SNS投稿登録
+      action: 写真を投稿してURLを登録
+      preview: 写真の投稿URLを登録
+    mission:
+      title: ミッション
+      preview: 応援LT・交換・SNS投稿
+  status:
+    registered: 登録済み
+    checkedIn: チェックイン済み
+    team: チーム $team
+    stampCount: "$n / $total"
+    exchangeCount:
+      one: $n人
+      other: $n人
+  quizCheckIn:
+    title: クイズ大会のチェックインを受付中です
+    body: 会場スクリーンのQRコードを読み取ってください
 
 stampRally:
   title: スタンプラリー
@@ -491,7 +527,6 @@ supportLt:
   submitting: 登録中…
   registeredTitle: 参加登録が完了しました
   registeredBody: 応援LTをお楽しみください
-  registeredStatus: 参加登録済み
   backToAccount: アカウントに戻る
   signInRequired: "応援LTに参加登録するには\nサインインしてください"
   invalidFormat: 6桁の数字を入力してください

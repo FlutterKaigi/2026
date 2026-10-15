@@ -38,23 +38,12 @@ class MissionPage extends StatelessWidget {
   }
 }
 
-enum _Status {
-  complete,
-  incomplete,
-  loading,
-  error;
-
-  static _Status from<T>(AsyncValue<T> value, bool Function(T) isComplete) => switch (value) {
-    AsyncData(:final value) => isComplete(value) ? complete : incomplete,
-    AsyncError() => error,
-    _ => loading,
-  };
-
+extension on MissionStatus {
   String label(Translations t) => switch (this) {
-    complete => t.mission.complete,
-    incomplete => t.mission.incomplete,
-    loading => t.mission.loading,
-    error => t.mission.loadFailed,
+    MissionStatus.complete => t.mission.complete,
+    MissionStatus.incomplete => t.mission.incomplete,
+    MissionStatus.loading => t.mission.loading,
+    MissionStatus.error => t.mission.loadFailed,
   };
 }
 
@@ -66,15 +55,9 @@ class _MissionBody extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final t = Translations.of(context);
-    final lt = ref.watch(supportLtRegistrationProvider(uid));
-    final exchanges = ref.watch(missionExchangeProgressProvider(uid));
-    final sns = ref.watch(snsPostRegistrationProvider(uid));
-    final ltStatus = _Status.from(lt, (value) => value != null);
-    final exchangeStatus = _Status.from(exchanges, (value) => value.isComplete);
-    final snsStatus = _Status.from(sns, (value) => value != null);
-    final statuses = [ltStatus, exchangeStatus, snsStatus];
-    final progress = exchanges.asData?.value;
-    final post = sns.asData?.value;
+    final statuses = ref.watch(missionStatusesProvider(uid));
+    final progress = ref.watch(missionExchangeProgressProvider(uid)).asData?.value;
+    final post = ref.watch(snsPostRegistrationProvider(uid)).asData?.value;
 
     void retryExchange() {
       ref.invalidate(exchangedUserProfileProvider(uid));
@@ -94,7 +77,7 @@ class _MissionBody extends ConsumerWidget {
             icon: Icons.mic_none_outlined,
             title: t.mission.ltTitle,
             description: t.mission.ltDescription,
-            status: ltStatus,
+            status: statuses.supportLt,
             onTap: () => const SupportLtRoute().push<void>(context),
             onRetry: () => ref.invalidate(supportLtRegistrationProvider(uid)),
           ),
@@ -106,7 +89,7 @@ class _MissionBody extends ConsumerWidget {
             description: progress == null
                 ? t.mission.exchangeDescription(required: ProfileExchangeProgress.requiredCount)
                 : null,
-            status: exchangeStatus,
+            status: statuses.profileExchange,
             onTap: () => const ExchangeHomeRoute().push<void>(context),
             onRetry: retryExchange,
             detail: progress == null
@@ -137,7 +120,7 @@ class _MissionBody extends ConsumerWidget {
             icon: Icons.add_photo_alternate_outlined,
             title: t.mission.snsTitle,
             description: post == null ? t.mission.snsDescription : snsPostCompanionLabel(t, post.companion),
-            status: snsStatus,
+            status: statuses.snsPost,
             onTap: () => const SnsPostRoute().push<void>(context),
             onRetry: () => ref.invalidate(snsPostRegistrationProvider(uid)),
           ),
@@ -150,23 +133,22 @@ class _MissionBody extends ConsumerWidget {
 class _SummaryCard extends StatelessWidget {
   const _SummaryCard({required this.statuses});
 
-  final List<_Status> statuses;
+  final MissionStatuses statuses;
 
   @override
   Widget build(BuildContext context) {
     final t = Translations.of(context);
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
-    final count = statuses.where((status) => status == _Status.complete).length;
-    final total = statuses.length;
-    final complete = count == total;
-    final summary = complete
-        ? t.mission.allComplete
-        : statuses.contains(_Status.error)
-        ? t.mission.checkFailed
-        : statuses.contains(_Status.loading)
-        ? t.mission.loading
-        : t.mission.inProgress;
+    final all = statuses.all;
+    final count = statuses.completeCount;
+    final total = all.length;
+    final summary = switch (statuses.overall) {
+      MissionStatus.complete => t.mission.allComplete,
+      MissionStatus.error => t.mission.checkFailed,
+      MissionStatus.loading => t.mission.loading,
+      MissionStatus.incomplete => t.mission.inProgress,
+    };
     return Semantics(
       container: true,
       child: Card.outlined(
@@ -229,13 +211,13 @@ class _SummaryCard extends StatelessWidget {
                       ExcludeSemantics(
                         child: Row(
                           children: [
-                            for (var index = 0; index < statuses.length; index++) ...[
+                            for (var index = 0; index < all.length; index++) ...[
                               if (index > 0) const SizedBox(width: 6),
                               Expanded(
                                 child: Container(
                                   height: 6,
                                   decoration: BoxDecoration(
-                                    color: statuses[index] == _Status.complete
+                                    color: all[index] == MissionStatus.complete
                                         ? Colors.white
                                         : Colors.white.withValues(alpha: 0.24),
                                     borderRadius: BorderRadius.circular(3),
@@ -273,7 +255,7 @@ class _MissionCard extends StatelessWidget {
   final IconData icon;
   final String title;
   final String? description;
-  final _Status status;
+  final MissionStatus status;
   final VoidCallback onTap;
   final VoidCallback onRetry;
   final Widget? detail;
@@ -282,7 +264,7 @@ class _MissionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
-    final complete = status == _Status.complete;
+    final complete = status == MissionStatus.complete;
     return Card.outlined(
       margin: EdgeInsets.zero,
       clipBehavior: Clip.antiAlias,
@@ -323,7 +305,7 @@ class _MissionCard extends StatelessWidget {
                 Text(description!, style: theme.textTheme.bodySmall?.copyWith(color: colors.onSurfaceVariant)),
               ],
               if (detail != null) ...[const SizedBox(height: 10), detail!],
-              if (status == _Status.error)
+              if (status == MissionStatus.error)
                 Align(
                   alignment: Alignment.centerLeft,
                   child: TextButton(onPressed: onRetry, child: Text(Translations.of(context).error.retry)),
@@ -339,17 +321,21 @@ class _MissionCard extends StatelessWidget {
 class _StatusBadge extends StatelessWidget {
   const _StatusBadge({required this.status});
 
-  final _Status status;
+  final MissionStatus status;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
     final (background, foreground, icon) = switch (status) {
-      _Status.complete => (colors.primaryContainer, colors.onPrimaryContainer, Icons.check_circle),
-      _Status.incomplete => (colors.surfaceContainerHighest, colors.onSurfaceVariant, Icons.radio_button_unchecked),
-      _Status.loading => (colors.tertiaryContainer, colors.onTertiaryContainer, Icons.hourglass_top_rounded),
-      _Status.error => (colors.errorContainer, colors.onErrorContainer, Icons.error_outline),
+      MissionStatus.complete => (colors.primaryContainer, colors.onPrimaryContainer, Icons.check_circle),
+      MissionStatus.incomplete => (
+        colors.surfaceContainerHighest,
+        colors.onSurfaceVariant,
+        Icons.radio_button_unchecked,
+      ),
+      MissionStatus.loading => (colors.tertiaryContainer, colors.onTertiaryContainer, Icons.hourglass_top_rounded),
+      MissionStatus.error => (colors.errorContainer, colors.onErrorContainer, Icons.error_outline),
     };
     return DecoratedBox(
       decoration: BoxDecoration(color: background, borderRadius: BorderRadius.circular(20)),

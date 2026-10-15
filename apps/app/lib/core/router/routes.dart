@@ -90,6 +90,7 @@ class StampRallyLinkRoute extends GoRouteData with $StampRallyLinkRoute {
           routes: [
             TypedGoRoute<EmailSignInRoute>(path: 'email'),
             TypedGoRoute<ProfileEditRoute>(path: 'profile'),
+            TypedGoRoute<VenueEventsRoute>(path: 'venue-events'),
             TypedGoRoute<QuizListRoute>(
               path: 'quiz',
               routes: [
@@ -206,6 +207,19 @@ class ProfileEditRoute extends GoRouteData with $ProfileEditRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) => const ProfileEditPage();
+}
+
+/// `/account/venue-events` — every venue activity of the event days in one
+/// place, opened from the event tab and the account tab.
+///
+/// Declared in the account branch beside the activities it opens, so they
+/// stack above the hub and the venue QR code links under `/account` keep their
+/// paths.
+class VenueEventsRoute extends GoRouteData with $VenueEventsRoute {
+  const VenueEventsRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const VenueEventsPage();
 }
 
 /// `/account/quiz` — the quiz event list.
