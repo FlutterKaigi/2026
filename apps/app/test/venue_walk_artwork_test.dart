@@ -24,7 +24,14 @@ void main() {
         locale.languageCode: (await locale.build()).venueWalk.entranceSign,
     });
     final images = (manifest['images'] as Map<String, dynamic>).cast<String, Map<String, dynamic>>();
-    expect(images.length, 82);
+    expect(images.length, 80);
+    for (final language in ['ja', 'en']) {
+      expect(images, isNot(contains('sponsor_18_$language.png')));
+      expect(File('$venueArtworkDirectory/sponsor_18_$language.png').existsSync(), isFalse);
+      for (final number in [19, 20, 21, 22]) {
+        expect(images, contains('sponsor_${number}_$language.png'));
+      }
+    }
     for (final entry in images.entries) {
       // Read the actual application bundle, catching omitted pubspec assets too.
       final data = await rootBundle.load('$venueArtworkDirectory/${entry.key}');

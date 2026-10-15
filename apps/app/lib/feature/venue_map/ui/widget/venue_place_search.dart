@@ -27,6 +27,7 @@ class _VenuePlaceSearchState extends State<VenuePlaceSearch> {
     final theme = Theme.of(context);
     final language = Localizations.localeOf(context).languageCode;
     final places = widget.plan.places.where((p) => (_type == null || p.type == _type) && p.matches(_query)).toList();
+    final sponsorCount = widget.plan.places.where((p) => p.type == VenuePlaceType.sponsor).length;
     return CustomScrollView(
       slivers: [
         SliverToBoxAdapter(
@@ -63,7 +64,7 @@ class _VenuePlaceSearchState extends State<VenuePlaceSearch> {
                 for (final (type, label) in [
                   (null, t.all),
                   (VenuePlaceType.hall, t.halls),
-                  (VenuePlaceType.sponsor, '${t.booths} 22'),
+                  (VenuePlaceType.sponsor, '${t.booths} $sponsorCount'),
                   (VenuePlaceType.facility, t.facilities),
                 ])
                   FilterChip(

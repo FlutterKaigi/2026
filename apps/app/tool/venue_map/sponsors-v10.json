@@ -105,10 +105,10 @@
       "color": "purple",
       "rank": 1,
       "foyer": 2,
-      "position": "上段・左から7",
+      "position": "上段・左から6",
       "previousNo": "16",
       "table": [
-        1280,
+        1239,
         382,
         71,
         10
@@ -267,10 +267,10 @@
       "color": "pink",
       "rank": 3,
       "foyer": 2,
-      "position": "上段・左から6",
+      "position": "上段・左から5",
       "previousNo": "15",
       "table": [
-        1239,
+        1198,
         382,
         35,
         10
@@ -309,24 +309,6 @@
         1081,
         382,
         35,
-        10
-      ]
-    },
-    {
-      "no": 18,
-      "displayNo": "⑱",
-      "name": "ハイヤールー",
-      "tier": null,
-      "tierLabel": "青",
-      "color": "blue",
-      "rank": 4,
-      "foyer": 2,
-      "position": "上段・左から5",
-      "previousNo": "14",
-      "table": [
-        1198,
-        382,
-        36,
         10
       ]
     },
