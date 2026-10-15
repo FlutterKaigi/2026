@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:app/core/i18n/strings.g.dart';
+import 'package:app/core/log/talker.dart';
 import 'package:app/feature/auth/data/provider/auth_repository.dart';
 import 'package:app/feature/profile/data/provider/user_profile_repository.dart';
 import 'package:app/feature/profile/ui/page/profile_edit_page.dart';
@@ -11,6 +12,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:talker_flutter/talker_flutter.dart';
 
 import 'fake_auth_repository.dart';
 import 'fake_user_profile_repository.dart';
@@ -19,12 +21,14 @@ void main() {
   Widget buildSubject(
     FakeAuthRepository authRepository,
     FakeUserProfileRepository profileRepository,
-    GoRouter router,
-  ) => TranslationProvider(
+    GoRouter router, {
+    Talker? talker,
+  }) => TranslationProvider(
     child: ProviderScope(
       overrides: [
         authRepositoryProvider.overrideWithValue(authRepository),
         userProfileRepositoryProvider.overrideWithValue(profileRepository),
+        if (talker != null) talkerProvider.overrideWithValue(talker),
       ],
       child: MaterialApp.router(
         routerConfig: router,
@@ -231,6 +235,34 @@ void main() {
     expect(tester.takeException(), isNull);
     expect(profileRepository.savedProfiles.single.displayName, 'Renamed');
     expect(find.text('exchange destination'), findsOneWidget);
+  });
+
+  testWidgets('logs a save that fails after the attendee leaves', (tester) async {
+    final authRepository = FakeAuthRepository(
+      initialUser: FakeUser(uid: 'uid-1', displayName: 'Auth Name'),
+    );
+    addTearDown(authRepository.dispose);
+    final profileRepository = FakeUserProfileRepository(initialProfile: existingProfile())
+      ..pendingSave = Completer<void>();
+    addTearDown(profileRepository.dispose);
+    final talker = Talker(settings: TalkerSettings(useConsoleLogs: false));
+    final router = buildRouter();
+
+    await tester.pumpWidget(buildSubject(authRepository, profileRepository, router, talker: talker));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.widgetWithText(FilledButton, '保存'));
+    await tester.tap(find.widgetWithText(FilledButton, '保存'));
+    await tester.pump();
+
+    router.pop();
+    await tester.pumpAndSettle();
+    expect(find.byType(ProfileEditPage), findsNothing);
+    final failure = Exception('offline');
+    profileRepository.pendingSave!.completeError(failure);
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(talker.history.map((log) => log.exception), contains(failure));
   });
 
   testWidgets('rejects invalid social IDs and URLs', (tester) async {

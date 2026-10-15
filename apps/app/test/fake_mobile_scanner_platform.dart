@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:flutter/widgets.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 /// Fails every `start()` the way an unavailable camera would, so
@@ -34,4 +37,24 @@ final class FakeMobileScannerPlatform extends MobileScannerPlatform {
 
   @override
   Future<void> dispose() async {}
+}
+
+/// Starts the camera, so [MobileScannerController.stop] actually reaches the
+/// platform and a test can hold it open with [stopGate].
+final class FakeStartedMobileScannerPlatform extends FakeMobileScannerPlatform {
+  /// When set, [stop] completes only after this does.
+  Completer<void>? stopGate;
+
+  @override
+  Future<MobileScannerViewAttributes> start(StartOptions startOptions) async => const MobileScannerViewAttributes(
+    cameraDirection: CameraFacing.back,
+    currentTorchMode: TorchState.unavailable,
+    size: Size(640, 480),
+  );
+
+  @override
+  Future<void> stop() async => stopGate?.future;
+
+  @override
+  Widget buildCameraView() => const SizedBox();
 }

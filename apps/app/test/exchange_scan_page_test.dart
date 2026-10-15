@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:app/core/i18n/strings.g.dart';
+import 'package:app/core/log/talker.dart';
 import 'package:app/core/provider/environment.dart';
 import 'package:app/feature/auth/data/provider/auth_repository.dart';
 import 'package:app/feature/exchange/data/exchange_token.dart';
@@ -11,6 +14,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:talker_flutter/talker_flutter.dart';
 
 import 'fake_auth_repository.dart';
 import 'fake_mobile_scanner_platform.dart';
@@ -27,6 +31,7 @@ void main() {
     required FakeUserProfileRepository profileRepository,
     required FakeProfileExchangeRepository exchangeRepository,
     Flavor flavor = Flavor.production,
+    Talker? talker,
   }) => TranslationProvider(
     child: ProviderScope(
       overrides: [
@@ -34,6 +39,7 @@ void main() {
         authRepositoryProvider.overrideWithValue(authRepository),
         userProfileRepositoryProvider.overrideWithValue(profileRepository),
         profileExchangeRepositoryProvider.overrideWithValue(exchangeRepository),
+        if (talker != null) talkerProvider.overrideWithValue(talker),
       ],
       child: MaterialApp(
         locale: const Locale('ja'),
@@ -284,6 +290,78 @@ void main() {
 
     expect(find.text('プロフィールを交換できませんでした'), findsOneWidget);
     expect(find.byType(ExchangeScanPage), findsOneWidget);
+  });
+
+  testWidgets('logs an exchange that fails after the scanner is closed', (tester) async {
+    final authRepository = FakeAuthRepository(initialUser: FakeUser(uid: 'uid-1'));
+    addTearDown(authRepository.dispose);
+    final profileRepository = FakeUserProfileRepository(initialProfile: ownProfile());
+    addTearDown(profileRepository.dispose);
+    final exchangeRepository = FakeProfileExchangeRepository();
+    addTearDown(exchangeRepository.dispose);
+    final gate = Completer<void>();
+    exchangeRepository.createGate = gate;
+    final talker = Talker(settings: TalkerSettings(useConsoleLogs: false));
+
+    await openScanPage(
+      tester,
+      buildSubject(
+        authRepository: authRepository,
+        profileRepository: profileRepository,
+        exchangeRepository: exchangeRepository,
+        talker: talker,
+      ),
+    );
+    final scanner = tester.widget<MobileScanner>(find.byType(MobileScanner));
+    scanner.onDetect!(const BarcodeCapture(barcodes: [Barcode(rawValue: 'v1.uid-2.9999999999.deadbeef')]));
+    await tester.pump();
+    expect(exchangeRepository.createCalls, hasLength(1));
+
+    await tester.tap(find.byType(BackButton));
+    await tester.pumpAndSettle();
+    expect(find.byType(ExchangeScanPage), findsNothing);
+    final failure = Exception('offline');
+    gate.completeError(failure);
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(talker.history.map((log) => log.exception), contains(failure));
+  });
+
+  testWidgets('still creates the exchange when the scanner closes while the camera is stopping', (tester) async {
+    final platform = FakeStartedMobileScannerPlatform();
+    final previousPlatform = MobileScannerPlatform.instance;
+    MobileScannerPlatform.instance = platform;
+    addTearDown(() => MobileScannerPlatform.instance = previousPlatform);
+    final authRepository = FakeAuthRepository(initialUser: FakeUser(uid: 'uid-1'));
+    addTearDown(authRepository.dispose);
+    final profileRepository = FakeUserProfileRepository(initialProfile: ownProfile());
+    addTearDown(profileRepository.dispose);
+    final exchangeRepository = FakeProfileExchangeRepository();
+    addTearDown(exchangeRepository.dispose);
+
+    await openScanPage(
+      tester,
+      buildSubject(
+        authRepository: authRepository,
+        profileRepository: profileRepository,
+        exchangeRepository: exchangeRepository,
+      ),
+    );
+    final stopGate = platform.stopGate = Completer<void>();
+    final scanner = tester.widget<MobileScanner>(find.byType(MobileScanner));
+    scanner.onDetect!(const BarcodeCapture(barcodes: [Barcode(rawValue: 'v1.uid-2.9999999999.deadbeef')]));
+    await tester.pump();
+    expect(exchangeRepository.createCalls, isEmpty);
+
+    await tester.tap(find.byType(BackButton));
+    await tester.pumpAndSettle();
+    expect(find.byType(ExchangeScanPage), findsNothing);
+    stopGate.complete();
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(exchangeRepository.createCalls, [(uid: 'uid-1', otherUid: 'uid-2', token: 'v1.uid-2.9999999999.deadbeef')]);
   });
 
   testWidgets('shows a camera error message when the camera is unavailable', (tester) async {
