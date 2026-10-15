@@ -16,6 +16,19 @@ void main() {
     }
   });
 
+  test('opens the guide window at 6:00 JST on day 1 and closes it when day 2 ends', () {
+    const justBefore = Duration(milliseconds: 1);
+    for (final (now, open) in <(DateTime, bool)>[
+      (DateTime.utc(2026, 10, 28, 21).subtract(justBefore), false),
+      (DateTime.utc(2026, 10, 28, 21), true),
+      (DateTime.utc(2026, 10, 29, 15), true),
+      (DateTime.utc(2026, 10, 30, 15).subtract(justBefore), true),
+      (DateTime.utc(2026, 10, 30, 15), false),
+    ]) {
+      expect(isEventGuideWindow(now), open, reason: '$now');
+    }
+  });
+
   test('follows the instant, not the wall clock of the device time zone', () {
     // 10/29 00:30 JST is still 10/28 on a UTC device clock.
     expect(eventDayAt(DateTime.utc(2026, 10, 28, 15, 30).toLocal()), EventDay.day1);

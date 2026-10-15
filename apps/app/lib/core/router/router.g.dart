@@ -8,6 +8,7 @@ part of 'router.dart';
 
 List<RouteBase> get $appRoutes => [
   $settingsRoute,
+  $eventGuideRoute,
   $shareLinkRoute,
   $stampRallyLinkRoute,
   $appShellRoute,
@@ -20,6 +21,27 @@ mixin $SettingsRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/settings');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) => context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+RouteBase get $eventGuideRoute => GoRouteData.$route(path: '/guide', factory: $EventGuideRoute._fromState);
+
+mixin $EventGuideRoute on GoRouteData {
+  static EventGuideRoute _fromState(GoRouterState state) => const EventGuideRoute();
+
+  @override
+  String get location => GoRouteData.$location('/guide');
 
   @override
   void go(BuildContext context) => context.go(location);

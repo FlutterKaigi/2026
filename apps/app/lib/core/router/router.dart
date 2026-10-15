@@ -8,6 +8,7 @@ import 'package:app/feature/auth/ui/page/account_page.dart';
 import 'package:app/feature/auth/ui/page/email_sign_in_page.dart';
 import 'package:app/feature/contributor/ui/page/contributor_list_page.dart';
 import 'package:app/feature/event/ui/page/event_info_page.dart';
+import 'package:app/feature/event_guide/ui/page/event_guide_page.dart';
 import 'package:app/feature/exchange/ui/page/exchange_home_page.dart';
 import 'package:app/feature/exchange/ui/page/exchange_list_page.dart';
 import 'package:app/feature/exchange/ui/page/exchange_scan_page.dart';
@@ -142,6 +143,9 @@ final routerProvider = Provider<GoRouter>((ref) {
         return null;
       }
       final path = state.uri.path;
+      if (path == const EventGuideRoute().location) {
+        return const EventInfoRoute().location;
+      }
       final isBlocked = eventFeatureLocations.any((location) => path == location || path.startsWith('$location/'));
       return isBlocked ? const AccountRoute().location : null;
     },

@@ -399,6 +399,35 @@ venueEvents:
     title: クイズ大会のチェックインを受付中です
     body: 会場スクリーンのQRコードを読み取ってください
 
+eventGuide:
+  title: 当日ガイド
+  open: 当日ガイドを見る
+  skip: スキップ
+  next: 次へ
+  close: 閉じる
+  pageIndicator: $totalページ中$pageページ目
+  welcome:
+    title: FlutterKaigi 2026 へようこそ
+    body: 当日に使う3つの機能を紹介します
+  sessions:
+    title: セッションをブックマーク
+    body: "セッション終了後は、詳細画面から\nフィードバックを送れます"
+    sampleTime: "11:00 – 11:40"
+    sampleRoom: ホール A
+    afterSession: セッション終了後
+  venueEvents:
+    title: 参加者やスポンサーと交流
+    body: "スタンプラリーやプロフィール交換は\n「会場イベントに参加」から始められます"
+    eventTab: イベントタブ
+  quiz:
+    title: 2日目はクイズ大会
+    body: "参加表明のうえ、スクリーンの\nQRコードでチェックインしてください"
+    checkInOpens: チェックイン開始
+    firstRound: 前半戦
+    secondRound: 後半戦
+    firstRoundTime: "15:30"
+    secondRoundTime: "16:30"
+
 stampRally:
   title: スタンプラリー
   signInRequired: スタンプを集めるにはサインインしてください

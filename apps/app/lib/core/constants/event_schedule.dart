@@ -6,6 +6,7 @@ enum EventDay { day1, day2 }
 final _day1StartsAt = DateTime.utc(2026, 10, 28, 15);
 final _day2StartsAt = DateTime.utc(2026, 10, 29, 15);
 final _day2EndsAt = DateTime.utc(2026, 10, 30, 15);
+final _guideStartsAt = _day1StartsAt.add(const Duration(hours: 6));
 
 /// The conference day at [now], or `null` before and after the conference.
 EventDay? eventDayAt(DateTime now) {
@@ -14,3 +15,5 @@ EventDay? eventDayAt(DateTime now) {
   }
   return now.isBefore(_day2StartsAt) ? EventDay.day1 : EventDay.day2;
 }
+
+bool isEventGuideWindow(DateTime now) => !now.isBefore(_guideStartsAt) && now.isBefore(_day2EndsAt);

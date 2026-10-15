@@ -398,6 +398,35 @@ venueEvents:
     title: Quiz check-in is open
     body: Scan the QR code on the venue screen
 
+eventGuide:
+  title: Event day guide
+  open: View the event day guide
+  skip: Skip
+  next: Next
+  close: Close
+  pageIndicator: Page $page of $total
+  welcome:
+    title: Welcome to FlutterKaigi 2026
+    body: Here are three features you'll use at the event
+  sessions:
+    title: Bookmark sessions
+    body: "After a session ends, you can send\nfeedback from its details screen"
+    sampleTime: "11:00 – 11:40"
+    sampleRoom: Hall A
+    afterSession: After the session
+  venueEvents:
+    title: Connect with attendees and sponsors
+    body: "Start the stamp rally and profile exchange\nfrom “Join Venue Events”"
+    eventTab: Event tab
+  quiz:
+    title: Quiz on Day 2
+    body: "After registering, check in with\nthe QR code on the screen"
+    checkInOpens: Check-in opens
+    firstRound: First round
+    secondRound: Second round
+    firstRoundTime: "15:30"
+    secondRoundTime: "16:30"
+
 stampRally:
   title: Stamp Rally
   signInRequired: Sign in to collect stamps

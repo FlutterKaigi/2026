@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:app/core/i18n/strings.g.dart';
+import 'package:app/core/provider/clock.dart';
 import 'package:app/core/provider/shared_preferences.dart';
 import 'package:app/core/remote_config/remote_config_keys.dart';
 import 'package:app/core/remote_config/remote_config_provider.dart';
@@ -10,8 +11,11 @@ import 'package:app/core/ui/not_found_page.dart';
 import 'package:app/feature/auth/data/provider/auth_repository.dart';
 import 'package:app/feature/auth/ui/page/account_page.dart';
 import 'package:app/feature/event/ui/page/event_info_page.dart';
+import 'package:app/feature/event_guide/data/event_guide_seen_provider.dart';
+import 'package:app/feature/event_guide/ui/page/event_guide_page.dart';
 import 'package:app/feature/exchange/ui/page/exchange_share_link_page.dart';
 import 'package:app/feature/profile/data/provider/user_profile_repository.dart';
+import 'package:app/feature/push_notification/data/push_notification_provider.dart';
 import 'package:app/feature/settings/ui/page/settings_page.dart';
 import 'package:app/feature/support_lt/data/provider/support_lt_provider.dart';
 import 'package:app/feature/support_lt/ui/page/support_lt_page.dart';
@@ -25,6 +29,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'fake_auth_repository.dart';
+import 'fake_push_notification_repository.dart';
 import 'fake_remote_config_repository.dart';
 import 'fake_support_lt_repository.dart';
 import 'fake_user_profile_repository.dart';
@@ -35,6 +40,8 @@ const _firebaseAuthCallbacks = [
   'app-1-000000000000-ios-0000000000000000000000://firebaseauth/link$_firebaseAuthCallbackQuery',
   'com.googleusercontent.apps.test-client://firebaseauth/link$_firebaseAuthCallbackQuery',
 ];
+
+final _beforeGuideWindow = DateTime.utc(2026, 10, 15, 3);
 
 void main() {
   test('application router reflects pushed deep links in the web URL', () {
@@ -61,6 +68,7 @@ void main() {
     );
     expect(const AccountRoute().location, '/account');
     expect(const EmailSignInRoute().location, '/account/email');
+    expect(const EventGuideRoute().location, '/guide');
     expect(const VenueEventsRoute().location, '/account/venue-events');
     expect(const SupportLtRoute().location, '/account/support-lt');
     // 応援LTのQRコードが指すリンクは、生成側(`supportLtQrPayload`)と同じパスで解決する。
@@ -94,17 +102,21 @@ void main() {
     late FakeRemoteConfigRepository remoteConfig;
     late FakeUserProfileRepository profileRepository;
     late FakeSupportLtRepository supportLtRepository;
+    late FakePushNotificationRepository pushNotifications;
     late SharedPreferences preferences;
+    late DateTime now;
     late ProviderContainer container;
 
     setUp(() async {
       LocaleSettings.setLocaleSync(AppLocale.ja);
       SharedPreferences.setMockInitialValues(const {});
       preferences = await SharedPreferences.getInstance();
+      now = _beforeGuideWindow;
       authRepository = FakeAuthRepository();
       remoteConfig = FakeRemoteConfigRepository();
       profileRepository = FakeUserProfileRepository();
       supportLtRepository = FakeSupportLtRepository();
+      pushNotifications = FakePushNotificationRepository();
       container = ProviderContainer(
         overrides: [
           authRepositoryProvider.overrideWithValue(authRepository),
@@ -112,6 +124,8 @@ void main() {
           supportLtRepositoryProvider.overrideWithValue(supportLtRepository),
           remoteConfigRepositoryProvider.overrideWithValue(remoteConfig),
           sharedPreferencesProvider.overrideWithValue(preferences),
+          pushNotificationRepositoryProvider.overrideWithValue(pushNotifications),
+          clockProvider.overrideWithValue(() => now),
         ],
       );
     });
@@ -123,6 +137,7 @@ void main() {
       remoteConfig.dispose();
       profileRepository.dispose();
       supportLtRepository.dispose();
+      pushNotifications.dispose();
     });
 
     /// Pumps the real app router (built through `routerProvider`, kept
@@ -140,6 +155,8 @@ void main() {
             supportLtRepositoryProvider.overrideWithValue(supportLtRepository),
             remoteConfigRepositoryProvider.overrideWithValue(remoteConfig),
             sharedPreferencesProvider.overrideWithValue(preferences),
+            pushNotificationRepositoryProvider.overrideWithValue(pushNotifications),
+            clockProvider.overrideWithValue(() => now),
             launchRouteProvider.overrideWithValue(launchRoute),
           ],
         );
@@ -422,6 +439,32 @@ void main() {
       router.go('/xyz');
       await tester.pumpAndSettle();
       expect(currentPath(router), '/xyz');
+    });
+
+    testWidgets('sends the day-of guide to the event tab when the flag is false', (tester) async {
+      remoteConfig.setValue(RemoteConfigKeys.eventFeaturesEnabled, false);
+      final router = await pumpRouter(tester);
+      router.go('/account');
+      await tester.pumpAndSettle();
+
+      router.go('/guide');
+      await tester.pumpAndSettle();
+
+      expect(currentPath(router), '/info');
+      expect(find.byType(EventInfoPage), findsOneWidget);
+      expect(find.byType(EventGuidePage), findsNothing);
+    });
+
+    testWidgets('starts on the event tab when the app opens on a day-of guide link with the flag false', (
+      tester,
+    ) async {
+      now = DateTime.utc(2026, 10, 29, 1);
+      remoteConfig.setValue(RemoteConfigKeys.eventFeaturesEnabled, false);
+      final router = await pumpRouter(tester, launchRoute: Uri(path: '/guide'));
+
+      expect(currentPath(router), '/info');
+      expect(find.byType(EventGuidePage), findsNothing);
+      expect(preferences.getBool(EventGuideSeenNotifier.preferencesKey), isNull);
     });
 
     testWidgets('redirects away as soon as the flag flips false while the destination is open', (tester) async {

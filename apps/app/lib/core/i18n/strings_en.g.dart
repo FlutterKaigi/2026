@@ -60,6 +60,7 @@ class TranslationsEn extends Translations with BaseTranslations<AppLocale, Trans
 	@override late final _Translations$snsPost$en snsPost = _Translations$snsPost$en._(_root);
 	@override late final _Translations$mission$en mission = _Translations$mission$en._(_root);
 	@override late final _Translations$venueEvents$en venueEvents = _Translations$venueEvents$en._(_root);
+	@override late final _Translations$eventGuide$en eventGuide = _Translations$eventGuide$en._(_root);
 	@override late final _Translations$stampRally$en stampRally = _Translations$stampRally$en._(_root);
 	@override late final _Translations$exchange$en exchange = _Translations$exchange$en._(_root);
 	@override late final _Translations$supportLt$en supportLt = _Translations$supportLt$en._(_root);
@@ -517,6 +518,25 @@ class _Translations$venueEvents$en extends Translations$venueEvents$ja {
 	@override late final _Translations$venueEvents$features$en features = _Translations$venueEvents$features$en._(_root);
 	@override late final _Translations$venueEvents$status$en status = _Translations$venueEvents$status$en._(_root);
 	@override late final _Translations$venueEvents$quizCheckIn$en quizCheckIn = _Translations$venueEvents$quizCheckIn$en._(_root);
+}
+
+// Path: eventGuide
+class _Translations$eventGuide$en extends Translations$eventGuide$ja {
+	_Translations$eventGuide$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Event day guide';
+	@override String get open => 'View the event day guide';
+	@override String get skip => 'Skip';
+	@override String get next => 'Next';
+	@override String get close => 'Close';
+	@override String pageIndicator({required Object page, required Object total}) => 'Page ${page} of ${total}';
+	@override late final _Translations$eventGuide$welcome$en welcome = _Translations$eventGuide$welcome$en._(_root);
+	@override late final _Translations$eventGuide$sessions$en sessions = _Translations$eventGuide$sessions$en._(_root);
+	@override late final _Translations$eventGuide$venueEvents$en venueEvents = _Translations$eventGuide$venueEvents$en._(_root);
+	@override late final _Translations$eventGuide$quiz$en quiz = _Translations$eventGuide$quiz$en._(_root);
 }
 
 // Path: stampRally
@@ -1044,6 +1064,59 @@ class _Translations$venueEvents$quizCheckIn$en extends Translations$venueEvents$
 	// Translations
 	@override String get title => 'Quiz check-in is open';
 	@override String get body => 'Scan the QR code on the venue screen';
+}
+
+// Path: eventGuide.welcome
+class _Translations$eventGuide$welcome$en extends Translations$eventGuide$welcome$ja {
+	_Translations$eventGuide$welcome$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Welcome to FlutterKaigi 2026';
+	@override String get body => 'Here are three features you\'ll use at the event';
+}
+
+// Path: eventGuide.sessions
+class _Translations$eventGuide$sessions$en extends Translations$eventGuide$sessions$ja {
+	_Translations$eventGuide$sessions$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Bookmark sessions';
+	@override String get body => 'After a session ends, you can send\nfeedback from its details screen';
+	@override String get sampleTime => '11:00 – 11:40';
+	@override String get sampleRoom => 'Hall A';
+	@override String get afterSession => 'After the session';
+}
+
+// Path: eventGuide.venueEvents
+class _Translations$eventGuide$venueEvents$en extends Translations$eventGuide$venueEvents$ja {
+	_Translations$eventGuide$venueEvents$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Connect with attendees and sponsors';
+	@override String get body => 'Start the stamp rally and profile exchange\nfrom “Join Venue Events”';
+	@override String get eventTab => 'Event tab';
+}
+
+// Path: eventGuide.quiz
+class _Translations$eventGuide$quiz$en extends Translations$eventGuide$quiz$ja {
+	_Translations$eventGuide$quiz$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Quiz on Day 2';
+	@override String get body => 'After registering, check in with\nthe QR code on the screen';
+	@override String get checkInOpens => 'Check-in opens';
+	@override String get firstRound => 'First round';
+	@override String get secondRound => 'Second round';
+	@override String get firstRoundTime => '15:30';
+	@override String get secondRoundTime => '16:30';
 }
 
 // Path: settings.themeMode
@@ -1740,6 +1813,29 @@ extension on TranslationsEn {
 			'venueEvents.status.exchangeCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} person', other: '${n} people', ), 
 			'venueEvents.quizCheckIn.title' => 'Quiz check-in is open',
 			'venueEvents.quizCheckIn.body' => 'Scan the QR code on the venue screen',
+			'eventGuide.title' => 'Event day guide',
+			'eventGuide.open' => 'View the event day guide',
+			'eventGuide.skip' => 'Skip',
+			'eventGuide.next' => 'Next',
+			'eventGuide.close' => 'Close',
+			'eventGuide.pageIndicator' => ({required Object page, required Object total}) => 'Page ${page} of ${total}',
+			'eventGuide.welcome.title' => 'Welcome to FlutterKaigi 2026',
+			'eventGuide.welcome.body' => 'Here are three features you\'ll use at the event',
+			'eventGuide.sessions.title' => 'Bookmark sessions',
+			'eventGuide.sessions.body' => 'After a session ends, you can send\nfeedback from its details screen',
+			'eventGuide.sessions.sampleTime' => '11:00 – 11:40',
+			'eventGuide.sessions.sampleRoom' => 'Hall A',
+			'eventGuide.sessions.afterSession' => 'After the session',
+			'eventGuide.venueEvents.title' => 'Connect with attendees and sponsors',
+			'eventGuide.venueEvents.body' => 'Start the stamp rally and profile exchange\nfrom “Join Venue Events”',
+			'eventGuide.venueEvents.eventTab' => 'Event tab',
+			'eventGuide.quiz.title' => 'Quiz on Day 2',
+			'eventGuide.quiz.body' => 'After registering, check in with\nthe QR code on the screen',
+			'eventGuide.quiz.checkInOpens' => 'Check-in opens',
+			'eventGuide.quiz.firstRound' => 'First round',
+			'eventGuide.quiz.secondRound' => 'Second round',
+			'eventGuide.quiz.firstRoundTime' => '15:30',
+			'eventGuide.quiz.secondRoundTime' => '16:30',
 			'stampRally.title' => 'Stamp Rally',
 			'stampRally.signInRequired' => 'Sign in to collect stamps',
 			'stampRally.description' => 'Scan the QR codes at sponsor booths to collect stamps',
@@ -1882,6 +1978,8 @@ extension on TranslationsEn {
 			'settings.appearance' => 'Appearance',
 			'settings.appInfo' => 'App Information',
 			'settings.version' => 'Version',
+			_ => null,
+		} ?? switch (path) {
 			'settings.saveError' => 'Could not save the setting',
 			'settings.themeMode.title' => 'Theme',
 			'settings.themeMode.system' => 'System',
@@ -1905,8 +2003,6 @@ extension on TranslationsEn {
 			'notFound.title' => 'Page not found',
 			'notFound.description' => 'The page you are looking for does not exist or may have moved.',
 			'common.retry' => 'Retry',
-			_ => null,
-		} ?? switch (path) {
 			'quiz.title' => 'Quiz',
 			'quiz.entrySubtitle' => 'Join sponsor-provided quizzes',
 			'quiz.list.empty' => 'No quizzes yet',

@@ -61,6 +61,7 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	late final Translations$snsPost$ja snsPost = Translations$snsPost$ja.internal(_root);
 	late final Translations$mission$ja mission = Translations$mission$ja.internal(_root);
 	late final Translations$venueEvents$ja venueEvents = Translations$venueEvents$ja.internal(_root);
+	late final Translations$eventGuide$ja eventGuide = Translations$eventGuide$ja.internal(_root);
 	late final Translations$stampRally$ja stampRally = Translations$stampRally$ja.internal(_root);
 	late final Translations$exchange$ja exchange = Translations$exchange$ja.internal(_root);
 	late final Translations$supportLt$ja supportLt = Translations$supportLt$ja.internal(_root);
@@ -994,6 +995,38 @@ class Translations$venueEvents$ja {
 	late final Translations$venueEvents$features$ja features = Translations$venueEvents$features$ja.internal(_root);
 	late final Translations$venueEvents$status$ja status = Translations$venueEvents$status$ja.internal(_root);
 	late final Translations$venueEvents$quizCheckIn$ja quizCheckIn = Translations$venueEvents$quizCheckIn$ja.internal(_root);
+}
+
+// Path: eventGuide
+class Translations$eventGuide$ja {
+	Translations$eventGuide$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: '当日ガイド'
+	String get title => '当日ガイド';
+
+	/// ja: '当日ガイドを見る'
+	String get open => '当日ガイドを見る';
+
+	/// ja: 'スキップ'
+	String get skip => 'スキップ';
+
+	/// ja: '次へ'
+	String get next => '次へ';
+
+	/// ja: '閉じる'
+	String get close => '閉じる';
+
+	/// ja: '$totalページ中$pageページ目'
+	String pageIndicator({required Object total, required Object page}) => '${total}ページ中${page}ページ目';
+
+	late final Translations$eventGuide$welcome$ja welcome = Translations$eventGuide$welcome$ja.internal(_root);
+	late final Translations$eventGuide$sessions$ja sessions = Translations$eventGuide$sessions$ja.internal(_root);
+	late final Translations$eventGuide$venueEvents$ja venueEvents = Translations$eventGuide$venueEvents$ja.internal(_root);
+	late final Translations$eventGuide$quiz$ja quiz = Translations$eventGuide$quiz$ja.internal(_root);
 }
 
 // Path: stampRally
@@ -2036,6 +2069,93 @@ class Translations$venueEvents$quizCheckIn$ja {
 	String get body => '会場スクリーンのQRコードを読み取ってください';
 }
 
+// Path: eventGuide.welcome
+class Translations$eventGuide$welcome$ja {
+	Translations$eventGuide$welcome$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'FlutterKaigi 2026 へようこそ'
+	String get title => 'FlutterKaigi 2026 へようこそ';
+
+	/// ja: '当日に使う3つの機能を紹介します'
+	String get body => '当日に使う3つの機能を紹介します';
+}
+
+// Path: eventGuide.sessions
+class Translations$eventGuide$sessions$ja {
+	Translations$eventGuide$sessions$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: 'セッションをブックマーク'
+	String get title => 'セッションをブックマーク';
+
+	/// ja: 'セッション終了後は、詳細画面から フィードバックを送れます'
+	String get body => 'セッション終了後は、詳細画面から\nフィードバックを送れます';
+
+	/// ja: '11:00 – 11:40'
+	String get sampleTime => '11:00 – 11:40';
+
+	/// ja: 'ホール A'
+	String get sampleRoom => 'ホール A';
+
+	/// ja: 'セッション終了後'
+	String get afterSession => 'セッション終了後';
+}
+
+// Path: eventGuide.venueEvents
+class Translations$eventGuide$venueEvents$ja {
+	Translations$eventGuide$venueEvents$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: '参加者やスポンサーと交流'
+	String get title => '参加者やスポンサーと交流';
+
+	/// ja: 'スタンプラリーやプロフィール交換は 「会場イベントに参加」から始められます'
+	String get body => 'スタンプラリーやプロフィール交換は\n「会場イベントに参加」から始められます';
+
+	/// ja: 'イベントタブ'
+	String get eventTab => 'イベントタブ';
+}
+
+// Path: eventGuide.quiz
+class Translations$eventGuide$quiz$ja {
+	Translations$eventGuide$quiz$ja.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// ja: '2日目はクイズ大会'
+	String get title => '2日目はクイズ大会';
+
+	/// ja: '参加表明のうえ、スクリーンの QRコードでチェックインしてください'
+	String get body => '参加表明のうえ、スクリーンの\nQRコードでチェックインしてください';
+
+	/// ja: 'チェックイン開始'
+	String get checkInOpens => 'チェックイン開始';
+
+	/// ja: '前半戦'
+	String get firstRound => '前半戦';
+
+	/// ja: '後半戦'
+	String get secondRound => '後半戦';
+
+	/// ja: '15:30'
+	String get firstRoundTime => '15:30';
+
+	/// ja: '16:30'
+	String get secondRoundTime => '16:30';
+}
+
 // Path: settings.themeMode
 class Translations$settings$themeMode$ja {
 	Translations$settings$themeMode$ja.internal(this._root);
@@ -2975,6 +3095,29 @@ extension on Translations {
 			'venueEvents.status.exchangeCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(n, one: '${n}人', other: '${n}人', ), 
 			'venueEvents.quizCheckIn.title' => 'クイズ大会のチェックインを受付中です',
 			'venueEvents.quizCheckIn.body' => '会場スクリーンのQRコードを読み取ってください',
+			'eventGuide.title' => '当日ガイド',
+			'eventGuide.open' => '当日ガイドを見る',
+			'eventGuide.skip' => 'スキップ',
+			'eventGuide.next' => '次へ',
+			'eventGuide.close' => '閉じる',
+			'eventGuide.pageIndicator' => ({required Object total, required Object page}) => '${total}ページ中${page}ページ目',
+			'eventGuide.welcome.title' => 'FlutterKaigi 2026 へようこそ',
+			'eventGuide.welcome.body' => '当日に使う3つの機能を紹介します',
+			'eventGuide.sessions.title' => 'セッションをブックマーク',
+			'eventGuide.sessions.body' => 'セッション終了後は、詳細画面から\nフィードバックを送れます',
+			'eventGuide.sessions.sampleTime' => '11:00 – 11:40',
+			'eventGuide.sessions.sampleRoom' => 'ホール A',
+			'eventGuide.sessions.afterSession' => 'セッション終了後',
+			'eventGuide.venueEvents.title' => '参加者やスポンサーと交流',
+			'eventGuide.venueEvents.body' => 'スタンプラリーやプロフィール交換は\n「会場イベントに参加」から始められます',
+			'eventGuide.venueEvents.eventTab' => 'イベントタブ',
+			'eventGuide.quiz.title' => '2日目はクイズ大会',
+			'eventGuide.quiz.body' => '参加表明のうえ、スクリーンの\nQRコードでチェックインしてください',
+			'eventGuide.quiz.checkInOpens' => 'チェックイン開始',
+			'eventGuide.quiz.firstRound' => '前半戦',
+			'eventGuide.quiz.secondRound' => '後半戦',
+			'eventGuide.quiz.firstRoundTime' => '15:30',
+			'eventGuide.quiz.secondRoundTime' => '16:30',
 			'stampRally.title' => 'スタンプラリー',
 			'stampRally.signInRequired' => 'スタンプを集めるにはサインインしてください',
 			'stampRally.description' => 'スポンサーブースでQRコードを読み取ってスタンプを集めましょう',
@@ -3117,6 +3260,8 @@ extension on Translations {
 			'settings.appearance' => '表示設定',
 			'settings.appInfo' => 'アプリ情報',
 			'settings.version' => 'バージョン',
+			_ => null,
+		} ?? switch (path) {
 			'settings.saveError' => '設定を保存できませんでした',
 			'settings.themeMode.title' => 'テーマ',
 			'settings.themeMode.system' => 'システムに合わせる',
@@ -3140,8 +3285,6 @@ extension on Translations {
 			'notFound.title' => 'ページが見つかりません',
 			'notFound.description' => 'お探しのページは存在しないか、移動した可能性があります。',
 			'common.retry' => '再試行',
-			_ => null,
-		} ?? switch (path) {
 			'quiz.title' => 'クイズ大会',
 			'quiz.entrySubtitle' => 'スポンサー提供のクイズに参加',
 			'quiz.list.empty' => 'クイズはまだありません',

@@ -9,6 +9,14 @@ class SettingsRoute extends GoRouteData with $SettingsRoute {
   Widget build(BuildContext context, GoRouterState state) => const SettingsPage();
 }
 
+@TypedGoRoute<EventGuideRoute>(path: '/guide')
+class EventGuideRoute extends GoRouteData with $EventGuideRoute {
+  const EventGuideRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const EventGuidePage();
+}
+
 /// `/x/:token` — a profile-exchange share link
 /// (`ExchangeToken.qrPayload`), opened as a Universal
 /// Link / App Link or in-app. Declared as a top-level route (not nested
