@@ -86,7 +86,7 @@ class _PendingShareLink extends HookConsumerWidget {
 
     final t = Translations.of(context);
     return ExchangeAccessGate(
-      signInTitle: t.exchange.shareLinkSignInRequired,
+      signInDescription: t.exchange.shareLinkSignInRequired,
       profileTitle: t.exchange.shareLinkProfileRequired,
       // Opening a second link while the first one's result is on screen keeps
       // the same `/x/:token` route, so without a token-derived key the body's
@@ -99,10 +99,10 @@ class _PendingShareLink extends HookConsumerWidget {
 
 /// Resolves [token] against the now-confirmed signed-in, profile-having user
 /// and renders the outcome. Runs at most once per [token] regardless of
-/// rebuilds (the `useRef` guard), and clears the pending token it just
-/// handled so `AccountPage`'s own listener (the fallback for a sign-in
-/// detour that ends up back there instead of on this page) doesn't also
-/// attempt it.
+/// rebuilds (the `useRef` guard), and clears the pending token before it
+/// starts so `AccountPage`'s own listener (the fallback for a visitor who
+/// leaves this page unfinished) can't start the same exchange, even if the
+/// visitor leaves for the account tab while it is in flight.
 class _ShareLinkBody extends HookConsumerWidget {
   const _ShareLinkBody({required this.token, super.key});
 
@@ -120,19 +120,16 @@ class _ShareLinkBody extends HookConsumerWidget {
       }
       started.value = true;
 
+      // Leaving the page mid-flight disposes this `ref`, so what the exchange
+      // still needs once it lands is read up front. Only the on-screen result
+      // is skipped afterwards.
+      final pendingTokens = ref.read(pendingExchangeTokenProvider.notifier);
+      final talker = ref.read(talkerProvider);
+      final repository = ref.read(profileExchangeRepositoryProvider);
+
       Future<void> resolve() async {
-        // Leaving the page mid-flight disposes this `ref`, so everything that
-        // still has to happen once the exchange lands — dropping the pending
-        // token above all, or it would be replayed by `AccountPage` — is read
-        // before the await. Only the on-screen result is skipped afterwards.
-        final pendingTokens = ref.read(pendingExchangeTokenProvider.notifier);
-        final talker = ref.read(talkerProvider);
-        final resolved = await resolvePendingExchangeToken(
-          token: token,
-          myUid: myUid,
-          repository: ref.read(profileExchangeRepositoryProvider),
-        );
         pendingTokens.clearIfCurrent(token);
+        final resolved = await resolvePendingExchangeToken(token: token, myUid: myUid, repository: repository);
         if (resolved case PendingExchangeResolved(outcome: ExchangeCreateFailed(:final error, :final stackTrace))) {
           talker.handle(error, stackTrace);
         }
@@ -142,7 +139,9 @@ class _ShareLinkBody extends HookConsumerWidget {
         result.value = resolved;
       }
 
-      unawaited(resolve());
+      // Deferred to a microtask: Riverpod disallows modifying a provider
+      // synchronously from a widget life-cycle callback.
+      unawaited(Future.microtask(resolve));
       return null;
     }, [myUid]);
 

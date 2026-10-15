@@ -6,6 +6,7 @@ import 'package:app/core/log/talker.dart';
 import 'package:app/core/ui/widget/app_error_view.dart';
 import 'package:app/core/ui/widget/app_scrollbar.dart';
 import 'package:app/feature/auth/data/provider/auth_state.dart';
+import 'package:app/feature/auth/ui/widget/centered_sign_in_card.dart';
 import 'package:app/feature/profile/data/provider/user_profile_provider.dart';
 import 'package:app/feature/profile/data/provider/user_profile_repository.dart';
 import 'package:app/feature/profile/data/sns_platform.dart';
@@ -77,7 +78,7 @@ class ProfileEditPage extends HookConsumerWidget {
           user: user,
           profile: value,
         ),
-        AsyncData() => Center(child: Text(t.auth.signIn.description)),
+        AsyncData() => CenteredSignInCard(title: t.auth.signIn.required, description: t.profile.signInRequired),
         AsyncError(:final error) => AppErrorView(
           error: error,
           onRetry: () => ref.invalidate(userProfileProvider),

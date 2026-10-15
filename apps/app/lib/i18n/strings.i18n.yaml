@@ -217,7 +217,6 @@ contributors:
 auth:
   signIn:
     required: サインインが必要です
-    description: FlutterKaigi 2026 アプリで利用するサインイン方法を選択してください
     accountTitle: サインイン
     accountDescription: "プロフィールや会場イベントの記録は\nアカウントに保存されます"
     withGoogle: Google でサインイン
@@ -265,6 +264,7 @@ auth:
     unknown: 認証に失敗しました。もう一度お試しください
 profile:
   title: プロフィール
+  signInRequired: プロフィールを作成するにはサインインしてください
   editTitle: プロフィールを編集
   createTitle: プロフィールを作成
   promptTitle: プロフィールを登録しましょう
@@ -486,7 +486,6 @@ exchange:
   scanButton: QRコードを読み取る
   listButton: 交換した人を見る
   signInRequired: サインインすると自分のQRコードを表示できます
-  signInAction: サインインする
   profileRequired: プロフィールを作成すると自分のQRコードを表示できます
   profileRequiredAction: プロフィールを作成する
   scanTitle: QRコードを読み取る
@@ -620,10 +619,6 @@ quiz:
       inProgress: 進行中
       finished: 結果発表
   signInRequired:
-    title: サインインが必要です
-    description: クイズ大会は参加と回答の記録をアカウントに紐づけます。
-      アカウントタブからサインインしてご参加ください。
-    button: アカウントへ
     inPage: クイズ大会に参加するにはサインインしてください
   errors:
     signInFailed: サインインに失敗しました

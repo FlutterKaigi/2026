@@ -59,10 +59,12 @@ class SignInCard extends HookConsumerWidget {
         return;
       }
       isProcessing.value = true;
+      // 処理中にカードが破棄されると `ref` が使えなくなるため、先に読んでおく。
+      final talker = ref.read(talkerProvider);
       try {
         await action(ref.read(authRepositoryProvider));
       } on FirebaseAuthException catch (exception, stackTrace) {
-        ref.read(talkerProvider).handle(exception, stackTrace);
+        talker.handle(exception, stackTrace);
         final message = authErrorMessage(t, exception);
         if (message != null && context.mounted) {
           ScaffoldMessenger.of(context)

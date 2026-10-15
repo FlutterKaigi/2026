@@ -2,9 +2,8 @@ import 'dart:async';
 
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/router/router.dart';
-import 'package:app/core/ui/widget/app_page_content.dart';
 import 'package:app/feature/auth/ui/widget/authenticated_body.dart';
-import 'package:app/feature/auth/ui/widget/sign_in_card.dart';
+import 'package:app/feature/auth/ui/widget/centered_sign_in_card.dart';
 import 'package:app/feature/stamp_rally/data/stamp_rally_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -21,12 +20,7 @@ class StampRallyScanPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: Text(t.stampRally.scanTitle)),
       body: AuthenticatedBody(
-        signedOut: AppPageContent(
-          maxWidth: signInCardMaxWidth,
-          padding: const EdgeInsets.all(24),
-          centerVertically: true,
-          child: SignInCard(title: t.auth.signIn.required, description: t.stampRally.signInRequired),
-        ),
+        signedOut: CenteredSignInCard(title: t.auth.signIn.required, description: t.stampRally.signInRequired),
         builder: (_) => const _ScannerBody(),
       ),
     );

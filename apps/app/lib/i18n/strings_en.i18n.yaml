@@ -217,7 +217,6 @@ contributors:
 auth:
   signIn:
     required: Sign in required
-    description: Choose how you want to sign in to the FlutterKaigi 2026 app
     accountTitle: Sign in
     accountDescription: "Your profile and venue event records\nare saved to your account"
     withGoogle: Sign in with Google
@@ -264,6 +263,7 @@ auth:
     unknown: Authentication failed. Please try again
 profile:
   title: Profile
+  signInRequired: Sign in to create your profile
   editTitle: Edit Profile
   createTitle: Create Profile
   promptTitle: Set up your profile
@@ -485,7 +485,6 @@ exchange:
   scanButton: Scan a QR code
   listButton: View exchanged profiles
   signInRequired: Sign in to show your QR code
-  signInAction: Sign in
   profileRequired: Create a profile to show your QR code
   profileRequiredAction: Create profile
   scanTitle: Scan a QR code
@@ -619,10 +618,6 @@ quiz:
       inProgress: In progress
       finished: Results
   signInRequired:
-    title: Sign-in required
-    description: The quiz links your entry and answers to your account.
-      Sign in from the Account tab to take part.
-    button: Go to Account
     inPage: Sign in to take part in the quiz
   errors:
     signInFailed: Failed to sign in

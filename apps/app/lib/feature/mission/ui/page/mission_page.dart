@@ -3,7 +3,7 @@ import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/router/router.dart';
 import 'package:app/core/ui/widget/app_page_content.dart';
 import 'package:app/feature/auth/ui/widget/authenticated_body.dart';
-import 'package:app/feature/auth/ui/widget/sign_in_card.dart';
+import 'package:app/feature/auth/ui/widget/centered_sign_in_card.dart';
 import 'package:app/feature/exchange/data/provider/profile_exchange_provider.dart';
 import 'package:app/feature/mission/data/mission_provider.dart';
 import 'package:app/feature/mission/data/profile_exchange_progress.dart';
@@ -28,10 +28,7 @@ class MissionPage extends StatelessWidget {
         ),
       ),
       body: AuthenticatedBody(
-        signedOut: AppPageContent(
-          maxWidth: 640,
-          child: SignInCard(title: t.auth.signIn.required, description: t.mission.signInRequired),
-        ),
+        signedOut: CenteredSignInCard(title: t.auth.signIn.required, description: t.mission.signInRequired),
         builder: (uid) => _MissionBody(uid: uid),
       ),
     );

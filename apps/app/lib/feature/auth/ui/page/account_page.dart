@@ -48,12 +48,10 @@ class AccountPage extends HookConsumerWidget {
     // Fallback consumer for `pendingExchangeTokenProvider`: `ExchangeShareLinkPage`
     // queues a share-link token here when it opens signed-out or profile-less,
     // then consumes it itself once its own `ExchangeAccessGate` passes. If the
-    // visitor's sign-in / profile-creation detour lands back on this tab
-    // instead — the normal outcome, since neither flow returns to the
-    // original `/x/<token>` URL — this is what actually completes the
-    // exchange. `handledToken` guards against redoing it if `profile` (a
-    // stream value) emits again before the notifier's `state = null` clear is
-    // observed.
+    // visitor leaves the link before that and signs in or creates the profile
+    // on this tab instead, this is what completes the exchange. `handledToken`
+    // guards against redoing it if `profile` (a stream value) emits again
+    // before the notifier's `state = null` clear is observed.
     final pending = ref.watch(pendingExchangeTokenProvider);
     final profile = profileState.value;
     final myUid = authState.value?.uid;
@@ -80,19 +78,18 @@ class AccountPage extends HookConsumerWidget {
       }
       handledPendingToken.value = pendingToken;
 
+      // Leaving the tab mid-flight disposes this `ref`, so what the exchange
+      // still needs once it lands is read up front. Only the snack bar is
+      // skipped afterwards.
+      final pendingTokens = ref.read(pendingExchangeTokenProvider.notifier);
+      final talker = ref.read(talkerProvider);
+      final repository = ref.read(profileExchangeRepositoryProvider);
+
       Future<void> resolve() async {
-        // Leaving the tab mid-flight disposes this `ref`, so everything that
-        // still has to happen once the exchange lands — dropping the pending
-        // token above all, or it would be replayed on the next visit — is read
-        // before the await. Only the snack bar is skipped afterwards.
-        final pendingTokens = ref.read(pendingExchangeTokenProvider.notifier);
-        final talker = ref.read(talkerProvider);
-        final resolved = await resolvePendingExchangeToken(
-          token: pendingToken,
-          myUid: myUid,
-          repository: ref.read(profileExchangeRepositoryProvider),
-        );
+        // Dropped before the create starts, so reopening this tab while it is
+        // in flight doesn't start the same exchange again.
         pendingTokens.clearIfCurrent(pendingToken);
+        final resolved = await resolvePendingExchangeToken(token: pendingToken, myUid: myUid, repository: repository);
         if (resolved case PendingExchangeResolved(outcome: ExchangeCreateFailed(:final error, :final stackTrace))) {
           talker.handle(error, stackTrace);
         }
@@ -115,7 +112,9 @@ class AccountPage extends HookConsumerWidget {
         }
       }
 
-      unawaited(resolve());
+      // Deferred to a microtask: Riverpod disallows modifying a provider
+      // synchronously from a widget life-cycle callback.
+      unawaited(Future.microtask(resolve));
       return null;
     }, [pending, myUid, profile]);
 

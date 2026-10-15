@@ -82,6 +82,34 @@ void main() {
     expect(find.text('account destination'), findsOneWidget);
   });
 
+  testWidgets('goes to the account tab when there is no page to go back to', (tester) async {
+    final repository = FakeAuthRepository();
+    addTearDown(repository.dispose);
+    final router = GoRouter(
+      initialLocation: '/account/email',
+      routes: [
+        GoRoute(
+          path: '/account',
+          builder: (_, _) => const Scaffold(body: Text('account destination')),
+        ),
+        GoRoute(path: '/account/email', builder: (_, _) => const EmailSignInPage()),
+      ],
+    );
+    addTearDown(router.dispose);
+
+    await tester.pumpWidget(buildSubject(repository, router));
+    await tester.pumpAndSettle();
+    expect(router.canPop(), isFalse);
+
+    await tester.enterText(find.byType(TextFormField).at(0), 'attendee@example.com');
+    await tester.enterText(find.byType(TextFormField).at(1), 'password123');
+    await tester.tap(find.text('サインイン'));
+    await tester.pumpAndSettle();
+
+    expect(router.routeInformationProvider.value.uri.path, '/account');
+    expect(find.text('account destination'), findsOneWidget);
+  });
+
   testWidgets('returns to the previous page only once when the visitor leaves while signing in', (tester) async {
     final repository = FakeAuthRepository()..pendingAction = Completer<void>();
     addTearDown(repository.dispose);

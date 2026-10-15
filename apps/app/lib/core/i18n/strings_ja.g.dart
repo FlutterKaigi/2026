@@ -702,6 +702,9 @@ class Translations$profile$ja {
 	/// ja: 'プロフィール'
 	String get title => 'プロフィール';
 
+	/// ja: 'プロフィールを作成するにはサインインしてください'
+	String get signInRequired => 'プロフィールを作成するにはサインインしてください';
+
 	/// ja: 'プロフィールを編集'
 	String get editTitle => 'プロフィールを編集';
 
@@ -1210,9 +1213,6 @@ class Translations$exchange$ja {
 
 	/// ja: 'サインインすると自分のQRコードを表示できます'
 	String get signInRequired => 'サインインすると自分のQRコードを表示できます';
-
-	/// ja: 'サインインする'
-	String get signInAction => 'サインインする';
 
 	/// ja: 'プロフィールを作成すると自分のQRコードを表示できます'
 	String get profileRequired => 'プロフィールを作成すると自分のQRコードを表示できます';
@@ -1834,9 +1834,6 @@ class Translations$auth$signIn$ja {
 	/// ja: 'サインインが必要です'
 	String get required => 'サインインが必要です';
 
-	/// ja: 'FlutterKaigi 2026 アプリで利用するサインイン方法を選択してください'
-	String get description => 'FlutterKaigi 2026 アプリで利用するサインイン方法を選択してください';
-
 	/// ja: 'サインイン'
 	String get accountTitle => 'サインイン';
 
@@ -2219,15 +2216,6 @@ class Translations$quiz$signInRequired$ja {
 	final Translations _root; // ignore: unused_field
 
 	// Translations
-
-	/// ja: 'サインインが必要です'
-	String get title => 'サインインが必要です';
-
-	/// ja: 'クイズ大会は参加と回答の記録をアカウントに紐づけます。 アカウントタブからサインインしてご参加ください。'
-	String get description => 'クイズ大会は参加と回答の記録をアカウントに紐づけます。 アカウントタブからサインインしてご参加ください。';
-
-	/// ja: 'アカウントへ'
-	String get button => 'アカウントへ';
 
 	/// ja: 'クイズ大会に参加するにはサインインしてください'
 	String get inPage => 'クイズ大会に参加するにはサインインしてください';
@@ -2936,7 +2924,6 @@ extension on Translations {
 			'contributors.empty' => 'コントリビューターが見つかりませんでした',
 			'contributors.contributionsCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(n, one: '${n} contributions', other: '${n} contributions', ), 
 			'auth.signIn.required' => 'サインインが必要です',
-			'auth.signIn.description' => 'FlutterKaigi 2026 アプリで利用するサインイン方法を選択してください',
 			'auth.signIn.accountTitle' => 'サインイン',
 			'auth.signIn.accountDescription' => 'プロフィールや会場イベントの記録は\nアカウントに保存されます',
 			'auth.signIn.withGoogle' => 'Google でサインイン',
@@ -2979,6 +2966,7 @@ extension on Translations {
 			'auth.error.appleTokenRevocationFailed' => 'Appleのトークン失効に失敗したため、アカウントを削除できませんでした。もう一度お試しください',
 			'auth.error.unknown' => '認証に失敗しました。もう一度お試しください',
 			'profile.title' => 'プロフィール',
+			'profile.signInRequired' => 'プロフィールを作成するにはサインインしてください',
 			'profile.editTitle' => 'プロフィールを編集',
 			'profile.createTitle' => 'プロフィールを作成',
 			'profile.promptTitle' => 'プロフィールを登録しましょう',
@@ -3173,7 +3161,6 @@ extension on Translations {
 			'exchange.scanButton' => 'QRコードを読み取る',
 			'exchange.listButton' => '交換した人を見る',
 			'exchange.signInRequired' => 'サインインすると自分のQRコードを表示できます',
-			'exchange.signInAction' => 'サインインする',
 			'exchange.profileRequired' => 'プロフィールを作成すると自分のQRコードを表示できます',
 			'exchange.profileRequiredAction' => 'プロフィールを作成する',
 			'exchange.scanTitle' => 'QRコードを読み取る',
@@ -3260,9 +3247,9 @@ extension on Translations {
 			'settings.appearance' => '表示設定',
 			'settings.appInfo' => 'アプリ情報',
 			'settings.version' => 'バージョン',
+			'settings.saveError' => '設定を保存できませんでした',
 			_ => null,
 		} ?? switch (path) {
-			'settings.saveError' => '設定を保存できませんでした',
 			'settings.themeMode.title' => 'テーマ',
 			'settings.themeMode.system' => 'システムに合わせる',
 			'settings.themeMode.light' => 'ライト',
@@ -3294,9 +3281,6 @@ extension on Translations {
 			'quiz.list.status.entryClosed' => '受付終了',
 			'quiz.list.status.inProgress' => '進行中',
 			'quiz.list.status.finished' => '結果発表',
-			'quiz.signInRequired.title' => 'サインインが必要です',
-			'quiz.signInRequired.description' => 'クイズ大会は参加と回答の記録をアカウントに紐づけます。 アカウントタブからサインインしてご参加ください。',
-			'quiz.signInRequired.button' => 'アカウントへ',
 			'quiz.signInRequired.inPage' => 'クイズ大会に参加するにはサインインしてください',
 			'quiz.errors.signInFailed' => 'サインインに失敗しました',
 			'quiz.errors.eventLoadFailed' => 'イベント情報の取得に失敗しました',

@@ -19,7 +19,7 @@ import 'package:app/feature/exchange/data/provider/profile_exchange_repository.d
 import 'package:app/feature/profile/data/provider/user_profile_repository.dart';
 import 'package:app/feature/profile/ui/widget/country_flag_widget.dart';
 import 'package:app/feature/quiz/data/provider/quiz_repositories.dart';
-import 'package:app/feature/quiz/ui/component/quiz_sign_in_required_view.dart';
+import 'package:app/feature/quiz/ui/page/quiz_event_list_page.dart';
 import 'package:app/feature/quiz/ui/page/quiz_page.dart';
 import 'package:app/feature/support_lt/data/provider/support_lt_provider.dart';
 import 'package:data/data.dart';
@@ -265,6 +265,29 @@ void main() {
     expect(find.text('Appleでサインイン'), findsOneWidget);
   });
 
+  testWidgets('ignores a sign-in that fails after the card has gone away', (tester) async {
+    final repository = FakeAuthRepository()..pendingAction = Completer<void>();
+    addTearDown(repository.dispose);
+    final showsAccountPage = ValueNotifier(true);
+    addTearDown(showsAccountPage.dispose);
+
+    await tester.pumpWidget(
+      buildSubject(repository, preferences: preferences, showsAccountPage: showsAccountPage),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.bySemanticsLabel('Google でサインイン'));
+    await tester.pump();
+    showsAccountPage.value = false;
+    await tester.pump();
+    expect(find.byType(SignInCard), findsNothing);
+
+    repository.pendingAction!.completeError(FirebaseAuthException(code: 'network-request-failed'));
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('stays silent when the user cancels sign-in', (tester) async {
     final repository = FakeAuthRepository()..nextError = FirebaseAuthException(code: 'canceled');
     addTearDown(repository.dispose);
@@ -412,9 +435,17 @@ void main() {
     expect(find.text('プロフィールを編集'), findsNothing);
   });
 
-  testWidgets('requires account sign-in before opening the quiz list', (tester) async {
+  testWidgets('lists the quiz events after signing in on the quiz list, without leaving it', (tester) async {
     final repository = FakeAuthRepository();
-    final quizzes = _QuizEventRepository();
+    final quizzes = _QuizEventRepository([
+      QuizEvent(
+        id: 'first',
+        title: const LocaleMap(ja: '前半戦', en: 'First round'),
+        status: QuizEventStatus.registration,
+        createdAt: DateTime.utc(2026),
+        updatedAt: DateTime.utc(2026),
+      ),
+    ]);
     final router = GoRouter(initialLocation: '/account', routes: app_router.$appRoutes);
     addTearDown(repository.dispose);
     addTearDown(router.dispose);
@@ -426,11 +457,17 @@ void main() {
     router.go('/account/quiz');
     await tester.pumpAndSettle();
 
-    expect(find.byType(QuizSignInRequiredView), findsOneWidget);
+    final quizList = find.byType(QuizEventListPage);
+    final signInCard = find.descendant(of: quizList, matching: find.byType(SignInCard));
+    expect(signInCard, findsOneWidget);
     expect(quizzes.publishedSubscriptions, 0);
-    await tester.tap(find.text(t.quiz.signInRequired.button));
+
+    await tester.tap(find.descendant(of: signInCard, matching: find.byType(GoogleSignInButton)));
     await tester.pumpAndSettle();
-    expect(find.byType(AccountPage), findsOneWidget);
+
+    expect(router.routerDelegate.currentConfiguration.uri.path, '/account/quiz');
+    expect(signInCard, findsNothing);
+    expect(find.descendant(of: quizList, matching: find.text('前半戦')), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -610,6 +647,84 @@ void main() {
     },
   );
 
+  testWidgets('starts a pending share-link exchange only once when the tab is left and reopened mid-flight', (
+    tester,
+  ) async {
+    final repository = FakeAuthRepository(
+      initialUser: FakeUser(uid: 'uid-1', email: 'attendee@example.com'),
+    );
+    addTearDown(repository.dispose);
+    final profileRepository = FakeUserProfileRepository(initialProfile: _profile(id: 'uid-1'));
+    addTearDown(profileRepository.dispose);
+    final exchangeRepository = FakeProfileExchangeRepository()..createGate = Completer<void>();
+    addTearDown(exchangeRepository.dispose);
+    final showsAccountPage = ValueNotifier(true);
+    addTearDown(showsAccountPage.dispose);
+    final expSeconds = DateTime.now().add(const Duration(hours: 1)).millisecondsSinceEpoch ~/ 1000;
+
+    await tester.pumpWidget(
+      buildSubject(
+        repository,
+        preferences: preferences,
+        profileRepository: profileRepository,
+        exchangeRepository: exchangeRepository,
+        pendingExchangeToken: 'v1.other-uid.$expSeconds.deadbeef',
+        showsAccountPage: showsAccountPage,
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(exchangeRepository.createCalls, hasLength(1));
+
+    showsAccountPage.value = false;
+    await tester.pumpAndSettle();
+    showsAccountPage.value = true;
+    await tester.pumpAndSettle();
+
+    exchangeRepository.createGate!.complete();
+    await tester.pumpAndSettle();
+    expect(exchangeRepository.createCalls, hasLength(1));
+  });
+
+  testWidgets('starts a share-link exchange only once when the visitor leaves the link for this tab mid-flight', (
+    tester,
+  ) async {
+    final repository = FakeAuthRepository(
+      initialUser: FakeUser(uid: 'uid-1', email: 'attendee@example.com'),
+    );
+    addTearDown(repository.dispose);
+    final profileRepository = FakeUserProfileRepository(initialProfile: _profile(id: 'uid-1'));
+    addTearDown(profileRepository.dispose);
+    final exchangeRepository = FakeProfileExchangeRepository()..createGate = Completer<void>();
+    addTearDown(exchangeRepository.dispose);
+    final expSeconds = DateTime.now().add(const Duration(hours: 1)).millisecondsSinceEpoch ~/ 1000;
+    final router = GoRouter(initialLocation: '/x/v1.other-uid.$expSeconds.deadbeef', routes: app_router.$appRoutes);
+    addTearDown(router.dispose);
+
+    await tester.pumpWidget(
+      buildSubject(
+        repository,
+        preferences: preferences,
+        profileRepository: profileRepository,
+        exchangeRepository: exchangeRepository,
+        router: router,
+      ),
+    );
+    // 交換を止めている間はリンクの画面のローディングが回り続けるため、
+    // `pumpAndSettle` ではなくフレームを進める。
+    for (var frame = 0; frame < 5; frame++) {
+      await tester.pump();
+    }
+    expect(exchangeRepository.createCalls, hasLength(1));
+
+    router.go('/account');
+    await tester.pumpAndSettle();
+    expect(find.byType(AccountPage), findsOneWidget);
+
+    exchangeRepository.createGate!.complete();
+    await tester.pumpAndSettle();
+    expect(exchangeRepository.createCalls, hasLength(1));
+  });
+
   testWidgets(
     'discards a pending share-link token left behind by a different uid instead of resolving it',
     (tester) async {
@@ -786,12 +901,15 @@ void main() {
 }
 
 class _QuizEventRepository extends Fake implements QuizEventRepository {
+  _QuizEventRepository([this.events = const []]);
+
+  final List<QuizEvent> events;
   int publishedSubscriptions = 0;
 
   @override
   Stream<List<QuizEvent>> watchPublished() {
     publishedSubscriptions++;
-    return Stream.value(const []);
+    return Stream.value(events);
   }
 }
 

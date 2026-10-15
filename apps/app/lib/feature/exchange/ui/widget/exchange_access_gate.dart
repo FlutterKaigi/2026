@@ -3,6 +3,7 @@ import 'package:app/core/router/router.dart';
 import 'package:app/core/ui/widget/app_error_view.dart';
 import 'package:app/core/ui/widget/app_scrollbar.dart';
 import 'package:app/feature/auth/data/provider/auth_state.dart';
+import 'package:app/feature/auth/ui/widget/centered_sign_in_card.dart';
 import 'package:app/feature/profile/data/provider/user_profile_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -10,27 +11,29 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 /// Guards every `/account/exchange` route behind sign-in and a created
 /// profile, showing [builder]'s content only once both are satisfied.
 ///
-/// `ExchangeHomeRoute` is the only entry point the account tab links to, but
-/// `ExchangeScanRoute` / `ExchangeListRoute` are independently reachable
-/// (e.g. a deep link), so each route wraps its body in this gate rather than
-/// relying on `ExchangeHomeRoute` having been visited first.
+/// `ExchangeHomeRoute` is the entry point the venue events hub and the mission
+/// page link to, but `ExchangeScanRoute` / `ExchangeListRoute` are
+/// independently reachable (e.g. a deep link), so each route wraps its body in
+/// this gate rather than relying on `ExchangeHomeRoute` having been visited
+/// first.
 class ExchangeAccessGate extends ConsumerWidget {
   const ExchangeAccessGate({
     required this.builder,
-    this.signInTitle,
+    this.signInDescription,
     this.profileTitle,
     super.key,
   });
 
   final WidgetBuilder builder;
 
-  /// Overrides the generic "sign in to show your QR code" prompt title —
-  /// used by `ExchangeShareLinkPage`, where the visitor opened the gate to
-  /// exchange with someone else's link rather than to show their own QR.
-  final String? signInTitle;
+  /// Overrides the generic "sign in to show your QR code" description of the
+  /// sign-in card — used by `ExchangeShareLinkPage`, where the visitor opened
+  /// the gate to exchange with someone else's link rather than to show their
+  /// own QR.
+  final String? signInDescription;
 
   /// Overrides the generic "create a profile to show your QR code" prompt
-  /// title, for the same reason as [signInTitle].
+  /// title, for the same reason as [signInDescription].
   final String? profileTitle;
 
   @override
@@ -39,7 +42,10 @@ class ExchangeAccessGate extends ConsumerWidget {
     final authState = ref.watch(authStateChangesProvider);
 
     return switch (authState) {
-      AsyncData(value: null) => _SignInPrompt(t: t, title: signInTitle ?? t.exchange.signInRequired),
+      AsyncData(value: null) => CenteredSignInCard(
+        title: t.auth.signIn.required,
+        description: signInDescription ?? t.exchange.signInRequired,
+      ),
       AsyncData() => _ProfileGate(builder: builder, title: profileTitle ?? t.exchange.profileRequired),
       AsyncError(:final error) => AppErrorView(
         error: error,
@@ -74,21 +80,6 @@ class _ProfileGate extends ConsumerWidget {
       AsyncLoading() => const Center(child: CircularProgressIndicator.adaptive()),
     };
   }
-}
-
-class _SignInPrompt extends StatelessWidget {
-  const _SignInPrompt({required this.t, required this.title});
-
-  final Translations t;
-  final String title;
-
-  @override
-  Widget build(BuildContext context) => _MessagePrompt(
-    icon: Icons.qr_code_2_outlined,
-    title: title,
-    actionLabel: t.exchange.signInAction,
-    onAction: () => const AccountRoute().go(context),
-  );
 }
 
 class _ProfilePrompt extends StatelessWidget {

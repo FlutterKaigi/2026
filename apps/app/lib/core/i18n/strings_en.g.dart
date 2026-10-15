@@ -400,6 +400,7 @@ class _Translations$profile$en extends Translations$profile$ja {
 
 	// Translations
 	@override String get title => 'Profile';
+	@override String get signInRequired => 'Sign in to create your profile';
 	@override String get editTitle => 'Edit Profile';
 	@override String get createTitle => 'Create Profile';
 	@override String get promptTitle => 'Set up your profile';
@@ -610,7 +611,6 @@ class _Translations$exchange$en extends Translations$exchange$ja {
 	@override String get scanButton => 'Scan a QR code';
 	@override String get listButton => 'View exchanged profiles';
 	@override String get signInRequired => 'Sign in to show your QR code';
-	@override String get signInAction => 'Sign in';
 	@override String get profileRequired => 'Create a profile to show your QR code';
 	@override String get profileRequiredAction => 'Create profile';
 	@override String get scanTitle => 'Scan a QR code';
@@ -938,7 +938,6 @@ class _Translations$auth$signIn$en extends Translations$auth$signIn$ja {
 
 	// Translations
 	@override String get required => 'Sign in required';
-	@override String get description => 'Choose how you want to sign in to the FlutterKaigi 2026 app';
 	@override String get accountTitle => 'Sign in';
 	@override String get accountDescription => 'Your profile and venue event records\nare saved to your account';
 	@override String get withGoogle => 'Sign in with Google';
@@ -1163,9 +1162,6 @@ class _Translations$quiz$signInRequired$en extends Translations$quiz$signInRequi
 	final TranslationsEn _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'Sign-in required';
-	@override String get description => 'The quiz links your entry and answers to your account. Sign in from the Account tab to take part.';
-	@override String get button => 'Go to Account';
 	@override String get inPage => 'Sign in to take part in the quiz';
 }
 
@@ -1654,7 +1650,6 @@ extension on TranslationsEn {
 			'contributors.empty' => 'No contributors found',
 			'contributors.contributionsCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} contribution', other: '${n} contributions', ), 
 			'auth.signIn.required' => 'Sign in required',
-			'auth.signIn.description' => 'Choose how you want to sign in to the FlutterKaigi 2026 app',
 			'auth.signIn.accountTitle' => 'Sign in',
 			'auth.signIn.accountDescription' => 'Your profile and venue event records\nare saved to your account',
 			'auth.signIn.withGoogle' => 'Sign in with Google',
@@ -1697,6 +1692,7 @@ extension on TranslationsEn {
 			'auth.error.appleTokenRevocationFailed' => 'Could not delete the account because revoking the Apple token failed. Please try again',
 			'auth.error.unknown' => 'Authentication failed. Please try again',
 			'profile.title' => 'Profile',
+			'profile.signInRequired' => 'Sign in to create your profile',
 			'profile.editTitle' => 'Edit Profile',
 			'profile.createTitle' => 'Create Profile',
 			'profile.promptTitle' => 'Set up your profile',
@@ -1891,7 +1887,6 @@ extension on TranslationsEn {
 			'exchange.scanButton' => 'Scan a QR code',
 			'exchange.listButton' => 'View exchanged profiles',
 			'exchange.signInRequired' => 'Sign in to show your QR code',
-			'exchange.signInAction' => 'Sign in',
 			'exchange.profileRequired' => 'Create a profile to show your QR code',
 			'exchange.profileRequiredAction' => 'Create profile',
 			'exchange.scanTitle' => 'Scan a QR code',
@@ -1978,9 +1973,9 @@ extension on TranslationsEn {
 			'settings.appearance' => 'Appearance',
 			'settings.appInfo' => 'App Information',
 			'settings.version' => 'Version',
+			'settings.saveError' => 'Could not save the setting',
 			_ => null,
 		} ?? switch (path) {
-			'settings.saveError' => 'Could not save the setting',
 			'settings.themeMode.title' => 'Theme',
 			'settings.themeMode.system' => 'System',
 			'settings.themeMode.light' => 'Light',
@@ -2012,9 +2007,6 @@ extension on TranslationsEn {
 			'quiz.list.status.entryClosed' => 'Entry closed',
 			'quiz.list.status.inProgress' => 'In progress',
 			'quiz.list.status.finished' => 'Results',
-			'quiz.signInRequired.title' => 'Sign-in required',
-			'quiz.signInRequired.description' => 'The quiz links your entry and answers to your account. Sign in from the Account tab to take part.',
-			'quiz.signInRequired.button' => 'Go to Account',
 			'quiz.signInRequired.inPage' => 'Sign in to take part in the quiz',
 			'quiz.errors.signInFailed' => 'Failed to sign in',
 			'quiz.errors.eventLoadFailed' => 'Failed to load the event',

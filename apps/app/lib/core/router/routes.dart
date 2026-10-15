@@ -232,8 +232,8 @@ class VenueEventsRoute extends GoRouteData with $VenueEventsRoute {
 
 /// `/account/quiz` — the quiz event list.
 ///
-/// Lives under the account branch because taking part requires being signed
-/// in: the entry point is a tile on the signed-in account page.
+/// Opened from the venue events hub ([VenueEventsRoute]), so it lives in the
+/// account branch and stacks above the hub.
 class QuizListRoute extends GoRouteData with $QuizListRoute {
   const QuizListRoute();
 

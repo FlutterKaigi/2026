@@ -2,8 +2,7 @@ import 'dart:async';
 
 import 'package:app/core/extension/locale_map_extension.dart';
 import 'package:app/core/i18n/strings.g.dart';
-import 'package:app/core/ui/widget/app_page_content.dart';
-import 'package:app/feature/auth/ui/widget/sign_in_card.dart';
+import 'package:app/feature/auth/ui/widget/centered_sign_in_card.dart';
 import 'package:app/feature/quiz/data/provider/quiz_providers.dart';
 import 'package:app/feature/quiz/data/provider/quiz_repositories.dart';
 import 'package:app/feature/quiz/ui/component/quiz_check_in_view.dart';
@@ -70,11 +69,9 @@ class _QuizPageBody extends ConsumerWidget {
         AsyncError() => _Centered(message: t.quiz.errors.signInFailed),
         AsyncLoading() => const _Loading(),
         // QR コードのリンクから開いた場合もコードを失わないよう、この画面でサインインする。
-        AsyncData(:final value) when value == null => AppPageContent(
-          maxWidth: signInCardMaxWidth,
-          padding: const EdgeInsets.all(24),
-          centerVertically: true,
-          child: SignInCard(title: t.auth.signIn.required, description: t.quiz.signInRequired.inPage),
+        AsyncData(:final value) when value == null => CenteredSignInCard(
+          title: t.auth.signIn.required,
+          description: t.quiz.signInRequired.inPage,
         ),
         AsyncData(:final value) => switch (eventAsync) {
           AsyncData(value: null) => const _PreparingView(),
