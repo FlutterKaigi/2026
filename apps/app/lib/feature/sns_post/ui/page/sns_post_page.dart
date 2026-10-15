@@ -116,6 +116,8 @@ class _RegistrationForm extends HookConsumerWidget {
       submitting.value = true;
       error.value = null;
       FocusScope.of(context).unfocus();
+      // 処理中に画面が破棄されても失敗を記録できるよう、`ref` が使えるうちに読んでおく。
+      final talker = ref.read(talkerProvider);
       try {
         await ref
             .read(snsPostRepositoryProvider)
@@ -128,8 +130,8 @@ class _RegistrationForm extends HookConsumerWidget {
           onSaved();
         }
       } on Exception catch (exception, stackTrace) {
+        talker.handle(exception, stackTrace);
         if (context.mounted) {
-          ref.read(talkerProvider).handle(exception, stackTrace);
           error.value = t.snsPost.saveFailed;
         }
       } finally {

@@ -123,11 +123,13 @@ class _RegistrationForm extends HookConsumerWidget {
       }
       isSubmitting.value = true;
       error.value = null;
+      // 処理中に画面が破棄されても失敗を記録できるよう、`ref` が使えるうちに読んでおく。
+      final talker = ref.read(talkerProvider);
       try {
         await ref.read(supportLtRepositoryProvider).register(code);
       } on Exception catch (exception, stackTrace) {
+        talker.handle(exception, stackTrace);
         if (context.mounted) {
-          ref.read(talkerProvider).handle(exception, stackTrace);
           error.value = (
             message: supportLtErrorMessage(t, exception),
             highlightsCode: isSupportLtCodeError(exception),
