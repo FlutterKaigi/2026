@@ -31,8 +31,9 @@ final class NotificationRoute {
 /// segments. `Uri` removes dot segments while parsing, so the path that is checked is the path that is opened.
 ///
 /// Invariant: a notification goes to every attendee, so it never opens a link that acts on the attendee's behalf
-/// when opened: `/x/<token>` (profile exchange), `/s/<token>` (stamp rally) and `/account/support-lt/<code>`
-/// (attendance registration). A new route that acts when opened must be rejected here too.
+/// when opened: `/x/<token>` (profile exchange), `/s/<token>` (stamp rally), `/account/support-lt/<code>`
+/// (attendance registration) and `/account/quiz/<eventId>/check-in/<code>` (quiz check-in). A new route that acts
+/// when opened must be rejected here too.
 NotificationRoute? parseNotificationRoute(Object? raw) {
   if (raw is! String) {
     return null;
@@ -60,6 +61,6 @@ NotificationRoute? parseNotificationRoute(Object? raw) {
 }
 
 bool _actsWhenOpened(List<String> segments) => switch (segments) {
-  ['x' || 's', ...] || ['account', 'support-lt', _, ...] => true,
+  ['x' || 's', ...] || ['account', 'support-lt', _, ...] || ['account', 'quiz', _, 'check-in', ...] => true,
   _ => false,
 };

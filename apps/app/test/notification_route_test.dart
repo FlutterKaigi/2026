@@ -16,6 +16,9 @@ const _actingLinks = [
   r'/x\v1.other-uid.9999999999.deadbeef',
   '/%78/v1.other-uid.9999999999.deadbeef',
   '/account/support-lt/%31%32%33%34%35%36',
+  '/account/quiz/event1/check-in/123456',
+  '/account/quiz/event1/../event1/check-in/123456',
+  '/account/quiz/event1/check-in/%31%32%33%34%35%36',
 ];
 
 void main() {
@@ -26,6 +29,8 @@ void main() {
         ('/sessions/abc', '/sessions/abc'),
         ('  /venue-map\n', '/venue-map'),
         ('/account/support-lt', '/account/support-lt'),
+        ('/account/quiz', '/account/quiz'),
+        ('/account/quiz/event1', '/account/quiz/event1'),
         ('/sessions/../news', '/news'),
         ('/sessions/%E6%97%A5%E6%9C%AC%E8%AA%9E', '/sessions/日本語'),
       ]) {
