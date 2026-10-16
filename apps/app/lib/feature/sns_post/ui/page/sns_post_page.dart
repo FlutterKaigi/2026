@@ -6,7 +6,7 @@ import 'package:app/core/ui/widget/app_error_view.dart';
 import 'package:app/core/ui/widget/app_page_content.dart';
 import 'package:app/core/ui/widget/brand_header_card.dart';
 import 'package:app/feature/auth/ui/widget/authenticated_body.dart';
-import 'package:app/feature/auth/ui/widget/sign_in_card.dart';
+import 'package:app/feature/auth/ui/widget/centered_sign_in_card.dart';
 import 'package:app/feature/sns_post/data/sns_post_provider.dart';
 import 'package:app/feature/sns_post/ui/sns_post_companion_label.dart';
 import 'package:data/data.dart';
@@ -30,10 +30,7 @@ class SnsPostPage extends StatelessWidget {
         ),
       ),
       body: AuthenticatedBody(
-        signedOut: AppPageContent(
-          maxWidth: 560,
-          child: SignInCard(title: t.auth.signIn.required, description: t.snsPost.signInRequired),
-        ),
+        signedOut: CenteredSignInCard(title: t.auth.signIn.required, description: t.snsPost.signInRequired),
         builder: (uid) => _RegistrationBody(uid: uid),
       ),
     );

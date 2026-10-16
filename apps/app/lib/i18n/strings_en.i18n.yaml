@@ -217,7 +217,8 @@ contributors:
 auth:
   signIn:
     required: Sign in required
-    description: Choose how you want to sign in to the FlutterKaigi 2026 app
+    accountTitle: Sign in
+    accountDescription: "Your profile and venue event records\nare saved to your account"
     withGoogle: Sign in with Google
     withApple: Sign in with Apple
     withEmail: Sign in with email
@@ -237,10 +238,8 @@ auth:
     resetEmailSent: Password reset email sent
   account:
     title: Account
-    features: Take part
     signedIn: Signed in
     signOut: Sign out
-    signOutError: Could not sign out
     noEmail: No email address
     delete: Delete account
     deleteConfirmTitle: Delete your account?
@@ -248,14 +247,6 @@ auth:
     deleteConfirmAction: Delete
     deletePasswordTitle: Confirm your password
     deletePasswordBody: Enter your current password to delete your account.
-    mission: Missions
-    missionDescription: Judged by your participation in Support LT, profile exchange and SNS posts
-    joinEvent: Join the event
-    quiz: Quiz
-    lightningTalks: Join Support LT
-    profileExchange: Profile exchange
-    snsPost: Register SNS post
-    comingSoon: This feature is coming soon
     deleted: Your account has been deleted
     cancel: Cancel
   error:
@@ -272,6 +263,7 @@ auth:
     unknown: Authentication failed. Please try again
 profile:
   title: Profile
+  signInRequired: Sign in to create your profile
   editTitle: Edit Profile
   createTitle: Create Profile
   promptTitle: Set up your profile
@@ -362,6 +354,79 @@ mission:
   snsTitle: Share a photo on SNS
   snsDescription: Post a photo with an eligible attendee and register its URL and category
 
+venueEvents:
+  title: Join Venue Events
+  entrySubtitle: Stamp rally, profile exchange and more
+  day1: Thu, Oct 29 · Day 1
+  day2: Fri, Oct 30 · Day 2
+  signInTitle: Sign in to take part
+  signInDescription: Your stamps and quiz records are saved to your account.
+  previewHeading: Sign in to join these activities
+  features:
+    quiz:
+      title: Quiz
+      action: Check in with the QR code on the screen and choose your team
+      preview: "Day 2, from 15:30"
+    stampRally:
+      title: Stamp Rally
+      action: Scan the QR codes at sponsor booths
+      preview: Visit the sponsor booths
+    profileExchange:
+      title: Profile Exchange
+      action: Exchange with attendees by QR code or 6-digit code
+      preview: Exchange QR codes with attendees
+    supportLt:
+      title: Join Support LT
+      action: Register with the QR code at the venue
+      preview: Register with the venue QR code
+    snsPost:
+      title: Register SNS post
+      action: Post a photo and register its URL
+      preview: Register your photo post's URL
+    mission:
+      title: Missions
+      preview: Support LT, exchanges and SNS posts
+  status:
+    registered: Registered
+    checkedIn: Checked in
+    team: Team $team
+    stampCount: "$n / $total"
+    exchangeCount:
+      one: $n person
+      other: $n people
+  quizCheckIn:
+    title: Quiz check-in is open
+    body: Scan the QR code on the venue screen
+
+eventGuide:
+  title: Event day guide
+  open: View the event day guide
+  skip: Skip
+  next: Next
+  close: Close
+  pageIndicator: Page $page of $total
+  welcome:
+    title: Welcome to FlutterKaigi 2026
+    body: Here are three features you'll use at the event
+  sessions:
+    title: Bookmark sessions
+    body: "After a session ends, you can send\nfeedback from its details screen"
+    sampleTime: "11:00 – 11:40"
+    sampleRoom: Hall A
+    afterSession: After the session
+  venueEvents:
+    title: Connect with attendees and sponsors
+    body: "Start the stamp rally and profile exchange\nfrom “Join Venue Events”"
+    eventTab: Event tab
+  quiz:
+    title: Quiz on Day 2
+    body: "After registering, check in with\nthe QR code on the screen"
+    checkInOpens: Check-in opens
+    firstRound: First round
+    secondRound: Second round
+    firstRoundTime: "15:30"
+    secondRoundTime: "16:30"
+
 stampRally:
   title: Stamp Rally
   signInRequired: Sign in to collect stamps
@@ -420,7 +485,6 @@ exchange:
   scanButton: Scan a QR code
   listButton: View exchanged profiles
   signInRequired: Sign in to show your QR code
-  signInAction: Sign in
   profileRequired: Create a profile to show your QR code
   profileRequiredAction: Create profile
   scanTitle: Scan a QR code
@@ -490,7 +554,6 @@ supportLt:
   submitting: Registering…
   registeredTitle: Registration complete
   registeredBody: Enjoy Support LT
-  registeredStatus: Registered
   backToAccount: Back to account
   signInRequired: Sign in to register your participation in Support LT
   invalidFormat: Enter a 6-digit code
@@ -555,10 +618,6 @@ quiz:
       inProgress: In progress
       finished: Results
   signInRequired:
-    title: Sign-in required
-    description: The quiz links your entry and answers to your account.
-      Sign in from the Account tab to take part.
-    button: Go to Account
     inPage: Sign in to take part in the quiz
   errors:
     signInFailed: Failed to sign in

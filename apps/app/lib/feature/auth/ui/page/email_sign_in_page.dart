@@ -6,6 +6,7 @@ import 'package:app/feature/auth/ui/auth_error_message.dart';
 import 'package:data/user.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 /// Whether the form signs in to an existing account or creates a new one.
@@ -55,11 +56,12 @@ class EmailSignInPage extends HookConsumerWidget {
       }
     }
 
-    // アカウントタブへ戻る。push で開いたときは pop し、ディープリンクで
-    // 直接開いたときは宣言的スタックの親 `/account` へ戻す。
-    void backToAccount() {
-      if (Navigator.of(context).canPop()) {
-        Navigator.of(context).pop();
+    // 開いた画面へ戻る。`/x/<token>` などタブの外の画面から push されると、この
+    // 画面は新しいシェルに 1 枚だけで載り Navigator では戻れないため、GoRouter に
+    // 尋ねる。どこにも戻れないときだけアカウントタブへ移る。
+    void back() {
+      if (context.canPop()) {
+        context.pop();
       } else {
         const AccountRoute().go(context);
       }
@@ -77,10 +79,16 @@ class EmailSignInPage extends HookConsumerWidget {
           _EmailAuthMode.signIn => repository.signInWithEmailAndPassword(email: email, password: password),
           _EmailAuthMode.createAccount => repository.createUserWithEmailAndPassword(email: email, password: password),
         },
-        // 処理中に戻る操作をしていたら、その下の画面まで閉じない。
+        // 処理中に戻る操作をしていたら、その下の画面まで閉じない。別のタブへ
+        // 切り替えていたときは、この画面が隠れたまま isCurrent も true で残るので、
+        // ルーターの最前面がこの画面のときだけ戻す。そうしないと表示中のタブの
+        // 画面を閉じてしまう。
         onSuccess: () {
-          if (route?.isCurrent ?? false) {
-            backToAccount();
+          final inFront =
+              GoRouter.of(context).routerDelegate.currentConfiguration.lastOrNull?.matchedLocation ==
+              const EmailSignInRoute().location;
+          if ((route?.isCurrent ?? false) && inFront) {
+            back();
           }
         },
       );
@@ -108,7 +116,7 @@ class EmailSignInPage extends HookConsumerWidget {
         toolbarHeight: 52,
         leading: IconButton(
           tooltip: MaterialLocalizations.of(context).backButtonTooltip,
-          onPressed: backToAccount,
+          onPressed: back,
           icon: const BackButtonIcon(),
         ),
         title: Text(

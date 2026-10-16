@@ -9,6 +9,7 @@ import 'package:app/core/ui/widget/brand_header_card.dart';
 import 'package:app/core/ui/widget/digit_code_field.dart';
 import 'package:app/feature/auth/data/provider/auth_repository.dart';
 import 'package:app/feature/auth/ui/widget/authenticated_body.dart';
+import 'package:app/feature/auth/ui/widget/centered_sign_in_card.dart';
 import 'package:app/feature/auth/ui/widget/sign_in_card.dart';
 import 'package:app/feature/support_lt/data/provider/support_lt_provider.dart';
 import 'package:app/feature/support_lt/ui/page/support_lt_scan_page.dart';
@@ -47,15 +48,7 @@ class SupportLtPage extends HookWidget {
         ),
       ),
       body: AuthenticatedBody(
-        signedOut: AppPageContent(
-          maxWidth: signInCardMaxWidth,
-          padding: const EdgeInsets.all(24),
-          centerVertically: true,
-          child: SignInCard(
-            title: t.auth.signIn.required,
-            description: t.supportLt.signInRequired,
-          ),
-        ),
+        signedOut: CenteredSignInCard(title: t.auth.signIn.required, description: t.supportLt.signInRequired),
         // 別のリンクを続けて開いても同じルートが使い回されるため、コードごとに
         // 状態を作り直して、前のコードの入力や結果を引き継がない。
         builder: (uid) => _RegistrationBody(

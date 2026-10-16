@@ -8,6 +8,7 @@ part of 'router.dart';
 
 List<RouteBase> get $appRoutes => [
   $settingsRoute,
+  $eventGuideRoute,
   $shareLinkRoute,
   $stampRallyLinkRoute,
   $appShellRoute,
@@ -20,6 +21,27 @@ mixin $SettingsRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/settings');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) => context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+RouteBase get $eventGuideRoute => GoRouteData.$route(path: '/guide', factory: $EventGuideRoute._fromState);
+
+mixin $EventGuideRoute on GoRouteData {
+  static EventGuideRoute _fromState(GoRouterState state) => const EventGuideRoute();
+
+  @override
+  String get location => GoRouteData.$location('/guide');
 
   @override
   void go(BuildContext context) => context.go(location);
@@ -173,6 +195,10 @@ RouteBase get $appShellRoute => StatefulShellRouteData.$route(
             GoRouteData.$route(
               path: 'profile',
               factory: $ProfileEditRoute._fromState,
+            ),
+            GoRouteData.$route(
+              path: 'venue-events',
+              factory: $VenueEventsRoute._fromState,
             ),
             GoRouteData.$route(
               path: 'quiz',
@@ -546,6 +572,25 @@ mixin $ProfileEditRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/account/profile');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) => context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $VenueEventsRoute on GoRouteData {
+  static VenueEventsRoute _fromState(GoRouterState state) => const VenueEventsRoute();
+
+  @override
+  String get location => GoRouteData.$location('/account/venue-events');
 
   @override
   void go(BuildContext context) => context.go(location);

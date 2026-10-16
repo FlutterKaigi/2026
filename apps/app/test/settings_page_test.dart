@@ -2,6 +2,8 @@ import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/provider/package_info.dart';
 import 'package:app/core/provider/shared_preferences.dart';
 import 'package:app/core/provider/theme_mode.dart';
+import 'package:app/core/remote_config/remote_config_keys.dart';
+import 'package:app/core/remote_config/remote_config_provider.dart';
 import 'package:app/feature/settings/ui/page/settings_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -11,7 +13,14 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'fake_remote_config_repository.dart';
+
 void main() {
+  late FakeRemoteConfigRepository remoteConfig;
+
+  setUp(() => remoteConfig = FakeRemoteConfigRepository());
+  tearDown(() => remoteConfig.dispose());
+
   testWidgets('shows theme, language, and app information', (tester) async {
     SharedPreferences.setMockInitialValues({'app_locale': 'ja'});
     final preferences = await SharedPreferences.getInstance();
@@ -21,6 +30,7 @@ void main() {
         child: ProviderScope(
           overrides: [
             sharedPreferencesProvider.overrideWithValue(preferences),
+            remoteConfigRepositoryProvider.overrideWithValue(remoteConfig),
             packageInfoProvider.overrideWithValue(
               AsyncData(
                 PackageInfo(
@@ -87,6 +97,7 @@ void main() {
         child: ProviderScope(
           overrides: [
             sharedPreferencesProvider.overrideWithValue(preferences),
+            remoteConfigRepositoryProvider.overrideWithValue(remoteConfig),
             themeModeProvider.overrideWith(_FailingThemeModeNotifier.new),
             packageInfoProvider.overrideWithValue(
               const AsyncValue.loading(),
@@ -135,6 +146,7 @@ void main() {
         child: ProviderScope(
           overrides: [
             sharedPreferencesProvider.overrideWithValue(preferences),
+            remoteConfigRepositoryProvider.overrideWithValue(remoteConfig),
             packageInfoProvider.overrideWithValue(
               const AsyncValue.loading(),
             ),
@@ -155,6 +167,62 @@ void main() {
 
     expect(router.routeInformationProvider.value.uri.path, '/info');
     expect(find.text('event destination'), findsOneWidget);
+  });
+
+  group('day-of guide row', () {
+    Future<GoRouter> pumpSettings(WidgetTester tester) async {
+      LocaleSettings.setLocaleSync(AppLocale.ja);
+      SharedPreferences.setMockInitialValues({'app_locale': 'ja'});
+      final preferences = await SharedPreferences.getInstance();
+      final router = GoRouter(
+        initialLocation: '/settings',
+        routes: [
+          GoRoute(path: '/settings', builder: (_, _) => const SettingsPage()),
+          GoRoute(
+            path: '/guide',
+            builder: (_, _) => const Scaffold(body: Text('guide destination')),
+          ),
+        ],
+      );
+      addTearDown(router.dispose);
+      await tester.pumpWidget(
+        TranslationProvider(
+          child: ProviderScope(
+            overrides: [
+              sharedPreferencesProvider.overrideWithValue(preferences),
+              remoteConfigRepositoryProvider.overrideWithValue(remoteConfig),
+              packageInfoProvider.overrideWithValue(const AsyncValue.loading()),
+            ],
+            child: MaterialApp.router(
+              routerConfig: router,
+              locale: const Locale('ja'),
+              supportedLocales: AppLocaleUtils.supportedLocales,
+              localizationsDelegates: GlobalMaterialLocalizations.delegates,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      return router;
+    }
+
+    testWidgets('opens the guide over the settings', (tester) async {
+      final router = await pumpSettings(tester);
+
+      await tester.tap(find.text('当日ガイドを見る'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('guide destination'), findsOneWidget);
+      expect(router.canPop(), isTrue);
+    });
+
+    testWidgets('is hidden while event features are off', (tester) async {
+      remoteConfig.setValue(RemoteConfigKeys.eventFeaturesEnabled, false);
+      await pumpSettings(tester);
+
+      expect(find.text('当日ガイドを見る'), findsNothing);
+      expect(find.text('アプリ情報'), findsOneWidget);
+    });
   });
 }
 

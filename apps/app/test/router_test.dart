@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:app/core/i18n/strings.g.dart';
+import 'package:app/core/provider/clock.dart';
 import 'package:app/core/provider/shared_preferences.dart';
 import 'package:app/core/remote_config/remote_config_keys.dart';
 import 'package:app/core/remote_config/remote_config_provider.dart';
@@ -9,10 +10,18 @@ import 'package:app/core/router/router.dart';
 import 'package:app/core/ui/not_found_page.dart';
 import 'package:app/feature/auth/data/provider/auth_repository.dart';
 import 'package:app/feature/auth/ui/page/account_page.dart';
+import 'package:app/feature/auth/ui/page/email_sign_in_page.dart';
+import 'package:app/feature/auth/ui/widget/sign_in_card.dart';
 import 'package:app/feature/event/ui/page/event_info_page.dart';
+import 'package:app/feature/event_guide/data/event_guide_seen_provider.dart';
+import 'package:app/feature/event_guide/ui/page/event_guide_page.dart';
+import 'package:app/feature/exchange/data/provider/pending_exchange_token_provider.dart';
+import 'package:app/feature/exchange/data/provider/profile_exchange_repository.dart';
 import 'package:app/feature/exchange/ui/page/exchange_share_link_page.dart';
 import 'package:app/feature/profile/data/provider/user_profile_repository.dart';
+import 'package:app/feature/push_notification/data/push_notification_provider.dart';
 import 'package:app/feature/settings/ui/page/settings_page.dart';
+import 'package:app/feature/stamp_rally/data/stamp_rally_provider.dart';
 import 'package:app/feature/support_lt/data/provider/support_lt_provider.dart';
 import 'package:app/feature/support_lt/ui/page/support_lt_page.dart';
 import 'package:data/data.dart';
@@ -25,7 +34,10 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'fake_auth_repository.dart';
+import 'fake_profile_exchange_repository.dart';
+import 'fake_push_notification_repository.dart';
 import 'fake_remote_config_repository.dart';
+import 'fake_stamp_rally_repository.dart';
 import 'fake_support_lt_repository.dart';
 import 'fake_user_profile_repository.dart';
 
@@ -35,6 +47,8 @@ const _firebaseAuthCallbacks = [
   'app-1-000000000000-ios-0000000000000000000000://firebaseauth/link$_firebaseAuthCallbackQuery',
   'com.googleusercontent.apps.test-client://firebaseauth/link$_firebaseAuthCallbackQuery',
 ];
+
+final _beforeGuideWindow = DateTime.utc(2026, 10, 15, 3);
 
 void main() {
   test('application router reflects pushed deep links in the web URL', () {
@@ -61,6 +75,8 @@ void main() {
     );
     expect(const AccountRoute().location, '/account');
     expect(const EmailSignInRoute().location, '/account/email');
+    expect(const EventGuideRoute().location, '/guide');
+    expect(const VenueEventsRoute().location, '/account/venue-events');
     expect(const SupportLtRoute().location, '/account/support-lt');
     // 応援LTのQRコードが指すリンクは、生成側(`supportLtQrPayload`)と同じパスで解決する。
     expect(
@@ -93,24 +109,36 @@ void main() {
     late FakeRemoteConfigRepository remoteConfig;
     late FakeUserProfileRepository profileRepository;
     late FakeSupportLtRepository supportLtRepository;
+    late FakeProfileExchangeRepository exchangeRepository;
+    late FakeStampRallyRepository stampRallyRepository;
+    late FakePushNotificationRepository pushNotifications;
     late SharedPreferences preferences;
+    late DateTime now;
     late ProviderContainer container;
 
     setUp(() async {
       LocaleSettings.setLocaleSync(AppLocale.ja);
       SharedPreferences.setMockInitialValues(const {});
       preferences = await SharedPreferences.getInstance();
+      now = _beforeGuideWindow;
       authRepository = FakeAuthRepository();
       remoteConfig = FakeRemoteConfigRepository();
       profileRepository = FakeUserProfileRepository();
       supportLtRepository = FakeSupportLtRepository();
+      exchangeRepository = FakeProfileExchangeRepository();
+      stampRallyRepository = FakeStampRallyRepository();
+      pushNotifications = FakePushNotificationRepository();
       container = ProviderContainer(
         overrides: [
           authRepositoryProvider.overrideWithValue(authRepository),
           userProfileRepositoryProvider.overrideWithValue(profileRepository),
           supportLtRepositoryProvider.overrideWithValue(supportLtRepository),
+          profileExchangeRepositoryProvider.overrideWithValue(exchangeRepository),
+          stampRallyRepositoryProvider.overrideWithValue(stampRallyRepository),
           remoteConfigRepositoryProvider.overrideWithValue(remoteConfig),
           sharedPreferencesProvider.overrideWithValue(preferences),
+          pushNotificationRepositoryProvider.overrideWithValue(pushNotifications),
+          clockProvider.overrideWithValue(() => now),
         ],
       );
     });
@@ -122,6 +150,8 @@ void main() {
       remoteConfig.dispose();
       profileRepository.dispose();
       supportLtRepository.dispose();
+      exchangeRepository.dispose();
+      pushNotifications.dispose();
     });
 
     /// Pumps the real app router (built through `routerProvider`, kept
@@ -137,8 +167,12 @@ void main() {
             authRepositoryProvider.overrideWithValue(authRepository),
             userProfileRepositoryProvider.overrideWithValue(profileRepository),
             supportLtRepositoryProvider.overrideWithValue(supportLtRepository),
+            profileExchangeRepositoryProvider.overrideWithValue(exchangeRepository),
+            stampRallyRepositoryProvider.overrideWithValue(stampRallyRepository),
             remoteConfigRepositoryProvider.overrideWithValue(remoteConfig),
             sharedPreferencesProvider.overrideWithValue(preferences),
+            pushNotificationRepositoryProvider.overrideWithValue(pushNotifications),
+            clockProvider.overrideWithValue(() => now),
             launchRouteProvider.overrideWithValue(launchRoute),
           ],
         );
@@ -345,6 +379,7 @@ void main() {
       final router = await pumpRouter(tester);
 
       for (final location in <String>[
+        '/account/venue-events',
         '/account/missions',
         '/account/quiz',
         '/account/quiz/some-event',
@@ -372,6 +407,7 @@ void main() {
       final router = await pumpRouter(tester);
 
       for (final location in <String>[
+        '/account/venue-events',
         '/account/missions',
         '/account/quiz',
         '/account/support-lt',
@@ -419,6 +455,184 @@ void main() {
       router.go('/xyz');
       await tester.pumpAndSettle();
       expect(currentPath(router), '/xyz');
+    });
+
+    testWidgets('sends the day-of guide to the event tab when the flag is false', (tester) async {
+      remoteConfig.setValue(RemoteConfigKeys.eventFeaturesEnabled, false);
+      final router = await pumpRouter(tester);
+      router.go('/account');
+      await tester.pumpAndSettle();
+
+      router.go('/guide');
+      await tester.pumpAndSettle();
+
+      expect(currentPath(router), '/info');
+      expect(find.byType(EventInfoPage), findsOneWidget);
+      expect(find.byType(EventGuidePage), findsNothing);
+    });
+
+    testWidgets('starts on the event tab when the app opens on a day-of guide link with the flag false', (
+      tester,
+    ) async {
+      now = DateTime.utc(2026, 10, 29, 1);
+      remoteConfig.setValue(RemoteConfigKeys.eventFeaturesEnabled, false);
+      final router = await pumpRouter(tester, launchRoute: Uri(path: '/guide'));
+
+      expect(currentPath(router), '/info');
+      expect(find.byType(EventGuidePage), findsNothing);
+      expect(preferences.getBool(EventGuideSeenNotifier.preferencesKey), isNull);
+    });
+
+    group('email sign-in', () {
+      Future<void> signInWithEmail(WidgetTester tester) async {
+        await tester.enterText(find.byType(TextFormField).at(0), 'attendee@example.com');
+        await tester.enterText(find.byType(TextFormField).at(1), 'password123');
+        await tester.tap(find.text('サインイン'));
+        await tester.pumpAndSettle();
+      }
+
+      String futureExchangeToken() {
+        final expSeconds = DateTime.now().add(const Duration(hours: 1)).millisecondsSinceEpoch ~/ 1000;
+        return 'v1.other-uid.$expSeconds.deadbeef';
+      }
+
+      Future<void> openTab(WidgetTester tester, String label) async {
+        await tester.tap(
+          find.descendant(
+            of: find.byWidgetPredicate((widget) => widget is NavigationBar || widget is NavigationRail),
+            matching: find.text(label),
+          ),
+        );
+        await tester.pumpAndSettle();
+      }
+
+      /// Submits the email form opened from the share link, and leaves the
+      /// sign-in pending until the returned completer completes.
+      Future<Completer<void>> holdEmailSignInFromShareLink(WidgetTester tester, GoRouter router, String token) async {
+        router.go('/x/$token');
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('メールアドレスでサインイン'));
+        await tester.pumpAndSettle();
+        final pending = authRepository.pendingAction = Completer<void>();
+        await tester.enterText(find.byType(TextFormField).at(0), 'attendee@example.com');
+        await tester.enterText(find.byType(TextFormField).at(1), 'password123');
+        await tester.tap(find.text('サインイン'));
+        await tester.pump();
+        return pending;
+      }
+
+      testWidgets('comes back to the share link, which completes the exchange there', (tester) async {
+        await profileRepository.save(
+          UserProfile(
+            id: 'fake-uid',
+            displayName: 'Attendee',
+            countryOrRegion: 'JP',
+            createdAt: DateTime.utc(2026, 8),
+            updatedAt: DateTime.utc(2026, 8),
+          ),
+        );
+        final token = futureExchangeToken();
+        final router = await pumpRouter(tester);
+        router.go('/x/$token');
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('メールアドレスでサインイン'));
+        await tester.pumpAndSettle();
+        expect(find.byType(EmailSignInPage), findsOneWidget);
+        await signInWithEmail(tester);
+
+        expect(currentPath(router), '/x/$token');
+        expect(find.text('プロフィールを交換しました'), findsOneWidget);
+        expect(exchangeRepository.createCalls, [(uid: 'fake-uid', otherUid: 'other-uid', token: token)]);
+        expect(find.byType(AccountPage, skipOffstage: false), findsNothing);
+      });
+
+      testWidgets('goes back from the email page to the share link with its token still queued', (tester) async {
+        final token = futureExchangeToken();
+        final router = await pumpRouter(tester);
+        router.go('/x/$token');
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('メールアドレスでサインイン'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byType(BackButtonIcon));
+        await tester.pumpAndSettle();
+
+        expect(currentPath(router), '/x/$token');
+        expect(find.byType(SignInCard), findsOneWidget);
+        expect(container.read(pendingExchangeTokenProvider), (uid: null, token: token));
+        expect(find.byType(AccountPage, skipOffstage: false), findsNothing);
+      });
+
+      testWidgets('comes back to the stamp rally link, which scans the code there', (tester) async {
+        stampRallyRepository.scanResult = StampRallyThanksCardResult(
+          alreadyRedeemed: false,
+          redeemedAt: DateTime.utc(2026, 10, 30, 5),
+        );
+        final token = 'ab' * 32;
+        final router = await pumpRouter(tester);
+        router.go('/s/$token');
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('メールアドレスでサインイン'));
+        await tester.pumpAndSettle();
+        await signInWithEmail(tester);
+
+        expect(currentPath(router), '/s/$token');
+        expect(find.text('クレーンゲームに挑戦できます'), findsOneWidget);
+        expect(stampRallyRepository.scannedTokens, [token]);
+        expect(find.byType(AccountPage, skipOffstage: false), findsNothing);
+      });
+
+      testWidgets('leaves the page pushed on another tab alone when a held email sign-in finishes', (tester) async {
+        final token = futureExchangeToken();
+        final router = await pumpRouter(tester);
+        final signIn = await holdEmailSignInFromShareLink(tester, router, token);
+
+        await openTab(tester, 'イベント');
+        unawaited(router.push<void>('/licenses'));
+        await tester.pumpAndSettle();
+        signIn.complete();
+        await tester.pumpAndSettle();
+
+        expect(authRepository.currentUser, isNotNull);
+        expect(currentPath(router), '/licenses');
+        expect(router.canPop(), isTrue);
+
+        // The email page waits on the account tab, and its back arrow returns
+        // to the link, now signed in.
+        await openTab(tester, 'アカウント');
+        expect(currentPath(router), '/account/email');
+        await tester.tap(find.byType(BackButtonIcon));
+        await tester.pumpAndSettle();
+        expect(currentPath(router), '/x/$token');
+        expect(find.text('プロフィールを作成すると相手とプロフィールを交換できます'), findsOneWidget);
+      });
+
+      testWidgets("stays on another tab's root page when a held email sign-in finishes", (tester) async {
+        final router = await pumpRouter(tester);
+        final signIn = await holdEmailSignInFromShareLink(tester, router, futureExchangeToken());
+
+        await openTab(tester, 'イベント');
+        signIn.complete();
+        await tester.pumpAndSettle();
+
+        expect(authRepository.currentUser, isNotNull);
+        expect(currentPath(router), '/info');
+        expect(find.byType(EventInfoPage), findsOneWidget);
+      });
+
+      testWidgets('lands on the account tab when the email page was opened by URL', (tester) async {
+        final router = await pumpRouter(tester);
+        router.go('/account/email');
+        await tester.pumpAndSettle();
+
+        await signInWithEmail(tester);
+
+        expect(currentPath(router), '/account');
+        expect(find.byType(EmailSignInPage), findsNothing);
+        expect(find.byType(AccountPage), findsOneWidget);
+      });
     });
 
     testWidgets('redirects away as soon as the flag flips false while the destination is open', (tester) async {

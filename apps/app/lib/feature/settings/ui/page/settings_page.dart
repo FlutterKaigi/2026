@@ -2,6 +2,7 @@ import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/provider/app_locale.dart';
 import 'package:app/core/provider/package_info.dart';
 import 'package:app/core/provider/theme_mode.dart';
+import 'package:app/core/remote_config/event_features_provider.dart';
 import 'package:app/core/router/router.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -16,6 +17,7 @@ class SettingsPage extends ConsumerWidget {
     final appLocale = ref.watch(appLocaleProvider);
     final packageInfo = ref.watch(packageInfoProvider);
     final themeMode = ref.watch(themeModeProvider);
+    final eventFeaturesEnabled = ref.watch(eventFeaturesEnabledProvider);
     final appVersion = switch (packageInfo) {
       AsyncData(:final value) => '${value.version} (${value.buildNumber})',
       AsyncError() => '—',
@@ -98,14 +100,31 @@ class SettingsPage extends ConsumerWidget {
                   const SizedBox(height: 8),
                   Card.outlined(
                     margin: EdgeInsets.zero,
-                    child: ListTile(
-                      dense: true,
-                      visualDensity: VisualDensity.compact,
-                      minTileHeight: 48,
-                      leading: const Icon(Icons.info_outline, size: 22),
-                      title: Text(t.app.title),
-                      subtitle: Text(t.settings.version),
-                      trailing: Text(appVersion),
+                    clipBehavior: Clip.antiAlias,
+                    child: Column(
+                      children: [
+                        if (eventFeaturesEnabled) ...[
+                          ListTile(
+                            dense: true,
+                            visualDensity: VisualDensity.compact,
+                            minTileHeight: 48,
+                            leading: const Icon(Icons.help_outline, size: 22),
+                            title: Text(t.eventGuide.open),
+                            trailing: const Icon(Icons.chevron_right, size: 20),
+                            onTap: () => const EventGuideRoute().push<void>(context),
+                          ),
+                          const Divider(height: 1),
+                        ],
+                        ListTile(
+                          dense: true,
+                          visualDensity: VisualDensity.compact,
+                          minTileHeight: 48,
+                          leading: const Icon(Icons.info_outline, size: 22),
+                          title: Text(t.app.title),
+                          subtitle: Text(t.settings.version),
+                          trailing: Text(appVersion),
+                        ),
+                      ],
                     ),
                   ),
                 ],

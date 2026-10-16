@@ -20,7 +20,6 @@ import 'package:app/feature/profile/data/provider/user_profile_provider.dart';
 import 'package:app/feature/profile/data/provider/user_profile_repository.dart';
 import 'package:app/feature/profile/ui/widget/profile_summary_card_widget.dart';
 import 'package:app/feature/stamp_rally/data/stamp_rally_provider.dart';
-import 'package:app/feature/support_lt/data/provider/support_lt_provider.dart';
 import 'package:data/data.dart';
 import 'package:data/user.dart';
 import 'package:flutter/material.dart';
@@ -49,12 +48,10 @@ class AccountPage extends HookConsumerWidget {
     // Fallback consumer for `pendingExchangeTokenProvider`: `ExchangeShareLinkPage`
     // queues a share-link token here when it opens signed-out or profile-less,
     // then consumes it itself once its own `ExchangeAccessGate` passes. If the
-    // visitor's sign-in / profile-creation detour lands back on this tab
-    // instead — the normal outcome, since neither flow returns to the
-    // original `/x/<token>` URL — this is what actually completes the
-    // exchange. `handledToken` guards against redoing it if `profile` (a
-    // stream value) emits again before the notifier's `state = null` clear is
-    // observed.
+    // visitor leaves the link before that and signs in or creates the profile
+    // on this tab instead, this is what completes the exchange. `handledToken`
+    // guards against redoing it if `profile` (a stream value) emits again
+    // before the notifier's `state = null` clear is observed.
     final pending = ref.watch(pendingExchangeTokenProvider);
     final profile = profileState.value;
     final myUid = authState.value?.uid;
@@ -81,19 +78,18 @@ class AccountPage extends HookConsumerWidget {
       }
       handledPendingToken.value = pendingToken;
 
+      // Leaving the tab mid-flight disposes this `ref`, so what the exchange
+      // still needs once it lands is read up front. Only the snack bar is
+      // skipped afterwards.
+      final pendingTokens = ref.read(pendingExchangeTokenProvider.notifier);
+      final talker = ref.read(talkerProvider);
+      final repository = ref.read(profileExchangeRepositoryProvider);
+
       Future<void> resolve() async {
-        // Leaving the tab mid-flight disposes this `ref`, so everything that
-        // still has to happen once the exchange lands — dropping the pending
-        // token above all, or it would be replayed on the next visit — is read
-        // before the await. Only the snack bar is skipped afterwards.
-        final pendingTokens = ref.read(pendingExchangeTokenProvider.notifier);
-        final talker = ref.read(talkerProvider);
-        final resolved = await resolvePendingExchangeToken(
-          token: pendingToken,
-          myUid: myUid,
-          repository: ref.read(profileExchangeRepositoryProvider),
-        );
+        // Dropped before the create starts, so reopening this tab while it is
+        // in flight doesn't start the same exchange again.
         pendingTokens.clearIfCurrent(pendingToken);
+        final resolved = await resolvePendingExchangeToken(token: pendingToken, myUid: myUid, repository: repository);
         if (resolved case PendingExchangeResolved(outcome: ExchangeCreateFailed(:final error, :final stackTrace))) {
           talker.handle(error, stackTrace);
         }
@@ -116,7 +112,9 @@ class AccountPage extends HookConsumerWidget {
         }
       }
 
-      unawaited(resolve());
+      // Deferred to a microtask: Riverpod disallows modifying a provider
+      // synchronously from a widget life-cycle callback.
+      unawaited(Future.microtask(resolve));
       return null;
     }, [pending, myUid, profile]);
 
@@ -258,11 +256,9 @@ class AccountPage extends HookConsumerWidget {
                     await ref.read(exchangeCodeCacheRepositoryProvider).clear(value.uid);
                     ref.read(pendingExchangeTokenProvider.notifier).clear();
                     ref.read(pendingStampRallyTokenProvider.notifier).clear();
-                    ref.read(pendingStampRallyTokenProvider.notifier).clear();
                     await repository.signOut();
                   }),
                   onDeleteAccount: () => deleteAccount(value),
-                  onComingSoon: () => showMessage(t.auth.account.comingSoon),
                 ),
         ),
         AsyncError(:final error) => AppErrorView(
@@ -277,27 +273,40 @@ class AccountPage extends HookConsumerWidget {
   }
 }
 
-/// Centered sign-in card shown while signed out.
-class _SignedOutView extends StatelessWidget {
+/// Centered sign-in card shown while signed out, above the venue events entry.
+class _SignedOutView extends ConsumerWidget {
   const _SignedOutView();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final t = Translations.of(context);
     return Center(
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
-        child: SignInCard(
-          title: t.auth.signIn.required,
-          description: t.auth.signIn.description,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: signInCardMaxWidth),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SignInCard(
+                title: t.auth.signIn.accountTitle,
+                description: t.auth.signIn.accountDescription,
+              ),
+              if (ref.watch(eventFeaturesEnabledProvider)) ...[
+                const SizedBox(height: 8),
+                const _VenueEventsTile(),
+              ],
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-/// Signed-in account tab: profile card, missions, event entry points and
-/// account actions as a top-aligned scrolling list.
+/// Signed-in account tab: profile card, the venue events entry and account
+/// actions as a top-aligned scrolling list.
 class _SignedInView extends ConsumerWidget {
   const _SignedInView({
     required this.user,
@@ -306,7 +315,6 @@ class _SignedInView extends ConsumerWidget {
     required this.onRetryProfile,
     required this.onSignOut,
     required this.onDeleteAccount,
-    required this.onComingSoon,
   });
 
   final User user;
@@ -315,9 +323,6 @@ class _SignedInView extends ConsumerWidget {
   final VoidCallback onRetryProfile;
   final Future<void> Function() onSignOut;
   final Future<void> Function() onDeleteAccount;
-
-  /// Tapped an event entry point whose screen is not implemented yet.
-  final VoidCallback onComingSoon;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -357,58 +362,7 @@ class _SignedInView extends ConsumerWidget {
                 },
                 if (eventFeaturesEnabled) ...[
                   const SizedBox(height: 8),
-                  Card.outlined(
-                    margin: EdgeInsets.zero,
-                    clipBehavior: Clip.antiAlias,
-                    semanticContainer: false,
-                    child: ListTile(
-                      minTileHeight: 56,
-                      leading: const Icon(Icons.track_changes_outlined, size: 22),
-                      title: Text(t.auth.account.mission, style: theme.textTheme.bodyMedium),
-                      subtitle: Text(t.auth.account.missionDescription, style: theme.textTheme.bodySmall),
-                      trailing: const Icon(Icons.chevron_right, size: 20),
-                      onTap: () => const MissionRoute().push<void>(context),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  _SectionHeading(title: t.auth.account.joinEvent),
-                  const SizedBox(height: 8),
-                  Card.outlined(
-                    margin: EdgeInsets.zero,
-                    clipBehavior: Clip.antiAlias,
-                    semanticContainer: false,
-                    child: Column(
-                      children: [
-                        // クイズ大会は参加と回答の記録をアカウントに紐づけるため、
-                        // サインイン中のここが唯一の入口になる。
-                        _NavigationTile(
-                          icon: Icons.quiz_outlined,
-                          title: t.auth.account.quiz,
-                          onTap: () => unawaited(const QuizListRoute().push<void>(context)),
-                        ),
-                        const Divider(height: 1),
-                        _SupportLtNavigationTile(uid: user.uid),
-                        const Divider(height: 1),
-                        _NavigationTile(
-                          icon: Icons.qr_code_2_outlined,
-                          title: t.auth.account.profileExchange,
-                          onTap: () => const ExchangeHomeRoute().push<void>(context),
-                        ),
-                        const Divider(height: 1),
-                        _NavigationTile(
-                          icon: Icons.image_outlined,
-                          title: t.auth.account.snsPost,
-                          onTap: () => const SnsPostRoute().push<void>(context),
-                        ),
-                        const Divider(height: 1),
-                        _NavigationTile(
-                          icon: Icons.approval_outlined,
-                          title: t.stampRally.title,
-                          onTap: () => const StampRallyRoute().push<void>(context),
-                        ),
-                      ],
-                    ),
-                  ),
+                  const _VenueEventsTile(),
                 ],
                 // フラグの ON/OFF どちらでもアカウント見出しの前に同じ余白を置く。
                 const SizedBox(height: 24),
@@ -457,59 +411,24 @@ class _SectionHeading extends StatelessWidget {
   );
 }
 
-class _SupportLtNavigationTile extends ConsumerWidget {
-  const _SupportLtNavigationTile({required this.uid});
-
-  final String uid;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final t = Translations.of(context);
-    ref.listen(supportLtRegistrationProvider(uid), (_, next) {
-      // The tile has no room for an error view; the Support LT page offers a
-      // retry. Record the failure so a permission or network problem is visible.
-      if (next case AsyncError(:final error, :final stackTrace)) {
-        ref.read(talkerProvider).handle(error, stackTrace);
-      }
-    });
-    // `value` keeps the last registration through reloads so the badge does
-    // not flicker while the stream resubscribes.
-    final isRegistered = ref.watch(supportLtRegistrationProvider(uid)).value != null;
-    return _NavigationTile(
-      icon: Icons.mic_none_outlined,
-      title: t.auth.account.lightningTalks,
-      badge: isRegistered ? _RegisteredBadge(label: t.supportLt.registeredStatus) : null,
-      onTap: () => const SupportLtRoute().push<void>(context),
-    );
-  }
-}
-
-/// Compact tonal badge marking a completed Support LT registration.
-class _RegisteredBadge extends StatelessWidget {
-  const _RegisteredBadge({required this.label});
-
-  final String label;
+class _VenueEventsTile extends StatelessWidget {
+  const _VenueEventsTile();
 
   @override
   Widget build(BuildContext context) {
+    final t = Translations.of(context);
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    return DecoratedBox(
-      // プロフィール編集ボタンと同じく、アカウントタブの強調は primary 系で揃える。
-      decoration: BoxDecoration(
-        color: colorScheme.primaryContainer,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Padding(
-        padding: const EdgeInsetsDirectional.fromSTEB(6, 4, 8, 4),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.check_circle, size: 16, color: colorScheme.onPrimaryContainer),
-            const SizedBox(width: 4),
-            Text(label, style: theme.textTheme.labelMedium?.copyWith(color: colorScheme.onPrimaryContainer)),
-          ],
-        ),
+    return Card.outlined(
+      margin: EdgeInsets.zero,
+      clipBehavior: Clip.antiAlias,
+      semanticContainer: false,
+      child: ListTile(
+        minTileHeight: 56,
+        leading: const Icon(Icons.flag_outlined, size: 22),
+        title: Text(t.venueEvents.title, style: theme.textTheme.bodyMedium),
+        subtitle: Text(t.venueEvents.entrySubtitle, style: theme.textTheme.bodySmall),
+        trailing: const Icon(Icons.chevron_right, size: 20),
+        onTap: () => const VenueEventsRoute().push<void>(context),
       ),
     );
   }
@@ -523,7 +442,6 @@ class _NavigationTile extends StatelessWidget {
     required this.onTap,
     this.color,
     this.showsChevron = true,
-    this.badge,
   });
 
   final IconData icon;
@@ -534,9 +452,6 @@ class _NavigationTile extends StatelessWidget {
   final Color? color;
   final bool showsChevron;
 
-  /// Shown before the chevron, e.g. a status badge.
-  final Widget? badge;
-
   @override
   Widget build(BuildContext context) => ListTile(
     dense: true,
@@ -546,15 +461,7 @@ class _NavigationTile extends StatelessWidget {
     textColor: color,
     leading: Icon(icon, size: 22),
     title: Text(title, style: Theme.of(context).textTheme.bodyMedium),
-    trailing: badge == null && !showsChevron
-        ? null
-        : Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (badge case final badge?) ...[badge, const SizedBox(width: 4)],
-              if (showsChevron) const Icon(Icons.chevron_right, size: 20),
-            ],
-          ),
+    trailing: showsChevron ? const Icon(Icons.chevron_right, size: 20) : null,
     onTap: onTap,
   );
 }

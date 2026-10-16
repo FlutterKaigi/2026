@@ -2,10 +2,12 @@ import 'dart:async';
 
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/feature/auth/data/provider/auth_repository.dart';
+import 'package:app/feature/auth/ui/widget/sign_in_card.dart';
 import 'package:app/feature/exchange/data/provider/pending_exchange_token_provider.dart';
 import 'package:app/feature/exchange/data/provider/profile_exchange_repository.dart';
 import 'package:app/feature/exchange/ui/page/exchange_share_link_page.dart';
 import 'package:app/feature/profile/data/provider/user_profile_repository.dart';
+import 'package:app/feature/profile/ui/page/profile_edit_page.dart';
 import 'package:data/data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -36,6 +38,10 @@ void main() {
         GoRoute(
           path: '/account',
           builder: (_, _) => const Scaffold(body: Text('account destination')),
+        ),
+        GoRoute(
+          path: '/account/profile',
+          builder: (_, _) => const ProfileEditPage(),
         ),
         GoRoute(
           path: '/account/exchange/list',
@@ -70,8 +76,8 @@ void main() {
     return 'v1.$uid.$expSeconds.deadbeef';
   }
 
-  UserProfile ownProfile() => UserProfile(
-    id: 'uid-1',
+  UserProfile ownProfile({String id = 'uid-1'}) => UserProfile(
+    id: id,
     displayName: 'Me',
     countryOrRegion: 'JP',
     createdAt: DateTime.utc(2026, 8),
@@ -82,6 +88,12 @@ void main() {
   // still readable in the tests that navigate away from the share link.
   PendingExchangeToken? readPendingToken(WidgetTester tester) =>
       ProviderScope.containerOf(tester.element(find.byType(MaterialApp))).read(pendingExchangeTokenProvider);
+
+  List<String> recordNavigation() {
+    final paths = <String>[];
+    router.routerDelegate.addListener(() => paths.add(router.routerDelegate.currentConfiguration.uri.path));
+    return paths;
+  }
 
   setUp(() => LocaleSettings.setLocaleSync(AppLocale.ja));
 
@@ -102,7 +114,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('このリンクは無効です'), findsOneWidget);
-    expect(find.text('サインインする'), findsNothing);
+    expect(find.byType(SignInCard), findsNothing);
   });
 
   testWidgets('rejects an already-expired token before requiring sign-in', (tester) async {
@@ -143,12 +155,82 @@ void main() {
 
     // ExchangeHomePage 等の一般的な文言（自分のQRコードを表示できます）
     // ではなく、共有リンクの文脈に合わせた文言が出る。
-    expect(find.text('サインインすると相手とプロフィールを交換できます'), findsOneWidget);
+    expect(
+      find.descendant(of: find.byType(SignInCard), matching: find.text('サインインすると相手とプロフィールを交換できます')),
+      findsOneWidget,
+    );
     expect(find.text('サインインすると自分のQRコードを表示できます'), findsNothing);
-    await tester.tap(find.text('サインインする'));
+  });
+
+  testWidgets('completes the exchange on the link page after signing in there', (tester) async {
+    final authRepository = FakeAuthRepository();
+    addTearDown(authRepository.dispose);
+    final exchangeRepository = FakeProfileExchangeRepository();
+    addTearDown(exchangeRepository.dispose);
+    final token = futureToken('other-uid');
+
+    await tester.pumpWidget(
+      buildSubject(
+        token: token,
+        authRepository: authRepository,
+        profileRepository: FakeUserProfileRepository(initialProfile: ownProfile(id: 'fake-uid')),
+        exchangeRepository: exchangeRepository,
+      ),
+    );
+    final visitedPaths = recordNavigation();
     await tester.pumpAndSettle();
 
-    expect(find.text('account destination'), findsOneWidget);
+    await tester.tap(find.bySemanticsLabel('Google でサインイン'));
+    await tester.pumpAndSettle();
+
+    expect(exchangeRepository.createCalls, [(uid: 'fake-uid', otherUid: 'other-uid', token: token)]);
+    expect(find.text('プロフィールを交換しました'), findsOneWidget);
+    expect(router.routerDelegate.currentConfiguration.uri.path, '/x/$token');
+    expect(visitedPaths, everyElement('/x/$token'));
+    expect(readPendingToken(tester), isNull);
+  });
+
+  testWidgets('completes the exchange on the link page once the profile created from there is saved', (tester) async {
+    final authRepository = FakeAuthRepository();
+    addTearDown(authRepository.dispose);
+    final profileRepository = FakeUserProfileRepository();
+    addTearDown(profileRepository.dispose);
+    final exchangeRepository = FakeProfileExchangeRepository();
+    addTearDown(exchangeRepository.dispose);
+    final token = futureToken('other-uid');
+
+    await tester.pumpWidget(
+      buildSubject(
+        token: token,
+        authRepository: authRepository,
+        profileRepository: profileRepository,
+        exchangeRepository: exchangeRepository,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.bySemanticsLabel('Google でサインイン'));
+    await tester.pumpAndSettle();
+    expect(find.text('プロフィールを作成すると相手とプロフィールを交換できます'), findsOneWidget);
+
+    await tester.tap(find.text('プロフィールを作成する'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('選択してください'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.widgetWithText(TextField, '国名・地域名で検索'), 'japan');
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('日本'));
+    await tester.pumpAndSettle();
+    expect(exchangeRepository.createCalls, isEmpty);
+
+    await tester.ensureVisible(find.widgetWithText(FilledButton, '保存'));
+    await tester.tap(find.widgetWithText(FilledButton, '保存'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(ProfileEditPage), findsNothing);
+    expect(exchangeRepository.createCalls, [(uid: 'fake-uid', otherUid: 'other-uid', token: token)]);
+    expect(find.text('プロフィールを交換しました'), findsOneWidget);
+    expect(readPendingToken(tester), isNull);
   });
 
   testWidgets(

@@ -8,6 +8,7 @@ import 'package:app/feature/auth/ui/page/account_page.dart';
 import 'package:app/feature/auth/ui/page/email_sign_in_page.dart';
 import 'package:app/feature/contributor/ui/page/contributor_list_page.dart';
 import 'package:app/feature/event/ui/page/event_info_page.dart';
+import 'package:app/feature/event_guide/ui/page/event_guide_page.dart';
 import 'package:app/feature/exchange/ui/page/exchange_home_page.dart';
 import 'package:app/feature/exchange/ui/page/exchange_list_page.dart';
 import 'package:app/feature/exchange/ui/page/exchange_scan_page.dart';
@@ -32,6 +33,7 @@ import 'package:app/feature/stamp_rally/ui/page/stamp_rally_link_page.dart';
 import 'package:app/feature/stamp_rally/ui/page/stamp_rally_page.dart';
 import 'package:app/feature/stamp_rally/ui/page/stamp_rally_scan_page.dart';
 import 'package:app/feature/support_lt/ui/page/support_lt_page.dart';
+import 'package:app/feature/venue_events/ui/page/venue_events_page.dart';
 import 'package:app/feature/venue_map/ui/page/venue_map_page.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -88,6 +90,7 @@ final routerProvider = Provider<GoRouter>((ref) {
   // Conference-day destinations hidden behind `event_features_enabled`,
   // including their sub-routes (quiz event detail, exchange scan/list, …).
   final eventFeatureLocations = <String>[
+    const VenueEventsRoute().location,
     const MissionRoute().location,
     const QuizListRoute().location,
     const SupportLtRoute().location,
@@ -140,6 +143,9 @@ final routerProvider = Provider<GoRouter>((ref) {
         return null;
       }
       final path = state.uri.path;
+      if (path == const EventGuideRoute().location) {
+        return const EventInfoRoute().location;
+      }
       final isBlocked = eventFeatureLocations.any((location) => path == location || path.startsWith('$location/'));
       return isBlocked ? const AccountRoute().location : null;
     },

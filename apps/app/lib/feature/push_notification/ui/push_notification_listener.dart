@@ -9,8 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-/// Shows foreground notifications, opens tapped ones, and asks for the notification permission after the first
-/// frame.
+/// Shows foreground notifications and opens tapped ones.
 ///
 /// Inserted from `MaterialApp.builder`, below the app's [ScaffoldMessenger] and outside its Navigator, so it serves
 /// every route.
@@ -23,20 +22,13 @@ class PushNotificationListener extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final pushNotifications = ref.watch(pushNotificationRepositoryProvider);
     useEffect(() {
-      var disposed = false;
       final foreground = pushNotifications.onForeground.listen((notification) {
         if (context.mounted) {
           _show(context, ref, notification);
         }
       });
       final opened = pushNotifications.onOpened.listen((route) => _open(ref, route));
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!disposed) {
-          unawaited(pushNotifications.requestPermission());
-        }
-      });
       return () {
-        disposed = true;
         unawaited(foreground.cancel());
         unawaited(opened.cancel());
       };

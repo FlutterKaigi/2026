@@ -19,7 +19,6 @@ import 'package:app/feature/exchange/data/provider/profile_exchange_repository.d
 import 'package:app/feature/profile/data/provider/user_profile_repository.dart';
 import 'package:app/feature/profile/ui/widget/country_flag_widget.dart';
 import 'package:app/feature/quiz/data/provider/quiz_repositories.dart';
-import 'package:app/feature/quiz/ui/component/quiz_sign_in_required_view.dart';
 import 'package:app/feature/quiz/ui/page/quiz_event_list_page.dart';
 import 'package:app/feature/quiz/ui/page/quiz_page.dart';
 import 'package:app/feature/support_lt/data/provider/support_lt_provider.dart';
@@ -164,7 +163,8 @@ void main() {
     await tester.pumpWidget(buildSubject(repository, preferences: preferences));
     await tester.pumpAndSettle();
 
-    expect(find.text('サインインが必要です'), findsOneWidget);
+    expect(find.text('サインイン'), findsOneWidget);
+    expect(find.text('プロフィールや会場イベントの記録は\nアカウントに保存されます'), findsOneWidget);
     expect(find.bySemanticsLabel('Google でサインイン'), findsOneWidget);
     expect(find.text('Appleでサインイン'), findsNothing);
     expect(find.text('メールアドレスでサインイン'), findsOneWidget);
@@ -176,7 +176,7 @@ void main() {
     expect(find.text('Google User'), findsOneWidget);
     expect(find.text('google@example.com'), findsOneWidget);
     expect(find.text('サインイン中'), findsOneWidget);
-    expect(find.text('サインインが必要です'), findsNothing);
+    expect(find.text('サインイン'), findsNothing);
   });
 
   for (final flavor in Flavor.values) {
@@ -263,6 +263,29 @@ void main() {
       findsOneWidget,
     );
     expect(find.text('Appleでサインイン'), findsOneWidget);
+  });
+
+  testWidgets('ignores a sign-in that fails after the card has gone away', (tester) async {
+    final repository = FakeAuthRepository()..pendingAction = Completer<void>();
+    addTearDown(repository.dispose);
+    final showsAccountPage = ValueNotifier(true);
+    addTearDown(showsAccountPage.dispose);
+
+    await tester.pumpWidget(
+      buildSubject(repository, preferences: preferences, showsAccountPage: showsAccountPage),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.bySemanticsLabel('Google でサインイン'));
+    await tester.pump();
+    showsAccountPage.value = false;
+    await tester.pump();
+    expect(find.byType(SignInCard), findsNothing);
+
+    repository.pendingAction!.completeError(FirebaseAuthException(code: 'network-request-failed'));
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('stays silent when the user cancels sign-in', (tester) async {
@@ -412,32 +435,17 @@ void main() {
     expect(find.text('プロフィールを編集'), findsNothing);
   });
 
-  testWidgets('opens the quiz list from the signed-in account and returns to the account', (tester) async {
-    final repository = FakeAuthRepository(initialUser: FakeUser(uid: 'uid-1'));
-    final quizzes = _QuizEventRepository();
-    final router = GoRouter(initialLocation: '/account', routes: app_router.$appRoutes);
-    addTearDown(repository.dispose);
-    addTearDown(router.dispose);
-    await tester.pumpWidget(
-      buildSubject(repository, preferences: preferences, router: router, quizRepository: quizzes),
-    );
-    await tester.pumpAndSettle();
-
-    await tapListItem(tester, t.auth.account.quiz);
-
-    expect(find.byType(QuizEventListPage), findsOneWidget);
-    expect(find.text(t.quiz.list.empty), findsOneWidget);
-    expect(quizzes.publishedSubscriptions, 1);
-    expect(tester.takeException(), isNull);
-
-    router.pop();
-    await tester.pumpAndSettle();
-    expect(find.byType(AccountPage), findsOneWidget);
-  });
-
-  testWidgets('requires account sign-in before opening the quiz list', (tester) async {
+  testWidgets('lists the quiz events after signing in on the quiz list, without leaving it', (tester) async {
     final repository = FakeAuthRepository();
-    final quizzes = _QuizEventRepository();
+    final quizzes = _QuizEventRepository([
+      QuizEvent(
+        id: 'first',
+        title: const LocaleMap(ja: '前半戦', en: 'First round'),
+        status: QuizEventStatus.registration,
+        createdAt: DateTime.utc(2026),
+        updatedAt: DateTime.utc(2026),
+      ),
+    ]);
     final router = GoRouter(initialLocation: '/account', routes: app_router.$appRoutes);
     addTearDown(repository.dispose);
     addTearDown(router.dispose);
@@ -445,16 +453,21 @@ void main() {
       buildSubject(repository, preferences: preferences, router: router, quizRepository: quizzes),
     );
     await tester.pumpAndSettle();
-    expect(find.text(t.auth.account.quiz), findsNothing);
 
     router.go('/account/quiz');
     await tester.pumpAndSettle();
 
-    expect(find.byType(QuizSignInRequiredView), findsOneWidget);
+    final quizList = find.byType(QuizEventListPage);
+    final signInCard = find.descendant(of: quizList, matching: find.byType(SignInCard));
+    expect(signInCard, findsOneWidget);
     expect(quizzes.publishedSubscriptions, 0);
-    await tester.tap(find.text(t.quiz.signInRequired.button));
+
+    await tester.tap(find.descendant(of: signInCard, matching: find.byType(GoogleSignInButton)));
     await tester.pumpAndSettle();
-    expect(find.byType(AccountPage), findsOneWidget);
+
+    expect(router.routerDelegate.currentConfiguration.uri.path, '/account/quiz');
+    expect(signInCard, findsNothing);
+    expect(find.descendant(of: quizList, matching: find.text('前半戦')), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -477,57 +490,48 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('opens support LT registration from the account event tile', (tester) async {
-    final repository = FakeAuthRepository(initialUser: FakeUser(uid: 'uid-1'));
+  for (final (state, user) in [('signed out', null), ('signed in', FakeUser(uid: 'uid-1'))]) {
+    testWidgets('opens the venue events hub above the account page while $state', (tester) async {
+      final repository = FakeAuthRepository(initialUser: user);
+      addTearDown(repository.dispose);
+      final router = GoRouter(
+        initialLocation: '/account',
+        routes: [
+          GoRoute(
+            path: '/account',
+            builder: (_, _) => const AccountPage(),
+            routes: [
+              GoRoute(
+                path: 'venue-events',
+                builder: (_, _) => const Scaffold(body: Text('venue events destination')),
+              ),
+            ],
+          ),
+        ],
+      );
+      addTearDown(router.dispose);
+      await tester.pumpWidget(buildSubject(repository, preferences: preferences, router: router));
+      await tester.pumpAndSettle();
+
+      await tapListItem(tester, '会場イベントに参加');
+      expect(find.text('venue events destination'), findsOneWidget);
+
+      router.pop();
+      await tester.pumpAndSettle();
+      expect(find.byType(AccountPage), findsOneWidget);
+    });
+  }
+
+  testWidgets('lines the signed-out venue events entry up with the sign-in card', (tester) async {
+    final repository = FakeAuthRepository();
     addTearDown(repository.dispose);
-    final router = GoRouter(
-      initialLocation: '/account',
-      routes: [
-        GoRoute(
-          path: '/account',
-          builder: (_, _) => const AccountPage(),
-          routes: [
-            GoRoute(
-              path: 'support-lt',
-              builder: (_, _) => const Scaffold(body: Text('support LT destination')),
-            ),
-          ],
-        ),
-      ],
-    );
-    addTearDown(router.dispose);
-    await tester.pumpWidget(buildSubject(repository, preferences: preferences, router: router));
+    await tester.pumpWidget(buildSubject(repository, preferences: preferences));
     await tester.pumpAndSettle();
 
-    await tapListItem(tester, '応援LT参加');
-
-    expect(find.text('support LT destination'), findsOneWidget);
-    expect(find.byType(SnackBar), findsNothing);
-  });
-
-  testWidgets('reflects the signed-in attendee registration without completing other missions', (tester) async {
-    final repository = FakeAuthRepository(initialUser: FakeUser(uid: 'uid-1'));
-    final supportLt = FakeSupportLtRepository();
-    addTearDown(repository.dispose);
-    addTearDown(supportLt.dispose);
-    await tester.pumpWidget(
-      buildSubject(repository, preferences: preferences, supportLtRepository: supportLt),
-    );
-    await tester.pumpAndSettle();
-    expect(find.text('参加登録済み'), findsNothing);
-
-    supportLt.setRegistration(
-      SupportLtRegistration(uid: 'uid-1', displayName: 'Attendee', registeredAt: DateTime.utc(2026, 11, 13)),
-    );
-    await tester.pumpAndSettle();
-    expect(find.text('参加登録済み'), findsOneWidget);
-    expect(find.text('応援LT参加・プロフィール交換・SNS投稿登録の参加状況で判定'), findsOneWidget);
-
-    await repository.signOut();
-    await tester.pumpAndSettle();
-    await repository.signInWithGoogle();
-    await tester.pumpAndSettle();
-    expect(find.text('参加登録済み'), findsNothing);
+    final tile = find.ancestor(of: find.text('会場イベントに参加'), matching: find.byType(Card));
+    expect(find.text('スタンプラリー・プロフィール交換など'), findsOneWidget);
+    expect(tester.getSize(tile).width, tester.getSize(find.byType(SignInCard)).width);
+    expect(tester.getTopLeft(tile).dy, greaterThan(tester.getBottomLeft(find.byType(SignInCard)).dy));
   });
 
   testWidgets('shows the saved profile with country, links and bio', (tester) async {
@@ -643,6 +647,84 @@ void main() {
     },
   );
 
+  testWidgets('starts a pending share-link exchange only once when the tab is left and reopened mid-flight', (
+    tester,
+  ) async {
+    final repository = FakeAuthRepository(
+      initialUser: FakeUser(uid: 'uid-1', email: 'attendee@example.com'),
+    );
+    addTearDown(repository.dispose);
+    final profileRepository = FakeUserProfileRepository(initialProfile: _profile(id: 'uid-1'));
+    addTearDown(profileRepository.dispose);
+    final exchangeRepository = FakeProfileExchangeRepository()..createGate = Completer<void>();
+    addTearDown(exchangeRepository.dispose);
+    final showsAccountPage = ValueNotifier(true);
+    addTearDown(showsAccountPage.dispose);
+    final expSeconds = DateTime.now().add(const Duration(hours: 1)).millisecondsSinceEpoch ~/ 1000;
+
+    await tester.pumpWidget(
+      buildSubject(
+        repository,
+        preferences: preferences,
+        profileRepository: profileRepository,
+        exchangeRepository: exchangeRepository,
+        pendingExchangeToken: 'v1.other-uid.$expSeconds.deadbeef',
+        showsAccountPage: showsAccountPage,
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(exchangeRepository.createCalls, hasLength(1));
+
+    showsAccountPage.value = false;
+    await tester.pumpAndSettle();
+    showsAccountPage.value = true;
+    await tester.pumpAndSettle();
+
+    exchangeRepository.createGate!.complete();
+    await tester.pumpAndSettle();
+    expect(exchangeRepository.createCalls, hasLength(1));
+  });
+
+  testWidgets('starts a share-link exchange only once when the visitor leaves the link for this tab mid-flight', (
+    tester,
+  ) async {
+    final repository = FakeAuthRepository(
+      initialUser: FakeUser(uid: 'uid-1', email: 'attendee@example.com'),
+    );
+    addTearDown(repository.dispose);
+    final profileRepository = FakeUserProfileRepository(initialProfile: _profile(id: 'uid-1'));
+    addTearDown(profileRepository.dispose);
+    final exchangeRepository = FakeProfileExchangeRepository()..createGate = Completer<void>();
+    addTearDown(exchangeRepository.dispose);
+    final expSeconds = DateTime.now().add(const Duration(hours: 1)).millisecondsSinceEpoch ~/ 1000;
+    final router = GoRouter(initialLocation: '/x/v1.other-uid.$expSeconds.deadbeef', routes: app_router.$appRoutes);
+    addTearDown(router.dispose);
+
+    await tester.pumpWidget(
+      buildSubject(
+        repository,
+        preferences: preferences,
+        profileRepository: profileRepository,
+        exchangeRepository: exchangeRepository,
+        router: router,
+      ),
+    );
+    // 交換を止めている間はリンクの画面のローディングが回り続けるため、
+    // `pumpAndSettle` ではなくフレームを進める。
+    for (var frame = 0; frame < 5; frame++) {
+      await tester.pump();
+    }
+    expect(exchangeRepository.createCalls, hasLength(1));
+
+    router.go('/account');
+    await tester.pumpAndSettle();
+    expect(find.byType(AccountPage), findsOneWidget);
+
+    exchangeRepository.createGate!.complete();
+    await tester.pumpAndSettle();
+    expect(exchangeRepository.createCalls, hasLength(1));
+  });
+
   testWidgets(
     'discards a pending share-link token left behind by a different uid instead of resolving it',
     (tester) async {
@@ -730,7 +812,7 @@ void main() {
     expect(find.text('attendee@example.com'), findsOneWidget);
   });
 
-  testWidgets('shows the mission entry and join-event section when event_features_enabled is true', (
+  testWidgets('shows the venue events entry instead of a feature list when event_features_enabled is true', (
     tester,
   ) async {
     final repository = FakeAuthRepository(initialUser: FakeUser(uid: 'uid-1'));
@@ -747,13 +829,34 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('ミッション'), findsOneWidget);
-    expect(find.text('イベントに参加'), findsOneWidget);
-    expect(find.text(t.auth.account.quiz), findsOneWidget);
-    expect(find.text(t.stampRally.title), findsOneWidget);
+    expect(find.text('会場イベントに参加'), findsOneWidget);
+    for (final title in ['ミッション', 'クイズ大会', '応援LT参加', 'プロフィール交換', 'SNS投稿登録', 'スタンプラリー']) {
+      expect(find.text(title), findsNothing, reason: title);
+    }
   });
 
-  testWidgets('hides the mission entry and join-event section when event_features_enabled is false', (
+  for (final (state, user) in [('signed out', null), ('signed in', FakeUser(uid: 'uid-1'))]) {
+    testWidgets('hides the venue events entry while $state when event_features_enabled is false', (tester) async {
+      final repository = FakeAuthRepository(initialUser: user);
+      addTearDown(repository.dispose);
+
+      await tester.pumpWidget(
+        buildSubject(
+          repository,
+          preferences: preferences,
+          remoteConfigRepository: FakeRemoteConfigRepository(
+            initialValues: const {RemoteConfigKeys.eventFeaturesEnabled: false},
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('会場イベントに参加'), findsNothing);
+      expect(find.bySemanticsLabel('Google でサインイン'), user == null ? findsOneWidget : findsNothing);
+    });
+  }
+
+  testWidgets('keeps the account actions when event_features_enabled is false', (
     tester,
   ) async {
     final repository = FakeAuthRepository(initialUser: FakeUser(uid: 'uid-1'));
@@ -770,15 +873,12 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('ミッション'), findsNothing);
-    expect(find.text('イベントに参加'), findsNothing);
-    expect(find.text(t.auth.account.quiz), findsNothing);
-    expect(find.text(t.stampRally.title), findsNothing);
     // 削除・サインアウトなどアカウント自体の操作は引き続き表示される。
     expect(find.text('サインアウト'), findsOneWidget);
+    expect(find.text('アカウントを削除'), findsOneWidget);
   });
 
-  testWidgets('hides the join-event section as soon as the flag flips while the tab is open', (tester) async {
+  testWidgets('hides the venue events entry as soon as the flag flips while the tab is open', (tester) async {
     final repository = FakeAuthRepository(initialUser: FakeUser(uid: 'uid-1'));
     addTearDown(repository.dispose);
     final remoteConfig = FakeRemoteConfigRepository(
@@ -791,22 +891,25 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('イベントに参加'), findsOneWidget);
+    expect(find.text('会場イベントに参加'), findsOneWidget);
 
     remoteConfig.setValue(RemoteConfigKeys.eventFeaturesEnabled, false);
     await tester.pumpAndSettle();
 
-    expect(find.text('イベントに参加'), findsNothing);
+    expect(find.text('会場イベントに参加'), findsNothing);
   });
 }
 
 class _QuizEventRepository extends Fake implements QuizEventRepository {
+  _QuizEventRepository([this.events = const []]);
+
+  final List<QuizEvent> events;
   int publishedSubscriptions = 0;
 
   @override
   Stream<List<QuizEvent>> watchPublished() {
     publishedSubscriptions++;
-    return Stream.value(const []);
+    return Stream.value(events);
   }
 }
 

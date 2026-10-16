@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/feature/auth/data/provider/auth_repository.dart';
+import 'package:app/feature/auth/ui/widget/sign_in_card.dart';
 import 'package:app/feature/profile/data/provider/user_profile_repository.dart';
 import 'package:app/feature/profile/ui/page/profile_edit_page.dart';
 import 'package:app/feature/profile/ui/widget/country_picker_sheet.dart';
@@ -75,6 +76,29 @@ void main() {
     // ISO コード一致 (KR) に加えて、英語名に "kr" を含む Ukraine も残る。
     expect(filterCountries(' kr ').map((c) => c.code), ['KR', 'UA']);
     expect(filterCountries('zzzz'), isEmpty);
+  });
+
+  testWidgets('shows the form after signing in on the page, without leaving it', (tester) async {
+    final authRepository = FakeAuthRepository();
+    addTearDown(authRepository.dispose);
+    final profileRepository = FakeUserProfileRepository();
+    addTearDown(profileRepository.dispose);
+    final router = buildRouter();
+
+    await tester.pumpWidget(buildSubject(authRepository, profileRepository, router));
+    await tester.pumpAndSettle();
+
+    final signInCard = find.byType(SignInCard);
+    expect(find.descendant(of: signInCard, matching: find.text('プロフィールを作成するにはサインインしてください')), findsOneWidget);
+    expect(find.byType(TextFormField), findsNothing);
+
+    await tester.tap(find.bySemanticsLabel('Google でサインイン'));
+    await tester.pumpAndSettle();
+
+    expect(router.routerDelegate.currentConfiguration.uri.path, '/account/profile');
+    expect(signInCard, findsNothing);
+    expect(find.widgetWithText(TextFormField, 'Google User'), findsOneWidget);
+    expect(find.text('選択してください'), findsOneWidget);
   });
 
   testWidgets('prefills the display name and avatar from the auth user when creating', (tester) async {

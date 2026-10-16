@@ -37,10 +37,15 @@ const signInCardMaxWidth = signInMethodButtonMaxWidth + brandHeaderCardPadding *
 /// attendee (such as Support LT registration opened from a shared link), so
 /// attendees can sign in where they are.
 class SignInCard extends HookConsumerWidget {
-  const SignInCard({required this.title, required this.description, super.key});
+  const SignInCard({required this.title, required this.description, this.showsBrandHeader = true, super.key});
 
   final String title;
   final String description;
+
+  /// Whether the card is topped by the brand band. Without it, the card is a
+  /// compact outlined card that fills the available width, for a page that
+  /// shows more content below the sign-in prompt.
+  final bool showsBrandHeader;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -54,10 +59,12 @@ class SignInCard extends HookConsumerWidget {
         return;
       }
       isProcessing.value = true;
+      // 処理中にカードが破棄されると `ref` が使えなくなるため、先に読んでおく。
+      final talker = ref.read(talkerProvider);
       try {
         await action(ref.read(authRepositoryProvider));
       } on FirebaseAuthException catch (exception, stackTrace) {
-        ref.read(talkerProvider).handle(exception, stackTrace);
+        talker.handle(exception, stackTrace);
         final message = authErrorMessage(t, exception);
         if (message != null && context.mounted) {
           ScaffoldMessenger.of(context)
@@ -70,6 +77,68 @@ class SignInCard extends HookConsumerWidget {
           isProcessing.value = false;
         }
       }
+    }
+
+    final signInMethods = [
+      GoogleSignInButton(
+        onPressed: isProcessing.value ? null : () async => signIn((repository) => repository.signInWithGoogle()),
+      ),
+      const SizedBox(height: 8),
+      if (showsAppleSignIn) ...[
+        AppleSignInButton(
+          onPressed: isProcessing.value ? null : () async => signIn((repository) => repository.signInWithApple()),
+        ),
+        const SizedBox(height: 8),
+      ],
+      OutlinedButton(
+        onPressed: isProcessing.value ? null : () async => const EmailSignInRoute().push<void>(context),
+        style: OutlinedButton.styleFrom(
+          minimumSize: const Size.fromHeight(signInMethodButtonHeight),
+          maximumSize: const Size.fromHeight(signInMethodButtonHeight),
+          padding: EdgeInsets.zero,
+          shape: const RoundedRectangleBorder(borderRadius: signInMethodButtonBorderRadius),
+          textStyle: signInMethodButtonLabelStyle,
+        ),
+        child: SizedBox.expand(
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              const PositionedDirectional(
+                start: signInMethodButtonIconInset,
+                child: Icon(Icons.mail_outline, size: signInMethodButtonIconSize),
+              ),
+              Text(t.auth.signIn.withEmail),
+            ],
+          ),
+        ),
+      ),
+      if (isProcessing.value) ...[
+        const SizedBox(height: 24),
+        const Center(child: CircularProgressIndicator()),
+      ],
+    ];
+
+    if (!showsBrandHeader) {
+      return Card.outlined(
+        margin: EdgeInsets.zero,
+        semanticContainer: false,
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(title, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+              const SizedBox(height: 4),
+              Text(
+                description,
+                style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+              ),
+              const SizedBox(height: 16),
+              ...signInMethods,
+            ],
+          ),
+        ),
+      );
     }
 
     return ConstrainedBox(
@@ -92,42 +161,7 @@ class SignInCard extends HookConsumerWidget {
               style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
             ),
             const SizedBox(height: 24),
-            GoogleSignInButton(
-              onPressed: isProcessing.value ? null : () async => signIn((repository) => repository.signInWithGoogle()),
-            ),
-            const SizedBox(height: 8),
-            if (showsAppleSignIn) ...[
-              AppleSignInButton(
-                onPressed: isProcessing.value ? null : () async => signIn((repository) => repository.signInWithApple()),
-              ),
-              const SizedBox(height: 8),
-            ],
-            OutlinedButton(
-              onPressed: isProcessing.value ? null : () async => const EmailSignInRoute().push<void>(context),
-              style: OutlinedButton.styleFrom(
-                minimumSize: const Size.fromHeight(signInMethodButtonHeight),
-                maximumSize: const Size.fromHeight(signInMethodButtonHeight),
-                padding: EdgeInsets.zero,
-                shape: const RoundedRectangleBorder(borderRadius: signInMethodButtonBorderRadius),
-                textStyle: signInMethodButtonLabelStyle,
-              ),
-              child: SizedBox.expand(
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    const PositionedDirectional(
-                      start: signInMethodButtonIconInset,
-                      child: Icon(Icons.mail_outline, size: signInMethodButtonIconSize),
-                    ),
-                    Text(t.auth.signIn.withEmail),
-                  ],
-                ),
-              ),
-            ),
-            if (isProcessing.value) ...[
-              const SizedBox(height: 24),
-              const Center(child: CircularProgressIndicator()),
-            ],
+            ...signInMethods,
           ],
         ),
       ),

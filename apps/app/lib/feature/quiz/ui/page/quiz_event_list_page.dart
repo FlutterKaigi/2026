@@ -1,9 +1,9 @@
 import 'package:app/core/extension/locale_map_extension.dart';
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/router/router.dart';
+import 'package:app/feature/auth/ui/widget/centered_sign_in_card.dart';
 import 'package:app/feature/quiz/data/provider/quiz_providers.dart';
 import 'package:app/feature/quiz/ui/component/quiz_motion.dart';
-import 'package:app/feature/quiz/ui/component/quiz_sign_in_required_view.dart';
 import 'package:data/data.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -23,12 +23,15 @@ class QuizEventListPage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: Text(t.quiz.title)),
-      // 導線はサインイン後のアカウントタブにあるが、ディープリンクや途中での
-      // サインアウトでも未ログインのまま開かれうるのでここでも弾く。
+      // 入口はサインイン後の会場イベントの画面にあるが、ディープリンクや途中での
+      // サインアウトでも未ログインのまま開かれうるので、この画面でサインインできるようにする。
       body: switch (user) {
         AsyncError() => Center(child: Text(t.quiz.errors.signInFailed)),
         AsyncLoading() => const Center(child: CircularProgressIndicator.adaptive()),
-        AsyncData(:final value) when value == null => const QuizSignInRequiredView(),
+        AsyncData(:final value) when value == null => CenteredSignInCard(
+          title: t.auth.signIn.required,
+          description: t.quiz.signInRequired.inPage,
+        ),
         AsyncData() =>
           ref
               .watch(quizEventsProvider)

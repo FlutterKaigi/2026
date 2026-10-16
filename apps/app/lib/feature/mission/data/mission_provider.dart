@@ -2,6 +2,8 @@ import 'package:app/feature/exchange/data/provider/profile_exchange_provider.dar
 import 'package:app/feature/exchange/data/provider/profile_exchange_repository.dart';
 import 'package:app/feature/mission/data/profile_exchange_progress.dart';
 import 'package:app/feature/profile/data/provider/user_profile_repository.dart';
+import 'package:app/feature/sns_post/data/sns_post_provider.dart';
+import 'package:app/feature/support_lt/data/provider/support_lt_provider.dart';
 import 'package:data/data.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -50,4 +52,59 @@ final missionExchangeProgressProvider = Provider.autoDispose.family<AsyncValue<P
       ),
     );
   },
+);
+
+/// Whether a mission is complete, or why that cannot be told yet.
+enum MissionStatus {
+  complete,
+  incomplete,
+  loading,
+  error;
+
+  static MissionStatus from<T>(AsyncValue<T> value, bool Function(T) isComplete) => switch (value) {
+    AsyncData(:final value) => isComplete(value) ? complete : incomplete,
+    AsyncError() => error,
+    _ => loading,
+  };
+}
+
+typedef MissionStatuses = ({MissionStatus supportLt, MissionStatus profileExchange, MissionStatus snsPost});
+
+extension MissionStatusesSummary on MissionStatuses {
+  /// Every mission's status, in display order.
+  List<MissionStatus> get all => [supportLt, profileExchange, snsPost];
+
+  int get completeCount => all.where((status) => status == MissionStatus.complete).length;
+
+  /// The missions taken together. A failure, then a pending check, outranks
+  /// the rest because the achieved count is not final until every mission is
+  /// known.
+  MissionStatus get overall {
+    final statuses = all;
+    if (statuses.contains(MissionStatus.error)) {
+      return MissionStatus.error;
+    }
+    if (statuses.contains(MissionStatus.loading)) {
+      return MissionStatus.loading;
+    }
+    return statuses.every((status) => status == MissionStatus.complete)
+        ? MissionStatus.complete
+        : MissionStatus.incomplete;
+  }
+}
+
+/// What completes each mission, shared by the mission page and the venue
+/// events hub so both count the same achievements.
+final missionStatusesProvider = Provider.autoDispose.family<MissionStatuses, String>(
+  (ref, uid) => (
+    supportLt: MissionStatus.from(
+      ref.watch(supportLtRegistrationProvider(uid)),
+      (registration) => registration != null,
+    ),
+    profileExchange: MissionStatus.from(
+      ref.watch(missionExchangeProgressProvider(uid)),
+      (progress) => progress.isComplete,
+    ),
+    snsPost: MissionStatus.from(ref.watch(snsPostRegistrationProvider(uid)), (post) => post != null),
+  ),
 );

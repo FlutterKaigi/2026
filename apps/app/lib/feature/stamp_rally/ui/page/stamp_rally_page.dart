@@ -6,7 +6,7 @@ import 'package:app/core/router/router.dart';
 import 'package:app/core/ui/widget/app_error_view.dart';
 import 'package:app/core/ui/widget/app_page_content.dart';
 import 'package:app/feature/auth/ui/widget/authenticated_body.dart';
-import 'package:app/feature/auth/ui/widget/sign_in_card.dart';
+import 'package:app/feature/auth/ui/widget/centered_sign_in_card.dart';
 import 'package:app/feature/sponsor/data/provider/sponsor_list_provider.dart';
 import 'package:app/feature/stamp_rally/data/stamp_rally_provider.dart';
 import 'package:data/data.dart';
@@ -30,12 +30,7 @@ class StampRallyPage extends StatelessWidget {
         ),
       ),
       body: AuthenticatedBody(
-        signedOut: AppPageContent(
-          maxWidth: signInCardMaxWidth,
-          padding: const EdgeInsets.all(24),
-          centerVertically: true,
-          child: SignInCard(title: t.auth.signIn.required, description: t.stampRally.signInRequired),
-        ),
+        signedOut: CenteredSignInCard(title: t.auth.signIn.required, description: t.stampRally.signInRequired),
         builder: (uid) => _StampRallyBody(uid: uid),
       ),
     );

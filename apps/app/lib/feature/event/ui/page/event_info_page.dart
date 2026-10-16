@@ -1,29 +1,30 @@
 import 'dart:async';
 
 import 'package:app/core/constants/app_links.dart';
+import 'package:app/core/constants/event_schedule.dart';
 import 'package:app/core/designsystem/theme/app_gradients.dart';
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/provider/app_locale.dart';
 import 'package:app/core/provider/clock.dart';
+import 'package:app/core/remote_config/event_features_provider.dart';
 import 'package:app/core/remote_config/survey_url_provider.dart';
 import 'package:app/core/router/router.dart';
 import 'package:app/core/ui/launch_external_url.dart';
 import 'package:app/core/ui/widget/settings_icon_button.dart';
+import 'package:app/feature/event_guide/data/event_guide_seen_provider.dart';
+import 'package:app/feature/event_guide/ui/page/event_guide_page.dart';
+import 'package:app/feature/push_notification/data/push_notification_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 final _surveyStartsAt = DateTime.utc(2026, 10, 30, 6);
 
-final _surveyClockTickProvider = StreamProvider.autoDispose<DateTime>((ref) async* {
-  final clock = ref.watch(clockProvider);
-  yield clock();
-  yield* Stream<DateTime>.periodic(const Duration(minutes: 1), (_) => clock());
-});
-
 bool _isSurveyVisible(DateTime now) => !now.toUtc().isBefore(_surveyStartsAt);
 
 /// Shows the FlutterKaigi 2026 overview, related links, and app settings.
-class EventInfoPage extends ConsumerWidget {
+class EventInfoPage extends HookConsumerWidget {
   const EventInfoPage({super.key, this.externalUrlLauncher});
 
   /// Optional launcher used by tests to observe the destination URI.
@@ -31,15 +32,17 @@ class EventInfoPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    _useGuideOrPermissionPrompt(context, ref);
     final t = Translations.of(context);
     final appLocale = ref.watch(appLocaleProvider);
     final localizedLinks = _LocalizedEventLinks.fromLocale(appLocale);
-    final now = switch (ref.watch(_surveyClockTickProvider)) {
+    final now = switch (ref.watch(clockTickProvider)) {
       AsyncData(:final value) => value,
       _ => ref.watch(clockProvider)(),
     };
     final showSurvey = _isSurveyVisible(now);
     final surveyUrl = ref.watch(surveyUrlProvider);
+    final eventFeaturesEnabled = ref.watch(eventFeaturesEnabledProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -50,7 +53,15 @@ class EventInfoPage extends ConsumerWidget {
             fontWeight: FontWeight.w700,
           ),
         ),
-        actions: const [SettingsIconButton()],
+        actions: [
+          if (eventFeaturesEnabled)
+            IconButton(
+              tooltip: t.eventGuide.title,
+              onPressed: () => const EventGuideRoute().push<void>(context),
+              icon: const Icon(Icons.help_outline),
+            ),
+          const SettingsIconButton(),
+        ],
       ),
       body: LayoutBuilder(
         builder: (context, constraints) {
@@ -69,7 +80,21 @@ class EventInfoPage extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      _NewsBanner(
+                      if (eventFeaturesEnabled) ...[
+                        _GradientBanner(
+                          icon: Icons.flag_outlined,
+                          title: t.venueEvents.title,
+                          subtitle: t.venueEvents.entrySubtitle,
+                          // `go` rather than `push`. The hub lives in the account
+                          // branch, and opening it moves to the account tab.
+                          onTap: () => const VenueEventsRoute().go(context),
+                        ),
+                        const SizedBox(height: 8),
+                      ],
+                      _GradientBanner(
+                        icon: Icons.notifications_outlined,
+                        title: t.eventInfo.newsTitle,
+                        subtitle: t.eventInfo.newsSubtitle,
                         onTap: () => const NewsRoute().push<void>(context),
                       ),
                       const SizedBox(height: 8),
@@ -228,6 +253,49 @@ class EventInfoPage extends ConsumerWidget {
     failureMessage: failureMessage,
     launcher: externalUrlLauncher,
   );
+}
+
+void _useGuideOrPermissionPrompt(BuildContext context, WidgetRef ref) {
+  final router = GoRouter.of(context);
+
+  // `currentConfiguration.uri` keeps the location of the last `go` while pages
+  // are pushed over it, the guide included, so this reads the top-most match.
+  bool eventTabInFront() =>
+      router.routerDelegate.currentConfiguration.lastOrNull?.matchedLocation == const EventInfoRoute().location;
+
+  void check() {
+    if (!context.mounted || !eventTabInFront() || ref.read(eventGuidePresenceProvider).onScreen) {
+      return;
+    }
+    if (ref.read(eventFeaturesEnabledProvider) &&
+        isEventGuideWindow(ref.read(clockProvider)()) &&
+        !ref.read(eventGuideSeenProvider)) {
+      // go_router applies the push asynchronously. A check in the meantime
+      // still finds the guide due and pushes it again, and the Router keeps
+      // only the newest of two pending navigations, so one guide opens and
+      // no prompt starts under it. The guide page marks it seen once shown.
+      unawaited(const EventGuideRoute().push<void>(context));
+    } else {
+      unawaited(ref.read(pushNotificationRepositoryProvider).requestPermission());
+    }
+  }
+
+  useEffect(() {
+    void onNavigation() {
+      if (eventTabInFront()) {
+        WidgetsBinding.instance.addPostFrameCallback((_) => check());
+      }
+    }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) => check());
+    router.routerDelegate.addListener(onNavigation);
+    return () => router.routerDelegate.removeListener(onNavigation);
+  }, [router]);
+  useOnAppLifecycleStateChange((_, state) {
+    if (state == AppLifecycleState.resumed) {
+      check();
+    }
+  });
 }
 
 /// External documents that have separate Japanese and English pages.
@@ -406,14 +474,16 @@ class _EventOverviewCard extends StatelessWidget {
   }
 }
 
-class _NewsBanner extends StatelessWidget {
-  const _NewsBanner({required this.onTap});
+class _GradientBanner extends StatelessWidget {
+  const _GradientBanner({required this.icon, required this.title, required this.subtitle, required this.onTap});
 
+  final IconData icon;
+  final String title;
+  final String subtitle;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final t = Translations.of(context);
     const foreground = Colors.white;
     const textShadows = [
       Shadow(color: Color(0xCC000000), blurRadius: 3),
@@ -433,8 +503,8 @@ class _NewsBanner extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             child: Row(
               children: [
-                const Icon(
-                  Icons.notifications_outlined,
+                Icon(
+                  icon,
                   size: 22,
                   color: foreground,
                 ),
@@ -444,7 +514,7 @@ class _NewsBanner extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        t.eventInfo.newsTitle,
+                        title,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: foreground,
                           fontWeight: FontWeight.w700,
@@ -452,7 +522,7 @@ class _NewsBanner extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        t.eventInfo.newsSubtitle,
+                        subtitle,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: foreground,
                           shadows: textShadows,

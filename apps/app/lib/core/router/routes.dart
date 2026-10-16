@@ -9,6 +9,14 @@ class SettingsRoute extends GoRouteData with $SettingsRoute {
   Widget build(BuildContext context, GoRouterState state) => const SettingsPage();
 }
 
+@TypedGoRoute<EventGuideRoute>(path: '/guide')
+class EventGuideRoute extends GoRouteData with $EventGuideRoute {
+  const EventGuideRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const EventGuidePage();
+}
+
 /// `/x/:token` — a profile-exchange share link
 /// (`ExchangeToken.qrPayload`), opened as a Universal
 /// Link / App Link or in-app. Declared as a top-level route (not nested
@@ -90,6 +98,7 @@ class StampRallyLinkRoute extends GoRouteData with $StampRallyLinkRoute {
           routes: [
             TypedGoRoute<EmailSignInRoute>(path: 'email'),
             TypedGoRoute<ProfileEditRoute>(path: 'profile'),
+            TypedGoRoute<VenueEventsRoute>(path: 'venue-events'),
             TypedGoRoute<QuizListRoute>(
               path: 'quiz',
               routes: [
@@ -208,10 +217,23 @@ class ProfileEditRoute extends GoRouteData with $ProfileEditRoute {
   Widget build(BuildContext context, GoRouterState state) => const ProfileEditPage();
 }
 
+/// `/account/venue-events` — every venue activity of the event days in one
+/// place, opened from the event tab and the account tab.
+///
+/// Declared in the account branch beside the activities it opens, so they
+/// stack above the hub and the venue QR code links under `/account` keep their
+/// paths.
+class VenueEventsRoute extends GoRouteData with $VenueEventsRoute {
+  const VenueEventsRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const VenueEventsPage();
+}
+
 /// `/account/quiz` — the quiz event list.
 ///
-/// Lives under the account branch because taking part requires being signed
-/// in: the entry point is a tile on the signed-in account page.
+/// Opened from the venue events hub ([VenueEventsRoute]), so it lives in the
+/// account branch and stacks above the hub.
 class QuizListRoute extends GoRouteData with $QuizListRoute {
   const QuizListRoute();
 

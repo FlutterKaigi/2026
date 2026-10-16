@@ -2,6 +2,7 @@ import 'package:app/core/designsystem/theme/app_theme.dart';
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/provider/shared_preferences.dart';
 import 'package:app/feature/auth/data/provider/auth_repository.dart';
+import 'package:app/feature/auth/ui/widget/sign_in_card.dart';
 import 'package:app/feature/exchange/data/exchange_code.dart';
 import 'package:app/feature/exchange/data/exchange_code_redeem_handler.dart';
 import 'package:app/feature/exchange/data/exchange_token.dart';
@@ -100,30 +101,37 @@ void main() {
 
   setUp(() => LocaleSettings.setLocaleSync(AppLocale.ja));
 
-  testWidgets('shows a sign-in prompt when signed out and navigates to the account tab', (tester) async {
+  testWidgets('shows the own QR code after signing in on the page, without leaving it', (tester) async {
     final authRepository = FakeAuthRepository();
     addTearDown(authRepository.dispose);
-    final profileRepository = FakeUserProfileRepository();
+    final profileRepository = FakeUserProfileRepository(initialProfile: _profile(id: 'fake-uid'));
     addTearDown(profileRepository.dispose);
+    final tokenIssuer = _StubExchangeTokenIssuer();
+    final router = buildRouter();
 
     await tester.pumpWidget(
       buildSubject(
         authRepository: authRepository,
         profileRepository: profileRepository,
-        tokenIssuer: _StubExchangeTokenIssuer(),
+        tokenIssuer: tokenIssuer,
         codeIssuer: _StubExchangeCodeIssuer(),
-        router: buildRouter(),
+        router: router,
         preferences: await emptyPreferences(),
       ),
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('サインインすると自分のQRコードを表示できます'), findsOneWidget);
+    final signInCard = find.byType(SignInCard);
+    expect(find.descendant(of: signInCard, matching: find.text('サインインすると自分のQRコードを表示できます')), findsOneWidget);
+    expect(tokenIssuer.issueCallCount, 0);
 
-    await tester.tap(find.text('サインインする'));
+    await tester.tap(find.bySemanticsLabel('Google でサインイン'));
     await tester.pumpAndSettle();
 
-    expect(find.text('account destination'), findsOneWidget);
+    expect(router.routerDelegate.currentConfiguration.uri.path, '/account/exchange');
+    expect(signInCard, findsNothing);
+    expect(find.byType(QrImageView), findsOneWidget);
+    expect(tokenIssuer.issueCallCount, 1);
   });
 
   testWidgets('shows a profile prompt when signed in without a profile', (tester) async {

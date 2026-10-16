@@ -125,13 +125,11 @@ void main() {
     expect(find.text('ニュース一覧'), findsOneWidget);
   });
 
-  testWidgets('asks for the permission once after the first frame, not on rebuilds', (tester) async {
+  testWidgets('leaves the notification permission to the event tab', (tester) async {
     final (router: _, :pumpApp) = await pumpListener(tester);
-    expect(repository.permissionRequestCount, 1);
-
     await pumpApp();
 
-    expect(repository.permissionRequestCount, 1);
+    expect(repository.permissionRequestCount, 0);
   });
 
   testWidgets('stops listening when removed', (tester) async {

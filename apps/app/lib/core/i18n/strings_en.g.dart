@@ -59,6 +59,8 @@ class TranslationsEn extends Translations with BaseTranslations<AppLocale, Trans
 	@override late final _Translations$profile$en profile = _Translations$profile$en._(_root);
 	@override late final _Translations$snsPost$en snsPost = _Translations$snsPost$en._(_root);
 	@override late final _Translations$mission$en mission = _Translations$mission$en._(_root);
+	@override late final _Translations$venueEvents$en venueEvents = _Translations$venueEvents$en._(_root);
+	@override late final _Translations$eventGuide$en eventGuide = _Translations$eventGuide$en._(_root);
 	@override late final _Translations$stampRally$en stampRally = _Translations$stampRally$en._(_root);
 	@override late final _Translations$exchange$en exchange = _Translations$exchange$en._(_root);
 	@override late final _Translations$supportLt$en supportLt = _Translations$supportLt$en._(_root);
@@ -398,6 +400,7 @@ class _Translations$profile$en extends Translations$profile$ja {
 
 	// Translations
 	@override String get title => 'Profile';
+	@override String get signInRequired => 'Sign in to create your profile';
 	@override String get editTitle => 'Edit Profile';
 	@override String get createTitle => 'Create Profile';
 	@override String get promptTitle => 'Set up your profile';
@@ -499,6 +502,44 @@ class _Translations$mission$en extends Translations$mission$ja {
 	@override String get snsDescription => 'Post a photo with an eligible attendee and register its URL and category';
 }
 
+// Path: venueEvents
+class _Translations$venueEvents$en extends Translations$venueEvents$ja {
+	_Translations$venueEvents$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Join Venue Events';
+	@override String get entrySubtitle => 'Stamp rally, profile exchange and more';
+	@override String get day1 => 'Thu, Oct 29 · Day 1';
+	@override String get day2 => 'Fri, Oct 30 · Day 2';
+	@override String get signInTitle => 'Sign in to take part';
+	@override String get signInDescription => 'Your stamps and quiz records are saved to your account.';
+	@override String get previewHeading => 'Sign in to join these activities';
+	@override late final _Translations$venueEvents$features$en features = _Translations$venueEvents$features$en._(_root);
+	@override late final _Translations$venueEvents$status$en status = _Translations$venueEvents$status$en._(_root);
+	@override late final _Translations$venueEvents$quizCheckIn$en quizCheckIn = _Translations$venueEvents$quizCheckIn$en._(_root);
+}
+
+// Path: eventGuide
+class _Translations$eventGuide$en extends Translations$eventGuide$ja {
+	_Translations$eventGuide$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Event day guide';
+	@override String get open => 'View the event day guide';
+	@override String get skip => 'Skip';
+	@override String get next => 'Next';
+	@override String get close => 'Close';
+	@override String pageIndicator({required Object page, required Object total}) => 'Page ${page} of ${total}';
+	@override late final _Translations$eventGuide$welcome$en welcome = _Translations$eventGuide$welcome$en._(_root);
+	@override late final _Translations$eventGuide$sessions$en sessions = _Translations$eventGuide$sessions$en._(_root);
+	@override late final _Translations$eventGuide$venueEvents$en venueEvents = _Translations$eventGuide$venueEvents$en._(_root);
+	@override late final _Translations$eventGuide$quiz$en quiz = _Translations$eventGuide$quiz$en._(_root);
+}
+
 // Path: stampRally
 class _Translations$stampRally$en extends Translations$stampRally$ja {
 	_Translations$stampRally$en._(TranslationsEn root) : this._root = root, super.internal(root);
@@ -570,7 +611,6 @@ class _Translations$exchange$en extends Translations$exchange$ja {
 	@override String get scanButton => 'Scan a QR code';
 	@override String get listButton => 'View exchanged profiles';
 	@override String get signInRequired => 'Sign in to show your QR code';
-	@override String get signInAction => 'Sign in';
 	@override String get profileRequired => 'Create a profile to show your QR code';
 	@override String get profileRequiredAction => 'Create profile';
 	@override String get scanTitle => 'Scan a QR code';
@@ -648,7 +688,6 @@ class _Translations$supportLt$en extends Translations$supportLt$ja {
 	@override String get submitting => 'Registering…';
 	@override String get registeredTitle => 'Registration complete';
 	@override String get registeredBody => 'Enjoy Support LT';
-	@override String get registeredStatus => 'Registered';
 	@override String get backToAccount => 'Back to account';
 	@override String get signInRequired => 'Sign in to register your participation in Support LT';
 	@override String get invalidFormat => 'Enter a 6-digit code';
@@ -899,7 +938,8 @@ class _Translations$auth$signIn$en extends Translations$auth$signIn$ja {
 
 	// Translations
 	@override String get required => 'Sign in required';
-	@override String get description => 'Choose how you want to sign in to the FlutterKaigi 2026 app';
+	@override String get accountTitle => 'Sign in';
+	@override String get accountDescription => 'Your profile and venue event records\nare saved to your account';
 	@override String get withGoogle => 'Sign in with Google';
 	@override String get withApple => 'Sign in with Apple';
 	@override String get withEmail => 'Sign in with email';
@@ -935,10 +975,8 @@ class _Translations$auth$account$en extends Translations$auth$account$ja {
 
 	// Translations
 	@override String get title => 'Account';
-	@override String get features => 'Take part';
 	@override String get signedIn => 'Signed in';
 	@override String get signOut => 'Sign out';
-	@override String get signOutError => 'Could not sign out';
 	@override String get noEmail => 'No email address';
 	@override String get delete => 'Delete account';
 	@override String get deleteConfirmTitle => 'Delete your account?';
@@ -946,14 +984,6 @@ class _Translations$auth$account$en extends Translations$auth$account$ja {
 	@override String get deleteConfirmAction => 'Delete';
 	@override String get deletePasswordTitle => 'Confirm your password';
 	@override String get deletePasswordBody => 'Enter your current password to delete your account.';
-	@override String get mission => 'Missions';
-	@override String get missionDescription => 'Judged by your participation in Support LT, profile exchange and SNS posts';
-	@override String get joinEvent => 'Join the event';
-	@override String get quiz => 'Quiz';
-	@override String get lightningTalks => 'Join Support LT';
-	@override String get profileExchange => 'Profile exchange';
-	@override String get snsPost => 'Register SNS post';
-	@override String get comingSoon => 'This feature is coming soon';
 	@override String get deleted => 'Your account has been deleted';
 	@override String get cancel => 'Cancel';
 }
@@ -990,6 +1020,102 @@ class _Translations$snsPost$companions$en extends Translations$snsPost$companion
 	@override String get sponsor => 'Sponsor';
 	@override String get firstTime => 'First-time attendee';
 	@override String get differentCountry => 'Different country or region';
+}
+
+// Path: venueEvents.features
+class _Translations$venueEvents$features$en extends Translations$venueEvents$features$ja {
+	_Translations$venueEvents$features$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override late final _Translations$venueEvents$features$quiz$en quiz = _Translations$venueEvents$features$quiz$en._(_root);
+	@override late final _Translations$venueEvents$features$stampRally$en stampRally = _Translations$venueEvents$features$stampRally$en._(_root);
+	@override late final _Translations$venueEvents$features$profileExchange$en profileExchange = _Translations$venueEvents$features$profileExchange$en._(_root);
+	@override late final _Translations$venueEvents$features$supportLt$en supportLt = _Translations$venueEvents$features$supportLt$en._(_root);
+	@override late final _Translations$venueEvents$features$snsPost$en snsPost = _Translations$venueEvents$features$snsPost$en._(_root);
+	@override late final _Translations$venueEvents$features$mission$en mission = _Translations$venueEvents$features$mission$en._(_root);
+}
+
+// Path: venueEvents.status
+class _Translations$venueEvents$status$en extends Translations$venueEvents$status$ja {
+	_Translations$venueEvents$status$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get registered => 'Registered';
+	@override String get checkedIn => 'Checked in';
+	@override String team({required Object team}) => 'Team ${team}';
+	@override String stampCount({required Object n, required Object total}) => '${n} / ${total}';
+	@override String exchangeCount({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n,
+		one: '${n} person',
+		other: '${n} people',
+	);
+}
+
+// Path: venueEvents.quizCheckIn
+class _Translations$venueEvents$quizCheckIn$en extends Translations$venueEvents$quizCheckIn$ja {
+	_Translations$venueEvents$quizCheckIn$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Quiz check-in is open';
+	@override String get body => 'Scan the QR code on the venue screen';
+}
+
+// Path: eventGuide.welcome
+class _Translations$eventGuide$welcome$en extends Translations$eventGuide$welcome$ja {
+	_Translations$eventGuide$welcome$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Welcome to FlutterKaigi 2026';
+	@override String get body => 'Here are three features you\'ll use at the event';
+}
+
+// Path: eventGuide.sessions
+class _Translations$eventGuide$sessions$en extends Translations$eventGuide$sessions$ja {
+	_Translations$eventGuide$sessions$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Bookmark sessions';
+	@override String get body => 'After a session ends, you can send\nfeedback from its details screen';
+	@override String get sampleTime => '11:00 – 11:40';
+	@override String get sampleRoom => 'Hall A';
+	@override String get afterSession => 'After the session';
+}
+
+// Path: eventGuide.venueEvents
+class _Translations$eventGuide$venueEvents$en extends Translations$eventGuide$venueEvents$ja {
+	_Translations$eventGuide$venueEvents$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Connect with attendees and sponsors';
+	@override String get body => 'Start the stamp rally and profile exchange\nfrom “Join Venue Events”';
+	@override String get eventTab => 'Event tab';
+}
+
+// Path: eventGuide.quiz
+class _Translations$eventGuide$quiz$en extends Translations$eventGuide$quiz$ja {
+	_Translations$eventGuide$quiz$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Quiz on Day 2';
+	@override String get body => 'After registering, check in with\nthe QR code on the screen';
+	@override String get checkInOpens => 'Check-in opens';
+	@override String get firstRound => 'First round';
+	@override String get secondRound => 'Second round';
+	@override String get firstRoundTime => '15:30';
+	@override String get secondRoundTime => '16:30';
 }
 
 // Path: settings.themeMode
@@ -1036,9 +1162,6 @@ class _Translations$quiz$signInRequired$en extends Translations$quiz$signInRequi
 	final TranslationsEn _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'Sign-in required';
-	@override String get description => 'The quiz links your entry and answers to your account. Sign in from the Account tab to take part.';
-	@override String get button => 'Go to Account';
 	@override String get inPage => 'Sign in to take part in the quiz';
 }
 
@@ -1244,6 +1367,77 @@ class _Translations$venueWalk$photo$poses$en extends Translations$venueWalk$phot
 	@override String get wave => 'Wave';
 	@override String get sitting => 'Sit';
 	@override String get jumping => 'Jump';
+}
+
+// Path: venueEvents.features.quiz
+class _Translations$venueEvents$features$quiz$en extends Translations$venueEvents$features$quiz$ja {
+	_Translations$venueEvents$features$quiz$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Quiz';
+	@override String get action => 'Check in with the QR code on the screen and choose your team';
+	@override String get preview => 'Day 2, from 15:30';
+}
+
+// Path: venueEvents.features.stampRally
+class _Translations$venueEvents$features$stampRally$en extends Translations$venueEvents$features$stampRally$ja {
+	_Translations$venueEvents$features$stampRally$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Stamp Rally';
+	@override String get action => 'Scan the QR codes at sponsor booths';
+	@override String get preview => 'Visit the sponsor booths';
+}
+
+// Path: venueEvents.features.profileExchange
+class _Translations$venueEvents$features$profileExchange$en extends Translations$venueEvents$features$profileExchange$ja {
+	_Translations$venueEvents$features$profileExchange$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Profile Exchange';
+	@override String get action => 'Exchange with attendees by QR code or 6-digit code';
+	@override String get preview => 'Exchange QR codes with attendees';
+}
+
+// Path: venueEvents.features.supportLt
+class _Translations$venueEvents$features$supportLt$en extends Translations$venueEvents$features$supportLt$ja {
+	_Translations$venueEvents$features$supportLt$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Join Support LT';
+	@override String get action => 'Register with the QR code at the venue';
+	@override String get preview => 'Register with the venue QR code';
+}
+
+// Path: venueEvents.features.snsPost
+class _Translations$venueEvents$features$snsPost$en extends Translations$venueEvents$features$snsPost$ja {
+	_Translations$venueEvents$features$snsPost$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Register SNS post';
+	@override String get action => 'Post a photo and register its URL';
+	@override String get preview => 'Register your photo post\'s URL';
+}
+
+// Path: venueEvents.features.mission
+class _Translations$venueEvents$features$mission$en extends Translations$venueEvents$features$mission$ja {
+	_Translations$venueEvents$features$mission$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Missions';
+	@override String get preview => 'Support LT, exchanges and SNS posts';
 }
 
 // Path: quiz.list.status
@@ -1456,7 +1650,8 @@ extension on TranslationsEn {
 			'contributors.empty' => 'No contributors found',
 			'contributors.contributionsCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} contribution', other: '${n} contributions', ), 
 			'auth.signIn.required' => 'Sign in required',
-			'auth.signIn.description' => 'Choose how you want to sign in to the FlutterKaigi 2026 app',
+			'auth.signIn.accountTitle' => 'Sign in',
+			'auth.signIn.accountDescription' => 'Your profile and venue event records\nare saved to your account',
 			'auth.signIn.withGoogle' => 'Sign in with Google',
 			'auth.signIn.withApple' => 'Sign in with Apple',
 			'auth.signIn.withEmail' => 'Sign in with email',
@@ -1474,10 +1669,8 @@ extension on TranslationsEn {
 			'auth.email.forgotPassword' => 'Reset your password',
 			'auth.email.resetEmailSent' => 'Password reset email sent',
 			'auth.account.title' => 'Account',
-			'auth.account.features' => 'Take part',
 			'auth.account.signedIn' => 'Signed in',
 			'auth.account.signOut' => 'Sign out',
-			'auth.account.signOutError' => 'Could not sign out',
 			'auth.account.noEmail' => 'No email address',
 			'auth.account.delete' => 'Delete account',
 			'auth.account.deleteConfirmTitle' => 'Delete your account?',
@@ -1485,14 +1678,6 @@ extension on TranslationsEn {
 			'auth.account.deleteConfirmAction' => 'Delete',
 			'auth.account.deletePasswordTitle' => 'Confirm your password',
 			'auth.account.deletePasswordBody' => 'Enter your current password to delete your account.',
-			'auth.account.mission' => 'Missions',
-			'auth.account.missionDescription' => 'Judged by your participation in Support LT, profile exchange and SNS posts',
-			'auth.account.joinEvent' => 'Join the event',
-			'auth.account.quiz' => 'Quiz',
-			'auth.account.lightningTalks' => 'Join Support LT',
-			'auth.account.profileExchange' => 'Profile exchange',
-			'auth.account.snsPost' => 'Register SNS post',
-			'auth.account.comingSoon' => 'This feature is coming soon',
 			'auth.account.deleted' => 'Your account has been deleted',
 			'auth.account.cancel' => 'Cancel',
 			'auth.error.invalidEmail' => 'The email address is badly formatted',
@@ -1507,6 +1692,7 @@ extension on TranslationsEn {
 			'auth.error.appleTokenRevocationFailed' => 'Could not delete the account because revoking the Apple token failed. Please try again',
 			'auth.error.unknown' => 'Authentication failed. Please try again',
 			'profile.title' => 'Profile',
+			'profile.signInRequired' => 'Sign in to create your profile',
 			'profile.editTitle' => 'Edit Profile',
 			'profile.createTitle' => 'Create Profile',
 			'profile.promptTitle' => 'Set up your profile',
@@ -1592,6 +1778,60 @@ extension on TranslationsEn {
 			'mission.profileRequired' => 'Add your country or region to your profile',
 			'mission.snsTitle' => 'Share a photo on SNS',
 			'mission.snsDescription' => 'Post a photo with an eligible attendee and register its URL and category',
+			'venueEvents.title' => 'Join Venue Events',
+			'venueEvents.entrySubtitle' => 'Stamp rally, profile exchange and more',
+			'venueEvents.day1' => 'Thu, Oct 29 · Day 1',
+			'venueEvents.day2' => 'Fri, Oct 30 · Day 2',
+			'venueEvents.signInTitle' => 'Sign in to take part',
+			'venueEvents.signInDescription' => 'Your stamps and quiz records are saved to your account.',
+			'venueEvents.previewHeading' => 'Sign in to join these activities',
+			'venueEvents.features.quiz.title' => 'Quiz',
+			'venueEvents.features.quiz.action' => 'Check in with the QR code on the screen and choose your team',
+			'venueEvents.features.quiz.preview' => 'Day 2, from 15:30',
+			'venueEvents.features.stampRally.title' => 'Stamp Rally',
+			'venueEvents.features.stampRally.action' => 'Scan the QR codes at sponsor booths',
+			'venueEvents.features.stampRally.preview' => 'Visit the sponsor booths',
+			'venueEvents.features.profileExchange.title' => 'Profile Exchange',
+			'venueEvents.features.profileExchange.action' => 'Exchange with attendees by QR code or 6-digit code',
+			'venueEvents.features.profileExchange.preview' => 'Exchange QR codes with attendees',
+			'venueEvents.features.supportLt.title' => 'Join Support LT',
+			'venueEvents.features.supportLt.action' => 'Register with the QR code at the venue',
+			'venueEvents.features.supportLt.preview' => 'Register with the venue QR code',
+			'venueEvents.features.snsPost.title' => 'Register SNS post',
+			'venueEvents.features.snsPost.action' => 'Post a photo and register its URL',
+			'venueEvents.features.snsPost.preview' => 'Register your photo post\'s URL',
+			'venueEvents.features.mission.title' => 'Missions',
+			'venueEvents.features.mission.preview' => 'Support LT, exchanges and SNS posts',
+			'venueEvents.status.registered' => 'Registered',
+			'venueEvents.status.checkedIn' => 'Checked in',
+			'venueEvents.status.team' => ({required Object team}) => 'Team ${team}',
+			'venueEvents.status.stampCount' => ({required Object n, required Object total}) => '${n} / ${total}',
+			'venueEvents.status.exchangeCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} person', other: '${n} people', ), 
+			'venueEvents.quizCheckIn.title' => 'Quiz check-in is open',
+			'venueEvents.quizCheckIn.body' => 'Scan the QR code on the venue screen',
+			'eventGuide.title' => 'Event day guide',
+			'eventGuide.open' => 'View the event day guide',
+			'eventGuide.skip' => 'Skip',
+			'eventGuide.next' => 'Next',
+			'eventGuide.close' => 'Close',
+			'eventGuide.pageIndicator' => ({required Object page, required Object total}) => 'Page ${page} of ${total}',
+			'eventGuide.welcome.title' => 'Welcome to FlutterKaigi 2026',
+			'eventGuide.welcome.body' => 'Here are three features you\'ll use at the event',
+			'eventGuide.sessions.title' => 'Bookmark sessions',
+			'eventGuide.sessions.body' => 'After a session ends, you can send\nfeedback from its details screen',
+			'eventGuide.sessions.sampleTime' => '11:00 – 11:40',
+			'eventGuide.sessions.sampleRoom' => 'Hall A',
+			'eventGuide.sessions.afterSession' => 'After the session',
+			'eventGuide.venueEvents.title' => 'Connect with attendees and sponsors',
+			'eventGuide.venueEvents.body' => 'Start the stamp rally and profile exchange\nfrom “Join Venue Events”',
+			'eventGuide.venueEvents.eventTab' => 'Event tab',
+			'eventGuide.quiz.title' => 'Quiz on Day 2',
+			'eventGuide.quiz.body' => 'After registering, check in with\nthe QR code on the screen',
+			'eventGuide.quiz.checkInOpens' => 'Check-in opens',
+			'eventGuide.quiz.firstRound' => 'First round',
+			'eventGuide.quiz.secondRound' => 'Second round',
+			'eventGuide.quiz.firstRoundTime' => '15:30',
+			'eventGuide.quiz.secondRoundTime' => '16:30',
 			'stampRally.title' => 'Stamp Rally',
 			'stampRally.signInRequired' => 'Sign in to collect stamps',
 			'stampRally.description' => 'Scan the QR codes at sponsor booths to collect stamps',
@@ -1647,7 +1887,6 @@ extension on TranslationsEn {
 			'exchange.scanButton' => 'Scan a QR code',
 			'exchange.listButton' => 'View exchanged profiles',
 			'exchange.signInRequired' => 'Sign in to show your QR code',
-			'exchange.signInAction' => 'Sign in',
 			'exchange.profileRequired' => 'Create a profile to show your QR code',
 			'exchange.profileRequiredAction' => 'Create profile',
 			'exchange.scanTitle' => 'Scan a QR code',
@@ -1716,7 +1955,6 @@ extension on TranslationsEn {
 			'supportLt.submitting' => 'Registering…',
 			'supportLt.registeredTitle' => 'Registration complete',
 			'supportLt.registeredBody' => 'Enjoy Support LT',
-			'supportLt.registeredStatus' => 'Registered',
 			'supportLt.backToAccount' => 'Back to account',
 			'supportLt.signInRequired' => 'Sign in to register your participation in Support LT',
 			'supportLt.invalidFormat' => 'Enter a 6-digit code',
@@ -1736,6 +1974,8 @@ extension on TranslationsEn {
 			'settings.appInfo' => 'App Information',
 			'settings.version' => 'Version',
 			'settings.saveError' => 'Could not save the setting',
+			_ => null,
+		} ?? switch (path) {
 			'settings.themeMode.title' => 'Theme',
 			'settings.themeMode.system' => 'System',
 			'settings.themeMode.light' => 'Light',
@@ -1767,9 +2007,6 @@ extension on TranslationsEn {
 			'quiz.list.status.entryClosed' => 'Entry closed',
 			'quiz.list.status.inProgress' => 'In progress',
 			'quiz.list.status.finished' => 'Results',
-			'quiz.signInRequired.title' => 'Sign-in required',
-			'quiz.signInRequired.description' => 'The quiz links your entry and answers to your account. Sign in from the Account tab to take part.',
-			'quiz.signInRequired.button' => 'Go to Account',
 			'quiz.signInRequired.inPage' => 'Sign in to take part in the quiz',
 			'quiz.errors.signInFailed' => 'Failed to sign in',
 			'quiz.errors.eventLoadFailed' => 'Failed to load the event',
@@ -1780,8 +2017,6 @@ extension on TranslationsEn {
 			'quiz.registration.participantUnit' => '',
 			'quiz.registration.join' => 'Join',
 			'quiz.registration.full' => ({required Object max}) => 'Full capacity (${max} participants) reached',
-			_ => null,
-		} ?? switch (path) {
 			'quiz.registration.failed' => 'Could not register. Please try again later.',
 			'quiz.registration.alreadyParticipated' => 'You have already registered for another round and cannot join this one.',
 			'quiz.registration.closed' => 'Registration for this round has closed.',
