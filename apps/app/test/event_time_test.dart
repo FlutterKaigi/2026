@@ -26,6 +26,15 @@ void main() {
       ),
       '09:00-10:15',
     );
+    expect(
+      formatEventTimeRange(
+        startsAt,
+        endsAt,
+        EventTimeFormat.twentyFourHour,
+        separator: ' – ',
+      ),
+      '09:00 – 10:15',
+    );
   });
 
   test('hasSessionEnded treats the end time itself as ended', () {

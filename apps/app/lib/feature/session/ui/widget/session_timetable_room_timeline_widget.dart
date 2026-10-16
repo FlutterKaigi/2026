@@ -17,7 +17,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 const _sidePadding = 8.0;
-const _timeColumnWidth = 64.0;
+const _minimumTimeColumnWidth = 64.0;
 const _minimumRoomColumnWidth = 216.0;
 // The cell and card paddings on both sides of a band's label.
 const _bandLabelInset = 2 * (6 + 8);
@@ -67,13 +67,27 @@ class SessionTimetableRoomTimelineWidget extends HookWidget {
     final columns = _buildRoomColumns(context, day.entries);
     final schedule = _buildRoomSchedule(day.entries, columns);
     final colorScheme = Theme.of(context).colorScheme;
+    final timeLabelStyle = Theme.of(context).textTheme.labelMedium!.copyWith(
+      fontSize: 13,
+      fontWeight: FontWeight.w700,
+      color: colorScheme.onSurface,
+      fontFeatures: const [FontFeature.tabularFigures()],
+    );
+    final timeLabelPainter = TextPainter(
+      text: TextSpan(text: '00:00', style: timeLabelStyle),
+      textDirection: Directionality.of(context),
+      textScaler: MediaQuery.textScalerOf(context),
+    )..layout();
+    final timeColumnWidth = math.max(_minimumTimeColumnWidth, timeLabelPainter.width + 20);
+    final timeLabelInset = timeLabelPainter.height / 2;
+    timeLabelPainter.dispose();
 
     // Measured outside the vertical scroll view, so scrolling the day does not
     // rebuild the grid.
     return LayoutBuilder(
       builder: (context, constraints) {
         final availableRoomWidth = constraints.maxWidth.isFinite
-            ? math.max<double>(0, constraints.maxWidth - 2 * _sidePadding - _timeColumnWidth)
+            ? math.max<double>(0, constraints.maxWidth - 2 * _sidePadding - timeColumnWidth)
             : _minimumRoomColumnWidth * columns.length;
         final roomColumnWidth = math.max<double>(
           _minimumRoomColumnWidth,
@@ -81,7 +95,7 @@ class SessionTimetableRoomTimelineWidget extends HookWidget {
         );
         final visibleRoomWidth = math.min(availableRoomWidth, roomColumnWidth * columns.length);
         final columnWidths = [
-          _timeColumnWidth,
+          timeColumnWidth,
           for (var index = 0; index < columns.length; index++) roomColumnWidth,
         ];
 
@@ -159,6 +173,8 @@ class SessionTimetableRoomTimelineWidget extends HookWidget {
                     controller: scrollController,
                     scrollDirection: Axis.horizontal,
                     physics: const ClampingScrollPhysics(),
+                    // Boundary labels straddle the first and last rows.
+                    padding: EdgeInsets.symmetric(vertical: timeLabelInset),
                     child: _RowSpanGrid(
                       columnWidths: columnWidths,
                       rowCount: schedule.rowStarts.length,
@@ -192,7 +208,11 @@ class SessionTimetableRoomTimelineWidget extends HookWidget {
                             child: _PinnedTimeCellWidget(
                               scrollOffset: scrollOffset,
                               backgroundColor: colorScheme.surface,
-                              child: _TimeCellWidget(startsAt: schedule.rowStarts[row]),
+                              child: _TimeCellWidget(
+                                startsAt: schedule.rowStarts[row],
+                                endsAt: row == schedule.rowStarts.length - 1 ? schedule.endsAt : null,
+                                style: timeLabelStyle,
+                              ),
                             ),
                           ),
                         for (var roomIndex = 0; roomIndex < columns.length; roomIndex++)
@@ -284,12 +304,12 @@ class _PinnedTimeCellWidget extends StatelessWidget {
           color: backgroundColor,
           border: Border(
             top: isHeader ? borderSide : BorderSide.none,
-            left: borderSide,
+            left: isHeader ? borderSide : BorderSide.none,
             right: borderSide,
-            bottom: borderSide,
+            bottom: isHeader ? borderSide : BorderSide.none,
           ),
         ),
-        child: Align(alignment: Alignment.topCenter, child: child),
+        child: child,
       ),
     );
   }
@@ -388,20 +408,90 @@ class _RoomHeaderCellWidget extends StatelessWidget {
 }
 
 class _TimeCellWidget extends StatelessWidget {
-  const _TimeCellWidget({required this.startsAt});
+  const _TimeCellWidget({required this.startsAt, required this.endsAt, required this.style});
 
   final DateTime startsAt;
+  final DateTime? endsAt;
+  final TextStyle style;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(4, 12, 4, 8),
-      child: Text(
-        _formatWallClock(startsAt),
-        textAlign: TextAlign.center,
-        style: Theme.of(context).textTheme.labelMedium?.copyWith(
-          color: Theme.of(context).colorScheme.onSurfaceVariant,
-          fontFeatures: const [FontFeature.tabularFigures()],
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        FractionalTranslation(
+          translation: const Offset(0, -0.5),
+          child: _TimeBoundaryLabelWidget(time: startsAt, style: style),
+        ),
+        const SizedBox(height: 16),
+        if (endsAt case final end?)
+          FractionalTranslation(
+            translation: const Offset(0, 0.5),
+            child: _TimeBoundaryLabelWidget(time: end, style: style),
+          ),
+      ],
+    );
+  }
+}
+
+class _TimeBoundaryLabelWidget extends StatelessWidget {
+  const _TimeBoundaryLabelWidget({required this.time, required this.style});
+
+  final DateTime time;
+  final TextStyle style;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            _formatWallClock(time),
+            textAlign: TextAlign.center,
+            style: style,
+          ),
+        ),
+        SizedBox(
+          width: 8,
+          child: Divider(height: 1, thickness: 1, color: Theme.of(context).colorScheme.outline),
+        ),
+      ],
+    );
+  }
+}
+
+class _RoomScheduleTimeWidget extends StatelessWidget {
+  const _RoomScheduleTimeWidget({required this.entry});
+
+  final SessionTimetableEntry entry;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final color = entry.isSession ? colorScheme.primary : colorScheme.onTertiaryContainer;
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+          child: Text(
+            formatEventTimeRange(
+              entry.startsAt,
+              entry.endsAt,
+              EventTimeFormat.twentyFourHour,
+              separator: ' – ',
+            ),
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+              color: color,
+              fontWeight: FontWeight.w700,
+              fontFeatures: const [FontFeature.tabularFigures()],
+            ),
+          ),
         ),
       ),
     );
@@ -488,16 +578,7 @@ class _RoomScheduleEntryWidget extends ConsumerWidget {
         Row(
           children: [
             Expanded(
-              child: Text(
-                formatEventTimeRange(
-                  entry.startsAt,
-                  entry.endsAt,
-                  EventTimeFormat.twentyFourHour,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.labelSmall,
-              ),
+              child: _RoomScheduleTimeWidget(entry: entry),
             ),
             if (languageLabel != null) _TinyLanguageTagWidget(label: languageLabel),
             if (bookmarked) ...[
@@ -641,6 +722,7 @@ final class _RoomColumn {
 final class _RoomSchedule {
   const _RoomSchedule({
     required this.rowStarts,
+    required this.endsAt,
     required this.roomBlocks,
     required this.bands,
   });
@@ -648,6 +730,9 @@ final class _RoomSchedule {
   /// The event-local time each row starts at. A row ends where the next one
   /// starts; the last row ends with the day's last entry.
   final List<DateTime> rowStarts;
+
+  /// The closing boundary, if the last row has a known end.
+  final DateTime? endsAt;
 
   /// Each room's column split into blocks. Together they cover every row of
   /// the room that no band covers.
@@ -778,6 +863,7 @@ _RoomSchedule _buildRoomSchedule(
   };
   return _RoomSchedule(
     rowStarts: rowStarts,
+    endsAt: ticks.last.isAfter(rowStarts.last) ? ticks.last : null,
     roomBlocks: [
       for (var roomIndex = 0; roomIndex < columns.length; roomIndex++)
         _withEmptyRows(blocksOf(roomIndex), rowCount: rowStarts.length, bandRows: bandRows),

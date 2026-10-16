@@ -11,6 +11,7 @@ import 'package:app/feature/session/data/provider/session_timetable_view_mode_pr
 import 'package:app/feature/session/ui/page/session_timetable_page.dart';
 import 'package:data/data.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -188,7 +189,7 @@ void main() {
 
     expect(_selectedViewMode(tester), SessionTimetableViewMode.rooms);
     expect(find.text('10:15'), findsOneWidget);
-    expect(find.text('10:15-11:00'), findsOneWidget);
+    expect(find.text('10:15 – 11:00'), findsOneWidget);
     expect(find.text('Room A'), findsOneWidget);
     expect(find.text('JA'), findsOneWidget);
     expect(find.text('Speaker A'), findsOneWidget);
@@ -394,6 +395,60 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  for (final textScale in [1.0, 2.0]) {
+    testWidgets('aligns time labels with slot boundaries at text scale $textScale', (tester) async {
+      tester.platformDispatcher.textScaleFactorTestValue = textScale;
+      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+      await _pumpTimetableState(
+        tester,
+        AsyncData(_talkBesideLtsTimetable),
+        viewportSize: const Size(390, 1200),
+      );
+
+      await _switchToRooms(tester);
+
+      final timeLabels = ['13:25', '13:35', '13:45', '13:55'];
+      for (var row = 0; row < 3; row++) {
+        final slot = tester.getRect(find.byKey(ValueKey(('room-schedule-cell', 1, row))));
+        expect(tester.getCenter(find.text(timeLabels[row])).dy, closeTo(slot.top, 0.01));
+        expect(tester.getCenter(find.text(timeLabels[row + 1])).dy, closeTo(slot.bottom, 0.01));
+        expect(
+          tester.getRect(find.text(timeLabels[row])).bottom,
+          lessThan(tester.getRect(find.text(timeLabels[row + 1])).top),
+        );
+      }
+
+      final scrollRect = tester.getRect(
+        find.byKey(ValueKey(('room-schedule-scroll', _talkBesideLtsTimetable.selectedDate!))),
+      );
+      expect(tester.getRect(find.text('13:25')).top, greaterThanOrEqualTo(scrollRect.top));
+      expect(tester.getRect(find.text('13:55')).bottom, lessThanOrEqualTo(scrollRect.bottom));
+      final range = tester.renderObject<RenderParagraph>(find.text('13:25 – 13:55'));
+      expect(range.didExceedMaxLines, isFalse);
+      expect(tester.takeException(), isNull);
+    });
+  }
+
+  testWidgets('does not invent a closing time for an open-ended event', (tester) async {
+    await _pumpTimetableState(
+      tester,
+      AsyncData(
+        _singleDayTimetable([
+          SessionTimetableEntry.timelineEvent(
+            timelineEvent: _sharedEvent.copyWith(endsAt: null),
+            venue: null,
+          ),
+        ]),
+      ),
+    );
+
+    await _switchToRooms(tester);
+
+    expect(find.text('12:00'), findsNWidgets(2));
+    expect(find.text('12:30'), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('keeps a long room entry running through the breaks beside it', (tester) async {
     await _pumpTimetableState(
       tester,
@@ -410,7 +465,7 @@ void main() {
 
     expect(workshop.top, closeTo(firstTalk.top, 0.01));
     expect(workshop.bottom, closeTo(lastTalk.bottom, 0.01));
-    expect(firstTalk.bottom, lessThan(breakLabel.top));
+    expect(firstTalk.bottom, lessThan(breakLabel.center.dy));
     expect(breakLabel.top, greaterThan(workshop.top));
     expect(breakLabel.bottom, lessThan(workshop.bottom));
     expect(find.text('11:15'), findsOneWidget);
@@ -430,7 +485,7 @@ void main() {
     final lunchStage = tester.getRect(find.byKey(const ValueKey('room-timeline-entry-lunch-stage')));
     final roomBTalk = tester.getRect(find.byKey(const ValueKey('room-timeline-entry-afternoon-talk-b')));
 
-    expect(find.text('12:10-13:10'), findsOneWidget);
+    expect(find.text('12:10 – 13:10'), findsOneWidget);
     expect(find.text('13:05'), findsOneWidget);
     expect(find.text('13:10'), findsNothing);
     expect(lunchBreak.bottom, lessThan(lunchStage.top));

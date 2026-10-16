@@ -36,13 +36,14 @@ String formatEventTimeRange(
   DateTime? endsAt,
   EventTimeFormat format, {
   String? locale,
+  String separator = '-',
 }) {
   final formattedStart = formatEventTime(startsAt, format, locale: locale);
   if (endsAt == null) {
     return formattedStart;
   }
 
-  return '$formattedStart-${formatEventTime(endsAt, format, locale: locale)}';
+  return '$formattedStart$separator${formatEventTime(endsAt, format, locale: locale)}';
 }
 
 String _formatTwentyFourHour(DateTime value) {
