@@ -80,10 +80,14 @@ class _ScannerBody extends HookConsumerWidget {
       }
 
       isProcessing.value = true;
+      // Read before the awaits: `ref` throws once the page is unmounted, and a started exchange must still
+      // complete and log its failure.
+      final repository = ref.read(profileExchangeRepositoryProvider);
+      final talker = ref.read(talkerProvider);
       await controller.stop();
       final outcome = await ExchangeScanHandler(
         myUid: myUid,
-        repository: ref.read(profileExchangeRepositoryProvider),
+        repository: repository,
       ).createExchange(otherUid: scanned.otherUid, token: scanned.token);
 
       switch (outcome) {
@@ -101,7 +105,7 @@ class _ScannerBody extends HookConsumerWidget {
             showMessage(t.exchange.scanAlreadyExists);
           }
         case ExchangeCreateFailed(:final error, :final stackTrace):
-          ref.read(talkerProvider).handle(error, stackTrace);
+          talker.handle(error, stackTrace);
           if (context.mounted) {
             showMessage(t.exchange.scanFailed);
           }

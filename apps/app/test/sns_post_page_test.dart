@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:app/core/i18n/strings.g.dart';
+import 'package:app/core/log/talker.dart';
 import 'package:app/feature/auth/data/provider/auth_repository.dart';
 import 'package:app/feature/auth/ui/widget/sign_in_card.dart';
 import 'package:app/feature/sns_post/data/sns_post_provider.dart';
@@ -11,6 +12,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:talker_flutter/talker_flutter.dart';
 
 import 'fake_auth_repository.dart';
 import 'fake_sns_post_repository.dart';
@@ -18,6 +20,7 @@ import 'fake_sns_post_repository.dart';
 void main() {
   late FakeAuthRepository auth;
   late FakeSnsPostRepository repository;
+  late Talker talker;
   late GoRouter router;
 
   setUpAll(() async => AppLocale.en.build());
@@ -25,6 +28,7 @@ void main() {
     LocaleSettings.setLocaleSync(AppLocale.ja);
     auth = FakeAuthRepository(initialUser: FakeUser(uid: 'uid-1'));
     repository = FakeSnsPostRepository();
+    talker = Talker(settings: TalkerSettings(useConsoleLogs: false));
     router = GoRouter(
       initialLocation: '/account/sns-post',
       routes: [
@@ -46,6 +50,7 @@ void main() {
       overrides: [
         authRepositoryProvider.overrideWithValue(auth),
         snsPostRepositoryProvider.overrideWithValue(repository),
+        talkerProvider.overrideWithValue(talker),
         appleSignInAvailabilityProvider.overrideWithValue(false),
       ],
       child: MaterialApp.router(
@@ -181,6 +186,32 @@ void main() {
 
     expect(locationWhilePending, '/account/missions');
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('logs a save that fails after the attendee leaves', (tester) async {
+    await tester.pumpWidget(subject());
+    await tester.pumpAndSettle();
+    router.go('/account/missions');
+    await tester.pumpAndSettle();
+    unawaited(router.push<void>('/account/sns-post'));
+    await tester.pumpAndSettle();
+    final pending = repository.saveGate = Completer<void>();
+    await tester.tap(find.text('スタッフ'));
+    await tester.enterText(find.byType(TextFormField), 'https://x.com/test/status/123');
+    await tester.ensureVisible(find.byType(FilledButton));
+    await tester.tap(find.byType(FilledButton));
+    await tester.pump();
+    expect(repository.saves, hasLength(1));
+
+    await tester.tap(find.byType(BackButton));
+    await tester.pumpAndSettle();
+    expect(find.byType(SnsPostPage), findsNothing);
+    final failure = Exception('offline');
+    pending.completeError(failure);
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(talker.history.map((log) => log.exception), contains(failure));
   });
 
   testWidgets('malformed stored registrations can be replaced from the form', (tester) async {

@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:app/core/designsystem/theme/app_theme.dart';
 import 'package:app/core/i18n/strings.g.dart';
+import 'package:app/core/log/talker.dart';
 import 'package:app/core/provider/shared_preferences.dart';
 import 'package:app/feature/auth/data/provider/auth_repository.dart';
 import 'package:app/feature/auth/ui/widget/sign_in_card.dart';
@@ -20,6 +23,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:talker_flutter/talker_flutter.dart';
 
 import 'fake_auth_repository.dart';
 import 'fake_profile_exchange_repository.dart';
@@ -36,6 +40,7 @@ void main() {
     ExchangeCodeRedeemer? codeRedeemer,
     FakeProfileExchangeRepository? exchangeRepository,
     ThemeData? theme,
+    Talker? talker,
   }) => TranslationProvider(
     child: ProviderScope(
       // Riverpod 3 retries a throwing provider automatically; tests assert on
@@ -49,6 +54,7 @@ void main() {
         exchangeCodeRedeemerProvider.overrideWithValue(codeRedeemer ?? _StubExchangeCodeRedeemer()),
         profileExchangeRepositoryProvider.overrideWithValue(exchangeRepository ?? FakeProfileExchangeRepository()),
         sharedPreferencesProvider.overrideWithValue(preferences),
+        if (talker != null) talkerProvider.overrideWithValue(talker),
       ],
       child: MaterialApp.router(
         routerConfig: router,
@@ -473,6 +479,50 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('コードが見つからないか、有効期限が切れています'), findsOneWidget);
+  });
+
+  testWidgets('logs a code exchange that fails after the attendee leaves', (tester) async {
+    final authRepository = FakeAuthRepository(initialUser: FakeUser(uid: 'uid-1'));
+    addTearDown(authRepository.dispose);
+    final profileRepository = FakeUserProfileRepository(initialProfile: _profile(id: 'uid-1'));
+    addTearDown(profileRepository.dispose);
+    final exchangeRepository = FakeProfileExchangeRepository();
+    addTearDown(exchangeRepository.dispose);
+    final gate = Completer<void>();
+    exchangeRepository.createGate = gate;
+    final talker = Talker(settings: TalkerSettings(useConsoleLogs: false));
+    final router = buildRouter();
+
+    await tester.pumpWidget(
+      buildSubject(
+        authRepository: authRepository,
+        profileRepository: profileRepository,
+        tokenIssuer: _StubExchangeTokenIssuer(),
+        codeIssuer: _StubExchangeCodeIssuer(),
+        exchangeRepository: exchangeRepository,
+        router: router,
+        preferences: await emptyPreferences(),
+        talker: talker,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.ensureVisible(find.byType(TextField).last);
+    await tester.enterText(find.byType(TextField).last, '654321');
+    await tester.ensureVisible(find.text('交換する'));
+    await tester.tap(find.text('交換する'));
+    await tester.pump();
+    expect(exchangeRepository.createCalls, hasLength(1));
+
+    router.pop();
+    await tester.pumpAndSettle();
+    expect(find.byType(ExchangeHomePage), findsNothing);
+    final failure = Exception('offline');
+    gate.completeError(failure);
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(talker.history.map((log) => log.exception), contains(failure));
   });
 }
 

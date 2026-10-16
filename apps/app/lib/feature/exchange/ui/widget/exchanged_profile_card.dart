@@ -65,10 +65,12 @@ class ExchangedProfileCard extends HookConsumerWidget {
         return;
       }
       isDeleting.value = true;
+      // Read before the await: `ref` throws once the card is unmounted, and the failure must still be logged.
+      final talker = ref.read(talkerProvider);
       try {
         await ref.read(profileExchangeRepositoryProvider).delete(uid: uid, otherUid: exchange.id);
       } on Exception catch (error, stackTrace) {
-        ref.read(talkerProvider).handle(error, stackTrace);
+        talker.handle(error, stackTrace);
         if (context.mounted) {
           showMessage(t.exchange.deleteFailed);
         }
@@ -92,12 +94,14 @@ class ExchangedProfileCard extends HookConsumerWidget {
         return;
       }
       isSavingNote.value = true;
+      // Read before the await: `ref` throws once the card is unmounted, and the failure must still be logged.
+      final talker = ref.read(talkerProvider);
       try {
         await ref
             .read(profileExchangeRepositoryProvider)
             .updateNote(uid: uid, otherUid: exchange.id, note: result.note);
       } on Exception catch (error, stackTrace) {
-        ref.read(talkerProvider).handle(error, stackTrace);
+        talker.handle(error, stackTrace);
         if (context.mounted) {
           showMessage(t.exchange.noteSaveFailed);
         }

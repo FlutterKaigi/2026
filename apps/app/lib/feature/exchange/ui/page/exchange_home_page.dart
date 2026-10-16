@@ -311,6 +311,8 @@ class _RedeemCodeForm extends HookConsumerWidget {
       }
 
       isSubmitting.value = true;
+      // Read before the await: `ref` throws once the page is unmounted, and the failure must still be logged.
+      final talker = ref.read(talkerProvider);
       final outcome = await ExchangeCodeRedeemHandler(
         myUid: uid,
         redeemer: ref.read(exchangeCodeRedeemerProvider),
@@ -344,7 +346,7 @@ class _RedeemCodeForm extends HookConsumerWidget {
             showMessage(t.exchange.redeemRateLimited);
           }
         case RedeemExchangeCodeFailed(:final error, :final stackTrace):
-          ref.read(talkerProvider).handle(error, stackTrace);
+          talker.handle(error, stackTrace);
           if (context.mounted) {
             showMessage(t.exchange.scanFailed);
           }

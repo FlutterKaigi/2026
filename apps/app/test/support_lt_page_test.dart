@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:app/core/i18n/strings.g.dart';
+import 'package:app/core/log/talker.dart';
 import 'package:app/core/provider/environment.dart';
 import 'package:app/feature/auth/data/provider/auth_repository.dart';
 import 'package:app/feature/auth/ui/page/email_sign_in_page.dart';
@@ -16,6 +17,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:talker_flutter/talker_flutter.dart';
 
 import 'fake_auth_repository.dart';
 import 'fake_mobile_scanner_platform.dart';
@@ -28,6 +30,7 @@ const _invalidCodeMessage = 'コードが正しくありません。会場のQR�
 void main() {
   late FakeAuthRepository auth;
   late FakeSupportLtRepository repository;
+  late Talker talker;
   late GoRouter router;
 
   final originalPlatform = MobileScannerPlatform.instance;
@@ -41,6 +44,7 @@ void main() {
     LocaleSettings.setLocaleSync(AppLocale.ja);
     auth = FakeAuthRepository(initialUser: FakeUser(uid: 'uid-1'));
     repository = FakeSupportLtRepository();
+    talker = Talker(settings: TalkerSettings(useConsoleLogs: false));
     addTearDown(auth.dispose);
     addTearDown(repository.dispose);
   });
@@ -71,6 +75,7 @@ void main() {
           environmentProvider.overrideWithValue(Environment.fromEnvironment().copyWith(flavor: Flavor.production)),
           authRepositoryProvider.overrideWithValue(auth),
           supportLtRepositoryProvider.overrideWithValue(repository),
+          talkerProvider.overrideWithValue(talker),
           appleSignInAvailabilityProvider.overrideWithValue(false),
         ],
         child: MaterialApp.router(
@@ -548,6 +553,23 @@ void main() {
       expect(tester.takeException(), isNull);
       expect(find.text('account destination'), findsOneWidget);
       expect(repository.submittedCodes, ['123456']);
+    });
+
+    testWidgets('logs a registration that fails after the attendee leaves', (tester) async {
+      repository.pendingRegistration = Completer<void>();
+      await tester.pumpWidget(buildSubject(location: _linkPath));
+      await pumpFrames(tester);
+      expect(find.text('登録中…'), findsOneWidget);
+
+      router.go('/account');
+      await tester.pumpAndSettle();
+      expect(find.byType(SupportLtPage), findsNothing);
+      final failure = rejectedCode();
+      repository.pendingRegistration!.completeError(failure);
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(talker.history.map((log) => log.exception), contains(failure));
     });
   });
 }

@@ -166,6 +166,8 @@ class _ProfileForm extends HookConsumerWidget {
       );
 
       isSaving.value = true;
+      // 処理中に画面が破棄されても失敗を記録できるよう、`ref` が使えるうちに読んでおく。
+      final talker = ref.read(talkerProvider);
       try {
         await ref.read(userProfileRepositoryProvider).save(updated);
         if (!context.mounted) {
@@ -180,7 +182,7 @@ class _ProfileForm extends HookConsumerWidget {
           context.pop();
         }
       } on Exception catch (exception, stackTrace) {
-        ref.read(talkerProvider).handle(exception, stackTrace);
+        talker.handle(exception, stackTrace);
         if (context.mounted) {
           ScaffoldMessenger.of(context)
             ..hideCurrentSnackBar()

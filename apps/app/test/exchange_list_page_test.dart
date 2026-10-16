@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:app/core/i18n/strings.g.dart';
+import 'package:app/core/log/talker.dart';
 import 'package:app/feature/auth/data/provider/auth_repository.dart';
 import 'package:app/feature/exchange/data/provider/profile_exchange_repository.dart';
 import 'package:app/feature/exchange/ui/page/exchange_list_page.dart';
@@ -10,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:talker_flutter/talker_flutter.dart';
 
 import 'fake_auth_repository.dart';
 import 'fake_profile_exchange_repository.dart';
@@ -20,18 +22,29 @@ void main() {
     required FakeAuthRepository authRepository,
     required FakeProfileExchangeRepository exchangeRepository,
     required FakeUserProfileRepository profileRepository,
+    Talker? talker,
+    ValueNotifier<bool>? showsListPage,
   }) => TranslationProvider(
     child: ProviderScope(
       overrides: [
         authRepositoryProvider.overrideWithValue(authRepository),
         profileExchangeRepositoryProvider.overrideWithValue(exchangeRepository),
         userProfileRepositoryProvider.overrideWithValue(profileRepository),
+        if (talker != null) talkerProvider.overrideWithValue(talker),
       ],
       child: MaterialApp(
         locale: const Locale('ja'),
         supportedLocales: AppLocaleUtils.supportedLocales,
         localizationsDelegates: GlobalMaterialLocalizations.delegates,
-        home: const ExchangeListPage(),
+        // `showsListPage` を渡すと、`ProviderScope` を保ったまま一覧だけを外せる
+        // （一覧の画面から戻ったのと同じ状況）。
+        home: switch (showsListPage) {
+          null => const ExchangeListPage(),
+          final listenable => ValueListenableBuilder(
+            valueListenable: listenable,
+            builder: (_, shows, _) => shows ? const ExchangeListPage() : const Scaffold(body: Text('前の画面')),
+          ),
+        },
       ),
     ),
   );
@@ -370,6 +383,117 @@ void main() {
 
     expect(find.text('ロビーで交換'), findsOneWidget);
     expect(find.byTooltip('メモを編集'), findsOneWidget);
+  });
+
+  testWidgets('logs a delete that fails after the list page is gone', (tester) async {
+    final authRepository = FakeAuthRepository(initialUser: FakeUser(uid: 'uid-1'));
+    addTearDown(authRepository.dispose);
+    final exchangeRepository = FakeProfileExchangeRepository(
+      initialExchangesByUid: {
+        'uid-1': [
+          ProfileExchange(id: 'uid-2', createdAt: DateTime.utc(2026, 8, 2), origin: ProfileExchangeOrigin.scan),
+        ],
+      },
+    );
+    addTearDown(exchangeRepository.dispose);
+    final profileRepository = FakeUserProfileRepository(initialProfile: _ownProfile());
+    addTearDown(profileRepository.dispose);
+    await profileRepository.save(
+      UserProfile(
+        id: 'uid-2',
+        displayName: 'Exchanged Attendee',
+        countryOrRegion: 'TW',
+        createdAt: DateTime.utc(2026, 8),
+        updatedAt: DateTime.utc(2026, 8),
+      ),
+    );
+    final gate = Completer<void>();
+    exchangeRepository.deleteGate = gate;
+    final talker = Talker(settings: TalkerSettings(useConsoleLogs: false));
+    final showsListPage = ValueNotifier(true);
+    addTearDown(showsListPage.dispose);
+
+    await tester.pumpWidget(
+      buildSubject(
+        authRepository: authRepository,
+        exchangeRepository: exchangeRepository,
+        profileRepository: profileRepository,
+        talker: talker,
+        showsListPage: showsListPage,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byTooltip('削除'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('削除する'));
+    await tester.pump();
+    expect(exchangeRepository.deleteCalls, [(uid: 'uid-1', otherUid: 'uid-2')]);
+
+    showsListPage.value = false;
+    await tester.pumpAndSettle();
+    final failure = Exception('offline');
+    gate.completeError(failure);
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(talker.history.map((log) => log.exception), contains(failure));
+  });
+
+  testWidgets('logs a note save that fails after the list page is gone', (tester) async {
+    final authRepository = FakeAuthRepository(initialUser: FakeUser(uid: 'uid-1'));
+    addTearDown(authRepository.dispose);
+    final exchangeRepository = FakeProfileExchangeRepository(
+      initialExchangesByUid: {
+        'uid-1': [
+          ProfileExchange(id: 'uid-2', createdAt: DateTime.utc(2026, 8, 2), origin: ProfileExchangeOrigin.scan),
+        ],
+      },
+    );
+    addTearDown(exchangeRepository.dispose);
+    final profileRepository = FakeUserProfileRepository(initialProfile: _ownProfile());
+    addTearDown(profileRepository.dispose);
+    await profileRepository.save(
+      UserProfile(
+        id: 'uid-2',
+        displayName: 'Exchanged Attendee',
+        countryOrRegion: 'TW',
+        createdAt: DateTime.utc(2026, 8),
+        updatedAt: DateTime.utc(2026, 8),
+      ),
+    );
+    final gate = Completer<void>();
+    exchangeRepository.updateNoteGate = gate;
+    final talker = Talker(settings: TalkerSettings(useConsoleLogs: false));
+    final showsListPage = ValueNotifier(true);
+    addTearDown(showsListPage.dispose);
+
+    await tester.pumpWidget(
+      buildSubject(
+        authRepository: authRepository,
+        exchangeRepository: exchangeRepository,
+        profileRepository: profileRepository,
+        talker: talker,
+        showsListPage: showsListPage,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byTooltip('メモを追加'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), 'ロビーで交換');
+    await tester.tap(find.text('保存'));
+    await tester.pump();
+    expect(exchangeRepository.updateNoteCalls, [(uid: 'uid-1', otherUid: 'uid-2', note: 'ロビーで交換')]);
+
+    showsListPage.value = false;
+    await tester.pumpAndSettle();
+    final failure = Exception('offline');
+    gate.completeError(failure);
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(talker.history.map((log) => log.exception), contains(failure));
   });
 }
 
