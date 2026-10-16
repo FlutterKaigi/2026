@@ -6,6 +6,7 @@ import 'package:app/core/router/router.dart';
 import 'package:app/feature/session/data/provider/bookmarked_sessions_provider.dart';
 import 'package:app/feature/session/data/provider/session_timetable_provider.dart';
 import 'package:app/feature/session/ui/widget/session_speaker_widget.dart';
+import 'package:app/feature/session/ui/widget/timeline_event_details_dialog.dart';
 import 'package:app/feature/session/util/event_time.dart';
 import 'package:app/feature/session/util/session_language.dart';
 import 'package:flutter/foundation.dart';
@@ -543,7 +544,15 @@ class _RoomScheduleEntryWidget extends ConsumerWidget {
       ),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: session == null ? null : () => SessionDetailsRoute(sessionId: session.id).push<void>(context),
+        onTap: switch ((session, entry.timelineEvent?.resolveDescription(locale))) {
+          (final session?, _) => () => SessionDetailsRoute(sessionId: session.id).push<void>(context),
+          (null, final description?) => () => showTimelineEventDetailsDialog(
+            context,
+            entry: entry,
+            description: description,
+          ),
+          (null, null) => null,
+        },
         child: Padding(
           padding: const EdgeInsets.all(8),
           child: switch (followScrollOffset) {
