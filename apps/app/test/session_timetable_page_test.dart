@@ -444,7 +444,7 @@ void main() {
 
     await _switchToRooms(tester);
 
-    expect(find.text('12:00'), findsNWidgets(2));
+    expect(find.text('12:00'), findsOneWidget);
     expect(find.text('12:30'), findsNothing);
     expect(tester.takeException(), isNull);
   });
@@ -485,7 +485,9 @@ void main() {
     final lunchStage = tester.getRect(find.byKey(const ValueKey('room-timeline-entry-lunch-stage')));
     final roomBTalk = tester.getRect(find.byKey(const ValueKey('room-timeline-entry-afternoon-talk-b')));
 
-    expect(find.text('12:10 – 13:10'), findsOneWidget);
+    expect(find.text('12:10 – 13:10'), findsNothing);
+    expect(find.text('12:10'), findsOneWidget);
+    expect(find.text('13:05 – 13:25'), findsOneWidget);
     expect(find.text('13:05'), findsOneWidget);
     expect(find.text('13:10'), findsNothing);
     expect(lunchBreak.bottom, lessThan(lunchStage.top));
@@ -801,28 +803,46 @@ void main() {
     expect(dialog, findsNothing);
   });
 
-  testWidgets('keeps events without a description untappable in both layouts', (tester) async {
+  testWidgets('opens event details without a description in both layouts', (tester) async {
     await _pumpTimetableState(
       tester,
       AsyncData(_undescribedEventTimetable),
     );
 
-    for (final title in ['受付', '休憩']) {
-      await tester.tap(find.text(title));
-      await tester.pumpAndSettle();
+    for (final viewMode in SessionTimetableViewMode.values) {
+      if (viewMode == SessionTimetableViewMode.rooms) {
+        await _switchToRooms(tester);
+        expect(find.text('09:30 – 10:00'), findsNothing);
+        expect(find.text('10:00 – 10:15'), findsOneWidget);
+      } else {
+        expect(find.text('イベント'), findsOneWidget);
+        expect(find.text('09:30-10:00'), findsNothing);
+        expect(find.text('10:00-10:15'), findsOneWidget);
+      }
+      expect(find.text('09:30'), findsOneWidget);
 
-      expect(find.byKey(const ValueKey('timeline-event-details-dialog')), findsNothing, reason: title);
-      expect(find.byType(AlertDialog), findsNothing, reason: title);
-    }
+      for (final (title, time, hasVenue) in [
+        ('受付', '09:30-10:00', false),
+        ('休憩', '10:00-10:15', true),
+      ]) {
+        await tester.tap(find.text(title));
+        await tester.pumpAndSettle();
 
-    await _switchToRooms(tester);
+        final dialog = find.byKey(const ValueKey('timeline-event-details-dialog'));
+        expect(dialog, findsOneWidget, reason: '$viewMode / $title');
+        for (final text in [title, '2026/10/31', time]) {
+          expect(find.descendant(of: dialog, matching: find.text(text)), findsOneWidget);
+        }
+        expect(
+          find.descendant(of: dialog, matching: find.text('Room A')),
+          hasVenue ? findsOneWidget : findsNothing,
+        );
+        expect(find.descendant(of: dialog, matching: find.byType(Divider)), findsNothing);
 
-    for (final id in ['registration', 'blank-description-event']) {
-      await tester.tap(find.byKey(ValueKey('room-timeline-entry-$id')));
-      await tester.pumpAndSettle();
-
-      expect(find.byKey(const ValueKey('timeline-event-details-dialog')), findsNothing, reason: id);
-      expect(find.byType(AlertDialog), findsNothing, reason: id);
+        await tester.tap(find.text('閉じる'));
+        await tester.pumpAndSettle();
+        expect(dialog, findsNothing);
+      }
     }
   });
 

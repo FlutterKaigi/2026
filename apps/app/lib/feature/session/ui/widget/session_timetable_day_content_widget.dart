@@ -265,9 +265,7 @@ class _TimelineEventCardWidget extends StatelessWidget {
     final description = timelineEvent.resolveDescription(locale);
 
     return _TimetableCardWidget(
-      onTap: description == null
-          ? null
-          : () => showTimelineEventDetailsDialog(context, entry: entry, description: description),
+      onTap: () => showTimelineEventDetailsDialog(context, entry: entry, description: description),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -293,31 +291,33 @@ class _TimelineEventCardWidget extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              _InfoChipWidget(
-                icon: Icons.sell_outlined,
-                label: t.sessionTimetable.type.event,
-              ),
-              if (entry.venue != null)
+          if (entry.venueId != null) ...[
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
                 _InfoChipWidget(
-                  icon: Icons.meeting_room_outlined,
-                  label: entry.venue!.name.resolve(locale),
+                  icon: Icons.sell_outlined,
+                  label: t.sessionTimetable.type.event,
                 ),
-              _InfoChipWidget(
-                icon: Icons.schedule,
-                label: formatEventTimeRange(
-                  entry.startsAt,
-                  entry.endsAt,
-                  timeFormat,
-                  locale: locale.toLanguageTag(),
+                if (entry.venue != null)
+                  _InfoChipWidget(
+                    icon: Icons.meeting_room_outlined,
+                    label: entry.venue!.name.resolve(locale),
+                  ),
+                _InfoChipWidget(
+                  icon: Icons.schedule,
+                  label: formatEventTimeRange(
+                    entry.startsAt,
+                    entry.endsAt,
+                    timeFormat,
+                    locale: locale.toLanguageTag(),
+                  ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
+          ],
         ],
       ),
     );
