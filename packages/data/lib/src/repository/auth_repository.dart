@@ -1,8 +1,8 @@
-import 'dart:io';
-
 import 'package:data/src/firebase/firebase_initializer.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 abstract interface class AuthRepository {
   Stream<User?> authStateChanges();
@@ -33,6 +33,12 @@ final class FirebaseAuthRepository implements AuthRepository {
   /// Firestore ルールの hasAdminAccess で行う）。null の場合は無制限。
   final String? hostedDomain;
 
+  // GoogleSignIn is a process-wide singleton, even when repositories are recreated.
+  static Future<void>? _googleSignInInitialization;
+
+  bool get _usesNativeGoogleSignIn =>
+      !kIsWeb && defaultTargetPlatform == TargetPlatform.android && !FirebaseInitializer.emulatorConfigured;
+
   @override
   Stream<User?> authStateChanges() => _auth.authStateChanges();
 
@@ -40,13 +46,17 @@ final class FirebaseAuthRepository implements AuthRepository {
   User? get currentUser => _auth.currentUser;
 
   @override
-  Future<void> signInWithGoogle() {
-    return _signInWithOAuth(_googleProvider());
+  Future<void> signInWithGoogle() async {
+    if (_usesNativeGoogleSignIn) {
+      await _auth.signInWithCredential(await _nativeGoogleCredential());
+      return;
+    }
+    await _signInWithOAuth(_googleProvider());
   }
 
   @override
   Future<void> signInWithApple() {
-    if (kIsWeb || !Platform.isIOS) {
+    if (kIsWeb || defaultTargetPlatform != TargetPlatform.iOS) {
       throw UnsupportedError('AppleサインインはiOSでのみ利用できます');
     }
     return _auth.signInWithProvider(_appleProvider());
@@ -64,8 +74,40 @@ final class FirebaseAuthRepository implements AuthRepository {
     ..addScope('email')
     ..addScope('name');
 
-  /// GoogleはWebではポップアップ、モバイルではsignInWithProviderで
-  /// サインインする。
+  Future<T> _withNativeGoogleSignIn<T>(Future<T> Function(GoogleSignIn google) action) async {
+    final google = GoogleSignIn.instance;
+    try {
+      await (_googleSignInInitialization ??= google.initialize(hostedDomain: hostedDomain));
+      return await action(google);
+    } on GoogleSignInException catch (error) {
+      throw FirebaseAuthException(
+        code: switch (error.code) {
+          GoogleSignInExceptionCode.canceled => 'canceled',
+          GoogleSignInExceptionCode.userMismatch => 'user-mismatch',
+          _ => 'google-sign-in-failed',
+        },
+        message: error.description,
+      );
+    } on PlatformException catch (error) {
+      // CredentialManager session cleanup can surface a platform-channel error.
+      throw FirebaseAuthException(code: 'google-sign-in-failed', message: error.message);
+    }
+  }
+
+  Future<OAuthCredential> _nativeGoogleCredential() => _withNativeGoogleSignIn((google) async {
+    // Clear a previous selection before sign-in or account-deletion reauthentication.
+    // This leaves the Firebase session intact until the new credential is accepted.
+    await google.signOut();
+    final account = await google.authenticate();
+    final idToken = account.authentication.idToken;
+    if (idToken == null || idToken.isEmpty) {
+      throw FirebaseAuthException(code: 'invalid-credential', message: 'Google did not return an ID token.');
+    }
+    return GoogleAuthProvider.credential(idToken: idToken);
+  });
+
+  /// GoogleはWebではポップアップ、iOSとAndroidのAuth Emulatorでは
+  /// signInWithProviderでサインインする。
   ///
   /// Auth Emulator接続時は全プラットフォームでEmulatorの擬似IdP画面が
   /// 開く。
@@ -73,7 +115,7 @@ final class FirebaseAuthRepository implements AuthRepository {
     if (kIsWeb) {
       return _auth.signInWithPopup(provider);
     }
-    if (Platform.isAndroid || Platform.isIOS) {
+    if (defaultTargetPlatform == TargetPlatform.android || defaultTargetPlatform == TargetPlatform.iOS) {
       return _auth.signInWithProvider(provider);
     }
     throw UnsupportedError('サポートされていないプラットフォームです');
@@ -91,7 +133,16 @@ final class FirebaseAuthRepository implements AuthRepository {
   Future<void> sendPasswordResetEmail({required String email}) => _auth.sendPasswordResetEmail(email: email);
 
   @override
-  Future<void> signOut() => _auth.signOut();
+  Future<void> signOut() async {
+    try {
+      if (_usesNativeGoogleSignIn &&
+          (_auth.currentUser?.providerData.any((info) => info.providerId == GoogleAuthProvider.PROVIDER_ID) ?? false)) {
+        await _withNativeGoogleSignIn((google) => google.signOut());
+      }
+    } finally {
+      await _auth.signOut();
+    }
+  }
 
   @override
   Future<void> deleteAccount({String? password, Future<void> Function()? beforeDelete}) async {
@@ -105,7 +156,7 @@ final class FirebaseAuthRepository implements AuthRepository {
     // authorizationCode も再認証で取得する。
     final providerIds = user.providerData.map((info) => info.providerId).toSet();
     final usesApple = providerIds.contains(AppleAuthProvider.PROVIDER_ID);
-    if (usesApple && (kIsWeb || !Platform.isIOS)) {
+    if (usesApple && (kIsWeb || defaultTargetPlatform != TargetPlatform.iOS)) {
       // Web / Android のApple OAuthを開始するとServices IDが必要になる。
       // Apple連携済みアカウントの削除とトークン失効はiOSからだけ行う。
       throw FirebaseAuthException(
@@ -123,7 +174,11 @@ final class FirebaseAuthRepository implements AuthRepository {
         EmailAuthProvider.credential(email: email, password: password),
       );
     } else if (providerIds.contains(GoogleAuthProvider.PROVIDER_ID)) {
-      await _reauthenticateWithOAuth(user, _googleProvider());
+      if (_usesNativeGoogleSignIn) {
+        await user.reauthenticateWithCredential(await _nativeGoogleCredential());
+      } else {
+        await _reauthenticateWithOAuth(user, _googleProvider());
+      }
     } else if (providerIds.contains(AppleAuthProvider.PROVIDER_ID)) {
       appleCredential = await _reauthenticateWithOAuth(user, _appleProvider());
     }
@@ -146,7 +201,7 @@ final class FirebaseAuthRepository implements AuthRepository {
     if (kIsWeb) {
       return user.reauthenticateWithPopup(provider);
     }
-    if (Platform.isAndroid || Platform.isIOS) {
+    if (defaultTargetPlatform == TargetPlatform.android || defaultTargetPlatform == TargetPlatform.iOS) {
       return user.reauthenticateWithProvider(provider);
     }
     throw UnsupportedError('サポートされていないプラットフォームです');
@@ -163,7 +218,7 @@ final class FirebaseAuthRepository implements AuthRepository {
     if (FirebaseInitializer.emulatorConfigured) {
       return;
     }
-    if (kIsWeb || !Platform.isIOS) {
+    if (kIsWeb || defaultTargetPlatform != TargetPlatform.iOS) {
       throw UnsupportedError('Appleアカウントの削除はiOSでのみ利用できます');
     }
     final authorizationCode = credential.additionalUserInfo?.authorizationCode;

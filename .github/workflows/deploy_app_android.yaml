@@ -110,6 +110,11 @@ jobs:
           jq -e --arg package "$ANDROID_PACKAGE_NAME" \
             'any(.client[]; .client_info.android_client_info.package_name == $package)' \
             android/app/google-services.json > /dev/null
+          jq -e --arg package "$ANDROID_PACKAGE_NAME" \
+            'any(.client[]; .client_info.android_client_info.package_name == $package and
+              any(.oauth_client[]?; .client_type == 3 and
+                (.client_id | type == "string" and length > 0)))' \
+            android/app/google-services.json > /dev/null
           grep -Fq "projectId: '$FIREBASE_PROJECT_ID'" lib/firebase_options.dart
 
       - name: Install Google Play CLI
