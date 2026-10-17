@@ -564,10 +564,11 @@ class _RoomScheduleEntryWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final t = Translations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
     final session = entry.session;
     final title = _entryTitle(entry, locale);
-    final languageLabel = session == null ? null : sessionLanguageLabel(session.primaryLocale);
+    final languageLabel = session == null ? null : sessionLanguageLabel(t, session.primaryLocale);
     final bookmarked = switch (ref.watch(bookmarkedSessionIdsProvider)) {
       AsyncData(:final value) when session != null => value.contains(session.id),
       _ => false,

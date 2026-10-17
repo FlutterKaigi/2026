@@ -35,7 +35,7 @@ class SessionDetailsContentWidget extends ConsumerWidget {
     final session = data.session;
     final title = session.title.resolve(locale);
     final description = session.description.resolve(locale).trim();
-    final languageLabel = sessionLanguageLabel(session.primaryLocale);
+    final languageLabel = sessionLanguageLabel(t, session.primaryLocale);
     const timeFormat = EventTimeFormat.twentyFourHour;
     final sessionizeUri = _externalUri(session.sessionizeUrl);
     final feedbackUri = _externalUri(session.feedbackUrl);

@@ -53,7 +53,7 @@ sessionTimetable:
   type:
     regular: セッション
     lightningTalk: LT
-    beginnersLightningTalk: 初心者向けLT
+    beginnersLightningTalk: ビギナーズLT
     event: イベント
 sessionSearch:
   title: セッションを検索
