@@ -265,7 +265,9 @@ class _TimelineEventCardWidget extends StatelessWidget {
     final description = timelineEvent.resolveDescription(locale);
 
     return _TimetableCardWidget(
-      onTap: () => showTimelineEventDetailsDialog(context, entry: entry, description: description),
+      onTap: entry.venueId == null
+          ? null
+          : () => showTimelineEventDetailsDialog(context, entry: entry, description: description),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

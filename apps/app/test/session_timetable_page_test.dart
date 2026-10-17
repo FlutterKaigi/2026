@@ -803,11 +803,20 @@ void main() {
     expect(dialog, findsNothing);
   });
 
-  testWidgets('opens event details without a description in both layouts', (tester) async {
-    await _pumpTimetableState(
-      tester,
-      AsyncData(_undescribedEventTimetable),
-    );
+  testWidgets('only opens room event details in both layouts', (tester) async {
+    final timetable = _singleDayTimetable([
+      ..._undescribedEventTimetable.days.single.entries,
+      SessionTimetableEntry.timelineEvent(
+        timelineEvent: _sharedEvent.copyWith(
+          startsAt: _jst(10, 15),
+          endsAt: _jst(10, 30),
+          description: const LocaleMap(ja: '会場全体のイベント', en: 'A shared event'),
+        ),
+        venue: null,
+      ),
+      _overlapEntry,
+    ]);
+    await _pumpTimetableState(tester, AsyncData(timetable));
 
     for (final viewMode in SessionTimetableViewMode.values) {
       if (viewMode == SessionTimetableViewMode.rooms) {
@@ -815,28 +824,30 @@ void main() {
         expect(find.text('09:30 – 10:00'), findsNothing);
         expect(find.text('10:00 – 10:15'), findsOneWidget);
       } else {
-        expect(find.text('イベント'), findsOneWidget);
+        expect(find.text('イベント'), findsNWidgets(2));
         expect(find.text('09:30-10:00'), findsNothing);
         expect(find.text('10:00-10:15'), findsOneWidget);
       }
       expect(find.text('09:30'), findsOneWidget);
 
-      for (final (title, time, hasVenue) in [
-        ('受付', '09:30-10:00', false),
-        ('休憩', '10:00-10:15', true),
+      final dialog = find.byKey(const ValueKey('timeline-event-details-dialog'));
+      for (final title in ['受付', 'Shared Event']) {
+        await tester.tap(find.text(title));
+        await tester.pumpAndSettle();
+        expect(dialog, findsNothing, reason: '$viewMode / $title');
+      }
+
+      for (final (title, time) in [
+        ('休憩', '10:00-10:15'),
+        ('Overlap Event', '10:30-10:50'),
       ]) {
         await tester.tap(find.text(title));
         await tester.pumpAndSettle();
 
-        final dialog = find.byKey(const ValueKey('timeline-event-details-dialog'));
         expect(dialog, findsOneWidget, reason: '$viewMode / $title');
-        for (final text in [title, '2026/10/31', time]) {
+        for (final text in [title, '2026/10/31', time, 'Room A']) {
           expect(find.descendant(of: dialog, matching: find.text(text)), findsOneWidget);
         }
-        expect(
-          find.descendant(of: dialog, matching: find.text('Room A')),
-          hasVenue ? findsOneWidget : findsNothing,
-        );
         expect(find.descendant(of: dialog, matching: find.byType(Divider)), findsNothing);
 
         await tester.tap(find.text('閉じる'));

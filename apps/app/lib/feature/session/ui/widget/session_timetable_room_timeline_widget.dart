@@ -627,12 +627,13 @@ class _RoomScheduleEntryWidget extends ConsumerWidget {
       ),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: switch ((session, entry.timelineEvent?.resolveDescription(locale))) {
+        onTap: switch ((session, entry.venueId)) {
           (final session?, _) => () => SessionDetailsRoute(sessionId: session.id).push<void>(context),
-          (null, final description) => () => showTimelineEventDetailsDialog(
+          (null, null) => null,
+          (null, _) => () => showTimelineEventDetailsDialog(
             context,
             entry: entry,
-            description: description,
+            description: entry.timelineEvent?.resolveDescription(locale),
           ),
         },
         child: Padding(
