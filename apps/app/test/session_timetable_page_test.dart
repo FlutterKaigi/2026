@@ -249,7 +249,7 @@ void main() {
     expect(listTitle.maxLines, isNull);
     expect(listTitle.overflow, isNull);
     expect(find.text('LT'), findsOneWidget);
-    expect(find.text('初心者向けLT'), findsOneWidget);
+    expect(find.text('ビギナーズLT'), findsOneWidget);
 
     await _switchToRooms(tester);
 

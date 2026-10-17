@@ -430,8 +430,8 @@ String _languageLabel(
 ) {
   return switch (language) {
     SessionSearchLanguageFilter.all => t.sessionSearch.allLanguages,
-    SessionSearchLanguageFilter.ja => 'JA',
-    SessionSearchLanguageFilter.en => 'EN',
+    SessionSearchLanguageFilter.ja => t.settings.language.japanese,
+    SessionSearchLanguageFilter.en => t.settings.language.english,
   };
 }
 

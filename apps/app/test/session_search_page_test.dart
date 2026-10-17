@@ -158,6 +158,7 @@ void main() {
 
     await tester.tap(find.byTooltip('種類で絞り込み'));
     await tester.pumpAndSettle();
+    expect(find.text('ビギナーズLT'), findsOneWidget);
     await tester.tap(find.text('LT').last);
     await tester.pumpAndSettle();
 
@@ -174,12 +175,15 @@ void main() {
 
     await tester.tap(find.byTooltip('言語で絞り込み'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('EN').last);
+    expect(find.text('日本語'), findsOneWidget);
+    await tester.tap(find.text('English').last);
     await tester.pumpAndSettle();
 
     expect(find.text('アニメーション'), findsOneWidget);
     expect(find.text('状態管理'), findsNothing);
     expect(find.text('1件のセッション'), findsOneWidget);
+    expect(find.text('English'), findsOneWidget);
+    expect(find.text('EN'), findsOneWidget);
   });
 
   testWidgets('groups matching search results by event day', (tester) async {
