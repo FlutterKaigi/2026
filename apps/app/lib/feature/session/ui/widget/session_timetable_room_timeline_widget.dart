@@ -575,23 +575,25 @@ class _RoomScheduleEntryWidget extends ConsumerWidget {
     final details = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: _RoomScheduleTimeWidget(entry: entry),
-            ),
-            if (languageLabel != null) _TinyLanguageTagWidget(label: languageLabel),
-            if (bookmarked) ...[
-              const SizedBox(width: 4),
-              Icon(
-                Icons.bookmark,
-                size: 14,
-                color: colorScheme.primary,
+        if (entry.isSession || entry.venueId != null) ...[
+          Row(
+            children: [
+              Expanded(
+                child: _RoomScheduleTimeWidget(entry: entry),
               ),
+              if (languageLabel != null) _TinyLanguageTagWidget(label: languageLabel),
+              if (bookmarked) ...[
+                const SizedBox(width: 4),
+                Icon(
+                  Icons.bookmark,
+                  size: 14,
+                  color: colorScheme.primary,
+                ),
+              ],
             ],
-          ],
-        ),
-        const SizedBox(height: 4),
+          ),
+          const SizedBox(height: 4),
+        ],
         Text(
           key: ValueKey('room-session-title-${entry.id}'),
           title,
@@ -625,14 +627,14 @@ class _RoomScheduleEntryWidget extends ConsumerWidget {
       ),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: switch ((session, entry.timelineEvent?.resolveDescription(locale))) {
+        onTap: switch ((session, entry.venueId)) {
           (final session?, _) => () => SessionDetailsRoute(sessionId: session.id).push<void>(context),
-          (null, final description?) => () => showTimelineEventDetailsDialog(
+          (null, null) => null,
+          (null, _) => () => showTimelineEventDetailsDialog(
             context,
             entry: entry,
-            description: description,
+            description: entry.timelineEvent?.resolveDescription(locale),
           ),
-          (null, null) => null,
         },
         child: Padding(
           padding: const EdgeInsets.all(8),

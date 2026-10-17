@@ -21,7 +21,7 @@ extension TimelineEventDetailsX on TimelineEvent {
 Future<void> showTimelineEventDetailsDialog(
   BuildContext context, {
   required SessionTimetableEntry entry,
-  required String description,
+  required String? description,
   ExternalUrlLauncher? launcher,
 }) {
   final locale = Localizations.localeOf(context);
@@ -59,10 +59,12 @@ Future<void> showTimelineEventDetailsDialog(
               label: venue.name.resolve(locale),
             ),
           ],
-          const SizedBox(height: 16),
-          const Divider(height: 1),
-          const SizedBox(height: 16),
-          _DescriptionText(description: description, launcher: launcher),
+          if (description != null) ...[
+            const SizedBox(height: 16),
+            const Divider(height: 1),
+            const SizedBox(height: 16),
+            _DescriptionText(description: description, launcher: launcher),
+          ],
         ],
       ),
       actions: [
