@@ -32,7 +32,7 @@ void main() {
     expect(find.text('2026/10/29'), findsWidgets);
     expect(find.text('10:00-10:45'), findsWidgets);
     expect(find.text('Hall A'), findsWidgets);
-    expect(find.text('EN'), findsOneWidget);
+    expect(find.text('English'), findsOneWidget);
     expect(find.text('Speaker A'), findsOneWidget);
     expect(find.text('Speaker B'), findsOneWidget);
     expect(find.text('Bio A'), findsOneWidget);

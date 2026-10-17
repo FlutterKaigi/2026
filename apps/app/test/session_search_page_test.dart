@@ -182,8 +182,8 @@ void main() {
     expect(find.text('アニメーション'), findsOneWidget);
     expect(find.text('状態管理'), findsNothing);
     expect(find.text('1件のセッション'), findsOneWidget);
-    expect(find.text('English'), findsOneWidget);
-    expect(find.text('EN'), findsOneWidget);
+    expect(find.text('English'), findsNWidgets(2));
+    expect(find.text('EN'), findsNothing);
   });
 
   testWidgets('groups matching search results by event day', (tester) async {

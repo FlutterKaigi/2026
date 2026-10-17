@@ -30,7 +30,7 @@ class SessionCardWidget extends StatelessWidget {
     final session = entry.session!;
     final title = session.title.resolve(locale);
     final description = session.description.resolve(locale).trim();
-    final languageLabel = sessionLanguageLabel(session.primaryLocale);
+    final languageLabel = sessionLanguageLabel(t, session.primaryLocale);
 
     return _SessionCardSurfaceWidget(
       onTap: onTap ?? () => SessionDetailsRoute(sessionId: session.id).push<void>(context),

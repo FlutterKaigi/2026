@@ -133,7 +133,7 @@ void main() {
     expect(find.text('会場'), findsNothing);
     expect(find.text('時刻表示'), findsNothing);
     expect(find.text('2026/10/31'), findsNothing);
-    expect(find.text('JA'), findsOneWidget);
+    expect(find.text('日本語'), findsOneWidget);
     expect(find.text('Description'), findsNothing);
     expect(find.text('セッション'), findsOneWidget);
     expect(find.text('Speaker A'), findsOneWidget);
@@ -191,7 +191,7 @@ void main() {
     expect(find.text('10:15'), findsOneWidget);
     expect(find.text('10:15 – 11:00'), findsOneWidget);
     expect(find.text('Room A'), findsOneWidget);
-    expect(find.text('JA'), findsOneWidget);
+    expect(find.text('日本語'), findsOneWidget);
     expect(find.text('Speaker A'), findsOneWidget);
     expect(find.text('Speaker B'), findsOneWidget);
   });
