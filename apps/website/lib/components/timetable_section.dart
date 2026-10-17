@@ -7,6 +7,7 @@ import '../constants/theme.dart';
 import '../constants/timetable.dart';
 import '../l10n/strings.dart';
 import 'app_dialog.dart';
+import 'linkified_text.dart';
 
 /// Home-page Timetable section: 当日タイムライン（Day 1 / Day 2 タブ切替）。
 ///
@@ -471,7 +472,11 @@ class TimetableSection extends StatelessComponent {
           gap: Gap.row(8.px),
           color: const Color('#494456'),
           fontFamily: uiFontFamily,
-          raw: const {'font-size': '0.9rem', 'line-height': '1.7'},
+          raw: const {'font-size': '0.9rem', 'line-height': '1.7', 'overflow-wrap': 'anywhere'},
+        ),
+        css('.timetable-dialog__desc a').styles(
+          color: primary,
+          raw: const {'text-decoration': 'underline', 'text-underline-offset': '0.2em'},
         ),
       ]),
     ]),
@@ -738,7 +743,7 @@ class _SessionDialog extends StatelessComponent {
             if (speaker != null) _speakerRow('timetable-dialog__speaker', session.speakerAvatarUrls, speaker),
             if (description != null)
               div(classes: 'timetable-dialog__desc', [
-                for (final paragraph in description.split('\n')) p([.text(paragraph)]),
+                for (final paragraph in description.split('\n')) p([LinkifiedText(paragraph)]),
               ]),
           ],
         ),
