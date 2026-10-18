@@ -37,7 +37,9 @@ final class FirebaseAuthRepository implements AuthRepository {
   static Future<void>? _googleSignInInitialization;
 
   bool get _usesNativeGoogleSignIn =>
-      !kIsWeb && defaultTargetPlatform == TargetPlatform.android && !FirebaseInitializer.emulatorConfigured;
+      !kIsWeb &&
+      (defaultTargetPlatform == TargetPlatform.android || defaultTargetPlatform == TargetPlatform.iOS) &&
+      !FirebaseInitializer.emulatorConfigured;
 
   @override
   Stream<User?> authStateChanges() => _auth.authStateChanges();

@@ -24,10 +24,11 @@
 	<string>$(FLUTTER_BUILD_NAME)</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
-	<!-- Firebase Auth の signInWithProvider(Google)がブラウザからアプリへ
-	     戻るためのコールバックスキーム。dev は FirebaseInitializer のダミー
+	<!-- Auth Emulator の signInWithProvider(Google)がアプリへ戻るための
+	     コールバックスキーム。dev は FirebaseInitializer のダミー
 	     appId(1:000000000000:ios:0000000000000000000000)を `app-` 形式に
-	     エンコードした値を使う。本番の REVERSED_CLIENT_ID は配布 Workflow
+	     エンコードした値を使う。ネイティブ Google 認証の GIDClientID と
+	     REVERSED_CLIENT_ID は配布 Workflow
 	     (deploy_app_ios.yaml)が FlutterFire CLI の生成値からアーカイブ前に
 	     挿入・検証する。 -->
 	<key>CFBundleURLTypes</key>

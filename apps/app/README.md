@@ -58,11 +58,13 @@ Webは `/account` や `/x/<token>` のパス形式を使用します。以前の
 
 Google / メールアドレス+パスワードのサインインに対応し、iOSアプリではAppleサインインも表示します。Appleサインインの表示条件はiOSアプリであることのみで、dev / stg / prodによる違いはありません。リポジトリ実装は`packages/data`の`AuthRepository`、UIはアカウントタブ(`/account`)です。アカウントタブからはサインアウトと、再認証をともなうアカウント削除(App Store Review Guideline 5.1.1(v)対応)ができます。Appleユーザーの削除ではiOSのFirebase SDKでAppleのトークンを失効させてから削除します(Emulator接続時は失効をスキップ)。
 
-Androidのstg / prodでは、`google_sign_in_android`のネイティブ認証で取得したIDトークンをFirebaseの`signInWithCredential`へ渡します。アカウント削除前のGoogle再認証も同じ経路を使います。Webは`signInWithPopup`、iOSとAuth Emulator接続時のモバイルは`signInWithProvider`を使います。依存をAndroid実装に限定し、Webで使わないGoogle Identity Services SDKの自動読み込みを防ぎます。
+AndroidとiOSのstg / prodでは、`google_sign_in_android` / `google_sign_in_ios`のネイティブ認証で取得したIDトークンをFirebaseの`signInWithCredential`へ渡します。アカウント削除前のGoogle再認証も同じ経路を使います。Webは`signInWithPopup`、Auth Emulator接続時のモバイルは`signInWithProvider`を使います。依存をネイティブ実装に限定し、Webで使わないGoogle Identity Services SDKの自動読み込みを防ぎます。
 
 AndroidのGoogle認証は、配布Workflowが生成する`google-services.json`のWeb OAuth clientを使用します。対象Packageの`oauth_client`に`client_type: 3`と空でない`client_id`が必要です。各環境のFirebase Android Appに配布署名のSHA-1 / SHA-256を登録し、Google Play経由の配布ではApp Signingの証明書を使用してください。設定ファイルやClient IDをGitへ追加する必要はありません。
 
-内部テスト版をGoogle Playからインストールした実機で、Googleサインイン、キャンセル、サインアウト後の別アカウントでのサインイン、アカウント削除前の再認証を確認します。Emulatorや単体テストだけでは配布署名とGoogle認証設定の整合性を確認できません。
+iOSのGoogle認証は、配布Workflowが生成する`GoogleService-Info.plist`の`CLIENT_ID`と`REVERSED_CLIENT_ID`を使用します。Workflowは両者の整合性を確認してから、`Info.plist`に`GIDClientID`と戻りURLのスキームを設定し、署名済みIPAでも設定を検証します。STGと本番はそれぞれのFirebase iOS Appから生成します。
+
+内部テスト版をGoogle PlayまたはTestFlightからインストールした実機で、Googleサインイン、キャンセル、サインアウト後の別アカウントでのサインイン、アカウント削除前の再認証を確認します。Emulatorや単体テストだけでは配布署名とGoogle認証設定の整合性を確認できません。
 
 devフレーバーはAuth Emulator(port 9099)へ自動接続します。
 
@@ -73,9 +75,9 @@ Emulator接続時は次のように動作します。
 - メール+パスワード: アカウント作成・サインイン・パスワード再設定を利用できます。再設定メールのリンクはEmulatorを起動したターミナルのログに出力されます。
 - 登録されたユーザーはEmulator UI(`http://localhost:4000/auth`)で確認できます。
 
-iOSのGoogleサインインはブラウザ経由(`signInWithProvider`)で行われ、`Info.plist`のコールバックスキームでアプリへ戻ります。iOSのAppleサインインは全環境で共通のEntitlementsを使い、Sign in with Apple Capabilityを要求します。署名に使う各App IDでもCapabilityを有効化し、対応するProvisioning Profileを用意してください。Firebaseに接続するstg / prodではAppleプロバイダを有効化します。配布に必要なコールバックスキーム、Entitlements、Provisioning Profileはメンテナー向けWorkflowとApple Developer Portalで管理します。Web OAuthを提供しないため、AppleのServices IDは使用しません。
+iOSのAppleサインインは全環境で共通のEntitlementsを使い、Sign in with Apple Capabilityを要求します。署名に使う各App IDでもCapabilityを有効化し、対応するProvisioning Profileを用意してください。Firebaseに接続するstg / prodではAppleプロバイダを有効化します。配布に必要なコールバックスキーム、Entitlements、Provisioning Profileはメンテナー向けWorkflowとApple Developer Portalで管理します。Web OAuthを提供しないため、AppleのServices IDは使用しません。
 
-認証用の戻りURL(`app-…://firebaseauth/link` / `com.googleusercontent.apps.…://firebaseauth/link`)がFlutterにも通知された場合、ルーターは画面遷移を止め、サインインを開始した画面と戻る履歴を維持します。認証状態の更新はFirebase SDKが処理します。このURLからアプリが新規起動した場合はアカウントタブを表示します。プロフィール交換などのUniversal Linksは引き続き通常のルーティングで処理します。
+認証用の戻りURL(`app-…://firebaseauth/link` / `com.googleusercontent.apps.…://firebaseauth/link` / `com.googleusercontent.apps.…:/oauth2callback`)がFlutterにも通知された場合、ルーターは画面遷移を止め、サインインを開始した画面と戻る履歴を維持します。認証処理は各SDKが担当します。このURLからアプリが新規起動した場合はアカウントタブを表示しますが、終了したアプリの認証処理を復元するものではありません。プロフィール交換などのUniversal Linksは引き続き通常のルーティングで処理します。
 
 ## プロフィール
 

@@ -28,22 +28,25 @@ void main() {
     expect(google.calls, isEmpty);
   });
 
-  test('Google sign-in opens the Firebase popup with the hosted domain even in an Android browser', () async {
-    auth.signInGate = Completer<UserCredential>();
-    var completed = false;
+  for (final platform in [TargetPlatform.android, TargetPlatform.iOS]) {
+    test('Google sign-in opens the Firebase popup with the hosted domain even in a ${platform.name} browser', () async {
+      debugDefaultTargetPlatformOverride = platform;
+      auth.signInGate = Completer<UserCredential>();
+      var completed = false;
 
-    final signIn = repository.signInWithGoogle().then((_) => completed = true);
+      final signIn = repository.signInWithGoogle().then((_) => completed = true);
 
-    final provider = auth.providers.single as GoogleAuthProvider;
-    expect(provider.providerId, GoogleAuthProvider.PROVIDER_ID);
-    expect(provider.parameters, {'hd': 'example.com'});
-    await Future<void>.delayed(Duration.zero);
-    expect(completed, isFalse);
+      final provider = auth.providers.single as GoogleAuthProvider;
+      expect(provider.providerId, GoogleAuthProvider.PROVIDER_ID);
+      expect(provider.parameters, {'hd': 'example.com'});
+      await Future<void>.delayed(Duration.zero);
+      expect(completed, isFalse);
 
-    auth.signInGate!.complete(_UserCredential());
-    await signIn;
-    expect(completed, isTrue);
-  });
+      auth.signInGate!.complete(_UserCredential());
+      await signIn;
+      expect(completed, isTrue);
+    });
+  }
 
   test('Google sign-in without a hosted domain does not restrict the popup account selection', () async {
     repository = FirebaseAuthRepository(auth: auth);

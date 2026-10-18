@@ -109,26 +109,11 @@ jobs:
           test "$(/usr/libexec/PlistBuddy -c 'Print :BUNDLE_ID' ios/Runner/GoogleService-Info.plist)" = "$IOS_BUNDLE_ID"
           grep -Fq "projectId: '$FIREBASE_PROJECT_ID'" lib/firebase_options.dart
 
-      # Google サインイン(signInWithProvider)のブラウザフローがアプリへ戻る
-      # には REVERSED_CLIENT_ID の URL スキーム登録が必要。Info.plist には
-      # dev(Emulator)用スキームしかコミットされていないため、FlutterFire CLI が
-      # 生成した本番値をアーカイブ前に挿入して検証する。
-      - name: Register Google sign-in callback URL scheme
-        working-directory: apps/app
-        run: |
-          reversed_client_id="$(/usr/libexec/PlistBuddy -c 'Print :REVERSED_CLIENT_ID' ios/Runner/GoogleService-Info.plist)"
-          if [ -z "$reversed_client_id" ]; then
-            echo "::error::REVERSED_CLIENT_ID was not found in GoogleService-Info.plist."
-            exit 1
-          fi
-          /usr/libexec/PlistBuddy \
-            -c 'Add :CFBundleURLTypes:1 dict' \
-            -c 'Add :CFBundleURLTypes:1:CFBundleTypeRole string Editor' \
-            -c 'Add :CFBundleURLTypes:1:CFBundleURLSchemes array' \
-            -c "Add :CFBundleURLTypes:1:CFBundleURLSchemes:0 string $reversed_client_id" \
-            ios/Runner/Info.plist
-          /usr/libexec/PlistBuddy -c 'Print :CFBundleURLTypes:1:CFBundleURLSchemes:0' ios/Runner/Info.plist \
-            | grep -Fx "$reversed_client_id"
+      - name: Configure native Google sign-in
+        run: >-
+          python3 .github/scripts/configure_ios_google_sign_in.py configure
+          --google-service-plist apps/app/ios/Runner/GoogleService-Info.plist
+          --app-plist apps/app/ios/Runner/Info.plist
 
       # プッシュ通知の aps-environment は、ローカルの Debug ビルドに合わせて development を
       # コミットしている。署名検証は App Store プロファイルの production と突き合わせるため、
@@ -215,7 +200,7 @@ jobs:
             -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" \
             -exportPath build/ios/export
 
-      - name: IPA 内のアプリID・バージョン・ビルド番号を検証
+      - name: IPA 内のアプリID・バージョン・ビルド番号・Google 認証設定を検証
         working-directory: apps/app
         run: |
           ipa_path="$(find build/ios/export -maxdepth 1 -name '*.ipa' -print -quit)"
@@ -227,6 +212,9 @@ jobs:
           test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$app_plist")" = "$APP_VERSION"
           test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$app_plist")" = "$BUILD_NUMBER"
           test "$(/usr/libexec/PlistBuddy -c 'Print :ITSAppUsesNonExemptEncryption' "$app_plist")" = false
+          python3 ../../.github/scripts/configure_ios_google_sign_in.py verify \
+            --google-service-plist ios/Runner/GoogleService-Info.plist \
+            --app-plist "$app_plist"
 
       - name: Upload IPA artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2

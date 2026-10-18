@@ -74,10 +74,15 @@ jobs:
           from pathlib import Path
 
           plugins = json.loads(Path("apps/app/.flutter-plugins-dependencies").read_text())["plugins"]
-          assert any(p["name"] == "google_sign_in_android" for p in plugins["android"])
+          expected = {
+              "android": {"google_sign_in_android"},
+              "ios": {"google_sign_in_ios"},
+              "macos": {"google_sign_in_ios"},
+          }
+          assert expected.keys() <= plugins.keys()
           for platform, entries in plugins.items():
-              if platform != "android":
-                  assert not any(p["name"].startswith("google_sign_in_") for p in entries), platform
+              actual = {p["name"] for p in entries if p["name"].startswith("google_sign_in_")}
+              assert actual == expected.get(platform, set()), (platform, actual)
           PY
 
       - name: Check formatting

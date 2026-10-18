@@ -28,7 +28,8 @@ void main() {
     debugDefaultTargetPlatformOverride = null;
   });
 
-  test('concurrent Android sign-ins wait for one shared initialization and use native ID tokens', () async {
+  test('concurrent iOS sign-ins wait for one shared initialization and use native ID tokens', () async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
     google.initializationGate = Completer<void>();
     final anotherRepository = FirebaseAuthRepository(auth: auth, hostedDomain: 'example.com');
     final signIns = Future.wait([
@@ -55,208 +56,239 @@ void main() {
     }
   });
 
-  test('sign-in clears an earlier Google session before requesting a fresh account', () async {
-    await repository.signInWithGoogle();
+  for (final platform in [TargetPlatform.android, TargetPlatform.iOS]) {
+    group(platform.name, () {
+      setUp(() {
+        debugDefaultTargetPlatformOverride = platform;
+      });
 
-    expect(google.events, ['signOut', 'authenticate']);
-    expect(auth.credentials, hasLength(1));
-    expect(auth.providers, isEmpty);
+      test('sign-in clears an earlier Google session before requesting a fresh account', () async {
+        await repository.signInWithGoogle();
+
+        expect(google.events, ['signOut', 'authenticate']);
+        expect(auth.credentials.single.providerId, GoogleAuthProvider.PROVIDER_ID);
+        expect((auth.credentials.single as OAuthCredential).idToken, 'native-google-id-token');
+        expect(auth.providers, isEmpty);
+      });
+
+      test('failed Google session cleanup stops authentication and uses the Firebase error contract', () async {
+        google.signOutError = PlatformException(code: 'Clear Failed', message: 'Google sign-out failed');
+
+        await expectLater(
+          repository.signInWithGoogle(),
+          throwsA(
+            isA<FirebaseAuthException>()
+                .having((error) => error.code, 'code', 'google-sign-in-failed')
+                .having((error) => error.message, 'message', 'Google sign-out failed'),
+          ),
+        );
+
+        expect(google.events, ['signOut']);
+        expect(auth.credentials, isEmpty);
+        expect(auth.providers, isEmpty);
+      });
+
+      for (final entry in {
+        GoogleSignInExceptionCode.canceled: 'canceled',
+        GoogleSignInExceptionCode.userMismatch: 'user-mismatch',
+        GoogleSignInExceptionCode.clientConfigurationError: 'google-sign-in-failed',
+      }.entries) {
+        test('maps native ${entry.key.name} to the existing Firebase error contract', () async {
+          google.authenticationError = GoogleSignInException(code: entry.key, description: 'Native failure');
+
+          await expectLater(
+            repository.signInWithGoogle(),
+            throwsA(
+              isA<FirebaseAuthException>()
+                  .having((error) => error.code, 'code', entry.value)
+                  .having((error) => error.message, 'message', 'Native failure'),
+            ),
+          );
+          expect(auth.credentials, isEmpty);
+        });
+      }
+
+      for (final token in <String?>[null, '']) {
+        test('rejects a ${token == null ? 'missing' : 'blank'} Google ID token before contacting Firebase', () async {
+          google.idToken = token;
+
+          await expectLater(
+            repository.signInWithGoogle(),
+            throwsA(isA<FirebaseAuthException>().having((error) => error.code, 'code', 'invalid-credential')),
+          );
+          expect(auth.credentials, isEmpty);
+        });
+      }
+
+      test('preserves Firebase credential exchange errors', () async {
+        final failure = FirebaseAuthException(code: 'account-exists-with-different-credential');
+        auth.credentialError = failure;
+
+        await expectLater(repository.signInWithGoogle(), throwsA(same(failure)));
+      });
+
+      test('account deletion reauthenticates with a native token before deleting user data and the account', () async {
+        final user = _User([GoogleAuthProvider.PROVIDER_ID]);
+        auth.currentUser = user;
+
+        await repository.deleteAccount(beforeDelete: () async => user.events.add('beforeDelete'));
+
+        expect(google.events, ['signOut', 'authenticate']);
+        expect(user.credentials.single.providerId, GoogleAuthProvider.PROVIDER_ID);
+        expect((user.credentials.single as OAuthCredential).idToken, 'native-google-id-token');
+        expect(user.events, ['reauthenticate', 'beforeDelete', 'delete']);
+        expect(user.providers, isEmpty);
+        expect(auth.credentials, isEmpty);
+      });
+
+      test('canceling account reauthentication leaves user data and the account intact', () async {
+        final user = _User([GoogleAuthProvider.PROVIDER_ID]);
+        auth.currentUser = user;
+        google.authenticationError = const GoogleSignInException(code: GoogleSignInExceptionCode.canceled);
+
+        await expectLater(
+          repository.deleteAccount(beforeDelete: () async => user.events.add('beforeDelete')),
+          throwsA(isA<FirebaseAuthException>().having((error) => error.code, 'code', 'canceled')),
+        );
+        expect(user.credentials, isEmpty);
+        expect(user.events, isEmpty);
+      });
+
+      test('a different Google account cannot delete the signed-in Firebase account or its data', () async {
+        final user = _User([GoogleAuthProvider.PROVIDER_ID]);
+        final failure = FirebaseAuthException(code: 'user-mismatch');
+        user.reauthenticationError = failure;
+        auth.currentUser = user;
+
+        await expectLater(
+          repository.deleteAccount(beforeDelete: () async => user.events.add('beforeDelete')),
+          throwsA(same(failure)),
+        );
+        expect(user.events, ['reauthenticate']);
+        expect(auth.credentials, isEmpty);
+      });
+
+      test('a failed data deletion leaves the reauthenticated Firebase account intact', () async {
+        final user = _User([GoogleAuthProvider.PROVIDER_ID]);
+        final failure = StateError('Data deletion failed');
+        auth.currentUser = user;
+
+        await expectLater(repository.deleteAccount(beforeDelete: () async => throw failure), throwsA(same(failure)));
+        expect(user.events, ['reauthenticate']);
+      });
+
+      test('email account deletion continues to reauthenticate with a password without Google', () async {
+        final user = _User([EmailAuthProvider.PROVIDER_ID]);
+        auth.currentUser = user;
+
+        await repository.deleteAccount(password: 'test-password');
+
+        expect(user.credentials.single.providerId, EmailAuthProvider.PROVIDER_ID);
+        expect(user.events, ['reauthenticate', 'delete']);
+        expect(google.events, isEmpty);
+      });
+
+      test('signing out a Google account clears both Google and Firebase sessions', () async {
+        auth.currentUser = _User([GoogleAuthProvider.PROVIDER_ID]);
+
+        await repository.signOut();
+
+        expect(google.events, ['signOut']);
+        expect(auth.signOutCount, 1);
+      });
+
+      test('Google sign-out failure still signs out Firebase', () async {
+        auth.currentUser = _User([GoogleAuthProvider.PROVIDER_ID]);
+        google.signOutError = PlatformException(code: 'Clear Failed', message: 'Google sign-out failed');
+
+        await expectLater(
+          repository.signOut(),
+          throwsA(
+            isA<FirebaseAuthException>()
+                .having((error) => error.code, 'code', 'google-sign-in-failed')
+                .having((error) => error.message, 'message', 'Google sign-out failed'),
+          ),
+        );
+
+        expect(google.events, ['signOut']);
+        expect(auth.signOutCount, 1);
+      });
+
+      test('signing out an email-only account does not invoke Google', () async {
+        auth.currentUser = _User([EmailAuthProvider.PROVIDER_ID]);
+
+        await repository.signOut();
+
+        expect(google.events, isEmpty);
+        expect(auth.signOutCount, 1);
+      });
+
+      test('signing out without a current user does not invoke Google', () async {
+        await repository.signOut();
+
+        expect(google.events, isEmpty);
+        expect(auth.signOutCount, 1);
+      });
+    });
+  }
+
+  test('iOS Apple sign-in keeps provider authentication and requested scopes without Google', () async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+
+    await repository.signInWithApple();
+
+    final provider = auth.providers.single as AppleAuthProvider;
+    expect(provider.providerId, AppleAuthProvider.PROVIDER_ID);
+    expect(provider.scopes, ['email', 'name']);
+    expect(auth.credentials, isEmpty);
+    expect(google.events, isEmpty);
   });
 
-  test('failed Google session cleanup stops authentication and uses the Firebase error contract', () async {
-    google.signOutError = PlatformException(code: 'Clear Failed', message: 'Google sign-out failed');
-
-    await expectLater(
-      repository.signInWithGoogle(),
-      throwsA(
-        isA<FirebaseAuthException>()
-            .having((error) => error.code, 'code', 'google-sign-in-failed')
-            .having((error) => error.message, 'message', 'Google sign-out failed'),
-      ),
+  test('iOS linked Google and Apple account deletion waits for both reauthentication and Apple revocation', () async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    final user = _User(
+      [GoogleAuthProvider.PROVIDER_ID, AppleAuthProvider.PROVIDER_ID],
+      events: auth.events,
     );
-
-    expect(google.events, ['signOut']);
-    expect(auth.credentials, isEmpty);
-    expect(auth.providers, isEmpty);
-  });
-
-  test('iOS Google sign-in retains the Firebase provider flow and hosted domain', () async {
-    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-
-    await repository.signInWithGoogle();
-
-    final provider = auth.providers.single as GoogleAuthProvider;
-    expect(provider.providerId, GoogleAuthProvider.PROVIDER_ID);
-    expect(provider.parameters, {'hd': 'example.com'});
-    expect(auth.credentials, isEmpty);
-    expect(google.events, isEmpty);
-  });
-
-  test('iOS Google account deletion retains provider reauthentication and hosted domain', () async {
-    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-    final user = _User([GoogleAuthProvider.PROVIDER_ID]);
+    user.providerCredential = _UserCredential(authorizationCode: 'apple-authorization-code');
     auth.currentUser = user;
+    auth.revocationGate = Completer<void>();
 
-    await repository.deleteAccount(beforeDelete: () async => user.events.add('beforeDelete'));
-
-    final provider = user.providers.single as GoogleAuthProvider;
-    expect(provider.providerId, GoogleAuthProvider.PROVIDER_ID);
-    expect(provider.parameters, {'hd': 'example.com'});
-    expect(user.events, ['reauthenticateWithProvider', 'beforeDelete', 'delete']);
-    expect(user.credentials, isEmpty);
-    expect(google.events, isEmpty);
-  });
-
-  test('iOS sign-out keeps the Firebase session flow without invoking the Google plugin', () async {
-    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-    auth.currentUser = _User([GoogleAuthProvider.PROVIDER_ID]);
-
-    await repository.signOut();
-
-    expect(auth.signOutCount, 1);
-    expect(google.events, isEmpty);
-  });
-
-  for (final entry in {
-    GoogleSignInExceptionCode.canceled: 'canceled',
-    GoogleSignInExceptionCode.userMismatch: 'user-mismatch',
-    GoogleSignInExceptionCode.clientConfigurationError: 'google-sign-in-failed',
-  }.entries) {
-    test('maps native ${entry.key.name} to the existing Firebase error contract', () async {
-      google.authenticationError = GoogleSignInException(code: entry.key, description: 'Native failure');
-
-      await expectLater(
-        repository.signInWithGoogle(),
-        throwsA(
-          isA<FirebaseAuthException>()
-              .having((error) => error.code, 'code', entry.value)
-              .having((error) => error.message, 'message', 'Native failure'),
-        ),
-      );
-      expect(auth.credentials, isEmpty);
-    });
-  }
-
-  for (final token in <String?>[null, '']) {
-    test('rejects a ${token == null ? 'missing' : 'blank'} Google ID token before contacting Firebase', () async {
-      google.idToken = token;
-
-      await expectLater(
-        repository.signInWithGoogle(),
-        throwsA(isA<FirebaseAuthException>().having((error) => error.code, 'code', 'invalid-credential')),
-      );
-      expect(auth.credentials, isEmpty);
-    });
-  }
-
-  test('preserves Firebase credential exchange errors', () async {
-    final failure = FirebaseAuthException(code: 'account-exists-with-different-credential');
-    auth.credentialError = failure;
-
-    await expectLater(repository.signInWithGoogle(), throwsA(same(failure)));
-  });
-
-  test('account deletion reauthenticates with a native token before deleting user data and the account', () async {
-    final user = _User([GoogleAuthProvider.PROVIDER_ID]);
-    auth.currentUser = user;
-
-    await repository.deleteAccount(beforeDelete: () async => user.events.add('beforeDelete'));
+    final deletion = repository.deleteAccount(beforeDelete: () async => user.events.add('beforeDelete'));
+    await Future<void>.delayed(Duration.zero);
 
     expect(google.events, ['signOut', 'authenticate']);
-    expect(user.credentials.single.providerId, GoogleAuthProvider.PROVIDER_ID);
     expect((user.credentials.single as OAuthCredential).idToken, 'native-google-id-token');
-    expect(user.events, ['reauthenticate', 'beforeDelete', 'delete']);
-    expect(user.providers, isEmpty);
+    expect(user.providers.single, isA<AppleAuthProvider>());
+    expect(auth.revokedAuthorizationCodes, ['apple-authorization-code']);
+    expect(user.events, ['reauthenticate', 'reauthenticateWithProvider', 'revokeAppleToken']);
+
+    auth.revocationGate!.complete();
+    await deletion;
+
+    expect(user.events, ['reauthenticate', 'reauthenticateWithProvider', 'revokeAppleToken', 'beforeDelete', 'delete']);
     expect(auth.credentials, isEmpty);
   });
 
-  test('canceling account reauthentication leaves user data and the account intact', () async {
-    final user = _User([GoogleAuthProvider.PROVIDER_ID]);
-    auth.currentUser = user;
-    google.authenticationError = const GoogleSignInException(code: GoogleSignInExceptionCode.canceled);
-
-    await expectLater(
-      repository.deleteAccount(beforeDelete: () async => user.events.add('beforeDelete')),
-      throwsA(isA<FirebaseAuthException>().having((error) => error.code, 'code', 'canceled')),
+  test('iOS linked Google and Apple account remains intact when Apple revocation fails', () async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    final user = _User(
+      [GoogleAuthProvider.PROVIDER_ID, AppleAuthProvider.PROVIDER_ID],
+      events: auth.events,
     );
-    expect(user.credentials, isEmpty);
-    expect(user.events, isEmpty);
-  });
-
-  test('a different Google account cannot delete the signed-in Firebase account or its data', () async {
-    final user = _User([GoogleAuthProvider.PROVIDER_ID]);
-    final failure = FirebaseAuthException(code: 'user-mismatch');
-    user.reauthenticationError = failure;
+    user.providerCredential = _UserCredential(authorizationCode: 'apple-authorization-code');
     auth.currentUser = user;
+    final failure = FirebaseAuthException(code: 'network-request-failed');
+    auth.revocationError = failure;
 
     await expectLater(
       repository.deleteAccount(beforeDelete: () async => user.events.add('beforeDelete')),
       throwsA(same(failure)),
     );
-    expect(user.events, ['reauthenticate']);
+
+    expect(auth.revokedAuthorizationCodes, ['apple-authorization-code']);
+    expect(user.events, ['reauthenticate', 'reauthenticateWithProvider', 'revokeAppleToken']);
     expect(auth.credentials, isEmpty);
-  });
-
-  test('a failed data deletion leaves the reauthenticated Firebase account intact', () async {
-    final user = _User([GoogleAuthProvider.PROVIDER_ID]);
-    final failure = StateError('Data deletion failed');
-    auth.currentUser = user;
-
-    await expectLater(repository.deleteAccount(beforeDelete: () async => throw failure), throwsA(same(failure)));
-    expect(user.events, ['reauthenticate']);
-  });
-
-  test('email account deletion continues to reauthenticate with a password without Google', () async {
-    final user = _User([EmailAuthProvider.PROVIDER_ID]);
-    auth.currentUser = user;
-
-    await repository.deleteAccount(password: 'test-password');
-
-    expect(user.credentials.single.providerId, EmailAuthProvider.PROVIDER_ID);
-    expect(user.events, ['reauthenticate', 'delete']);
-    expect(google.events, isEmpty);
-  });
-
-  test('signing out a Google account clears both Google and Firebase sessions', () async {
-    auth.currentUser = _User([GoogleAuthProvider.PROVIDER_ID]);
-
-    await repository.signOut();
-
-    expect(google.events, ['signOut']);
-    expect(auth.signOutCount, 1);
-  });
-
-  test('Google sign-out failure still signs out Firebase', () async {
-    auth.currentUser = _User([GoogleAuthProvider.PROVIDER_ID]);
-    google.signOutError = PlatformException(code: 'Clear Failed', message: 'Google sign-out failed');
-
-    await expectLater(
-      repository.signOut(),
-      throwsA(
-        isA<FirebaseAuthException>()
-            .having((error) => error.code, 'code', 'google-sign-in-failed')
-            .having((error) => error.message, 'message', 'Google sign-out failed'),
-      ),
-    );
-
-    expect(google.events, ['signOut']);
-    expect(auth.signOutCount, 1);
-  });
-
-  test('signing out an email-only account does not invoke Google', () async {
-    auth.currentUser = _User([EmailAuthProvider.PROVIDER_ID]);
-
-    await repository.signOut();
-
-    expect(google.events, isEmpty);
-    expect(auth.signOutCount, 1);
-  });
-
-  test('signing out without a current user does not invoke Google', () async {
-    await repository.signOut();
-
-    expect(google.events, isEmpty);
-    expect(auth.signOutCount, 1);
   });
 }
 
@@ -314,6 +346,10 @@ class _Auth extends Fake implements FirebaseAuth {
   final credentials = <AuthCredential>[];
   final providers = <AuthProvider>[];
   Object? credentialError;
+  final events = <String>[];
+  final revokedAuthorizationCodes = <String>[];
+  Completer<void>? revocationGate;
+  Object? revocationError;
   var signOutCount = 0;
 
   @override
@@ -332,6 +368,16 @@ class _Auth extends Fake implements FirebaseAuth {
   }
 
   @override
+  Future<void> revokeTokenWithAuthorizationCode(String authorizationCode) async {
+    events.add('revokeAppleToken');
+    revokedAuthorizationCodes.add(authorizationCode);
+    await revocationGate?.future;
+    if (revocationError case final error?) {
+      throw error;
+    }
+  }
+
+  @override
   Future<void> signOut() async {
     signOutCount++;
     currentUser = null;
@@ -339,7 +385,9 @@ class _Auth extends Fake implements FirebaseAuth {
 }
 
 class _User extends Fake implements User {
-  _User(List<String> providers) : providerData = providers.map(_UserInfo.new).toList();
+  _User(List<String> providers, {List<String>? events})
+    : providerData = providers.map(_UserInfo.new).toList(),
+      events = events ?? [];
 
   @override
   final List<UserInfo> providerData;
@@ -349,8 +397,9 @@ class _User extends Fake implements User {
 
   final credentials = <AuthCredential>[];
   final providers = <AuthProvider>[];
-  final events = <String>[];
+  final List<String> events;
   Object? reauthenticationError;
+  UserCredential providerCredential = _UserCredential();
 
   @override
   Future<UserCredential> reauthenticateWithCredential(AuthCredential credential) async {
@@ -366,7 +415,7 @@ class _User extends Fake implements User {
   Future<UserCredential> reauthenticateWithProvider(AuthProvider provider) async {
     events.add('reauthenticateWithProvider');
     providers.add(provider);
-    return _UserCredential();
+    return providerCredential;
   }
 
   @override
@@ -380,4 +429,17 @@ class _UserInfo extends Fake implements UserInfo {
   final String providerId;
 }
 
-class _UserCredential extends Fake implements UserCredential {}
+class _UserCredential extends Fake implements UserCredential {
+  _UserCredential({String? authorizationCode})
+    : additionalUserInfo = authorizationCode == null ? null : _AdditionalUserInfo(authorizationCode);
+
+  @override
+  final AdditionalUserInfo? additionalUserInfo;
+}
+
+class _AdditionalUserInfo extends Fake implements AdditionalUserInfo {
+  _AdditionalUserInfo(this.authorizationCode);
+
+  @override
+  final String authorizationCode;
+}

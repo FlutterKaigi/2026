@@ -16,8 +16,9 @@ dependencies:
   flutter:
     sdk: flutter
   freezed_annotation: ^3.1.0
-  # Use the Android implementation so Web does not automatically load the GIS SDK.
+  # Use native implementations so Web does not automatically load the GIS SDK.
   google_sign_in_android: ^7.1.0
+  google_sign_in_ios: ^6.3.8
   google_sign_in_platform_interface: ^3.1.0
   # Used only by src/firestore/firestore_rest_client.dart, the Flutter-free
   # REST fetch path (see news_model.dart) for plain `dart run` tooling.
