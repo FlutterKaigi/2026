@@ -58,7 +58,7 @@ Webは `/account` や `/x/<token>` のパス形式を使用します。以前の
 
 Google / メールアドレス+パスワードのサインインに対応し、iOSアプリではAppleサインインも表示します。Appleサインインの表示条件はiOSアプリであることのみで、dev / stg / prodによる違いはありません。リポジトリ実装は`packages/data`の`AuthRepository`、UIはアカウントタブ(`/account`)です。アカウントタブからはサインアウトと、再認証をともなうアカウント削除(App Store Review Guideline 5.1.1(v)対応)ができます。Appleユーザーの削除ではiOSのFirebase SDKでAppleのトークンを失効させてから削除します(Emulator接続時は失効をスキップ)。
 
-Androidのstg / prodでは、`google_sign_in`のネイティブ認証で取得したIDトークンをFirebaseの`signInWithCredential`へ渡します。アカウント削除前のGoogle再認証も同じ経路を使います。Webは`signInWithPopup`、iOSとAuth Emulator接続時のモバイルは`signInWithProvider`を使います。
+Androidのstg / prodでは、`google_sign_in_android`のネイティブ認証で取得したIDトークンをFirebaseの`signInWithCredential`へ渡します。アカウント削除前のGoogle再認証も同じ経路を使います。Webは`signInWithPopup`、iOSとAuth Emulator接続時のモバイルは`signInWithProvider`を使います。依存をAndroid実装に限定し、Webで使わないGoogle Identity Services SDKの自動読み込みを防ぎます。
 
 AndroidのGoogle認証は、配布Workflowが生成する`google-services.json`のWeb OAuth clientを使用します。対象Packageの`oauth_client`に`client_type: 3`と空でない`client_id`が必要です。各環境のFirebase Android Appに配布署名のSHA-1 / SHA-256を登録し、Google Play経由の配布ではApp Signingの証明書を使用してください。設定ファイルやClient IDをGitへ追加する必要はありません。
 

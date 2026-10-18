@@ -2,7 +2,7 @@ import 'package:data/src/firebase/firebase_initializer.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:google_sign_in/google_sign_in.dart';
+import 'package:google_sign_in_platform_interface/google_sign_in_platform_interface.dart';
 
 abstract interface class AuthRepository {
   Stream<User?> authStateChanges();
@@ -33,7 +33,7 @@ final class FirebaseAuthRepository implements AuthRepository {
   /// Firestore ルールの hasAdminAccess で行う）。null の場合は無制限。
   final String? hostedDomain;
 
-  // GoogleSignIn is a process-wide singleton, even when repositories are recreated.
+  // GoogleSignInPlatform is a process-wide singleton, even when repositories are recreated.
   static Future<void>? _googleSignInInitialization;
 
   bool get _usesNativeGoogleSignIn =>
@@ -74,10 +74,10 @@ final class FirebaseAuthRepository implements AuthRepository {
     ..addScope('email')
     ..addScope('name');
 
-  Future<T> _withNativeGoogleSignIn<T>(Future<T> Function(GoogleSignIn google) action) async {
-    final google = GoogleSignIn.instance;
+  Future<T> _withNativeGoogleSignIn<T>(Future<T> Function(GoogleSignInPlatform google) action) async {
+    final google = GoogleSignInPlatform.instance;
     try {
-      await (_googleSignInInitialization ??= google.initialize(hostedDomain: hostedDomain));
+      await (_googleSignInInitialization ??= google.init(InitParameters(hostedDomain: hostedDomain)));
       return await action(google);
     } on GoogleSignInException catch (error) {
       throw FirebaseAuthException(
@@ -97,9 +97,9 @@ final class FirebaseAuthRepository implements AuthRepository {
   Future<OAuthCredential> _nativeGoogleCredential() => _withNativeGoogleSignIn((google) async {
     // Clear a previous selection before sign-in or account-deletion reauthentication.
     // This leaves the Firebase session intact until the new credential is accepted.
-    await google.signOut();
-    final account = await google.authenticate();
-    final idToken = account.authentication.idToken;
+    await google.signOut(const SignOutParams());
+    final result = await google.authenticate(const AuthenticateParameters());
+    final idToken = result.authenticationTokens.idToken;
     if (idToken == null || idToken.isEmpty) {
       throw FirebaseAuthException(code: 'invalid-credential', message: 'Google did not return an ID token.');
     }
@@ -137,7 +137,7 @@ final class FirebaseAuthRepository implements AuthRepository {
     try {
       if (_usesNativeGoogleSignIn &&
           (_auth.currentUser?.providerData.any((info) => info.providerId == GoogleAuthProvider.PROVIDER_ID) ?? false)) {
-        await _withNativeGoogleSignIn((google) => google.signOut());
+        await _withNativeGoogleSignIn((google) => google.signOut(const SignOutParams()));
       }
     } finally {
       await _auth.signOut();
