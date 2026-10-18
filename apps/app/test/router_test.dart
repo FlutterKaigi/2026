@@ -41,11 +41,12 @@ import 'fake_stamp_rally_repository.dart';
 import 'fake_support_lt_repository.dart';
 import 'fake_user_profile_repository.dart';
 
-// Synthetic versions of the two callback schemes configured for iOS builds.
+// Synthetic versions of the Firebase and native Google callbacks on iOS.
 const _firebaseAuthCallbackQuery = '?deep_link_id=https%3A%2F%2Fexample.firebaseapp.com%2F__%2Fauth%2Fcallback';
-const _firebaseAuthCallbacks = [
+const _authCallbacks = [
   'app-1-000000000000-ios-0000000000000000000000://firebaseauth/link$_firebaseAuthCallbackQuery',
   'com.googleusercontent.apps.test-client://firebaseauth/link$_firebaseAuthCallbackQuery',
+  'com.googleusercontent.apps.test-client:/oauth2callback?code=test-code&state=test-state',
 ];
 
 final _beforeGuideWindow = DateTime.utc(2026, 10, 15, 3);
@@ -209,16 +210,18 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    testWidgets('keeps the account page when an iOS Firebase Auth callback arrives', (tester) async {
+    testWidgets('keeps the account page when an iOS auth callback arrives', (tester) async {
       final router = await pumpRouter(tester);
       router.go('/account');
       await tester.pumpAndSettle();
 
-      await sendPlatformUrl(tester, _firebaseAuthCallbacks.first);
+      for (final callback in _authCallbacks) {
+        await sendPlatformUrl(tester, callback);
 
-      expect(find.byType(NotFoundPage), findsNothing);
-      expect(find.byType(AccountPage), findsOneWidget);
-      expect(currentPath(router), '/account');
+        expect(find.byType(NotFoundPage), findsNothing);
+        expect(find.byType(AccountPage), findsOneWidget);
+        expect(currentPath(router), '/account');
+      }
     });
 
     for (final eventFeaturesEnabled in [true, false]) {
@@ -235,7 +238,7 @@ void main() {
         expect(currentPath(router), '/account');
         expect(container.read(routerProvider), same(router));
 
-        for (final callback in _firebaseAuthCallbacks) {
+        for (final callback in _authCallbacks) {
           await sendPlatformUrl(tester, callback);
 
           expect(find.byType(NotFoundPage), findsNothing);
@@ -253,7 +256,7 @@ void main() {
       await tester.pumpAndSettle();
       final previousConfiguration = router.routerDelegate.currentConfiguration;
 
-      for (final callback in _firebaseAuthCallbacks) {
+      for (final callback in _authCallbacks) {
         await sendPlatformUrl(tester, callback);
 
         expect(find.byType(NotFoundPage), findsNothing);
@@ -276,17 +279,20 @@ void main() {
       expect(find.text('Google User'), findsOneWidget);
     });
 
-    for (final callback in _firebaseAuthCallbacks) {
-      testWidgets('opens the account page on a cold start from ${Uri.parse(callback).scheme}', (tester) async {
-        tester.binding.platformDispatcher.defaultRouteNameTestValue = callback;
-        addTearDown(tester.binding.platformDispatcher.clearDefaultRouteNameTestValue);
+    for (final callback in _authCallbacks) {
+      testWidgets(
+        'opens the account page on a cold start from ${Uri.parse(callback).scheme}${Uri.parse(callback).path}',
+        (tester) async {
+          tester.binding.platformDispatcher.defaultRouteNameTestValue = callback;
+          addTearDown(tester.binding.platformDispatcher.clearDefaultRouteNameTestValue);
 
-        final router = await pumpRouter(tester);
+          final router = await pumpRouter(tester);
 
-        expect(find.byType(NotFoundPage), findsNothing);
-        expect(find.byType(AccountPage), findsOneWidget);
-        expect(currentPath(router), '/account');
-      });
+          expect(find.byType(NotFoundPage), findsNothing);
+          expect(find.byType(AccountPage), findsOneWidget);
+          expect(currentPath(router), '/account');
+        },
+      );
     }
 
     testWidgets('opens the event info page when the app-host root URL arrives as a universal link', (
@@ -364,6 +370,12 @@ void main() {
         'unrelated://firebaseauth/link',
         'com.googleusercontent.apps.test-client://firebaseauth/unknown',
         'com.googleusercontent.apps.test-client://unrelated/link',
+        'com.googleusercontent.apps.test-client://unrelated/oauth2callback',
+        'com.googleusercontent.apps.test-client:/oauth2callback/unknown',
+        'com.googleusercontent.apps.test-client:/oauthredirect',
+        'app-1-test:/oauth2callback',
+        'unrelated:/oauth2callback',
+        'https://example.com/oauth2callback',
       ]) {
         await sendPlatformUrl(tester, location);
 

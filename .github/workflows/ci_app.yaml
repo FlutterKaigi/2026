@@ -67,6 +67,24 @@ jobs:
       - name: Resolve dependencies
         run: flutter pub get
 
+      - name: Verify Google sign-in plugin platforms
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          plugins = json.loads(Path("apps/app/.flutter-plugins-dependencies").read_text())["plugins"]
+          expected = {
+              "android": {"google_sign_in_android"},
+              "ios": {"google_sign_in_ios"},
+              "macos": {"google_sign_in_ios"},
+          }
+          assert expected.keys() <= plugins.keys()
+          for platform, entries in plugins.items():
+              actual = {p["name"] for p in entries if p["name"].startswith("google_sign_in_")}
+              assert actual == expected.get(platform, set()), (platform, actual)
+          PY
+
       - name: Check formatting
         run: dart format --output=none --set-exit-if-changed apps/app
 
@@ -96,3 +114,7 @@ jobs:
       - name: Test data package
         working-directory: packages/data
         run: flutter test
+
+      - name: Test Web authentication
+        working-directory: packages/data
+        run: flutter test --platform chrome test/auth_repository_web_test.dart
