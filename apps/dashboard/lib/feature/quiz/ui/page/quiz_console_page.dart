@@ -1,3 +1,5 @@
+import 'package:dashboard/core/env.dart';
+import 'package:dashboard/core/event_environment/event_admin_client.dart';
 import 'package:dashboard/core/router/router.dart';
 import 'package:dashboard/core/event_environment/event_environment.dart';
 import 'package:dashboard/feature/quiz/data/provider/quiz_list_state.dart';
@@ -25,6 +27,33 @@ class QuizConsolePage extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final event = ref.watch(quizEventProvider(eventId));
 
+    // 進行中の操作を 1 つに限定し、実行中はすべての操作ボタンを無効化する。
+    final busyLabel = useState<String?>(null);
+    final errorMessage = useState<String?>(null);
+
+    Future<void> runOperation(String label, Future<void> Function() action) async {
+      if (!context.mounted || busyLabel.value != null) return;
+      busyLabel.value = label;
+      errorMessage.value = null;
+      try {
+        await action();
+      } catch (e) {
+        if (context.mounted) {
+          errorMessage.value = '$label の完了を確認できませんでした: $e\n現在の状態を確認してください。通信エラー後は同じ画面で再試行できます。';
+        }
+      } finally {
+        if (context.mounted) busyLabel.value = null;
+      }
+    }
+
+    Future<void> withdrawPromotion() => runOperation('反映取消', () async {
+      final client = ref.read(eventAdminClientProvider)!;
+      await client.mutate('withdrawQuizPromotion', {'eventId': eventId});
+      if (context.mounted) {
+        context.go(eventLocation(const QuizEventListRoute().location, Flavor.prod));
+      }
+    });
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -38,11 +67,34 @@ class QuizConsolePage extends HookConsumerWidget {
           ),
         ),
         const Divider(height: 1),
+        if (busyLabel.value != null)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
+            child: Row(
+              children: [
+                const SizedBox.square(dimension: 16, child: CircularProgressIndicator(strokeWidth: 2)),
+                const SizedBox(width: 8),
+                Text('${busyLabel.value} を実行中…'),
+              ],
+            ),
+          ),
+        if (errorMessage.value != null)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
+            child: _ErrorBanner(message: errorMessage.value!, onDismiss: () => errorMessage.value = null),
+          ),
         Expanded(
           child: event.when(
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (e, _) => Center(child: Text('エラー: $e')),
-            data: (event) => event == null ? const Center(child: Text('イベントが見つかりません')) : _ConsoleBody(event: event),
+            data: (event) => event == null
+                ? const Center(child: Text('イベントが見つかりません'))
+                : _ConsoleBody(
+                    event: event,
+                    busyLabel: busyLabel,
+                    runOperation: runOperation,
+                    onWithdraw: withdrawPromotion,
+                  ),
           ),
         ),
       ],
@@ -51,9 +103,17 @@ class QuizConsolePage extends HookConsumerWidget {
 }
 
 class _ConsoleBody extends HookConsumerWidget {
-  const _ConsoleBody({required this.event});
+  const _ConsoleBody({
+    required this.event,
+    required this.busyLabel,
+    required this.runOperation,
+    required this.onWithdraw,
+  });
 
   final QuizEvent event;
+  final ValueNotifier<String?> busyLabel;
+  final Future<void> Function(String label, Future<void> Function() action) runOperation;
+  final Future<void> Function() onWithdraw;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -61,25 +121,6 @@ class _ConsoleBody extends HookConsumerWidget {
     final participants = ref.watch(quizParticipantListProvider(eventId));
     final teams = ref.watch(quizTeamListProvider(eventId));
     final questions = ref.watch(quizQuestionListProvider(eventId));
-
-    // 進行中の操作を 1 つに限定し、実行中はすべての操作ボタンを無効化する。
-    final busyLabel = useState<String?>(null);
-    final errorMessage = useState<String?>(null);
-
-    Future<void> runOperation(String label, Future<void> Function() action) async {
-      if (busyLabel.value != null) return;
-      busyLabel.value = label;
-      errorMessage.value = null;
-      try {
-        await action();
-      } catch (e) {
-        if (context.mounted) {
-          errorMessage.value = '$label の完了を確認できませんでした: $e\n現在の状態を確認してください。通信エラー後は同じ画面で再試行できます。';
-        }
-      } finally {
-        if (context.mounted) busyLabel.value = null;
-      }
-    }
 
     final ops = ref.read(quizOperationsRepositoryProvider);
     final isBusy = busyLabel.value != null;
@@ -144,7 +185,7 @@ class _ConsoleBody extends HookConsumerWidget {
             ],
           ),
           const SizedBox(height: 16),
-          QuizPromotionControls(event: event, busy: isBusy),
+          QuizPromotionControls(event: event, busy: isBusy, onWithdraw: onWithdraw),
           const SizedBox(height: 16),
           Wrap(
             spacing: 8,
@@ -357,20 +398,6 @@ class _ConsoleBody extends HookConsumerWidget {
                 ),
               ),
             ),
-          if (busyLabel.value != null) ...[
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                const SizedBox.square(dimension: 16, child: CircularProgressIndicator(strokeWidth: 2)),
-                const SizedBox(width: 8),
-                Text('${busyLabel.value} を実行中…'),
-              ],
-            ),
-          ],
-          if (errorMessage.value != null) ...[
-            const SizedBox(height: 16),
-            _ErrorBanner(message: errorMessage.value!, onDismiss: () => errorMessage.value = null),
-          ],
           const SizedBox(height: 24),
           if (isPrestart)
             participants.when(
@@ -652,8 +679,10 @@ class _QuestionRow extends ConsumerWidget {
                     children: [
                       Text(question.title.ja, maxLines: 2, overflow: TextOverflow.ellipsis),
                       Text(sponsorName ?? question.sponsorId, style: Theme.of(context).textTheme.bodySmall),
-                      if (question.status == QuizQuestionStatus.open && question.closesAt != null)
-                        QuizCountdown(closesAt: question.closesAt!),
+                      if (question.status == QuizQuestionStatus.reading || question.status == QuizQuestionStatus.open)
+                        QuizCountdown(
+                          closesAt: question.status == QuizQuestionStatus.open ? question.closesAt : null,
+                        ),
                     ],
                   ),
                 ),

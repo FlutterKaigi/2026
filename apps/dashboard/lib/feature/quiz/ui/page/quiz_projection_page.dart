@@ -98,8 +98,11 @@ class _ProjectionQuestion extends StatelessWidget {
           children: [
             Text('第 ${question.order} 問', style: theme.textTheme.headlineMedium),
             Text(quizQuestionStatusLabel(question.status), style: theme.textTheme.titleLarge),
-            if (question.status == QuizQuestionStatus.open && question.closesAt != null)
-              QuizCountdown(closesAt: question.closesAt!, large: true),
+            if (question.status == QuizQuestionStatus.reading || question.status == QuizQuestionStatus.open)
+              QuizCountdown(
+                closesAt: question.status == QuizQuestionStatus.open ? question.closesAt : null,
+                large: true,
+              ),
           ],
         ),
         const SizedBox(height: 24),
