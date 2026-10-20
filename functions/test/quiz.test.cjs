@@ -91,6 +91,40 @@ test("an account deletion tombstone blocks check-in before attempts can be recre
   );
 });
 
+test("check-in without a participant document reports a removed registration", async () => {
+  const auth = {
+    uid: "removed",
+    token: { firebase: { sign_in_provider: "password" } },
+  };
+  const ref = { collection: () => ({ doc: () => ref }) };
+  const db = {
+    doc: () => ref,
+    runTransaction: async (callback) =>
+      callback({
+        get: async () => ({ get: () => undefined }),
+        getAll: async () => [
+          {
+            exists: true,
+            get: (field) => ({ status: "entryClosed", teamSelectionStatus: "open" })[field],
+          },
+          { exists: false, get: () => undefined },
+          { get: () => "123456" },
+          { data: () => undefined },
+        ],
+        set: () => assert.fail("A missing participant should not record an attempt"),
+        update: () => assert.fail("A missing participant should not be checked in"),
+      }),
+  };
+  await assert.rejects(
+    checkInQuizParticipantForUser(
+      auth,
+      { eventId: "event", code: "123456" },
+      { db, getUser: async () => ({ disabled: false }) },
+    ),
+    { code: "failed-precondition", details: { reason: "not-registered" } },
+  );
+});
+
 test("an account deletion tombstone blocks registration even if Auth lookup would still succeed", async () => {
   const auth = {
     uid: "deleted",

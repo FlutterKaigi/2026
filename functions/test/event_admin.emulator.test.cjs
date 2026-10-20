@@ -49,6 +49,12 @@ test("source authentication manages STG and production independently through the
   await call("prod", "saveQuestion", questionPayload);
   assert.equal((await stg.doc(`quizEvents/${eventId}/questions/q1`).get()).exists, false);
   assert.equal((await prod.doc(`admins/${actor.uid}`).get()).exists, false);
+  // Projection names sponsors from the selected project, in the console's shape.
+  await stg.doc("sponsors/sponsor").set({ name: { ja: "STGスポンサー", en: "STG sponsor" } });
+  const stgProjection = await call("stg", "read", { view: "quizProjection", eventId });
+  assert.deepEqual(stgProjection.sponsors, [{ id: "sponsor", name: { ja: "STGスポンサー", en: "STG sponsor" } }]);
+  assert.deepEqual(stgProjection.sponsors, (await call("stg", "read", { view: "quizConsole", eventId })).sponsors);
+  assert.deepEqual((await call("prod", "read", { view: "quizProjection", eventId })).sponsors, []);
 
   await op("publish");
   await op("openRegistration");

@@ -83,11 +83,14 @@ async function readSnapshot(db: Firestore, input: Data): Promise<Data> {
   if (input.view === "quizProjection") {
     // Projection never reads unpublished questions or answer secrets. The
     // check-in code is shown at the venue only while check-in is open.
-    const question = event?.currentQuestionId
-      ? document(await db.doc(`${path}/questions/${id(event.currentQuestionId)}`).get()) : null;
-    const participants = beforeStart ? await list(`${path}/participants`, "registeredAt") : [];
+    // Sponsors match the console so the projection can name the question sponsor.
+    const [question, participants, sponsors] = await Promise.all([
+      event?.currentQuestionId ? db.doc(`${path}/questions/${id(event.currentQuestionId)}`).get().then(document) : null,
+      beforeStart ? list(`${path}/participants`, "registeredAt") : [],
+      list("sponsors"),
+    ]);
     return {
-      event, teams, participants, question: question?.status === "draft" ? null : question,
+      event, teams, participants, question: question?.status === "draft" ? null : question, sponsors,
       checkInCode: beforeStart && event?.teamSelectionStatus === "open" ? await checkInCode() : null,
     };
   }

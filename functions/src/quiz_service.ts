@@ -344,7 +344,13 @@ export async function checkInQuizParticipantForUser(
       attemptRef,
     );
     requireState(event.exists, "イベントが見つかりません。");
-    requireState(participant.exists, "先に参加表明してください。取り消された場合は再登録が必要です。");
+    // The reason lets the app tell a removed registration apart from other
+    // precondition failures without parsing the message.
+    if (!participant.exists) {
+      throw new HttpsError("failed-precondition", "先に参加表明してください。取り消された場合は再登録が必要です。", {
+        reason: "not-registered",
+      });
+    }
     // Lost acknowledgements remain retryable after check-in closes.
     if (participant.get("checkedInAt") instanceof Timestamp) return "checked-in";
     requireState(
