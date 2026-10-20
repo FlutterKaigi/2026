@@ -51,11 +51,84 @@ void main() {
     final received = <Map<String, dynamic>>[];
     final subscription = client.watch().listen(received.add);
     await Future<void>.delayed(Duration.zero);
-    await client.mutate('issueSupportLtCode', {'rotate': true});
+    final mutation = client.mutate('issueSupportLtCode', {'rotate': true});
+    await Future<void>.delayed(Duration.zero);
     pending.complete({'code': 'old'});
+    await mutation;
     await Future<void>.delayed(Duration.zero);
     expect(received, [
       {'code': 'new'},
+    ]);
+    await subscription.cancel();
+    client.dispose();
+  });
+
+  test('mutation waits for a fresh read even while its page is inactive', () async {
+    final refreshed = Completer<Map<String, dynamic>>();
+    var reads = 0;
+    final client = EventAdminClient(
+      environment: Flavor.stg,
+      view: {'view': 'supportLt'},
+      pollInterval: const Duration(days: 1),
+      request: (request) async {
+        if (request['action'] != 'read') return {};
+        return ++reads == 1 ? {'code': 'old'} : refreshed.future;
+      },
+    );
+    final received = <Map<String, dynamic>>[];
+    final subscription = client.watch().listen(received.add);
+    await Future<void>.delayed(Duration.zero);
+    client.setActive(false);
+    var completed = false;
+    final mutation = client.mutate('issueSupportLtCode', {'rotate': true}).then((_) => completed = true);
+    await Future<void>.delayed(Duration.zero);
+    expect(reads, 2);
+    expect(completed, isFalse);
+    refreshed.complete({'code': 'new'});
+    await mutation;
+    await Future<void>.delayed(Duration.zero);
+    expect(received.last, {'code': 'new'});
+    await subscription.cancel();
+    client.dispose();
+  });
+
+  test('overlapping mutations do not complete on a discarded read', () async {
+    final firstRead = Completer<Map<String, dynamic>>();
+    final latestRead = Completer<Map<String, dynamic>>();
+    var reads = 0;
+    final client = EventAdminClient(
+      environment: Flavor.stg,
+      view: {'view': 'supportLt'},
+      pollInterval: const Duration(days: 1),
+      request: (request) async {
+        if (request['action'] != 'read') return {};
+        return switch (++reads) {
+          1 => {'code': 'old'},
+          2 => firstRead.future,
+          _ => latestRead.future,
+        };
+      },
+    );
+    final received = <Map<String, dynamic>>[];
+    final subscription = client.watch().listen(received.add);
+    await Future<void>.delayed(Duration.zero);
+    var firstCompleted = false;
+    var secondCompleted = false;
+    final first = client.mutate('issueSupportLtCode', {'rotate': true}).then((_) => firstCompleted = true);
+    await Future<void>.delayed(Duration.zero);
+    final second = client.mutate('issueSupportLtCode', {'rotate': true}).then((_) => secondCompleted = true);
+    await Future<void>.delayed(Duration.zero);
+    firstRead.complete({'code': 'superseded'});
+    await Future<void>.delayed(Duration.zero);
+    expect(reads, 3);
+    expect(firstCompleted, isFalse);
+    expect(secondCompleted, isFalse);
+    latestRead.complete({'code': 'latest'});
+    await Future.wait([first, second]);
+    await Future<void>.delayed(Duration.zero);
+    expect(received, [
+      {'code': 'old'},
+      {'code': 'latest'},
     ]);
     await subscription.cancel();
     client.dispose();
