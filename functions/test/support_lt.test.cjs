@@ -9,6 +9,7 @@ const { deleteAuthUserData } = require("../lib/auth_user_data.js");
 
 const NOW = 1_800_000_000_000;
 const BUCKET = String(Math.floor(NOW / 600_000));
+const FAILURE_KEY = `v4_${BUCKET}`;
 const ADMIN = {
   uid: "admin",
   token: {
@@ -185,7 +186,7 @@ test("current code is reused indefinitely and explicit rotation always changes e
   const rotated = await issueSupportLtCodeForUser(ADMIN, { rotate: true }, dependencies);
   assert.equal(rotated.code, "000001");
   assert.equal(documents.get("supportLtSettings/current").version, 5);
-  assert.equal(documents.has("supportLtSettings/attempts"), false, "rotation lifts the shared block");
+  assert.deepEqual(documents.get("supportLtSettings/attempts"), { resetCodeVersion: 5, counts: {} }, "rotation lifts the shared block");
   await rejectsCode(registerSupportLtForUser(USER, { code: original.code }, dependencies), "not-found");
   await registerSupportLtForUser(USER, { code: rotated.code }, dependencies);
 });
@@ -258,7 +259,7 @@ test("missing and incorrect codes persist per-user and shared failed attempts be
     const attempts = documents.get(`supportLtRegistrationAttempts/${USER.uid}`);
     assert.equal(attempts.failCount, 1);
     assert.equal(attempts.windowStartedAt.toMillis(), NOW);
-    assert.deepEqual(documents.get("supportLtSettings/attempts"), { counts: { [BUCKET]: 1 } });
+    assert.deepEqual(documents.get("supportLtSettings/attempts"), { counts: { [`v${settings?.version ?? 0}_${BUCKET}`]: 1 } });
     assert.equal(events.includes(`read:users/${USER.uid}`), false, "profile is not read for a failed guess");
     // The hot shared document never takes part in the transaction.
     assert.equal(events.includes("read:supportLtSettings/attempts"), false);
@@ -269,16 +270,211 @@ test("missing and incorrect codes persist per-user and shared failed attempts be
 test("shared failures across accounts block the code for everyone in the bucket until rotation", async () => {
   const { dependencies, documents } = fixture({
     "supportLtSettings/current": liveSettings(),
-    "supportLtSettings/attempts": { counts: { [BUCKET]: 199, "0": 5 } },
+    "supportLtSettings/attempts": { counts: { [FAILURE_KEY]: 199, "v3_0": 5 } },
   });
   await rejectsCode(registerSupportLtForUser({ uid: "guesser", token: {} }, { code: "111111" }, dependencies), "not-found");
-  assert.deepEqual(documents.get("supportLtSettings/attempts"), { counts: { [BUCKET]: 200, "0": 5 } });
+  assert.deepEqual(documents.get("supportLtSettings/attempts"), { counts: { [FAILURE_KEY]: 200, "v3_0": 5 } });
   await rejectsCode(registerSupportLtForUser(USER, { code: "000000" }, dependencies), "resource-exhausted");
   assert.equal(documents.has(`supportLtRegistrations/${USER.uid}`), false);
   assert.equal(documents.has(`supportLtRegistrationAttempts/${USER.uid}`), false, "a shared block records no per-user failure");
-  assert.deepEqual(documents.get("supportLtSettings/attempts"), { counts: { [BUCKET]: 200, "0": 5 } });
+  assert.deepEqual(documents.get("supportLtSettings/attempts"), { counts: { [FAILURE_KEY]: 200, "v3_0": 5 } });
   // The next ten-minute bucket starts with a fresh budget.
   await registerSupportLtForUser(USER, { code: "000000" }, { ...dependencies, now: () => NOW + 600_000 });
+});
+
+test("shared-limit preflight rejects a stable current or legacy block without Auth or transaction locks", async () => {
+  for (const counts of [{ [FAILURE_KEY]: 200 }, { [BUCKET]: 200 }]) {
+    const { dependencies, events, documents } = fixture({
+      "supportLtSettings/current": liveSettings(),
+      "supportLtSettings/attempts": { counts },
+    });
+    await rejectsCode(registerSupportLtForUser(USER, { code: "000000" }, dependencies), "resource-exhausted");
+    assert.equal(events.some((event) => event.startsWith("auth:")), false, "blocked traffic must not call Auth");
+    assert.equal(events.some((event) => event.startsWith("read:")), false, "blocked traffic must not acquire transaction read locks");
+    assert.equal(events.includes("transaction-commit"), false);
+    assert.equal(documents.has(`supportLtRegistrationAttempts/${USER.uid}`), false);
+  }
+});
+
+test("shared-limit preflight cannot reject a new code using a blocked previous generation", async () => {
+  const { dependencies, documents } = fixture({
+    "admins/admin": {},
+    "supportLtSettings/current": liveSettings(),
+    "supportLtSettings/attempts": { counts: { [FAILURE_KEY]: 200 } },
+  });
+  let rotate = true;
+  const db = {
+    ...dependencies.db,
+    doc(path) {
+      const reference = dependencies.db.doc(path);
+      if (path !== "supportLtSettings/attempts") return reference;
+      return {
+        ...reference,
+        async get() {
+          if (rotate) {
+            rotate = false;
+            await issueSupportLtCodeForUser(ADMIN, { rotate: true }, dependencies);
+            // Previous-generation increments can arrive after rotation. The
+            // pending request's original settings read is now obsolete.
+            await reference.set({ counts: { [FAILURE_KEY]: 200 } }, { merge: true });
+          }
+          return reference.get();
+        },
+      };
+    },
+  };
+  const registered = await registerSupportLtForUser(USER, { code: "000001" }, { ...dependencies, db });
+  assert.equal(registered.alreadyRegistered, false);
+  assert.equal(documents.get(`supportLtRegistrations/${USER.uid}`).codeVersion, 5);
+});
+
+test("shared-limit preflight rechecks the budget when rotation occurs before the registration transaction", async () => {
+  const { dependencies, documents } = fixture({ "supportLtSettings/current": liveSettings() });
+  const db = {
+    ...dependencies.db,
+    async runTransaction(callback) {
+      documents.set("supportLtSettings/current", liveSettings({ version: 5, code: "000001" }));
+      documents.set("supportLtSettings/attempts", { resetCodeVersion: 5, counts: { [`v5_${BUCKET}`]: 200 } });
+      return dependencies.db.runTransaction(callback);
+    },
+  };
+  await rejectsCode(registerSupportLtForUser(USER, { code: "000001" }, { ...dependencies, db }), "resource-exhausted");
+  assert.equal(documents.has(`supportLtRegistrations/${USER.uid}`), false);
+  assert.equal(documents.has(`supportLtRegistrationAttempts/${USER.uid}`), false);
+});
+
+test("shared-limit preflight rechecks the budget after crossing a ten-minute bucket", async () => {
+  const { dependencies, documents } = fixture({
+    "supportLtSettings/current": liveSettings(),
+    "supportLtSettings/attempts": { counts: { [`v4_${Number(BUCKET) + 1}`]: 200 } },
+  });
+  let now = NOW;
+  const db = {
+    ...dependencies.db,
+    async runTransaction(callback) {
+      now += 600_000;
+      return dependencies.db.runTransaction(callback);
+    },
+  };
+  await rejectsCode(registerSupportLtForUser(USER, { code: "000000" }, {
+    ...dependencies, db, now: () => now,
+  }), "resource-exhausted");
+  assert.equal(documents.has(`supportLtRegistrations/${USER.uid}`), false);
+});
+
+function deferred() {
+  let resolve;
+  const promise = new Promise((complete) => { resolve = complete; });
+  return { promise, resolve };
+}
+
+test("200 delayed failures for the previous code cannot consume the new code's budget", async () => {
+  const { dependencies, documents } = fixture({
+    "admins/admin": {},
+    "supportLtSettings/current": liveSettings(),
+  });
+  const allWritesQueued = deferred();
+  const releaseWrites = deferred();
+  let queued = 0;
+  const delayedDb = {
+    ...dependencies.db,
+    doc(path) {
+      const reference = dependencies.db.doc(path);
+      if (path !== "supportLtSettings/attempts") return reference;
+      return {
+        ...reference,
+        async set(data, options) {
+          queued += 1;
+          if (queued === 200) allWritesQueued.resolve();
+          await releaseWrites.promise;
+          return reference.set(data, options);
+        },
+      };
+    },
+  };
+  const pending = Array.from({ length: 200 }, (_, index) => rejectsCode(
+    registerSupportLtForUser({ uid: `old-guesser-${index}`, token: {} }, { code: "111111" }, {
+      ...dependencies, db: delayedDb,
+    }), "not-found",
+  ));
+  let rotated;
+  try {
+    await allWritesQueued.promise;
+    assert.equal(documents.has("supportLtSettings/attempts"), false);
+    rotated = await issueSupportLtCodeForUser(ADMIN, { rotate: true }, dependencies);
+  } finally {
+    releaseWrites.resolve();
+    await Promise.all(pending);
+  }
+  const registered = await registerSupportLtForUser(USER, { code: rotated.code }, dependencies);
+  assert.equal(registered.alreadyRegistered, false);
+  assert.deepEqual(documents.get("supportLtSettings/attempts"), {
+    resetCodeVersion: 5, counts: { [FAILURE_KEY]: 200 },
+  });
+
+  // Every failure against the new code still counts, including guesses that
+  // reuse the old code. No per-user limit masks this cross-account check.
+  for (let index = 0; index < 200; index++) {
+    await rejectsCode(registerSupportLtForUser({ uid: `new-guesser-${index}`, token: {} }, {
+      code: "000000",
+    }, dependencies), "not-found");
+  }
+  assert.equal(documents.get("supportLtSettings/attempts").counts[`v5_${BUCKET}`], 200);
+  const blockedUser = { uid: "new-bystander", token: {} };
+  await rejectsCode(registerSupportLtForUser(blockedUser, { code: rotated.code }, dependencies), "resource-exhausted");
+  assert.equal(documents.has(`supportLtRegistrationAttempts/${blockedUser.uid}`), false);
+  const recovered = await issueSupportLtCodeForUser(ADMIN, { rotate: true }, dependencies);
+  assert.equal((await registerSupportLtForUser(blockedUser, { code: recovered.code }, dependencies)).alreadyRegistered, false);
+});
+
+test("a committed failure keeps its checked generation and time even if recording starts after rotation", async () => {
+  const { dependencies, documents } = fixture({
+    "admins/admin": {},
+    "supportLtSettings/current": liveSettings(),
+  });
+  const committed = deferred();
+  const releaseResult = deferred();
+  let now = NOW;
+  const pending = rejectsCode(registerSupportLtForUser(USER, { code: "111111" }, {
+    ...dependencies,
+    now: () => now,
+    db: {
+      ...dependencies.db,
+      async runTransaction(callback) {
+        const outcome = await dependencies.db.runTransaction(callback);
+        committed.resolve();
+        await releaseResult.promise;
+        return outcome;
+      },
+    },
+  }), "not-found");
+  try {
+    await committed.promise;
+    now += 600_000;
+    await issueSupportLtCodeForUser(ADMIN, { rotate: true }, { ...dependencies, now: () => now });
+  } finally {
+    releaseResult.resolve();
+    await pending;
+  }
+  assert.deepEqual(documents.get("supportLtSettings/attempts"), {
+    resetCodeVersion: 5, counts: { [FAILURE_KEY]: 1 },
+  });
+});
+
+test("legacy failure budgets survive deployment until rotation and late legacy writes cannot restore them", async () => {
+  const { dependencies, documents } = fixture({
+    "admins/admin": {},
+    "supportLtSettings/current": liveSettings(),
+    "supportLtSettings/attempts": { counts: { [BUCKET]: 199 } },
+  });
+  await rejectsCode(registerSupportLtForUser({ uid: "guesser", token: {} }, { code: "111111" }, dependencies), "not-found");
+  assert.deepEqual(documents.get("supportLtSettings/attempts"), { counts: { [BUCKET]: 199, [FAILURE_KEY]: 1 } });
+  await rejectsCode(registerSupportLtForUser(USER, { code: "000000" }, dependencies), "resource-exhausted");
+  const rotated = await issueSupportLtCodeForUser(ADMIN, { rotate: true }, dependencies);
+  // An in-flight request running the previous deployment can still merge a
+  // bucket-only increment after rotation. Its unscoped budget is obsolete.
+  await dependencies.db.doc("supportLtSettings/attempts").set({ counts: { [BUCKET]: 200 } }, { merge: true });
+  assert.equal((await registerSupportLtForUser(USER, { code: rotated.code }, dependencies)).alreadyRegistered, false);
 });
 
 test("a per-user lock from the tenth failure counts once toward the shared budget", async () => {
@@ -288,7 +484,7 @@ test("a per-user lock from the tenth failure counts once toward the shared budge
   });
   await rejectsCode(registerSupportLtForUser(USER, { code: "111111" }, dependencies), "resource-exhausted");
   await rejectsCode(registerSupportLtForUser(USER, { code: "111111" }, dependencies), "resource-exhausted");
-  assert.deepEqual(documents.get("supportLtSettings/attempts"), { counts: { [BUCKET]: 1 } });
+  assert.deepEqual(documents.get("supportLtSettings/attempts"), { counts: { [FAILURE_KEY]: 1 } });
 });
 
 test("ten failures within ten minutes lock attempts and a valid code cannot bypass lock", async () => {

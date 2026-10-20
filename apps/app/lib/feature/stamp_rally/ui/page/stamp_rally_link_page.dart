@@ -14,6 +14,7 @@ import 'package:data/data.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 /// Opens `<app origin>/s/<token>`, from the OS camera as a Universal Link /
@@ -33,8 +34,7 @@ class StampRallyLinkPage extends StatelessWidget {
           ? _ResultMessage(icon: Icons.link_off, title: t.stampRally.invalidTitle, body: t.stampRally.invalidBody)
           : AuthenticatedBody(
               signedOut: _PendingSignIn(token: token),
-              // A second link opened while a result is shown keeps this route,
-              // so the token-derived key makes it scan again.
+              // Different tokens and accounts discard the previous scan state.
               builder: (uid) => _ScanResult(key: ValueKey(token), token: token),
             ),
     );
@@ -70,29 +70,68 @@ class _ScanResult extends HookConsumerWidget {
     final t = Translations.of(context);
     final attempt = useState(0);
     final result = useState<AsyncValue<StampRallyScanResult>>(const AsyncLoading());
+    final routeInformation = GoRouter.of(context).routeInformationProvider;
+    useEffect(() {
+      var previous = routeInformation.value;
+      void onLinkOpened() {
+        final next = routeInformation.value;
+        // Refresh notifications can reuse the same RouteInformation. Only a
+        // new navigation to this QR is a scan; merely resuming is not.
+        if (identical(previous, next)) {
+          return;
+        }
+        previous = next;
+        // Router reports replace the value with an encoded state without a
+        // navigation notification. A later refresh must not treat that as a scan.
+        // Pushed pages perform their own scan; restoring the back stack is
+        // not another QR delivery to an existing result.
+        final navigation = next.state;
+        if (navigation is! RouteInformationState ||
+            (navigation.type != NavigatingType.go && navigation.type != NavigatingType.replace) ||
+            next.uri.path != '/s/$token' ||
+            result.value.isLoading) {
+          return;
+        }
+        // An OS link can replace an imperative result page. Let the router
+        // settle before deciding whether this instance still owns the scan.
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (context.mounted && (ModalRoute.of(context)?.isCurrent ?? false)) {
+            result.value = const AsyncLoading();
+            attempt.value++;
+          }
+        });
+      }
+
+      routeInformation.addListener(onLinkOpened);
+      return () => routeInformation.removeListener(onLinkOpened);
+    }, [routeInformation, token]);
 
     useEffect(() {
       result.value = const AsyncLoading();
+      var active = true;
       final pending = ref.read(pendingStampRallyTokenProvider.notifier);
       final repository = ref.read(stampRallyRepositoryProvider);
       final talker = ref.read(talkerProvider);
       Future<void> scan() async {
+        if (!active) {
+          return;
+        }
         pending.clearIfCurrent(token);
         try {
           final value = await repository.scan(token);
-          if (context.mounted) {
+          if (active && context.mounted) {
             result.value = AsyncData(value);
           }
         } on Exception catch (error, stackTrace) {
           talker.handle(error, stackTrace);
-          if (context.mounted) {
+          if (active && context.mounted) {
             result.value = AsyncError(error, stackTrace);
           }
         }
       }
 
       unawaited(Future.microtask(scan));
-      return null;
+      return () => active = false;
     }, [attempt.value]);
 
     return switch (result.value) {

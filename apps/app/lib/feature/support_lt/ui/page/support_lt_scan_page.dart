@@ -58,6 +58,7 @@ class SupportLtScanPage extends HookConsumerWidget {
       body: QrScannerView(
         controller: controller,
         onDetect: handleDetect,
+        canScan: () => !isCompleted.value,
         hint: t.supportLt.scanHint,
         cameraErrorMessage: t.supportLt.scanCameraError,
       ),

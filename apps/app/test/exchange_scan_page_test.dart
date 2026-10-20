@@ -364,6 +364,44 @@ void main() {
     expect(exchangeRepository.createCalls, [(uid: 'uid-1', otherUid: 'uid-2', token: 'v1.uid-2.9999999999.deadbeef')]);
   });
 
+  testWidgets('does not restart the camera while an exchange is still being created', (tester) async {
+    final platform = FakeStartedMobileScannerPlatform();
+    final previousPlatform = MobileScannerPlatform.instance;
+    MobileScannerPlatform.instance = platform;
+    addTearDown(() => MobileScannerPlatform.instance = previousPlatform);
+    final authRepository = FakeAuthRepository(initialUser: FakeUser(uid: 'uid-1'));
+    addTearDown(authRepository.dispose);
+    final profileRepository = FakeUserProfileRepository(initialProfile: ownProfile());
+    addTearDown(profileRepository.dispose);
+    final gate = Completer<void>();
+    final exchangeRepository = FakeProfileExchangeRepository()..createGate = gate;
+    addTearDown(exchangeRepository.dispose);
+    await openScanPage(
+      tester,
+      buildSubject(
+        authRepository: authRepository,
+        profileRepository: profileRepository,
+        exchangeRepository: exchangeRepository,
+      ),
+    );
+    final scanner = tester.widget<MobileScanner>(find.byType(MobileScanner));
+    scanner.onDetect!(const BarcodeCapture(barcodes: [Barcode(rawValue: 'v1.uid-2.9999999999.deadbeef')]));
+    await tester.pump();
+    expect(exchangeRepository.createCalls, hasLength(1));
+    expect(scanner.controller!.value.isRunning, isFalse);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pump();
+    expect(scanner.controller!.value.isRunning, isFalse);
+    scanner.onDetect!(const BarcodeCapture(barcodes: [Barcode(rawValue: 'v1.uid-3.9999999999.deadbeef')]));
+    await tester.pump();
+    expect(exchangeRepository.createCalls, hasLength(1));
+    gate.complete();
+    await tester.pumpAndSettle();
+    expect(find.text('open scan'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('shows a camera error message when the camera is unavailable', (tester) async {
     final authRepository = FakeAuthRepository(initialUser: FakeUser(uid: 'uid-1'));
     addTearDown(authRepository.dispose);

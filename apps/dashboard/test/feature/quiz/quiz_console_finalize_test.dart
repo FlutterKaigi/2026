@@ -1,5 +1,6 @@
 import 'package:dashboard/feature/quiz/data/provider/quiz_list_state.dart';
 import 'package:dashboard/feature/quiz/data/provider/quiz_repository.dart';
+import 'package:dashboard/feature/quiz/ui/component/quiz_countdown.dart';
 import 'package:dashboard/feature/quiz/ui/page/quiz_console_page.dart';
 import 'package:data/data.dart';
 import 'package:flutter/material.dart';
@@ -41,6 +42,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          quizClockRepositoryProvider.overrideWithValue(_Clock()),
           quizEventProvider('event').overrideWith((_) => Stream.value(eventValue ?? event)),
           quizParticipantListProvider('event').overrideWith((_) => Stream.value(people)),
           quizTeamListProvider('event').overrideWith((_) => Stream.value(teams ?? quizTeamsFromParticipants(people))),
@@ -255,4 +257,9 @@ class _Operations extends Fake implements QuizOperationsRepository {
 
   @override
   Future<void> finalizeEvent(String eventId) async => finalized++;
+}
+
+class _Clock implements QuizClockRepository {
+  @override
+  Future<QuizClock> synchronize() async => QuizClock(serverNow: DateTime(2026), elapsed: () => Duration.zero);
 }

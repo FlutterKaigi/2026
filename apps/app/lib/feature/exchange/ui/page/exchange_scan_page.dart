@@ -121,6 +121,7 @@ class _ScannerBody extends HookConsumerWidget {
       children: [
         QrScannerView(
           controller: controller,
+          canScan: () => !isProcessing.value,
           onDetect: (capture) => unawaited(handleDetect(capture)),
           hint: t.exchange.scanHint,
           cameraErrorMessage: t.exchange.scanCameraError,

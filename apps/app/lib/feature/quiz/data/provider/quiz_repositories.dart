@@ -38,6 +38,17 @@ final quizClockRepositoryProvider = Provider<QuizClockRepository>(
   (ref) => FirebaseQuizClockRepository(),
 );
 
-final quizClockProvider = FutureProvider.autoDispose<QuizClock>(
-  (ref) => ref.watch(quizClockRepositoryProvider).synchronize(),
+final quizClockProvider = AsyncNotifierProvider.autoDispose<QuizClockController, QuizClock?>(
+  QuizClockController.new,
 );
+
+class QuizClockController extends AsyncNotifier<QuizClock?> {
+  @override
+  Future<QuizClock> build() => ref.watch(quizClockRepositoryProvider).synchronize();
+
+  void resynchronizeAfterInterruption() {
+    // Keep the required synchronization across question/widget changes.
+    state = const AsyncData(null);
+    ref.invalidateSelf();
+  }
+}

@@ -44,8 +44,8 @@ class EventAdminClient {
   String? _fingerprint;
   bool _disposed = false;
   bool _active = true;
-  bool _reading = false;
-  bool _refreshAgain = false;
+  Future<void>? _reading;
+  int _lastReadRevision = -1;
   int _revision = 0;
 
   Stream<Map<String, dynamic>> watch() => Stream.multi((sink) {
@@ -91,17 +91,20 @@ class EventAdminClient {
       // An ambiguous network response may already have committed. Re-read the
       // server before displaying a previous snapshot or offering another action.
       _revision++;
-      if (!_disposed) unawaited(refresh());
+      while (!_disposed && _updates.hasListener && _lastReadRevision < _revision) {
+        await _refresh(force: true);
+      }
     }
   }
 
-  Future<void> refresh() async {
-    if (_disposed || !_active || !_updates.hasListener) return;
-    if (_reading) {
-      _refreshAgain = true;
-      return;
-    }
-    _reading = true;
+  Future<void> refresh() => _refresh();
+
+  Future<void> _refresh({bool force = false}) {
+    if (_disposed || (!force && !_active) || !_updates.hasListener) return Future.value();
+    return _reading ??= _readSnapshot().whenComplete(() => _reading = null);
+  }
+
+  Future<void> _readSnapshot() async {
     final revision = _revision;
     try {
       final value = await call('read', _view);
@@ -119,11 +122,7 @@ class EventAdminClient {
         _updates.addError(error, stack);
       }
     } finally {
-      _reading = false;
-      if (_refreshAgain && !_disposed) {
-        _refreshAgain = false;
-        unawaited(refresh());
-      }
+      _lastReadRevision = revision;
     }
   }
 

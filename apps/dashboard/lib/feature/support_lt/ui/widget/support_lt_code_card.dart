@@ -95,7 +95,9 @@ class _SupportLtCodeCardState extends ConsumerState<SupportLtCodeCard> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (code == null)
+        if (_isIssuing)
+          const Text('新しい登録コードを確認しています…')
+        else if (code == null)
           const Text('登録コードはまだ発行されていません')
         else
           _CodeDetails(

@@ -67,6 +67,7 @@ class QuizCheckInScanPage extends HookConsumerWidget {
       body: QrScannerView(
         controller: controller,
         onDetect: handleDetect,
+        canScan: () => !isCompleted.value,
         hint: t.scanHint,
         cameraErrorMessage: t.scanCameraError,
       ),
