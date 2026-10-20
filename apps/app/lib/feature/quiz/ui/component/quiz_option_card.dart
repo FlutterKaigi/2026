@@ -1,3 +1,4 @@
+import 'package:app/core/i18n/strings.g.dart';
 import 'package:flutter/material.dart';
 
 /// 選択肢カードの表示状態。
@@ -51,23 +52,27 @@ class QuizOptionCard extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
 
-    // バッジの色は選択肢ごとに固定（状態で変えない）。
+    // バッジの色は選択肢ごとに固定し、沈めた選択肢だけ控えめにする。
     final badgeColors = [
       (scheme.primaryContainer, scheme.onPrimaryContainer),
       (scheme.secondaryContainer, scheme.onSecondaryContainer),
       (scheme.tertiaryContainer, scheme.onTertiaryContainer),
       (scheme.surfaceContainerHighest, scheme.onSurface),
     ];
-    final (badgeBackground, badgeForeground) = badgeColors[index % badgeColors.length];
+    final (badgeBackground, badgeForeground) = state == QuizOptionState.dimmed
+        ? (scheme.surfaceContainerHighest, scheme.onSurfaceVariant)
+        : badgeColors[index % badgeColors.length];
 
+    // 沈めた選択肢は、カード全体を透過させず背景と文字の色で控えめにして、文字のコントラストを保つ。
     final (background, foreground, border) = switch (state) {
       QuizOptionState.idle => (scheme.surfaceContainerLow, scheme.onSurface, scheme.outlineVariant),
       QuizOptionState.selected => (scheme.primaryContainer, scheme.onPrimaryContainer, scheme.primary),
       QuizOptionState.correct => (scheme.primaryContainer, scheme.onPrimaryContainer, scheme.primary),
       QuizOptionState.wrongChoice => (scheme.errorContainer, scheme.onErrorContainer, scheme.error),
-      QuizOptionState.dimmed => (scheme.surfaceContainerLow, scheme.onSurfaceVariant, scheme.outlineVariant),
+      QuizOptionState.dimmed => (scheme.surface, scheme.onSurfaceVariant, scheme.outlineVariant),
     };
     final emphasized = state == QuizOptionState.selected || state == QuizOptionState.correct;
+    final highlighted = emphasized || state == QuizOptionState.wrongChoice;
 
     final trailingIcon = switch (state) {
       QuizOptionState.selected || QuizOptionState.correct => Icon(Icons.check_circle, color: scheme.primary),
@@ -75,100 +80,105 @@ class QuizOptionCard extends StatelessWidget {
       _ => null,
     };
 
-    return AnimatedOpacity(
+    final card = AnimatedContainer(
       duration: const Duration(milliseconds: 250),
-      opacity: state == QuizOptionState.dimmed ? 0.55 : 1,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 250),
-        curve: Curves.easeOutCubic,
-        constraints: BoxConstraints(minHeight: minHeight),
-        decoration: BoxDecoration(
-          color: background,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: emphasized || state == QuizOptionState.wrongChoice ? border : scheme.outlineVariant,
-            width: emphasized || state == QuizOptionState.wrongChoice ? 2 : 1,
-          ),
-          boxShadow: emphasized
-              ? [
-                  BoxShadow(
-                    color: scheme.primary.withValues(alpha: 0.25),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                ]
-              : const [],
+      curve: Curves.easeOutCubic,
+      constraints: BoxConstraints(minHeight: minHeight),
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: highlighted ? border : scheme.outlineVariant,
+          width: highlighted ? 2 : 1,
         ),
-        child: Material(
-          type: MaterialType.transparency,
-          child: InkWell(
-            onTap: enabled ? onTap : null,
-            borderRadius: BorderRadius.circular(20),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: Row(
-                children: [
-                  // 選択肢の番号。
-                  AnimatedScale(
-                    duration: const Duration(milliseconds: 250),
-                    scale: emphasized ? 1.08 : 1,
-                    child: Container(
-                      width: 40,
-                      height: 40,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: badgeBackground,
-                        shape: BoxShape.circle,
+      ),
+      child: Material(
+        type: MaterialType.transparency,
+        child: InkWell(
+          onTap: enabled ? onTap : null,
+          borderRadius: BorderRadius.circular(20),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Row(
+              children: [
+                // 選択肢の番号。
+                AnimatedScale(
+                  duration: const Duration(milliseconds: 250),
+                  scale: emphasized ? 1.08 : 1,
+                  child: Container(
+                    width: 40,
+                    height: 40,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: badgeBackground,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Text(
+                      '${index + 1}',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        color: badgeForeground,
+                        fontWeight: FontWeight.bold,
                       ),
-                      child: Text(
-                        '${index + 1}',
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        label,
                         style: theme.textTheme.titleMedium?.copyWith(
-                          color: badgeForeground,
-                          fontWeight: FontWeight.bold,
+                          color: foreground,
+                          fontWeight: highlighted ? FontWeight.bold : FontWeight.normal,
                         ),
                       ),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
+                      if (trailingNote != null) ...[
+                        const SizedBox(height: 2),
                         Text(
-                          label,
-                          style: theme.textTheme.titleMedium?.copyWith(
+                          trailingNote!,
+                          style: theme.textTheme.labelSmall?.copyWith(
                             color: foreground,
-                            fontWeight: emphasized ? FontWeight.bold : FontWeight.normal,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
-                        if (trailingNote != null) ...[
-                          const SizedBox(height: 4),
-                          Text(
-                            trailingNote!,
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              color: foreground.withValues(alpha: 0.75),
-                            ),
-                          ),
-                        ],
                       ],
-                    ),
+                    ],
                   ),
-                  if (trailingIcon != null) ...[
-                    const SizedBox(width: 8),
-                    AnimatedScale(
-                      duration: const Duration(milliseconds: 350),
-                      curve: Curves.easeOutBack,
-                      scale: 1,
-                      child: trailingIcon,
-                    ),
-                  ],
+                ),
+                if (trailingIcon != null) ...[
+                  const SizedBox(width: 8),
+                  AnimatedScale(
+                    duration: const Duration(milliseconds: 350),
+                    curve: Curves.easeOutBack,
+                    scale: 1,
+                    child: trailingIcon,
+                  ),
                 ],
-              ),
+              ],
             ),
           ),
         ),
       ),
+    );
+
+    // 回答ボタンとして使うときは、押せるかどうかと選択中かを読み上げる。
+    // 正解発表（表示専用）では、色とアイコンでしか示していない正解・自チームの誤答を値として読み上げる。
+    final t = Translations.of(context).quiz.revealed;
+    final revealed = switch (state) {
+      QuizOptionState.correct => t.correctLabel,
+      QuizOptionState.wrongChoice => t.wrongLabel,
+      _ => null,
+    };
+    return Semantics(
+      container: true,
+      button: onTap != null,
+      enabled: onTap == null ? null : enabled,
+      selected: onTap == null ? null : state == QuizOptionState.selected,
+      value: onTap == null ? revealed : null,
+      child: card,
     );
   }
 }

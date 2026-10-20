@@ -607,14 +607,13 @@ common:
   retry: Retry
 quiz:
   title: Quiz
-  entrySubtitle: Join sponsor-provided quizzes
   list:
     empty: No quizzes yet
     error: Failed to load quizzes
     status:
       preparing: Coming soon
       registration: Open for entry
-      entryClosed: Entry closed
+      entryClosed: Registration closed
       inProgress: In progress
       finished: Results
   signInRequired:
@@ -627,9 +626,10 @@ quiz:
     description: Once it is announced,
       you can join from this screen.
   registration:
-    subtitle: Confirm your round to join. You may join either the first or the second round.
+    subtitle: You can join only one round.
     participantCount: "Participants:"
     participantUnit: ""
+    capacity: "/ $max"
     join: Join
     full: Full capacity ($max participants) reached
     failed: Could not register. Please try again later.
@@ -637,12 +637,26 @@ quiz:
     closed: Registration for this round has closed.
     unavailable: Registration could not be confirmed. Check your connection and try again.
     accountUnavailable: This account cannot join. Please contact event staff.
+    flow:
+      title: How it works
+      step1Title: Join
+      step2Title: Check in at the venue
+      step2Body: Scan the QR code on the screen
+      step3Title: Select your team
+      step3Body: Choose the table (A–T) the staff assigned you
+      step4Title: Answer as a team
+      step4Body: 10 points per question. Answer every question from one sponsor correctly to win the Sponsor Award.
   waiting:
     title: Registration confirmed
-    description: Check-in opens at the venue after registration closes. Scan the QR code on the screen to check in, then select the team assigned by staff.
+    description: When check-in opens, scan the QR code on the venue screen.
+  progress:
+    join: Join
+    checkIn: Check in
+    selectTeam: Choose team
+    semantic: Step $current of $total
   checkIn:
     title: Check-in
-    instructions: Scan the QR code shown on the venue screen, or enter the 6-digit check-in code. You can select your team after checking in.
+    instructions: Scan the QR code shown on the venue screen.
     scanButton: Scan the QR code
     scanTitle: Scan the QR code
     scanHint: Line up the QR code shown on the venue screen within the frame
@@ -655,15 +669,16 @@ quiz:
     submitting: Checking…
     invalidFormat: Enter a 6-digit code
     linkInvalid: This link isn't valid. Scan the QR code at the venue again
-    wrongCode: This code is incorrect. Scan the QR code on the screen again or ask the staff
+    wrongCode: That code is incorrect. Check the 6-digit code on the screen and enter it again.
     rateLimited: Too many attempts. Wait about a minute and try again
     closed: Check-in has closed. Please contact event staff.
+    notRegistered: Your registration was canceled. To take part, please ask a staff member.
     unavailable: Could not confirm your check-in. Check your connection and try again.
-    failed: Could not check in. Please contact event staff.
+    failed: "Couldn't check you in. Update the app to the latest version, sign in again, and try again."
   selection:
     title: Select your team
-    instructions: Sit at the table assigned by staff, then select its team (A–T).
-    unselected: No team selected
+    instructions: Sit at the table the staff assigned you, then select the team shown on that table.
+    unselected: Not decided yet
     current: Your team is $team
     option: $team ($count people)
     confirm: Confirm this team
@@ -671,32 +686,41 @@ quiz:
     changeHint: You can change teams while selection is open.
     closed: Team selection has closed. Please wait for the questions.
     closedUnselected: Team selection has closed. Please contact event staff.
-    changed: Your membership changed. Check your current team and select again.
-    failed: Could not confirm your selection. Check your connection and current team. Contact staff if selection has closed or your registration was cancelled.
+    changed: Your team was changed. Check your current team and select again.
+    failed: 'Couldn''t confirm your selection. Check your connection and tap "Confirm this team" again.'
   team:
-    yourTable: Your team is
-    table: Team
-    teamLabel: Team
-    gatherHint: Gather at your table and wait for the next question!
+    yourTable: Your team
+    gatherHint: Please wait for the question.
     badge: Team $name
+    members: Members · $count
+    you: You
+  rules:
+    title: Quiz rules
+    teamAnswerTitle: One answer per team
+    teamAnswerBody: "Anyone on your team can change it until time's up. The last accepted answer counts."
+    scoringTitle: 10 points per question
+    scoringBody: Tied teams share the same rank.
+    sponsorAwardTitle: Sponsor Award
+    sponsorAwardBody: Awarded to teams that answer every question from the same sponsor correctly.
   entryClosed:
     title: Entry is closed
-    description: The quiz is in progress.
-      Results will be shown on this screen.
+    description: Results will be shown on this screen.
   question:
-    sponsoredBy: "Sponsored by $name"
+    number: Question $n
+    sponsoredBy: "$name's question"
     secondsUnit: s
     locked: Answers are closed
     submitFailed: Could not submit. The question may have closed.
     answeredBy: Selected by $name
     member: a member
     reading: The question is being read. Please wait for answers to open.
-    synchronizing: Checking server time…
+    synchronizing: Checking the remaining time…
     connectionUnavailable: Connection unavailable. Check your connection and try again.
-    cached: Showing saved information. Your team's latest answer has not been confirmed.
+    cached: "Your team's latest answer couldn't be confirmed."
+    tapHint: "The option you tap becomes your team's answer."
     sending: Sending your answer…
-    received: Your answer was accepted by the server.
-    teamAnswer: The selection shows the team's server-accepted answer. Any member can change it before the deadline.
+    accepted: "Accepted as your team's answer"
+    changeHint: "Anyone on your team can change it until time's up."
     submitUnconfirmed: Acceptance could not be confirmed. Check your connection and the current team answer, and retry before the deadline.
   suspense:
     title: Time's up!
@@ -705,16 +729,24 @@ quiz:
     title: Answer reveal
     correct: Correct!
     wrong: Not this time…
+    correctLabel: Correct
+    wrongLabel: Incorrect
     yourAnswer: Your team's answer
-    teamScore: "Current team score: $score pts"
+    teamScore: "Total: $score pts"
+    gain: "+$points pts"
   result:
     title: Final results
     table: Team $name
     points: $score pts
     yourTeam: Your team
-    yourTeamRanked: "#$rank / $name ($score pts)"
-    yourTeamUnranked: $name ($score pts)
-    perfect: Visit the $sponsor booth to claim your prize!
+    rank: "#$rank"
+    ranking: Ranking
+    tieNote: If teams are tied, how winners are decided will be announced at the venue.
+    award:
+      title: Sponsor Award
+      perfect: All $sponsor questions correct
+      voucher: Event staff will hand you a prize voucher.
+      voucherHint: Please wait for instructions from the staff.
     error: Failed to load results
 forceUpdate:
   title: Update Required

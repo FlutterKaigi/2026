@@ -352,7 +352,7 @@ void main() {
     await tester.pumpAndSettle();
     repository.pending!.complete();
     await tester.pumpAndSettle();
-    expect(find.text(t.quiz.question.received), findsNothing);
+    expect(find.text(t.quiz.question.accepted), findsNothing);
     expect(find.text(t.quiz.question.sending), findsNothing);
     expect(tester.takeException(), isNull);
   });

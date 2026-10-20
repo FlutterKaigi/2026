@@ -791,16 +791,17 @@ class _Translations$quiz$en extends Translations$quiz$ja {
 
 	// Translations
 	@override String get title => 'Quiz';
-	@override String get entrySubtitle => 'Join sponsor-provided quizzes';
 	@override late final _Translations$quiz$list$en list = _Translations$quiz$list$en._(_root);
 	@override late final _Translations$quiz$signInRequired$en signInRequired = _Translations$quiz$signInRequired$en._(_root);
 	@override late final _Translations$quiz$errors$en errors = _Translations$quiz$errors$en._(_root);
 	@override late final _Translations$quiz$preparing$en preparing = _Translations$quiz$preparing$en._(_root);
 	@override late final _Translations$quiz$registration$en registration = _Translations$quiz$registration$en._(_root);
 	@override late final _Translations$quiz$waiting$en waiting = _Translations$quiz$waiting$en._(_root);
+	@override late final _Translations$quiz$progress$en progress = _Translations$quiz$progress$en._(_root);
 	@override late final _Translations$quiz$checkIn$en checkIn = _Translations$quiz$checkIn$en._(_root);
 	@override late final _Translations$quiz$selection$en selection = _Translations$quiz$selection$en._(_root);
 	@override late final _Translations$quiz$team$en team = _Translations$quiz$team$en._(_root);
+	@override late final _Translations$quiz$rules$en rules = _Translations$quiz$rules$en._(_root);
 	@override late final _Translations$quiz$entryClosed$en entryClosed = _Translations$quiz$entryClosed$en._(_root);
 	@override late final _Translations$quiz$question$en question = _Translations$quiz$question$en._(_root);
 	@override late final _Translations$quiz$suspense$en suspense = _Translations$quiz$suspense$en._(_root);
@@ -1194,9 +1195,10 @@ class _Translations$quiz$registration$en extends Translations$quiz$registration$
 	final TranslationsEn _root; // ignore: unused_field
 
 	// Translations
-	@override String get subtitle => 'Confirm your round to join. You may join either the first or the second round.';
+	@override String get subtitle => 'You can join only one round.';
 	@override String get participantCount => 'Participants:';
 	@override String get participantUnit => '';
+	@override String capacity({required Object max}) => '/ ${max}';
 	@override String get join => 'Join';
 	@override String full({required Object max}) => 'Full capacity (${max} participants) reached';
 	@override String get failed => 'Could not register. Please try again later.';
@@ -1204,6 +1206,7 @@ class _Translations$quiz$registration$en extends Translations$quiz$registration$
 	@override String get closed => 'Registration for this round has closed.';
 	@override String get unavailable => 'Registration could not be confirmed. Check your connection and try again.';
 	@override String get accountUnavailable => 'This account cannot join. Please contact event staff.';
+	@override late final _Translations$quiz$registration$flow$en flow = _Translations$quiz$registration$flow$en._(_root);
 }
 
 // Path: quiz.waiting
@@ -1214,7 +1217,20 @@ class _Translations$quiz$waiting$en extends Translations$quiz$waiting$ja {
 
 	// Translations
 	@override String get title => 'Registration confirmed';
-	@override String get description => 'Check-in opens at the venue after registration closes. Scan the QR code on the screen to check in, then select the team assigned by staff.';
+	@override String get description => 'When check-in opens, scan the QR code on the venue screen.';
+}
+
+// Path: quiz.progress
+class _Translations$quiz$progress$en extends Translations$quiz$progress$ja {
+	_Translations$quiz$progress$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get join => 'Join';
+	@override String get checkIn => 'Check in';
+	@override String get selectTeam => 'Choose team';
+	@override String semantic({required Object current, required Object total}) => 'Step ${current} of ${total}';
 }
 
 // Path: quiz.checkIn
@@ -1225,7 +1241,7 @@ class _Translations$quiz$checkIn$en extends Translations$quiz$checkIn$ja {
 
 	// Translations
 	@override String get title => 'Check-in';
-	@override String get instructions => 'Scan the QR code shown on the venue screen, or enter the 6-digit check-in code. You can select your team after checking in.';
+	@override String get instructions => 'Scan the QR code shown on the venue screen.';
 	@override String get scanButton => 'Scan the QR code';
 	@override String get scanTitle => 'Scan the QR code';
 	@override String get scanHint => 'Line up the QR code shown on the venue screen within the frame';
@@ -1238,11 +1254,12 @@ class _Translations$quiz$checkIn$en extends Translations$quiz$checkIn$ja {
 	@override String get submitting => 'Checking…';
 	@override String get invalidFormat => 'Enter a 6-digit code';
 	@override String get linkInvalid => 'This link isn\'t valid. Scan the QR code at the venue again';
-	@override String get wrongCode => 'This code is incorrect. Scan the QR code on the screen again or ask the staff';
+	@override String get wrongCode => 'That code is incorrect. Check the 6-digit code on the screen and enter it again.';
 	@override String get rateLimited => 'Too many attempts. Wait about a minute and try again';
 	@override String get closed => 'Check-in has closed. Please contact event staff.';
+	@override String get notRegistered => 'Your registration was canceled. To take part, please ask a staff member.';
 	@override String get unavailable => 'Could not confirm your check-in. Check your connection and try again.';
-	@override String get failed => 'Could not check in. Please contact event staff.';
+	@override String get failed => 'Couldn\'t check you in. Update the app to the latest version, sign in again, and try again.';
 }
 
 // Path: quiz.selection
@@ -1253,8 +1270,8 @@ class _Translations$quiz$selection$en extends Translations$quiz$selection$ja {
 
 	// Translations
 	@override String get title => 'Select your team';
-	@override String get instructions => 'Sit at the table assigned by staff, then select its team (A–T).';
-	@override String get unselected => 'No team selected';
+	@override String get instructions => 'Sit at the table the staff assigned you, then select the team shown on that table.';
+	@override String get unselected => 'Not decided yet';
 	@override String current({required Object team}) => 'Your team is ${team}';
 	@override String option({required Object team, required Object count}) => '${team} (${count} people)';
 	@override String get confirm => 'Confirm this team';
@@ -1262,8 +1279,8 @@ class _Translations$quiz$selection$en extends Translations$quiz$selection$ja {
 	@override String get changeHint => 'You can change teams while selection is open.';
 	@override String get closed => 'Team selection has closed. Please wait for the questions.';
 	@override String get closedUnselected => 'Team selection has closed. Please contact event staff.';
-	@override String get changed => 'Your membership changed. Check your current team and select again.';
-	@override String get failed => 'Could not confirm your selection. Check your connection and current team. Contact staff if selection has closed or your registration was cancelled.';
+	@override String get changed => 'Your team was changed. Check your current team and select again.';
+	@override String get failed => 'Couldn\'t confirm your selection. Check your connection and tap "Confirm this team" again.';
 }
 
 // Path: quiz.team
@@ -1273,11 +1290,27 @@ class _Translations$quiz$team$en extends Translations$quiz$team$ja {
 	final TranslationsEn _root; // ignore: unused_field
 
 	// Translations
-	@override String get yourTable => 'Your team is';
-	@override String get table => 'Team';
-	@override String get teamLabel => 'Team';
-	@override String get gatherHint => 'Gather at your table and wait for the next question!';
+	@override String get yourTable => 'Your team';
+	@override String get gatherHint => 'Please wait for the question.';
 	@override String badge({required Object name}) => 'Team ${name}';
+	@override String members({required Object count}) => 'Members · ${count}';
+	@override String get you => 'You';
+}
+
+// Path: quiz.rules
+class _Translations$quiz$rules$en extends Translations$quiz$rules$ja {
+	_Translations$quiz$rules$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Quiz rules';
+	@override String get teamAnswerTitle => 'One answer per team';
+	@override String get teamAnswerBody => 'Anyone on your team can change it until time\'s up. The last accepted answer counts.';
+	@override String get scoringTitle => '10 points per question';
+	@override String get scoringBody => 'Tied teams share the same rank.';
+	@override String get sponsorAwardTitle => 'Sponsor Award';
+	@override String get sponsorAwardBody => 'Awarded to teams that answer every question from the same sponsor correctly.';
 }
 
 // Path: quiz.entryClosed
@@ -1288,7 +1321,7 @@ class _Translations$quiz$entryClosed$en extends Translations$quiz$entryClosed$ja
 
 	// Translations
 	@override String get title => 'Entry is closed';
-	@override String get description => 'The quiz is in progress. Results will be shown on this screen.';
+	@override String get description => 'Results will be shown on this screen.';
 }
 
 // Path: quiz.question
@@ -1298,19 +1331,21 @@ class _Translations$quiz$question$en extends Translations$quiz$question$ja {
 	final TranslationsEn _root; // ignore: unused_field
 
 	// Translations
-	@override String sponsoredBy({required Object name}) => 'Sponsored by ${name}';
+	@override String number({required Object n}) => 'Question ${n}';
+	@override String sponsoredBy({required Object name}) => '${name}\'s question';
 	@override String get secondsUnit => 's';
 	@override String get locked => 'Answers are closed';
 	@override String get submitFailed => 'Could not submit. The question may have closed.';
 	@override String answeredBy({required Object name}) => 'Selected by ${name}';
 	@override String get member => 'a member';
 	@override String get reading => 'The question is being read. Please wait for answers to open.';
-	@override String get synchronizing => 'Checking server time…';
+	@override String get synchronizing => 'Checking the remaining time…';
 	@override String get connectionUnavailable => 'Connection unavailable. Check your connection and try again.';
-	@override String get cached => 'Showing saved information. Your team\'s latest answer has not been confirmed.';
+	@override String get cached => 'Your team\'s latest answer couldn\'t be confirmed.';
+	@override String get tapHint => 'The option you tap becomes your team\'s answer.';
 	@override String get sending => 'Sending your answer…';
-	@override String get received => 'Your answer was accepted by the server.';
-	@override String get teamAnswer => 'The selection shows the team\'s server-accepted answer. Any member can change it before the deadline.';
+	@override String get accepted => 'Accepted as your team\'s answer';
+	@override String get changeHint => 'Anyone on your team can change it until time\'s up.';
 	@override String get submitUnconfirmed => 'Acceptance could not be confirmed. Check your connection and the current team answer, and retry before the deadline.';
 }
 
@@ -1335,8 +1370,11 @@ class _Translations$quiz$revealed$en extends Translations$quiz$revealed$ja {
 	@override String get title => 'Answer reveal';
 	@override String get correct => 'Correct!';
 	@override String get wrong => 'Not this time…';
+	@override String get correctLabel => 'Correct';
+	@override String get wrongLabel => 'Incorrect';
 	@override String get yourAnswer => 'Your team\'s answer';
-	@override String teamScore({required Object score}) => 'Current team score: ${score} pts';
+	@override String teamScore({required Object score}) => 'Total: ${score} pts';
+	@override String gain({required Object points}) => '+${points} pts';
 }
 
 // Path: quiz.result
@@ -1350,9 +1388,10 @@ class _Translations$quiz$result$en extends Translations$quiz$result$ja {
 	@override String table({required Object name}) => 'Team ${name}';
 	@override String points({required Object score}) => '${score} pts';
 	@override String get yourTeam => 'Your team';
-	@override String yourTeamRanked({required Object rank, required Object name, required Object score}) => '#${rank} / ${name} (${score} pts)';
-	@override String yourTeamUnranked({required Object name, required Object score}) => '${name} (${score} pts)';
-	@override String perfect({required Object sponsor}) => 'Visit the ${sponsor} booth to claim your prize!';
+	@override String rank({required Object rank}) => '#${rank}';
+	@override String get ranking => 'Ranking';
+	@override String get tieNote => 'If teams are tied, how winners are decided will be announced at the venue.';
+	@override late final _Translations$quiz$result$award$en award = _Translations$quiz$result$award$en._(_root);
 	@override String get error => 'Failed to load results';
 }
 
@@ -1449,9 +1488,39 @@ class _Translations$quiz$list$status$en extends Translations$quiz$list$status$ja
 	// Translations
 	@override String get preparing => 'Coming soon';
 	@override String get registration => 'Open for entry';
-	@override String get entryClosed => 'Entry closed';
+	@override String get entryClosed => 'Registration closed';
 	@override String get inProgress => 'In progress';
 	@override String get finished => 'Results';
+}
+
+// Path: quiz.registration.flow
+class _Translations$quiz$registration$flow$en extends Translations$quiz$registration$flow$ja {
+	_Translations$quiz$registration$flow$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'How it works';
+	@override String get step1Title => 'Join';
+	@override String get step2Title => 'Check in at the venue';
+	@override String get step2Body => 'Scan the QR code on the screen';
+	@override String get step3Title => 'Select your team';
+	@override String get step3Body => 'Choose the table (A–T) the staff assigned you';
+	@override String get step4Title => 'Answer as a team';
+	@override String get step4Body => '10 points per question. Answer every question from one sponsor correctly to win the Sponsor Award.';
+}
+
+// Path: quiz.result.award
+class _Translations$quiz$result$award$en extends Translations$quiz$result$award$ja {
+	_Translations$quiz$result$award$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Sponsor Award';
+	@override String perfect({required Object sponsor}) => 'All ${sponsor} questions correct';
+	@override String get voucher => 'Event staff will hand you a prize voucher.';
+	@override String get voucherHint => 'Please wait for instructions from the staff.';
 }
 
 /// The flat map containing all translations for locale <en>.
@@ -1999,12 +2068,11 @@ extension on TranslationsEn {
 			'notFound.description' => 'The page you are looking for does not exist or may have moved.',
 			'common.retry' => 'Retry',
 			'quiz.title' => 'Quiz',
-			'quiz.entrySubtitle' => 'Join sponsor-provided quizzes',
 			'quiz.list.empty' => 'No quizzes yet',
 			'quiz.list.error' => 'Failed to load quizzes',
 			'quiz.list.status.preparing' => 'Coming soon',
 			'quiz.list.status.registration' => 'Open for entry',
-			'quiz.list.status.entryClosed' => 'Entry closed',
+			'quiz.list.status.entryClosed' => 'Registration closed',
 			'quiz.list.status.inProgress' => 'In progress',
 			'quiz.list.status.finished' => 'Results',
 			'quiz.signInRequired.inPage' => 'Sign in to take part in the quiz',
@@ -2012,9 +2080,10 @@ extension on TranslationsEn {
 			'quiz.errors.eventLoadFailed' => 'Failed to load the event',
 			'quiz.preparing.title' => 'The quiz is being prepared',
 			'quiz.preparing.description' => 'Once it is announced, you can join from this screen.',
-			'quiz.registration.subtitle' => 'Confirm your round to join. You may join either the first or the second round.',
+			'quiz.registration.subtitle' => 'You can join only one round.',
 			'quiz.registration.participantCount' => 'Participants:',
 			'quiz.registration.participantUnit' => '',
+			'quiz.registration.capacity' => ({required Object max}) => '/ ${max}',
 			'quiz.registration.join' => 'Join',
 			'quiz.registration.full' => ({required Object max}) => 'Full capacity (${max} participants) reached',
 			'quiz.registration.failed' => 'Could not register. Please try again later.',
@@ -2022,10 +2091,22 @@ extension on TranslationsEn {
 			'quiz.registration.closed' => 'Registration for this round has closed.',
 			'quiz.registration.unavailable' => 'Registration could not be confirmed. Check your connection and try again.',
 			'quiz.registration.accountUnavailable' => 'This account cannot join. Please contact event staff.',
+			'quiz.registration.flow.title' => 'How it works',
+			'quiz.registration.flow.step1Title' => 'Join',
+			'quiz.registration.flow.step2Title' => 'Check in at the venue',
+			'quiz.registration.flow.step2Body' => 'Scan the QR code on the screen',
+			'quiz.registration.flow.step3Title' => 'Select your team',
+			'quiz.registration.flow.step3Body' => 'Choose the table (A–T) the staff assigned you',
+			'quiz.registration.flow.step4Title' => 'Answer as a team',
+			'quiz.registration.flow.step4Body' => '10 points per question. Answer every question from one sponsor correctly to win the Sponsor Award.',
 			'quiz.waiting.title' => 'Registration confirmed',
-			'quiz.waiting.description' => 'Check-in opens at the venue after registration closes. Scan the QR code on the screen to check in, then select the team assigned by staff.',
+			'quiz.waiting.description' => 'When check-in opens, scan the QR code on the venue screen.',
+			'quiz.progress.join' => 'Join',
+			'quiz.progress.checkIn' => 'Check in',
+			'quiz.progress.selectTeam' => 'Choose team',
+			'quiz.progress.semantic' => ({required Object current, required Object total}) => 'Step ${current} of ${total}',
 			'quiz.checkIn.title' => 'Check-in',
-			'quiz.checkIn.instructions' => 'Scan the QR code shown on the venue screen, or enter the 6-digit check-in code. You can select your team after checking in.',
+			'quiz.checkIn.instructions' => 'Scan the QR code shown on the venue screen.',
 			'quiz.checkIn.scanButton' => 'Scan the QR code',
 			'quiz.checkIn.scanTitle' => 'Scan the QR code',
 			'quiz.checkIn.scanHint' => 'Line up the QR code shown on the venue screen within the frame',
@@ -2038,14 +2119,15 @@ extension on TranslationsEn {
 			'quiz.checkIn.submitting' => 'Checking…',
 			'quiz.checkIn.invalidFormat' => 'Enter a 6-digit code',
 			'quiz.checkIn.linkInvalid' => 'This link isn\'t valid. Scan the QR code at the venue again',
-			'quiz.checkIn.wrongCode' => 'This code is incorrect. Scan the QR code on the screen again or ask the staff',
+			'quiz.checkIn.wrongCode' => 'That code is incorrect. Check the 6-digit code on the screen and enter it again.',
 			'quiz.checkIn.rateLimited' => 'Too many attempts. Wait about a minute and try again',
 			'quiz.checkIn.closed' => 'Check-in has closed. Please contact event staff.',
+			'quiz.checkIn.notRegistered' => 'Your registration was canceled. To take part, please ask a staff member.',
 			'quiz.checkIn.unavailable' => 'Could not confirm your check-in. Check your connection and try again.',
-			'quiz.checkIn.failed' => 'Could not check in. Please contact event staff.',
+			'quiz.checkIn.failed' => 'Couldn\'t check you in. Update the app to the latest version, sign in again, and try again.',
 			'quiz.selection.title' => 'Select your team',
-			'quiz.selection.instructions' => 'Sit at the table assigned by staff, then select its team (A–T).',
-			'quiz.selection.unselected' => 'No team selected',
+			'quiz.selection.instructions' => 'Sit at the table the staff assigned you, then select the team shown on that table.',
+			'quiz.selection.unselected' => 'Not decided yet',
 			'quiz.selection.current' => ({required Object team}) => 'Your team is ${team}',
 			'quiz.selection.option' => ({required Object team, required Object count}) => '${team} (${count} people)',
 			'quiz.selection.confirm' => 'Confirm this team',
@@ -2053,43 +2135,59 @@ extension on TranslationsEn {
 			'quiz.selection.changeHint' => 'You can change teams while selection is open.',
 			'quiz.selection.closed' => 'Team selection has closed. Please wait for the questions.',
 			'quiz.selection.closedUnselected' => 'Team selection has closed. Please contact event staff.',
-			'quiz.selection.changed' => 'Your membership changed. Check your current team and select again.',
-			'quiz.selection.failed' => 'Could not confirm your selection. Check your connection and current team. Contact staff if selection has closed or your registration was cancelled.',
-			'quiz.team.yourTable' => 'Your team is',
-			'quiz.team.table' => 'Team',
-			'quiz.team.teamLabel' => 'Team',
-			'quiz.team.gatherHint' => 'Gather at your table and wait for the next question!',
+			'quiz.selection.changed' => 'Your team was changed. Check your current team and select again.',
+			'quiz.selection.failed' => 'Couldn\'t confirm your selection. Check your connection and tap "Confirm this team" again.',
+			'quiz.team.yourTable' => 'Your team',
+			'quiz.team.gatherHint' => 'Please wait for the question.',
 			'quiz.team.badge' => ({required Object name}) => 'Team ${name}',
+			'quiz.team.members' => ({required Object count}) => 'Members · ${count}',
+			'quiz.team.you' => 'You',
+			'quiz.rules.title' => 'Quiz rules',
+			'quiz.rules.teamAnswerTitle' => 'One answer per team',
+			'quiz.rules.teamAnswerBody' => 'Anyone on your team can change it until time\'s up. The last accepted answer counts.',
+			'quiz.rules.scoringTitle' => '10 points per question',
+			'quiz.rules.scoringBody' => 'Tied teams share the same rank.',
+			'quiz.rules.sponsorAwardTitle' => 'Sponsor Award',
+			'quiz.rules.sponsorAwardBody' => 'Awarded to teams that answer every question from the same sponsor correctly.',
 			'quiz.entryClosed.title' => 'Entry is closed',
-			'quiz.entryClosed.description' => 'The quiz is in progress. Results will be shown on this screen.',
-			'quiz.question.sponsoredBy' => ({required Object name}) => 'Sponsored by ${name}',
+			'quiz.entryClosed.description' => 'Results will be shown on this screen.',
+			'quiz.question.number' => ({required Object n}) => 'Question ${n}',
+			'quiz.question.sponsoredBy' => ({required Object name}) => '${name}\'s question',
 			'quiz.question.secondsUnit' => 's',
 			'quiz.question.locked' => 'Answers are closed',
 			'quiz.question.submitFailed' => 'Could not submit. The question may have closed.',
 			'quiz.question.answeredBy' => ({required Object name}) => 'Selected by ${name}',
 			'quiz.question.member' => 'a member',
 			'quiz.question.reading' => 'The question is being read. Please wait for answers to open.',
-			'quiz.question.synchronizing' => 'Checking server time…',
+			'quiz.question.synchronizing' => 'Checking the remaining time…',
 			'quiz.question.connectionUnavailable' => 'Connection unavailable. Check your connection and try again.',
-			'quiz.question.cached' => 'Showing saved information. Your team\'s latest answer has not been confirmed.',
+			'quiz.question.cached' => 'Your team\'s latest answer couldn\'t be confirmed.',
+			'quiz.question.tapHint' => 'The option you tap becomes your team\'s answer.',
 			'quiz.question.sending' => 'Sending your answer…',
-			'quiz.question.received' => 'Your answer was accepted by the server.',
-			'quiz.question.teamAnswer' => 'The selection shows the team\'s server-accepted answer. Any member can change it before the deadline.',
+			'quiz.question.accepted' => 'Accepted as your team\'s answer',
+			'quiz.question.changeHint' => 'Anyone on your team can change it until time\'s up.',
 			'quiz.question.submitUnconfirmed' => 'Acceptance could not be confirmed. Check your connection and the current team answer, and retry before the deadline.',
 			'quiz.suspense.title' => 'Time\'s up!',
 			'quiz.suspense.description' => 'Waiting for the answer reveal',
 			'quiz.revealed.title' => 'Answer reveal',
 			'quiz.revealed.correct' => 'Correct!',
 			'quiz.revealed.wrong' => 'Not this time…',
+			'quiz.revealed.correctLabel' => 'Correct',
+			'quiz.revealed.wrongLabel' => 'Incorrect',
 			'quiz.revealed.yourAnswer' => 'Your team\'s answer',
-			'quiz.revealed.teamScore' => ({required Object score}) => 'Current team score: ${score} pts',
+			'quiz.revealed.teamScore' => ({required Object score}) => 'Total: ${score} pts',
+			'quiz.revealed.gain' => ({required Object points}) => '+${points} pts',
 			'quiz.result.title' => 'Final results',
 			'quiz.result.table' => ({required Object name}) => 'Team ${name}',
 			'quiz.result.points' => ({required Object score}) => '${score} pts',
 			'quiz.result.yourTeam' => 'Your team',
-			'quiz.result.yourTeamRanked' => ({required Object rank, required Object name, required Object score}) => '#${rank} / ${name} (${score} pts)',
-			'quiz.result.yourTeamUnranked' => ({required Object name, required Object score}) => '${name} (${score} pts)',
-			'quiz.result.perfect' => ({required Object sponsor}) => 'Visit the ${sponsor} booth to claim your prize!',
+			'quiz.result.rank' => ({required Object rank}) => '#${rank}',
+			'quiz.result.ranking' => 'Ranking',
+			'quiz.result.tieNote' => 'If teams are tied, how winners are decided will be announced at the venue.',
+			'quiz.result.award.title' => 'Sponsor Award',
+			'quiz.result.award.perfect' => ({required Object sponsor}) => 'All ${sponsor} questions correct',
+			'quiz.result.award.voucher' => 'Event staff will hand you a prize voucher.',
+			'quiz.result.award.voucherHint' => 'Please wait for instructions from the staff.',
 			'quiz.result.error' => 'Failed to load results',
 			'forceUpdate.title' => 'Update Required',
 			'forceUpdate.message' => 'A new version of the app is available. Please update to the latest version.',

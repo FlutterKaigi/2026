@@ -11,8 +11,9 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 /// クイズイベントの一覧ページ。
 ///
 /// 前半戦・後半戦などのイベントを状態チップつきで並べる。参加できるか
-/// どうか（受付前 / 受付中 / 進行中 / 結果発表）はイベント側の status に
-/// 連動し、行をタップすると各イベントのページで状態に応じた画面が出る。
+/// どうか（開催準備中 / 参加受付中 / 参加受付終了 / 進行中 / 結果発表）は
+/// イベント側の status に連動し、行をタップすると各イベントのページで
+/// 状態に応じた画面が出る。
 class QuizEventListPage extends ConsumerWidget {
   const QuizEventListPage({super.key});
 
@@ -115,10 +116,13 @@ class _StatusChip extends StatelessWidget {
         scheme.onSurfaceVariant,
       ),
       QuizEventStatus.registration => (t.quiz.list.status.registration, scheme.primary),
-      QuizEventStatus.entryClosed => (t.quiz.list.status.entryClosed, scheme.error),
+      // 受付終了はエラーではなく、進行中（secondary）とも見分けられるよう中立の灰色にする。
+      QuizEventStatus.entryClosed => (t.quiz.list.status.entryClosed, scheme.outline),
       QuizEventStatus.inProgress => (t.quiz.list.status.inProgress, scheme.secondary),
       QuizEventStatus.finished => (t.quiz.list.status.finished, scheme.tertiary),
     };
+    // outline は文字には薄い（ライトテーマで約3.6:1）ため、受付終了は文字だけ onSurfaceVariant にする。
+    final textColor = status == QuizEventStatus.entryClosed ? scheme.onSurfaceVariant : color;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
       decoration: BoxDecoration(
@@ -129,7 +133,7 @@ class _StatusChip extends StatelessWidget {
       child: Text(
         label,
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-          color: color,
+          color: textColor,
           fontWeight: FontWeight.bold,
         ),
       ),
