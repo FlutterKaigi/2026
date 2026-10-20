@@ -86,29 +86,41 @@ class _SettingsCard extends ConsumerWidget {
           retryKey: const Key('retry-stamp-rally-settings'),
           onRetry: () => ref.invalidate(stampRallySettingsProvider),
         ),
-        // Reset the form whenever the saved values change.
-        data: (value) => _SettingsForm(key: ValueKey('${value.checkpoints}/${value.isOpen}'), settings: value),
+        data: (value) => _SettingsForm(settings: value),
       ),
     );
   }
 }
 
 class _SettingsForm extends HookConsumerWidget {
-  const _SettingsForm({super.key, required this.settings});
+  const _SettingsForm({required this.settings});
 
   final StampRallySettings settings;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final controller = useTextEditingController(text: settings.checkpoints.join(', '));
+    final savedText = settings.checkpoints.join(', ');
+    final controller = useTextEditingController(text: savedText);
+    final previousSavedText = useRef(savedText);
+    useEffect(() {
+      // Reception updates and other administrators' writes must not discard a draft.
+      if (controller.text == previousSavedText.value) controller.text = savedText;
+      previousSavedText.value = savedText;
+      return null;
+    }, [savedText]);
     final error = useState<String?>(null);
     final saving = useState(false);
 
-    Future<void> save(StampRallySettings next) async {
+    Future<void> save(StampRallySettings next, {String? checkpointDraft}) async {
       saving.value = true;
       try {
         await ref.read(stampRallyRepositoryProvider).saveSettings(next);
-        if (context.mounted) context.showSnackBar('保存しました');
+        if (context.mounted) {
+          if (checkpointDraft != null && controller.text == checkpointDraft) {
+            controller.text = next.checkpoints.join(', ');
+          }
+          context.showSnackBar('保存しました');
+        }
       } catch (e) {
         if (context.mounted) context.showSnackBar('保存に失敗しました: $e');
       } finally {
@@ -117,9 +129,15 @@ class _SettingsForm extends HookConsumerWidget {
     }
 
     void saveCheckpoints() {
-      final checkpoints = parseCheckpoints(controller.text);
+      final draft = controller.text;
+      final checkpoints = parseCheckpoints(draft);
       error.value = checkpoints == null ? '1〜5個の正の整数を昇順にカンマ区切りで入力してください' : null;
-      if (checkpoints != null) save(StampRallySettings(checkpoints: checkpoints, isOpen: settings.isOpen));
+      if (checkpoints != null) {
+        save(
+          StampRallySettings(checkpoints: checkpoints, isOpen: settings.isOpen),
+          checkpointDraft: draft,
+        );
+      }
     }
 
     return Column(
