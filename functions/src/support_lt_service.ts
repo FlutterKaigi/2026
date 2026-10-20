@@ -57,9 +57,11 @@ interface Attempts {
   blockedUntil?: Timestamp;
 }
 
-/** Failure counts per ten-minute bucket, keyed by `Math.floor(now / window)`. */
+/** Failure counts keyed by the verified code version and ten-minute bucket. */
 interface SharedAttempts {
   counts?: Record<string, number>;
+  /** Set on rotation; unscoped counts from older deployments no longer apply. */
+  resetCodeVersion?: number;
 }
 
 export interface IssueSupportLtCodeResult {
@@ -128,9 +130,9 @@ export async function issueSupportLtCodeForUser(
       version: (previous?.version ?? 0) + 1,
     };
     tx.set(ref, settings);
-    // A new code starts with a clean shared failure budget so staff can
-    // recover from a brute-force block by rotating.
-    tx.delete(db.doc(SHARED_ATTEMPTS_PATH));
+    // Keep a reset marker so even a delayed, unscoped merge from an older
+    // deployment cannot restore the previous code's failure budget.
+    tx.set(db.doc(SHARED_ATTEMPTS_PATH), { resetCodeVersion: settings.version, counts: {} });
     return codeResult(settings);
   });
 }
@@ -154,17 +156,46 @@ function sharedBucket(now: number): string {
   return Math.floor(now / ATTEMPT_WINDOW_MILLIS).toString();
 }
 
-// The shared counter is a single hot document, so it stays out of the
-// registration transaction: a plain read for the check and an atomic
-// increment for the update never hold or wait on transaction locks, which
-// concurrent failed guesses would otherwise contend for until they time out.
-async function isSharedBlocked(db: Firestore, now: number): Promise<boolean> {
-  const shared = (await db.doc(SHARED_ATTEMPTS_PATH).get()).data() as SharedAttempts | undefined;
-  return (shared?.counts?.[sharedBucket(now)] ?? 0) >= MAX_FAILURES_SHARED;
+function sharedFailureKey(codeVersion: number, now: number): string {
+  return `v${codeVersion}_${sharedBucket(now)}`;
 }
 
-function recordSharedFailure(db: Firestore, now: number): Promise<unknown> {
-  return db.doc(SHARED_ATTEMPTS_PATH).set({ counts: { [sharedBucket(now)]: FieldValue.increment(1) } }, { merge: true });
+// Do not transactionally read the hot shared document: concurrent failed
+// guesses must not contend on its read lock.
+async function isSharedBlocked(db: Firestore, codeVersion: number, now: number): Promise<boolean> {
+  const shared = (await db.doc(SHARED_ATTEMPTS_PATH).get()).data() as SharedAttempts | undefined;
+  const failures = shared?.counts?.[sharedFailureKey(codeVersion, now)] ?? 0;
+  // Preserve the existing budget when deploying over the old bucket-only
+  // format. Rotation resets it and permanently ignores later legacy writes.
+  const legacyFailures = shared?.resetCodeVersion == null ? shared?.counts?.[sharedBucket(now)] ?? 0 : 0;
+  return failures + legacyFailures >= MAX_FAILURES_SHARED;
+}
+
+interface CheckedSharedBudget {
+  codeVersion: number;
+  bucket: string;
+}
+
+async function checkSharedBudgetBeforeRegistration(db: Firestore, now: number): Promise<CheckedSharedBudget | null> {
+  const settingsRef = db.doc(SETTINGS_PATH);
+  const settings = (await settingsRef.get()).data() as CodeSettings | undefined;
+  const codeVersion = settings?.version ?? 0;
+  if (!await isSharedBlocked(db, codeVersion, now)) {
+    return { codeVersion, bucket: sharedBucket(now) };
+  }
+  // Reject blocked traffic without Auth lookups or transaction read locks,
+  // but do not reject a newly rotated code using an obsolete generation.
+  const latest = (await settingsRef.get()).data() as CodeSettings | undefined;
+  if ((latest?.version ?? 0) === codeVersion) {
+    throw new HttpsError("resource-exhausted", "試行回数が多すぎます。10分ほど待ってからお試しください。");
+  }
+  return null;
+}
+
+function recordSharedFailure(db: Firestore, codeVersion: number, now: number): Promise<unknown> {
+  return db.doc(SHARED_ATTEMPTS_PATH).set({
+    counts: { [sharedFailureKey(codeVersion, now)]: FieldValue.increment(1) },
+  }, { merge: true });
 }
 
 /** gRPC status 10 (ABORTED) is what Firestore reports after transaction retries are exhausted. */
@@ -176,14 +207,20 @@ function nonEmptyName(value: unknown): string | undefined {
   return typeof value === "string" && value.trim().length > 0 ? value.trim() : undefined;
 }
 
+interface FailedCodeCheck {
+  codeVersion: number;
+  failedAt: number;
+}
+
 type RegistrationOutcome =
   | { kind: "registered"; result: RegisterSupportLtResult }
-  | { kind: "blocked"; failed: boolean }
-  | { kind: "invalid-code"; failed: true };
+  | { kind: "blocked"; failure: FailedCodeCheck | null }
+  | { kind: "invalid-code"; failure: FailedCodeCheck };
 
 function attemptRegistration(
   user: SupportLtAuth,
   code: string,
+  checkedBudget: CheckedSharedBudget | null,
   dependencies: Dependencies,
 ): Promise<RegistrationOutcome> {
   const { db } = dependencies;
@@ -195,22 +232,29 @@ function attemptRegistration(
     // batch until commit/rollback. Check Auth while holding it so cleanup can
     // never finish before this transaction recreates a deleted user's entry.
     await assertActiveSupportLtUser(user.uid, dependencies.getUser);
+    const settings = (await tx.get(db.doc(SETTINGS_PATH))).data() as CodeSettings | undefined;
+    const codeVersion = settings?.version ?? 0;
+    const now = (dependencies.now ?? Date.now)();
+    // Reuse the preflight only for the same generation and time bucket.
+    // Rotation or a bucket boundary requires checking the new budget.
+    if ((checkedBudget?.codeVersion !== codeVersion || checkedBudget.bucket !== sharedBucket(now))
+      && await isSharedBlocked(db, codeVersion, now)) {
+      return { kind: "blocked", failure: null };
+    }
     if (existing) {
       return { kind: "registered", result: { registeredAt: existing.registeredAt.toMillis(), alreadyRegistered: true } };
     }
-    const [settingsSnapshot, attemptsSnapshot] = await Promise.all([
-      tx.get(db.doc(SETTINGS_PATH)), tx.get(attemptsRef),
-    ]);
-    const settings = settingsSnapshot.data() as CodeSettings | undefined;
-    const attempts = attemptsSnapshot.data() as Attempts | undefined;
-    const now = (dependencies.now ?? Date.now)();
+    const attempts = (await tx.get(attemptsRef)).data() as Attempts | undefined;
     if (isBlocked(attempts, now)) {
-      return { kind: "blocked", failed: false };
+      return { kind: "blocked", failure: null };
     }
     if (settings == null || settings.code !== code) {
       const failure = nextFailure(attempts, now);
       tx.set(attemptsRef, failure);
-      return failure.blockedUntil ? { kind: "blocked", failed: true } : { kind: "invalid-code", failed: true };
+      return {
+        kind: failure.blockedUntil ? "blocked" : "invalid-code",
+        failure: { codeVersion, failedAt: now },
+      };
     }
     // The profile is only needed for the display name, so read it after the
     // code matched instead of paying for it on every failed guess.
@@ -238,10 +282,8 @@ export async function registerSupportLtForUser(
     throw new HttpsError("invalid-argument", "6桁の数字を入力してください。");
   }
   const { db } = dependencies;
-  if (await isSharedBlocked(db, (dependencies.now ?? Date.now)())) {
-    throw new HttpsError("resource-exhausted", "試行回数が多すぎます。10分ほど待ってからお試しください。");
-  }
-  const outcome = await attemptRegistration(user, input.code.trim(), dependencies).catch(async (error: unknown) => {
+  const checkedBudget = await checkSharedBudgetBeforeRegistration(db, (dependencies.now ?? Date.now)());
+  const outcome = await attemptRegistration(user, input.code.trim(), checkedBudget, dependencies).catch(async (error: unknown) => {
     // Only a deleted account loses its data: a disabled account may be
     // re-enabled and must keep its registration. A separate batch must run
     // after rollback, never under this transaction's registration read lock,
@@ -259,8 +301,10 @@ export async function registerSupportLtForUser(
   });
   // Throw only after commit: throwing inside the transaction would discard
   // the failed-attempt update and leave the six-digit code open to guessing.
-  if (outcome.kind !== "registered" && outcome.failed) {
-    await recordSharedFailure(db, (dependencies.now ?? Date.now)());
+  if (outcome.kind !== "registered" && outcome.failure != null) {
+    // Use the generation and bucket actually checked, even when rotation or
+    // a bucket boundary occurs before this asynchronous write completes.
+    await recordSharedFailure(db, outcome.failure.codeVersion, outcome.failure.failedAt);
   }
   if (outcome.kind === "blocked") {
     throw new HttpsError("resource-exhausted", "試行回数が多すぎます。10分ほど待ってからお試しください。");

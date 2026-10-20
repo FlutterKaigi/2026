@@ -4,21 +4,20 @@ import 'package:dashboard/core/event_environment/event_environment.dart';
 import 'package:dashboard/core/router/router.dart';
 import 'package:data/data.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 /// Promotion copies only this event's definition; publication remains a
 /// separate production action. The request always uses the current login.
-class QuizPromotionControls extends HookConsumerWidget {
-  const QuizPromotionControls({super.key, required this.event, required this.busy});
+class QuizPromotionControls extends ConsumerWidget {
+  const QuizPromotionControls({super.key, required this.event, required this.busy, required this.onWithdraw});
   final QuizEvent event;
   final bool busy;
+  final Future<void> Function() onWithdraw;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final client = ref.watch(eventAdminClientProvider);
-    final withdrawing = useState(false);
     if (client == null || client.environment == Flavor.dev) return const SizedBox.shrink();
     if (client.environment == Flavor.stg) {
       return OutlinedButton.icon(
@@ -50,7 +49,7 @@ class QuizPromotionControls extends HookConsumerWidget {
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
         OutlinedButton.icon(
-          onPressed: !canWithdraw || busy || withdrawing.value
+          onPressed: !canWithdraw || busy
               ? null
               : () async {
                   final ok = await showDialog<bool>(
@@ -68,20 +67,10 @@ class QuizPromotionControls extends HookConsumerWidget {
                     ),
                   );
                   if (ok != true || !context.mounted) return;
-                  withdrawing.value = true;
-                  try {
-                    await client.mutate('withdrawQuizPromotion', {'eventId': event.id});
-                    if (context.mounted) context.go(eventLocation(const QuizEventListRoute().location, Flavor.prod));
-                  } catch (error) {
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('反映を取り消せませんでした: $error')));
-                    }
-                  } finally {
-                    if (context.mounted) withdrawing.value = false;
-                  }
+                  await onWithdraw();
                 },
           icon: const Icon(Icons.undo),
-          label: Text(withdrawing.value ? '取り消し中…' : '反映を取り消す'),
+          label: const Text('反映を取り消す'),
         ),
         Text(canWithdraw ? 'STG から反映したイベントです。参加受付の開始前なら取り消せます。' : '参加受付開始後は反映を取り消せません。'),
       ],

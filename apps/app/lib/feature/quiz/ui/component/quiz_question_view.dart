@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:app/core/extension/locale_map_extension.dart';
 import 'package:app/core/i18n/strings.g.dart';
@@ -44,12 +45,16 @@ class QuizQuestionView extends HookConsumerWidget {
     final answerAsync = ref.watch(teamAnswerProvider);
     final teamAnswer = answerAsync.value;
     final clockAsync = ref.watch(quizClockProvider);
-    final clock = clockAsync.hasError || clockAsync.isLoading ? null : clockAsync.value;
+    final clock = clockAsync.value;
+    void resynchronizeAfterInterruption() {
+      ref.read(quizClockProvider.notifier).resynchronizeAfterInterruption();
+    }
+
     final tick = useState(0);
     useEffect(() {
       final timer = Timer.periodic(const Duration(seconds: 1), (_) => tick.value++);
       final resync = Timer.periodic(const Duration(seconds: 30), (_) => ref.invalidate(quizClockProvider));
-      final lifecycle = AppLifecycleListener(onResume: () => ref.invalidate(quizClockProvider));
+      final lifecycle = AppLifecycleListener(onResume: resynchronizeAfterInterruption);
       return () {
         timer.cancel();
         resync.cancel();
@@ -59,10 +64,11 @@ class QuizQuestionView extends HookConsumerWidget {
     // Recalibrate as soon as a cached answer stream reconnects.
     ref.listen(teamAnswerProvider, (previous, next) {
       if ((previous?.value?.isFromCache ?? false) && next.value?.isFromCache == false) {
-        ref.invalidate(quizClockProvider);
+        resynchronizeAfterInterruption();
       }
     });
     final reading = question.status == QuizQuestionStatus.reading;
+    // Periodic refreshes can keep a fresh clock; reconnect/resume must replace it.
     final synchronized = clock != null && clock.isFresh;
     final remaining = synchronized ? question.closesAt?.difference(clock.now) : null;
     final expired = remaining != null && remaining <= Duration.zero;
@@ -250,8 +256,8 @@ class _CountdownBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    final seconds = remaining == null ? null : (remaining!.inMilliseconds / 1000).ceil().clamp(0, durationSeconds);
-    final ratio = seconds == null || durationSeconds == 0 ? 1.0 : seconds / durationSeconds;
+    final seconds = remaining == null ? null : math.max(0, (remaining!.inMilliseconds / 1000).ceil());
+    final ratio = seconds == null || durationSeconds <= 0 ? 1.0 : math.min<double>(1, seconds / durationSeconds);
     final urgent = ratio <= _urgentRatio;
     final color = urgent ? theme.colorScheme.error : theme.colorScheme.primary;
 

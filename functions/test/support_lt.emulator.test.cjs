@@ -254,12 +254,16 @@ test("Support LT real callable, transaction, Auth cleanup, and Firestore securit
     // Seed this and the next ten-minute bucket so a bucket boundary during
     // the test cannot lift the block early.
     const bucket = Math.floor(Date.now() / 600_000);
-    await db.doc("supportLtSettings/attempts").set({ counts: { [bucket]: 199, [bucket + 1]: 199 } });
+    const version = (await db.doc("supportLtSettings/current").get()).data().version;
+    await db.doc("supportLtSettings/attempts").set({
+      resetCodeVersion: version,
+      counts: { [`v${version}_${bucket}`]: 199, [`v${version}_${bucket + 1}`]: 199 },
+    });
     const wrongCode = liveCode === "111111" ? "222222" : "111111";
     // The 200th failure is still reported as a wrong code; the block applies
     // to every call after it, including correct codes from other accounts.
     await expectCallError("registerSupportLt", blocker, { code: wrongCode }, "NOT_FOUND");
-    assert.equal((await db.doc("supportLtSettings/attempts").get()).data().counts[bucket], 200);
+    assert.equal((await db.doc("supportLtSettings/attempts").get()).data().counts[`v${version}_${bucket}`], 200);
     const fresh = await createUser("blocked-bystander");
     await expectCallError("registerSupportLt", fresh, { code: liveCode }, "RESOURCE_EXHAUSTED");
     await expectCallError("registerSupportLt", blocker, { code: wrongCode }, "RESOURCE_EXHAUSTED");
@@ -268,7 +272,9 @@ test("Support LT real callable, transaction, Auth cleanup, and Firestore securit
       "a shared block records no further per-user failures");
     const rotated = await call("issueSupportLtCode", admin, { rotate: true });
     liveCode = rotated.result.code;
-    assert.equal((await db.doc("supportLtSettings/attempts").get()).exists, false);
+    assert.deepEqual((await db.doc("supportLtSettings/attempts").get()).data(), {
+      resetCodeVersion: version + 1, counts: {},
+    });
     const registered = await call("registerSupportLt", fresh, { code: liveCode });
     assert.equal(registered.result.alreadyRegistered, false);
   });

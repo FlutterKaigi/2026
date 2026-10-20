@@ -1,4 +1,5 @@
 import 'package:dashboard/feature/quiz/data/provider/quiz_list_state.dart';
+import 'package:dashboard/feature/quiz/ui/component/quiz_countdown.dart';
 import 'package:dashboard/feature/quiz/ui/page/quiz_projection_page.dart';
 import 'package:data/data.dart';
 import 'package:flutter/material.dart';
@@ -35,6 +36,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          quizClockRepositoryProvider.overrideWithValue(_Clock()),
           quizEventProvider('event').overrideWith((_) => Stream.value(event)),
           quizQuestionProvider((eventId: 'event', questionId: 'question')).overrideWith((_) => Stream.value(question)),
           quizQuestionSecretProvider((
@@ -117,4 +119,9 @@ void main() {
     }
     expect(find.text('1 位'), findsNWidgets(3));
   });
+}
+
+class _Clock implements QuizClockRepository {
+  @override
+  Future<QuizClock> synchronize() async => QuizClock(serverNow: DateTime(2026), elapsed: () => Duration.zero);
 }
