@@ -565,12 +565,13 @@ class _ConsoleBody extends HookConsumerWidget {
   }
 }
 
-class _TeamsTable extends StatelessWidget {
+class _TeamsTable extends ConsumerWidget {
   const _TeamsTable({required this.teams});
   final List<QuizTeam> teams;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final sponsors = ref.watch(quizSponsorListProvider).asData?.value;
     final sorted = [...teams]
       ..sort((a, b) {
         final score = b.score.compareTo(a.score);
@@ -587,6 +588,7 @@ class _TeamsTable extends StatelessWidget {
             DataColumn(label: Text('メンバー')),
             DataColumn(label: Text('スコア'), numeric: true),
             DataColumn(label: Text('順位'), numeric: true),
+            DataColumn(label: Text('全問正解スポンサー')),
           ],
           rows: [
             for (final team in sorted)
@@ -597,6 +599,13 @@ class _TeamsTable extends StatelessWidget {
                   DataCell(Text(team.members.map((member) => member.displayName).join(', '))),
                   DataCell(Text('${team.score}')),
                   DataCell(Text(team.rank?.toString() ?? '-')),
+                  DataCell(
+                    Text(
+                      team.perfectSponsorIds.isEmpty
+                          ? '-'
+                          : team.perfectSponsorIds.map((id) => _sponsorLabel(sponsors, id)).join(', '),
+                    ),
+                  ),
                 ],
               ),
           ],
@@ -638,15 +647,10 @@ class _QuestionRow extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final sponsors = ref.watch(quizSponsorListProvider);
+    final sponsors = ref.watch(quizSponsorListProvider).asData?.value;
     final answers = ref.watch(
       quizAnswersByQuestionProvider((eventId: eventId, questionId: question.id)),
     );
-
-    final sponsorName = sponsors.asData?.value
-        .where((s) => s.id == question.sponsorId)
-        .map((s) => s.name.ja.isEmpty ? s.name.en : s.name.ja)
-        .firstOrNull;
 
     final answeredCount = answers.asData?.value.where((a) => a.selectedOptionIndex != null).length;
 
@@ -678,7 +682,7 @@ class _QuestionRow extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(question.title.ja, maxLines: 2, overflow: TextOverflow.ellipsis),
-                      Text(sponsorName ?? question.sponsorId, style: Theme.of(context).textTheme.bodySmall),
+                      Text(_sponsorLabel(sponsors, question.sponsorId), style: Theme.of(context).textTheme.bodySmall),
                       if (question.status == QuizQuestionStatus.reading || question.status == QuizQuestionStatus.open)
                         QuizCountdown(
                           closesAt: question.status == QuizQuestionStatus.open ? question.closesAt : null,
@@ -775,4 +779,10 @@ Future<bool?> _confirm(BuildContext context, {required String title, required St
       ],
     ),
   );
+}
+
+String _sponsorLabel(List<Sponsor>? sponsors, String sponsorId) {
+  final sponsor = sponsors?.where((s) => s.id == sponsorId).firstOrNull;
+  if (sponsor == null) return sponsorId;
+  return sponsor.name.ja.isEmpty ? sponsor.name.en : sponsor.name.ja;
 }

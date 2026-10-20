@@ -34,6 +34,8 @@ void main() {
     List<QuizQuestion> questions, {
     QuizEvent? eventValue,
     List<QuizParticipant> people = const [],
+    List<QuizTeam>? teams,
+    List<Sponsor> sponsors = const [],
   }) async {
     await tester.binding.setSurfaceSize(const Size(1400, 1200));
     addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -43,9 +45,9 @@ void main() {
           quizClockRepositoryProvider.overrideWithValue(_Clock()),
           quizEventProvider('event').overrideWith((_) => Stream.value(eventValue ?? event)),
           quizParticipantListProvider('event').overrideWith((_) => Stream.value(people)),
-          quizTeamListProvider('event').overrideWith((_) => Stream.value(quizTeamsFromParticipants(people))),
+          quizTeamListProvider('event').overrideWith((_) => Stream.value(teams ?? quizTeamsFromParticipants(people))),
           quizQuestionListProvider('event').overrideWith((_) => Stream.value(questions)),
-          quizSponsorListProvider.overrideWith((_) => Stream.value([])),
+          quizSponsorListProvider.overrideWith((_) => Stream.value(sponsors)),
           quizAnswersByQuestionProvider.overrideWith((_, _) => Stream.value([])),
           quizOperationsRepositoryProvider.overrideWithValue(operations),
           quizCheckInCodeProvider('event').overrideWith((_) => Stream.value('123456')),
@@ -202,6 +204,40 @@ void main() {
   testWidgets('cannot finish without a revealed question', (tester) async {
     await showConsole(tester, _Operations(), [draft]);
     expect(tester.widget<FilledButton>(finalizeButton()).onPressed, isNull);
+  });
+
+  testWidgets('team table names the sponsors each team answered perfectly', (tester) async {
+    Sponsor sponsor(String id, LocaleMap name) => Sponsor(
+      id: id,
+      name: name,
+      description: const LocaleMap(ja: '', en: ''),
+      tier: SponsorTier.gold,
+      createdAt: DateTime(2026),
+      updatedAt: DateTime(2026),
+    );
+    await showConsole(
+      tester,
+      _Operations(),
+      [revealed.copyWith(sponsorId: 'ja')],
+      eventValue: event.copyWith(status: QuizEventStatus.finished),
+      teams: const [
+        QuizTeam(id: 'A', tableNumber: 1, name: 'A', score: 30, rank: 1, perfectSponsorIds: ['en', 'unknown', 'ja']),
+        QuizTeam(id: 'B', tableNumber: 2, name: 'B', rank: 2),
+      ],
+      sponsors: [
+        sponsor('ja', const LocaleMap(ja: '日本語名', en: 'Japanese name')),
+        sponsor('en', const LocaleMap(ja: '', en: 'English name')),
+      ],
+    );
+    final table = find.byType(DataTable);
+    Finder inTable(String text) => find.descendant(of: table, matching: find.text(text));
+    double rowOf(String text) => tester.getCenter(inTable(text)).dy;
+    expect(inTable('全問正解スポンサー'), findsOneWidget);
+    expect(inTable('English name, unknown, 日本語名'), findsOneWidget);
+    expect(inTable('-'), findsOneWidget);
+    expect(rowOf('English name, unknown, 日本語名'), rowOf('A'));
+    expect(rowOf('-'), rowOf('B'));
+    expect(find.text('日本語名'), findsOneWidget);
   });
 }
 
