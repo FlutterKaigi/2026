@@ -20,6 +20,31 @@ String quizQuestionStatusLabel(QuizQuestionStatus status) => switch (status) {
   QuizQuestionStatus.revealed => '発表済み',
 };
 
+/// 投影画面の状態ピルの文言（出題していない間と結果発表）。管理画面のラベルとは分け、会場向けの言い方にする。
+String quizProjectionEventStatusLabel(QuizEvent event) {
+  if (event.status == QuizEventStatus.finished) return '結果発表';
+  final beforeStart = event.status == QuizEventStatus.registration || event.status == QuizEventStatus.entryClosed;
+  if (beforeStart && event.teamSelectionStatus == QuizTeamSelectionStatus.open) return 'チェックイン受付中';
+  if (event.teamSelectionStatus == QuizTeamSelectionStatus.closed) return 'まもなく出題';
+  return switch (event.status) {
+    QuizEventStatus.draft || QuizEventStatus.published => '参加受付前',
+    QuizEventStatus.registration => '参加受付中',
+    QuizEventStatus.entryClosed => '参加受付終了',
+    QuizEventStatus.inProgress => 'まもなく出題',
+    QuizEventStatus.finished => '結果発表',
+  };
+}
+
+/// 投影画面の出題中の状態ピルの文言。[expired] は回答受付中のまま締切を過ぎたかどうか。
+String quizProjectionQuestionStatusLabel(QuizQuestionStatus status, {bool expired = false}) => switch (status) {
+  // 投影画面は下書きの問題を表示しない。
+  QuizQuestionStatus.draft => 'まもなく出題',
+  QuizQuestionStatus.reading => '読み上げ中',
+  QuizQuestionStatus.open => expired ? '回答締切' : '回答受付中',
+  QuizQuestionStatus.closed => '回答締切',
+  QuizQuestionStatus.revealed => '正解発表',
+};
+
 /// イベント status を表す色付き Chip。
 class QuizEventStatusChip extends StatelessWidget {
   const QuizEventStatusChip({super.key, required this.status});

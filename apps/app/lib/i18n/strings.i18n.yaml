@@ -608,14 +608,13 @@ common:
   retry: 再試行
 quiz:
   title: クイズ大会
-  entrySubtitle: スポンサー提供のクイズに参加
   list:
     empty: クイズはまだありません
     error: クイズ一覧を取得できませんでした
     status:
       preparing: 開催準備中
       registration: 参加受付中
-      entryClosed: 受付終了
+      entryClosed: 参加受付終了
       inProgress: 進行中
       finished: 結果発表
   signInRequired:
@@ -625,12 +624,12 @@ quiz:
     eventLoadFailed: イベント情報の取得に失敗しました
   preparing:
     title: クイズは開催準備中です
-    description: 開始のアナウンスがあったら
-      この画面から参加できます。
+    description: 開始のアナウンスがあったらこの画面から参加できます。
   registration:
-    subtitle: 参加する回を確認して参加表明してください。前半戦・後半戦のどちらか一方に参加できます。
+    subtitle: 参加できるのは、いずれか1つの回だけです
     participantCount: 現在の参加人数
     participantUnit: 人
+    capacity: "/ $max 人"
     join: 参加する
     full: 定員（$max 人）に達しました
     failed: 登録できませんでした。時間をおいて再度お試しください。
@@ -638,12 +637,26 @@ quiz:
     closed: この回の参加受付は終了しました。
     unavailable: 登録を確認できませんでした。通信状況を確認して再試行してください。
     accountUnavailable: このアカウントでは参加できません。運営にお問い合わせください。
+    flow:
+      title: 参加の流れ
+      step1Title: 参加表明
+      step2Title: 会場でチェックイン
+      step2Body: スクリーンの QR コードを読み取ります
+      step3Title: チームを選ぶ
+      step3Body: スタッフに案内されたテーブル（A〜T）を選びます
+      step4Title: チームで回答
+      step4Body: 1問10点。同じスポンサーの問題に全問正解するとスポンサー賞
   waiting:
     title: 参加表明済み
-    description: 参加登録の終了後、会場でチェックインを開始します。スクリーンの QR コードを読み取ってチェックインし、スタッフに案内されたチームを選んでください。
+    description: チェックインが始まったら、会場スクリーンの QR コードを読み取ってください。
+  progress:
+    join: 参加表明
+    checkIn: チェックイン
+    selectTeam: チーム選択
+    semantic: $total 段階中 $current 段階目
   checkIn:
     title: チェックイン
-    instructions: 会場のスクリーンに表示された QR コードを読み取るか、6桁の参加コードを入力してください。チェックイン後にチームを選べます。
+    instructions: 会場のスクリーンに表示された QR コードを読み取ってください。
     scanButton: QR コードを読み取る
     scanTitle: QR コードを読み取る
     scanHint: 会場のスクリーンに表示された QR コードを枠内に合わせてください
@@ -656,15 +669,16 @@ quiz:
     submitting: 確認中…
     invalidFormat: 6桁の参加コードを入力してください
     linkInvalid: このリンクは無効です。会場の QR コードを読み取り直してください
-    wrongCode: 参加コードが正しくありません。スクリーンの QR コードを読み取り直すか、スタッフにお声がけください
+    wrongCode: 参加コードが正しくありません。スクリーンに表示された6桁の参加コードを確かめて、入力し直してください
     rateLimited: 確認回数の上限に達しました。1分ほど待ってから再度お試しください
     closed: チェックインの受付は終了しました。スタッフにお声がけください。
+    notRegistered: 参加登録が取り消されています。参加する場合はスタッフにお声がけください。
     unavailable: チェックインを確認できませんでした。通信状況を確認して再試行してください。
-    failed: チェックインできませんでした。スタッフにお声がけください。
+    failed: チェックインできませんでした。アプリを最新版に更新し、サインインし直してから、もう一度お試しください。
   selection:
     title: チームを選択
-    instructions: スタッフに案内されたテーブルに着席してから、そのテーブルのチーム（A〜T）を選んでください。
-    unselected: チーム未選択
+    instructions: スタッフに案内されたテーブルに着席してから、テーブルに表示されたチームを選んでください。
+    unselected: まだ決定していません
     current: あなたのチームは $team です
     option: $team（$count 人）
     confirm: このチームに決定
@@ -672,32 +686,41 @@ quiz:
     changeHint: 受付中はチームを選び直せます。
     closed: チーム選択は終了しました。出題をお待ちください。
     closedUnselected: チーム選択は終了しました。運営スタッフにお声がけください。
-    changed: 所属が変更されました。現在のチームを確認して選び直してください。
-    failed: 選択の完了を確認できませんでした。通信状況と現在の所属を確認してください。受付終了や参加取消の場合はスタッフにお声がけください。
+    changed: チームが変更されました。現在のチームを確認して選び直してください。
+    failed: 選択を確認できませんでした。通信状況を確認して、もう一度「このチームに決定」を押してください。
   team:
-    yourTable: あなたのチームは
-    table: チーム
-    teamLabel: チーム
-    gatherHint: テーブルに集まって次の出題を待とう！
+    yourTable: あなたのチーム
+    gatherHint: 出題をお待ちください
     badge: チーム $name
+    members: メンバー · $count人
+    you: あなた
+  rules:
+    title: クイズのルール
+    teamAnswerTitle: 回答はチームで1つ
+    teamAnswerBody: 締切までチームの誰でも変更できます。最後に受理された回答が採用されます
+    scoringTitle: 1問10点
+    scoringBody: 同点のチームは同じ順位です
+    sponsorAwardTitle: スポンサー賞
+    sponsorAwardBody: 同じスポンサーの問題にすべて正解したチームが対象です
   entryClosed:
     title: 参加受付は終了しました
-    description: クイズ大会は進行中です。
-      結果発表はこの画面でご覧いただけます。
+    description: 結果はこの画面に表示されます。
   question:
-    sponsoredBy: "提供: $name"
+    number: 第 $n 問
+    sponsoredBy: $name の問題
     secondsUnit: 秒
     locked: 回答を締め切りました
     submitFailed: 送信できませんでした。締め切られた可能性があります。
     answeredBy: $name が選択
     member: メンバー
     reading: 問題を読み上げています。回答開始をお待ちください。
-    synchronizing: サーバー時刻を確認しています…
+    synchronizing: 残り時間を確認しています…
     connectionUnavailable: 通信を確認できません。接続を確認して再試行してください。
-    cached: 保存済みの情報を表示しています。チームの最新回答を確認できていません。
+    cached: チームの最新の回答を確認できていません。
+    tapHint: タップした選択肢がチームの回答になります
     sending: 回答を送信しています…
-    received: 回答がサーバーで受理されました。
-    teamAnswer: 選択表示はサーバーで受理したチームの回答です。締切までは全員が変更できます。
+    accepted: チームの回答として受理されました
+    changeHint: 締切までチームの誰でも変更できます
     submitUnconfirmed: 回答の受理を確認できません。通信状況とチームの現在の回答を確認し、締切までに再試行してください。
   suspense:
     title: 回答締切！
@@ -706,16 +729,24 @@ quiz:
     title: 正解発表
     correct: 正解！
     wrong: 残念…
+    correctLabel: 正解
+    wrongLabel: 不正解
     yourAnswer: あなたのチームの回答
-    teamScore: "現在のチームスコア: $score 点"
+    teamScore: 合計 $score 点
+    gain: "+$points点"
   result:
     title: 最終結果
     table: チーム $name
     points: $score 点
     yourTeam: あなたのチーム
-    yourTeamRanked: $rank 位 / $name（$score 点）
-    yourTeamUnranked: $name（$score 点）
-    perfect: $sponsor のブースへ景品を受け取りに行こう！
+    rank: $rank位
+    ranking: 順位
+    tieNote: 同点の場合の入賞チームの決め方は会場でご案内します
+    award:
+      title: スポンサー賞
+      perfect: $sponsor の問題に全問正解
+      voucher: 景品の引換券は運営スタッフからお渡しします
+      voucherHint: 会場のスタッフの案内をお待ちください
     error: 結果の取得に失敗しました
 forceUpdate:
   title: アップデートが必要です

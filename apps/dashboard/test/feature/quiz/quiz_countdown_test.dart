@@ -89,9 +89,10 @@ void main() {
             overrides: [
               quizEventProvider('event').overrideWith((_) => Stream.value(event)),
               quizClockRepositoryProvider.overrideWithValue(clock),
-              if (projection)
-                quizQuestionProvider((eventId: 'event', questionId: 'question1')).overrideWith((_) => questions.stream)
-              else ...[
+              if (projection) ...[
+                quizQuestionProvider((eventId: 'event', questionId: 'question1')).overrideWith((_) => questions.stream),
+                quizSponsorListProvider.overrideWith((_) => Stream.value([])),
+              ] else ...[
                 quizQuestionListProvider('event').overrideWith((_) => questions.stream.map((value) => [value])),
                 quizParticipantListProvider('event').overrideWith((_) => Stream.value([])),
                 quizTeamListProvider('event').overrideWith((_) => Stream.value([])),
@@ -129,8 +130,10 @@ void main() {
         questions.add(question('question1', QuizQuestionStatus.open, 105));
         await tester.pumpAndSettle();
         expect(clock.calls, 4, reason: 'Opening answers must reuse the prepared clock');
-        expect(find.text('残り 0:15'), findsOneWidget);
+        // The projection shows the label and the large m:ss separately.
+        expect(find.text(projection ? '0:15' : '残り 0:15'), findsOneWidget);
         expect(find.text('時刻を同期中…'), findsNothing);
+        expect(find.text('残り時間を確認中…'), findsNothing);
         await tester.pumpWidget(const SizedBox());
       },
     );
@@ -205,6 +208,7 @@ void main() {
         quizQuestionProvider((eventId: 'event', questionId: 'question1')).overrideWith((_) => question1.stream),
         quizQuestionProvider((eventId: 'event', questionId: 'question2')).overrideWith((_) => question2.stream),
         quizClockRepositoryProvider.overrideWithValue(clock),
+        quizSponsorListProvider.overrideWith((_) => Stream.value([])),
       ],
     );
     addTearDown(() async {
@@ -226,7 +230,7 @@ void main() {
     question1.add(question('question1', QuizQuestionStatus.open, 15));
     await tester.pumpAndSettle();
     expect(clock.calls, 1);
-    expect(find.text('残り 0:15'), findsOneWidget);
+    expect(find.text('0:15'), findsOneWidget);
 
     clock.elapsed = const Duration(seconds: 15);
     await tester.pump(const Duration(seconds: 15));
@@ -244,12 +248,14 @@ void main() {
     expect(find.text('question2 の問題'), findsOneWidget);
     question2.add(question('question2', QuizQuestionStatus.open, 100));
     await tester.pumpAndSettle();
-    expect(find.text('残り 0:15'), findsOneWidget);
+    expect(find.text('0:15'), findsOneWidget);
     expect(clock.calls, 2, reason: 'The new question must synchronize before the first 30-second periodic tick');
     for (var second = 1; second <= 15; second++) {
       clock.elapsed = Duration(seconds: 85 + second);
       await tester.pump(const Duration(seconds: 1));
-      expect(find.text(second == 15 ? '回答時間終了' : '残り 0:${(15 - second).toString().padLeft(2, '0')}'), findsOneWidget);
+      // Once the deadline passes, the projection says answers are closed before the moderator closes them.
+      final shown = second == 15 ? '正解発表をお待ちください' : '0:${(15 - second).toString().padLeft(2, '0')}';
+      expect(find.text(shown), findsOneWidget);
       expect(clock.calls, 2);
     }
     expect(clock.now, anchor.add(const Duration(seconds: 100)));
@@ -258,7 +264,7 @@ void main() {
     await tester.pump(const Duration(seconds: 15));
     await tester.pumpAndSettle();
     expect(clock.calls, 3);
-    expect(find.text('回答時間終了'), findsOneWidget);
+    expect(find.text('正解発表をお待ちください'), findsOneWidget);
     await tester.pumpWidget(const SizedBox());
   });
 }

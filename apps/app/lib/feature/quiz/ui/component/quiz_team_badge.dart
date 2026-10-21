@@ -16,7 +16,7 @@ class QuizTeamBadge extends StatelessWidget {
     final theme = Theme.of(context);
     return Center(
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+        padding: const EdgeInsets.fromLTRB(8, 4, 12, 4),
         decoration: BoxDecoration(
           color: theme.colorScheme.surfaceContainerHigh,
           borderRadius: BorderRadius.circular(999),
@@ -26,8 +26,8 @@ class QuizTeamBadge extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
-              Icons.table_restaurant_outlined,
-              size: 16,
+              Icons.groups_outlined,
+              size: 18,
               color: theme.colorScheme.primary,
             ),
             const SizedBox(width: 6),

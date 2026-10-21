@@ -99,14 +99,42 @@ test("projection reads participants only before questions begin", async () => {
           assert.equal(path, "quizEvents/event");
           return { id: "event", exists: true, data: () => ({ status, currentQuestionId: null }) };
         } }),
-        collection: (path) => ({ orderBy: () => ({ get: async () => {
-          reads.push(path);
-          return { docs: path.endsWith("/participants") ? [{ id: "person", exists: true, data: () => ({ displayName: "Member", teamId: "A" }) }] : [] };
-        } }) }),
+        collection: (path) => {
+          const snapshot = async () => {
+            reads.push(path);
+            return { docs: path.endsWith("/participants") ? [{ id: "person", exists: true, data: () => ({ displayName: "Member", teamId: "A" }) }] : [] };
+          };
+          return { get: snapshot, orderBy: () => ({ get: snapshot }) };
+        },
       }),
     });
     const prestart = ["registration", "entryClosed"].includes(status);
     assert.equal(reads.includes("quizEvents/event/participants"), prestart);
     assert.equal(result.participants.length, prestart ? 1 : 0);
   }
+});
+
+test("projection returns sponsors in the same shape as the console", async () => {
+  const sponsor = {
+    id: "sponsor", exists: true,
+    data: () => ({ name: { ja: "スポンサー", en: "Sponsor" }, updatedAt: Timestamp.fromMillis(0) }),
+  };
+  const read = (view) => administerEvent(admin, { environment: "prod", action: "read", payload: { view, eventId: "event" } }, {
+    adminDb, getUser: async () => ({ disabled: false }),
+    target: () => ({
+      doc: (path) => ({ get: async () => {
+        assert.equal(path, "quizEvents/event");
+        return { id: "event", exists: true, data: () => ({ status: "inProgress", currentQuestionId: null }) };
+      } }),
+      collection: (path) => {
+        const snapshot = async () => ({ docs: path === "sponsors" ? [sponsor] : [] });
+        return { get: snapshot, orderBy: () => ({ get: snapshot }) };
+      },
+    }),
+  });
+  const [projection, quizConsole] = await Promise.all([read("quizProjection"), read("quizConsole")]);
+  assert.deepEqual(projection.sponsors, [
+    { id: "sponsor", name: { ja: "スポンサー", en: "Sponsor" }, updatedAt: "1970-01-01T00:00:00.000Z" },
+  ]);
+  assert.deepEqual(projection.sponsors, quizConsole.sponsors);
 });

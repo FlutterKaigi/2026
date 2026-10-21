@@ -49,3 +49,7 @@ dev_dependencies:
 flutter:
 
   uses-material-design: true
+
+  assets:
+    # 投影画面のヘッダーに出す FlutterKaigi のロゴ（参加者アプリと同じ画像）。
+    - res/assets/shuriken-logo.png

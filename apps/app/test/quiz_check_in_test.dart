@@ -5,6 +5,7 @@ import 'package:app/core/provider/environment.dart';
 import 'package:app/feature/auth/ui/widget/sign_in_card.dart';
 import 'package:app/feature/quiz/data/provider/quiz_providers.dart';
 import 'package:app/feature/quiz/data/provider/quiz_repositories.dart';
+import 'package:app/feature/quiz/ui/component/quiz_progress_steps.dart';
 import 'package:app/feature/quiz/ui/page/quiz_check_in_scan_page.dart';
 import 'package:app/feature/quiz/ui/page/quiz_page.dart';
 import 'package:cloud_functions/cloud_functions.dart';
@@ -96,29 +97,52 @@ void main() {
       participant: participant.stream,
       user: FakeUser(),
     );
-    expect(find.text(t.quiz.checkIn.title), findsOneWidget);
-    expect(find.byType(ChoiceChip), findsNothing);
+    expect(find.text(t.quiz.checkIn.instructions), findsOneWidget);
+    expect(find.text(t.quiz.selection.instructions), findsNothing);
 
     await submit(tester, '123456');
     expect(repository.calls, ['123456']);
-    expect(find.text(t.quiz.checkIn.title), findsOneWidget);
+    expect(find.text(t.quiz.checkIn.instructions), findsOneWidget);
 
     participant.add(person.copyWith(checkedInAt: DateTime.utc(2026)));
     await tester.pumpAndSettle();
-    expect(find.text(t.quiz.checkIn.title), findsNothing);
-    expect(find.byType(ChoiceChip), findsNWidgets(20));
+    expect(find.text(t.quiz.checkIn.instructions), findsNothing);
+    expect(find.text(t.quiz.selection.instructions), findsOneWidget);
+    for (final teamId in quizTeamIds) {
+      expect(find.text(teamId), findsOneWidget);
+    }
   });
 
-  for (final (reason, message) in [
-    ('wrong-code', () => t.quiz.checkIn.wrongCode),
-    ('rate-limited', () => t.quiz.checkIn.rateLimited),
+  testWidgets('check-in shows where the attendee is in the joining steps', (tester) async {
+    final semantics = tester.ensureSemantics();
+    await show(
+      tester,
+      _Participants(),
+      events: Stream.value(event),
+      participant: Stream.value(person),
+      user: FakeUser(),
+    );
+    expect(
+      tester.getSemantics(find.byType(QuizProgressSteps)),
+      isSemantics(label: t.quiz.progress.semantic(total: 3, current: 2), value: t.quiz.progress.checkIn),
+    );
+    semantics.dispose();
+  });
+
+  for (final (code, reason, message) in [
+    ('permission-denied', 'wrong-code', () => t.quiz.checkIn.wrongCode),
+    ('resource-exhausted', 'rate-limited', () => t.quiz.checkIn.rateLimited),
+    ('permission-denied', 'disabled-account', () => t.quiz.registration.accountUnavailable),
+    ('permission-denied', null, () => t.quiz.registration.accountUnavailable),
+    ('failed-precondition', 'not-registered', () => t.quiz.checkIn.notRegistered),
+    ('failed-precondition', null, () => t.quiz.checkIn.closed),
   ]) {
-    testWidgets('a rejected code explains $reason', (tester) async {
+    testWidgets('a rejected check-in explains ${reason ?? code}', (tester) async {
       final repository = _Participants()
         ..failure = FirebaseFunctionsException(
-          code: reason == 'wrong-code' ? 'permission-denied' : 'resource-exhausted',
-          message: reason,
-          details: {'reason': reason},
+          code: code,
+          message: reason ?? code,
+          details: reason == null ? null : {'reason': reason},
         );
       await show(tester, repository, events: Stream.value(event), participant: Stream.value(person), user: FakeUser());
       await submit(tester, '123456');
@@ -221,7 +245,7 @@ void main() {
     expect(find.byType(SignInCard), findsOneWidget);
     users.add(member);
     await tester.pumpAndSettle();
-    expect(find.text(t.quiz.checkIn.title), findsOneWidget);
+    expect(find.text(t.quiz.checkIn.instructions), findsOneWidget);
     expect(repository.calls, ['654321']);
   });
 
@@ -234,7 +258,7 @@ void main() {
       user: FakeUser(),
     );
     expect(find.text(t.quiz.waiting.description), findsOneWidget);
-    expect(find.text(t.quiz.checkIn.title), findsNothing);
+    expect(find.text(t.quiz.checkIn.instructions), findsNothing);
   });
 
   group('QuizCheckInScanPage', () {

@@ -22,7 +22,7 @@ void main() {
     updatedAt: DateTime.utc(2026),
   );
 
-  Future<void> show(WidgetTester tester, _Participants repository) async {
+  Future<void> show(WidgetTester tester, _Participants repository, {int registered = 0}) async {
     tester.view.physicalSize = const Size(1000, 1400);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
@@ -36,7 +36,12 @@ void main() {
             quizEventProvider.overrideWith((_) => Stream.value(event)),
             myParticipantProvider.overrideWith((_) => Stream.value(null)),
             myTeamProvider.overrideWith((_) => Stream.value(null)),
-            quizParticipantsProvider.overrideWith((_) => Stream.value(<QuizParticipant>[])),
+            quizParticipantsProvider.overrideWith(
+              (_) => Stream.value([
+                for (var index = 0; index < registered; index++)
+                  QuizParticipant(id: 'participant$index', displayName: 'P$index', registeredAt: DateTime.utc(2026)),
+              ]),
+            ),
             quizParticipantRepositoryProvider.overrideWithValue(repository),
           ],
           child: MaterialApp(
@@ -86,6 +91,17 @@ void main() {
     await tester.tap(find.widgetWithText(FilledButton, t.quiz.registration.join));
     await tester.pumpAndSettle();
     expect(repository.events, ['event']);
+  });
+
+  testWidgets('a full round shows the count against the capacity and cannot be joined', (tester) async {
+    final repository = _Participants();
+    await show(tester, repository, registered: 80);
+    expect(find.text('80'), findsOneWidget);
+    expect(find.text(t.quiz.registration.capacity(max: '80')), findsOneWidget);
+    expect(find.text(t.quiz.registration.full(max: '80')), findsOneWidget);
+    await tester.tap(find.widgetWithText(FilledButton, t.quiz.registration.join));
+    await tester.pumpAndSettle();
+    expect(repository.events, isEmpty);
   });
 }
 

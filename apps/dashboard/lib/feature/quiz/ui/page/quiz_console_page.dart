@@ -541,8 +541,8 @@ class _ConsoleBody extends HookConsumerWidget {
                     ? () => confirmAndRun(
                         title: '結果確定',
                         message: draftCount > 0
-                            ? '未出題の問題が $draftCount 問残っています。未出題を採点・スポンサーパーフェクトの判定から除外し、発表済み $revealedCount 問だけで結果を確定して終了します。よろしいですか？'
-                            : '発表済み $revealedCount 問で順位とスポンサーパーフェクトを確定し、イベントを終了します。よろしいですか？',
+                            ? '未出題の問題が $draftCount 問残っています。未出題を採点・スポンサー賞の判定から除外し、発表済み $revealedCount 問だけで結果を確定して終了します。よろしいですか？'
+                            : '発表済み $revealedCount 問で順位とスポンサー賞を確定し、イベントを終了します。よろしいですか？',
                         label: '結果確定',
                         action: () => ops.finalizeEvent(eventId),
                       )

@@ -438,7 +438,9 @@ test("check-in needs the venue code, limits guesses, keeps the code on reopening
   await op(eventId, "openTeamSelection");
   const code = await checkInCode(eventId);
   assert.match(code, /^[1-9]\d{5}$/);
-  await error("checkInQuizParticipant", outsider, { eventId, code }, "FAILED_PRECONDITION");
+  const unregistered = await call("checkInQuizParticipant", outsider, { eventId, code });
+  assert.equal(unregistered.error?.status, "FAILED_PRECONDITION", JSON.stringify(unregistered));
+  assert.equal(unregistered.error?.details?.reason, "not-registered", JSON.stringify(unregistered));
   for (let attempt = 0; attempt < 5; attempt++) {
     const wrong = await call("checkInQuizParticipant", person, { eventId, code: "000000" });
     assert.equal(wrong.error?.details?.reason, "wrong-code", JSON.stringify(wrong));
@@ -465,6 +467,8 @@ test("check-in needs the venue code, limits guesses, keeps the code on reopening
   await error("checkInQuizParticipant", leaver, { eventId, code: "000000" }, "PERMISSION_DENIED");
   await op(eventId, "removeParticipant", { uid: leaver.uid });
   assert.equal((await db.doc(`quizEvents/${eventId}/checkInAttempts/${leaver.uid}`).get()).exists, false);
+  const removed = await call("checkInQuizParticipant", leaver, { eventId, code: rotated });
+  assert.equal(removed.error?.details?.reason, "not-registered", JSON.stringify(removed));
 });
 
 test("check-in racing account deletion leaves no attempt record and later requests are rejected", async () => {
