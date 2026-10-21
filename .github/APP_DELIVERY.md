@@ -66,6 +66,25 @@ Artifactsから署名済みAABを取得してPlay Consoleの内部テストへ�
 その権限・証明書がstgにも適用されていることを確認してください。
 stgのAndroidでもPlay Integrityを使用するため、ストア外へのAPK配布はこのWorkflowの対象ではありません。
 
+### ストアのアイコン更新
+
+アイコンの正本と再生成コマンドは[アプリのREADME](../apps/app/README.md#アプリアイコン)を参照してください。
+生成済み画像をコミットし、次の手順でストアへ反映します。
+
+- **App Store / TestFlight**: `FlutterKaigi2026.icon` を含む新しいiOSビルドを配布します。
+  `AppIcon.appiconset` のPNGだけを差し替えても有効なアイコンは変わりません。
+  TestFlightで表示を確認し、一般公開版にはApp Store Connectから新しいビルドを選んで審査・公開します。
+- **Google Play**: 新しいAndroidビルドで端末上のアイコンを更新します。
+  ストア掲載画像はAABと別管理です。Play Consoleの対象アプリで
+  `Grow users > Store presence > Main store listing > Graphics` を開き、
+  `apps/app/android/app/src/main/ic_launcher-playstore.png`（512×512、32-bit PNG）を
+  アプリアイコンとしてアップロードし、変更を審査・公開します。
+  stgとprodの両方を運用する場合は、各アプリレコードで更新します。
+
+現在の配布WorkflowはIPA / AABのアップロードまでを担当し、Google Playの掲載画像は同期しません。
+仕様は[AppleのIcon Composerガイド](https://developer.apple.com/documentation/xcode/creating-your-app-icon-using-icon-composer)と
+[Google Playの掲載画像ガイド](https://support.google.com/googleplay/android-developer/answer/9866151?hl=en)を参照してください。
+
 ### ビルド番号
 
 iOSは App Store Connect の同じ公開バージョン・同じ環境の最新ビルド番号に1を加算します。

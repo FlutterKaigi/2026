@@ -2,6 +2,37 @@
 
 FlutterKaigi 2026のiOS、Android、Web公式アプリです。
 
+## アプリアイコン
+
+アプリ内と同じ `res/assets/shuriken-logo.png`（2026年版ロゴ）と、
+[デザインシステム](../../docs/design-system/DESIGN.md)の Deep Purple (`#6200EA`) を使用します。
+Repositoryルートで次を実行すると、iOS・Android・Web用の各サイズを再生成できます。
+
+```bash
+fvm dart run tool/generate_app_icons.dart
+fvm dart run tool/generate_app_icons.dart --check
+```
+
+iOSの有効なアイコンは `ios/Runner/FlutterKaigi2026.icon` です。
+`Assets.xcassets/AppIcon.appiconset` も同じ素材で生成しますが、こちらだけを変更しても
+メインアイコンは更新されません。Androidは通常・丸形・Adaptive Icon、Webはfaviconと
+ホーム画面用アイコンを生成します。角丸などのマスクはOSに任せ、Adaptive Iconの前景には余白を確保します。
+
+iOSのIcon Composerは、同じロゴから生成した手裏剣・紫のバッジ・白いロゴと年号の3層を使います。
+手裏剣とバッジにはLiquid Glassの半透明・反射・影を適用し、文字の層は効果を無効にして読みやすさを保ちます。
+背景は紫からDeep Navyへのグラデーションです。効果と重なり順は `FlutterKaigi2026.icon/icon.json` で管理します。
+
+Androidも同じ3層のロゴと背景色を使い、iOSの通常表示に合わせたハイライト・陰影をPNGに描画します。
+背景のグラデーションは `icon.json` の色から生成します。Adaptive Iconは108 dpのレイヤー内の中央72 dpを
+表示範囲とし、手裏剣の先端も66 dpの安全領域に収まるように配置します。
+通常・丸形・Google Play掲載用の画像にも同じ描画を使用します。
+
+Webのfavicon（SVG・ICO）、Apple Touch Icon、PWA用PNGにも同じグラデーションと陰影を使用します。
+PWAのmaskable画像は、手裏剣の先端まで中央80%の円形安全領域に収まるよう余白を広げています。
+
+Google Play掲載用の画像は `android/app/src/main/ic_launcher-playstore.png` です。
+配布Workflowはストア掲載画像を更新しないため、[配布手順](../../.github/APP_DELIVERY.md#ストアのアイコン更新)に従って別途反映します。
+
 ## 環境
 
 外部Contributorを含むローカル開発では、`dev`フレーバーとFirebase Emulator Suiteを使用します。stg／prodのFirebase Projectや配布サービスへのアクセス権限は不要です。以下はWeb（Chrome）での起動手順です。

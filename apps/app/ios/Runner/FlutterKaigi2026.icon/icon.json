@@ -1,33 +1,65 @@
 {
-  "fill" : {
-    "linear-gradient" : [
-      "srgb:1.00000,1.00000,1.00000,1.00000",
-      "srgb:0.87354,0.96148,1.00000,1.00000"
+  "fill": {
+    "linear-gradient": [
+      "srgb:0.60784,0.40000,1.00000,1.00000",
+      "srgb:0.00000,0.06667,0.33333,1.00000"
     ]
   },
-  "groups" : [
+  "groups": [
     {
-      "hidden" : false,
-      "layers" : [
+      "layers": [
         {
-          "image-name" : "IconGroup 2.png",
-          "name" : "IconGroup 2"
+          "image-name": "mark-white.png",
+          "name": "FlutterKaigi 2026",
+          "glass": false
         }
       ],
-      "shadow" : {
-        "kind" : "neutral",
-        "opacity" : 0.5
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0
       },
-      "translucency" : {
-        "enabled" : true,
-        "value" : 0.5
+      "translucency": {
+        "enabled": false,
+        "value": 0
+      }
+    },
+    {
+      "layers": [
+        {
+          "image-name": "badge-purple.png",
+          "name": "Purple badge"
+        }
+      ],
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.3
+      },
+      "translucency": {
+        "enabled": true,
+        "value": 0.2
+      }
+    },
+    {
+      "layers": [
+        {
+          "image-name": "shuriken-glass.png",
+          "name": "Shuriken glass"
+        }
+      ],
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.35
+      },
+      "translucency": {
+        "enabled": true,
+        "value": 0.65
       }
     }
   ],
-  "supported-platforms" : {
-    "circles" : [
+  "supported-platforms": {
+    "circles": [
       "watchOS"
     ],
-    "squares" : "shared"
+    "squares": "shared"
   }
 }
