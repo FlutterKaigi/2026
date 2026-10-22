@@ -546,9 +546,21 @@ export async function operateQuizEvent(
       });
       return result;
     };
+    if (operation === "unpublish") {
+      requireState(
+        PRESTART.includes(eventData.status) && !eventData.currentQuestionId,
+        "出題開始後は非公開に戻せません。",
+      );
+      const questions = await tx.get(ref.collection("questions"));
+      requireState(questions.docs.every((question) => question.get("status") === "draft"),
+        "出題開始後は非公開に戻せません。");
+      // The event read serializes with admissions and question operations.
+      // Keep every attendee/check-in record and participation lock so a later
+      // explicit reopening resumes this event without permitting double entry.
+      return finish({ status: "draft", isPublic: false });
+    }
     const transitions: Record<string, [string, string]> = {
       publish: ["draft", "published"],
-      unpublish: ["published", "draft"],
       openRegistration: ["published", "registration"],
       closeRegistration: ["registration", "entryClosed"],
     };

@@ -6,6 +6,7 @@ import { assertActiveSupportLtUser, SupportLtGetUser } from "./support_lt_auth";
 import { issueSupportLtCodeForUser } from "./support_lt_service";
 import { Data, eventDefinition, id, invalid, object, questionDefinition } from "./event_admin_validation";
 import { previewQuizPromotion, promoteQuizEvent, withdrawQuizPromotion } from "./quiz_promotion_service";
+import { deleteQuizEvent } from "./quiz_deletion_service";
 
 const PROJECTS = { stg: "flutterkaigi-2026-stg", prod: "flutterkaigi-2026-283db" } as const;
 const PRESTART = ["draft", "published", "registration", "entryClosed"];
@@ -48,6 +49,40 @@ function document(snapshot: DocumentSnapshot): Data | null {
   return snapshot.exists ? { ...snapshot.data(), id: snapshot.id } : null;
 }
 
+function optionalText(value: unknown): string | null {
+  return typeof value === "string" && value.trim() ? value.trim() : null;
+}
+
+function participantName(value: unknown): string | null {
+  const name = optionalText(value);
+  return name === "参加者" ? null : name;
+}
+
+async function participantIdentities(db: Firestore, path: string, participants: (Data | null)[]): Promise<Data[]> {
+  const roster = participants.filter((participant): participant is Data => participant !== null);
+  if (!roster.length) return [];
+  const profileRefs = roster.filter((participant) => !participantName(participant.displayName))
+    .map((participant) => db.doc(`users/${id(participant.id)}`));
+  const [accounts, profiles] = await Promise.all([
+    db.getAll(...roster.map((participant) => db.doc(`${path}/participantAccounts/${id(participant.id)}`))),
+    profileRefs.length ? db.getAll(...profileRefs) : [],
+  ]);
+  const accountsByUid = new Map(accounts.map((account) => [account.id, account]));
+  const profilesByUid = new Map(profiles.map((profile) => [profile.id, profile]));
+  return roster.map((participant) => {
+    const uid = id(participant.id);
+    const account = accountsByUid.get(uid);
+    const profile = profilesByUid.get(uid);
+    return {
+      id: uid,
+      displayName: participantName(participant.displayName) ?? participantName(profile?.get("displayName"))
+        ?? participantName(account?.get("accountName")) ?? "参加者",
+      accountName: optionalText(account?.get("accountName")),
+      email: optionalText(account?.get("email")),
+    };
+  });
+}
+
 async function readSnapshot(db: Firestore, input: Data): Promise<Data> {
   const list = async (path: string, order?: string) => {
     const collection = db.collection(path);
@@ -61,8 +96,18 @@ async function readSnapshot(db: Firestore, input: Data): Promise<Data> {
     return { code: document(code), registrations: registrations.reverse() };
   }
   if (input.view === "quizEvents") {
-    const [events, sponsors] = await Promise.all([list("quizEvents", "createdAt"), list("sponsors")]);
-    return { events: events.filter((event) => event?.promotionWithdrawn !== true).reverse(), sponsors };
+    const [events, sponsors, deletions] = await Promise.all([
+      list("quizEvents", "createdAt"), list("sponsors"),
+      db.collection("quizEventDeletions").where("status", "==", "deleting").get(),
+    ]);
+    // A failed cleanup remains actionable after reloading the dashboard even
+    // though its parent document has already been removed.
+    const pending = deletions.docs.map((deletion) => deletion.get("event") as Data);
+    const pendingIds = new Set(pending.map((event) => event.id));
+    return {
+      events: [...pending, ...events.filter((event) => event?.promotionWithdrawn !== true && !pendingIds.has(event?.id)).reverse()],
+      sponsors,
+    };
   }
   if (!["quizConsole", "quizQuestion", "quizProjection"].includes(input.view as string)) invalid("画面");
   const path = `quizEvents/${id(input.eventId)}`;
@@ -98,7 +143,10 @@ async function readSnapshot(db: Firestore, input: Data): Promise<Data> {
     list(`${path}/participants`, "registeredAt"), list(`${path}/questions`, "order"),
     list(`${path}/answers`), list("sponsors"), beforeStart ? checkInCode() : null,
   ]);
-  return { event, teams, participants, questions, answers, sponsors, checkInCode: code };
+  // Private identity supplements belong only to the authorized console. Keep
+  // the public roster unchanged so projection never gains account information.
+  const participantAccounts = await participantIdentities(db, path, participants);
+  return { event, teams, participants, participantAccounts, questions, answers, sponsors, checkInCode: code };
 }
 
 async function saveEvent(db: Firestore, input: Data): Promise<Data> {
@@ -107,7 +155,8 @@ async function saveEvent(db: Firestore, input: Data): Promise<Data> {
   const definition = eventDefinition(input);
   const { capacity } = definition;
   return db.runTransaction(async (tx) => {
-    const snapshot = await tx.get(ref);
+    const [snapshot, deletion] = await tx.getAll(ref, db.doc(`quizEventDeletions/${eventId}`));
+    if (deletion.exists) throw new HttpsError("failed-precondition", "削除済みのイベントは保存できません。");
     const data = { ...definition, updatedAt: Timestamp.now() };
     if (snapshot.exists) {
       const current = requireBeforeStart(snapshot);
@@ -179,6 +228,7 @@ export async function administerEvent(auth: AdminAuth | undefined, raw: unknown,
       return issueSupportLtCodeForUser(auth, payload, { db, adminDb: deps.adminDb, getUser: deps.getUser });
     case "quizOperation": return operateQuizEvent(auth, payload, db, deps.adminDb);
     case "saveEvent": return saveEvent(db, payload);
+    case "deleteEvent": return deleteQuizEvent(db, payload, auth.uid);
     case "saveQuestion": return saveQuestion(db, payload);
     case "deleteQuestion": return saveQuestion(db, payload, true);
     default: return invalid("操作");

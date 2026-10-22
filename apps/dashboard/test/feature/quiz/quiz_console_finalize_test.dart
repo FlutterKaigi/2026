@@ -71,6 +71,58 @@ void main() {
   final checkedIn = waiting.copyWith(id: 'seated', displayName: 'Seated', teamId: 'A', checkedInAt: DateTime(2026));
   final arrived = waiting.copyWith(id: 'arrived', displayName: 'Arrived', checkedInAt: DateTime(2026));
 
+  for (final status in [QuizEventStatus.registration, QuizEventStatus.entryClosed]) {
+    testWidgets('hiding a $status event requires confirmation and preserves registration', (tester) async {
+      final operations = _Operations();
+      await showConsole(
+        tester,
+        operations,
+        [draft],
+        eventValue: event.copyWith(status: status, isPublic: true),
+        people: [waiting, checkedIn],
+      );
+      final button = find.widgetWithText(OutlinedButton, '受付を停止して非公開');
+      await tester.tap(button);
+      await tester.pumpAndSettle();
+      final dialog = find.byType(AlertDialog);
+      expect(find.descendant(of: dialog, matching: find.text('受付を停止して非公開')), findsOneWidget);
+      expect(find.descendant(of: dialog, matching: find.textContaining('保持')), findsOneWidget);
+      expect(find.descendant(of: dialog, matching: find.textContaining('参加登録')), findsOneWidget);
+      expect(find.descendant(of: dialog, matching: find.textContaining('自動')), findsOneWidget);
+      expect(operations.unpublished, isEmpty);
+      await tester.tap(find.widgetWithText(TextButton, 'キャンセル'));
+      await tester.pumpAndSettle();
+      expect(operations.unpublished, isEmpty);
+      expect(find.text('参加者数: 2 / 80 人'), findsOneWidget);
+      await tester.tap(button);
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(FilledButton, '実行'));
+      await tester.pumpAndSettle();
+      expect(operations.unpublished, ['event']);
+      expect(find.text('参加者数: 2 / 80 人'), findsOneWidget);
+    });
+  }
+
+  testWidgets('published events retain the existing unpublish action', (tester) async {
+    final operations = _Operations();
+    await showConsole(tester, operations, [], eventValue: event.copyWith(status: QuizEventStatus.published));
+    expect(find.text('受付を停止して非公開'), findsNothing);
+    await tester.tap(find.widgetWithText(OutlinedButton, '非公開に戻す'));
+    await tester.pumpAndSettle();
+    expect(operations.unpublished, isEmpty);
+    await tester.tap(find.widgetWithText(FilledButton, '実行'));
+    await tester.pumpAndSettle();
+    expect(operations.unpublished, ['event']);
+  });
+
+  for (final status in [QuizEventStatus.draft, QuizEventStatus.inProgress, QuizEventStatus.finished]) {
+    testWidgets('unpublish controls are absent while the event is $status', (tester) async {
+      await showConsole(tester, _Operations(), [], eventValue: event.copyWith(status: status));
+      expect(find.text('受付を停止して非公開'), findsNothing);
+      expect(find.text('非公開に戻す'), findsNothing);
+    });
+  }
+
   testWidgets('no-show cancellation is confirmed and reports the actual count', (tester) async {
     final operations = _Operations();
     await showConsole(
@@ -153,9 +205,15 @@ void main() {
     await tester.ensureVisible(roster);
     await tester.tap(roster);
     await tester.pumpAndSettle();
-    expect(find.text('未チェックイン / waiting'), findsOneWidget);
-    expect(find.text('チェックイン済み・未選択 / arrived'), findsOneWidget);
-    expect(find.text('チーム A / seated'), findsOneWidget);
+    expect(find.text('未チェックイン'), findsOneWidget);
+    expect(find.text('チェックイン済み・未選択'), findsOneWidget);
+    expect(find.text('チーム A'), findsOneWidget);
+    expect(find.textContaining(' / waiting'), findsNothing);
+    expect(find.textContaining(' / arrived'), findsNothing);
+    expect(find.textContaining(' / seated'), findsNothing);
+    expect(find.byTooltip('参加者ID: waiting'), findsOneWidget);
+    expect(find.byTooltip('参加者ID: arrived'), findsOneWidget);
+    expect(find.byTooltip('参加者ID: seated'), findsOneWidget);
   });
 
   testWidgets('first question needs closed selection and no unselected attendees', (tester) async {
@@ -245,6 +303,10 @@ class _Operations extends Fake implements QuizOperationsRepository {
   int finalized = 0;
   int cancelled = 0;
   int regenerated = 0;
+  final unpublished = <String>[];
+
+  @override
+  Future<void> unpublishEvent(String eventId) async => unpublished.add(eventId);
 
   @override
   Future<void> regenerateCheckInCode(String eventId) async => regenerated++;

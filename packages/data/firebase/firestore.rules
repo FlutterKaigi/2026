@@ -162,6 +162,7 @@ service cloud.firestore {
       allow get, list: if hasAdminAccess()
         || (signedInWithAccount() && resource.data.isPublic == true);
       allow create: if hasAdminAccess()
+        && !exists(/databases/$(database)/documents/quizEventDeletions/$(eventId))
         && request.resource.data.keys().hasOnly([
           'title', 'status', 'isPublic', 'currentQuestionId', 'sponsorIds',
           'capacity', 'teamNamePool', 'createdAt', 'updatedAt', 'revision', 'participantCount'

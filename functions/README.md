@@ -264,11 +264,20 @@ Auth アカウントの有効性、App Check を検証する。読取も毎回�
 ```
 
 `action` は `read`、`clock`、`issueSupportLtCode`、`quizOperation`、`saveEvent`、
-`saveQuestion`、`deleteQuestion`、
+`deleteEvent`、`saveQuestion`、`deleteQuestion`、
 `previewQuizPromotion`、`promoteQuizEvent`、`withdrawQuizPromotion` のみ。
 読取の `view` は `supportLt` / `quizEvents` / `quizConsole` / `quizQuestion` / `quizProjection`。
 投影用の取得では受付コードや非公開の正解を取得しない。
 画面全体で1回の取得を共有し、2秒間隔と操作直後に更新する。
+
+`quizConsole` は管理者向けの `participantAccounts`（参加者ID・補完済み表示名・アカウント名・メール）も返す。
+表示名の欠落は選択環境のプロフィール・保存済みアカウント名で補完し、公開参加者データは書き換えない。
+この情報は投影画面や問題画面の応答には含めない。
+
+`unpublish` は出題前なら参加受付中・受付終了からも非公開に戻せる。参加者・チェックイン・チーム・参加枠・
+重複参加を防ぐ登録記録は保持し、新規登録・チェックイン・チーム変更を停止する。
+再公開は `published` までで、受付は `openRegistration` による明示再開が必要。
+`deleteEvent` は受付準備前の下書きに限定し、配下の問題・正解も削除する。削除記録を保持して古い保存・反映による復活を防ぐ。
 
 出題・採点・受付・チーム選択・取消はトランザクション処理を使う。問題編集は開始前かつ未出題に
 制限し、正解を公開データへ混ぜない。操作ログには操作環境・実行者・操作名・イベントIDを記録する。
