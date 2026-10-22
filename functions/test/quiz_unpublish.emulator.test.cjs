@@ -122,11 +122,11 @@ test("unpublishing reception preserves all records and locks until explicit reop
     assert.deepEqual(await eventRecords(ref), beforeRecords);
     const other = await seedEvent();
     await assert.rejects(register(other.id, selected), { code: "already-exists" });
-    await assert.rejects(deleteQuizEvent(db, { eventId: ref.id }, admin.uid), { code: "failed-precondition" });
 
     await op(ref.id, "publish");
     assert.equal((await ref.get()).get("status"), "published");
     assert.equal((await ref.get()).get("isPublic"), true);
+    await assert.rejects(deleteQuizEvent(db, { eventId: ref.id }, admin.uid), { code: "failed-precondition" });
     await assert.rejects(register(ref.id, newcomer), { code: "failed-precondition" });
     await assert.rejects(checkIn(ref.id, unchecked, code), { code: "failed-precondition" });
     await assert.rejects(select(ref.id, selected, "B", "A"), { code: "failed-precondition" });

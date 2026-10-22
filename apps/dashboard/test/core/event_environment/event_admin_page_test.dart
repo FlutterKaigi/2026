@@ -169,12 +169,12 @@ void main() {
     await tester.pumpWidget(const SizedBox());
   });
 
-  testWidgets('cancelling draft deletion leaves the selected event unchanged', (tester) async {
+  testWidgets('cancelling event deletion leaves the selected event unchanged', (tester) async {
     await show(tester, '/quiz?environment=prod');
     await tester.tap(find.byKey(const ValueKey('delete-quiz-event-same-id')));
     await tester.pumpAndSettle();
     final dialog = find.byType(AlertDialog);
-    expect(find.text('下書きイベントを削除'), findsOneWidget);
+    expect(find.text('イベントを削除'), findsOneWidget);
     expect(find.descendant(of: dialog, matching: find.textContaining('本番')), findsOneWidget);
     expect(find.descendant(of: dialog, matching: find.textContaining('prod のクイズ')), findsOneWidget);
     expect(find.descendant(of: dialog, matching: find.textContaining('問題')), findsOneWidget);
@@ -188,7 +188,7 @@ void main() {
     await tester.pumpWidget(const SizedBox());
   });
 
-  testWidgets('confirmed draft deletion uses the selected environment and refreshes the list', (tester) async {
+  testWidgets('confirmed event deletion uses the selected environment and refreshes the list', (tester) async {
     var deleted = false;
     await show(
       tester,
@@ -204,7 +204,7 @@ void main() {
         return data;
       },
     );
-    await tester.tap(find.byTooltip('下書きを削除'));
+    await tester.tap(find.byTooltip('イベントを削除'));
     await tester.pumpAndSettle();
     await tester.tap(find.widgetWithText(FilledButton, '削除する'));
     await tester.pumpAndSettle();
@@ -218,7 +218,7 @@ void main() {
     await tester.pumpWidget(const SizedBox());
   });
 
-  testWidgets('only private draft events expose deletion', (tester) async {
+  testWidgets('private events expose deletion regardless of lifecycle or registration history', (tester) async {
     await show(
       tester,
       '/quiz?environment=stg',
@@ -235,12 +235,12 @@ void main() {
       },
     );
     expect(find.byKey(const ValueKey('delete-quiz-event-draft')), findsOneWidget);
-    expect(find.byTooltip('下書きを削除'), findsOneWidget);
-    for (final status in QuizEventStatus.values.where((status) => status != QuizEventStatus.draft)) {
-      expect(find.byKey(ValueKey('delete-quiz-event-${status.name}')), findsNothing);
+    expect(find.byTooltip('イベントを削除'), findsNWidgets(QuizEventStatus.values.length + 1));
+    for (final status in QuizEventStatus.values) {
+      expect(find.byKey(ValueKey('delete-quiz-event-${status.name}')), findsOneWidget);
     }
     expect(find.byKey(const ValueKey('delete-quiz-event-public-draft')), findsNothing);
-    expect(find.byKey(const ValueKey('delete-quiz-event-registration-preserved-draft')), findsNothing);
+    expect(find.byKey(const ValueKey('delete-quiz-event-registration-preserved-draft')), findsOneWidget);
     await tester.pumpWidget(const SizedBox());
   });
 
@@ -260,7 +260,7 @@ void main() {
         return data;
       },
     );
-    await tester.tap(find.byTooltip('下書きを削除'));
+    await tester.tap(find.byTooltip('イベントを削除'));
     await tester.pumpAndSettle();
     await tester.tap(find.widgetWithText(FilledButton, '削除する'));
     await tester.pumpAndSettle();
@@ -476,6 +476,190 @@ void main() {
     expect(cancellation['payload'], containsPair('operation', 'removeParticipant'));
     expect(cancellation['payload'], containsPair('eventId', 'same-id'));
     expect(cancellation['payload'], containsPair('uid', 'resolved-account-uid'));
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('console deletion can be cancelled and excludes other operations while confirming', (tester) async {
+    final (_, router) = await show(tester, '/quiz/same-id?environment=prod');
+    final deletion = find.byKey(const ValueKey('delete-quiz-event-same-id'));
+    await tester.tap(deletion);
+    await tester.pumpAndSettle();
+    final dialog = find.byType(AlertDialog);
+    expect(find.descendant(of: dialog, matching: find.text('イベントを削除')), findsOneWidget);
+    expect(find.descendant(of: dialog, matching: find.textContaining('本番')), findsOneWidget);
+    for (final relatedData in ['参加者', 'チーム', '問題', '正解', '回答', '元に戻せません']) {
+      expect(find.descendant(of: dialog, matching: find.textContaining(relatedData)), findsOneWidget);
+    }
+    expect(tester.widget<OutlinedButton>(deletion).onPressed, isNull);
+    expect(tester.widget<FilledButton>(find.widgetWithText(FilledButton, '公開する')).onPressed, isNull);
+    expect(requests.where((request) => request['action'] != 'read'), isEmpty);
+    await tester.tap(find.widgetWithText(TextButton, 'キャンセル'));
+    await tester.pumpAndSettle();
+    expect(dialog, findsNothing);
+    expect(tester.widget<OutlinedButton>(deletion).onPressed, isNotNull);
+    expect(tester.widget<FilledButton>(find.widgetWithText(FilledButton, '公開する')).onPressed, isNotNull);
+    expect(requests.where((request) => request['action'] == 'deleteEvent'), isEmpty);
+    expect(router.routeInformationProvider.value.uri.toString(), '/quiz/same-id?environment=prod');
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  for (final (environment, status) in [('stg', 'finished'), ('prod', 'inProgress')]) {
+    testWidgets('console deletes a private $status event with attendees and returns to $environment', (tester) async {
+      var deleted = false;
+      final (_, router) = await show(
+        tester,
+        '/quiz/same-id?environment=$environment',
+        request: (request) async {
+          requests.add(request);
+          if (request['action'] == 'deleteEvent') {
+            deleted = true;
+            return {};
+          }
+          final data = snapshot(request);
+          if (data.containsKey('events')) data['events'] = [];
+          if (data.containsKey('event')) {
+            data['event'] = deleted
+                ? null
+                : {
+                    ...data['event'] as Map<String, dynamic>,
+                    'status': status,
+                    'isPublic': false,
+                    'admissionSlotsReady': true,
+                    'currentQuestionId': 'asked-question',
+                  };
+            data['participants'] = [
+              {'id': 'registered-person', 'displayName': '参加登録済み', 'registeredAt': '2026-09-22T00:00:00Z'},
+            ];
+            data['questions'] = [
+              {
+                'id': 'asked-question',
+                'sponsorId': 'sponsor',
+                'order': 1,
+                'title': {'ja': '出題済みの問題', 'en': 'Asked question'},
+                'options': [
+                  {'ja': '正解', 'en': 'Correct'},
+                  {'ja': '不正解', 'en': 'Wrong'},
+                ],
+                'status': 'revealed',
+              },
+            ];
+          }
+          return data;
+        },
+      );
+      expect(find.text('参加者数: 1 / 80 人'), findsOneWidget);
+      expect(find.text('出題済みの問題'), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('delete-quiz-event-same-id')));
+      await tester.pumpAndSettle();
+      expect(requests.where((request) => request['action'] == 'deleteEvent'), isEmpty);
+      await tester.tap(find.widgetWithText(FilledButton, '削除する'));
+      await tester.pumpAndSettle();
+      final deletion = requests.singleWhere((request) => request['action'] == 'deleteEvent');
+      expect(deletion['environment'], environment);
+      expect(deletion['payload'], {'eventId': 'same-id'});
+      expect(router.routeInformationProvider.value.uri.toString(), '/quiz?environment=$environment');
+      expect(find.text('クイズイベントがありません'), findsOneWidget);
+      expect(find.byType(AlertDialog), findsNothing);
+      await tester.pumpWidget(const SizedBox());
+    });
+  }
+
+  testWidgets('console deletion is unavailable until the event is loaded and while it is public', (tester) async {
+    final pending = Completer<Map<String, dynamic>>();
+    await show(
+      tester,
+      '/quiz/same-id?environment=prod',
+      settle: false,
+      request: (request) async {
+        requests.add(request);
+        return pending.future;
+      },
+    );
+    final deletion = find.byKey(const ValueKey('delete-quiz-event-same-id'));
+    expect(deletion, findsNothing);
+    pending.complete({
+      ...snapshot({
+        'environment': 'prod',
+        'payload': {'view': 'quizConsole'},
+      }),
+      'event': {
+        'id': 'same-id',
+        'title': {'ja': '公開中のクイズ', 'en': 'Public quiz'},
+        'status': 'draft',
+        'isPublic': true,
+        'createdAt': '2026-09-22T00:00:00Z',
+        'updatedAt': '2026-09-22T00:00:00Z',
+      },
+    });
+    await tester.pumpAndSettle();
+    expect(tester.widget<OutlinedButton>(deletion).onPressed, isNull);
+    expect(find.text('削除するには非公開にしてください'), findsOneWidget);
+    expect(requests.where((request) => request['action'] == 'deleteEvent'), isEmpty);
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('console deletion retries the same event after its parent disappears', (tester) async {
+    var attempts = 0;
+    final (_, router) = await show(
+      tester,
+      '/quiz/same-id?environment=stg',
+      request: (request) async {
+        requests.add(request);
+        if (request['action'] == 'deleteEvent') {
+          if (attempts++ == 0) throw FirebaseFunctionsException(code: 'unavailable', message: 'network error');
+          return {};
+        }
+        final data = snapshot(request);
+        if (attempts > 0) {
+          data['event'] = null;
+          data['events'] = [];
+        }
+        return data;
+      },
+    );
+    await tester.tap(find.byKey(const ValueKey('delete-quiz-event-same-id')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(FilledButton, '削除する'));
+    await tester.pumpAndSettle();
+    expect(find.byType(AlertDialog), findsOneWidget);
+    expect(find.textContaining('削除できませんでした:'), findsOneWidget);
+    expect(router.routeInformationProvider.value.uri.toString(), '/quiz/same-id?environment=stg');
+    await tester.tap(find.widgetWithText(FilledButton, '削除する'));
+    await tester.pumpAndSettle();
+    final deletions = requests.where((request) => request['action'] == 'deleteEvent').toList();
+    expect(deletions, hasLength(2));
+    expect(deletions.first, deletions.last);
+    expect(deletions.last['environment'], 'stg');
+    expect(deletions.last['payload'], {'eventId': 'same-id'});
+    expect(router.routeInformationProvider.value.uri.toString(), '/quiz?environment=stg');
+    expect(find.text('クイズイベントがありません'), findsOneWidget);
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('an existing console operation blocks deletion until it completes', (tester) async {
+    final pending = Completer<Map<String, dynamic>>();
+    await show(
+      tester,
+      '/quiz/same-id?environment=prod',
+      request: (request) async {
+        requests.add(request);
+        return request['action'] == 'quizOperation' ? pending.future : snapshot(request);
+      },
+    );
+    await tester.tap(find.widgetWithText(FilledButton, '公開する'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(FilledButton, '実行'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    final deletion = find.byKey(const ValueKey('delete-quiz-event-same-id'));
+    expect(tester.widget<OutlinedButton>(deletion).onPressed, isNull);
+    await tester.tap(deletion);
+    await tester.pump();
+    expect(find.byType(AlertDialog), findsNothing);
+    expect(requests.where((request) => request['action'] == 'deleteEvent'), isEmpty);
+    pending.complete({});
+    await tester.pumpAndSettle();
+    expect(tester.widget<OutlinedButton>(deletion).onPressed, isNotNull);
     await tester.pumpWidget(const SizedBox());
   });
 
