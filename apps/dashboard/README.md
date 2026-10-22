@@ -140,6 +140,11 @@ CI はダミーの Firebase 設定を使う。配布時は既存の OIDC 認証�
 このワークフローは Hosting のみを更新する。`eventAdministration` などの Functions の変更は
 `Deploy Firebase` で別途適用する。
 
+Hosting の配信ファイルは `Cache-Control: no-cache` で、再読み込み時に最新かを再検証する。
+`main.dart.js` などの固定名ファイルが古いまま残り、デプロイ済みの操作が画面に出ないことを防ぐ。
+開いたままの画面は自動更新されないため、配布後は再読み込みする。変更前のキャッシュが残る場合は
+Chrome で Shift を押しながら再読み込みボタンをクリックする。
+
 ### ローカル
 
 `dashboard:deploy:stg` / `dashboard:deploy:prod` スクリプトでも配布できる。
