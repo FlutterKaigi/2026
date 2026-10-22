@@ -9,6 +9,7 @@ import 'package:app/feature/auth/ui/widget/authenticated_body.dart';
 import 'package:app/feature/auth/ui/widget/centered_sign_in_card.dart';
 import 'package:app/feature/sponsor/data/provider/sponsor_list_provider.dart';
 import 'package:app/feature/stamp_rally/data/stamp_rally_provider.dart';
+import 'package:app/feature/stamp_rally/ui/widget/stamp_rally_ticket_link.dart';
 import 'package:data/data.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -94,6 +95,8 @@ class _StampRallyBody extends ConsumerWidget {
             icon: const Icon(Icons.qr_code_scanner),
             label: Text(t.stampRally.scanButton),
           ),
+          const SizedBox(height: 12),
+          const StampRallyTicketLink(),
           if (!currentSettings.isOpen) ...[
             const SizedBox(height: 12),
             _Notice(text: t.stampRally.closed),

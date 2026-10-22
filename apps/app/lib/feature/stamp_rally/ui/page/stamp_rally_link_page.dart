@@ -10,6 +10,7 @@ import 'package:app/feature/auth/ui/widget/centered_sign_in_card.dart';
 import 'package:app/feature/sponsor/data/provider/sponsor_list_provider.dart';
 import 'package:app/feature/stamp_rally/data/stamp_rally_provider.dart';
 import 'package:app/feature/stamp_rally/ui/page/stamp_rally_page.dart';
+import 'package:app/feature/stamp_rally/ui/widget/stamp_rally_ticket_link.dart';
 import 'package:data/data.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -233,6 +234,7 @@ class _RewardResultView extends StatelessWidget {
       ].join('\n'),
       emphasized: redeemed.isNotEmpty,
       staffNote: true,
+      action: const StampRallyTicketLink(),
     );
   }
 }
@@ -247,6 +249,7 @@ class _ResultMessage extends StatelessWidget {
     this.emphasized = false,
     this.staffNote = false,
     this.onRetry,
+    this.action,
   });
 
   final IconData icon;
@@ -257,6 +260,7 @@ class _ResultMessage extends StatelessWidget {
   final bool emphasized;
   final bool staffNote;
   final VoidCallback? onRetry;
+  final Widget? action;
 
   @override
   Widget build(BuildContext context) {
@@ -305,6 +309,10 @@ class _ResultMessage extends StatelessWidget {
               if (onRetry case final onRetry?) ...[
                 FilledButton(onPressed: onRetry, child: Text(t.stampRally.retry)),
                 const SizedBox(height: 8),
+              ],
+              if (action case final action?) ...[
+                action,
+                const SizedBox(height: 16),
               ],
               OutlinedButton(
                 onPressed: () => const StampRallyRoute().go(context),

@@ -433,6 +433,8 @@ stampRally:
   signInRequired: スタンプを集めるにはサインインしてください
   description: スポンサーブースでQRコードを読み取ってスタンプを集めましょう
   scanButton: QRコードを読み取る
+  lumaTicketButton: Lumaでチケットを開く
+  lumaTicketDescription: "景品交換時は、LumaのチケットQRを\nスタッフに提示してください"
   closed: 現在スタンプは獲得できません。景品の交換とクレーンゲームは利用できます
   stampCount: "$n / $total"
   stampCountSemantic: $total個中$n個のスタンプを獲得
