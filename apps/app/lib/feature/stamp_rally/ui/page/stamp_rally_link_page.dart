@@ -1,9 +1,11 @@
 import 'dart:async';
 
+import 'package:app/core/constants/app_links.dart';
 import 'package:app/core/extension/locale_map_extension.dart';
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/log/talker.dart';
 import 'package:app/core/router/router.dart';
+import 'package:app/core/ui/launch_external_url.dart';
 import 'package:app/core/ui/widget/app_page_content.dart';
 import 'package:app/feature/auth/ui/widget/authenticated_body.dart';
 import 'package:app/feature/auth/ui/widget/centered_sign_in_card.dart';
@@ -122,6 +124,15 @@ class _ScanResult extends HookConsumerWidget {
           final value = await repository.scan(token);
           if (active && context.mounted) {
             result.value = AsyncData(value);
+            if (value is StampRallyRewardResult &&
+                value.redeemedCheckpoints.isNotEmpty &&
+                ModalRoute.of(context)?.isCurrent == true) {
+              await launchExternalUrl(
+                context,
+                uri: Uri.parse(AppLinks.lumaEvent),
+                failureMessage: t.links.openError,
+              );
+            }
           }
         } on Exception catch (error, stackTrace) {
           talker.handle(error, stackTrace);
