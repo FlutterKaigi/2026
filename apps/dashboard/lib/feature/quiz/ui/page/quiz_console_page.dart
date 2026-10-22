@@ -7,6 +7,7 @@ import 'package:dashboard/feature/quiz/data/provider/quiz_repository.dart';
 import 'package:dashboard/feature/quiz/ui/component/quiz_status_label.dart';
 import 'package:dashboard/feature/quiz/ui/component/quiz_check_in_code.dart';
 import 'package:dashboard/feature/quiz/ui/component/quiz_countdown.dart';
+import 'package:dashboard/feature/quiz/ui/component/quiz_event_delete_dialog.dart';
 import 'package:dashboard/feature/quiz/ui/component/quiz_promotion_controls.dart';
 import 'package:data/data.dart';
 import 'package:flutter/material.dart';
@@ -30,9 +31,10 @@ class QuizConsolePage extends HookConsumerWidget {
     // 進行中の操作を 1 つに限定し、実行中はすべての操作ボタンを無効化する。
     final busyLabel = useState<String?>(null);
     final errorMessage = useState<String?>(null);
+    final deleting = useState(false);
 
     Future<void> runOperation(String label, Future<void> Function() action) async {
-      if (!context.mounted || busyLabel.value != null) return;
+      if (!context.mounted || busyLabel.value != null || deleting.value) return;
       busyLabel.value = label;
       errorMessage.value = null;
       try {
@@ -43,6 +45,20 @@ class QuizConsolePage extends HookConsumerWidget {
         }
       } finally {
         if (context.mounted) busyLabel.value = null;
+      }
+    }
+
+    Future<void> deleteEvent(QuizEvent event) async {
+      final client = ref.read(eventAdminClientProvider);
+      if (client == null || event.isPublic || busyLabel.value != null || deleting.value) return;
+      deleting.value = true;
+      try {
+        final deleted = await QuizEventDeleteDialog.show(context: context, client: client, event: event);
+        if (deleted && context.mounted) {
+          context.go(eventLocation(const QuizEventListRoute().location, client.environment));
+        }
+      } finally {
+        if (context.mounted) deleting.value = false;
       }
     }
 
@@ -92,8 +108,10 @@ class QuizConsolePage extends HookConsumerWidget {
                 : _ConsoleBody(
                     event: event,
                     busyLabel: busyLabel,
+                    deleting: deleting.value,
                     runOperation: runOperation,
                     onWithdraw: withdrawPromotion,
+                    onDelete: () => deleteEvent(event),
                   ),
           ),
         ),
@@ -106,14 +124,18 @@ class _ConsoleBody extends HookConsumerWidget {
   const _ConsoleBody({
     required this.event,
     required this.busyLabel,
+    required this.deleting,
     required this.runOperation,
     required this.onWithdraw,
+    required this.onDelete,
   });
 
   final QuizEvent event;
   final ValueNotifier<String?> busyLabel;
+  final bool deleting;
   final Future<void> Function(String label, Future<void> Function() action) runOperation;
   final Future<void> Function() onWithdraw;
+  final Future<void> Function() onDelete;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -128,7 +150,8 @@ class _ConsoleBody extends HookConsumerWidget {
     final questions = ref.watch(quizQuestionListProvider(eventId));
 
     final ops = ref.read(quizOperationsRepositoryProvider);
-    final isBusy = busyLabel.value != null;
+    final isBusy = busyLabel.value != null || deleting;
+    final client = ref.watch(eventAdminClientProvider);
 
     final participantList = participants.asData?.value;
     final participantCount = participantList?.length;
@@ -191,6 +214,23 @@ class _ConsoleBody extends HookConsumerWidget {
           ),
           const SizedBox(height: 16),
           QuizPromotionControls(event: event, busy: isBusy, onWithdraw: onWithdraw),
+          if (client != null) ...[
+            const SizedBox(height: 16),
+            Wrap(
+              spacing: 12,
+              runSpacing: 8,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                OutlinedButton.icon(
+                  key: ValueKey('delete-quiz-event-${event.id}'),
+                  onPressed: event.isPublic || isBusy ? null : onDelete,
+                  icon: const Icon(Icons.delete_outline),
+                  label: const Text('イベントを削除'),
+                ),
+                if (event.isPublic) const Text('削除するには非公開にしてください'),
+              ],
+            ),
+          ],
           const SizedBox(height: 16),
           Wrap(
             spacing: 8,

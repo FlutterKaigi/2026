@@ -1,9 +1,9 @@
-import 'package:cloud_functions/cloud_functions.dart';
 import 'package:dashboard/core/event_environment/event_admin_client.dart';
 import 'package:dashboard/core/router/router.dart';
 import 'package:dashboard/core/event_environment/event_environment.dart';
 import 'package:dashboard/feature/quiz/data/provider/quiz_list_state.dart';
 import 'package:dashboard/feature/quiz/ui/component/quiz_event_create_dialog.dart';
+import 'package:dashboard/feature/quiz/ui/component/quiz_event_delete_dialog.dart';
 import 'package:dashboard/feature/quiz/ui/component/quiz_status_label.dart';
 import 'package:data/data.dart';
 import 'package:flutter/material.dart';
@@ -23,10 +23,6 @@ class QuizEventListPage extends HookConsumerWidget {
       for (final event in snapshot?['events'] as List? ?? [])
         if (event['deletionPending'] == true) event['id'] as String,
     };
-    final registrationStartedIds = {
-      for (final event in snapshot?['events'] as List? ?? [])
-        if (event['admissionSlotsReady'] == true) event['id'] as String,
-    };
 
     Future<void> createEvent() async {
       await QuizEventCreateDialog.show(context: context, ref: ref);
@@ -36,13 +32,9 @@ class QuizEventListPage extends HookConsumerWidget {
       if (client == null || deleting.value) return;
       deleting.value = true;
       try {
-        final deleted = await showDialog<bool>(
-          context: context,
-          barrierDismissible: false,
-          builder: (_) => _DeleteQuizEventDialog(client: client, event: event),
-        );
+        final deleted = await QuizEventDeleteDialog.show(context: context, client: client, event: event);
         if (deleted == true && context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('下書きイベントを削除しました')));
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('イベントを削除しました')));
         }
       } finally {
         if (context.mounted) deleting.value = false;
@@ -76,13 +68,10 @@ class QuizEventListPage extends HookConsumerWidget {
                         children: [
                           QuizEventStatusChip(status: event.status),
                           const SizedBox(width: 8),
-                          if (client != null &&
-                              event.status == QuizEventStatus.draft &&
-                              !event.isPublic &&
-                              !registrationStartedIds.contains(event.id))
+                          if (client != null && !event.isPublic)
                             IconButton(
                               key: ValueKey('delete-quiz-event-${event.id}'),
-                              tooltip: '下書きを削除',
+                              tooltip: 'イベントを削除',
                               onPressed: deleting.value ? null : () => deleteEvent(event),
                               icon: const Icon(Icons.delete_outline),
                             ),
@@ -106,72 +95,6 @@ class QuizEventListPage extends HookConsumerWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _DeleteQuizEventDialog extends StatefulWidget {
-  const _DeleteQuizEventDialog({required this.client, required this.event});
-
-  final EventAdminClient client;
-  final QuizEvent event;
-
-  @override
-  State<_DeleteQuizEventDialog> createState() => _DeleteQuizEventDialogState();
-}
-
-class _DeleteQuizEventDialogState extends State<_DeleteQuizEventDialog> {
-  bool _busy = false;
-  String? _error;
-
-  Future<void> _delete() async {
-    if (_busy) return;
-    setState(() {
-      _busy = true;
-      _error = null;
-    });
-    try {
-      await widget.client.mutate('deleteEvent', {'eventId': widget.event.id});
-      if (mounted) Navigator.pop(context, true);
-    } catch (error) {
-      if (mounted) {
-        final message = error is FirebaseFunctionsException ? error.message ?? error.code : error.toString();
-        setState(() => _error = '削除できませんでした: $message\n状態を確認し、この画面から再試行できます。');
-      }
-    } finally {
-      if (mounted) setState(() => _busy = false);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final title = widget.event.title.ja.isEmpty ? '(タイトル未設定)' : widget.event.title.ja;
-    return PopScope(
-      canPop: !_busy,
-      child: AlertDialog(
-        title: const Text('下書きイベントを削除'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('${widget.client.environment.label}の「$title」を削除します。\n登録済みの問題・正解も削除され、元に戻せません。'),
-              if (_error != null) ...[
-                const SizedBox(height: 16),
-                Text(_error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
-              ],
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(onPressed: _busy ? null : () => Navigator.pop(context, false), child: const Text('キャンセル')),
-          FilledButton(
-            onPressed: _busy ? null : _delete,
-            style: FilledButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
-            child: Text(_busy ? '削除中…' : '削除する'),
-          ),
-        ],
-      ),
     );
   }
 }

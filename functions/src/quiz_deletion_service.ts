@@ -13,24 +13,12 @@ export async function deleteQuizEvent(db: Firestore, input: Data, uid: string): 
     if (deletion.exists) return deletion.get("status") === "deleted";
     if (!event.exists) throw new HttpsError("not-found", "イベントが見つかりません。");
     const data = event.data()!;
-    if (data.status !== "draft" || data.isPublic !== false || data.admissionSlotsReady === true ||
-      Number(data.participantCount ?? 0) !== 0 || data.currentQuestionId ||
-      (data.teamSelectionStatus != null && data.teamSelectionStatus !== "notStarted")) {
-      throw new HttpsError("failed-precondition", "参加受付・出題を開始していない非公開の下書きのみ削除できます。");
+    if (data.isPublic !== false) {
+      throw new HttpsError("failed-precondition", "非公開のイベントのみ削除できます。");
     }
     const promotionRef = data.promotion?.sourceEnvironment === "stg"
       ? db.doc(`quizPromotions/${id(object(data.promotion).sourceEventId)}`) : null;
-    const [questions, participation, promotion, ...activity] = await Promise.all([
-      tx.get(ref.collection("questions")),
-      tx.get(db.collection("quizParticipation").where("eventId", "==", eventId).limit(1)),
-      promotionRef ? tx.get(promotionRef) : null,
-      ...["participants", "participantAccounts", "teams", "answers", "admissionSlots", "entryClaims", "entryAttempts", "checkInAttempts"]
-        .map((name) => tx.get(ref.collection(name).limit(1))),
-    ]);
-    if (!participation.empty || activity.some((snapshot) => !snapshot.empty) ||
-      questions.docs.some((question) => question.get("status") !== "draft")) {
-      throw new HttpsError("failed-precondition", "参加者・回答・進行データがあるイベントは削除できません。");
-    }
+    const promotion = promotionRef ? await tx.get(promotionRef) : null;
     const now = Timestamp.now();
     tx.create(deletionRef, {
       status: "deleting", requestedAt: now, requestedBy: uid,
@@ -51,7 +39,27 @@ export async function deleteQuizEvent(db: Firestore, input: Data, uid: string): 
     // This also discovers descendants of a missing parent. After an ambiguous
     // or partial failure, the same request resumes cleanup under the tombstone.
     await db.recursiveDelete(ref);
+    await deleteParticipationLocks(db, eventId);
     await deletionRef.update({ status: "deleted", completedAt: Timestamp.now(), event: FieldValue.delete() });
   }
   return { eventId };
+}
+
+async function deleteParticipationLocks(db: Firestore, eventId: string): Promise<void> {
+  // Read each page inside its transaction: a lock moved to another event or
+  // marked by Auth deletion must be rechecked before any cleanup commits.
+  while (true) {
+    const cleared = await db.runTransaction(async (tx) => {
+      const locks = await tx.get(db.collection("quizParticipation").where("eventId", "==", eventId).limit(200));
+      for (const lock of locks.docs) {
+        if (lock.get("accountDeleted") === true) {
+          tx.update(lock.ref, { eventId: FieldValue.delete(), registeredAt: FieldValue.delete() });
+        } else {
+          tx.delete(lock.ref);
+        }
+      }
+      return locks.size;
+    });
+    if (cleared === 0) return;
+  }
 }

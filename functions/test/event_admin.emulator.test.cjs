@@ -4,6 +4,10 @@ const { before, after, test } = require("node:test");
 const { initializeApp, deleteApp } = require("firebase-admin/app");
 const { getFirestore, Timestamp } = require("firebase-admin/firestore");
 const { administerEvent } = require("../lib/event_admin_service.js");
+const { deleteAuthUserData } = require("../lib/auth_user_data.js");
+const {
+  registerQuizParticipantForUser, checkInQuizParticipantForUser, selectQuizTeamForUser, submitQuizAnswerForUser,
+} = require("../lib/quiz_service.js");
 
 // These integration tests always use isolated emulator projects. They do not
 // depend on a production account or grant the caller any target-project role.
@@ -21,6 +25,8 @@ const deps = { adminDb: source, getUser, target: (environment) => {
   return environment === "stg" ? stg : prod;
 } };
 const call = (environment, action, payload) => administerEvent(actor, { environment, action, payload }, deps);
+const participant = (uid) => ({ uid, token: { firebase: { sign_in_provider: "password" } } });
+const participantDeps = { db: prod, getUser: async (uid) => ({ uid, disabled: false, email: `${uid}@example.test` }) };
 const eventId = "identical-event-id";
 const eventPayload = {
   eventId, title: { ja: "クイズ", en: "Quiz" }, capacity: 3, sponsorIds: ["sponsor"], teamNamePool: [],
@@ -280,7 +286,7 @@ async function draft(label) {
   return id;
 }
 
-test("only an active source administrator can delete a draft", async () => {
+test("only an active source administrator can delete a private event", async () => {
   const id = await draft("deletion-auth");
   const request = { environment: "prod", action: "deleteEvent", payload: { eventId: id } };
   for (const [auth, getUser, code] of [
@@ -326,26 +332,80 @@ test("deleting a draft removes its whole tree and permanently rejects stale save
   await assert.rejects(call("prod", "deleteEvent", { eventId: "missing-event" }), { code: "not-found" });
 });
 
-test("deletion protects publication, registration preparation, participants and progress", async () => {
+test("deletion requires an explicitly private event in every lifecycle state", async () => {
   const cases = [
-    ...["published", "registration", "entryClosed", "inProgress", "finished"].map((status) => ({ fields: { status } })),
-    ...[{ isPublic: true }, { admissionSlotsReady: true }, { participantCount: 1 }, { currentQuestionId: "q1" }, { teamSelectionStatus: "closed" }]
-      .map((fields) => ({ fields })),
-    ...["participants", "participantAccounts", "teams", "answers", "admissionSlots", "entryClaims", "entryAttempts", "checkInAttempts"]
-      .map((collection) => ({ collection })),
-    { questionStatus: "revealed" }, { participation: true },
+    ...["draft", "published", "registration", "entryClosed", "inProgress", "finished"]
+      .map((status) => ({ status, isPublic: true })),
+    { status: "draft" }, { status: "draft", isPublic: null }, { status: "draft", isPublic: "false" },
   ];
-  for (const scenario of cases) {
-    const id = await draft("protected");
+  for (const fields of cases) {
+    const id = await draft("public-protected");
     const ref = prod.doc(`quizEvents/${id}`);
-    if (scenario.fields) await ref.update(scenario.fields);
-    if (scenario.collection) await ref.collection(scenario.collection).doc("record").set({ data: "preserve" });
-    if (scenario.questionStatus) await ref.collection("questions").doc("q1").update({ status: scenario.questionStatus });
-    if (scenario.participation) await prod.doc(`quizParticipation/${id}`).set({ eventId: id });
-    await assert.rejects(call("prod", "deleteEvent", { eventId: id }), { code: "failed-precondition" }, JSON.stringify(scenario));
-    assert.equal((await ref.get()).exists, true);
+    await ref.set(fields);
+    await assert.rejects(call("prod", "deleteEvent", { eventId: id }), { code: "failed-precondition" });
+    assert.deepEqual((await ref.get()).data(), fields);
     assert.equal((await ref.collection("questions").doc("q1").get()).exists, true);
     assert.equal((await prod.doc(`quizEventDeletions/${id}`).get()).exists, false);
+  }
+});
+
+test("private events can be deleted with participants and results in every lifecycle state", async () => {
+  const other = await draft("keep-other-event");
+  const otherLock = prod.doc(`quizParticipation/${other}-member`);
+  const otherLockData = { eventId: other, registeredAt: Timestamp.now() };
+  await otherLock.set(otherLockData);
+  for (const status of ["draft", "published", "registration", "entryClosed", "inProgress", "finished"]) {
+    const id = await draft(`private-${status}`);
+    const ref = prod.doc(`quizEvents/${id}`);
+    await ref.update({ status, isPublic: false, admissionSlotsReady: true, participantCount: 3,
+      currentQuestionId: "q1", teamSelectionStatus: "closed" });
+    await ref.collection("questions").doc("q1").update({ status: "revealed" });
+    await ref.collection("teams").doc("A").set({ score: 10, rank: 1, perfectSponsorIds: ["sponsor"] });
+    for (const name of ["participants", "participantAccounts", "answers", "admissionSlots", "entryClaims", "entryAttempts", "checkInAttempts", "operations", "secret"]) {
+      await ref.collection(name).doc("record").set({ value: "remove" });
+    }
+    const active = prod.doc(`quizParticipation/${id}-active`);
+    const deleted = prod.doc(`quizParticipation/${id}-deleted`);
+    await active.set({ eventId: id, registeredAt: Timestamp.now() });
+    await deleted.set({ eventId: id, registeredAt: Timestamp.now(), accountDeleted: true });
+    await call("prod", "deleteEvent", { eventId: id });
+    assert.equal((await ref.get()).exists, false);
+    assert.deepEqual(await ref.listCollections(), []);
+    assert.equal((await active.get()).exists, false);
+    assert.deepEqual((await deleted.get()).data(), { accountDeleted: true });
+    assert.equal((await prod.doc(`quizEventDeletions/${id}`).get()).get("status"), "deleted");
+    assert.deepEqual((await otherLock.get()).data(), otherLockData);
+    assert.equal((await prod.doc(`quizEvents/${other}/questions/q1/secret/answer`).get()).exists, true);
+  }
+});
+
+test("a reception event can be deleted after unpublishing with or without cancelling its participants", async () => {
+  for (const cancel of [false, true]) {
+    const id = await draft("delete-after-reception");
+    const ref = prod.doc(`quizEvents/${id}`);
+    const person = participant(`${id}-member`);
+    const operate = (operation, extra = {}) => call("prod", "quizOperation", { eventId: id, operation, operationId: randomUUID(), ...extra });
+    await operate("publish");
+    await operate("openRegistration");
+    await registerQuizParticipantForUser(person, { eventId: id }, participantDeps);
+    await operate("closeRegistration");
+    await operate("openTeamSelection");
+    const code = (await ref.collection("secret").doc("checkIn").get()).get("code");
+    await checkInQuizParticipantForUser(person, { eventId: id, code }, participantDeps);
+    await selectQuizTeamForUser(person, { eventId: id, teamId: "A", expectedTeamId: null }, prod);
+    await ref.collection("entryAttempts").doc(person.uid).set({ count: 1 });
+    if (cancel) await operate("removeParticipant", { uid: person.uid });
+    await operate("unpublish");
+    assert.equal((await ref.get()).get("admissionSlotsReady"), true);
+    assert.equal((await ref.collection("participants").get()).size, cancel ? 0 : 1);
+    await call("prod", "deleteEvent", { eventId: id });
+    assert.equal((await ref.get()).exists, false);
+    assert.deepEqual(await ref.listCollections(), []);
+    assert.equal((await prod.doc(`quizParticipation/${person.uid}`).get()).exists, false);
+    const next = await draft("next-registration");
+    await prod.doc(`quizEvents/${next}`).update({ status: "registration", isPublic: true });
+    await registerQuizParticipantForUser(person, { eventId: next }, participantDeps);
+    assert.equal((await prod.doc(`quizParticipation/${person.uid}`).get()).get("eventId"), next);
   }
 });
 
@@ -427,4 +487,91 @@ test("deletion racing publication or edits cannot remove a published event or le
   assert.equal((await prod.doc(`quizEvents/${editingId}`).get()).exists, false);
   assert.deepEqual(await prod.doc(`quizEvents/${editingId}`).listCollections(), []);
   await assert.rejects(call("prod", "saveEvent", { ...eventPayload, eventId: editingId }), { code: "failed-precondition" });
+});
+
+
+test("partial participation cleanup resumes in pages and preserves moved locks and deleted-account markers", async () => {
+  const id = await draft("delete-lock-retry");
+  const other = await draft("moved-lock-target");
+  const batch = prod.batch();
+  for (let index = 0; index < 202; index++) {
+    batch.set(prod.doc(`quizParticipation/${id}-bulk-${String(index).padStart(3, "0")}`), { eventId: id, registeredAt: Timestamp.now() });
+  }
+  const moved = prod.doc(`quizParticipation/${id}-z-moved`);
+  const deleted = prod.doc(`quizParticipation/${id}-z-deleted`);
+  for (const ref of [moved, deleted]) batch.set(ref, { eventId: id, registeredAt: Timestamp.now() });
+  await batch.commit();
+  let transactions = 0;
+  const partialDb = new Proxy(prod, { get(target, name) {
+    if (name === "runTransaction") return (...args) => {
+      if (++transactions === 3) throw new Error("simulated participation cleanup interruption");
+      return target.runTransaction(...args);
+    };
+    const value = Reflect.get(target, name, target);
+    return typeof value === "function" ? value.bind(target) : value;
+  } });
+  await assert.rejects(administerEvent(actor, { environment: "prod", action: "deleteEvent", payload: { eventId: id } }, {
+    ...deps, target: () => partialDb,
+  }), /simulated participation cleanup interruption/);
+  assert.deepEqual(await prod.doc(`quizEvents/${id}`).listCollections(), []);
+  assert.equal((await prod.collection("quizParticipation").where("eventId", "==", id).get()).size, 4);
+  assert.equal((await prod.doc(`quizEventDeletions/${id}`).get()).get("status"), "deleting");
+  assert.equal((await call("prod", "read", { view: "quizEvents" })).events.find((event) => event.id === id).deletionPending, true);
+  const movedData = { eventId: other, registeredAt: Timestamp.now() };
+  await moved.set(movedData);
+  await deleteAuthUserData(deleted.id, prod);
+  await call("prod", "deleteEvent", { eventId: id });
+  await call("prod", "deleteEvent", { eventId: id });
+  assert.equal((await prod.collection("quizParticipation").where("eventId", "==", id).get()).empty, true);
+  assert.deepEqual((await moved.get()).data(), movedData);
+  assert.deepEqual((await deleted.get()).data(), { accountDeleted: true });
+  assert.equal((await prod.doc(`quizEventDeletions/${id}`).get()).get("status"), "deleted");
+});
+
+test("Auth deletion racing event deletion keeps its account-deleted marker", async () => {
+  const id = await draft("delete-account-race");
+  const uid = `${id}-member`;
+  await prod.doc(`quizEvents/${id}/participants/${uid}`).set({ displayName: "Member" });
+  const lock = prod.doc(`quizParticipation/${uid}`);
+  await lock.set({ eventId: id, registeredAt: Timestamp.now() });
+  await Promise.all([call("prod", "deleteEvent", { eventId: id }), deleteAuthUserData(uid, prod)]);
+  assert.deepEqual((await lock.get()).data(), { accountDeleted: true });
+  assert.deepEqual(await prod.doc(`quizEvents/${id}`).listCollections(), []);
+});
+
+test("deletion racing registration, check-in, team selection, answers or question progress leaves no event data", async () => {
+  for (const operation of ["register", "checkIn", "selectTeam", "answer", "presentQuestion", "openQuestion"]) {
+    const id = await draft(`delete-${operation}-race`);
+    const ref = prod.doc(`quizEvents/${id}`);
+    const person = participant(`${id}-member`);
+    const now = Timestamp.now();
+    const status = operation === "answer" ? "inProgress" : ["presentQuestion", "openQuestion"].includes(operation) ? "entryClosed" : "registration";
+    await ref.update({ status, isPublic: false, admissionSlotsReady: true, teamSelectionStatus: operation === "checkIn" || operation === "selectTeam" ? "open" : "closed",
+      currentQuestionId: operation === "answer" ? "q1" : null });
+    if (operation !== "register") {
+      await ref.collection("participants").doc(person.uid).set({ displayName: "Member", registeredAt: now,
+        ...(operation === "checkIn" ? {} : { checkedInAt: now }),
+        ...(operation === "selectTeam" ? {} : { teamId: "A" }) });
+      await prod.doc(`quizParticipation/${person.uid}`).set({ eventId: id, registeredAt: now });
+    }
+    await ref.collection("secret").doc("checkIn").set({ code: "123456" });
+    if (operation === "answer") {
+      await ref.collection("questions").doc("q1").update({ status: "open", openedAt: now, closesAt: Timestamp.fromMillis(now.toMillis() + 180000) });
+      await ref.collection("teams").doc("A").set({ memberUids: [person.uid] });
+      await ref.collection("answers").doc("q1_A").set({ questionId: "q1", teamId: "A", selectedOptionIndex: null });
+    }
+    const write = () => {
+      if (operation === "register") return registerQuizParticipantForUser(person, { eventId: id }, participantDeps);
+      if (operation === "checkIn") return checkInQuizParticipantForUser(person, { eventId: id, code: "123456" }, participantDeps);
+      if (operation === "selectTeam") return selectQuizTeamForUser(person, { eventId: id, teamId: "A", expectedTeamId: null }, prod);
+      if (operation === "answer") return submitQuizAnswerForUser(person, { eventId: id, questionId: "q1", teamId: "A", selectedOptionIndex: 0 }, prod);
+      return call("prod", "quizOperation", { eventId: id, operation, questionId: "q1", operationId: randomUUID() });
+    };
+    const [deletion] = await Promise.allSettled([call("prod", "deleteEvent", { eventId: id }), write()]);
+    assert.equal(deletion.status, "fulfilled", operation);
+    assert.equal((await ref.get()).exists, false, operation);
+    assert.deepEqual(await ref.listCollections(), [], operation);
+    assert.equal((await prod.doc(`quizParticipation/${person.uid}`).get()).exists, false, operation);
+    await assert.rejects(write(), { code: operation === "answer" ? "permission-denied" : "failed-precondition" });
+  }
 });
