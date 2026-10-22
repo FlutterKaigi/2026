@@ -169,6 +169,316 @@ void main() {
     await tester.pumpWidget(const SizedBox());
   });
 
+  testWidgets('cancelling draft deletion leaves the selected event unchanged', (tester) async {
+    await show(tester, '/quiz?environment=prod');
+    await tester.tap(find.byKey(const ValueKey('delete-quiz-event-same-id')));
+    await tester.pumpAndSettle();
+    final dialog = find.byType(AlertDialog);
+    expect(find.text('下書きイベントを削除'), findsOneWidget);
+    expect(find.descendant(of: dialog, matching: find.textContaining('本番')), findsOneWidget);
+    expect(find.descendant(of: dialog, matching: find.textContaining('prod のクイズ')), findsOneWidget);
+    expect(find.descendant(of: dialog, matching: find.textContaining('問題')), findsOneWidget);
+    expect(find.descendant(of: dialog, matching: find.textContaining('元に戻せません')), findsOneWidget);
+    expect(requests.where((request) => request['action'] == 'deleteEvent'), isEmpty);
+    await tester.tap(find.widgetWithText(TextButton, 'キャンセル'));
+    await tester.pumpAndSettle();
+    expect(dialog, findsNothing);
+    expect(find.text('prod のクイズ'), findsOneWidget);
+    expect(requests.where((request) => request['action'] == 'deleteEvent'), isEmpty);
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('confirmed draft deletion uses the selected environment and refreshes the list', (tester) async {
+    var deleted = false;
+    await show(
+      tester,
+      '/quiz?environment=prod',
+      request: (request) async {
+        requests.add(request);
+        if (request['action'] == 'deleteEvent') {
+          deleted = true;
+          return {};
+        }
+        final data = snapshot(request);
+        if (deleted) data['events'] = [];
+        return data;
+      },
+    );
+    await tester.tap(find.byTooltip('下書きを削除'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(FilledButton, '削除する'));
+    await tester.pumpAndSettle();
+    final deletion = requests.singleWhere((request) => request['action'] == 'deleteEvent');
+    expect(deletion['environment'], 'prod');
+    expect(deletion['payload'], {'eventId': 'same-id'});
+    expect(requests.every((request) => request['environment'] == 'prod'), isTrue);
+    expect(find.byType(AlertDialog), findsNothing);
+    expect(find.text('prod のクイズ'), findsNothing);
+    expect(find.text('クイズイベントがありません'), findsOneWidget);
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('only private draft events expose deletion', (tester) async {
+    await show(
+      tester,
+      '/quiz?environment=stg',
+      request: (request) async {
+        requests.add(request);
+        final data = snapshot(request);
+        final event = (data['events'] as List).single as Map<String, dynamic>;
+        data['events'] = [
+          for (final status in QuizEventStatus.values) {...event, 'id': status.name, 'status': status.name},
+          {...event, 'id': 'public-draft', 'isPublic': true},
+          {...event, 'id': 'registration-preserved-draft', 'admissionSlotsReady': true},
+        ];
+        return data;
+      },
+    );
+    expect(find.byKey(const ValueKey('delete-quiz-event-draft')), findsOneWidget);
+    expect(find.byTooltip('下書きを削除'), findsOneWidget);
+    for (final status in QuizEventStatus.values.where((status) => status != QuizEventStatus.draft)) {
+      expect(find.byKey(ValueKey('delete-quiz-event-${status.name}')), findsNothing);
+    }
+    expect(find.byKey(const ValueKey('delete-quiz-event-public-draft')), findsNothing);
+    expect(find.byKey(const ValueKey('delete-quiz-event-registration-preserved-draft')), findsNothing);
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('failed deletion stays retryable even when the refreshed event is absent', (tester) async {
+    var attempts = 0;
+    await show(
+      tester,
+      '/quiz?environment=prod',
+      request: (request) async {
+        requests.add(request);
+        if (request['action'] == 'deleteEvent') {
+          if (attempts++ == 0) throw FirebaseFunctionsException(code: 'unavailable', message: 'network error');
+          return {};
+        }
+        final data = snapshot(request);
+        if (attempts > 0) data['events'] = [];
+        return data;
+      },
+    );
+    await tester.tap(find.byTooltip('下書きを削除'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(FilledButton, '削除する'));
+    await tester.pumpAndSettle();
+    expect(find.byType(AlertDialog), findsOneWidget);
+    expect(find.textContaining('削除できませんでした:'), findsOneWidget);
+    expect(find.textContaining('network error'), findsOneWidget);
+    expect(tester.widget<FilledButton>(find.widgetWithText(FilledButton, '削除する')).onPressed, isNotNull);
+    await tester.tap(find.widgetWithText(FilledButton, '削除する'));
+    await tester.pumpAndSettle();
+    final deletions = requests.where((request) => request['action'] == 'deleteEvent').toList();
+    expect(deletions, hasLength(2));
+    expect(deletions.first, deletions.last);
+    expect(deletions.last['environment'], 'prod');
+    expect(deletions.last['payload'], {'eventId': 'same-id'});
+    expect(find.byType(AlertDialog), findsNothing);
+    expect(find.text('クイズイベントがありません'), findsOneWidget);
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('pending deletion disables confirmation, cancellation, and other deletion buttons', (tester) async {
+    final pending = Completer<Map<String, dynamic>>();
+    var deleted = false;
+    await show(
+      tester,
+      '/quiz?environment=prod',
+      request: (request) async {
+        requests.add(request);
+        if (request['action'] == 'deleteEvent') {
+          final result = await pending.future;
+          deleted = true;
+          return result;
+        }
+        final data = snapshot(request);
+        final event = (data['events'] as List).single as Map<String, dynamic>;
+        data['events'] = [
+          if (!deleted) event,
+          {...event, 'id': 'another-draft'},
+        ];
+        return data;
+      },
+    );
+    await tester.tap(find.byKey(const ValueKey('delete-quiz-event-same-id')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(FilledButton, '削除する'));
+    await tester.pump();
+    expect(tester.widget<FilledButton>(find.widgetWithText(FilledButton, '削除中…')).onPressed, isNull);
+    expect(tester.widget<TextButton>(find.widgetWithText(TextButton, 'キャンセル')).onPressed, isNull);
+    expect(
+      tester.widget<IconButton>(find.byKey(const ValueKey('delete-quiz-event-another-draft'))).onPressed,
+      isNull,
+    );
+    await tester.tap(find.widgetWithText(FilledButton, '削除中…'));
+    await tester.pump();
+    expect(requests.where((request) => request['action'] == 'deleteEvent'), hasLength(1));
+    pending.complete({});
+    await tester.pumpAndSettle();
+    expect(find.byType(AlertDialog), findsNothing);
+    expect(find.byKey(const ValueKey('delete-quiz-event-same-id')), findsNothing);
+    expect(
+      tester.widget<IconButton>(find.byKey(const ValueKey('delete-quiz-event-another-draft'))).onPressed,
+      isNotNull,
+    );
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('an incomplete deletion can be retried after reloading the event list', (tester) async {
+    var deleted = false;
+    final (_, router) = await show(
+      tester,
+      '/quiz?environment=prod',
+      request: (request) async {
+        requests.add(request);
+        if (request['action'] == 'deleteEvent') {
+          deleted = true;
+          return {};
+        }
+        final data = snapshot(request);
+        final event = (data['events'] as List).single as Map<String, dynamic>;
+        data['events'] = [
+          if (!deleted) {...event, 'deletionPending': true},
+        ];
+        return data;
+      },
+    );
+    expect(find.text('削除が完了していません。削除を再試行してください。'), findsOneWidget);
+    await tester.tap(find.text('prod のクイズ'));
+    await tester.pumpAndSettle();
+    expect(router.routeInformationProvider.value.uri.toString(), '/quiz?environment=prod');
+    await tester.tap(find.byKey(const ValueKey('delete-quiz-event-same-id')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(FilledButton, '削除する'));
+    await tester.pumpAndSettle();
+    final deletion = requests.singleWhere((request) => request['action'] == 'deleteEvent');
+    expect(deletion['environment'], 'prod');
+    expect(deletion['payload'], {'eventId': 'same-id'});
+    expect(find.text('削除が完了していません。削除を再試行してください。'), findsNothing);
+    expect(find.text('クイズイベントがありません'), findsOneWidget);
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  for (final initialStatus in ['registration', 'entryClosed']) {
+    testWidgets('hiding $initialStatus in production preserves attendees and requires reopening registration', (
+      tester,
+    ) async {
+      var status = initialStatus;
+      await show(
+        tester,
+        '/quiz/same-id?environment=prod',
+        request: (request) async {
+          requests.add(request);
+          if (request['action'] == 'quizOperation') {
+            status = switch ((request['payload'] as Map)['operation']) {
+              'unpublish' => 'draft',
+              'publish' => 'published',
+              _ => status,
+            };
+            return {};
+          }
+          final data = snapshot(request);
+          data['event'] = {...data['event'] as Map<String, dynamic>, 'status': status, 'isPublic': status != 'draft'};
+          data['participants'] = [
+            {'id': 'registered-person', 'displayName': '登録済みの参加者', 'registeredAt': '2026-09-22T00:00:00Z'},
+          ];
+          return data;
+        },
+      );
+      await tester.tap(find.widgetWithText(OutlinedButton, '受付を停止して非公開'));
+      await tester.pumpAndSettle();
+      expect(requests.where((request) => request['action'] == 'quizOperation'), isEmpty);
+      await tester.tap(find.widgetWithText(FilledButton, '実行'));
+      await tester.pumpAndSettle();
+      expect(find.text('参加者数: 1 / 80 人'), findsOneWidget);
+      expect(find.text('受付を停止して非公開'), findsNothing);
+      expect(find.text('参加登録を開始'), findsNothing);
+      await tester.tap(find.widgetWithText(FilledButton, '公開する'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(FilledButton, '実行'));
+      await tester.pumpAndSettle();
+      expect(find.text('参加者数: 1 / 80 人'), findsOneWidget);
+      expect(find.widgetWithText(FilledButton, '参加登録を開始'), findsOneWidget);
+      expect(find.text('受付を停止して非公開'), findsNothing);
+      final operations = requests.where((request) => request['action'] == 'quizOperation').toList();
+      expect(operations.map((request) => (request['payload'] as Map)['operation']), ['unpublish', 'publish']);
+      expect(operations.every((request) => request['environment'] == 'prod'), isTrue);
+      expect(operations.every((request) => (request['payload'] as Map)['eventId'] == 'same-id'), isTrue);
+      await tester.pumpWidget(const SizedBox());
+    });
+  }
+
+  testWidgets('admin participant details identify attendees without displaying raw IDs', (tester) async {
+    await show(
+      tester,
+      '/quiz/same-id?environment=prod',
+      request: (request) async {
+        requests.add(request);
+        if (request['action'] != 'read') return {};
+        final data = snapshot(request);
+        data['event'] = {...data['event'] as Map<String, dynamic>, 'status': 'registration', 'isPublic': true};
+        data['participants'] = [
+          for (final (id, displayName) in [
+            ('resolved-account-uid', null),
+            ('nickname-uid', 'ニックネーム'),
+            ('email-only-uid', ''),
+            ('unknown-uid', 123),
+          ])
+            {'id': id, 'displayName': ?displayName, 'registeredAt': '2026-09-22T00:00:00Z'},
+        ];
+        data['participantAccounts'] = [
+          {
+            'id': 'resolved-account-uid',
+            'displayName': '鈴木 太郎',
+            'accountName': 'Google 鈴木',
+            'email': 'taro@example.test',
+          },
+          {
+            'id': 'nickname-uid',
+            'displayName': 'ニックネーム',
+            'accountName': '花子',
+            'email': 'hanako@example.test',
+          },
+          {'id': 'email-only-uid', 'displayName': '参加者', 'accountName': null, 'email': 'email@example.test'},
+        ];
+        return data;
+      },
+    );
+    final roster = find.text('参加者の確認・取消（4 人）');
+    await tester.ensureVisible(roster);
+    await tester.tap(roster);
+    await tester.pumpAndSettle();
+    expect(find.text('鈴木 太郎'), findsOneWidget);
+    expect(find.text('ニックネーム'), findsOneWidget);
+    expect(find.text('email@example.test'), findsOneWidget);
+    expect(find.text('名前未登録'), findsOneWidget);
+    expect(find.textContaining('アカウント: Google 鈴木'), findsOneWidget);
+    expect(find.textContaining('taro@example.test'), findsOneWidget);
+    expect(find.textContaining('アカウント: 花子'), findsOneWidget);
+    expect(find.textContaining('hanako@example.test'), findsOneWidget);
+    expect(find.textContaining('-uid'), findsNothing);
+    expect(find.byTooltip('参加者ID: resolved-account-uid'), findsOneWidget);
+    final row = find.ancestor(of: find.text('鈴木 太郎'), matching: find.byType(ListTile));
+    final cancel = find.descendant(of: row, matching: find.widgetWithText(TextButton, '取消'));
+    await tester.ensureVisible(cancel);
+    await tester.tap(cancel);
+    await tester.pumpAndSettle();
+    final dialog = find.byType(AlertDialog);
+    expect(find.descendant(of: dialog, matching: find.textContaining('鈴木 太郎')), findsOneWidget);
+    expect(find.descendant(of: dialog, matching: find.textContaining('taro@example.test')), findsOneWidget);
+    expect(requests.where((request) => request['action'] == 'quizOperation'), isEmpty);
+    await tester.tap(find.widgetWithText(FilledButton, '実行'));
+    await tester.pumpAndSettle();
+    final cancellation = requests.singleWhere((request) => request['action'] == 'quizOperation');
+    expect(cancellation['environment'], 'prod');
+    expect(cancellation['payload'], containsPair('operation', 'removeParticipant'));
+    expect(cancellation['payload'], containsPair('eventId', 'same-id'));
+    expect(cancellation['payload'], containsPair('uid', 'resolved-account-uid'));
+    await tester.pumpWidget(const SizedBox());
+  });
+
   testWidgets('a late response from the previous environment cannot restore its participants', (tester) async {
     final pending = Completer<Map<String, dynamic>>();
     final (_, router) = await show(

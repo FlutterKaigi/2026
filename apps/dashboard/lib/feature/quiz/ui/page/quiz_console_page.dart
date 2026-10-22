@@ -119,6 +119,11 @@ class _ConsoleBody extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final eventId = event.id;
     final participants = ref.watch(quizParticipantListProvider(eventId));
+    final snapshot = ref.watch(eventAdminSnapshotProvider).asData?.value;
+    final participantAccounts = {
+      for (final account in snapshot?['participantAccounts'] as List? ?? [])
+        account['id'] as String: Map<String, dynamic>.from(account as Map),
+    };
     final teams = ref.watch(quizTeamListProvider(eventId));
     final questions = ref.watch(quizQuestionListProvider(eventId));
 
@@ -284,6 +289,23 @@ class _ConsoleBody extends HookConsumerWidget {
                   label: const Text('受付を再開'),
                 ),
               ],
+              if (event.status == QuizEventStatus.registration || event.status == QuizEventStatus.entryClosed)
+                OutlinedButton.icon(
+                  onPressed: isBusy
+                      ? null
+                      : () => confirmAndRun(
+                          title: '受付を停止して非公開',
+                          message:
+                              '参加受付・チェックイン・チーム変更を停止し、参加者アプリの一覧から非表示にします。\n'
+                              '参加者データを保持し、参加登録・チェックイン済みの記録・選択済みチームは残ります。\n'
+                              '参加登録は取り消されず、別のイベントへの自動移行は行いません。\n'
+                              '再公開しても受付は自動で再開されません。',
+                          label: '非公開化',
+                          action: () => ops.unpublishEvent(eventId),
+                        ),
+                  icon: const Icon(Icons.visibility_off_outlined),
+                  label: const Text('受付を停止して非公開'),
+                ),
             ],
           ),
           const SizedBox(height: 16),
@@ -412,25 +434,15 @@ class _ConsoleBody extends HookConsumerWidget {
                     onChanged: (value) => onlyUnselected.value = value ?? false,
                   ),
                   for (final participant in list.where((person) => !onlyUnselected.value || person.teamId == null))
-                    ListTile(
-                      title: Text(participant.displayName),
-                      subtitle: Text(
-                        '${switch (participant) {
-                          QuizParticipant(:final teamId?) => 'チーム $teamId',
-                          QuizParticipant(checkedInAt: _?) => 'チェックイン済み・未選択',
-                          _ => '未チェックイン',
-                        }} / ${participant.id}',
-                      ),
-                      trailing: TextButton(
-                        onPressed: isBusy
-                            ? null
-                            : () => confirmAndRun(
-                                title: '参加登録を取消',
-                                message: '「${participant.displayName}」の登録を取り消します。他の参加者の所属は保持されます。',
-                                label: '参加取消',
-                                action: () => ops.removeParticipant(eventId, participant.id),
-                              ),
-                        child: const Text('取消'),
+                    _ParticipantTile(
+                      participant: participant,
+                      account: participantAccounts[participant.id],
+                      busy: isBusy,
+                      onCancel: (label) => confirmAndRun(
+                        title: '参加登録を取消',
+                        message: '「$label」の登録を取り消します。他の参加者の所属は保持されます。',
+                        label: '参加取消',
+                        action: () => ops.removeParticipant(eventId, participant.id),
                       ),
                     ),
                 ],
@@ -727,6 +739,57 @@ class _QuestionRow extends ConsumerWidget {
       ),
     );
   }
+}
+
+class _ParticipantTile extends StatelessWidget {
+  const _ParticipantTile({
+    required this.participant,
+    required this.account,
+    required this.busy,
+    required this.onCancel,
+  });
+
+  final QuizParticipant participant;
+  final Map<String, dynamic>? account;
+  final bool busy;
+  final Future<void> Function(String label) onCancel;
+
+  @override
+  Widget build(BuildContext context) {
+    final displayName = _nonEmptyText(account?['displayName']) ?? participant.displayName.trim();
+    final accountName = _nonEmptyText(account?['accountName']);
+    final email = _nonEmptyText(account?['email']);
+    final name = displayName.isEmpty || displayName == '参加者' ? email ?? '名前未登録' : displayName;
+    final status = switch (participant) {
+      QuizParticipant(:final teamId?) => 'チーム $teamId',
+      QuizParticipant(checkedInAt: _?) => 'チェックイン済み・未選択',
+      _ => '未チェックイン',
+    };
+    return Tooltip(
+      message: '参加者ID: ${participant.id}',
+      child: ListTile(
+        key: ValueKey('quiz-participant-${participant.id}'),
+        title: Text(name),
+        subtitle: Text(
+          [
+            if (accountName != null && accountName != name && accountName != '参加者') 'アカウント: $accountName',
+            if (email != null && email != name) email,
+            status,
+          ].join('\n'),
+        ),
+        trailing: TextButton(
+          onPressed: busy ? null : () => onCancel(email != null && email != name ? '$name / $email' : name),
+          child: const Text('取消'),
+        ),
+      ),
+    );
+  }
+}
+
+String? _nonEmptyText(Object? value) {
+  if (value is! String) return null;
+  final text = value.trim();
+  return text.isEmpty ? null : text;
 }
 
 class _ErrorBanner extends StatelessWidget {

@@ -68,15 +68,19 @@ export async function promoteQuizEvent(stg: Firestore, prod: Firestore, input: D
   const eventId = id(input.operationId);
   const revision = text(input.revision, 64);
   const ref = prod.doc(`quizEvents/${eventId}`);
+  const deletionRef = prod.doc(`quizEventDeletions/${eventId}`);
   // Retrying a committed request must not overwrite production, even if STG
   // has since changed. Withdrawn copies also retain their idempotency record.
-  const existing = existingResult(await ref.get(), sourceEventId, revision);
+  const [snapshot, deletion] = await prod.getAll(ref, deletionRef);
+  requireState(!deletion.exists, "この反映先は削除済みです。再反映する場合は確認画面を開き直してください。");
+  const existing = existingResult(snapshot, sourceEventId, revision);
   if (existing) return existing;
   const content = await definition(stg, sourceEventId);
   requireState(content.revision === revision, "確認後に STG の内容が変更されました。確認画面を開き直してください。");
   return prod.runTransaction(async (tx) => {
     const promotionRef = prod.doc(`quizPromotions/${sourceEventId}`);
-    const [event, promotion] = await tx.getAll(ref, promotionRef);
+    const [event, promotion, deletion] = await tx.getAll(ref, promotionRef, deletionRef);
+    requireState(!deletion.exists, "この反映先は削除済みです。再反映する場合は確認画面を開き直してください。");
     const retry = existingResult(event, sourceEventId, revision);
     if (retry) return retry;
     requireState(promotion.get("status") !== "active", "このイベントは既に本番へ反映されています。本番側のイベントを確認してください。");

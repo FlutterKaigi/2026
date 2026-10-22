@@ -135,8 +135,16 @@ class AdminQuizParticipantRepository implements QuizParticipantRepository {
   AdminQuizParticipantRepository(this.client);
   final EventAdminClient client;
   @override
-  Stream<List<QuizParticipant>> watchAll(String eventId) =>
-      client.watch().map((data) => _list(data, 'participants', QuizParticipant.fromJson));
+  Stream<List<QuizParticipant>> watchAll(String eventId) => client.watch().map(
+    (data) => _list(
+      data,
+      'participants',
+      (value) => QuizParticipant.fromJson({
+        ...value,
+        'displayName': value['displayName'] is String ? value['displayName'] : '参加者',
+      }),
+    ),
+  );
   @override
   Stream<QuizParticipant?> watchByUid(String eventId, String uid) =>
       watchAll(eventId).map((people) => people.where((person) => person.id == uid).firstOrNull);

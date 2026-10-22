@@ -272,3 +272,159 @@ test("withdrawal racing registration cannot hide an event that has begun admitti
     assert.equal(event.admissionSlotsReady, true);
   }
 });
+
+async function draft(label) {
+  const id = `${label}-${randomUUID()}`;
+  await call("prod", "saveEvent", { ...eventPayload, eventId: id });
+  await call("prod", "saveQuestion", { ...questionPayload, eventId: id });
+  return id;
+}
+
+test("only an active source administrator can delete a draft", async () => {
+  const id = await draft("deletion-auth");
+  const request = { environment: "prod", action: "deleteEvent", payload: { eventId: id } };
+  for (const [auth, getUser, code] of [
+    [undefined, async () => ({ disabled: false }), "unauthenticated"],
+    [{ uid: "attendee", token: { email: "attendee@example.test", email_verified: true } }, async () => ({ disabled: false }), "permission-denied"],
+    [{ ...actor, uid: "organization-member" }, async () => ({ disabled: false }), "permission-denied"],
+    [actor, async () => ({ disabled: true }), "permission-denied"],
+  ]) {
+    await assert.rejects(administerEvent(auth, request, { ...deps, getUser }), { code });
+    assert.equal((await prod.doc(`quizEvents/${id}`).get()).exists, true);
+    assert.equal((await prod.doc(`quizEventDeletions/${id}`).get()).exists, false);
+  }
+  await call("prod", "deleteEvent", { eventId: id });
+  assert.equal((await prod.doc(`quizEvents/${id}`).get()).exists, false);
+});
+
+test("deleting a draft removes its whole tree and permanently rejects stale saves", async () => {
+  const id = await draft("delete-tree");
+  const other = await draft("keep-tree");
+  await prod.doc(`quizEvents/${id}`).update({ teamSelectionStatus: "notStarted" });
+  await call("stg", "saveEvent", { ...eventPayload, eventId: id });
+  const nested = prod.doc(`quizEvents/${id}/questions/q1/secret/answer/audit/extra`);
+  await nested.set({ value: "nested secret" });
+  const orphan = prod.doc(`quizEvents/${id}/questions/missing/secret/answer`);
+  await orphan.set({ value: "orphaned descendant" });
+  const operate = (operation) => call("prod", "quizOperation", { eventId: id, operation, operationId: randomUUID() });
+  await operate("publish");
+  await operate("unpublish");
+  assert.deepEqual(await call("prod", "deleteEvent", { eventId: id }), { eventId: id });
+  assert.deepEqual(await call("prod", "deleteEvent", { eventId: id }), { eventId: id });
+  assert.equal((await prod.doc(`quizEvents/${id}`).get()).exists, false);
+  assert.deepEqual(await prod.doc(`quizEvents/${id}`).listCollections(), []);
+  assert.equal((await nested.get()).exists, false);
+  assert.equal((await orphan.get()).exists, false);
+  assert.equal((await prod.doc(`quizEvents/${other}/questions/q1/secret/answer`).get()).exists, true);
+  assert.equal((await stg.doc(`quizEvents/${id}`).get()).exists, true);
+  assert.equal((await prod.doc("sponsors/sponsor").get()).exists, true);
+  assert.equal((await prod.doc(`quizEventDeletions/${id}`).get()).get("status"), "deleted");
+  assert.equal((await prod.doc(`quizEventDeletions/${id}`).get()).get("event"), undefined);
+  await assert.rejects(call("prod", "saveEvent", { ...eventPayload, eventId: id }), { code: "failed-precondition" });
+  await assert.rejects(call("prod", "saveQuestion", { ...questionPayload, eventId: id }), { code: "failed-precondition" });
+  await assert.rejects(operate("publish"), { code: "failed-precondition" });
+  await assert.rejects(call("prod", "deleteEvent", { eventId: "missing-event" }), { code: "not-found" });
+});
+
+test("deletion protects publication, registration preparation, participants and progress", async () => {
+  const cases = [
+    ...["published", "registration", "entryClosed", "inProgress", "finished"].map((status) => ({ fields: { status } })),
+    ...[{ isPublic: true }, { admissionSlotsReady: true }, { participantCount: 1 }, { currentQuestionId: "q1" }, { teamSelectionStatus: "closed" }]
+      .map((fields) => ({ fields })),
+    ...["participants", "participantAccounts", "teams", "answers", "admissionSlots", "entryClaims", "entryAttempts", "checkInAttempts"]
+      .map((collection) => ({ collection })),
+    { questionStatus: "revealed" }, { participation: true },
+  ];
+  for (const scenario of cases) {
+    const id = await draft("protected");
+    const ref = prod.doc(`quizEvents/${id}`);
+    if (scenario.fields) await ref.update(scenario.fields);
+    if (scenario.collection) await ref.collection(scenario.collection).doc("record").set({ data: "preserve" });
+    if (scenario.questionStatus) await ref.collection("questions").doc("q1").update({ status: scenario.questionStatus });
+    if (scenario.participation) await prod.doc(`quizParticipation/${id}`).set({ eventId: id });
+    await assert.rejects(call("prod", "deleteEvent", { eventId: id }), { code: "failed-precondition" }, JSON.stringify(scenario));
+    assert.equal((await ref.get()).exists, true);
+    assert.equal((await ref.collection("questions").doc("q1").get()).exists, true);
+    assert.equal((await prod.doc(`quizEventDeletions/${id}`).get()).exists, false);
+  }
+});
+
+test("a deleted production import can be promoted anew without resurrecting old requests", async () => {
+  const sourceEventId = await rehearsal("delete-promotion");
+  const preview = await call("stg", "previewQuizPromotion", { eventId: sourceEventId });
+  const payload = { eventId: sourceEventId, revision: preview.revision, operationId: randomUUID() };
+  await call("stg", "promoteQuizEvent", payload);
+  await call("prod", "deleteEvent", { eventId: payload.operationId });
+  const record = (await prod.doc(`quizPromotions/${sourceEventId}`).get()).data();
+  assert.equal(record.status, "deleted");
+  assert.equal(record.eventId, undefined);
+  assert.equal(record.deletedEventId, payload.operationId);
+  await assert.rejects(call("stg", "promoteQuizEvent", payload), { code: "failed-precondition" });
+  assert.equal((await call("stg", "previewQuizPromotion", { eventId: sourceEventId })).existingEventId, null);
+  const next = { ...payload, operationId: randomUUID() };
+  await call("stg", "promoteQuizEvent", next);
+  await call("prod", "deleteEvent", { eventId: payload.operationId });
+  assert.equal((await prod.doc(`quizPromotions/${sourceEventId}`).get()).get("eventId"), next.operationId);
+  assert.equal((await prod.doc(`quizEvents/${next.operationId}/questions/q1/secret/answer`).get()).exists, true);
+  assert.equal((await stg.doc(`quizEvents/${sourceEventId}/participants/test-data`).get()).exists, true);
+  // An older withdrawn copy may be deleted after a newer import already owns
+  // the source's promotion record. That record must continue pointing at it.
+  await call("prod", "withdrawQuizPromotion", { eventId: next.operationId });
+  const newest = { ...payload, operationId: randomUUID() };
+  await call("stg", "promoteQuizEvent", newest);
+  await call("prod", "deleteEvent", { eventId: next.operationId });
+  assert.equal((await prod.doc(`quizPromotions/${sourceEventId}`).get()).get("eventId"), newest.operationId);
+  assert.equal((await prod.doc(`quizEvents/${newest.operationId}/questions/q1/secret/answer`).get()).exists, true);
+});
+
+test("partial recursive cleanup remains listed and a retry completes it without allowing edits", async () => {
+  const id = await draft("delete-retry");
+  const partialDb = new Proxy(prod, { get(target, name) {
+    if (name === "recursiveDelete") return async (ref) => {
+      await ref.collection("questions").doc("q1").delete();
+      throw new Error("simulated interrupted cleanup");
+    };
+    const value = Reflect.get(target, name, target);
+    return typeof value === "function" ? value.bind(target) : value;
+  } });
+  await assert.rejects(administerEvent(actor, { environment: "prod", action: "deleteEvent", payload: { eventId: id } }, {
+    ...deps, target: () => partialDb,
+  }), /simulated interrupted cleanup/);
+  assert.equal((await prod.doc(`quizEvents/${id}`).get()).exists, false);
+  assert.equal((await prod.doc(`quizEvents/${id}/questions/q1/secret/answer`).get()).exists, true);
+  const pending = (await call("prod", "read", { view: "quizEvents" })).events.find((event) => event.id === id);
+  assert.equal(pending.deletionPending, true);
+  assert.equal(pending.title.ja, eventPayload.title.ja);
+  await assert.rejects(call("prod", "saveEvent", { ...eventPayload, eventId: id }), { code: "failed-precondition" });
+  await call("prod", "deleteEvent", { eventId: id });
+  assert.deepEqual(await prod.doc(`quizEvents/${id}`).listCollections(), []);
+  assert.equal((await call("prod", "read", { view: "quizEvents" })).events.some((event) => event.id === id), false);
+});
+
+test("deletion racing publication or edits cannot remove a published event or leave orphaned changes", async () => {
+  const publishingId = await draft("delete-publish-race");
+  const published = await Promise.allSettled([
+    call("prod", "deleteEvent", { eventId: publishingId }),
+    call("prod", "quizOperation", { eventId: publishingId, operation: "publish", operationId: randomUUID() }),
+  ]);
+  assert.equal(published.filter((result) => result.status === "fulfilled").length, 1);
+  const publishedEvent = await prod.doc(`quizEvents/${publishingId}`).get();
+  if (publishedEvent.exists) {
+    assert.equal(publishedEvent.get("status"), "published");
+    assert.equal((await prod.doc(`quizEventDeletions/${publishingId}`).get()).exists, false);
+  } else {
+    assert.deepEqual(await prod.doc(`quizEvents/${publishingId}`).listCollections(), []);
+  }
+  const editingId = await draft("delete-edit-race");
+  const results = await Promise.allSettled([
+    call("prod", "deleteEvent", { eventId: editingId }),
+    call("prod", "saveQuestion", { ...questionPayload, eventId: editingId, questionId: "new-question" }),
+    call("prod", "saveEvent", { ...eventPayload, eventId: editingId, title: { ja: "変更", en: "Changed" } }),
+    call("prod", "deleteEvent", { eventId: editingId }),
+  ]);
+  assert.equal(results[0].status, "fulfilled");
+  assert.equal(results[3].status, "fulfilled");
+  assert.equal((await prod.doc(`quizEvents/${editingId}`).get()).exists, false);
+  assert.deepEqual(await prod.doc(`quizEvents/${editingId}`).listCollections(), []);
+  await assert.rejects(call("prod", "saveEvent", { ...eventPayload, eventId: editingId }), { code: "failed-precondition" });
+});
