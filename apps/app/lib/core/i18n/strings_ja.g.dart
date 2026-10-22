@@ -1052,6 +1052,12 @@ class Translations$stampRally$ja {
 	/// ja: 'QRコードを読み取る'
 	String get scanButton => 'QRコードを読み取る';
 
+	/// ja: 'Lumaでチケットを開く'
+	String get lumaTicketButton => 'Lumaでチケットを開く';
+
+	/// ja: '景品交換時は、LumaのチケットQRを スタッフに提示してください'
+	String get lumaTicketDescription => '景品交換時は、LumaのチケットQRを\nスタッフに提示してください';
+
 	/// ja: '現在スタンプは獲得できません。景品の交換とクレーンゲームは利用できます'
 	String get closed => '現在スタンプは獲得できません。景品の交換とクレーンゲームは利用できます';
 
@@ -3239,6 +3245,8 @@ extension on Translations {
 			'stampRally.signInRequired' => 'スタンプを集めるにはサインインしてください',
 			'stampRally.description' => 'スポンサーブースでQRコードを読み取ってスタンプを集めましょう',
 			'stampRally.scanButton' => 'QRコードを読み取る',
+			'stampRally.lumaTicketButton' => 'Lumaでチケットを開く',
+			'stampRally.lumaTicketDescription' => '景品交換時は、LumaのチケットQRを\nスタッフに提示してください',
 			'stampRally.closed' => '現在スタンプは獲得できません。景品の交換とクレーンゲームは利用できます',
 			'stampRally.stampCount' => ({required Object n, required Object total}) => '${n} / ${total}',
 			'stampRally.stampCountSemantic' => ({required Object total, required Object n}) => '${total}個中${n}個のスタンプを獲得',
@@ -3375,10 +3383,10 @@ extension on Translations {
 			'settings.title' => '設定',
 			'settings.appearance' => '表示設定',
 			'settings.appInfo' => 'アプリ情報',
-			'settings.version' => 'バージョン',
-			'settings.saveError' => '設定を保存できませんでした',
 			_ => null,
 		} ?? switch (path) {
+			'settings.version' => 'バージョン',
+			'settings.saveError' => '設定を保存できませんでした',
 			'settings.themeMode.title' => 'テーマ',
 			'settings.themeMode.system' => 'システムに合わせる',
 			'settings.themeMode.light' => 'ライト',

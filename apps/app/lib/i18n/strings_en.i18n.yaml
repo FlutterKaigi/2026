@@ -432,6 +432,8 @@ stampRally:
   signInRequired: Sign in to collect stamps
   description: Scan the QR codes at sponsor booths to collect stamps
   scanButton: Scan QR code
+  lumaTicketButton: Open ticket in Luma
+  lumaTicketDescription: Show your Luma ticket QR code to the staff when collecting prizes
   closed: Stamps are not available right now. Prizes and the crane game are still available
   stampCount: "$n / $total"
   stampCountSemantic: $n of $total stamps collected

@@ -1,15 +1,18 @@
 import 'dart:async';
 
+import 'package:app/core/constants/app_links.dart';
 import 'package:app/core/extension/locale_map_extension.dart';
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/log/talker.dart';
 import 'package:app/core/router/router.dart';
+import 'package:app/core/ui/launch_external_url.dart';
 import 'package:app/core/ui/widget/app_page_content.dart';
 import 'package:app/feature/auth/ui/widget/authenticated_body.dart';
 import 'package:app/feature/auth/ui/widget/centered_sign_in_card.dart';
 import 'package:app/feature/sponsor/data/provider/sponsor_list_provider.dart';
 import 'package:app/feature/stamp_rally/data/stamp_rally_provider.dart';
 import 'package:app/feature/stamp_rally/ui/page/stamp_rally_page.dart';
+import 'package:app/feature/stamp_rally/ui/widget/stamp_rally_ticket_link.dart';
 import 'package:data/data.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -121,6 +124,15 @@ class _ScanResult extends HookConsumerWidget {
           final value = await repository.scan(token);
           if (active && context.mounted) {
             result.value = AsyncData(value);
+            if (value is StampRallyRewardResult &&
+                value.redeemedCheckpoints.isNotEmpty &&
+                ModalRoute.of(context)?.isCurrent == true) {
+              await launchExternalUrl(
+                context,
+                uri: Uri.parse(AppLinks.lumaEvent),
+                failureMessage: t.links.openError,
+              );
+            }
           }
         } on Exception catch (error, stackTrace) {
           talker.handle(error, stackTrace);
@@ -233,6 +245,7 @@ class _RewardResultView extends StatelessWidget {
       ].join('\n'),
       emphasized: redeemed.isNotEmpty,
       staffNote: true,
+      action: const StampRallyTicketLink(),
     );
   }
 }
@@ -247,6 +260,7 @@ class _ResultMessage extends StatelessWidget {
     this.emphasized = false,
     this.staffNote = false,
     this.onRetry,
+    this.action,
   });
 
   final IconData icon;
@@ -257,6 +271,7 @@ class _ResultMessage extends StatelessWidget {
   final bool emphasized;
   final bool staffNote;
   final VoidCallback? onRetry;
+  final Widget? action;
 
   @override
   Widget build(BuildContext context) {
@@ -305,6 +320,10 @@ class _ResultMessage extends StatelessWidget {
               if (onRetry case final onRetry?) ...[
                 FilledButton(onPressed: onRetry, child: Text(t.stampRally.retry)),
                 const SizedBox(height: 8),
+              ],
+              if (action case final action?) ...[
+                action,
+                const SizedBox(height: 16),
               ],
               OutlinedButton(
                 onPressed: () => const StampRallyRoute().go(context),

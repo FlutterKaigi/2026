@@ -551,6 +551,8 @@ class _Translations$stampRally$en extends Translations$stampRally$ja {
 	@override String get signInRequired => 'Sign in to collect stamps';
 	@override String get description => 'Scan the QR codes at sponsor booths to collect stamps';
 	@override String get scanButton => 'Scan QR code';
+	@override String get lumaTicketButton => 'Open ticket in Luma';
+	@override String get lumaTicketDescription => 'Show your Luma ticket QR code to the staff when collecting prizes';
 	@override String get closed => 'Stamps are not available right now. Prizes and the crane game are still available';
 	@override String stampCount({required Object n, required Object total}) => '${n} / ${total}';
 	@override String stampCountSemantic({required Object n, required Object total}) => '${n} of ${total} stamps collected';
@@ -1905,6 +1907,8 @@ extension on TranslationsEn {
 			'stampRally.signInRequired' => 'Sign in to collect stamps',
 			'stampRally.description' => 'Scan the QR codes at sponsor booths to collect stamps',
 			'stampRally.scanButton' => 'Scan QR code',
+			'stampRally.lumaTicketButton' => 'Open ticket in Luma',
+			'stampRally.lumaTicketDescription' => 'Show your Luma ticket QR code to the staff when collecting prizes',
 			'stampRally.closed' => 'Stamps are not available right now. Prizes and the crane game are still available',
 			'stampRally.stampCount' => ({required Object n, required Object total}) => '${n} / ${total}',
 			'stampRally.stampCountSemantic' => ({required Object n, required Object total}) => '${n} of ${total} stamps collected',
@@ -2041,10 +2045,10 @@ extension on TranslationsEn {
 			'settings.title' => 'Settings',
 			'settings.appearance' => 'Appearance',
 			'settings.appInfo' => 'App Information',
-			'settings.version' => 'Version',
-			'settings.saveError' => 'Could not save the setting',
 			_ => null,
 		} ?? switch (path) {
+			'settings.version' => 'Version',
+			'settings.saveError' => 'Could not save the setting',
 			'settings.themeMode.title' => 'Theme',
 			'settings.themeMode.system' => 'System',
 			'settings.themeMode.light' => 'Light',
