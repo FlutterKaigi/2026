@@ -1,8 +1,10 @@
 import 'package:app/core/ui/root_scaffold.dart';
 import 'package:app/core/ui/widget/vertical_bar_safe_area.dart';
 import 'package:app/core/util/reserved_regions.dart';
+import 'package:app/core/util/system_vertical_bar.dart';
 import 'package:app/core/util/vertical_bar_edge.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
@@ -45,7 +47,7 @@ class _StateCounterState extends State<_StateCounter> {
   Widget build(BuildContext context) => const SizedBox.expand();
 }
 
-Future<void> _pumpShell(WidgetTester tester, {Widget? firstPage}) async {
+Future<void> _pumpShell(WidgetTester tester, {Widget? firstPage, bool askUIKit = false}) async {
   Widget page(String label) => Scaffold(key: label == 'One' ? _pageKey : null, body: firstPage ?? Text('$label page'));
   final router = GoRouter(
     initialLocation: '/one',
@@ -70,7 +72,13 @@ Future<void> _pumpShell(WidgetTester tester, {Widget? firstPage}) async {
     ],
   );
   addTearDown(router.dispose);
-  await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+  await tester.pumpWidget(
+    MaterialApp.router(
+      routerConfig: router,
+      // As in App: UIKit's answer about the vertical bar reaches every route.
+      builder: askUIKit ? (context, child) => SystemVerticalBarScope(child: child!) : null,
+    ),
+  );
   await tester.pumpAndSettle();
 }
 
@@ -277,6 +285,104 @@ void main() {
 
       expect(created, 1);
     }, variant: _iOS);
+
+    group('with the vertical bar edge from UIKit', () {
+      void reportEdge(WidgetTester tester, String? edge) {
+        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(verticalBarEdgeChannel, (call) async => edge);
+        addTearDown(() => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(verticalBarEdgeChannel, null));
+      }
+
+      Future<void> changeEdge(WidgetTester tester, String edge) =>
+          tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+            verticalBarEdgeChannel.name,
+            verticalBarEdgeChannel.codec.encodeMethodCall(MethodCall('edgeChanged', edge)),
+            (_) {},
+          );
+
+      testWidgets('keeps the navigation bar when UIKit says there is no vertical bar', (tester) async {
+        // A safe area shaped like the vertical bar, on a screen without one.
+        _setView(tester, const Size(466, 678), right: 84, bottom: 34);
+        reportEdge(tester, 'unspecified');
+        await _pumpShell(tester, askUIKit: true);
+
+        expect(find.byType(NavigationBar), findsOneWidget);
+        expect(find.byType(NavigationRail), findsNothing);
+      }, variant: _iOS);
+
+      testWidgets('moves the tabs into the vertical bar when UIKit names its edge', (tester) async {
+        _setView(tester, const Size(466, 678), right: 84, bottom: 34);
+        reportEdge(tester, 'trailing');
+        await _pumpShell(tester, askUIKit: true);
+
+        expect(tester.getRect(find.byType(NavigationRail)).left, 382);
+      }, variant: _iOS);
+
+      testWidgets('relies on the safe area when UIKit cannot tell', (tester) async {
+        _setView(tester, const Size(466, 678), right: 84, bottom: 34);
+        reportEdge(tester, null);
+        await _pumpShell(tester, askUIKit: true);
+
+        expect(tester.getRect(find.byType(NavigationRail)).left, 382);
+      }, variant: _iOS);
+
+      testWidgets('follows UIKit when the edge changes', (tester) async {
+        _setView(tester, const Size(466, 678), right: 84, bottom: 34);
+        reportEdge(tester, 'unspecified');
+        await _pumpShell(tester, askUIKit: true);
+        expect(find.byType(NavigationBar), findsOneWidget);
+
+        await changeEdge(tester, 'trailing');
+        await tester.pumpAndSettle();
+
+        expect(find.byType(NavigationBar), findsNothing);
+        expect(tester.getRect(find.byType(NavigationRail)).left, 382);
+      }, variant: _iOS);
+
+      testWidgets('waits for the resize before dropping the vertical bar', (tester) async {
+        _setView(tester, const Size(466, 678), right: 84, bottom: 34);
+        reportEdge(tester, 'trailing');
+        await _pumpShell(tester, askUIKit: true);
+
+        // UIKit says the bar is gone while the view still has the old size.
+        await changeEdge(tester, 'unspecified');
+        await tester.pump();
+        expect(tester.getRect(find.byType(NavigationRail)).left, 382);
+
+        // The answer takes effect with the resize, even where the new safe
+        // area still looks like a vertical bar.
+        _setView(tester, const Size(678, 466), right: 84, bottom: 34);
+        await tester.pump();
+        expect(tester.getRect(find.byType(NavigationRail)).left, 0);
+      }, variant: _iOS);
+
+      testWidgets('drops the vertical bar after a while without a resize', (tester) async {
+        _setView(tester, const Size(466, 678), right: 84, bottom: 34);
+        reportEdge(tester, 'trailing');
+        await _pumpShell(tester, askUIKit: true);
+
+        await changeEdge(tester, 'unspecified');
+        await tester.pump(verticalBarRemovalTimeout - const Duration(milliseconds: 1));
+        expect(find.byType(NavigationBar), findsNothing);
+
+        await tester.pump(const Duration(milliseconds: 1));
+        expect(find.byType(NavigationBar), findsOneWidget);
+      }, variant: _iOS);
+
+      testWidgets('keeps the vertical bar when UIKit names its edge again', (tester) async {
+        _setView(tester, const Size(466, 678), right: 84, bottom: 34);
+        reportEdge(tester, 'trailing');
+        await _pumpShell(tester, askUIKit: true);
+
+        await changeEdge(tester, 'unspecified');
+        await changeEdge(tester, 'trailing');
+        await tester.pump(verticalBarRemovalTimeout);
+        _setView(tester, const Size(466, 678), right: 84, bottom: 34);
+        await tester.pump();
+
+        expect(find.byType(NavigationBar), findsNothing);
+        expect(tester.getRect(find.byType(NavigationRail)).left, 382);
+      }, variant: _iOS);
+    });
 
     testWidgets('keeps the navigation bar without a vertical bar', (tester) async {
       _setView(tester, const Size(402, 874), top: 62, bottom: 34);
