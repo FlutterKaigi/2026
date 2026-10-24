@@ -12,8 +12,11 @@ const reservedRegionsChannel = MethodChannel('jp.flutterkaigi.conf2026/reserved_
 Future<List<Rect>?> fetchOcclusions() async {
   try {
     final regions = await reservedRegionsChannel.invokeListMethod<Map<Object?, Object?>>('occlusions');
+    if (regions == null) {
+      return null;
+    }
     return [
-      for (final region in regions ?? const <Map<Object?, Object?>>[])
+      for (final region in regions)
         if (region['active'] == true)
           Rect.fromLTWH(
             (region['x']! as num).toDouble(),

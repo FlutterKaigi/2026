@@ -32,8 +32,9 @@ import UIKit
         result(FlutterMethodNotImplemented)
         return
       }
+      // 取れないときは nil を返し、「カメラ穴がない」と区別して Flutter 側の既定の余白を使わせる。
       guard #available(iOS 27.1, *), let view = registrar?.viewController?.view else {
-        result([])
+        result(nil)
         return
       }
       result(

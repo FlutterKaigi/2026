@@ -185,6 +185,15 @@ void main() {
         expect(rail.bottom, 384);
       }, variant: _iOS);
 
+      testWidgets('keeps the top clear for the camera when UIKit cannot tell', (tester) async {
+        _setView(tester, const Size(466, 678), right: 84, bottom: 34);
+        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(reservedRegionsChannel, (call) async => null);
+        addTearDown(() => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(reservedRegionsChannel, null));
+        await _pumpShell(tester);
+
+        expect(tester.getRect(find.byType(NavigationRail)).top, 72);
+      }, variant: _iOS);
+
       testWidgets('ignores occlusions outside the vertical bar', (tester) async {
         _setView(tester, const Size(951, 669), right: 84, bottom: 34);
         reportOcclusions(tester, [const Rect.fromLTWH(400, 0, 60, 60)]);

@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'package:app/core/util/reserved_regions.dart';
 import 'package:app/core/util/vertical_bar_edge.dart';
 import 'package:app/core/util/window_size.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -197,8 +198,9 @@ class _VerticalBarTabsState extends State<_VerticalBarTabs> with WidgetsBindingO
   Future<void> _updateOcclusions() async {
     final request = ++_request;
     final occlusions = await fetchOcclusions();
-    // Only the latest answer describes the current screen.
-    if (mounted && request == _request) {
+    // Only the latest answer describes the current screen. The metrics also
+    // change every frame while the keyboard slides, so skip unchanged answers.
+    if (mounted && request == _request && !listEquals(occlusions, _occlusions)) {
       setState(() => _occlusions = occlusions);
     }
   }
