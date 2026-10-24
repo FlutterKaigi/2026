@@ -337,6 +337,51 @@ void main() {
         expect(find.byType(NavigationBar), findsNothing);
         expect(tester.getRect(find.byType(NavigationRail)).left, 382);
       }, variant: _iOS);
+
+      testWidgets('waits for the resize before dropping the vertical bar', (tester) async {
+        _setView(tester, const Size(466, 678), right: 84, bottom: 34);
+        reportEdge(tester, 'trailing');
+        await _pumpShell(tester, askUIKit: true);
+
+        // UIKit says the bar is gone while the view still has the old size.
+        await changeEdge(tester, 'unspecified');
+        await tester.pump();
+        expect(tester.getRect(find.byType(NavigationRail)).left, 382);
+
+        // The answer takes effect with the resize, even where the new safe
+        // area still looks like a vertical bar.
+        _setView(tester, const Size(678, 466), right: 84, bottom: 34);
+        await tester.pump();
+        expect(tester.getRect(find.byType(NavigationRail)).left, 0);
+      }, variant: _iOS);
+
+      testWidgets('drops the vertical bar after a while without a resize', (tester) async {
+        _setView(tester, const Size(466, 678), right: 84, bottom: 34);
+        reportEdge(tester, 'trailing');
+        await _pumpShell(tester, askUIKit: true);
+
+        await changeEdge(tester, 'unspecified');
+        await tester.pump(verticalBarRemovalTimeout - const Duration(milliseconds: 1));
+        expect(find.byType(NavigationBar), findsNothing);
+
+        await tester.pump(const Duration(milliseconds: 1));
+        expect(find.byType(NavigationBar), findsOneWidget);
+      }, variant: _iOS);
+
+      testWidgets('keeps the vertical bar when UIKit names its edge again', (tester) async {
+        _setView(tester, const Size(466, 678), right: 84, bottom: 34);
+        reportEdge(tester, 'trailing');
+        await _pumpShell(tester, askUIKit: true);
+
+        await changeEdge(tester, 'unspecified');
+        await changeEdge(tester, 'trailing');
+        await tester.pump(verticalBarRemovalTimeout);
+        _setView(tester, const Size(466, 678), right: 84, bottom: 34);
+        await tester.pump();
+
+        expect(find.byType(NavigationBar), findsNothing);
+        expect(tester.getRect(find.byType(NavigationRail)).left, 382);
+      }, variant: _iOS);
     });
 
     testWidgets('keeps the navigation bar without a vertical bar', (tester) async {

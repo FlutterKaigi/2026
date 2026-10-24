@@ -8,6 +8,15 @@ import 'package:flutter/widgets.dart';
 /// (iOS 27.1) and calls `edgeChanged` when it changes.
 const verticalBarEdgeChannel = MethodChannel('jp.flutterkaigi.conf2026/vertical_bar_edge');
 
+/// The longest UIKit's `unspecified` waits for the view to be resized.
+///
+/// When the open iPhone Duo turns from landscape to portrait, UIKit says the
+/// vertical bar is gone about 150 ms before it resizes the view. Taking that
+/// answer at once lays out the landscape frame without the bar for a moment,
+/// in the middle of the rotation. So the answer waits for the next resize,
+/// and no longer than this when none comes.
+const verticalBarRemovalTimeout = Duration(milliseconds: 500);
+
 /// Tells the widgets below whether UIKit places a vertical bar (iPhone Duo).
 ///
 /// `VerticalBarEdge` guesses the vertical bar from the shape of the safe area.
@@ -29,8 +38,9 @@ class SystemVerticalBarScope extends StatefulWidget {
   State<SystemVerticalBarScope> createState() => _SystemVerticalBarScopeState();
 }
 
-class _SystemVerticalBarScopeState extends State<SystemVerticalBarScope> {
+class _SystemVerticalBarScopeState extends State<SystemVerticalBarScope> with WidgetsBindingObserver {
   bool? _usesVerticalBar;
+  Timer? _pendingRemoval;
 
   @override
   void initState() {
@@ -38,12 +48,22 @@ class _SystemVerticalBarScopeState extends State<SystemVerticalBarScope> {
     if (kIsWeb || defaultTargetPlatform != TargetPlatform.iOS) {
       return;
     }
+    WidgetsBinding.instance.addObserver(this);
     verticalBarEdgeChannel.setMethodCallHandler(_handleCall);
     unawaited(_fetch());
   }
 
   @override
+  void didChangeMetrics() {
+    if (_pendingRemoval != null) {
+      _apply(false);
+    }
+  }
+
+  @override
   void dispose() {
+    _pendingRemoval?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
     verticalBarEdgeChannel.setMethodCallHandler(null);
     super.dispose();
   }
@@ -66,6 +86,20 @@ class _SystemVerticalBarScopeState extends State<SystemVerticalBarScope> {
 
   void _update(String? edge) {
     final usesVerticalBar = edge == null ? null : edge != 'unspecified';
+    // UIKit can say the bar is gone before it resizes the view, while the
+    // safe area still makes room for it. Taking that at once would lay out
+    // the old size without the bar, so it waits for the resize. The first
+    // answer, and any that allows a bar, applies at once.
+    if (usesVerticalBar == false && _usesVerticalBar == true) {
+      _pendingRemoval ??= Timer(verticalBarRemovalTimeout, () => _apply(false));
+      return;
+    }
+    _apply(usesVerticalBar);
+  }
+
+  void _apply(bool? usesVerticalBar) {
+    _pendingRemoval?.cancel();
+    _pendingRemoval = null;
     if (mounted && usesVerticalBar != _usesVerticalBar) {
       setState(() => _usesVerticalBar = usesVerticalBar);
     }
