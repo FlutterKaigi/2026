@@ -29,14 +29,15 @@ jobs:
     concurrency:
       group: deploy-app-ios-${{ inputs.environment }}
       cancel-in-progress: false
-    runs-on: macos-26
+    # iPhone Duo で全画面表示にするには iOS 27.1 SDK（Xcode 27.1）でのビルドが必要。
+    runs-on: xcode-27
     timeout-minutes: 60
     permissions:
       contents: read
       id-token: write
     env:
       DEPLOY_ENVIRONMENT: ${{ inputs.environment }}
-      XCODE_VERSION: "26.4.1"
+      XCODE_VERSION: "27.1"
       FIREBASE_PROJECT_ID: ${{ vars[format('{0}_FIREBASE_PROJECT_ID', inputs.environment == 'stg' && 'STG' || 'PROD')] }}
       APPLE_TEAM_ID: ${{ vars.APPLE_TEAM_ID }}
       IOS_BUNDLE_ID: ${{ inputs.environment == 'stg' && 'jp.flutterkaigi.conf2026.stg' || vars.IOS_BUNDLE_ID }}

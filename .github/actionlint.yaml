@@ -1,0 +1,4 @@
+self-hosted-runner:
+  labels:
+    # GitHub が提供する Xcode 27 のイメージ。actionlint v1.7.12 の既知ラベルにまだ含まれない。
+    - xcode-27

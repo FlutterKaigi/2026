@@ -15,6 +15,38 @@ import UIKit
 
   func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
     GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
+    if let registrar = engineBridge.pluginRegistry.registrar(forPlugin: "ReservedRegions") {
+      Self.registerReservedRegions(with: registrar)
+    }
+  }
+
+  // iPhone Duo の縦帯にはカメラ穴が入り、端末の向きによって上端にも下端にも来る。Flutter はこの位置を
+  // 受け取れないので、縦帯にタブを並べる画面のために UIKit の値を返す。
+  private static func registerReservedRegions(with registrar: FlutterPluginRegistrar) {
+    let channel = FlutterMethodChannel(
+      name: "jp.flutterkaigi.conf2026/reserved_regions",
+      binaryMessenger: registrar.messenger()
+    )
+    channel.setMethodCallHandler { [weak registrar] call, result in
+      guard call.method == "occlusions" else {
+        result(FlutterMethodNotImplemented)
+        return
+      }
+      // 取れないときは nil を返し、「カメラ穴がない」と区別して Flutter 側の既定の余白を使わせる。
+      guard #available(iOS 27.1, *), let view = registrar?.viewController?.view else {
+        result(nil)
+        return
+      }
+      result(
+        view.reservedRegions(kind: .occlusion).map { region in
+          [
+            "x": region.frame.minX, "y": region.frame.minY,
+            "width": region.frame.width, "height": region.frame.height,
+            "active": region.isActive,
+          ]
+        }
+      )
+    }
   }
 
   // firebase_messaging 16.7.0 は scene:willConnectToSession:options: を void で実装しているが、Flutter は

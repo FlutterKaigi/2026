@@ -7,6 +7,7 @@ import 'package:app/core/ui/widget/app_error_view.dart';
 import 'package:app/core/ui/widget/app_page_content.dart';
 import 'package:app/core/ui/widget/brand_header_card.dart';
 import 'package:app/core/ui/widget/digit_code_field.dart';
+import 'package:app/core/ui/widget/vertical_bar_safe_area.dart';
 import 'package:app/feature/auth/data/provider/auth_repository.dart';
 import 'package:app/feature/auth/ui/widget/authenticated_body.dart';
 import 'package:app/feature/auth/ui/widget/centered_sign_in_card.dart';
@@ -138,7 +139,7 @@ class _RegistrationForm extends HookConsumerWidget {
     Future<void> scan() async {
       // タブを切り替えてもカメラが動き続けないよう、ナビゲーションごと覆う。
       final code = await Navigator.of(context, rootNavigator: true).push<String>(
-        MaterialPageRoute(builder: (_) => const SupportLtScanPage()),
+        MaterialPageRoute(builder: (_) => const VerticalBarSafeArea(child: SupportLtScanPage())),
       );
       // 読み取り中に別のアカウントへ切り替わっていたら、そのアカウントでは登録しない。
       if (code == null || !context.mounted || ref.read(authRepositoryProvider).currentUser?.uid != uid) {
