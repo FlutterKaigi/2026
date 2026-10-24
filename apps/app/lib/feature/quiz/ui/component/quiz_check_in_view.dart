@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/ui/widget/digit_code_field.dart';
+import 'package:app/core/ui/widget/vertical_bar_safe_area.dart';
 import 'package:app/feature/quiz/data/provider/quiz_providers.dart';
 import 'package:app/feature/quiz/data/provider/quiz_repositories.dart';
 import 'package:app/feature/quiz/ui/component/quiz_progress_steps.dart';
@@ -135,7 +136,9 @@ class _CheckInForm extends HookConsumerWidget {
     Future<void> scan() async {
       // タブを切り替えてもカメラが動き続けないよう、ナビゲーションごと覆う。
       final code = await Navigator.of(context, rootNavigator: true).push<String>(
-        MaterialPageRoute(builder: (_) => QuizCheckInScanPage(eventId: eventId)),
+        MaterialPageRoute(
+          builder: (_) => VerticalBarSafeArea(child: QuizCheckInScanPage(eventId: eventId)),
+        ),
       );
       // 読み取り中に別のアカウントへ切り替わっていたら、そのアカウントでは送信しない。
       if (code == null || !context.mounted || ref.read(quizUserProvider).value?.uid != uid) {
