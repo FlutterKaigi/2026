@@ -236,6 +236,23 @@ void main() {
       expect(find.text('Two page'), findsOneWidget);
     }, variant: _iOS);
 
+    testWidgets('shows app-wide snack bars beside the vertical bar too', (tester) async {
+      _setView(tester, const Size(466, 678), right: 84, bottom: 34);
+      await _pumpShell(tester);
+
+      // Like PushNotificationListener, which sits above the Navigator in
+      // MaterialApp.builder and so uses the app's own messenger.
+      tester
+          .firstState<ScaffoldMessengerState>(find.byType(ScaffoldMessenger))
+          .showSnackBar(const SnackBar(content: Text('Notification')));
+      await tester.pumpAndSettle();
+      expect(tester.getRect(find.byType(SnackBar)).right, 382);
+
+      await tester.tap(find.text('Two'));
+      await tester.pumpAndSettle();
+      expect(find.text('Two page'), findsOneWidget);
+    }, variant: _iOS);
+
     testWidgets('leaves the keyboard to the page once with a vertical bar', (tester) async {
       _setView(tester, const Size(678, 466), right: 84, bottom: 34);
       tester.view.viewInsets = const FakeViewPadding(bottom: 216 * 3.0);

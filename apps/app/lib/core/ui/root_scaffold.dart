@@ -109,23 +109,17 @@ class RootScaffold extends StatelessWidget {
     final onRight = edge == VerticalBarEdge.right;
     final barWidth = onRight ? padding.right : padding.left;
 
-    // The pages end at the bar, while the scaffold background continues
-    // underneath it.
+    // The pages end at the bar, while the background continues underneath
+    // it. The only Scaffold here wraps the pages: snack bars go to the
+    // outermost Scaffold, so all of them, including the app-wide ones shown
+    // from MaterialApp.builder, stay beside the bar instead of covering the
+    // tabs at its bottom. It also makes room for the keyboard, once.
     final body = Expanded(
-      child: Builder(
-        // Read the media query below the Scaffold, which has already made
-        // room for the keyboard; the pages must not do so a second time.
-        builder: (context) => MediaQuery.removePadding(
-          context: context,
-          removeLeft: !onRight,
-          removeRight: onRight,
-          // Snack bars go to the outermost Scaffold of their messenger. Give
-          // the pages their own, so that snack bars stay beside the bar
-          // instead of covering the tabs at its bottom.
-          child: ScaffoldMessenger(
-            child: Scaffold(body: navigationShell),
-          ),
-        ),
+      child: MediaQuery.removePadding(
+        context: context,
+        removeLeft: !onRight,
+        removeRight: onRight,
+        child: Scaffold(body: navigationShell),
       ),
     );
     final bar = SizedBox(
@@ -146,8 +140,9 @@ class RootScaffold extends StatelessWidget {
       ),
     );
 
-    return Scaffold(
-      body: Row(children: onRight ? [body, bar] : [bar, body]),
+    return Material(
+      color: Theme.of(context).scaffoldBackgroundColor,
+      child: Row(children: onRight ? [body, bar] : [bar, body]),
     );
   }
 }
