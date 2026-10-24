@@ -155,25 +155,41 @@ class _VerticalBarTabs extends StatefulWidget {
   State<_VerticalBarTabs> createState() => _VerticalBarTabsState();
 }
 
-class _VerticalBarTabsState extends State<_VerticalBarTabs> {
-  (Size, EdgeInsets)? _geometry;
+class _VerticalBarTabsState extends State<_VerticalBarTabs> with WidgetsBindingObserver {
   List<Rect>? _occlusions;
+  int _request = 0;
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // The camera moves with every rotation, fold and split, all of which
-    // change the screen size or its safe area.
-    final geometry = (MediaQuery.sizeOf(context), MediaQuery.paddingOf(context));
-    if (geometry != _geometry) {
-      _geometry = geometry;
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    unawaited(_updateOcclusions());
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  // UIKit does not announce changes to the reserved regions, so ask again
+  // whenever the view is laid out again (rotation, fold, split, or anything
+  // else that resizes the Flutter view) and when the app comes back.
+  @override
+  void didChangeMetrics() => unawaited(_updateOcclusions());
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
       unawaited(_updateOcclusions());
     }
   }
 
   Future<void> _updateOcclusions() async {
+    final request = ++_request;
     final occlusions = await fetchOcclusions();
-    if (mounted) {
+    // Only the latest answer describes the current screen.
+    if (mounted && request == _request) {
       setState(() => _occlusions = occlusions);
     }
   }

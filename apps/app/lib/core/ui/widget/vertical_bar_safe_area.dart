@@ -15,9 +15,8 @@ class VerticalBarSafeArea extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final edge = VerticalBarEdge.of(context);
-    if (edge == null) {
-      return child;
-    }
+    // Keep the same widgets with or without the bar: rotating or unfolding
+    // the device must not rebuild the page and run its effects again.
     return ColoredBox(
       color: Theme.of(context).scaffoldBackgroundColor,
       child: SafeArea(
