@@ -4,6 +4,7 @@ import 'package:app/core/remote_config/event_features_provider.dart';
 import 'package:app/core/router/launch_route.dart';
 import 'package:app/core/ui/not_found_page.dart';
 import 'package:app/core/ui/root_scaffold.dart';
+import 'package:app/core/ui/widget/vertical_bar_safe_area.dart';
 import 'package:app/feature/auth/ui/page/account_page.dart';
 import 'package:app/feature/auth/ui/page/email_sign_in_page.dart';
 import 'package:app/feature/contributor/ui/page/contributor_list_page.dart';
@@ -115,7 +116,7 @@ final routerProvider = Provider<GoRouter>((ref) {
     overridePlatformDefaultLocation: launchRoute != null,
     routes: $appRoutes,
     observers: [TalkerRouteObserver(talker)],
-    errorBuilder: (context, state) => const NotFoundPage(),
+    errorBuilder: (context, state) => const VerticalBarSafeArea(child: NotFoundPage()),
     refreshListenable: eventFeaturesEnabled,
     onEnter: (context, currentState, nextState, router) {
       // iOS can forward the OAuth callback to Flutter's deep-link handler.

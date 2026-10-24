@@ -34,6 +34,7 @@ fvm dart run melos bootstrap
 ```
 
 The pinned Flutter version is `3.47.8` (see `.fvmrc`).
+Building the iOS app requires Xcode 27.1 or later (iOS 27.1 SDK), which the app needs for iPhone Duo.
 
 ## Common commands
 

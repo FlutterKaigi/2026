@@ -36,7 +36,10 @@ class ForceUpdateBlocker extends ConsumerWidget {
         // 読み上げも対象外にする。
         ExcludeFocus(child: ExcludeSemantics(child: child)),
         const ModalBarrier(dismissible: false, color: Colors.black54),
-        ForceUpdateDialog(state: state, launcher: launcher),
+        // showDialog と違い SafeArea が付かないので、iPhone Duo の縦帯などを自分で避ける。
+        SafeArea(
+          child: ForceUpdateDialog(state: state, launcher: launcher),
+        ),
       ],
     );
   }

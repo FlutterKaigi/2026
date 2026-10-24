@@ -6,7 +6,7 @@ class SettingsRoute extends GoRouteData with $SettingsRoute {
   const SettingsRoute();
 
   @override
-  Widget build(BuildContext context, GoRouterState state) => const SettingsPage();
+  Widget build(BuildContext context, GoRouterState state) => const VerticalBarSafeArea(child: SettingsPage());
 }
 
 @TypedGoRoute<EventGuideRoute>(path: '/guide')
@@ -14,7 +14,7 @@ class EventGuideRoute extends GoRouteData with $EventGuideRoute {
   const EventGuideRoute();
 
   @override
-  Widget build(BuildContext context, GoRouterState state) => const EventGuidePage();
+  Widget build(BuildContext context, GoRouterState state) => const VerticalBarSafeArea(child: EventGuidePage());
 }
 
 /// `/x/:token` — a profile-exchange share link
@@ -29,7 +29,8 @@ class ShareLinkRoute extends GoRouteData with $ShareLinkRoute {
   final String token;
 
   @override
-  Widget build(BuildContext context, GoRouterState state) => ExchangeShareLinkPage(token: token);
+  Widget build(BuildContext context, GoRouterState state) =>
+      VerticalBarSafeArea(child: ExchangeShareLinkPage(token: token));
 }
 
 /// `/s/:token` — a stamp rally QR code, opened from the OS camera as a
@@ -42,7 +43,8 @@ class StampRallyLinkRoute extends GoRouteData with $StampRallyLinkRoute {
   final String token;
 
   @override
-  Widget build(BuildContext context, GoRouterState state) => StampRallyLinkPage(token: token);
+  Widget build(BuildContext context, GoRouterState state) =>
+      VerticalBarSafeArea(child: StampRallyLinkPage(token: token));
 }
 
 /// Shell hosting the main bottom/rail navigation destinations.
