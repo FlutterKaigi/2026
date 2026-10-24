@@ -211,6 +211,22 @@ void main() {
       expect(created, 1);
     }, variant: _iOS);
 
+    testWidgets('shows snack bars beside the vertical bar, leaving the tabs usable', (tester) async {
+      _setView(tester, const Size(466, 678), right: 84, bottom: 34);
+      await _pumpShell(tester);
+
+      ScaffoldMessenger.of(
+        tester.element(find.byKey(_pageKey)),
+      ).showSnackBar(const SnackBar(content: Text('Saved')));
+      await tester.pumpAndSettle();
+      expect(tester.getRect(find.byType(SnackBar)).right, 382);
+
+      // The last tab sits at the bottom of the bar, level with the snack bar.
+      await tester.tap(find.text('Two'));
+      await tester.pumpAndSettle();
+      expect(find.text('Two page'), findsOneWidget);
+    }, variant: _iOS);
+
     testWidgets('leaves the keyboard to the page once with a vertical bar', (tester) async {
       _setView(tester, const Size(678, 466), right: 84, bottom: 34);
       tester.view.viewInsets = const FakeViewPadding(bottom: 216 * 3.0);

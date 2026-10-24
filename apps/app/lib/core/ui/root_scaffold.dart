@@ -118,7 +118,12 @@ class RootScaffold extends StatelessWidget {
           context: context,
           removeLeft: !onRight,
           removeRight: onRight,
-          child: navigationShell,
+          // Snack bars go to the outermost Scaffold of their messenger. Give
+          // the pages their own, so that snack bars stay beside the bar
+          // instead of covering the tabs at its bottom.
+          child: ScaffoldMessenger(
+            child: Scaffold(body: navigationShell),
+          ),
         ),
       ),
     );
