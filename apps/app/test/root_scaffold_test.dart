@@ -211,6 +211,16 @@ void main() {
       expect(created, 1);
     }, variant: _iOS);
 
+    testWidgets('leaves the keyboard to the page once with a vertical bar', (tester) async {
+      _setView(tester, const Size(678, 466), right: 84, bottom: 34);
+      tester.view.viewInsets = const FakeViewPadding(bottom: 216 * 3.0);
+      const content = ValueKey('content');
+      await _pumpShell(tester, firstPage: const SizedBox.expand(key: content));
+
+      // Only the page's own Scaffold makes room for the keyboard.
+      expect(tester.getRect(find.byKey(content)).height, 466 - 216);
+    }, variant: _iOS);
+
     testWidgets('keeps the navigation bar without a vertical bar', (tester) async {
       _setView(tester, const Size(402, 874), top: 62, bottom: 34);
       await _pumpShell(tester);

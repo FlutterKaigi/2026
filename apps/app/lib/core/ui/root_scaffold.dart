@@ -111,11 +111,15 @@ class RootScaffold extends StatelessWidget {
     // The pages end at the bar, while the scaffold background continues
     // underneath it.
     final body = Expanded(
-      child: MediaQuery.removePadding(
-        context: context,
-        removeLeft: !onRight,
-        removeRight: onRight,
-        child: navigationShell,
+      child: Builder(
+        // Read the media query below the Scaffold, which has already made
+        // room for the keyboard; the pages must not do so a second time.
+        builder: (context) => MediaQuery.removePadding(
+          context: context,
+          removeLeft: !onRight,
+          removeRight: onRight,
+          child: navigationShell,
+        ),
       ),
     );
     final bar = SizedBox(
