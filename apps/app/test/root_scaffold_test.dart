@@ -263,6 +263,21 @@ void main() {
       expect(tester.getRect(find.byKey(content)).height, 466 - 216);
     }, variant: _iOS);
 
+    testWidgets('keeps the page state when the vertical bar changes sides', (tester) async {
+      var created = 0;
+      // The closed device turned from one landscape to the other and back.
+      _setView(tester, const Size(678, 466), right: 84, bottom: 34);
+      await _pumpShell(tester, firstPage: _StateCounter(() => created++));
+
+      _setView(tester, const Size(678, 466), left: 84, bottom: 34);
+      await tester.pumpAndSettle();
+      expect(tester.getRect(find.byType(NavigationRail)).left, 0);
+      _setView(tester, const Size(678, 466), right: 84, bottom: 34);
+      await tester.pumpAndSettle();
+
+      expect(created, 1);
+    }, variant: _iOS);
+
     testWidgets('keeps the navigation bar without a vertical bar', (tester) async {
       _setView(tester, const Size(402, 874), top: 62, bottom: 34);
       await _pumpShell(tester);
