@@ -18,6 +18,49 @@ import UIKit
     if let registrar = engineBridge.pluginRegistry.registrar(forPlugin: "ReservedRegions") {
       Self.registerReservedRegions(with: registrar)
     }
+    if let registrar = engineBridge.pluginRegistry.registrar(forPlugin: "VerticalBarEdge") {
+      Self.registerVerticalBarEdge(with: registrar)
+    }
+  }
+
+  // Flutter は safe area の形から iPhone Duo の縦帯を推測している。想定していない状態（iPad のウインドウ表示など）で
+  // 誤判定しないよう、UIKit が縦帯を置く辺を返し、変わったら知らせる。
+  private static func registerVerticalBarEdge(with registrar: FlutterPluginRegistrar) {
+    let channel = FlutterMethodChannel(
+      name: "jp.flutterkaigi.conf2026/vertical_bar_edge",
+      binaryMessenger: registrar.messenger()
+    )
+    var observing = false
+    channel.setMethodCallHandler { [weak registrar] call, result in
+      guard call.method == "edge" else {
+        result(FlutterMethodNotImplemented)
+        return
+      }
+      guard #available(iOS 27.1, *), let viewController = registrar?.viewController else {
+        result(nil)
+        return
+      }
+      if !observing {
+        observing = true
+        _ = viewController.registerForTraitChanges(UITraitCollection.systemTraitsAffectingVerticalBarEdge) {
+          (viewController: UIViewController, _: UITraitCollection) in
+          channel.invokeMethod("edgeChanged", arguments: AppDelegate.name(of: viewController.traitCollection.verticalBarEdge))
+        }
+      }
+      result(AppDelegate.name(of: viewController.traitCollection.verticalBarEdge))
+    }
+  }
+
+  @available(iOS 27.1, *)
+  private static func name(of edge: UIVerticalBarEdge) -> String {
+    switch edge {
+    case .leading:
+      return "leading"
+    case .trailing:
+      return "trailing"
+    default:
+      return "unspecified"
+    }
   }
 
   // iPhone Duo の縦帯にはカメラ穴が入り、端末の向きによって上端にも下端にも来る。Flutter はこの位置を

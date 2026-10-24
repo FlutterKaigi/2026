@@ -1,3 +1,4 @@
+import 'package:app/core/util/system_vertical_bar.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -25,6 +26,13 @@ enum VerticalBarEdge {
     };
   }
 
-  /// Returns the edge holding the vertical bar in [context], if any.
-  static VerticalBarEdge? of(BuildContext context) => fromPadding(MediaQuery.paddingOf(context));
+  /// Returns the edge holding the vertical bar in [context], if any. When
+  /// UIKit says there is no vertical bar ([SystemVerticalBarScope]), the safe
+  /// area is not taken for one, whatever its shape.
+  static VerticalBarEdge? of(BuildContext context) {
+    if (SystemVerticalBarScope.usesVerticalBarOf(context) == false) {
+      return null;
+    }
+    return fromPadding(MediaQuery.paddingOf(context));
+  }
 }
