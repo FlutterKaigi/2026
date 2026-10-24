@@ -33,7 +33,7 @@ fvm dart pub get
 fvm dart run melos bootstrap
 ```
 
-The pinned Flutter version is `3.47.0` (see `.fvmrc`).
+The pinned Flutter version is `3.47.8` (see `.fvmrc`).
 
 ## Common commands
 
