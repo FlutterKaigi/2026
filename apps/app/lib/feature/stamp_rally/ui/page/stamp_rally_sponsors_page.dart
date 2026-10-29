@@ -2,7 +2,6 @@ import 'package:app/core/extension/locale_map_extension.dart';
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/router/router.dart';
 import 'package:app/core/ui/widget/app_error_view.dart';
-import 'package:app/core/ui/widget/app_network_image.dart';
 import 'package:app/core/ui/widget/app_page_content.dart';
 import 'package:app/feature/auth/ui/widget/authenticated_body.dart';
 import 'package:app/feature/auth/ui/widget/centered_sign_in_card.dart';
@@ -105,70 +104,33 @@ class _SponsorStampTile extends StatelessWidget {
     final t = Translations.of(context);
     final theme = Theme.of(context);
     final name = sponsor?.name.resolve(Localizations.localeOf(context)).trim();
-    final logoUrl = sponsor?.primaryLogoUrl?.trim();
     final time = acquiredAt;
     final statusColor = time == null ? theme.colorScheme.onSurfaceVariant : theme.colorScheme.primary;
-    const logoFallback = Icon(Icons.storefront_outlined, color: Colors.black54);
 
     return Card.outlined(
       key: ValueKey('stamp-sponsor-$id'),
       margin: EdgeInsets.zero,
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: Row(
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ExcludeSemantics(
-              child: Container(
-                width: 64,
-                height: 64,
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8)),
-                child: logoUrl == null || logoUrl.isEmpty
-                    ? logoFallback
-                    : AppNetworkImage(
-                        imageUrl: logoUrl,
-                        fit: BoxFit.contain,
-                        errorBuilder: (_, _, _) => logoFallback,
-                      ),
-              ),
+            Text(
+              name == null || name.isEmpty ? t.stampRally.sponsorUnavailable(id: id) : name,
+              style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
             ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    name == null || name.isEmpty ? t.stampRally.sponsorUnavailable(id: id) : name,
-                    style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Icon(
-                        time == null ? Icons.radio_button_unchecked : Icons.check_circle,
-                        size: 18,
-                        color: statusColor,
-                      ),
-                      const SizedBox(width: 6),
-                      Flexible(
-                        child: Text(
-                          time == null ? t.stampRally.notAcquired : t.stampRally.acquired,
-                          style: theme.textTheme.labelLarge?.copyWith(color: statusColor),
-                        ),
-                      ),
-                    ],
-                  ),
-                  if (time != null) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      t.stampRally.sponsorAcquiredAt(date: formatStampRallyTime(context, time)),
-                      style: theme.textTheme.bodySmall,
-                    ),
-                  ],
-                ],
-              ),
+            const SizedBox(height: 8),
+            Text(
+              time == null ? t.stampRally.notAcquired : t.stampRally.acquired,
+              style: theme.textTheme.labelLarge?.copyWith(color: statusColor),
             ),
+            if (time != null) ...[
+              const SizedBox(height: 4),
+              Text(
+                t.stampRally.sponsorAcquiredAt(date: formatStampRallyTime(context, time)),
+                style: theme.textTheme.bodySmall,
+              ),
+            ],
           ],
         ),
       ),
