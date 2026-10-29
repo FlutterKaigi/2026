@@ -210,7 +210,6 @@ RouteBase get $appShellRoute => StatefulShellRouteData.$route(
                 ),
                 GoRouteData.$route(
                   path: ':eventId/check-in/:code',
-                  hasOverriddenOnExit: false,
                   factory: $QuizCheckInLinkRoute._fromState,
                 ),
               ],
@@ -221,7 +220,6 @@ RouteBase get $appShellRoute => StatefulShellRouteData.$route(
             ),
             GoRouteData.$route(
               path: 'support-lt/:code',
-              hasOverriddenOnExit: false,
               factory: $SupportLtLinkRoute._fromState,
             ),
             GoRouteData.$route(
@@ -235,6 +233,10 @@ RouteBase get $appShellRoute => StatefulShellRouteData.$route(
                 GoRouteData.$route(
                   path: 'scan',
                   factory: $StampRallyScanRoute._fromState,
+                ),
+                GoRouteData.$route(
+                  path: 'sponsors',
+                  factory: $StampRallySponsorsRoute._fromState,
                 ),
               ],
             ),
@@ -549,10 +551,16 @@ mixin $AccountRoute on GoRouteData {
 }
 
 mixin $EmailSignInRoute on GoRouteData {
-  static EmailSignInRoute _fromState(GoRouterState state) => const EmailSignInRoute();
+  static EmailSignInRoute _fromState(GoRouterState state) =>
+      EmailSignInRoute(returnTo: state.uri.queryParameters['return-to']);
+
+  EmailSignInRoute get _self => this as EmailSignInRoute;
 
   @override
-  String get location => GoRouteData.$location('/account/email');
+  String get location => GoRouteData.$location(
+    '/account/email',
+    queryParams: {if (_self.returnTo != null) 'return-to': _self.returnTo},
+  );
 
   @override
   void go(BuildContext context) => context.go(location);
@@ -648,8 +656,10 @@ mixin $QuizRoute on GoRouteData {
 }
 
 mixin $QuizCheckInLinkRoute on GoRouteData {
-  static QuizCheckInLinkRoute _fromState(GoRouterState state) =>
-      QuizCheckInLinkRoute(eventId: state.pathParameters['eventId']!, code: state.pathParameters['code']!);
+  static QuizCheckInLinkRoute _fromState(GoRouterState state) => QuizCheckInLinkRoute(
+    eventId: state.pathParameters['eventId']!,
+    code: state.pathParameters['code']!,
+  );
 
   QuizCheckInLinkRoute get _self => this as QuizCheckInLinkRoute;
 
@@ -756,6 +766,25 @@ mixin $StampRallyScanRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/account/stamp-rally/scan');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) => context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $StampRallySponsorsRoute on GoRouteData {
+  static StampRallySponsorsRoute _fromState(GoRouterState state) => const StampRallySponsorsRoute();
+
+  @override
+  String get location => GoRouteData.$location('/account/stamp-rally/sponsors');
 
   @override
   void go(BuildContext context) => context.go(location);

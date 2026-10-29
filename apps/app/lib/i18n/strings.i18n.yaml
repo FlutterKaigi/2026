@@ -433,6 +433,13 @@ stampRally:
   signInRequired: スタンプを集めるにはサインインしてください
   description: スポンサーブースでQRコードを読み取ってスタンプを集めましょう
   scanButton: QRコードを読み取る
+  sponsorsButton: スポンサー別のスタンプ押下状況を見る
+  sponsorsTitle: スタンプ押下状況
+  sponsorsDescription: どのスポンサーのスタンプを押したか確認できます
+  sponsorsSignInRequired: スタンプ押下状況を確認するにはサインインしてください
+  sponsorsEmpty: 対象のスポンサーはまだありません
+  sponsorUnavailable: スポンサー（$id）
+  sponsorAcquiredAt: 獲得日時 $date
   lumaTicketButton: Lumaでチケットを開く
   lumaTicketDescription: "景品交換時は、LumaのチケットQRを\nスタッフに提示してください"
   closed: 現在スタンプは獲得できません。景品の交換とクレーンゲームは利用できます

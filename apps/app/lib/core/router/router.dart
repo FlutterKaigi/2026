@@ -33,6 +33,7 @@ import 'package:app/feature/staff/ui/page/staff_member_list_page.dart';
 import 'package:app/feature/stamp_rally/ui/page/stamp_rally_link_page.dart';
 import 'package:app/feature/stamp_rally/ui/page/stamp_rally_page.dart';
 import 'package:app/feature/stamp_rally/ui/page/stamp_rally_scan_page.dart';
+import 'package:app/feature/stamp_rally/ui/page/stamp_rally_sponsors_page.dart';
 import 'package:app/feature/support_lt/ui/page/support_lt_page.dart';
 import 'package:app/feature/venue_events/ui/page/venue_events_page.dart';
 import 'package:app/feature/venue_map/ui/page/venue_map_page.dart';

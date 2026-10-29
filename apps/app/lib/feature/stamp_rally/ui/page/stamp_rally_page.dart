@@ -96,6 +96,12 @@ class _StampRallyBody extends ConsumerWidget {
             label: Text(t.stampRally.scanButton),
           ),
           const SizedBox(height: 12),
+          OutlinedButton.icon(
+            onPressed: () => const StampRallySponsorsRoute().push<void>(context),
+            icon: const Icon(Icons.fact_check_outlined),
+            label: Text(t.stampRally.sponsorsButton),
+          ),
+          const SizedBox(height: 12),
           const StampRallyTicketLink(),
           if (!currentSettings.isOpen) ...[
             const SizedBox(height: 12),

@@ -432,6 +432,13 @@ stampRally:
   signInRequired: Sign in to collect stamps
   description: Scan the QR codes at sponsor booths to collect stamps
   scanButton: Scan QR code
+  sponsorsButton: View stamps by sponsor
+  sponsorsTitle: Stamps by sponsor
+  sponsorsDescription: See which sponsors you have collected stamps from
+  sponsorsSignInRequired: Sign in to see your stamp collection by sponsor
+  sponsorsEmpty: No participating sponsors yet
+  sponsorUnavailable: Sponsor ($id)
+  sponsorAcquiredAt: Collected at $date
   lumaTicketButton: Open ticket in Luma
   lumaTicketDescription: Show your Luma ticket QR code to the staff when collecting prizes
   closed: Stamps are not available right now. Prizes and the crane game are still available

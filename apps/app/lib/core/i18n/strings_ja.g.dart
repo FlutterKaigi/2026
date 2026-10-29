@@ -1052,6 +1052,27 @@ class Translations$stampRally$ja {
 	/// ja: 'QRコードを読み取る'
 	String get scanButton => 'QRコードを読み取る';
 
+	/// ja: 'スポンサー別のスタンプ押下状況を見る'
+	String get sponsorsButton => 'スポンサー別のスタンプ押下状況を見る';
+
+	/// ja: 'スタンプ押下状況'
+	String get sponsorsTitle => 'スタンプ押下状況';
+
+	/// ja: 'どのスポンサーのスタンプを押したか確認できます'
+	String get sponsorsDescription => 'どのスポンサーのスタンプを押したか確認できます';
+
+	/// ja: 'スタンプ押下状況を確認するにはサインインしてください'
+	String get sponsorsSignInRequired => 'スタンプ押下状況を確認するにはサインインしてください';
+
+	/// ja: '対象のスポンサーはまだありません'
+	String get sponsorsEmpty => '対象のスポンサーはまだありません';
+
+	/// ja: 'スポンサー（$id）'
+	String sponsorUnavailable({required Object id}) => 'スポンサー（${id}）';
+
+	/// ja: '獲得日時 $date'
+	String sponsorAcquiredAt({required Object date}) => '獲得日時 ${date}';
+
 	/// ja: 'Lumaでチケットを開く'
 	String get lumaTicketButton => 'Lumaでチケットを開く';
 
@@ -3245,6 +3266,13 @@ extension on Translations {
 			'stampRally.signInRequired' => 'スタンプを集めるにはサインインしてください',
 			'stampRally.description' => 'スポンサーブースでQRコードを読み取ってスタンプを集めましょう',
 			'stampRally.scanButton' => 'QRコードを読み取る',
+			'stampRally.sponsorsButton' => 'スポンサー別のスタンプ押下状況を見る',
+			'stampRally.sponsorsTitle' => 'スタンプ押下状況',
+			'stampRally.sponsorsDescription' => 'どのスポンサーのスタンプを押したか確認できます',
+			'stampRally.sponsorsSignInRequired' => 'スタンプ押下状況を確認するにはサインインしてください',
+			'stampRally.sponsorsEmpty' => '対象のスポンサーはまだありません',
+			'stampRally.sponsorUnavailable' => ({required Object id}) => 'スポンサー（${id}）',
+			'stampRally.sponsorAcquiredAt' => ({required Object date}) => '獲得日時 ${date}',
 			'stampRally.lumaTicketButton' => 'Lumaでチケットを開く',
 			'stampRally.lumaTicketDescription' => '景品交換時は、LumaのチケットQRを\nスタッフに提示してください',
 			'stampRally.closed' => '現在スタンプは獲得できません。景品の交換とクレーンゲームは利用できます',
@@ -3376,6 +3404,8 @@ extension on Translations {
 			'supportLt.permissionDenied' => '参加登録が許可されていません。運営に確認してください',
 			'supportLt.registrationFailed' => '参加登録できませんでした。もう一度お試しください',
 			'countryRegion.asia' => 'アジア',
+			_ => null,
+		} ?? switch (path) {
 			'countryRegion.oceania' => 'オセアニア',
 			'countryRegion.americas' => '北米・中南米',
 			'countryRegion.europe' => 'ヨーロッパ',
@@ -3383,8 +3413,6 @@ extension on Translations {
 			'settings.title' => '設定',
 			'settings.appearance' => '表示設定',
 			'settings.appInfo' => 'アプリ情報',
-			_ => null,
-		} ?? switch (path) {
 			'settings.version' => 'バージョン',
 			'settings.saveError' => '設定を保存できませんでした',
 			'settings.themeMode.title' => 'テーマ',

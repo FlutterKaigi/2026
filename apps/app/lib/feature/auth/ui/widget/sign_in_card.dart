@@ -37,10 +37,19 @@ const signInCardMaxWidth = signInMethodButtonMaxWidth + brandHeaderCardPadding *
 /// attendee (such as Support LT registration opened from a shared link), so
 /// attendees can sign in where they are.
 class SignInCard extends HookConsumerWidget {
-  const SignInCard({required this.title, required this.description, this.showsBrandHeader = true, super.key});
+  const SignInCard({
+    required this.title,
+    required this.description,
+    this.showsBrandHeader = true,
+    this.returnTo,
+    super.key,
+  });
 
   final String title;
   final String description;
+
+  /// An explicit destination for email sign-in, retained in the URL on reload.
+  final String? returnTo;
 
   /// Whether the card is topped by the brand band. Without it, the card is a
   /// compact outlined card that fills the available width, for a page that
@@ -91,7 +100,7 @@ class SignInCard extends HookConsumerWidget {
         const SizedBox(height: 8),
       ],
       OutlinedButton(
-        onPressed: isProcessing.value ? null : () async => const EmailSignInRoute().push<void>(context),
+        onPressed: isProcessing.value ? null : () async => EmailSignInRoute(returnTo: returnTo).push<void>(context),
         style: OutlinedButton.styleFrom(
           minimumSize: const Size.fromHeight(signInMethodButtonHeight),
           maximumSize: const Size.fromHeight(signInMethodButtonHeight),

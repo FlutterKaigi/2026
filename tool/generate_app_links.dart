@@ -96,7 +96,15 @@ void generateAppLinks({
       'details': [
         {
           'appID': '$teamId.$bundleId',
-          'paths': ['NOT /.well-known/*', '/', '/*'],
+          // Sponsor history stays in the browser, including trailing slashes.
+          // AASA uses the first matching path, so exclusions precede `/*`.
+          'paths': [
+            'NOT /.well-known/*',
+            'NOT /account/stamp-rally/sponsors',
+            'NOT /account/stamp-rally/sponsors/*',
+            '/',
+            '/*',
+          ],
         },
       ],
     },

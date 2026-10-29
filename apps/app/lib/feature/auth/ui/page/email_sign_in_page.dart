@@ -2,6 +2,7 @@ import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/router/router.dart';
 import 'package:app/core/ui/widget/app_scrollbar.dart';
 import 'package:app/feature/auth/data/provider/auth_repository.dart';
+import 'package:app/feature/auth/data/provider/auth_state.dart';
 import 'package:app/feature/auth/ui/auth_error_message.dart';
 import 'package:data/user.dart';
 import 'package:flutter/material.dart';
@@ -14,10 +15,15 @@ enum _EmailAuthMode { signIn, createAccount }
 
 /// Email/password sign-in, account creation, and password reset.
 class EmailSignInPage extends HookConsumerWidget {
-  const EmailSignInPage({super.key});
+  const EmailSignInPage({this.returnTo, super.key});
+
+  final String? returnTo;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Keep the auth subscription active while the pages below this form are
+    // paused, including when this URL is loaded without a previous page.
+    ref.watch(authStateChangesProvider);
     final t = Translations.of(context);
     final theme = Theme.of(context);
     final formKey = useMemoized(GlobalKey<FormState>.new);
@@ -60,7 +66,11 @@ class EmailSignInPage extends HookConsumerWidget {
     // 画面は新しいシェルに 1 枚だけで載り Navigator では戻れないため、GoRouter に
     // 尋ねる。どこにも戻れないときだけアカウントタブへ移る。
     void back() {
-      if (context.canPop()) {
+      // Only the supported, read-only destination may be supplied through the
+      // URL. Rebuild its route after a reload has discarded the pushed stack.
+      if (returnTo == const StampRallySponsorsRoute().location) {
+        const StampRallySponsorsRoute().go(context);
+      } else if (context.canPop()) {
         context.pop();
       } else {
         const AccountRoute().go(context);
