@@ -103,6 +103,17 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     icon: Image.asset('assets/g-logo.png', width: 20, height: 20, excludeFromSemantics: true),
                     label: const Text('Google でログイン'),
                   ),
+                  const SizedBox(height: 12),
+                  FilledButton.icon(
+                    onPressed: _busy ? null : () => _run(ref.read(authRepositoryProvider).signInWithApple),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: theme.brightness == Brightness.dark ? Colors.white : Colors.black,
+                      foregroundColor: theme.brightness == Brightness.dark ? Colors.black : Colors.white,
+                      minimumSize: const Size.fromHeight(44),
+                    ),
+                    icon: const ExcludeSemantics(child: Icon(Icons.apple)),
+                    label: const Text('Appleでサインイン'),
+                  ),
                   const Padding(
                     padding: EdgeInsets.symmetric(vertical: 20),
                     child: Row(
@@ -170,7 +181,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     ),
                   const SizedBox(height: 24),
                   Text(
-                    'Apple でログインした方は、iOS の公式アプリでスタンプ数・景品の交換状況をご確認ください。\nこのページではスタンプの取得・景品の交換操作は行えません。',
+                    'このページではスタンプの取得・景品の交換操作は行えません。',
                     textAlign: TextAlign.center,
                     style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                   ),
@@ -187,7 +198,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 String? authErrorMessage(FirebaseAuthException error) => switch (error.code) {
   'popup-closed-by-user' || 'cancelled-popup-request' || 'canceled' => null,
   'invalid-email' => 'メールアドレスの形式を確認してください。',
-  'invalid-credential' || 'user-not-found' || 'wrong-password' => 'メールアドレスまたはパスワードが正しくありません。',
+  'invalid-credential' => 'ログイン情報を確認して、再度お試しください。',
+  'user-not-found' || 'wrong-password' => 'メールアドレスまたはパスワードが正しくありません。',
   'user-disabled' => 'このアカウントは無効になっています。',
   'too-many-requests' => '操作が集中しています。しばらく待ってから再試行してください。',
   'network-request-failed' => '通信に失敗しました。ネットワーク接続を確認してください。',

@@ -58,10 +58,10 @@ final class FirebaseAuthRepository implements AuthRepository {
 
   @override
   Future<void> signInWithApple() {
-    if (kIsWeb || defaultTargetPlatform != TargetPlatform.iOS) {
-      throw UnsupportedError('AppleサインインはiOSでのみ利用できます');
+    if (!kIsWeb && defaultTargetPlatform != TargetPlatform.iOS) {
+      throw UnsupportedError('AppleサインインはiOSとWebでのみ利用できます');
     }
-    return _auth.signInWithProvider(_appleProvider());
+    return _signInWithOAuth(_appleProvider());
   }
 
   GoogleAuthProvider _googleProvider() {
@@ -108,8 +108,8 @@ final class FirebaseAuthRepository implements AuthRepository {
     return GoogleAuthProvider.credential(idToken: idToken);
   });
 
-  /// GoogleはWebではポップアップ、iOSとAndroidのAuth Emulatorでは
-  /// signInWithProviderでサインインする。
+  /// OAuth は Web ではポップアップ、対応するモバイル環境では
+  /// signInWithProvider でサインインする。
   ///
   /// Auth Emulator接続時は全プラットフォームでEmulatorの擬似IdP画面が
   /// 開く。
@@ -159,7 +159,6 @@ final class FirebaseAuthRepository implements AuthRepository {
     final providerIds = user.providerData.map((info) => info.providerId).toSet();
     final usesApple = providerIds.contains(AppleAuthProvider.PROVIDER_ID);
     if (usesApple && (kIsWeb || defaultTargetPlatform != TargetPlatform.iOS)) {
-      // Web / Android のApple OAuthを開始するとServices IDが必要になる。
       // Apple連携済みアカウントの削除とトークン失効はiOSからだけ行う。
       throw FirebaseAuthException(
         code: 'apple-token-revocation-failed',
