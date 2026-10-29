@@ -1,5 +1,5 @@
 name: flutterkaigi_2026
-description: FlutterKaigi 2026 monorepo workspace (website + app + dashboard).
+description: FlutterKaigi 2026 monorepo workspace (website + app + dashboard + stamp rally viewer).
 publish_to: none
 
 environment:
@@ -9,6 +9,7 @@ workspace:
   - apps/website
   - apps/app
   - apps/dashboard
+  - apps/stamp_rally_viewer
   - packages/data
   - packages/flutterkaigi_lints
 
@@ -41,13 +42,17 @@ melos:
       run: fvm dart run melos exec --scope=dashboard -- fvm flutter analyze .
       description: Run flutter analyze on the dashboard app
 
+    analyze:stamp_rally_viewer:
+      run: fvm dart run melos exec --scope=stamp_rally_viewer -- fvm flutter analyze .
+      description: Run flutter analyze on the stamp rally viewer web app
+
     analyze:data:
       run: fvm dart run melos exec --scope=data -- fvm flutter analyze .
       description: Run flutter analyze on the data package
 
     analyze:
-      run: fvm dart run melos run analyze:website && fvm dart run melos run analyze:app && fvm dart run melos run analyze:dashboard && fvm dart run melos run analyze:data
-      description: Analyze all packages (website + app + dashboard + shared packages)
+      run: fvm dart run melos run analyze:website && fvm dart run melos run analyze:app && fvm dart run melos run analyze:dashboard && fvm dart run melos run analyze:stamp_rally_viewer && fvm dart run melos run analyze:data
+      description: Analyze all applications and shared packages
 
     format:
       run: fvm dart run melos exec -- fvm dart format .
@@ -81,13 +86,17 @@ melos:
       run: fvm dart run melos exec --scope=dashboard --dir-exists=test -- fvm flutter test
       description: Run tests in the dashboard app (uses flutter test for widget tests)
 
+    test:stamp_rally_viewer:
+      run: fvm dart run melos exec --scope=stamp_rally_viewer --dir-exists=test -- fvm flutter test
+      description: Run tests in the stamp rally viewer web app
+
     test:data:
       run: fvm dart run melos exec --scope=data --dir-exists=test -- fvm flutter test
       description: Run tests in the data package
 
     test:
-      run: fvm dart run melos run test:website && fvm dart run melos run test:app && fvm dart run melos run test:dashboard && fvm dart run melos run test:data
-      description: Run all tests (website + app + dashboard + shared packages)
+      run: fvm dart run melos run test:website && fvm dart run melos run test:app && fvm dart run melos run test:dashboard && fvm dart run melos run test:stamp_rally_viewer && fvm dart run melos run test:data
+      description: Run all application and shared package tests
 
     website:serve:
       run: fvm dart run melos run sponsors:generate && fvm dart run melos run staff:generate && fvm dart run melos run news:generate && fvm dart run melos run sessions:generate && fvm dart run melos exec --scope=website -- fvm dart run jaspr_cli:jaspr serve
@@ -102,6 +111,30 @@ melos:
         fvm dart run melos run website:build \
         && deno run --no-prompt -N -R=apps/website/build/jaspr jsr:@std/http/file-server ./apps/website/build/jaspr
       description: Build the jaspr website and serve the built files with a simple file server (requires Deno to be installed)
+
+    stamp_rally_viewer:run:dev:
+      run: fvm dart run melos exec --scope=stamp_rally_viewer -- fvm flutter run -d chrome --dart-define-from-file=environments/.env.dev
+      description: Run the stamp rally viewer web app with Firebase emulators
+
+    stamp_rally_viewer:run:stg:
+      run: fvm dart run melos exec --scope=stamp_rally_viewer -- fvm flutter run -d chrome --dart-define-from-file=environments/.env.stg
+      description: Run the stamp rally viewer web app with staging Firebase settings
+
+    stamp_rally_viewer:run:prod:
+      run: fvm dart run melos exec --scope=stamp_rally_viewer -- fvm flutter run -d chrome --dart-define-from-file=environments/.env.prod
+      description: Run the stamp rally viewer web app with production Firebase settings
+
+    stamp_rally_viewer:build:dev:
+      run: fvm dart run melos exec --scope=stamp_rally_viewer -- fvm flutter build web --dart-define-from-file=environments/.env.dev
+      description: Build the stamp rally viewer web app for local emulator verification
+
+    stamp_rally_viewer:build:stg:
+      run: fvm dart run melos exec --scope=stamp_rally_viewer -- fvm flutter build web --dart-define-from-file=environments/.env.stg --dart-define=APP_CHECK_SITE_KEY="$APP_CHECK_SITE_KEY"
+      description: Build the stamp rally viewer web app for staging (requires generated Firebase settings and APP_CHECK_SITE_KEY)
+
+    stamp_rally_viewer:build:prod:
+      run: fvm dart run melos exec --scope=stamp_rally_viewer -- fvm flutter build web --dart-define-from-file=environments/.env.prod --dart-define=APP_CHECK_SITE_KEY="$APP_CHECK_SITE_KEY"
+      description: Build the stamp rally viewer web app for production (requires generated Firebase settings and APP_CHECK_SITE_KEY)
 
     dashboard:run:dev:
       run: fvm dart run melos exec --scope=dashboard -- fvm flutter run -d chrome --dart-define=FLAVOR=dev

@@ -1,0 +1,32 @@
+name: stamp_rally_viewer
+description: FlutterKaigi 2026 stamp rally status viewer.
+publish_to: none
+version: 1.0.0+1
+resolution: workspace
+
+environment:
+  sdk: ">=3.13.0 <4.0.0"
+  flutter: ">=3.47.8"
+
+dependencies:
+  data:
+    path: ../../packages/data
+  firebase_app_check: ^0.4.9
+  firebase_core: ^4.15.1
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  hooks_riverpod: ^3.3.2
+  intl: ^0.20.2
+
+dev_dependencies:
+  flutter_lints: ^6.0.0
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/g-logo.png
+    - assets/shuriken-logo.png

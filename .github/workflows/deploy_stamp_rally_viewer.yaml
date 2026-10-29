@@ -1,0 +1,126 @@
+name: Deploy Stamp Rally Viewer
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: スタンプラリー状況確認アプリの配布先
+        type: choice
+        options: [stg, prod]
+        default: stg
+
+concurrency:
+  group: deploy-stamp-rally-viewer-${{ inputs.environment }}
+  cancel-in-progress: false
+
+permissions: {}
+
+defaults:
+  run:
+    shell: bash -euo pipefail {0}
+
+jobs:
+  validate:
+    uses: ./.github/workflows/ci_stamp_rally_viewer.yaml
+    permissions:
+      contents: read
+
+  deploy:
+    needs: validate
+    if: ${{ github.ref == 'refs/heads/main' }}
+    name: Stamp Rally Viewer (${{ inputs.environment }})
+    environment:
+      name: app-website
+      deployment: ${{ inputs.environment == 'prod' }}
+      url: ${{ inputs.environment == 'prod' && 'https://2026-stamp-rally-viewer.flutterkaigi.jp' || 'https://flutterkaigi-2026-stamp-rally-viewer-stg.flutterkaigi.workers.dev' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      DEPLOY_ENVIRONMENT: ${{ inputs.environment }}
+      FIREBASE_PROJECT_ID: ${{ vars[format('{0}_FIREBASE_PROJECT_ID', inputs.environment == 'stg' && 'STG' || 'PROD')] }}
+      FIREBASE_WEB_APP_ID: ${{ vars[format('{0}_APP_FIREBASE_WEB_APP_ID', inputs.environment == 'stg' && 'STG' || 'PROD')] }}
+      APP_CHECK_SITE_KEY: ${{ vars[format('{0}_APP_CHECK_SITE_KEY', inputs.environment == 'stg' && 'STG' || 'PROD')] }}
+      GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ vars[format('GCP_WORKLOAD_IDENTITY_PROVIDER_{0}', inputs.environment == 'stg' && 'STG' || 'PROD')] }}
+      GCP_SERVICE_ACCOUNT: ${{ vars[format('GCP_SERVICE_ACCOUNT_{0}', inputs.environment == 'stg' && 'STG' || 'PROD')] }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - uses: ./.github/actions/setup-flutter
+
+      - name: Validate delivery configuration
+        run: |
+          case "$DEPLOY_ENVIRONMENT" in
+            stg|prod) ;;
+            *) echo '::error::environment must be stg or prod.'; exit 1 ;;
+          esac
+          for name in FIREBASE_PROJECT_ID FIREBASE_WEB_APP_ID APP_CHECK_SITE_KEY \
+            GCP_WORKLOAD_IDENTITY_PROVIDER GCP_SERVICE_ACCOUNT CLOUDFLARE_ACCOUNT_ID; do
+            if [ -z "${!name}" ]; then
+              echo "::error::$name is not configured. See apps/stamp_rally_viewer/README.md."
+              exit 1
+            fi
+          done
+          expected_project="$(sed -n 's/^FIREBASE_PROJECT_ID=//p' "apps/stamp_rally_viewer/environments/.env.$DEPLOY_ENVIRONMENT")"
+          test "$FIREBASE_PROJECT_ID" = "$expected_project"
+
+      - name: Resolve dependencies
+        run: flutter pub get
+
+      - uses: ./.github/actions/setup-firebase
+        with:
+          project-id: ${{ env.FIREBASE_PROJECT_ID }}
+          workload-identity-provider: ${{ env.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service-account: ${{ env.GCP_SERVICE_ACCOUNT }}
+
+      - name: Generate Firebase SDK settings
+        working-directory: apps/stamp_rally_viewer
+        run: >-
+          flutterfire configure
+          --yes
+          --project="$FIREBASE_PROJECT_ID"
+          --platforms=web
+          --web-app-id="$FIREBASE_WEB_APP_ID"
+          --out=lib/firebase_options.dart
+
+      - name: Verify generated Firebase settings
+        working-directory: apps/stamp_rally_viewer
+        run: |
+          grep -Fq "projectId: '$FIREBASE_PROJECT_ID'" lib/firebase_options.dart
+          grep -Fq "appId: '$FIREBASE_WEB_APP_ID'" lib/firebase_options.dart
+          grep -Fq 'authDomain:' lib/firebase_options.dart
+
+      - name: Build stamp rally viewer web
+        working-directory: apps/stamp_rally_viewer
+        run: >-
+          flutter build web --release
+          --dart-define-from-file="environments/.env.$DEPLOY_ENVIRONMENT"
+          --dart-define=FIREBASE_PROJECT_ID="$FIREBASE_PROJECT_ID"
+          --dart-define=APP_CHECK_SITE_KEY="$APP_CHECK_SITE_KEY"
+
+      - name: Deploy to Cloudflare Workers
+        id: deploy
+        uses: cloudflare/wrangler-action@ebbaa1584979971c8614a24965b4405ff95890e0 # v4.0.0
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ env.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: apps/stamp_rally_viewer
+          command: ${{ inputs.environment == 'prod' && 'deploy' || 'deploy --env stg' }}
+
+      - name: Record deployment
+        env:
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          {
+            echo "### Stamp Rally Viewer $DEPLOY_ENVIRONMENT"
+            echo "Firebase: $FIREBASE_PROJECT_ID; commit: $GITHUB_SHA"
+            echo "Deployment URL: $DEPLOYMENT_URL"
+            if [ "$DEPLOY_ENVIRONMENT" = prod ]; then
+              echo 'URL: https://2026-stamp-rally-viewer.flutterkaigi.jp'
+            else
+              echo 'URL: https://flutterkaigi-2026-stamp-rally-viewer-stg.flutterkaigi.workers.dev'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"

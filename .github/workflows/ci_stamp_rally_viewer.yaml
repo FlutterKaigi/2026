@@ -1,0 +1,68 @@
+name: Stamp Rally Viewer CI
+
+on:
+  pull_request:
+    paths:
+      - apps/stamp_rally_viewer/**
+      - packages/data/**
+      - packages/flutterkaigi_lints/**
+      - .fvmrc
+      - pubspec.yaml
+      - pubspec.lock
+      - analysis_options.yaml
+      - .github/workflows/ci_stamp_rally_viewer.yaml
+      - .github/workflows/deploy_stamp_rally_viewer.yaml
+      - .github/actions/setup-flutter/**
+      - .github/actions/setup-firebase/**
+  workflow_dispatch:
+  workflow_call:
+
+concurrency:
+  group: stamp-rally-viewer-ci-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions: {}
+
+defaults:
+  run:
+    shell: bash -euo pipefail {0}
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - uses: ./.github/actions/setup-flutter
+
+      - name: Prepare Firebase options stub
+        run: cp apps/stamp_rally_viewer/lib/firebase_options.stub.dart apps/stamp_rally_viewer/lib/firebase_options.dart
+
+      - name: Resolve dependencies
+        run: flutter pub get
+
+      - name: Check formatting
+        run: dart format --output=none --set-exit-if-changed apps/stamp_rally_viewer/lib apps/stamp_rally_viewer/test
+
+      - name: Analyze stamp rally viewer
+        working-directory: apps/stamp_rally_viewer
+        run: dart analyze
+
+      - name: Test stamp rally viewer
+        working-directory: apps/stamp_rally_viewer
+        run: flutter test
+
+      - name: Test shared repositories
+        working-directory: packages/data
+        run: flutter test
+
+      - name: Test Web authentication
+        working-directory: packages/data
+        run: flutter test --platform chrome test/auth_repository_web_test.dart
+
+      - name: Build stamp rally viewer web
+        working-directory: apps/stamp_rally_viewer
+        run: flutter build web --release --dart-define-from-file=environments/.env.dev
