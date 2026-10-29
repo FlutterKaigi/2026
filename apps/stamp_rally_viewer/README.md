@@ -18,14 +18,28 @@ Firestore Rules が本人のカードだけを取得できるよう制限して�
 
 ## ログイン
 
-公式アプリでスタンプを集めたときと同じ Google アカウント、またはメールアドレス・パスワードでログインします。
+公式アプリでスタンプを集めたときと同じ Apple アカウント、Google アカウント、またはメールアドレス・パスワードでログインします。
 Firebase のプロジェクト・ユーザー UID が同じため、既存の記録をそのまま参照できます。
 ブラウザのログイン状態はホストごとに保持されるため、公式アプリや別のサブドメインでログイン済みでも、初回はこのサイトでのログインが必要です。
 [Firebase の認証状態の永続化](https://firebase.google.com/docs/auth/web/auth-state-persistence)を参照してください。
 
-既存の `AuthRepository` は Apple サインインを iOS に限定しているため、この Web アプリも Apple サインインには対応していません。
-Apple のみで登録した参加者が Web でも同じ記録を参照するには、Apple Web OAuth と Services ID の設定などを別途追加する必要があります。
+Apple / Google は Firebase のポップアップ認証を使用します。Apple は iOS の Chrome / Safari を含む Web ブラウザで利用でき、OS によるボタンの表示制限はありません。
+ポップアップがブロックされた場合はブラウザで許可し、再度ログインしてください。
 別のアカウントを作成しても元の履歴にはアクセスできません。
+
+### Apple Web 認証の設定
+
+iOS ネイティブの Apple 認証が有効でも、Web 用の OAuth 設定が別途必要です。
+
+1. Apple Developer で Services ID を用意し、公式 iOS アプリと同じ Sign in with Apple の primary App ID に関連付けます。
+2. Services ID に Firebase の認証ドメインと Return URL `https://<Firebase authDomain>/__/auth/handler` を登録します。
+   本番の既定値は `https://flutterkaigi-2026-283db.firebaseapp.com/__/auth/handler` です。
+3. Firebase Authentication の Apple provider に Services ID、Team ID、Key ID、Sign in with Apple 用秘密鍵を設定します。
+   秘密鍵をソースコードや Repository Variables に保存しないでください。
+4. 配布後、公式アプリで使用済みの Apple アカウントでログインし、同じ UID のスタンプ・交換履歴を表示できることを確認します。
+
+設定手順は [Firebase の Apple Web 認証](https://firebase.google.com/docs/auth/web/apple) と
+[Apple の Services ID 設定](https://developer.apple.com/help/account/capabilities/configure-sign-in-with-apple-for-the-web/)を参照してください。
 
 ## ローカル開発
 
@@ -46,7 +60,7 @@ fvm dart run melos run stamp_rally_viewer:run:dev
 dev は `dev-flutterkaigi-2026` の Auth Emulator (`localhost:9099`) と Firestore Emulator (`localhost:8080`) に接続します。
 Emulator UI (`http://localhost:4000`) でメール・パスワードのテストユーザーを作り、その UID の `stampRallyCards` を用意すると履歴を確認できます。
 公式アプリと Functions Emulator でスタンプ獲得から確認する場合は、[公式アプリの開発手順](../app/README.md)に従ってください。
-スタブはメール認証・analyze・test・ビルド用です。Google の擬似 IdP を検証する場合は、既存アプリと同様にメンテナーが有効な Web SDK 設定を生成してから Emulator へ接続します。
+スタブはメール認証・analyze・test・ビルド用です。Apple / Google の擬似 IdP を検証する場合は、既存アプリと同様にメンテナーが有効な Web SDK 設定を生成してから Emulator へ接続します。
 
 ```bash
 fvm dart run melos run analyze:stamp_rally_viewer

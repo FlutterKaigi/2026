@@ -244,6 +244,18 @@ void main() {
     expect(google.events, isEmpty);
   });
 
+  for (final platform in TargetPlatform.values.where((platform) => platform != TargetPlatform.iOS)) {
+    test('native ${platform.name} Apple sign-in remains unsupported', () {
+      debugDefaultTargetPlatformOverride = platform;
+
+      expect(repository.signInWithApple, throwsA(isA<UnsupportedError>()));
+
+      expect(auth.providers, isEmpty);
+      expect(auth.credentials, isEmpty);
+      expect(google.events, isEmpty);
+    });
+  }
+
   test('iOS linked Google and Apple account deletion waits for both reauthentication and Apple revocation', () async {
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
     final user = _User(

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:data/data.dart';
 import 'package:data/user.dart';
 import 'package:flutter/material.dart';
@@ -51,6 +53,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Google でログイン'), findsOneWidget);
+      expect(find.text('Appleでサインイン'), findsOneWidget);
       expect(find.text('ログアウト'), findsNothing);
       expect(stamps.watchedUids, isEmpty);
       expect(sponsors.excludesUnsupportedTiers, isEmpty);
@@ -68,6 +71,73 @@ void main() {
     expect(find.text('attendee@example.com'), findsOneWidget);
     expect(find.text('Google でログイン'), findsNothing);
   });
+
+  testWidgets('Apple login reads the existing account history using its UID even with a relay email', (tester) async {
+    auth.appleUser = FakeUser(uid: 'existing-apple-attendee', email: 'attendee@privaterelay.appleid.com');
+    stamps.cards['existing-apple-attendee'] = StampRallyCard(
+      stamps: {'s1': DateTime.utc(2026, 11, 13)},
+      rewardsRedeemedAt: {1: DateTime.utc(2026, 11, 13, 1)},
+    );
+    await tester.pumpWidget(subject());
+    await tester.pumpAndSettle();
+
+    await tapText(tester, 'Appleでサインイン');
+
+    expect(auth.calls, ['apple']);
+    expect(stamps.watchedUids, ['existing-apple-attendee']);
+    expect(find.text('スポンサー A'), findsOneWidget);
+    expect(find.text('交換済み · 2026/11/13 10:00'), findsOneWidget);
+    expect(find.text('Appleでサインイン'), findsNothing);
+  });
+
+  testWidgets('pending Apple login disables other login actions and does not read private histories', (tester) async {
+    auth.appleSignInGate = Completer<void>();
+    await tester.pumpWidget(subject());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Appleでサインイン'));
+    await tester.pump();
+
+    expect(auth.calls, ['apple']);
+    expect(stamps.watchedUids, isEmpty);
+    expect(find.byType(LinearProgressIndicator), findsOneWidget);
+    for (final label in ['Google でログイン', 'Appleでサインイン', 'メールアドレスでログイン', 'パスワードを忘れた方']) {
+      final button = tester.widget<ButtonStyleButton>(
+        find.ancestor(of: find.text(label), matching: find.bySubtype<ButtonStyleButton>()),
+      );
+      expect(button.onPressed, isNull);
+    }
+
+    auth.appleSignInGate!.complete();
+    await tester.pumpAndSettle();
+    expect(stamps.watchedUids, ['attendee']);
+  });
+
+  for (final error in {
+    'popup-closed-by-user': null,
+    'popup-blocked': 'ブラウザのポップアップを許可して、再度ログインしてください。',
+    'invalid-credential': 'ログイン情報を確認して、再度お試しください。',
+  }.entries) {
+    testWidgets('Apple ${error.key} allows retry without reading private histories', (tester) async {
+      auth.nextError = FirebaseAuthException(code: error.key);
+      await tester.pumpWidget(subject());
+      await tester.pumpAndSettle();
+
+      await tapText(tester, 'Appleでサインイン');
+
+      expect(stamps.watchedUids, isEmpty);
+      expect(find.byType(LinearProgressIndicator), findsNothing);
+      expect(find.text('ログイン処理に失敗しました。時間をおいて再試行してください。'), findsNothing);
+      if (error.value case final message?) {
+        expect(find.text(message), findsOneWidget);
+      }
+
+      await tapText(tester, 'Appleでサインイン');
+
+      expect(auth.calls, ['apple', 'apple']);
+      expect(stamps.watchedUids, ['attendee']);
+    });
+  }
 
   testWidgets('email login trims the address while preserving the password', (tester) async {
     await tester.pumpWidget(subject());

@@ -30,6 +30,8 @@ class FakeAuthRepository extends Fake implements AuthRepository {
   String? lastEmail;
   String? lastPassword;
   String? lastResetEmail;
+  User appleUser = FakeUser();
+  Completer<void>? appleSignInGate;
 
   @override
   User? get currentUser => _user;
@@ -56,6 +58,14 @@ class FakeAuthRepository extends Fake implements AuthRepository {
     calls.add('google');
     _checkError();
     setUser(FakeUser());
+  }
+
+  @override
+  Future<void> signInWithApple() async {
+    calls.add('apple');
+    _checkError();
+    await appleSignInGate?.future;
+    setUser(appleUser);
   }
 
   @override

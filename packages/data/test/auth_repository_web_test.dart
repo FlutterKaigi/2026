@@ -65,6 +65,58 @@ void main() {
     expect(auth.providers, hasLength(1));
   });
 
+  for (final platform in [TargetPlatform.iOS, TargetPlatform.android, TargetPlatform.macOS]) {
+    test('Apple sign-in immediately opens a popup and awaits completion in a ${platform.name} browser', () async {
+      debugDefaultTargetPlatformOverride = platform;
+      auth.signInGate = Completer<UserCredential>();
+      var completed = false;
+
+      final signIn = repository.signInWithApple().then((_) => completed = true);
+
+      final provider = auth.providers.single as AppleAuthProvider;
+      expect(provider.providerId, AppleAuthProvider.PROVIDER_ID);
+      expect(provider.scopes, ['email', 'name']);
+      await Future<void>.delayed(Duration.zero);
+      expect(completed, isFalse);
+
+      auth.signInGate!.complete(_UserCredential());
+      await signIn;
+      expect(completed, isTrue);
+    });
+  }
+
+  for (final code in ['popup-closed-by-user', 'popup-blocked']) {
+    test('Apple $code errors retain the Firebase error contract', () async {
+      final failure = FirebaseAuthException(code: code);
+      auth.signInError = failure;
+
+      await expectLater(repository.signInWithApple(), throwsA(same(failure)));
+
+      expect(auth.providers.single, isA<AppleAuthProvider>());
+    });
+  }
+
+  for (final providerIds in [
+    [AppleAuthProvider.PROVIDER_ID],
+    [GoogleAuthProvider.PROVIDER_ID, AppleAuthProvider.PROVIDER_ID],
+  ]) {
+    test('deleting an account with $providerIds still requires the native iOS app', () async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+      final user = _User(providerIds);
+      auth.currentUser = user;
+
+      await expectLater(
+        repository.deleteAccount(beforeDelete: () async => user.events.add('beforeDelete')),
+        throwsA(isA<FirebaseAuthException>().having((error) => error.code, 'code', 'apple-token-revocation-failed')),
+      );
+
+      expect(user.events, isEmpty);
+      expect(user.providers, isEmpty);
+      expect(auth.providers, isEmpty);
+      expect(auth.currentUser, same(user));
+    });
+  }
+
   test('account deletion waits for popup reauthentication before deleting user data and the account', () async {
     final user = _User()..reauthenticationGate = Completer<UserCredential>();
     auth.currentUser = user;
@@ -159,8 +211,12 @@ class _Auth extends Fake implements FirebaseAuth {
 }
 
 class _User extends Fake implements User {
+  _User([List<String>? providerIds]) : providerIds = providerIds ?? [GoogleAuthProvider.PROVIDER_ID];
+
+  final List<String> providerIds;
+
   @override
-  List<UserInfo> get providerData => [_UserInfo(GoogleAuthProvider.PROVIDER_ID)];
+  List<UserInfo> get providerData => providerIds.map(_UserInfo.new).toList();
 
   final providers = <AuthProvider>[];
   final events = <String>[];
