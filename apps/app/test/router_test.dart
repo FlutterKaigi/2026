@@ -21,7 +21,9 @@ import 'package:app/feature/exchange/ui/page/exchange_share_link_page.dart';
 import 'package:app/feature/profile/data/provider/user_profile_repository.dart';
 import 'package:app/feature/push_notification/data/push_notification_provider.dart';
 import 'package:app/feature/settings/ui/page/settings_page.dart';
+import 'package:app/feature/sponsor/data/provider/sponsor_list_provider.dart';
 import 'package:app/feature/stamp_rally/data/stamp_rally_provider.dart';
+import 'package:app/feature/stamp_rally/ui/page/stamp_rally_sponsors_page.dart';
 import 'package:app/feature/support_lt/data/provider/support_lt_provider.dart';
 import 'package:app/feature/support_lt/ui/page/support_lt_page.dart';
 import 'package:data/data.dart';
@@ -76,6 +78,7 @@ void main() {
     );
     expect(const AccountRoute().location, '/account');
     expect(const EmailSignInRoute().location, '/account/email');
+    expect(const StampRallySponsorsRoute().location, '/account/stamp-rally/sponsors');
     expect(const EventGuideRoute().location, '/guide');
     expect(const VenueEventsRoute().location, '/account/venue-events');
     expect(const SupportLtRoute().location, '/account/support-lt');
@@ -136,6 +139,7 @@ void main() {
           supportLtRepositoryProvider.overrideWithValue(supportLtRepository),
           profileExchangeRepositoryProvider.overrideWithValue(exchangeRepository),
           stampRallyRepositoryProvider.overrideWithValue(stampRallyRepository),
+          sponsorListProvider.overrideWith((ref) => Stream.value(const <Sponsor>[])),
           remoteConfigRepositoryProvider.overrideWithValue(remoteConfig),
           sharedPreferencesProvider.overrideWithValue(preferences),
           pushNotificationRepositoryProvider.overrideWithValue(pushNotifications),
@@ -170,6 +174,7 @@ void main() {
             supportLtRepositoryProvider.overrideWithValue(supportLtRepository),
             profileExchangeRepositoryProvider.overrideWithValue(exchangeRepository),
             stampRallyRepositoryProvider.overrideWithValue(stampRallyRepository),
+            sponsorListProvider.overrideWith((ref) => Stream.value(const <Sponsor>[])),
             remoteConfigRepositoryProvider.overrideWithValue(remoteConfig),
             sharedPreferencesProvider.overrideWithValue(preferences),
             pushNotificationRepositoryProvider.overrideWithValue(pushNotifications),
@@ -403,6 +408,7 @@ void main() {
         '/account/sns-post',
         '/account/stamp-rally',
         '/account/stamp-rally/scan',
+        '/account/stamp-rally/sponsors',
         // プロフィール交換・スタンプラリーのリンクも塞ぐ。
         '/x/v1.other-uid.9999999999.deadbeef',
         '/s/abababababababababababababababababababababababababababababababab',
@@ -427,6 +433,7 @@ void main() {
         '/account/exchange',
         '/account/sns-post',
         '/account/stamp-rally',
+        '/account/stamp-rally/sponsors',
         '/x/v1.other-uid.9999999999.deadbeef',
         '/s/abababababababababababababababababababababababababababababababab',
       ]) {
@@ -495,12 +502,72 @@ void main() {
       expect(preferences.getBool(EventGuideSeenNotifier.preferencesKey), isNull);
     });
 
+    testWidgets('keeps the sponsor status URL when Google sign-in completes', (tester) async {
+      final location = const StampRallySponsorsRoute().location;
+      final router = await pumpRouter(tester, launchRoute: Uri.parse(location));
+
+      expect(find.byType(StampRallySponsorsPage), findsOneWidget);
+      expect(find.byType(SignInCard), findsOneWidget);
+
+      await tester.tap(find.bySemanticsLabel('Google でサインイン'));
+      await tester.pumpAndSettle();
+
+      expect(authRepository.calledMethods, ['signInWithGoogle']);
+      expect(currentPath(router), location);
+      expect(find.byType(StampRallySponsorsPage), findsOneWidget);
+      expect(find.byType(SignInCard), findsNothing);
+    });
+
     group('email sign-in', () {
       Future<void> signInWithEmail(WidgetTester tester) async {
         await tester.enterText(find.byType(TextFormField).at(0), 'attendee@example.com');
         await tester.enterText(find.byType(TextFormField).at(1), 'password123');
         await tester.tap(find.text('サインイン'));
         await tester.pumpAndSettle();
+      }
+
+      testWidgets('returns to sponsor status after signing in from its direct link', (tester) async {
+        final location = const StampRallySponsorsRoute().location;
+        final router = await pumpRouter(tester, launchRoute: Uri.parse(location));
+
+        await tester.tap(find.text('メールアドレスでサインイン'));
+        await tester.pumpAndSettle();
+        expect(currentPath(router), '/account/email');
+        expect(router.routeInformationProvider.value.uri.queryParameters.values, contains(location));
+
+        await signInWithEmail(tester);
+
+        expect(currentPath(router), location);
+        expect(find.byType(StampRallySponsorsPage), findsOneWidget);
+        expect(find.byType(SignInCard), findsNothing);
+      });
+
+      testWidgets('restores sponsor status from the email URL after a reload', (tester) async {
+        final location = const StampRallySponsorsRoute().location;
+        final router = await pumpRouter(
+          tester,
+          launchRoute: Uri.parse(EmailSignInRoute(returnTo: location).location),
+        );
+
+        await signInWithEmail(tester);
+
+        expect(currentPath(router), location);
+        expect(find.byType(StampRallySponsorsPage), findsOneWidget);
+        expect(find.byType(SignInCard), findsNothing);
+      });
+
+      for (final returnTo in ['https://example.com', '//example.com', '/s/untrusted-token', '/account/email']) {
+        testWidgets('ignores unsupported sign-in return destination: $returnTo', (tester) async {
+          final router = await pumpRouter(
+            tester,
+            launchRoute: Uri.parse(EmailSignInRoute(returnTo: returnTo).location),
+          );
+
+          await signInWithEmail(tester);
+
+          expect(currentPath(router), '/account');
+          expect(stampRallyRepository.scannedTokens, isEmpty);
+        });
       }
 
       String futureExchangeToken() {

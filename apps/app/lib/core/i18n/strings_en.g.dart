@@ -551,6 +551,13 @@ class _Translations$stampRally$en extends Translations$stampRally$ja {
 	@override String get signInRequired => 'Sign in to collect stamps';
 	@override String get description => 'Scan the QR codes at sponsor booths to collect stamps';
 	@override String get scanButton => 'Scan QR code';
+	@override String get sponsorsButton => 'View stamps by sponsor';
+	@override String get sponsorsTitle => 'Stamps by sponsor';
+	@override String get sponsorsDescription => 'See which sponsors you have collected stamps from';
+	@override String get sponsorsSignInRequired => 'Sign in to see your stamp collection by sponsor';
+	@override String get sponsorsEmpty => 'No participating sponsors yet';
+	@override String sponsorUnavailable({required Object id}) => 'Sponsor (${id})';
+	@override String sponsorAcquiredAt({required Object date}) => 'Collected at ${date}';
 	@override String get lumaTicketButton => 'Open ticket in Luma';
 	@override String get lumaTicketDescription => 'Show your Luma ticket QR code to the staff when collecting prizes';
 	@override String get closed => 'Stamps are not available right now. Prizes and the crane game are still available';
@@ -1907,6 +1914,13 @@ extension on TranslationsEn {
 			'stampRally.signInRequired' => 'Sign in to collect stamps',
 			'stampRally.description' => 'Scan the QR codes at sponsor booths to collect stamps',
 			'stampRally.scanButton' => 'Scan QR code',
+			'stampRally.sponsorsButton' => 'View stamps by sponsor',
+			'stampRally.sponsorsTitle' => 'Stamps by sponsor',
+			'stampRally.sponsorsDescription' => 'See which sponsors you have collected stamps from',
+			'stampRally.sponsorsSignInRequired' => 'Sign in to see your stamp collection by sponsor',
+			'stampRally.sponsorsEmpty' => 'No participating sponsors yet',
+			'stampRally.sponsorUnavailable' => ({required Object id}) => 'Sponsor (${id})',
+			'stampRally.sponsorAcquiredAt' => ({required Object date}) => 'Collected at ${date}',
 			'stampRally.lumaTicketButton' => 'Open ticket in Luma',
 			'stampRally.lumaTicketDescription' => 'Show your Luma ticket QR code to the staff when collecting prizes',
 			'stampRally.closed' => 'Stamps are not available right now. Prizes and the crane game are still available',
@@ -2038,6 +2052,8 @@ extension on TranslationsEn {
 			'supportLt.permissionDenied' => 'Registration is not permitted. Please ask the organizers',
 			'supportLt.registrationFailed' => 'Could not register your participation. Please try again',
 			'countryRegion.asia' => 'Asia',
+			_ => null,
+		} ?? switch (path) {
 			'countryRegion.oceania' => 'Oceania',
 			'countryRegion.americas' => 'Americas',
 			'countryRegion.europe' => 'Europe',
@@ -2045,8 +2061,6 @@ extension on TranslationsEn {
 			'settings.title' => 'Settings',
 			'settings.appearance' => 'Appearance',
 			'settings.appInfo' => 'App Information',
-			_ => null,
-		} ?? switch (path) {
 			'settings.version' => 'Version',
 			'settings.saveError' => 'Could not save the setting',
 			'settings.themeMode.title' => 'Theme',

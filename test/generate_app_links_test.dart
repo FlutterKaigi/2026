@@ -46,7 +46,7 @@ void main() {
 
   group('generateAppLinks', () {
     for (final environment in ['prod', 'stg']) {
-      test('generates full-route association files for $environment', () {
+      test('generates association files with browser-only sponsor history for $environment', () {
         final variables = variablesFor(environment);
         generateAppLinks(environment: environment, variables: variables, outputDirectory: outputDirectory);
 
@@ -56,7 +56,13 @@ void main() {
             'details': [
               {
                 'appID': 'ABCDE12345.${variables['IOS_BUNDLE_ID']}',
-                'paths': ['NOT /.well-known/*', '/', '/*'],
+                'paths': [
+                  'NOT /.well-known/*',
+                  'NOT /account/stamp-rally/sponsors',
+                  'NOT /account/stamp-rally/sponsors/*',
+                  '/',
+                  '/*',
+                ],
               },
             ],
           },

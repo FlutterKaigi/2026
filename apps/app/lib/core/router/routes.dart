@@ -113,7 +113,10 @@ class StampRallyLinkRoute extends GoRouteData with $StampRallyLinkRoute {
             TypedGoRoute<MissionRoute>(path: 'missions'),
             TypedGoRoute<StampRallyRoute>(
               path: 'stamp-rally',
-              routes: [TypedGoRoute<StampRallyScanRoute>(path: 'scan')],
+              routes: [
+                TypedGoRoute<StampRallyScanRoute>(path: 'scan'),
+                TypedGoRoute<StampRallySponsorsRoute>(path: 'sponsors'),
+              ],
             ),
             TypedGoRoute<SnsPostRoute>(path: 'sns-post'),
             TypedGoRoute<ExchangeHomeRoute>(
@@ -205,10 +208,12 @@ class AccountRoute extends GoRouteData with $AccountRoute {
 
 /// `/account/email` — email/password sign-in and account creation.
 class EmailSignInRoute extends GoRouteData with $EmailSignInRoute {
-  const EmailSignInRoute();
+  const EmailSignInRoute({this.returnTo});
+
+  final String? returnTo;
 
   @override
-  Widget build(BuildContext context, GoRouterState state) => const EmailSignInPage();
+  Widget build(BuildContext context, GoRouterState state) => EmailSignInPage(returnTo: returnTo);
 }
 
 /// `/account/profile` — create or edit the signed-in user's profile.
@@ -311,6 +316,14 @@ class StampRallyScanRoute extends GoRouteData with $StampRallyScanRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) => const StampRallyScanPage();
+}
+
+/// `/account/stamp-rally/sponsors` — stamp collection status for each sponsor.
+class StampRallySponsorsRoute extends GoRouteData with $StampRallySponsorsRoute {
+  const StampRallySponsorsRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const StampRallySponsorsPage();
 }
 
 /// `/account/sns-post` — register a photo post URL and one companion category.

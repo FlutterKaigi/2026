@@ -6,16 +6,17 @@ import 'package:flutter/material.dart';
 /// and scrollable when it doesn't fit on a short screen or at a large text
 /// size.
 class CenteredSignInCard extends StatelessWidget {
-  const CenteredSignInCard({required this.title, required this.description, super.key});
+  const CenteredSignInCard({required this.title, required this.description, this.returnTo, super.key});
 
   final String title;
   final String description;
+  final String? returnTo;
 
   @override
   Widget build(BuildContext context) => AppPageContent(
     maxWidth: signInCardMaxWidth,
     padding: const EdgeInsets.all(24),
     centerVertically: true,
-    child: SignInCard(title: title, description: description),
+    child: SignInCard(title: title, description: description, returnTo: returnTo),
   );
 }
