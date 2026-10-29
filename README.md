@@ -5,6 +5,7 @@ Monorepo for the FlutterKaigi 2026 website, app, and dashboard.
 - `apps/website/` — jaspr static site
 - `apps/app/` — Flutter app (iOS / Android)
 - `apps/dashboard/` — Flutter web app (dashboard)
+- [`apps/stamp_rally_viewer/`](apps/stamp_rally_viewer/README.md) — Flutter web app for signed-in attendees' stamp and prize history
 - `packages/` — shared Dart packages
 
 Managed with [melos](https://melos.invertase.dev/) (v7) on top of Dart pub workspaces, with Flutter pinned by [FVM](https://fvm.app/).

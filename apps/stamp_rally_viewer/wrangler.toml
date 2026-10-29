@@ -1,0 +1,17 @@
+"$schema" = "node_modules/wrangler/config-schema.json"
+name = "flutterkaigi-2026-stamp-rally-viewer"
+compatibility_date = "2026-10-29"
+preview_urls = true
+
+[assets]
+directory = "./build/web"
+not_found_handling = "single-page-application"
+
+[[routes]]
+custom_domain = true
+pattern = "2026-stamp-rally-viewer.flutterkaigi.jp"
+
+[env.stg]
+name = "flutterkaigi-2026-stamp-rally-viewer-stg"
+routes = []
+workers_dev = true
