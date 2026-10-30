@@ -140,7 +140,7 @@ void main() {
   }
 
   Future<void> startClose(WidgetTester tester) async {
-    await tester.tap(find.widgetWithText(OutlinedButton, '締切'));
+    await tester.tap(find.widgetWithText(FilledButton, '締切'));
     await tester.pump();
     await tester.tap(find.widgetWithText(FilledButton, '実行'));
     await tester.pump();
@@ -172,7 +172,7 @@ void main() {
     expect(find.text('第1問の本文'), findsOneWidget);
     expect(find.text('締切 を実行中…'), findsOneWidget, reason: 'operation is still in flight');
     expect(
-      tester.widget<OutlinedButton>(find.widgetWithText(OutlinedButton, '締切')).onPressed,
+      tester.widget<FilledButton>(find.widgetWithText(FilledButton, '締切')).onPressed,
       isNull,
       reason: 'controls stay locked while the first close is unresolved',
     );
