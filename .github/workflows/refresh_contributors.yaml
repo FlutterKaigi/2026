@@ -1,13 +1,10 @@
 name: Refresh Contributors
 
 # コントリビューター一覧 (Firestore `contributors` コレクション) を GitHub API から
-# 日次で更新する。アプリは Firestore を読むだけなので、GitHub API のレート制限が
-# クライアントに影響しない。
+# 更新する。定期実行は止めており、必要なときに手動で実行する。アプリは Firestore を
+# 読むだけなので、GitHub API のレート制限がクライアントに影響しない。
 
 on:
-  schedule:
-    # 毎日 06:00 JST (21:00 UTC)。
-    - cron: "0 21 * * *"
   workflow_dispatch:
 
 concurrency:
