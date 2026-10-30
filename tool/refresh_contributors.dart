@@ -3,8 +3,8 @@
 /// Fetches the contributor list of the repository (default `FlutterKaigi/2026`),
 /// excludes bot accounts, and mirrors the result into Firestore: every current
 /// contributor is upserted (document ID = GitHub login) and documents for
-/// accounts that no longer appear are deleted. Runs daily on GitHub Actions via
-/// `.github/workflows/refresh_contributors.yaml`.
+/// accounts that no longer appear are deleted. Runs manually on GitHub Actions
+/// via `.github/workflows/refresh_contributors.yaml`.
 ///
 /// Run via:
 ///
