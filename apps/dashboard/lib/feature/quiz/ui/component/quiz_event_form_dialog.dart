@@ -7,31 +7,48 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-/// クイズイベントの新規作成ダイアログ。
+/// クイズイベントの新規作成・編集ダイアログ。
 ///
-/// タイトル（日本語 / 英語）・定員・スポンサーの複数選択を受け取り、
+/// 新規作成ではタイトル（日本語 / 英語）・定員・スポンサーの複数選択を受け取り、
 /// `status = draft`（非公開）の新規イベントとして保存する。
-class QuizEventCreateDialog extends HookConsumerWidget {
-  const QuizEventCreateDialog._();
+///
+/// [event] を渡すと編集になり、タイトルと出題スポンサーだけを変更する。
+/// 定員は受付開始後に変えられず、その判定に要る状態をクライアントが持たないため、
+/// 編集では扱わず現在の値をそのまま保存する。
+class QuizEventFormDialog extends HookConsumerWidget {
+  const QuizEventFormDialog._({this.event, this.lockedSponsorIds = const {}});
+
+  /// 編集するイベント。`null` なら新規作成。
+  final QuizEvent? event;
+
+  /// 問題で使用中のため外せないスポンサー。外すと問題のスポンサーが
+  /// イベントに含まれなくなり、本番への反映や問題の編集ができなくなる。
+  final Set<String> lockedSponsorIds;
 
   static Future<void> show({
     required BuildContext context,
     required WidgetRef ref,
+    QuizEvent? event,
+    Set<String> lockedSponsorIds = const {},
   }) async {
     final container = ProviderScope.containerOf(context);
     await showDialog<void>(
       context: context,
-      builder: (_) => UncontrolledProviderScope(container: container, child: const QuizEventCreateDialog._()),
+      builder: (_) => UncontrolledProviderScope(
+        container: container,
+        child: QuizEventFormDialog._(event: event, lockedSponsorIds: lockedSponsorIds),
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final editing = event;
     final formKey = useMemoized(GlobalKey<FormState>.new);
-    final titleJaController = useTextEditingController();
-    final titleEnController = useTextEditingController();
+    final titleJaController = useTextEditingController(text: editing?.title.ja);
+    final titleEnController = useTextEditingController(text: editing?.title.en);
     final capacityController = useTextEditingController(text: '80');
-    final selectedSponsorIds = useState(<String>[]);
+    final selectedSponsorIds = useState(<String>[...?editing?.sponsorIds]);
     final isSaving = useState(false);
 
     final sponsors = ref.watch(quizSponsorListProvider);
@@ -45,11 +62,25 @@ class QuizEventCreateDialog extends HookConsumerWidget {
         // ドロップダウンなど、後段の表示順がこの並びになる）。
         final sponsorList = sponsors.value ?? const <Sponsor>[];
         final orderedIds = _sortIdsByTier(selectedSponsorIds.value, sponsorList);
+        final title = LocaleMap(ja: titleJaController.text.trim(), en: titleEnController.text.trim());
+        if (editing != null) {
+          // ダイアログを開いた後に変わった定員などを古い値で戻さないよう、
+          // 保存時点の最新のイベントに変更点だけを重ねる。
+          final current = ref.read(quizEventProvider(editing.id)).value ?? editing;
+          await ref
+              .read(quizEventRepositoryProvider)
+              .save(current.copyWith(title: title, sponsorIds: orderedIds, updatedAt: now));
+          if (context.mounted) {
+            context.showSnackBar('イベントを更新しました');
+            context.pop();
+          }
+          return;
+        }
         // 作成時点では非公開。アプリへの表示（公開）・受付開始はコンソールで
         // 運営が明示的に行う。
         final event = QuizEvent(
           id: '',
-          title: LocaleMap(ja: titleJaController.text.trim(), en: titleEnController.text.trim()),
+          title: title,
           status: QuizEventStatus.draft,
           capacity: int.parse(capacityController.text.trim()),
           sponsorIds: orderedIds,
@@ -62,14 +93,36 @@ class QuizEventCreateDialog extends HookConsumerWidget {
           context.pop();
         }
       } catch (e) {
-        if (context.mounted) context.showSnackBar('作成に失敗しました: $e');
+        if (context.mounted) context.showSnackBar('${editing == null ? '作成' : '更新'}に失敗しました: $e');
       } finally {
         if (context.mounted) isSaving.value = false;
       }
     }
 
+    void toggleSponsor(String id, bool selected) {
+      final next = [...selectedSponsorIds.value];
+      if (selected) {
+        next.add(id);
+      } else {
+        next.remove(id);
+      }
+      selectedSponsorIds.value = next;
+    }
+
+    Widget sponsorChip(String id, String label) {
+      final selected = selectedSponsorIds.value.contains(id);
+      final locked = selected && lockedSponsorIds.contains(id);
+      return FilterChip(
+        label: Text(label),
+        visualDensity: VisualDensity.compact,
+        tooltip: locked ? '問題で使用中のため外せません' : null,
+        selected: selected,
+        onSelected: locked ? null : (selected) => toggleSponsor(id, selected),
+      );
+    }
+
     return AlertDialog(
-      title: const Text('クイズイベント新規作成'),
+      title: Text(editing == null ? 'クイズイベント新規作成' : 'クイズイベント編集'),
       content: SizedBox(
         width: 460,
         child: Form(
@@ -90,21 +143,23 @@ class QuizEventCreateDialog extends HookConsumerWidget {
                   decoration: const InputDecoration(labelText: 'タイトル（英語）*', border: OutlineInputBorder()),
                   validator: (v) => (v == null || v.trim().isEmpty) ? 'English title is required' : null,
                 ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: capacityController,
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    labelText: '定員（人）*',
-                    helperText: '到達すると新規の参加登録を締め切る',
-                    border: OutlineInputBorder(),
+                if (editing == null) ...[
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: capacityController,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      labelText: '定員（人）*',
+                      helperText: '到達すると新規の参加登録を締め切る',
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: (v) {
+                      final n = int.tryParse((v ?? '').trim());
+                      if (n == null || n < 3 || n > 80) return '3〜80 の整数を入力してください';
+                      return null;
+                    },
                   ),
-                  validator: (v) {
-                    final n = int.tryParse((v ?? '').trim());
-                    if (n == null || n < 3 || n > 80) return '3〜80 の整数を入力してください';
-                    return null;
-                  },
-                ),
+                ],
                 const SizedBox(height: 24),
                 Row(
                   children: [
@@ -118,6 +173,13 @@ class QuizEventCreateDialog extends HookConsumerWidget {
                     ),
                   ],
                 ),
+                if (lockedSponsorIds.isNotEmpty)
+                  Text(
+                    '問題で使用中のスポンサーは外せません。外す場合は先に問題のスポンサーを変更してください。',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
                 const SizedBox(height: 4),
                 // 本番はスポンサー 30 社規模になるため、プラン別に区切って
                 // 探しやすくする。プラン単位の全選択 / 解除も用意する。
@@ -127,52 +189,62 @@ class QuizEventCreateDialog extends HookConsumerWidget {
                     child: Center(child: CircularProgressIndicator()),
                   ),
                   error: (e, _) => Text('スポンサーの取得に失敗しました: $e'),
-                  data: (sponsors) => sponsors.isEmpty
-                      ? const Text('スポンサーが登録されていません')
-                      : Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            for (final entry in _groupByTier(sponsors)) ...[
-                              _TierHeader(
-                                tier: entry.tier,
-                                sponsors: entry.sponsors,
-                                selectedIds: selectedSponsorIds.value,
-                                onToggleAll: (selectAll) {
-                                  final next = {...selectedSponsorIds.value};
-                                  final ids = entry.sponsors.map((s) => s.id);
-                                  if (selectAll) {
-                                    next.addAll(ids);
-                                  } else {
-                                    next.removeAll(ids);
-                                  }
-                                  selectedSponsorIds.value = next.toList();
-                                },
-                              ),
-                              Wrap(
-                                spacing: 8,
-                                runSpacing: 8,
-                                children: [
-                                  for (final sponsor in entry.sponsors)
-                                    FilterChip(
-                                      label: Text(sponsor.name.ja.isEmpty ? sponsor.name.en : sponsor.name.ja),
-                                      visualDensity: VisualDensity.compact,
-                                      selected: selectedSponsorIds.value.contains(sponsor.id),
-                                      onSelected: (selected) {
-                                        final next = [...selectedSponsorIds.value];
-                                        if (selected) {
-                                          next.add(sponsor.id);
-                                        } else {
-                                          next.remove(sponsor.id);
-                                        }
-                                        selectedSponsorIds.value = next;
-                                      },
-                                    ),
-                                ],
-                              ),
-                              const SizedBox(height: 12),
+                  data: (sponsors) {
+                    // 削除済みのスポンサーが設定に残っていても、見えないまま
+                    // 保存し続けないよう ID で表示して外せるようにする。
+                    final knownIds = {for (final s in sponsors) s.id};
+                    final missingIds = selectedSponsorIds.value.where((id) => !knownIds.contains(id)).toList();
+                    if (sponsors.isEmpty && missingIds.isEmpty) return const Text('スポンサーが登録されていません');
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        for (final entry in _groupByTier(sponsors)) ...[
+                          _TierHeader(
+                            tier: entry.tier,
+                            sponsors: entry.sponsors,
+                            selectedIds: selectedSponsorIds.value,
+                            lockedIds: lockedSponsorIds,
+                            onToggleAll: (selectAll) {
+                              final next = {...selectedSponsorIds.value};
+                              final ids = entry.sponsors.map((s) => s.id);
+                              if (selectAll) {
+                                next.addAll(ids);
+                              } else {
+                                next.removeAll(ids.where((id) => !lockedSponsorIds.contains(id)));
+                              }
+                              selectedSponsorIds.value = next.toList();
+                            },
+                          ),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: [
+                              for (final sponsor in entry.sponsors)
+                                sponsorChip(sponsor.id, sponsor.name.ja.isEmpty ? sponsor.name.en : sponsor.name.ja),
                             ],
-                          ],
-                        ),
+                          ),
+                          const SizedBox(height: 12),
+                        ],
+                        if (missingIds.isNotEmpty) ...[
+                          Padding(
+                            padding: const EdgeInsets.only(top: 4, bottom: 6),
+                            child: Text(
+                              '見つからないスポンサー（${missingIds.length} 社）',
+                              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: [for (final id in missingIds) sponsorChip(id, id)],
+                          ),
+                        ],
+                      ],
+                    );
+                  },
                 ),
               ],
             ),
@@ -188,7 +260,7 @@ class QuizEventCreateDialog extends HookConsumerWidget {
           onPressed: isSaving.value ? null : save,
           child: isSaving.value
               ? const SizedBox.square(dimension: 16, child: CircularProgressIndicator(strokeWidth: 2))
-              : const Text('作成'),
+              : Text(editing == null ? '作成' : '保存'),
         ),
       ],
     );
@@ -232,12 +304,16 @@ class _TierHeader extends StatelessWidget {
     required this.tier,
     required this.sponsors,
     required this.selectedIds,
+    required this.lockedIds,
     required this.onToggleAll,
   });
 
   final SponsorTier tier;
   final List<Sponsor> sponsors;
   final List<String> selectedIds;
+
+  /// 「解除」でも外さないスポンサー。
+  final Set<String> lockedIds;
   final ValueChanged<bool> onToggleAll;
 
   static const _tierLabels = {
@@ -254,6 +330,7 @@ class _TierHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final allSelected = sponsors.every((s) => selectedIds.contains(s.id));
+    final removable = sponsors.any((s) => selectedIds.contains(s.id) && !lockedIds.contains(s.id));
     return Padding(
       padding: const EdgeInsets.only(top: 4, bottom: 6),
       child: Row(
@@ -272,7 +349,7 @@ class _TierHeader extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 8),
               textStyle: theme.textTheme.labelSmall,
             ),
-            onPressed: () => onToggleAll(!allSelected),
+            onPressed: allSelected && !removable ? null : () => onToggleAll(!allSelected),
             child: Text(allSelected ? '解除' : '全選択'),
           ),
         ],
