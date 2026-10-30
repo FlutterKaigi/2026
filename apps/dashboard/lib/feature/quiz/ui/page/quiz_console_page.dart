@@ -629,6 +629,17 @@ class _ConsoleBody extends HookConsumerWidget {
                             label: '正解発表',
                             action: () => ops.revealQuestion(eventId, question.id),
                           ),
+                          // 出題前の未出題の問題だけ削除できる。サーバーでも同じ条件を検証する。
+                          onDelete: isPrestart && question.status == QuizQuestionStatus.draft
+                              ? () => confirmAndRun(
+                                  title: '問題を削除',
+                                  message:
+                                      '問題 #${question.order}「${question.title.ja}」を削除します。'
+                                      '正解と解説も削除され、元に戻せません。',
+                                  label: '問題削除',
+                                  action: () => ref.read(quizQuestionRepositoryProvider).delete(eventId, question.id),
+                                )
+                              : null,
                         ),
                     ],
                   ),
@@ -732,6 +743,7 @@ class _QuestionRow extends ConsumerWidget {
     required this.onExtend,
     required this.onClose,
     required this.onReveal,
+    this.onDelete,
     this.nextAction,
   });
 
@@ -747,6 +759,9 @@ class _QuestionRow extends ConsumerWidget {
   final VoidCallback onExtend;
   final VoidCallback onClose;
   final VoidCallback onReveal;
+
+  /// 削除できない問題では `null`。
+  final VoidCallback? onDelete;
 
   /// この問題で次に押すボタン。
   final QuizConsoleAction? nextAction;
@@ -806,33 +821,72 @@ class _QuestionRow extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Row(
-              children: [
-                SizedBox(width: 48, child: Text('#${question.order}', style: Theme.of(context).textTheme.titleMedium)),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final summary = Row(
+                  children: [
+                    SizedBox(
+                      width: 48,
+                      child: Text('#${question.order}', style: Theme.of(context).textTheme.titleMedium),
+                    ),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(question.title.ja, maxLines: 2, overflow: TextOverflow.ellipsis),
+                          Text(
+                            _sponsorLabel(sponsors, question.sponsorId),
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                          if (question.status == QuizQuestionStatus.reading ||
+                              question.status == QuizQuestionStatus.open)
+                            QuizCountdown(
+                              closesAt: question.status == QuizQuestionStatus.open ? question.closesAt : null,
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
+                );
+                final controls = Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    QuizQuestionStatusChip(status: question.status),
+                    const SizedBox(width: 12),
+                    Text('回答 ${answeredCount ?? '…'} / $teamCount'),
+                    IconButton(
+                      tooltip: '編集・詳細',
+                      icon: const Icon(Icons.edit_outlined),
+                      onPressed: () =>
+                          pushEventRoute(context, QuizQuestionEditRoute(eventId, questionId: question.id).location),
+                    ),
+                    if (onDelete != null)
+                      IconButton(
+                        tooltip: '問題を削除',
+                        icon: const Icon(Icons.delete_outline),
+                        color: scheme.error,
+                        onPressed: isBusy ? null : onDelete,
+                      ),
+                  ],
+                );
+                // 狭い画面では問題文が潰れないよう、状態と操作を次の行に送る。
+                if (constraints.maxWidth < 520) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Text(question.title.ja, maxLines: 2, overflow: TextOverflow.ellipsis),
-                      Text(_sponsorLabel(sponsors, question.sponsorId), style: Theme.of(context).textTheme.bodySmall),
-                      if (question.status == QuizQuestionStatus.reading || question.status == QuizQuestionStatus.open)
-                        QuizCountdown(
-                          closesAt: question.status == QuizQuestionStatus.open ? question.closesAt : null,
-                        ),
+                      summary,
+                      Align(alignment: Alignment.centerRight, child: controls),
                     ],
-                  ),
-                ),
-                const SizedBox(width: 12),
-                QuizQuestionStatusChip(status: question.status),
-                const SizedBox(width: 12),
-                Text('回答 ${answeredCount ?? '…'} / $teamCount'),
-                IconButton(
-                  tooltip: '編集・詳細',
-                  icon: const Icon(Icons.edit_outlined),
-                  onPressed: () =>
-                      pushEventRoute(context, QuizQuestionEditRoute(eventId, questionId: question.id).location),
-                ),
-              ],
+                  );
+                }
+                return Row(
+                  children: [
+                    Expanded(child: summary),
+                    const SizedBox(width: 12),
+                    controls,
+                  ],
+                );
+              },
             ),
             const SizedBox(height: 12),
             // 問題表示 → 回答開始 → 締切 → 正解発表 の順に押す。延長は必要なときだけ使うため列から外す。
