@@ -77,14 +77,17 @@ class Strings {
 
   String get heroThemeName => '〜Assemble〜';
 
-  /// Hero CTA label — links out to the ticket-sales announcement on Medium.
-  String get heroTicketsCta => switch (locale) {
-    AppLocale.ja => 'チケットの販売を開始しました',
-    AppLocale.en => 'Tickets Now on Sale!',
+  /// Hero CTA label — invites attendees to complete the event survey.
+  String get heroSurveyCta => switch (locale) {
+    AppLocale.ja => '全体アンケートのお願い',
+    AppLocale.en => 'Take the Event Survey',
   };
 
-  /// Ticket-sales announcement on Medium — shared by the Hero CTA and the
-  /// EventInformation ticket button.
+  /// Response form shared by both locales.
+  String get eventSurveyUrl =>
+      'https://docs.google.com/forms/d/e/1FAIpQLSf6f2B9XicSeqIsOYZW4IvxiSuP2piyZFi6uQMZMxhZI1F55g/viewform?usp=header';
+
+  /// Ticket-sales announcement on Medium for the EventInformation ticket button.
   String get ticketsCtaUrl => switch (locale) {
     AppLocale.ja => 'https://medium.com/flutterkaigi/flutterkaigi-2026のチケットを販売開始しました-99035b658a7b',
     AppLocale.en => 'https://medium.com/flutterkaigi/ticket-sales-for-flutterkaigi-2026-are-now-open-1d7c809a3c72',
