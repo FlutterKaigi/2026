@@ -8,6 +8,7 @@ import 'package:dashboard/feature/quiz/ui/component/quiz_status_label.dart';
 import 'package:dashboard/feature/quiz/ui/component/quiz_check_in_code.dart';
 import 'package:dashboard/feature/quiz/ui/component/quiz_countdown.dart';
 import 'package:dashboard/feature/quiz/ui/component/quiz_event_delete_dialog.dart';
+import 'package:dashboard/feature/quiz/ui/component/quiz_event_form_dialog.dart';
 import 'package:dashboard/feature/quiz/ui/component/quiz_promotion_controls.dart';
 import 'package:data/data.dart';
 import 'package:flutter/material.dart';
@@ -196,19 +197,50 @@ class _ConsoleBody extends HookConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // --- ヘッダー: status + 参加者数 + チーム選択 ---
-          Row(
+          // 狭い画面ではボタンを次の行に送り、画面外に押し出さない。
+          Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 12,
+            runSpacing: 8,
             children: [
-              Text(
-                event.title.ja.isEmpty ? '(タイトル未設定)' : event.title.ja,
-                style: Theme.of(context).textTheme.headlineSmall,
+              Wrap(
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: 12,
+                runSpacing: 4,
+                children: [
+                  Text(
+                    event.title.ja.isEmpty ? '(タイトル未設定)' : event.title.ja,
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
+                  QuizEventStatusChip(status: event.status),
+                ],
               ),
-              const SizedBox(width: 12),
-              QuizEventStatusChip(status: event.status),
-              const Spacer(),
-              OutlinedButton.icon(
-                onPressed: () => pushEventRoute(context, QuizProjectionRoute(eventId).location),
-                icon: const Icon(Icons.present_to_all),
-                label: const Text('投影画面'),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  // 大会名・出題スポンサーはクイズ開始前まで変えられる。使用中のスポンサーを
+                  // 外させないため、問題を読み込むまでは開かない。
+                  if (isPrestart)
+                    OutlinedButton.icon(
+                      onPressed: isBusy || !questions.hasValue
+                          ? null
+                          : () => QuizEventFormDialog.show(
+                              context: context,
+                              ref: ref,
+                              event: event,
+                              lockedSponsorIds: {for (final question in questionList) question.sponsorId},
+                            ),
+                      icon: const Icon(Icons.edit_outlined),
+                      label: const Text('イベントを編集'),
+                    ),
+                  OutlinedButton.icon(
+                    onPressed: () => pushEventRoute(context, QuizProjectionRoute(eventId).location),
+                    icon: const Icon(Icons.present_to_all),
+                    label: const Text('投影画面'),
+                  ),
+                ],
               ),
             ],
           ),

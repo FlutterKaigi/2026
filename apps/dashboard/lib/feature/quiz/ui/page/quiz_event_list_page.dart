@@ -2,7 +2,7 @@ import 'package:dashboard/core/event_environment/event_admin_client.dart';
 import 'package:dashboard/core/router/router.dart';
 import 'package:dashboard/core/event_environment/event_environment.dart';
 import 'package:dashboard/feature/quiz/data/provider/quiz_list_state.dart';
-import 'package:dashboard/feature/quiz/ui/component/quiz_event_create_dialog.dart';
+import 'package:dashboard/feature/quiz/ui/component/quiz_event_form_dialog.dart';
 import 'package:dashboard/feature/quiz/ui/component/quiz_event_delete_dialog.dart';
 import 'package:dashboard/feature/quiz/ui/component/quiz_status_label.dart';
 import 'package:data/data.dart';
@@ -25,7 +25,7 @@ class QuizEventListPage extends HookConsumerWidget {
     };
 
     Future<void> createEvent() async {
-      await QuizEventCreateDialog.show(context: context, ref: ref);
+      await QuizEventFormDialog.show(context: context, ref: ref);
     }
 
     Future<void> deleteEvent(QuizEvent event) async {
