@@ -6,8 +6,10 @@ import 'package:dashboard/feature/quiz/data/provider/quiz_list_state.dart';
 import 'package:dashboard/feature/quiz/data/provider/quiz_repository.dart';
 import 'package:dashboard/feature/quiz/ui/component/quiz_status_label.dart';
 import 'package:dashboard/feature/quiz/ui/component/quiz_check_in_code.dart';
+import 'package:dashboard/feature/quiz/ui/component/quiz_console_progress.dart';
 import 'package:dashboard/feature/quiz/ui/component/quiz_countdown.dart';
 import 'package:dashboard/feature/quiz/ui/component/quiz_event_delete_dialog.dart';
+import 'package:dashboard/feature/quiz/ui/component/quiz_event_form_dialog.dart';
 import 'package:dashboard/feature/quiz/ui/component/quiz_promotion_controls.dart';
 import 'package:data/data.dart';
 import 'package:flutter/material.dart';
@@ -178,6 +180,12 @@ class _ConsoleBody extends HookConsumerWidget {
     final draftCount = questionList.where((q) => q.status == QuizQuestionStatus.draft).length;
     // 時間切れ時は未出題を残して終了できる。出題済みの問題はすべて正解発表が必要。
     final canFinalize = revealedCount > 0 && !hasOpenQuestion;
+    final guide = quizConsoleGuide(
+      event: event,
+      participants: participantList,
+      questions: questionList,
+      canStart: canStart,
+    );
 
     Future<void> confirmAndRun({
       required String title,
@@ -196,23 +204,62 @@ class _ConsoleBody extends HookConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // --- ヘッダー: status + 参加者数 + チーム選択 ---
-          Row(
-            children: [
-              Text(
-                event.title.ja.isEmpty ? '(タイトル未設定)' : event.title.ja,
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
-              const SizedBox(width: 12),
-              QuizEventStatusChip(status: event.status),
-              const Spacer(),
-              OutlinedButton.icon(
-                onPressed: () => pushEventRoute(context, QuizProjectionRoute(eventId).location),
-                icon: const Icon(Icons.present_to_all),
-                label: const Text('投影画面'),
-              ),
-            ],
+          // 狭い画面ではボタンを次の行に送り、画面外に押し出さない。
+          SizedBox(
+            width: double.infinity,
+            child: Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 12,
+              runSpacing: 8,
+              children: [
+                Wrap(
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 12,
+                  runSpacing: 4,
+                  children: [
+                    Text(
+                      event.title.ja.isEmpty ? '(タイトル未設定)' : event.title.ja,
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
+                    QuizEventStatusChip(status: event.status),
+                  ],
+                ),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    // 大会名・出題スポンサーはクイズ開始前まで変えられる。使用中のスポンサーを
+                    // 外させないため、問題を読み込むまでは開かない。
+                    if (isPrestart)
+                      OutlinedButton.icon(
+                        onPressed: isBusy || !questions.hasValue
+                            ? null
+                            : () => QuizEventFormDialog.show(
+                                context: context,
+                                ref: ref,
+                                event: event,
+                                lockedSponsorIds: {for (final question in questionList) question.sponsorId},
+                              ),
+                        icon: const Icon(Icons.edit_outlined),
+                        label: const Text('イベントを編集'),
+                      ),
+                    OutlinedButton.icon(
+                      onPressed: () => pushEventRoute(context, QuizProjectionRoute(eventId).location),
+                      icon: const Icon(Icons.present_to_all),
+                      label: const Text('投影画面'),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 16),
+          // 進行の段階と次の操作を示し、次に押すボタンだけを塗りつぶしで強調する。
+          if (questions.hasValue) ...[
+            QuizConsoleProgress(guide: guide),
+            const SizedBox(height: 16),
+          ],
           QuizPromotionControls(event: event, busy: isBusy, onWithdraw: onWithdraw),
           if (client != null) ...[
             const SizedBox(height: 16),
@@ -302,7 +349,7 @@ class _ConsoleBody extends HookConsumerWidget {
                 ),
               ],
               if (event.status == QuizEventStatus.registration) ...[
-                FilledButton.tonalIcon(
+                FilledButton.icon(
                   onPressed: !isBusy
                       ? () => confirmAndRun(
                           title: '参加登録を終了',
@@ -387,7 +434,8 @@ class _ConsoleBody extends HookConsumerWidget {
                       runSpacing: 8,
                       children: [
                         if (event.teamSelectionStatus != QuizTeamSelectionStatus.open)
-                          OutlinedButton(
+                          _ProgressButton(
+                            next: guide.isNext(QuizConsoleAction.openCheckIn),
                             // 初回の開始は参加登録の終了後のみ。当日枠の受付再開中は再開だけできる。
                             onPressed:
                                 isBusy ||
@@ -403,10 +451,11 @@ class _ConsoleBody extends HookConsumerWidget {
                                     label: 'チェックイン開始',
                                     action: () => ops.openTeamSelection(eventId),
                                   ),
-                            child: const Text('チェックインを開始'),
+                            label: 'チェックインを開始',
                           ),
                         if (event.teamSelectionStatus == QuizTeamSelectionStatus.open)
-                          OutlinedButton(
+                          _ProgressButton(
+                            next: guide.isNext(QuizConsoleAction.closeCheckIn),
                             onPressed: isBusy
                                 ? null
                                 : () => confirmAndRun(
@@ -415,7 +464,7 @@ class _ConsoleBody extends HookConsumerWidget {
                                     label: 'チェックイン終了',
                                     action: () => ops.closeTeamSelection(eventId),
                                   ),
-                            child: const Text('チェックインを終了'),
+                            label: 'チェックインを終了',
                           ),
                         if (event.teamSelectionStatus != QuizTeamSelectionStatus.notStarted)
                           OutlinedButton(
@@ -544,6 +593,7 @@ class _ConsoleBody extends HookConsumerWidget {
                           event: event,
                           question: question,
                           teamCount: teamList.length,
+                          nextAction: guide.questionId == question.id ? guide.action : null,
                           canStart: canStart,
                           isBusy: isBusy,
                           hasOpenQuestion: hasOpenQuestion,
@@ -579,6 +629,17 @@ class _ConsoleBody extends HookConsumerWidget {
                             label: '正解発表',
                             action: () => ops.revealQuestion(eventId, question.id),
                           ),
+                          // 出題前の未出題の問題だけ削除できる。サーバーでも同じ条件を検証する。
+                          onDelete: isPrestart && question.status == QuizQuestionStatus.draft
+                              ? () => confirmAndRun(
+                                  title: '問題を削除',
+                                  message:
+                                      '問題 #${question.order}「${question.title.ja}」を削除します。'
+                                      '正解と解説も削除され、元に戻せません。',
+                                  label: '問題削除',
+                                  action: () => ref.read(quizQuestionRepositoryProvider).delete(eventId, question.id),
+                                )
+                              : null,
                         ),
                     ],
                   ),
@@ -682,6 +743,8 @@ class _QuestionRow extends ConsumerWidget {
     required this.onExtend,
     required this.onClose,
     required this.onReveal,
+    this.onDelete,
+    this.nextAction,
   });
 
   final String eventId;
@@ -696,6 +759,12 @@ class _QuestionRow extends ConsumerWidget {
   final VoidCallback onExtend;
   final VoidCallback onClose;
   final VoidCallback onReveal;
+
+  /// 削除できない問題では `null`。
+  final VoidCallback? onDelete;
+
+  /// この問題で次に押すボタン。
+  final QuizConsoleAction? nextAction;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -718,60 +787,127 @@ class _QuestionRow extends ConsumerWidget {
     // 発表済みの場合はサーバーで完了を確認する。採点は繰り返さない。
     final canReveal =
         (question.status == QuizQuestionStatus.closed || question.status == QuizQuestionStatus.revealed) && !isBusy;
+    final active = const [
+      QuizQuestionStatus.reading,
+      QuizQuestionStatus.open,
+      QuizQuestionStatus.closed,
+    ].contains(question.status);
+    final scheme = Theme.of(context).colorScheme;
+    // 「›」は後ろのボタンと一緒に折り返し、行末に取り残さない。
+    Widget step(QuizConsoleAction action, String label, VoidCallback? onPressed) {
+      final button = _ProgressButton(next: nextAction == action, onPressed: onPressed, label: label);
+      if (action == QuizConsoleAction.presentQuestion) return button;
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.chevron_right, size: 18, color: scheme.outline),
+          const SizedBox(width: 4),
+          button,
+        ],
+      );
+    }
 
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
+      // 出題中の問題を一覧の中で見失わないよう枠で囲む。
+      shape: active
+          ? RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: BorderSide(color: scheme.primary, width: 2),
+            )
+          : null,
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Row(
-              children: [
-                SizedBox(width: 48, child: Text('#${question.order}', style: Theme.of(context).textTheme.titleMedium)),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final summary = Row(
+                  children: [
+                    SizedBox(
+                      width: 48,
+                      child: Text('#${question.order}', style: Theme.of(context).textTheme.titleMedium),
+                    ),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(question.title.ja, maxLines: 2, overflow: TextOverflow.ellipsis),
+                          Text(
+                            _sponsorLabel(sponsors, question.sponsorId),
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                          if (question.status == QuizQuestionStatus.reading ||
+                              question.status == QuizQuestionStatus.open)
+                            QuizCountdown(
+                              closesAt: question.status == QuizQuestionStatus.open ? question.closesAt : null,
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
+                );
+                final controls = Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    QuizQuestionStatusChip(status: question.status),
+                    const SizedBox(width: 12),
+                    Text('回答 ${answeredCount ?? '…'} / $teamCount'),
+                    IconButton(
+                      tooltip: '編集・詳細',
+                      icon: const Icon(Icons.edit_outlined),
+                      onPressed: () =>
+                          pushEventRoute(context, QuizQuestionEditRoute(eventId, questionId: question.id).location),
+                    ),
+                    if (onDelete != null)
+                      IconButton(
+                        tooltip: '問題を削除',
+                        icon: const Icon(Icons.delete_outline),
+                        color: scheme.error,
+                        onPressed: isBusy ? null : onDelete,
+                      ),
+                  ],
+                );
+                // 狭い画面では問題文が潰れないよう、状態と操作を次の行に送る。
+                if (constraints.maxWidth < 520) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Text(question.title.ja, maxLines: 2, overflow: TextOverflow.ellipsis),
-                      Text(_sponsorLabel(sponsors, question.sponsorId), style: Theme.of(context).textTheme.bodySmall),
-                      if (question.status == QuizQuestionStatus.reading || question.status == QuizQuestionStatus.open)
-                        QuizCountdown(
-                          closesAt: question.status == QuizQuestionStatus.open ? question.closesAt : null,
-                        ),
+                      summary,
+                      Align(alignment: Alignment.centerRight, child: controls),
                     ],
-                  ),
-                ),
-                const SizedBox(width: 12),
-                QuizQuestionStatusChip(status: question.status),
-                const SizedBox(width: 12),
-                Text('回答 ${answeredCount ?? '…'} / $teamCount'),
-                IconButton(
-                  tooltip: '編集・詳細',
-                  icon: const Icon(Icons.edit_outlined),
-                  onPressed: () =>
-                      pushEventRoute(context, QuizQuestionEditRoute(eventId, questionId: question.id).location),
-                ),
-              ],
+                  );
+                }
+                return Row(
+                  children: [
+                    Expanded(child: summary),
+                    const SizedBox(width: 12),
+                    controls,
+                  ],
+                );
+              },
             ),
             const SizedBox(height: 12),
+            // 問題表示 → 回答開始 → 締切 → 正解発表 の順に押す。延長は必要なときだけ使うため列から外す。
             Wrap(
-              spacing: 8,
+              spacing: 4,
               runSpacing: 8,
               alignment: WrapAlignment.end,
+              crossAxisAlignment: WrapCrossAlignment.center,
               children: [
-                OutlinedButton(onPressed: canPresent ? onPresent : null, child: const Text('問題表示')),
-                OutlinedButton(onPressed: canOpen ? onOpen : null, child: const Text('回答開始')),
-                OutlinedButton(
-                  onPressed:
-                      !isBusy &&
-                          (question.status == QuizQuestionStatus.open || question.status == QuizQuestionStatus.closed)
-                      ? onExtend
-                      : null,
-                  child: const Text('+30 秒'),
-                ),
-                OutlinedButton(onPressed: canClose ? onClose : null, child: const Text('締切')),
-                OutlinedButton(onPressed: canReveal ? onReveal : null, child: const Text('正解発表')),
+                if (question.status == QuizQuestionStatus.open || question.status == QuizQuestionStatus.closed) ...[
+                  TextButton.icon(
+                    onPressed: isBusy ? null : onExtend,
+                    icon: const Icon(Icons.more_time),
+                    label: const Text('+30 秒'),
+                  ),
+                  const SizedBox(width: 12),
+                ],
+                step(QuizConsoleAction.presentQuestion, '問題表示', canPresent ? onPresent : null),
+                step(QuizConsoleAction.openQuestion, '回答開始', canOpen ? onOpen : null),
+                step(QuizConsoleAction.closeQuestion, '締切', canClose ? onClose : null),
+                step(QuizConsoleAction.revealQuestion, '正解発表', canReveal ? onReveal : null),
               ],
             ),
           ],
@@ -830,6 +966,20 @@ String? _nonEmptyText(Object? value) {
   if (value is! String) return null;
   final text = value.trim();
   return text.isEmpty ? null : text;
+}
+
+/// 進行の順に押すボタン。次に押すものだけを塗りつぶしにする。
+class _ProgressButton extends StatelessWidget {
+  const _ProgressButton({required this.next, required this.onPressed, required this.label});
+
+  final bool next;
+  final VoidCallback? onPressed;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) => next
+      ? FilledButton(onPressed: onPressed, child: Text(label))
+      : OutlinedButton(onPressed: onPressed, child: Text(label));
 }
 
 class _ErrorBanner extends StatelessWidget {

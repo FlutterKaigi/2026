@@ -169,7 +169,10 @@ void main() {
   testWidgets('check-in starts only after registration closes', (tester) async {
     for (final (status, enabled) in [(QuizEventStatus.registration, false), (QuizEventStatus.entryClosed, true)]) {
       await showConsole(tester, _Operations(), [], eventValue: event.copyWith(status: status));
-      final button = tester.widget<OutlinedButton>(find.widgetWithText(OutlinedButton, 'チェックインを開始'));
+      // 参加登録の終了後は次に押すボタンとして強調する。
+      final button = tester.widget<ButtonStyleButton>(
+        find.widgetWithText(enabled ? FilledButton : OutlinedButton, 'チェックインを開始'),
+      );
       expect(button.onPressed != null, enabled);
       expect(find.text('チェックインは参加登録を終了してから開始できます。'), enabled ? findsNothing : findsOneWidget);
       expect(find.text('123456'), findsNothing);
@@ -231,8 +234,11 @@ void main() {
         ),
         people: people,
       );
-      final button = tester.widget<OutlinedButton>(find.widgetWithText(OutlinedButton, '問題表示'));
-      expect(button.onPressed != null, people.length == 1);
+      final ready = people.length == 1;
+      final button = tester.widget<ButtonStyleButton>(
+        find.widgetWithText(ready ? FilledButton : OutlinedButton, '問題表示'),
+      );
+      expect(button.onPressed != null, ready);
       await tester.pumpWidget(const SizedBox());
     }
   });
