@@ -2,6 +2,7 @@ import 'package:dashboard/core/extension/build_context_extension.dart';
 import 'package:dashboard/core/ui/date_time_field.dart';
 import 'package:dashboard/core/ui/form_action_bar.dart';
 import 'package:dashboard/core/ui/locale_map_field.dart';
+import 'package:dashboard/core/ui/outlined_text_form_field.dart';
 import 'package:dashboard/feature/timeline_event/data/provider/timeline_event_repository.dart';
 import 'package:dashboard/feature/venue/data/provider/venue_list_state.dart';
 import 'package:data/data.dart';
@@ -25,6 +26,7 @@ class TimelineEventEditPage extends HookConsumerWidget {
     final titleEnController = useTextEditingController(text: timelineEvent?.title.en ?? '');
     final descJaController = useTextEditingController(text: timelineEvent?.description?.ja ?? '');
     final descEnController = useTextEditingController(text: timelineEvent?.description?.en ?? '');
+    final archiveUrlController = useTextEditingController(text: timelineEvent?.archiveUrl ?? '');
     final startsAt = useState<DateTime>(timelineEvent?.startsAt ?? DateTime.now());
     final endsAt = useState<DateTime?>(timelineEvent?.endsAt);
     final venueId = useState<String?>(timelineEvent?.venueId);
@@ -57,6 +59,7 @@ class TimelineEventEditPage extends HookConsumerWidget {
           startsAt: startsAt.value,
           endsAt: endsAt.value,
           venueId: venueId.value,
+          archiveUrl: archiveUrlController.text.trim().isEmpty ? null : archiveUrlController.text.trim(),
           createdAt: timelineEvent?.createdAt ?? DateTime.now(),
           updatedAt: DateTime.now(),
         );
@@ -117,6 +120,15 @@ class TimelineEventEditPage extends HookConsumerWidget {
                       controller: descEnController,
                       decoration: const InputDecoration(labelText: 'English', border: OutlineInputBorder()),
                       maxLines: 4,
+                    ),
+                    const SizedBox(height: 24),
+                    OutlinedTextFormField(
+                      controller: archiveUrlController,
+                      labelText: 'アーカイブ URL（YouTube）',
+                      hintText: 'https://www.youtube.com/watch?v=...',
+                      validator: (value) => (value == null || value.trim().isEmpty || youtubeArchiveUri(value) != null)
+                          ? null
+                          : 'YouTube の HTTPS URL を入力してください',
                     ),
                     const SizedBox(height: 24),
                     DateTimeField(label: '開始日時 *', value: startsAt.value, onTap: pickStartsAt),

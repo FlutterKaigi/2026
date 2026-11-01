@@ -15,6 +15,7 @@ _TimelineEvent _$TimelineEventFromJson(Map<String, dynamic> json) => _TimelineEv
     json['endsAt'],
   ),
   venueId: json['venueId'] as String?,
+  archiveUrl: json['archiveUrl'] as String?,
   createdAt: const FirestoreDateTimeConverter().fromJson(json['createdAt']),
   updatedAt: const FirestoreDateTimeConverter().fromJson(json['updatedAt']),
 );
@@ -28,6 +29,7 @@ Map<String, dynamic> _$TimelineEventToJson(
   'startsAt': const FirestoreDateTimeConverter().toJson(instance.startsAt),
   'endsAt': const FirestoreNullableDateTimeConverter().toJson(instance.endsAt),
   'venueId': instance.venueId,
+  'archiveUrl': instance.archiveUrl,
   'createdAt': const FirestoreDateTimeConverter().toJson(instance.createdAt),
   'updatedAt': const FirestoreDateTimeConverter().toJson(instance.updatedAt),
 };

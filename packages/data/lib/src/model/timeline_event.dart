@@ -20,6 +20,9 @@ abstract class TimelineEvent with _$TimelineEvent {
     @FirestoreDateTimeConverter() required DateTime startsAt,
     @FirestoreNullableDateTimeConverter() DateTime? endsAt,
     String? venueId,
+
+    /// YouTube recording URL, managed in the dashboard.
+    String? archiveUrl,
     @FirestoreDateTimeConverter() required DateTime createdAt,
     @FirestoreDateTimeConverter() required DateTime updatedAt,
   }) = _TimelineEvent;

@@ -67,3 +67,5 @@ export 'src/repository/support_lt_repository.dart' show FirebaseSupportLtReposit
 export 'src/repository/timeline_event_repository.dart' show FirestoreTimelineEventRepository, TimelineEventRepository;
 export 'src/repository/user_profile_repository.dart' show FirestoreUserProfileRepository, UserProfileRepository;
 export 'src/repository/venue_repository.dart' show FirestoreVenueRepository, VenueRepository;
+
+export 'src/youtube_archive_url.dart' show youtubeArchiveEmbedUri, youtubeArchiveUri;

@@ -36,6 +36,11 @@
     "venueId": {
       "type": ["string", "null"]
     },
+    "archiveUrl": {
+      "description": "Optional HTTPS YouTube recording URL, managed in the dashboard.",
+      "type": ["string", "null"],
+      "format": "uri"
+    },
     "createdAt": {
       "type": "string",
       "format": "date-time"

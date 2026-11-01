@@ -20,20 +20,21 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	/// Constructing via the enum [AppLocale.build] is preferred.
 	Translations({Map<String, Node>? overrides, PluralResolver? cardinalResolver, PluralResolver? ordinalResolver, TranslationMetadata<AppLocale, Translations>? meta})
 		: assert(overrides == null, 'Set "translation_overrides: true" in order to enable this feature.'),
-		  $meta = meta ?? TranslationMetadata(
+		  _meta = meta ?? TranslationMetadata(
 		    locale: AppLocale.ja,
 		    overrides: overrides ?? {},
 		    cardinalResolver: cardinalResolver,
 		    ordinalResolver: ordinalResolver,
 		  ) {
-		$meta.setFlatMapFunction(_flatMapFunction);
+		_meta.setFlatMapFunction(_flatMapFunction);
 	}
 
 	/// Metadata for the translations of <ja>.
-	@override final TranslationMetadata<AppLocale, Translations> $meta;
+	final TranslationMetadata<AppLocale, Translations> _meta;
+	@override TranslationMetadata<AppLocale, Translations> get $meta => _meta;
 
 	/// Access flat map
-	dynamic operator[](String key) => $meta.getTranslation(key);
+	dynamic operator[](String key) => _meta.getTranslation(key);
 
 	late final Translations _root = this; // ignore: unused_field
 
@@ -344,6 +345,15 @@ class Translations$sessionDetails$ja {
 
 	/// ja: 'Sessionize'
 	String get sessionize => 'Sessionize';
+
+	/// ja: 'YouTubeで開く'
+	String get openYoutube => 'YouTubeで開く';
+
+	/// ja: 'アーカイブを再生できません。YouTubeで開いてください。'
+	String get archivePlaybackError => 'アーカイブを再生できません。YouTubeで開いてください。';
+
+	/// ja: 'アーカイブを見る'
+	String get archive => 'アーカイブを見る';
 
 	/// ja: 'セッションのフィードバックを送る'
 	String get feedback => 'セッションのフィードバックを送る';
@@ -2959,6 +2969,9 @@ extension on Translations {
 			'sessionDetails.speakers' => '登壇者',
 			'sessionDetails.links' => 'リンク',
 			'sessionDetails.sessionize' => 'Sessionize',
+			'sessionDetails.openYoutube' => 'YouTubeで開く',
+			'sessionDetails.archivePlaybackError' => 'アーカイブを再生できません。YouTubeで開いてください。',
+			'sessionDetails.archive' => 'アーカイブを見る',
 			'sessionDetails.feedback' => 'セッションのフィードバックを送る',
 			'sessionDetails.feedbackDescription' => 'このセッションの感想をお聞かせください',
 			'sessionDetails.share' => '共有',
@@ -3401,11 +3414,11 @@ extension on Translations {
 			'supportLt.rateLimited' => '試行回数が多すぎます。しばらくしてからもう一度お試しください',
 			'supportLt.networkError' => '通信に失敗しました。通信状況を確認してもう一度お試しください',
 			'supportLt.sessionExpired' => 'サインインの有効期限が切れました。もう一度サインインしてください',
+			_ => null,
+		} ?? switch (path) {
 			'supportLt.permissionDenied' => '参加登録が許可されていません。運営に確認してください',
 			'supportLt.registrationFailed' => '参加登録できませんでした。もう一度お試しください',
 			'countryRegion.asia' => 'アジア',
-			_ => null,
-		} ?? switch (path) {
 			'countryRegion.oceania' => 'オセアニア',
 			'countryRegion.americas' => '北米・中南米',
 			'countryRegion.europe' => 'ヨーロッパ',

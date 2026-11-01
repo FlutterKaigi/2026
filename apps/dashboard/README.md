@@ -266,3 +266,10 @@ News は**このダッシュボードが編集元**（外部の原本は無い�
 - 操作にはメール確認済みの `@flutterkaigi.jp` アカウントと `admins/{uid}` の管理者登録が必要
 
 応援LTとスタンプQRが使うアプリホストは `tool/app_link_hosts.json` を正本とする。Repositoryルートで `node tool/generate_app_link_config.mjs` を実行してDart/JavaScript定数を再生成し、`node tool/generate_app_link_config.mjs --check` で更新漏れを確認する。公式サイト `2026.flutterkaigi.jp` と参加者アプリ `2026-app.flutterkaigi.jp` は用途が異なる。ネイティブ・配布設定の更新と検証手順は [APP_DELIVERY.md](../../.github/APP_DELIVERY.md#universal-links--app-links) を参照。
+
+## セッション・タイムラインイベントのアーカイブ
+
+セッションとタイムラインイベントの編集画面で、任意の「アーカイブ URL（YouTube）」を保存できます。
+YouTube の HTTPS URL（`youtube.com`、`www.youtube.com`、`m.youtube.com`、`music.youtube.com`、`youtu.be`、`youtube-nocookie.com`、`www.youtube-nocookie.com`）を指定します。空欄で保存すると登録済み URL を削除します。
+`archiveUrl` はダッシュボードが管理し、Sessionize の再取り込みでは上書きしません。既存データにこのフィールドがなくても従来どおり表示します。
+公式アプリと Web サイトは有効な URL がある場合にアーカイブへのリンクを表示します。Web サイトへの反映にはタイムテーブルデータの再生成とサイトのビルド・配布が必要です。

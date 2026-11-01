@@ -17,7 +17,8 @@ mixin _$Session {
 
  String get id; LocaleMap get title; LocaleMap get description; String get primaryLocale;@FirestoreDateTimeConverter() DateTime get startsAt;@FirestoreDateTimeConverter() DateTime get endsAt; String get venueId; List<String> get speakerIds; bool get isLightningTalk; bool get isBeginnersLightningTalk; String? get sessionizeUrl;/// Attendee feedback form (Sessionize). Owned by the dashboard, never
 /// written by the Sessionize import.
- String? get feedbackUrl;@FirestoreDateTimeConverter() DateTime get createdAt;@FirestoreDateTimeConverter() DateTime get updatedAt;
+ String? get feedbackUrl;/// YouTube recording URL, managed in the dashboard.
+ String? get archiveUrl;@FirestoreDateTimeConverter() DateTime get createdAt;@FirestoreDateTimeConverter() DateTime get updatedAt;
 /// Create a copy of Session
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -30,16 +31,16 @@ $SessionCopyWith<Session> get copyWith => _$SessionCopyWithImpl<Session>(this as
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Session&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.description, description) || other.description == description)&&(identical(other.primaryLocale, primaryLocale) || other.primaryLocale == primaryLocale)&&(identical(other.startsAt, startsAt) || other.startsAt == startsAt)&&(identical(other.endsAt, endsAt) || other.endsAt == endsAt)&&(identical(other.venueId, venueId) || other.venueId == venueId)&&const DeepCollectionEquality().equals(other.speakerIds, speakerIds)&&(identical(other.isLightningTalk, isLightningTalk) || other.isLightningTalk == isLightningTalk)&&(identical(other.isBeginnersLightningTalk, isBeginnersLightningTalk) || other.isBeginnersLightningTalk == isBeginnersLightningTalk)&&(identical(other.sessionizeUrl, sessionizeUrl) || other.sessionizeUrl == sessionizeUrl)&&(identical(other.feedbackUrl, feedbackUrl) || other.feedbackUrl == feedbackUrl)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Session&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.description, description) || other.description == description)&&(identical(other.primaryLocale, primaryLocale) || other.primaryLocale == primaryLocale)&&(identical(other.startsAt, startsAt) || other.startsAt == startsAt)&&(identical(other.endsAt, endsAt) || other.endsAt == endsAt)&&(identical(other.venueId, venueId) || other.venueId == venueId)&&const DeepCollectionEquality().equals(other.speakerIds, speakerIds)&&(identical(other.isLightningTalk, isLightningTalk) || other.isLightningTalk == isLightningTalk)&&(identical(other.isBeginnersLightningTalk, isBeginnersLightningTalk) || other.isBeginnersLightningTalk == isBeginnersLightningTalk)&&(identical(other.sessionizeUrl, sessionizeUrl) || other.sessionizeUrl == sessionizeUrl)&&(identical(other.feedbackUrl, feedbackUrl) || other.feedbackUrl == feedbackUrl)&&(identical(other.archiveUrl, archiveUrl) || other.archiveUrl == archiveUrl)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,title,description,primaryLocale,startsAt,endsAt,venueId,const DeepCollectionEquality().hash(speakerIds),isLightningTalk,isBeginnersLightningTalk,sessionizeUrl,feedbackUrl,createdAt,updatedAt);
+int get hashCode => Object.hash(runtimeType,id,title,description,primaryLocale,startsAt,endsAt,venueId,const DeepCollectionEquality().hash(speakerIds),isLightningTalk,isBeginnersLightningTalk,sessionizeUrl,feedbackUrl,archiveUrl,createdAt,updatedAt);
 
 @override
 String toString() {
-  return 'Session(id: $id, title: $title, description: $description, primaryLocale: $primaryLocale, startsAt: $startsAt, endsAt: $endsAt, venueId: $venueId, speakerIds: $speakerIds, isLightningTalk: $isLightningTalk, isBeginnersLightningTalk: $isBeginnersLightningTalk, sessionizeUrl: $sessionizeUrl, feedbackUrl: $feedbackUrl, createdAt: $createdAt, updatedAt: $updatedAt)';
+  return 'Session(id: $id, title: $title, description: $description, primaryLocale: $primaryLocale, startsAt: $startsAt, endsAt: $endsAt, venueId: $venueId, speakerIds: $speakerIds, isLightningTalk: $isLightningTalk, isBeginnersLightningTalk: $isBeginnersLightningTalk, sessionizeUrl: $sessionizeUrl, feedbackUrl: $feedbackUrl, archiveUrl: $archiveUrl, createdAt: $createdAt, updatedAt: $updatedAt)';
 }
 
 
@@ -50,7 +51,7 @@ abstract mixin class $SessionCopyWith<$Res>  {
   factory $SessionCopyWith(Session value, $Res Function(Session) _then) = _$SessionCopyWithImpl;
 @useResult
 $Res call({
- String id, LocaleMap title, LocaleMap description, String primaryLocale,@FirestoreDateTimeConverter() DateTime startsAt,@FirestoreDateTimeConverter() DateTime endsAt, String venueId, List<String> speakerIds, bool isLightningTalk, bool isBeginnersLightningTalk, String? sessionizeUrl, String? feedbackUrl,@FirestoreDateTimeConverter() DateTime createdAt,@FirestoreDateTimeConverter() DateTime updatedAt
+ String id, LocaleMap title, LocaleMap description, String primaryLocale,@FirestoreDateTimeConverter() DateTime startsAt,@FirestoreDateTimeConverter() DateTime endsAt, String venueId, List<String> speakerIds, bool isLightningTalk, bool isBeginnersLightningTalk, String? sessionizeUrl, String? feedbackUrl, String? archiveUrl,@FirestoreDateTimeConverter() DateTime createdAt,@FirestoreDateTimeConverter() DateTime updatedAt
 });
 
 
@@ -67,7 +68,7 @@ class _$SessionCopyWithImpl<$Res>
 
 /// Create a copy of Session
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? title = null,Object? description = null,Object? primaryLocale = null,Object? startsAt = null,Object? endsAt = null,Object? venueId = null,Object? speakerIds = null,Object? isLightningTalk = null,Object? isBeginnersLightningTalk = null,Object? sessionizeUrl = freezed,Object? feedbackUrl = freezed,Object? createdAt = null,Object? updatedAt = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? title = null,Object? description = null,Object? primaryLocale = null,Object? startsAt = null,Object? endsAt = null,Object? venueId = null,Object? speakerIds = null,Object? isLightningTalk = null,Object? isBeginnersLightningTalk = null,Object? sessionizeUrl = freezed,Object? feedbackUrl = freezed,Object? archiveUrl = freezed,Object? createdAt = null,Object? updatedAt = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
@@ -81,6 +82,7 @@ as List<String>,isLightningTalk: null == isLightningTalk ? _self.isLightningTalk
 as bool,isBeginnersLightningTalk: null == isBeginnersLightningTalk ? _self.isBeginnersLightningTalk : isBeginnersLightningTalk // ignore: cast_nullable_to_non_nullable
 as bool,sessionizeUrl: freezed == sessionizeUrl ? _self.sessionizeUrl : sessionizeUrl // ignore: cast_nullable_to_non_nullable
 as String?,feedbackUrl: freezed == feedbackUrl ? _self.feedbackUrl : feedbackUrl // ignore: cast_nullable_to_non_nullable
+as String?,archiveUrl: freezed == archiveUrl ? _self.archiveUrl : archiveUrl // ignore: cast_nullable_to_non_nullable
 as String?,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
 as DateTime,
@@ -186,10 +188,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  LocaleMap title,  LocaleMap description,  String primaryLocale, @FirestoreDateTimeConverter()  DateTime startsAt, @FirestoreDateTimeConverter()  DateTime endsAt,  String venueId,  List<String> speakerIds,  bool isLightningTalk,  bool isBeginnersLightningTalk,  String? sessionizeUrl,  String? feedbackUrl, @FirestoreDateTimeConverter()  DateTime createdAt, @FirestoreDateTimeConverter()  DateTime updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  LocaleMap title,  LocaleMap description,  String primaryLocale, @FirestoreDateTimeConverter()  DateTime startsAt, @FirestoreDateTimeConverter()  DateTime endsAt,  String venueId,  List<String> speakerIds,  bool isLightningTalk,  bool isBeginnersLightningTalk,  String? sessionizeUrl,  String? feedbackUrl,  String? archiveUrl, @FirestoreDateTimeConverter()  DateTime createdAt, @FirestoreDateTimeConverter()  DateTime updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Session() when $default != null:
-return $default(_that.id,_that.title,_that.description,_that.primaryLocale,_that.startsAt,_that.endsAt,_that.venueId,_that.speakerIds,_that.isLightningTalk,_that.isBeginnersLightningTalk,_that.sessionizeUrl,_that.feedbackUrl,_that.createdAt,_that.updatedAt);case _:
+return $default(_that.id,_that.title,_that.description,_that.primaryLocale,_that.startsAt,_that.endsAt,_that.venueId,_that.speakerIds,_that.isLightningTalk,_that.isBeginnersLightningTalk,_that.sessionizeUrl,_that.feedbackUrl,_that.archiveUrl,_that.createdAt,_that.updatedAt);case _:
   return orElse();
 
 }
@@ -207,10 +209,10 @@ return $default(_that.id,_that.title,_that.description,_that.primaryLocale,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  LocaleMap title,  LocaleMap description,  String primaryLocale, @FirestoreDateTimeConverter()  DateTime startsAt, @FirestoreDateTimeConverter()  DateTime endsAt,  String venueId,  List<String> speakerIds,  bool isLightningTalk,  bool isBeginnersLightningTalk,  String? sessionizeUrl,  String? feedbackUrl, @FirestoreDateTimeConverter()  DateTime createdAt, @FirestoreDateTimeConverter()  DateTime updatedAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  LocaleMap title,  LocaleMap description,  String primaryLocale, @FirestoreDateTimeConverter()  DateTime startsAt, @FirestoreDateTimeConverter()  DateTime endsAt,  String venueId,  List<String> speakerIds,  bool isLightningTalk,  bool isBeginnersLightningTalk,  String? sessionizeUrl,  String? feedbackUrl,  String? archiveUrl, @FirestoreDateTimeConverter()  DateTime createdAt, @FirestoreDateTimeConverter()  DateTime updatedAt)  $default,) {final _that = this;
 switch (_that) {
 case _Session():
-return $default(_that.id,_that.title,_that.description,_that.primaryLocale,_that.startsAt,_that.endsAt,_that.venueId,_that.speakerIds,_that.isLightningTalk,_that.isBeginnersLightningTalk,_that.sessionizeUrl,_that.feedbackUrl,_that.createdAt,_that.updatedAt);case _:
+return $default(_that.id,_that.title,_that.description,_that.primaryLocale,_that.startsAt,_that.endsAt,_that.venueId,_that.speakerIds,_that.isLightningTalk,_that.isBeginnersLightningTalk,_that.sessionizeUrl,_that.feedbackUrl,_that.archiveUrl,_that.createdAt,_that.updatedAt);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -227,10 +229,10 @@ return $default(_that.id,_that.title,_that.description,_that.primaryLocale,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  LocaleMap title,  LocaleMap description,  String primaryLocale, @FirestoreDateTimeConverter()  DateTime startsAt, @FirestoreDateTimeConverter()  DateTime endsAt,  String venueId,  List<String> speakerIds,  bool isLightningTalk,  bool isBeginnersLightningTalk,  String? sessionizeUrl,  String? feedbackUrl, @FirestoreDateTimeConverter()  DateTime createdAt, @FirestoreDateTimeConverter()  DateTime updatedAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  LocaleMap title,  LocaleMap description,  String primaryLocale, @FirestoreDateTimeConverter()  DateTime startsAt, @FirestoreDateTimeConverter()  DateTime endsAt,  String venueId,  List<String> speakerIds,  bool isLightningTalk,  bool isBeginnersLightningTalk,  String? sessionizeUrl,  String? feedbackUrl,  String? archiveUrl, @FirestoreDateTimeConverter()  DateTime createdAt, @FirestoreDateTimeConverter()  DateTime updatedAt)?  $default,) {final _that = this;
 switch (_that) {
 case _Session() when $default != null:
-return $default(_that.id,_that.title,_that.description,_that.primaryLocale,_that.startsAt,_that.endsAt,_that.venueId,_that.speakerIds,_that.isLightningTalk,_that.isBeginnersLightningTalk,_that.sessionizeUrl,_that.feedbackUrl,_that.createdAt,_that.updatedAt);case _:
+return $default(_that.id,_that.title,_that.description,_that.primaryLocale,_that.startsAt,_that.endsAt,_that.venueId,_that.speakerIds,_that.isLightningTalk,_that.isBeginnersLightningTalk,_that.sessionizeUrl,_that.feedbackUrl,_that.archiveUrl,_that.createdAt,_that.updatedAt);case _:
   return null;
 
 }
@@ -242,7 +244,7 @@ return $default(_that.id,_that.title,_that.description,_that.primaryLocale,_that
 @JsonSerializable()
 
 class _Session extends Session {
-  const _Session({required this.id, required this.title, required this.description, required this.primaryLocale, @FirestoreDateTimeConverter() required this.startsAt, @FirestoreDateTimeConverter() required this.endsAt, required this.venueId, final  List<String> speakerIds = const [], this.isLightningTalk = false, this.isBeginnersLightningTalk = false, this.sessionizeUrl, this.feedbackUrl, @FirestoreDateTimeConverter() required this.createdAt, @FirestoreDateTimeConverter() required this.updatedAt}): _speakerIds = speakerIds,super._();
+  const _Session({required this.id, required this.title, required this.description, required this.primaryLocale, @FirestoreDateTimeConverter() required this.startsAt, @FirestoreDateTimeConverter() required this.endsAt, required this.venueId, final  List<String> speakerIds = const [], this.isLightningTalk = false, this.isBeginnersLightningTalk = false, this.sessionizeUrl, this.feedbackUrl, this.archiveUrl, @FirestoreDateTimeConverter() required this.createdAt, @FirestoreDateTimeConverter() required this.updatedAt}): _speakerIds = speakerIds,super._();
   factory _Session.fromJson(Map<String, dynamic> json) => _$SessionFromJson(json);
 
 @override final  String id;
@@ -265,6 +267,8 @@ class _Session extends Session {
 /// Attendee feedback form (Sessionize). Owned by the dashboard, never
 /// written by the Sessionize import.
 @override final  String? feedbackUrl;
+/// YouTube recording URL, managed in the dashboard.
+@override final  String? archiveUrl;
 @override@FirestoreDateTimeConverter() final  DateTime createdAt;
 @override@FirestoreDateTimeConverter() final  DateTime updatedAt;
 
@@ -281,16 +285,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Session&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.description, description) || other.description == description)&&(identical(other.primaryLocale, primaryLocale) || other.primaryLocale == primaryLocale)&&(identical(other.startsAt, startsAt) || other.startsAt == startsAt)&&(identical(other.endsAt, endsAt) || other.endsAt == endsAt)&&(identical(other.venueId, venueId) || other.venueId == venueId)&&const DeepCollectionEquality().equals(other._speakerIds, _speakerIds)&&(identical(other.isLightningTalk, isLightningTalk) || other.isLightningTalk == isLightningTalk)&&(identical(other.isBeginnersLightningTalk, isBeginnersLightningTalk) || other.isBeginnersLightningTalk == isBeginnersLightningTalk)&&(identical(other.sessionizeUrl, sessionizeUrl) || other.sessionizeUrl == sessionizeUrl)&&(identical(other.feedbackUrl, feedbackUrl) || other.feedbackUrl == feedbackUrl)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Session&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.description, description) || other.description == description)&&(identical(other.primaryLocale, primaryLocale) || other.primaryLocale == primaryLocale)&&(identical(other.startsAt, startsAt) || other.startsAt == startsAt)&&(identical(other.endsAt, endsAt) || other.endsAt == endsAt)&&(identical(other.venueId, venueId) || other.venueId == venueId)&&const DeepCollectionEquality().equals(other._speakerIds, _speakerIds)&&(identical(other.isLightningTalk, isLightningTalk) || other.isLightningTalk == isLightningTalk)&&(identical(other.isBeginnersLightningTalk, isBeginnersLightningTalk) || other.isBeginnersLightningTalk == isBeginnersLightningTalk)&&(identical(other.sessionizeUrl, sessionizeUrl) || other.sessionizeUrl == sessionizeUrl)&&(identical(other.feedbackUrl, feedbackUrl) || other.feedbackUrl == feedbackUrl)&&(identical(other.archiveUrl, archiveUrl) || other.archiveUrl == archiveUrl)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,title,description,primaryLocale,startsAt,endsAt,venueId,const DeepCollectionEquality().hash(_speakerIds),isLightningTalk,isBeginnersLightningTalk,sessionizeUrl,feedbackUrl,createdAt,updatedAt);
+int get hashCode => Object.hash(runtimeType,id,title,description,primaryLocale,startsAt,endsAt,venueId,const DeepCollectionEquality().hash(_speakerIds),isLightningTalk,isBeginnersLightningTalk,sessionizeUrl,feedbackUrl,archiveUrl,createdAt,updatedAt);
 
 @override
 String toString() {
-  return 'Session(id: $id, title: $title, description: $description, primaryLocale: $primaryLocale, startsAt: $startsAt, endsAt: $endsAt, venueId: $venueId, speakerIds: $speakerIds, isLightningTalk: $isLightningTalk, isBeginnersLightningTalk: $isBeginnersLightningTalk, sessionizeUrl: $sessionizeUrl, feedbackUrl: $feedbackUrl, createdAt: $createdAt, updatedAt: $updatedAt)';
+  return 'Session(id: $id, title: $title, description: $description, primaryLocale: $primaryLocale, startsAt: $startsAt, endsAt: $endsAt, venueId: $venueId, speakerIds: $speakerIds, isLightningTalk: $isLightningTalk, isBeginnersLightningTalk: $isBeginnersLightningTalk, sessionizeUrl: $sessionizeUrl, feedbackUrl: $feedbackUrl, archiveUrl: $archiveUrl, createdAt: $createdAt, updatedAt: $updatedAt)';
 }
 
 
@@ -301,7 +305,7 @@ abstract mixin class _$SessionCopyWith<$Res> implements $SessionCopyWith<$Res> {
   factory _$SessionCopyWith(_Session value, $Res Function(_Session) _then) = __$SessionCopyWithImpl;
 @override @useResult
 $Res call({
- String id, LocaleMap title, LocaleMap description, String primaryLocale,@FirestoreDateTimeConverter() DateTime startsAt,@FirestoreDateTimeConverter() DateTime endsAt, String venueId, List<String> speakerIds, bool isLightningTalk, bool isBeginnersLightningTalk, String? sessionizeUrl, String? feedbackUrl,@FirestoreDateTimeConverter() DateTime createdAt,@FirestoreDateTimeConverter() DateTime updatedAt
+ String id, LocaleMap title, LocaleMap description, String primaryLocale,@FirestoreDateTimeConverter() DateTime startsAt,@FirestoreDateTimeConverter() DateTime endsAt, String venueId, List<String> speakerIds, bool isLightningTalk, bool isBeginnersLightningTalk, String? sessionizeUrl, String? feedbackUrl, String? archiveUrl,@FirestoreDateTimeConverter() DateTime createdAt,@FirestoreDateTimeConverter() DateTime updatedAt
 });
 
 
@@ -318,7 +322,7 @@ class __$SessionCopyWithImpl<$Res>
 
 /// Create a copy of Session
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? title = null,Object? description = null,Object? primaryLocale = null,Object? startsAt = null,Object? endsAt = null,Object? venueId = null,Object? speakerIds = null,Object? isLightningTalk = null,Object? isBeginnersLightningTalk = null,Object? sessionizeUrl = freezed,Object? feedbackUrl = freezed,Object? createdAt = null,Object? updatedAt = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? title = null,Object? description = null,Object? primaryLocale = null,Object? startsAt = null,Object? endsAt = null,Object? venueId = null,Object? speakerIds = null,Object? isLightningTalk = null,Object? isBeginnersLightningTalk = null,Object? sessionizeUrl = freezed,Object? feedbackUrl = freezed,Object? archiveUrl = freezed,Object? createdAt = null,Object? updatedAt = null,}) {
   return _then(_Session(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
@@ -332,6 +336,7 @@ as List<String>,isLightningTalk: null == isLightningTalk ? _self.isLightningTalk
 as bool,isBeginnersLightningTalk: null == isBeginnersLightningTalk ? _self.isBeginnersLightningTalk : isBeginnersLightningTalk // ignore: cast_nullable_to_non_nullable
 as bool,sessionizeUrl: freezed == sessionizeUrl ? _self.sessionizeUrl : sessionizeUrl // ignore: cast_nullable_to_non_nullable
 as String?,feedbackUrl: freezed == feedbackUrl ? _self.feedbackUrl : feedbackUrl // ignore: cast_nullable_to_non_nullable
+as String?,archiveUrl: freezed == archiveUrl ? _self.archiveUrl : archiveUrl // ignore: cast_nullable_to_non_nullable
 as String?,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
 as DateTime,

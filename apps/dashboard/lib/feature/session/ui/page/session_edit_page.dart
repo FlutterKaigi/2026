@@ -32,6 +32,7 @@ class SessionEditPage extends HookConsumerWidget {
     final sessionizeUrlController = useTextEditingController(text: session?.sessionizeUrl ?? '');
     final feedbackUrlController = useTextEditingController(text: session?.feedbackUrl ?? '');
     final primaryLocale = useState(session?.primaryLocale ?? 'ja');
+    final archiveUrlController = useTextEditingController(text: session?.archiveUrl ?? '');
     final startsAt = useState<DateTime>(session?.startsAt ?? DateTime.now());
     final endsAt = useState<DateTime>(session?.endsAt ?? DateTime.now().add(const Duration(minutes: 40)));
     final venueId = useState<String?>(session?.venueId.isEmpty == true ? null : session?.venueId);
@@ -73,6 +74,7 @@ class SessionEditPage extends HookConsumerWidget {
           isBeginnersLightningTalk: isBeginnersLightningTalk.value,
           sessionizeUrl: sessionizeUrlController.text.trim().isEmpty ? null : sessionizeUrlController.text.trim(),
           feedbackUrl: feedbackUrlController.text.trim().isEmpty ? null : feedbackUrlController.text.trim(),
+          archiveUrl: archiveUrlController.text.trim().isEmpty ? null : archiveUrlController.text.trim(),
           createdAt: session?.createdAt ?? DateTime.now(),
           updatedAt: DateTime.now(),
         );
@@ -142,6 +144,15 @@ class SessionEditPage extends HookConsumerWidget {
                       controller: descEnController,
                       decoration: const InputDecoration(labelText: 'English', border: OutlineInputBorder()),
                       maxLines: 4,
+                    ),
+                    const SizedBox(height: 24),
+                    OutlinedTextFormField(
+                      controller: archiveUrlController,
+                      labelText: 'アーカイブ URL（YouTube）',
+                      hintText: 'https://www.youtube.com/watch?v=...',
+                      validator: (value) => (value == null || value.trim().isEmpty || youtubeArchiveUri(value) != null)
+                          ? null
+                          : 'YouTube の HTTPS URL を入力してください',
                     ),
                     const SizedBox(height: 24),
                     DateTimeField(label: '開始日時 *', value: startsAt.value, onTap: pickStartsAt),

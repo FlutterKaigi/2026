@@ -9,6 +9,7 @@ import 'package:app/core/ui/widget/app_scrollbar.dart';
 import 'package:app/feature/session/data/provider/session_detail_provider.dart';
 import 'package:app/feature/session/ui/widget/session_bookmark_button.dart';
 import 'package:app/feature/session/ui/widget/session_speaker_widget.dart';
+import 'package:app/feature/session/ui/widget/youtube_archive_player.dart';
 import 'package:app/feature/session/util/event_time.dart';
 import 'package:app/feature/session/util/session_language.dart';
 import 'package:data/data.dart';
@@ -38,6 +39,7 @@ class SessionDetailsContentWidget extends ConsumerWidget {
     final languageLabel = sessionLanguageLabel(t, session.primaryLocale);
     const timeFormat = EventTimeFormat.twentyFourHour;
     final sessionizeUri = _externalUri(session.sessionizeUrl);
+    final archiveUri = youtubeArchiveUri(session.archiveUrl);
     final feedbackUri = _externalUri(session.feedbackUrl);
     final appOrigin = ref.watch(appLinkConfigurationProvider).origin;
     final sessionUrl = appOrigin == null ? null : Uri.parse(appOrigin).replace(pathSegments: ['sessions', session.id]);
@@ -83,6 +85,11 @@ class SessionDetailsContentWidget extends ConsumerWidget {
                 key: const ValueKey('session-details-content'),
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  if (archiveUri != null) ...[
+                    const SizedBox(height: 16),
+                    YouTubeArchivePlayer(archiveUri: archiveUri, title: title),
+                    const SizedBox(height: 16),
+                  ],
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                     child: Wrap(

@@ -82,6 +82,9 @@ sessionDetails:
   speakers: Speakers
   links: Links
   sessionize: Sessionize
+  openYoutube: Open in YouTube
+  archivePlaybackError: This archive could not be played. Open it in YouTube.
+  archive: Watch archive
   feedback: Send session feedback
   feedbackDescription: Let us know what you thought of this session
   share: Share

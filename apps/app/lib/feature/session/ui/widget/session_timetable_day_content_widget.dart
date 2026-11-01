@@ -6,6 +6,7 @@ import 'package:app/feature/session/data/provider/session_timetable_provider.dar
 import 'package:app/feature/session/ui/widget/session_card_widget.dart';
 import 'package:app/feature/session/ui/widget/timeline_event_details_dialog.dart';
 import 'package:app/feature/session/util/event_time.dart';
+import 'package:data/data.dart';
 import 'package:flutter/material.dart';
 
 const _entryContentGap = 12.0;
@@ -265,7 +266,7 @@ class _TimelineEventCardWidget extends StatelessWidget {
     final description = timelineEvent.resolveDescription(locale);
 
     return _TimetableCardWidget(
-      onTap: entry.venueId == null
+      onTap: entry.venueId == null && youtubeArchiveUri(timelineEvent.archiveUrl) == null
           ? null
           : () => showTimelineEventDetailsDialog(context, entry: entry, description: description),
       child: Column(
