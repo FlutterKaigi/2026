@@ -50,15 +50,15 @@ class EventInfoCard extends StatelessComponent {
           .text(strings.eventInfoTicketsLabel),
         ]),
         div(classes: 'event-info-card__cta-row', [
-          a(
-            href: strings.ticketsCtaUrl,
-            target: Target.blank,
-            classes: 'event-info-card__cta event-info-card__cta--active',
+          button(
             [
               span(classes: 'event-info-card__cta-label', [
-                .text(strings.eventInfoGetTicketsCta),
+                .text(strings.eventInfoEventEnded),
               ]),
             ],
+            classes: 'event-info-card__cta',
+            type: ButtonType.button,
+            disabled: true,
           ),
           button(
             [
@@ -205,29 +205,6 @@ class EventInfoCard extends StatelessComponent {
             'appearance': 'none',
             'text-align': 'left',
             'text-decoration': 'none',
-          },
-        ),
-        // チケット購入 CTA：活性リンク。M3 Filled button（primary 地に onPrimary
-        // 文字）にして、隣の disabled ボタン（40%濃度の primary）や薄い
-        // primaryContainer よりも確実に強い見た目にする — primaryContainer だと
-        // カード面 (event-info-card の背景) との明度差がほぼ無く、disabled
-        // ボタンより弱く見えてしまっていた。
-        css('&.event-info-card__cta--active').styles(
-          backgroundColor: primary,
-          color: onPrimary,
-          raw: const {
-            'cursor': 'pointer',
-            'transition': 'background-color 150ms ease',
-          },
-        ),
-        // M3 State Layer (Hover 8%) — onPrimary 由来のオーバーレイを単色の
-        // primary 上に重ねる。background-color の差し替えだと半透明色の背後に
-        // カード面が透けるため、linear-gradient で塗り重ねる。
-        css('&.event-info-card__cta--active:hover').styles(
-          raw: const {
-            'background-image':
-                'linear-gradient('
-                '$onPrimaryHoverHex, $onPrimaryHoverHex)',
           },
         ),
         css('.event-info-card__cta-label').styles(
