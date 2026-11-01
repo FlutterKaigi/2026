@@ -29,6 +29,22 @@ class StampRallyPage extends StatelessWidget {
           t.stampRally.title,
           style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
         ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: MediaQuery.sizeOf(context).width / 2),
+              child: Tooltip(
+                message: t.stampRally.sponsorsButton,
+                child: TextButton.icon(
+                  onPressed: () => const StampRallySponsorsRoute().push<void>(context),
+                  icon: const Icon(Icons.fact_check_outlined, size: 18),
+                  label: Text(t.stampRally.sponsorsTitle, maxLines: 1, overflow: TextOverflow.ellipsis),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
       body: AuthenticatedBody(
         signedOut: CenteredSignInCard(title: t.auth.signIn.required, description: t.stampRally.signInRequired),
@@ -94,12 +110,6 @@ class _StampRallyBody extends ConsumerWidget {
             style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(48)),
             icon: const Icon(Icons.qr_code_scanner),
             label: Text(t.stampRally.scanButton),
-          ),
-          const SizedBox(height: 12),
-          OutlinedButton.icon(
-            onPressed: () => const StampRallySponsorsRoute().push<void>(context),
-            icon: const Icon(Icons.fact_check_outlined),
-            label: Text(t.stampRally.sponsorsButton),
           ),
           const SizedBox(height: 12),
           const StampRallyTicketLink(),
