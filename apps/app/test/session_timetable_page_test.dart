@@ -803,6 +803,31 @@ void main() {
     expect(dialog, findsNothing);
   });
 
+  testWidgets('opens an archived event without a venue in both layouts', (tester) async {
+    final timetable = _singleDayTimetable([
+      SessionTimetableEntry.timelineEvent(
+        timelineEvent: _sharedEvent.copyWith(archiveUrl: 'https://youtu.be/shared-archive'),
+        venue: null,
+      ),
+      _overlapEntry,
+    ]);
+    await _pumpTimetableState(tester, AsyncData(timetable));
+
+    for (final viewMode in SessionTimetableViewMode.values) {
+      if (viewMode == SessionTimetableViewMode.rooms) {
+        await _switchToRooms(tester);
+      }
+      await tester.tap(find.text('Shared Event'));
+      await tester.pumpAndSettle();
+
+      final dialog = find.byKey(const ValueKey('timeline-event-details-dialog'));
+      expect(dialog, findsOneWidget, reason: '$viewMode');
+      expect(find.descendant(of: dialog, matching: find.text('アーカイブを見る')), findsOneWidget);
+      await tester.tap(find.text('閉じる'));
+      await tester.pumpAndSettle();
+    }
+  });
+
   testWidgets('only opens room event details in both layouts', (tester) async {
     final timetable = _singleDayTimetable([
       ..._undescribedEventTimetable.days.single.entries,

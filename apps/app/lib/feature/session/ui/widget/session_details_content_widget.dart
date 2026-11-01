@@ -38,6 +38,7 @@ class SessionDetailsContentWidget extends ConsumerWidget {
     final languageLabel = sessionLanguageLabel(t, session.primaryLocale);
     const timeFormat = EventTimeFormat.twentyFourHour;
     final sessionizeUri = _externalUri(session.sessionizeUrl);
+    final archiveUri = youtubeArchiveUri(session.archiveUrl);
     final feedbackUri = _externalUri(session.feedbackUrl);
     final appOrigin = ref.watch(appLinkConfigurationProvider).origin;
     final sessionUrl = appOrigin == null ? null : Uri.parse(appOrigin).replace(pathSegments: ['sessions', session.id]);
@@ -183,20 +184,34 @@ class SessionDetailsContentWidget extends ConsumerWidget {
                     icon: Icons.room_outlined,
                     title: data.venue?.name.resolve(locale) ?? t.sessionTimetable.venue.unknown,
                   ),
-                  if (sessionizeUri != null) ...[
+                  if (archiveUri != null || sessionizeUri != null) ...[
                     _SectionHeader(title: t.sessionDetails.links),
-                    _DetailListTile(
-                      icon: Icons.open_in_new,
-                      title: t.sessionDetails.sessionize,
-                      subtitle: sessionizeUri.toString(),
-                      onTap: () => unawaited(
-                        launchExternalUrl(
-                          context,
-                          uri: sessionizeUri,
-                          failureMessage: t.links.openError,
+                    if (archiveUri != null)
+                      _DetailListTile(
+                        icon: Icons.play_circle_outline,
+                        title: t.sessionDetails.archive,
+                        subtitle: archiveUri.toString(),
+                        onTap: () => unawaited(
+                          launchExternalUrl(
+                            context,
+                            uri: archiveUri,
+                            failureMessage: t.links.openError,
+                          ),
                         ),
                       ),
-                    ),
+                    if (sessionizeUri != null)
+                      _DetailListTile(
+                        icon: Icons.open_in_new,
+                        title: t.sessionDetails.sessionize,
+                        subtitle: sessionizeUri.toString(),
+                        onTap: () => unawaited(
+                          launchExternalUrl(
+                            context,
+                            uri: sessionizeUri,
+                            failureMessage: t.links.openError,
+                          ),
+                        ),
+                      ),
                   ],
                   const SizedBox(height: 32),
                 ],

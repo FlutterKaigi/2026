@@ -26,6 +26,9 @@ abstract class Session with _$Session {
     /// Attendee feedback form (Sessionize). Owned by the dashboard, never
     /// written by the Sessionize import.
     String? feedbackUrl,
+
+    /// YouTube recording URL, managed in the dashboard.
+    String? archiveUrl,
     @FirestoreDateTimeConverter() required DateTime createdAt,
     @FirestoreDateTimeConverter() required DateTime updatedAt,
   }) = _Session;

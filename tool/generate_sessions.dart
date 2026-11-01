@@ -238,6 +238,7 @@ typedef _Cell = ({
   _Text? speakerName,
   List<String?> avatarUrls,
   _Text? description,
+  String? archiveUrl,
   List<String> tagRefs,
 });
 
@@ -245,9 +246,13 @@ typedef _Cell = ({
 /// ([column] / [cell]), a full-width timeline event ([eventLabel] only), or a
 /// room-bound timeline event ([eventLabel] + [column] — e.g. the lunch stage).
 class _Entry {
-  _Entry.session(this.start, this.end, int this.column, _Cell this.cell) : eventLabel = null, eventDescription = null;
+  _Entry.session(this.start, this.end, int this.column, _Cell this.cell)
+    : eventLabel = null,
+      eventDescription = null,
+      eventArchiveUrl = null;
 
-  _Entry.event(this.start, this.end, this.eventLabel, {this.column, this.eventDescription}) : cell = null;
+  _Entry.event(this.start, this.end, this.eventLabel, {this.column, this.eventDescription, this.eventArchiveUrl})
+    : cell = null;
 
   final DateTime start;
   final DateTime end;
@@ -258,6 +263,7 @@ class _Entry {
   /// Only room-bound events carry one: a full-width bar has no dialog to show
   /// it in.
   final _Text? eventDescription;
+  final String? eventArchiveUrl;
 
   /// Where the entry stops on the grid when that differs from [end]; see
   /// [_clampBarsToOverlappingEntries]. Only a full-width bar ever sets one.
@@ -395,6 +401,7 @@ Map<String, _Day> _buildDays(_Data data, List<_Room> rooms) {
         // A full-width bar is a plain label with no dialog, so a description
         // on one has nowhere to go.
         eventDescription: column == null ? null : _optionalText(e.description),
+        eventArchiveUrl: youtubeArchiveUri(e.archiveUrl)?.toString(),
       ),
     );
   }
@@ -500,6 +507,7 @@ _Cell _buildCell(Session s, Map<String, Speaker> speakersById) {
     speakerName: names.isEmpty ? null : (ja: names.join('、'), en: names.join(', ')),
     avatarUrls: avatarUrls,
     description: description.ja.isEmpty && description.en.isEmpty ? null : description,
+    archiveUrl: youtubeArchiveUri(s.archiveUrl)?.toString(),
     tagRefs: [
       if (s.isBeginnersLightningTalk) '_tagBeginnersLt' else if (s.isLightningTalk) '_tagLt',
       if (s.primaryLocale == 'en') '_tagEn' else '_tagJa',
@@ -606,6 +614,9 @@ void _writeDart({required List<_Room> rooms, required Map<String, _Day> days}) {
         if (entry.eventDescription case final description?) {
           out.writeln('        eventDescription: ${_localizedText(description)},');
         }
+        if (entry.eventArchiveUrl case final url?) {
+          out.writeln('        eventArchiveUrl: ${_str(url)},');
+        }
         out.writeln('      ),');
         continue;
       }
@@ -625,6 +636,9 @@ void _writeDart({required List<_Room> rooms, required Map<String, _Day> days}) {
       }
       if (cell.description case final description?) {
         out.writeln('          description: ${_localizedText(description)},');
+      }
+      if (cell.archiveUrl case final url?) {
+        out.writeln('          archiveUrl: ${_str(url)},');
       }
       if (cell.tagRefs.isNotEmpty) {
         out.writeln('          tags: [${cell.tagRefs.join(', ')}],');

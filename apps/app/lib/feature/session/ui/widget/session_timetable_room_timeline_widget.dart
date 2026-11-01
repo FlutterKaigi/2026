@@ -9,6 +9,7 @@ import 'package:app/feature/session/ui/widget/session_speaker_widget.dart';
 import 'package:app/feature/session/ui/widget/timeline_event_details_dialog.dart';
 import 'package:app/feature/session/util/event_time.dart';
 import 'package:app/feature/session/util/session_language.dart';
+import 'package:data/data.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -630,7 +631,7 @@ class _RoomScheduleEntryWidget extends ConsumerWidget {
       child: InkWell(
         onTap: switch ((session, entry.venueId)) {
           (final session?, _) => () => SessionDetailsRoute(sessionId: session.id).push<void>(context),
-          (null, null) => null,
+          (null, null) when youtubeArchiveUri(entry.timelineEvent?.archiveUrl) == null => null,
           (null, _) => () => showTimelineEventDetailsDialog(
             context,
             entry: entry,

@@ -8,6 +8,28 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   setUp(() => LocaleSettings.setLocaleSync(AppLocale.ja));
 
+  testWidgets('opens a YouTube archive without a venue or description', (tester) async {
+    final launched = <Uri>[];
+    const archiveUrl = 'https://youtu.be/panel-archive?t=30';
+    await _openDialog(tester, description: null, archiveUrl: archiveUrl, launched: launched);
+
+    expect(find.text('アーカイブを見る'), findsOneWidget);
+    await tester.tap(find.text('アーカイブを見る'));
+    await tester.pumpAndSettle();
+
+    expect(launched, [Uri.parse(archiveUrl)]);
+    expect(find.byKey(const ValueKey('timeline-event-details-dialog')), findsOneWidget);
+  });
+
+  testWidgets('hides missing or invalid event archive URLs', (tester) async {
+    for (final url in [null, '', 'https://example.com/archive', 'javascript:alert(1)']) {
+      await _openDialog(tester, description: null, archiveUrl: url, launched: []);
+      expect(find.text('アーカイブを見る'), findsNothing, reason: '$url');
+      await tester.tap(find.text('Close'));
+      await tester.pumpAndSettle();
+    }
+  });
+
   testWidgets('opens a URL in the description only when the URL is tapped', (tester) async {
     const formUrl = 'https://docs.google.com/forms/d/e/1FAIpQLSe/viewform?usp=publish-editor';
     final launched = <Uri>[];
@@ -49,8 +71,9 @@ void main() {
 
 Future<void> _openDialog(
   WidgetTester tester, {
-  required String description,
+  required String? description,
   required List<Uri> launched,
+  String? archiveUrl,
 }) async {
   await tester.pumpWidget(
     TranslationProvider(
@@ -60,7 +83,10 @@ Future<void> _openDialog(
             builder: (context) => TextButton(
               onPressed: () => showTimelineEventDetailsDialog(
                 context,
-                entry: _entry,
+                entry: SessionTimetableEntry.timelineEvent(
+                  timelineEvent: _entry.timelineEvent!.copyWith(archiveUrl: archiveUrl),
+                  venue: null,
+                ),
                 description: description,
                 launcher: (uri) async {
                   launched.add(uri);

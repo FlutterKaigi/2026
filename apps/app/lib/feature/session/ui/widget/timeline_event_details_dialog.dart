@@ -26,6 +26,7 @@ Future<void> showTimelineEventDetailsDialog(
 }) {
   final locale = Localizations.localeOf(context);
   final venue = entry.venue;
+  final archiveUri = youtubeArchiveUri(entry.timelineEvent!.archiveUrl);
   final theme = Theme.of(context);
 
   return showDialog<void>(
@@ -68,6 +69,19 @@ Future<void> showTimelineEventDetailsDialog(
         ],
       ),
       actions: [
+        if (archiveUri != null)
+          TextButton.icon(
+            onPressed: () => unawaited(
+              launchExternalUrl(
+                context,
+                uri: archiveUri,
+                failureMessage: Translations.of(context).links.openError,
+                launcher: launcher,
+              ),
+            ),
+            icon: const Icon(Icons.play_circle_outline),
+            label: Text(Translations.of(context).sessionDetails.archive),
+          ),
         TextButton(
           onPressed: () => Navigator.pop(context),
           child: Text(MaterialLocalizations.of(context).closeButtonLabel),

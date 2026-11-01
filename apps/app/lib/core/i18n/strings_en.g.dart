@@ -16,22 +16,22 @@ class TranslationsEn extends Translations with BaseTranslations<AppLocale, Trans
 	/// Constructing via the enum [AppLocale.build] is preferred.
 	TranslationsEn({Map<String, Node>? overrides, PluralResolver? cardinalResolver, PluralResolver? ordinalResolver, TranslationMetadata<AppLocale, Translations>? meta})
 		: assert(overrides == null, 'Set "translation_overrides: true" in order to enable this feature.'),
-		  $meta = meta ?? TranslationMetadata(
+		  _meta = meta ?? TranslationMetadata(
 		    locale: AppLocale.en,
 		    overrides: overrides ?? {},
 		    cardinalResolver: cardinalResolver,
 		    ordinalResolver: ordinalResolver,
 		  ),
 		  super(cardinalResolver: cardinalResolver, ordinalResolver: ordinalResolver) {
-		super.$meta.setFlatMapFunction($meta.getTranslation); // copy base translations to super.$meta
-		$meta.setFlatMapFunction(_flatMapFunction);
+		_meta.setFlatMapFunction(_flatMapFunction);
 	}
 
 	/// Metadata for the translations of <en>.
-	@override final TranslationMetadata<AppLocale, Translations> $meta;
+	final TranslationMetadata<AppLocale, Translations> _meta;
+	@override TranslationMetadata<AppLocale, Translations> get $meta => _meta;
 
 	/// Access flat map
-	@override dynamic operator[](String key) => $meta.getTranslation(key) ?? super.$meta.getTranslation(key);
+	@override dynamic operator[](String key) => _meta.getTranslation(key) ?? super[key];
 
 	late final TranslationsEn _root = this; // ignore: unused_field
 
@@ -227,6 +227,7 @@ class _Translations$sessionDetails$en extends Translations$sessionDetails$ja {
 	@override String get speakers => 'Speakers';
 	@override String get links => 'Links';
 	@override String get sessionize => 'Sessionize';
+	@override String get archive => 'Watch archive';
 	@override String get feedback => 'Send session feedback';
 	@override String get feedbackDescription => 'Let us know what you thought of this session';
 	@override String get share => 'Share';
@@ -1607,6 +1608,7 @@ extension on TranslationsEn {
 			'sessionDetails.speakers' => 'Speakers',
 			'sessionDetails.links' => 'Links',
 			'sessionDetails.sessionize' => 'Sessionize',
+			'sessionDetails.archive' => 'Watch archive',
 			'sessionDetails.feedback' => 'Send session feedback',
 			'sessionDetails.feedbackDescription' => 'Let us know what you thought of this session',
 			'sessionDetails.share' => 'Share',
@@ -2051,9 +2053,9 @@ extension on TranslationsEn {
 			'supportLt.sessionExpired' => 'Your sign-in session has expired. Please sign in again',
 			'supportLt.permissionDenied' => 'Registration is not permitted. Please ask the organizers',
 			'supportLt.registrationFailed' => 'Could not register your participation. Please try again',
-			'countryRegion.asia' => 'Asia',
 			_ => null,
 		} ?? switch (path) {
+			'countryRegion.asia' => 'Asia',
 			'countryRegion.oceania' => 'Oceania',
 			'countryRegion.americas' => 'Americas',
 			'countryRegion.europe' => 'Europe',

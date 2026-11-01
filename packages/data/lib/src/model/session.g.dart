@@ -19,6 +19,7 @@ _Session _$SessionFromJson(Map<String, dynamic> json) => _Session(
   isBeginnersLightningTalk: json['isBeginnersLightningTalk'] as bool? ?? false,
   sessionizeUrl: json['sessionizeUrl'] as String?,
   feedbackUrl: json['feedbackUrl'] as String?,
+  archiveUrl: json['archiveUrl'] as String?,
   createdAt: const FirestoreDateTimeConverter().fromJson(json['createdAt']),
   updatedAt: const FirestoreDateTimeConverter().fromJson(json['updatedAt']),
 );
@@ -36,6 +37,7 @@ Map<String, dynamic> _$SessionToJson(_Session instance) => <String, dynamic>{
   'isBeginnersLightningTalk': instance.isBeginnersLightningTalk,
   'sessionizeUrl': instance.sessionizeUrl,
   'feedbackUrl': instance.feedbackUrl,
+  'archiveUrl': instance.archiveUrl,
   'createdAt': const FirestoreDateTimeConverter().toJson(instance.createdAt),
   'updatedAt': const FirestoreDateTimeConverter().toJson(instance.updatedAt),
 };

@@ -41,6 +41,7 @@ class TimetableSession {
     this.speakerName,
     this.speakerAvatarUrls = const [],
     this.description,
+    this.archiveUrl,
     this.tags = const [],
   });
 
@@ -57,6 +58,9 @@ class TimetableSession {
   /// セッション概要（詳細ダイアログに表示）。段落は `\n` 区切り。
   /// null のときは概要ブロックを表示しない。
   final LocalizedText? description;
+
+  /// YouTube recording, when published.
+  final String? archiveUrl;
 
   final List<LocalizedText> tags;
 }
@@ -90,6 +94,7 @@ class TimetableEntry {
     required TimetableSession this.session,
   }) : eventLabel = null,
        eventDescription = null,
+       eventArchiveUrl = null,
        labelEndTick = null;
 
   const TimetableEntry.event({
@@ -98,6 +103,7 @@ class TimetableEntry {
     this.roomIndex,
     required LocalizedText this.eventLabel,
     this.eventDescription,
+    this.eventArchiveUrl,
     this.labelEndTick,
   }) : session = null;
 
@@ -116,4 +122,7 @@ class TimetableEntry {
 
   /// 会場つきイベントの概要。ダイアログでのみ使う。
   final LocalizedText? eventDescription;
+
+  /// YouTube recording for venue-bound and full-width events alike.
+  final String? eventArchiveUrl;
 }

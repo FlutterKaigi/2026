@@ -233,6 +233,11 @@ class Strings {
 
   String get timetableTitle => 'Timetable';
 
+  String get timetableWatchArchive => switch (locale) {
+    AppLocale.ja => 'アーカイブを見る',
+    AppLocale.en => 'Watch archive',
+  };
+
   String get timetableSubtitle => switch (locale) {
     AppLocale.ja => 'FlutterKaigi 2026 当日のセッションタイムライン',
     AppLocale.en => 'Session timeline for the two days of FlutterKaigi 2026',

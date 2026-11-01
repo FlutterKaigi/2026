@@ -17,7 +17,8 @@ mixin _$TimelineEvent {
 
  String get id; LocaleMap get title;/// 概要。会場つきイベント（ランチステージ・学生支援など）でのみ使う。
 /// Sessionize から取り込むイベントは概要を持たないため null になる。
- LocaleMap? get description;@FirestoreDateTimeConverter() DateTime get startsAt;@FirestoreNullableDateTimeConverter() DateTime? get endsAt; String? get venueId;@FirestoreDateTimeConverter() DateTime get createdAt;@FirestoreDateTimeConverter() DateTime get updatedAt;
+ LocaleMap? get description;@FirestoreDateTimeConverter() DateTime get startsAt;@FirestoreNullableDateTimeConverter() DateTime? get endsAt; String? get venueId;/// YouTube recording URL, managed in the dashboard.
+ String? get archiveUrl;@FirestoreDateTimeConverter() DateTime get createdAt;@FirestoreDateTimeConverter() DateTime get updatedAt;
 /// Create a copy of TimelineEvent
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -30,16 +31,16 @@ $TimelineEventCopyWith<TimelineEvent> get copyWith => _$TimelineEventCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is TimelineEvent&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.description, description) || other.description == description)&&(identical(other.startsAt, startsAt) || other.startsAt == startsAt)&&(identical(other.endsAt, endsAt) || other.endsAt == endsAt)&&(identical(other.venueId, venueId) || other.venueId == venueId)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is TimelineEvent&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.description, description) || other.description == description)&&(identical(other.startsAt, startsAt) || other.startsAt == startsAt)&&(identical(other.endsAt, endsAt) || other.endsAt == endsAt)&&(identical(other.venueId, venueId) || other.venueId == venueId)&&(identical(other.archiveUrl, archiveUrl) || other.archiveUrl == archiveUrl)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,title,description,startsAt,endsAt,venueId,createdAt,updatedAt);
+int get hashCode => Object.hash(runtimeType,id,title,description,startsAt,endsAt,venueId,archiveUrl,createdAt,updatedAt);
 
 @override
 String toString() {
-  return 'TimelineEvent(id: $id, title: $title, description: $description, startsAt: $startsAt, endsAt: $endsAt, venueId: $venueId, createdAt: $createdAt, updatedAt: $updatedAt)';
+  return 'TimelineEvent(id: $id, title: $title, description: $description, startsAt: $startsAt, endsAt: $endsAt, venueId: $venueId, archiveUrl: $archiveUrl, createdAt: $createdAt, updatedAt: $updatedAt)';
 }
 
 
@@ -50,7 +51,7 @@ abstract mixin class $TimelineEventCopyWith<$Res>  {
   factory $TimelineEventCopyWith(TimelineEvent value, $Res Function(TimelineEvent) _then) = _$TimelineEventCopyWithImpl;
 @useResult
 $Res call({
- String id, LocaleMap title, LocaleMap? description,@FirestoreDateTimeConverter() DateTime startsAt,@FirestoreNullableDateTimeConverter() DateTime? endsAt, String? venueId,@FirestoreDateTimeConverter() DateTime createdAt,@FirestoreDateTimeConverter() DateTime updatedAt
+ String id, LocaleMap title, LocaleMap? description,@FirestoreDateTimeConverter() DateTime startsAt,@FirestoreNullableDateTimeConverter() DateTime? endsAt, String? venueId, String? archiveUrl,@FirestoreDateTimeConverter() DateTime createdAt,@FirestoreDateTimeConverter() DateTime updatedAt
 });
 
 
@@ -67,7 +68,7 @@ class _$TimelineEventCopyWithImpl<$Res>
 
 /// Create a copy of TimelineEvent
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? title = null,Object? description = freezed,Object? startsAt = null,Object? endsAt = freezed,Object? venueId = freezed,Object? createdAt = null,Object? updatedAt = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? title = null,Object? description = freezed,Object? startsAt = null,Object? endsAt = freezed,Object? venueId = freezed,Object? archiveUrl = freezed,Object? createdAt = null,Object? updatedAt = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
@@ -75,6 +76,7 @@ as LocaleMap,description: freezed == description ? _self.description : descripti
 as LocaleMap?,startsAt: null == startsAt ? _self.startsAt : startsAt // ignore: cast_nullable_to_non_nullable
 as DateTime,endsAt: freezed == endsAt ? _self.endsAt : endsAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,venueId: freezed == venueId ? _self.venueId : venueId // ignore: cast_nullable_to_non_nullable
+as String?,archiveUrl: freezed == archiveUrl ? _self.archiveUrl : archiveUrl // ignore: cast_nullable_to_non_nullable
 as String?,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
 as DateTime,
@@ -183,10 +185,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  LocaleMap title,  LocaleMap? description, @FirestoreDateTimeConverter()  DateTime startsAt, @FirestoreNullableDateTimeConverter()  DateTime? endsAt,  String? venueId, @FirestoreDateTimeConverter()  DateTime createdAt, @FirestoreDateTimeConverter()  DateTime updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  LocaleMap title,  LocaleMap? description, @FirestoreDateTimeConverter()  DateTime startsAt, @FirestoreNullableDateTimeConverter()  DateTime? endsAt,  String? venueId,  String? archiveUrl, @FirestoreDateTimeConverter()  DateTime createdAt, @FirestoreDateTimeConverter()  DateTime updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _TimelineEvent() when $default != null:
-return $default(_that.id,_that.title,_that.description,_that.startsAt,_that.endsAt,_that.venueId,_that.createdAt,_that.updatedAt);case _:
+return $default(_that.id,_that.title,_that.description,_that.startsAt,_that.endsAt,_that.venueId,_that.archiveUrl,_that.createdAt,_that.updatedAt);case _:
   return orElse();
 
 }
@@ -204,10 +206,10 @@ return $default(_that.id,_that.title,_that.description,_that.startsAt,_that.ends
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  LocaleMap title,  LocaleMap? description, @FirestoreDateTimeConverter()  DateTime startsAt, @FirestoreNullableDateTimeConverter()  DateTime? endsAt,  String? venueId, @FirestoreDateTimeConverter()  DateTime createdAt, @FirestoreDateTimeConverter()  DateTime updatedAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  LocaleMap title,  LocaleMap? description, @FirestoreDateTimeConverter()  DateTime startsAt, @FirestoreNullableDateTimeConverter()  DateTime? endsAt,  String? venueId,  String? archiveUrl, @FirestoreDateTimeConverter()  DateTime createdAt, @FirestoreDateTimeConverter()  DateTime updatedAt)  $default,) {final _that = this;
 switch (_that) {
 case _TimelineEvent():
-return $default(_that.id,_that.title,_that.description,_that.startsAt,_that.endsAt,_that.venueId,_that.createdAt,_that.updatedAt);case _:
+return $default(_that.id,_that.title,_that.description,_that.startsAt,_that.endsAt,_that.venueId,_that.archiveUrl,_that.createdAt,_that.updatedAt);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -224,10 +226,10 @@ return $default(_that.id,_that.title,_that.description,_that.startsAt,_that.ends
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  LocaleMap title,  LocaleMap? description, @FirestoreDateTimeConverter()  DateTime startsAt, @FirestoreNullableDateTimeConverter()  DateTime? endsAt,  String? venueId, @FirestoreDateTimeConverter()  DateTime createdAt, @FirestoreDateTimeConverter()  DateTime updatedAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  LocaleMap title,  LocaleMap? description, @FirestoreDateTimeConverter()  DateTime startsAt, @FirestoreNullableDateTimeConverter()  DateTime? endsAt,  String? venueId,  String? archiveUrl, @FirestoreDateTimeConverter()  DateTime createdAt, @FirestoreDateTimeConverter()  DateTime updatedAt)?  $default,) {final _that = this;
 switch (_that) {
 case _TimelineEvent() when $default != null:
-return $default(_that.id,_that.title,_that.description,_that.startsAt,_that.endsAt,_that.venueId,_that.createdAt,_that.updatedAt);case _:
+return $default(_that.id,_that.title,_that.description,_that.startsAt,_that.endsAt,_that.venueId,_that.archiveUrl,_that.createdAt,_that.updatedAt);case _:
   return null;
 
 }
@@ -239,7 +241,7 @@ return $default(_that.id,_that.title,_that.description,_that.startsAt,_that.ends
 @JsonSerializable()
 
 class _TimelineEvent extends TimelineEvent {
-  const _TimelineEvent({required this.id, required this.title, this.description, @FirestoreDateTimeConverter() required this.startsAt, @FirestoreNullableDateTimeConverter() this.endsAt, this.venueId, @FirestoreDateTimeConverter() required this.createdAt, @FirestoreDateTimeConverter() required this.updatedAt}): super._();
+  const _TimelineEvent({required this.id, required this.title, this.description, @FirestoreDateTimeConverter() required this.startsAt, @FirestoreNullableDateTimeConverter() this.endsAt, this.venueId, this.archiveUrl, @FirestoreDateTimeConverter() required this.createdAt, @FirestoreDateTimeConverter() required this.updatedAt}): super._();
   factory _TimelineEvent.fromJson(Map<String, dynamic> json) => _$TimelineEventFromJson(json);
 
 @override final  String id;
@@ -250,6 +252,8 @@ class _TimelineEvent extends TimelineEvent {
 @override@FirestoreDateTimeConverter() final  DateTime startsAt;
 @override@FirestoreNullableDateTimeConverter() final  DateTime? endsAt;
 @override final  String? venueId;
+/// YouTube recording URL, managed in the dashboard.
+@override final  String? archiveUrl;
 @override@FirestoreDateTimeConverter() final  DateTime createdAt;
 @override@FirestoreDateTimeConverter() final  DateTime updatedAt;
 
@@ -266,16 +270,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _TimelineEvent&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.description, description) || other.description == description)&&(identical(other.startsAt, startsAt) || other.startsAt == startsAt)&&(identical(other.endsAt, endsAt) || other.endsAt == endsAt)&&(identical(other.venueId, venueId) || other.venueId == venueId)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _TimelineEvent&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.description, description) || other.description == description)&&(identical(other.startsAt, startsAt) || other.startsAt == startsAt)&&(identical(other.endsAt, endsAt) || other.endsAt == endsAt)&&(identical(other.venueId, venueId) || other.venueId == venueId)&&(identical(other.archiveUrl, archiveUrl) || other.archiveUrl == archiveUrl)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,title,description,startsAt,endsAt,venueId,createdAt,updatedAt);
+int get hashCode => Object.hash(runtimeType,id,title,description,startsAt,endsAt,venueId,archiveUrl,createdAt,updatedAt);
 
 @override
 String toString() {
-  return 'TimelineEvent(id: $id, title: $title, description: $description, startsAt: $startsAt, endsAt: $endsAt, venueId: $venueId, createdAt: $createdAt, updatedAt: $updatedAt)';
+  return 'TimelineEvent(id: $id, title: $title, description: $description, startsAt: $startsAt, endsAt: $endsAt, venueId: $venueId, archiveUrl: $archiveUrl, createdAt: $createdAt, updatedAt: $updatedAt)';
 }
 
 
@@ -286,7 +290,7 @@ abstract mixin class _$TimelineEventCopyWith<$Res> implements $TimelineEventCopy
   factory _$TimelineEventCopyWith(_TimelineEvent value, $Res Function(_TimelineEvent) _then) = __$TimelineEventCopyWithImpl;
 @override @useResult
 $Res call({
- String id, LocaleMap title, LocaleMap? description,@FirestoreDateTimeConverter() DateTime startsAt,@FirestoreNullableDateTimeConverter() DateTime? endsAt, String? venueId,@FirestoreDateTimeConverter() DateTime createdAt,@FirestoreDateTimeConverter() DateTime updatedAt
+ String id, LocaleMap title, LocaleMap? description,@FirestoreDateTimeConverter() DateTime startsAt,@FirestoreNullableDateTimeConverter() DateTime? endsAt, String? venueId, String? archiveUrl,@FirestoreDateTimeConverter() DateTime createdAt,@FirestoreDateTimeConverter() DateTime updatedAt
 });
 
 
@@ -303,7 +307,7 @@ class __$TimelineEventCopyWithImpl<$Res>
 
 /// Create a copy of TimelineEvent
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? title = null,Object? description = freezed,Object? startsAt = null,Object? endsAt = freezed,Object? venueId = freezed,Object? createdAt = null,Object? updatedAt = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? title = null,Object? description = freezed,Object? startsAt = null,Object? endsAt = freezed,Object? venueId = freezed,Object? archiveUrl = freezed,Object? createdAt = null,Object? updatedAt = null,}) {
   return _then(_TimelineEvent(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
@@ -311,6 +315,7 @@ as LocaleMap,description: freezed == description ? _self.description : descripti
 as LocaleMap?,startsAt: null == startsAt ? _self.startsAt : startsAt // ignore: cast_nullable_to_non_nullable
 as DateTime,endsAt: freezed == endsAt ? _self.endsAt : endsAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,venueId: freezed == venueId ? _self.venueId : venueId // ignore: cast_nullable_to_non_nullable
+as String?,archiveUrl: freezed == archiveUrl ? _self.archiveUrl : archiveUrl // ignore: cast_nullable_to_non_nullable
 as String?,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
 as DateTime,

@@ -23,7 +23,7 @@
 ///     counted in the summary) rather than written with placeholder values.
 ///
 ///   - **Dashboard edits are preserved.** Writes use an explicit update mask,
-///     so fields this script does not own (`sessionizeUrl`, `feedbackUrl`) are
+///     so fields this script does not own (`sessionizeUrl`, `feedbackUrl`, `archiveUrl`) are
 ///     never touched. Translated `title` / `description` are only overwritten
 ///     when the Sessionize-side original actually changed, and even then only
 ///     the original-language half is rewritten — the translation is left for
@@ -584,7 +584,7 @@ _Write? _planSession({
     'isLightningTalk': format.isLightningTalk,
     'isBeginnersLightningTalk': format.isBeginners,
   };
-  // `sessionizeUrl` / `feedbackUrl` are deliberately absent: Sessionize's
+  // `sessionizeUrl` / `feedbackUrl` / `archiveUrl` are deliberately absent: Sessionize's
   // API has no equivalent, so they stay owned by the dashboard.
 
   final text = _planLocalizedText(

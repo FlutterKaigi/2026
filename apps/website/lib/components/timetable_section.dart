@@ -1,7 +1,7 @@
+import 'package:data/archive_url.dart';
 import 'package:jaspr/dom.dart';
 import 'package:jaspr/jaspr.dart';
 
-import '../constants/generated_sessions.dart';
 import '../constants/generated_tokens.dart';
 import '../constants/theme.dart';
 import '../constants/timetable.dart';
@@ -22,16 +22,17 @@ import 'linkified_text.dart';
 /// 由来、git 管理外）。タイムテーブル確定前は空になるため、その場合は
 /// タブとグリッドを出さず準備中メッセージのみを表示する。
 class TimetableSection extends StatelessComponent {
-  const TimetableSection({super.key});
+  const TimetableSection({required this.rooms, required this.programmes, super.key});
+
+  final List<TimetableRoom> rooms;
+  final Map<TimetableDay, TimetableProgramme> programmes;
 
   @override
   Component build(BuildContext context) {
     final strings = LocaleScope.stringsOf(context);
     // 会場が 1 つも無い＝タイムテーブル未確定。セッションが無ければ
     // タイムラインイベントだけ出しても意味がないので同じ扱いにする。
-    final hasProgramme =
-        generatedTimetableRooms.isNotEmpty &&
-        generatedTimetableByDay.values.any((programme) => programme.entries.isNotEmpty);
+    final hasProgramme = rooms.isNotEmpty && programmes.values.any((programme) => programme.entries.isNotEmpty);
     return section(id: 'timetable', classes: 'timetable-section', [
       div(classes: 'timetable-section__inner', [
         div(classes: 'timetable-section__header', [
@@ -69,12 +70,12 @@ class TimetableSection extends StatelessComponent {
               // 列数は会場データ由来。CSS 側は var() 経由で受けるので、
               // 縦積みに切り替えるメディアクエリを inline style が上書きしない。
               styles: Styles(
-                raw: {'--tt-cols': '4.5rem repeat(${generatedTimetableRooms.length}, minmax(0, 1fr))'},
+                raw: {'--tt-cols': '4.5rem repeat(${rooms.length}, minmax(0, 1fr))'},
               ),
               [
                 div(classes: 'timetable-rowhead', [
                   div([]),
-                  for (final room in generatedTimetableRooms)
+                  for (final room in rooms)
                     div(
                       classes: 'timetable-roomhead',
                       styles: Styles(raw: {'--tt-room-color': room.colorHex}),
@@ -85,10 +86,10 @@ class TimetableSection extends StatelessComponent {
                     ),
                 ]),
                 // 片方の日だけ未確定というケースもある。
-                if (generatedTimetableByDay[day]!.entries.isEmpty)
+                if (programmes[day]!.entries.isEmpty)
                   p(classes: 'timetable-empty', [.text(strings.timetableComingSoon)])
                 else
-                  _DayGrid(day: day, strings: strings),
+                  _DayGrid(day: day, strings: strings, rooms: rooms, programme: programmes[day]!),
               ],
             ),
         ],
@@ -413,6 +414,16 @@ class TimetableSection extends StatelessComponent {
 
       // ── タイムラインイベント（開場・休憩など）の全幅バー ─────────────
       // カードより一段引いた、塗りの薄い区切り表現。
+      css('.timetable-archive').styles(
+        color: primary,
+        fontFamily: uiFontFamily,
+        fontWeight: .w600,
+        raw: const {
+          'text-decoration': 'underline',
+          'text-underline-offset': '0.2em',
+          'white-space': 'nowrap',
+        },
+      ),
       css('.timetable-event', [
         css('&').styles(
           display: .flex,
@@ -425,6 +436,7 @@ class TimetableSection extends StatelessComponent {
           radius: .circular(16.px),
           raw: const {
             'grid-column': '2 / -1',
+            'flex-wrap': 'wrap',
             'font-size': '0.85rem',
             'background-color': 'rgba(255, 255, 255, 0.6)',
           },
@@ -565,7 +577,10 @@ String _gridRow(int startTick, int endTick) =>
 /// 押し込めないので、30 分枠の裏で 10 分の LT が 3 本走るような並びも
 /// 時間軸を保ったまま表示できる。
 class _DayGrid extends StatelessComponent {
-  const _DayGrid({required this.day, required this.strings});
+  const _DayGrid({required this.day, required this.strings, required this.rooms, required this.programme});
+
+  final List<TimetableRoom> rooms;
+  final TimetableProgramme programme;
 
   final TimetableDay day;
   final Strings strings;
@@ -575,7 +590,6 @@ class _DayGrid extends StatelessComponent {
 
   @override
   Component build(BuildContext context) {
-    final programme = generatedTimetableByDay[day]!;
     final ticks = programme.ticks;
     // 最後の境界は行を持たない（n 個の境界に対し行は n-1 個）。その時刻だけは
     // 最終行の下端へ寄せて描き、1 日の終わりが読めるようにする。
@@ -594,7 +608,7 @@ class _DayGrid extends StatelessComponent {
           if ((entry.session, entry.roomIndex) case (final session?, final roomIndex?)) ...[
             _SessionCard(
               session: session,
-              room: generatedTimetableRooms[roomIndex],
+              room: rooms[roomIndex],
               start: ticks[entry.startTick],
               end: ticks[entry.endTick],
               gridArea: (row: _gridRow(entry.startTick, entry.endTick), column: '${roomIndex + 2}'),
@@ -606,7 +620,7 @@ class _DayGrid extends StatelessComponent {
             _SessionDialog(
               id: _dialogId(i),
               session: session,
-              room: generatedTimetableRooms[roomIndex],
+              room: rooms[roomIndex],
               day: day,
               start: ticks[entry.startTick],
               end: ticks[entry.endTick],
@@ -618,7 +632,7 @@ class _DayGrid extends StatelessComponent {
             // 持たないだけなので、表示モデルごと流用できる。
             _SessionCard(
               session: TimetableSession(title: label),
-              room: generatedTimetableRooms[roomIndex],
+              room: rooms[roomIndex],
               start: ticks[entry.startTick],
               end: ticks[entry.endTick],
               gridArea: (row: _gridRow(entry.startTick, entry.endTick), column: '${roomIndex + 2}'),
@@ -627,8 +641,12 @@ class _DayGrid extends StatelessComponent {
             ),
             _SessionDialog(
               id: _dialogId(i),
-              session: TimetableSession(title: label, description: entry.eventDescription),
-              room: generatedTimetableRooms[roomIndex],
+              session: TimetableSession(
+                title: label,
+                description: entry.eventDescription,
+                archiveUrl: entry.eventArchiveUrl,
+              ),
+              room: rooms[roomIndex],
               day: day,
               start: ticks[entry.startTick],
               end: ticks[entry.endTick],
@@ -644,6 +662,7 @@ class _DayGrid extends StatelessComponent {
                   .text('${ticks[entry.startTick]} – ${ticks[entry.labelEndTick ?? entry.endTick]}'),
                 ]),
                 span([.text(label.resolve(strings.locale))]),
+                if (youtubeArchiveUri(entry.eventArchiveUrl) case final uri?) _archiveLink(uri, strings),
               ],
             ),
       ],
@@ -741,6 +760,7 @@ class _SessionDialog extends StatelessComponent {
               .text('${day.label} ${day.date} ${day.weekday} / $start – $end'),
             ]),
             if (speaker != null) _speakerRow('timetable-dialog__speaker', session.speakerAvatarUrls, speaker),
+            if (youtubeArchiveUri(session.archiveUrl) case final uri?) _archiveLink(uri, strings),
             if (description != null)
               div(classes: 'timetable-dialog__desc', [
                 for (final paragraph in description.split('\n')) p([LinkifiedText(paragraph)]),
@@ -751,3 +771,11 @@ class _SessionDialog extends StatelessComponent {
     );
   }
 }
+
+Component _archiveLink(Uri uri, Strings strings) => a(
+  href: uri.toString(),
+  target: Target.blank,
+  classes: 'timetable-archive',
+  attributes: const {'rel': 'noopener noreferrer'},
+  [.text(strings.timetableWatchArchive)],
+);
