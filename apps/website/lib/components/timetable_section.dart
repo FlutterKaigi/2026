@@ -2,12 +2,15 @@ import 'package:data/archive_url.dart';
 import 'package:jaspr/dom.dart';
 import 'package:jaspr/jaspr.dart';
 
+import '../constants/build_config.dart';
 import '../constants/generated_tokens.dart';
 import '../constants/theme.dart';
 import '../constants/timetable.dart';
 import '../l10n/strings.dart';
 import 'app_dialog.dart';
 import 'linkified_text.dart';
+import 'timetable_archive.dart';
+import 'timetable_event_card.dart';
 
 /// Home-page Timetable section: 当日タイムライン（Day 1 / Day 2 タブ切替）。
 ///
@@ -93,6 +96,7 @@ class TimetableSection extends StatelessComponent {
               ],
             ),
         ],
+        script(src: '${baseHref}archive-player.js', attributes: const {'type': 'module'}),
       ]),
     ]);
   }
@@ -414,16 +418,6 @@ class TimetableSection extends StatelessComponent {
 
       // ── タイムラインイベント（開場・休憩など）の全幅バー ─────────────
       // カードより一段引いた、塗りの薄い区切り表現。
-      css('.timetable-archive').styles(
-        color: primary,
-        fontFamily: uiFontFamily,
-        fontWeight: .w600,
-        raw: const {
-          'text-decoration': 'underline',
-          'text-underline-offset': '0.2em',
-          'white-space': 'nowrap',
-        },
-      ),
       css('.timetable-event', [
         css('&').styles(
           display: .flex,
@@ -443,6 +437,17 @@ class TimetableSection extends StatelessComponent {
         ),
         // 時刻は左の目盛りと重複するので desktop では出さない。
         css('.timetable-event__time').styles(raw: const {'display': 'none'}),
+        css('.timetable-event__archive').styles(
+          color: primary,
+          fontWeight: .w600,
+          raw: const {'text-decoration': 'underline', 'text-underline-offset': '0.2em'},
+        ),
+        css('&.timetable-event--interactive').styles(
+          raw: const {'border': '0', 'cursor': 'pointer', 'width': '100%'},
+        ),
+        css('&.timetable-event--interactive:focus-visible').styles(
+          raw: const {'outline': '2px solid #65558F', 'outline-offset': '2px'},
+        ),
       ]),
 
       // ── セッション詳細ダイアログ（AppDialog 内のコンテンツ） ─────────
@@ -451,10 +456,9 @@ class TimetableSection extends StatelessComponent {
           display: .flex,
           flexDirection: .column,
           gap: Gap.row(16.px),
-          // 右上の閉じるボタンとメタ行が重ならないための余白。
-          padding: .only(right: 32.px),
         ),
         css('.timetable-dialog__title').styles(
+          padding: .only(right: 32.px),
           color: const Color('#1D1A25'),
           fontFamily: uiFontFamily,
           fontWeight: .w700,
@@ -652,19 +656,29 @@ class _DayGrid extends StatelessComponent {
               end: ticks[entry.endTick],
               strings: strings,
             ),
-          ] else if (entry.eventLabel case final label?)
-            div(
-              classes: 'timetable-event',
-              styles: Styles(raw: {'grid-row': _gridRow(entry.startTick, entry.endTick)}),
-              [
-                // 時刻列が消える縦積み時のための時刻。desktop では非表示。
-                span(classes: 'timetable-event__time', [
-                  .text('${ticks[entry.startTick]} – ${ticks[entry.labelEndTick ?? entry.endTick]}'),
-                ]),
-                span([.text(label.resolve(strings.locale))]),
-                if (youtubeArchiveUri(entry.eventArchiveUrl) case final uri?) _archiveLink(uri, strings),
-              ],
+          ] else if (entry.eventLabel case final label?) ...[
+            TimetableEventCard(
+              title: label.resolve(strings.locale),
+              start: ticks[entry.startTick],
+              end: ticks[entry.labelEndTick ?? entry.endTick],
+              gridRow: _gridRow(entry.startTick, entry.endTick),
+              strings: strings,
+              dialogId: youtubeArchiveUri(entry.eventArchiveUrl) == null ? null : _dialogId(i),
             ),
+            if (youtubeArchiveUri(entry.eventArchiveUrl) != null)
+              _SessionDialog(
+                id: _dialogId(i),
+                session: TimetableSession(
+                  title: label,
+                  description: entry.eventDescription,
+                  archiveUrl: entry.eventArchiveUrl,
+                ),
+                day: day,
+                start: ticks[entry.startTick],
+                end: ticks[entry.labelEndTick ?? entry.endTick],
+                strings: strings,
+              ),
+          ],
       ],
     );
   }
@@ -723,7 +737,7 @@ class _SessionDialog extends StatelessComponent {
   const _SessionDialog({
     required this.id,
     required this.session,
-    required this.room,
+    this.room,
     required this.day,
     required this.start,
     required this.end,
@@ -732,7 +746,7 @@ class _SessionDialog extends StatelessComponent {
 
   final String id;
   final TimetableSession session;
-  final TimetableRoom room;
+  final TimetableRoom? room;
   final TimetableDay day;
   final String start;
   final String end;
@@ -749,18 +763,21 @@ class _SessionDialog extends StatelessComponent {
       children: [
         div(
           classes: 'timetable-dialog',
-          styles: Styles(raw: {'--tt-room-color': room.colorHex}),
+          styles: Styles(raw: {'--tt-room-color': ?room?.colorHex}),
           [
-            div(classes: 'timetable-card__meta', [
-              span(classes: 'timetable-chip timetable-chip--room', [.text(room.name.resolve(locale))]),
-              for (final tag in session.tags) span(classes: 'timetable-chip', [.text(tag.resolve(locale))]),
-            ]),
             h3(id: '$id-title', classes: 'timetable-dialog__title', [.text(session.title.resolve(locale))]),
+            if (session.archiveUrl case final url?)
+              TimetableArchive(url: url, title: session.title.resolve(locale), strings: strings),
             p(classes: 'timetable-dialog__schedule', [
               .text('${day.label} ${day.date} ${day.weekday} / $start – $end'),
             ]),
+            if (room != null || session.tags.isNotEmpty)
+              div(classes: 'timetable-card__meta', [
+                if (room case final venue?)
+                  span(classes: 'timetable-chip timetable-chip--room', [.text(venue.name.resolve(locale))]),
+                for (final tag in session.tags) span(classes: 'timetable-chip', [.text(tag.resolve(locale))]),
+              ]),
             if (speaker != null) _speakerRow('timetable-dialog__speaker', session.speakerAvatarUrls, speaker),
-            if (youtubeArchiveUri(session.archiveUrl) case final uri?) _archiveLink(uri, strings),
             if (description != null)
               div(classes: 'timetable-dialog__desc', [
                 for (final paragraph in description.split('\n')) p([LinkifiedText(paragraph)]),
@@ -771,11 +788,3 @@ class _SessionDialog extends StatelessComponent {
     );
   }
 }
-
-Component _archiveLink(Uri uri, Strings strings) => a(
-  href: uri.toString(),
-  target: Target.blank,
-  classes: 'timetable-archive',
-  attributes: const {'rel': 'noopener noreferrer'},
-  [.text(strings.timetableWatchArchive)],
-);

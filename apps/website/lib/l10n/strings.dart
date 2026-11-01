@@ -233,6 +233,16 @@ class Strings {
 
   String get timetableTitle => 'Timetable';
 
+  String get timetableWatchOnYouTube => switch (locale) {
+    AppLocale.ja => 'YouTubeで見る',
+    AppLocale.en => 'Watch on YouTube',
+  };
+
+  String timetableArchivePlayerTitle(String title) => switch (locale) {
+    AppLocale.ja => '$titleのアーカイブ動画',
+    AppLocale.en => 'Archive video: $title',
+  };
+
   String get timetableWatchArchive => switch (locale) {
     AppLocale.ja => 'アーカイブを見る',
     AppLocale.en => 'Watch archive',

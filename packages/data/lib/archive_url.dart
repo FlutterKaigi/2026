@@ -1,1 +1,1 @@
-export 'src/youtube_archive_url.dart' show youtubeArchiveUri;
+export 'src/youtube_archive_url.dart' show youtubeArchiveEmbedUri, youtubeArchiveUri;

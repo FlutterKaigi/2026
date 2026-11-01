@@ -9,6 +9,7 @@ import 'package:app/core/ui/widget/app_scrollbar.dart';
 import 'package:app/feature/session/data/provider/session_detail_provider.dart';
 import 'package:app/feature/session/ui/widget/session_bookmark_button.dart';
 import 'package:app/feature/session/ui/widget/session_speaker_widget.dart';
+import 'package:app/feature/session/ui/widget/youtube_archive_player.dart';
 import 'package:app/feature/session/util/event_time.dart';
 import 'package:app/feature/session/util/session_language.dart';
 import 'package:data/data.dart';
@@ -84,6 +85,11 @@ class SessionDetailsContentWidget extends ConsumerWidget {
                 key: const ValueKey('session-details-content'),
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  if (archiveUri != null) ...[
+                    const SizedBox(height: 16),
+                    YouTubeArchivePlayer(archiveUri: archiveUri, title: title),
+                    const SizedBox(height: 16),
+                  ],
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                     child: Wrap(
@@ -184,34 +190,20 @@ class SessionDetailsContentWidget extends ConsumerWidget {
                     icon: Icons.room_outlined,
                     title: data.venue?.name.resolve(locale) ?? t.sessionTimetable.venue.unknown,
                   ),
-                  if (archiveUri != null || sessionizeUri != null) ...[
+                  if (sessionizeUri != null) ...[
                     _SectionHeader(title: t.sessionDetails.links),
-                    if (archiveUri != null)
-                      _DetailListTile(
-                        icon: Icons.play_circle_outline,
-                        title: t.sessionDetails.archive,
-                        subtitle: archiveUri.toString(),
-                        onTap: () => unawaited(
-                          launchExternalUrl(
-                            context,
-                            uri: archiveUri,
-                            failureMessage: t.links.openError,
-                          ),
+                    _DetailListTile(
+                      icon: Icons.open_in_new,
+                      title: t.sessionDetails.sessionize,
+                      subtitle: sessionizeUri.toString(),
+                      onTap: () => unawaited(
+                        launchExternalUrl(
+                          context,
+                          uri: sessionizeUri,
+                          failureMessage: t.links.openError,
                         ),
                       ),
-                    if (sessionizeUri != null)
-                      _DetailListTile(
-                        icon: Icons.open_in_new,
-                        title: t.sessionDetails.sessionize,
-                        subtitle: sessionizeUri.toString(),
-                        onTap: () => unawaited(
-                          launchExternalUrl(
-                            context,
-                            uri: sessionizeUri,
-                            failureMessage: t.links.openError,
-                          ),
-                        ),
-                      ),
+                    ),
                   ],
                   const SizedBox(height: 32),
                 ],

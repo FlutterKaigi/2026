@@ -17,4 +17,4 @@ export 'src/model/speaker.dart' show Speaker;
 export 'src/model/timeline_event.dart' show TimelineEvent;
 export 'src/model/venue.dart' show Venue;
 
-export 'src/youtube_archive_url.dart' show youtubeArchiveUri;
+export 'src/youtube_archive_url.dart' show youtubeArchiveEmbedUri, youtubeArchiveUri;

@@ -1,11 +1,14 @@
 import 'dart:async';
+import 'dart:ui' show SemanticsHitTestBehavior;
 
 import 'package:app/core/extension/locale_map_extension.dart';
 import 'package:app/core/i18n/strings.g.dart';
 import 'package:app/core/ui/launch_external_url.dart';
 import 'package:app/feature/session/data/provider/session_timetable_provider.dart';
+import 'package:app/feature/session/ui/widget/youtube_archive_player.dart';
 import 'package:app/feature/session/util/event_time.dart';
 import 'package:data/data.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -29,16 +32,27 @@ Future<void> showTimelineEventDetailsDialog(
   final archiveUri = youtubeArchiveUri(entry.timelineEvent!.archiveUrl);
   final theme = Theme.of(context);
 
-  return showDialog<void>(
-    context: context,
-    builder: (context) => AlertDialog(
-      key: const ValueKey('timeline-event-details-dialog'),
-      scrollable: true,
-      title: Text(entry.timelineEvent!.title.resolve(locale)),
-      contentTextStyle: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-      content: Column(
+  Widget buildDialog(BuildContext context) => AlertDialog(
+    key: const ValueKey('timeline-event-details-dialog'),
+    scrollable: true,
+    constraints: archiveUri == null ? null : const BoxConstraints(maxWidth: 720),
+    insetPadding: EdgeInsets.symmetric(horizontal: archiveUri == null ? 40 : 16, vertical: 24),
+    contentPadding: EdgeInsets.fromLTRB(archiveUri == null ? 24 : 16, 16, archiveUri == null ? 24 : 16, 24),
+    title: Text(entry.timelineEvent!.title.resolve(locale)),
+    contentTextStyle: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+    content: SizedBox(
+      width: archiveUri == null ? null : 640,
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          if (archiveUri != null) ...[
+            YouTubeArchivePlayer(
+              archiveUri: archiveUri,
+              title: entry.timelineEvent!.title.resolve(locale),
+              launcher: launcher,
+            ),
+            const SizedBox(height: 16),
+          ],
           _InfoRowWidget(
             icon: Icons.calendar_today_outlined,
             label: DateFormat('yyyy/MM/dd').format(toEventTime(entry.startsAt)),
@@ -68,25 +82,61 @@ Future<void> showTimelineEventDetailsDialog(
           ],
         ],
       ),
-      actions: [
-        if (archiveUri != null)
-          TextButton.icon(
-            onPressed: () => unawaited(
-              launchExternalUrl(
-                context,
-                uri: archiveUri,
-                failureMessage: Translations.of(context).links.openError,
-                launcher: launcher,
-              ),
-            ),
-            icon: const Icon(Icons.play_circle_outline),
-            label: Text(Translations.of(context).sessionDetails.archive),
-          ),
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: Text(MaterialLocalizations.of(context).closeButtonLabel),
-        ),
-      ],
+    ),
+    actions: [
+      TextButton(
+        onPressed: () => Navigator.pop(context),
+        child: Text(MaterialLocalizations.of(context).closeButtonLabel),
+      ),
+    ],
+  );
+
+  if (kIsWeb && archiveUri != null) {
+    return _showWebArchiveDialog(context, buildDialog);
+  }
+  return showDialog<void>(context: context, builder: buildDialog);
+}
+
+Future<void> _showWebArchiveDialog(BuildContext context, WidgetBuilder builder) {
+  final navigator = Navigator.of(context, rootNavigator: true);
+  final themes = InheritedTheme.capture(from: context, to: navigator.context);
+  // DialogRoute adds an opaque, full-screen semantics node that intercepts
+  // pointer events before they reach HtmlElementView. Keep the modal route's
+  // semantics and focus trap without that extra pointer-event surface.
+  return navigator.push<void>(
+    _WebArchiveDialogRoute(
+      barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+      barrierColor: DialogTheme.of(context).barrierColor ?? Colors.black54,
+      pageBuilder: (context, animation, secondaryAnimation) => SafeArea(child: themes.wrap(Builder(builder: builder))),
+      transitionBuilder: (context, animation, secondaryAnimation, child) => FadeTransition(
+        opacity: animation.drive(CurveTween(curve: Curves.easeOut)),
+        child: child,
+      ),
+    ),
+  );
+}
+
+class _WebArchiveDialogRoute extends RawDialogRoute<void> {
+  _WebArchiveDialogRoute({
+    required super.pageBuilder,
+    required super.barrierLabel,
+    required super.barrierColor,
+    required super.transitionBuilder,
+  }) : super(
+         traversalEdgeBehavior: TraversalEdgeBehavior.closedLoop,
+         transitionDuration: const Duration(milliseconds: 150),
+       );
+
+  @override
+  Widget buildModalBarrier() => BlockSemantics(
+    child: Semantics(
+      // The default barrier has its own tappable DOM node. Replace that node
+      // with an accessible dismiss action that does not cover the iframe.
+      hitTestBehavior: SemanticsHitTestBehavior.transparent,
+      label: barrierLabel,
+      onTap: () => navigator?.maybePop(),
+      onDismiss: () => navigator?.maybePop(),
+      child: ExcludeSemantics(child: super.buildModalBarrier()),
     ),
   );
 }

@@ -227,6 +227,8 @@ class _Translations$sessionDetails$en extends Translations$sessionDetails$ja {
 	@override String get speakers => 'Speakers';
 	@override String get links => 'Links';
 	@override String get sessionize => 'Sessionize';
+	@override String get openYoutube => 'Open in YouTube';
+	@override String get archivePlaybackError => 'This archive could not be played. Open it in YouTube.';
 	@override String get archive => 'Watch archive';
 	@override String get feedback => 'Send session feedback';
 	@override String get feedbackDescription => 'Let us know what you thought of this session';
@@ -1608,6 +1610,8 @@ extension on TranslationsEn {
 			'sessionDetails.speakers' => 'Speakers',
 			'sessionDetails.links' => 'Links',
 			'sessionDetails.sessionize' => 'Sessionize',
+			'sessionDetails.openYoutube' => 'Open in YouTube',
+			'sessionDetails.archivePlaybackError' => 'This archive could not be played. Open it in YouTube.',
 			'sessionDetails.archive' => 'Watch archive',
 			'sessionDetails.feedback' => 'Send session feedback',
 			'sessionDetails.feedbackDescription' => 'Let us know what you thought of this session',
@@ -2051,10 +2055,10 @@ extension on TranslationsEn {
 			'supportLt.rateLimited' => 'Too many attempts. Please try again in a few minutes',
 			'supportLt.networkError' => 'A network error occurred. Check your connection and try again',
 			'supportLt.sessionExpired' => 'Your sign-in session has expired. Please sign in again',
-			'supportLt.permissionDenied' => 'Registration is not permitted. Please ask the organizers',
-			'supportLt.registrationFailed' => 'Could not register your participation. Please try again',
 			_ => null,
 		} ?? switch (path) {
+			'supportLt.permissionDenied' => 'Registration is not permitted. Please ask the organizers',
+			'supportLt.registrationFailed' => 'Could not register your participation. Please try again',
 			'countryRegion.asia' => 'Asia',
 			'countryRegion.oceania' => 'Oceania',
 			'countryRegion.americas' => 'Americas',

@@ -9,6 +9,7 @@ import 'package:app/feature/session/data/provider/session_timetable_provider.dar
 import 'package:app/feature/session/data/provider/session_timetable_repository.dart';
 import 'package:app/feature/session/data/provider/session_timetable_view_mode_provider.dart';
 import 'package:app/feature/session/ui/page/session_timetable_page.dart';
+import 'package:app/feature/session/ui/widget/youtube_archive_player.dart';
 import 'package:data/data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -16,6 +17,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'fake_youtube_archive_surface.dart';
 
 void main() {
   for (final viewport in _responsiveRoomViewports.entries) {
@@ -806,7 +809,7 @@ void main() {
   testWidgets('opens an archived event without a venue in both layouts', (tester) async {
     final timetable = _singleDayTimetable([
       SessionTimetableEntry.timelineEvent(
-        timelineEvent: _sharedEvent.copyWith(archiveUrl: 'https://youtu.be/shared-archive'),
+        timelineEvent: _sharedEvent.copyWith(archiveUrl: 'https://youtu.be/dQw4w9WgXcQ'),
         venue: null,
       ),
       _overlapEntry,
@@ -822,7 +825,7 @@ void main() {
 
       final dialog = find.byKey(const ValueKey('timeline-event-details-dialog'));
       expect(dialog, findsOneWidget, reason: '$viewMode');
-      expect(find.descendant(of: dialog, matching: find.text('アーカイブを見る')), findsOneWidget);
+      expect(find.descendant(of: dialog, matching: find.byType(YouTubeArchivePlayer)), findsOneWidget);
       await tester.tap(find.text('閉じる'));
       await tester.pumpAndSettle();
     }
@@ -928,6 +931,7 @@ Future<void> _pumpTimetableState(
       child: ProviderScope(
         overrides: [
           sharedPreferencesProvider.overrideWithValue(sharedPreferences),
+          youtubeArchiveSurfaceBuilderProvider.overrideWithValue(fakeYouTubeArchiveSurface),
           sessionTimetableProvider.overrideWithValue(state),
         ],
         child: _testApp(),

@@ -23,6 +23,8 @@ import 'package:website/components/header.dart' as _header;
 import 'package:website/components/hiring_section.dart' as _hiring_section;
 import 'package:website/components/sponsors_section.dart' as _sponsors_section;
 import 'package:website/components/staff_section.dart' as _staff_section;
+import 'package:website/components/timetable_archive.dart'
+    as _timetable_archive;
 import 'package:website/components/timetable_section.dart'
     as _timetable_section;
 import 'package:website/pages/home.dart' as _home;
@@ -58,6 +60,7 @@ ServerOptions get defaultServerOptions => ServerOptions(
     ..._hiring_section.HiringSection.styles,
     ..._sponsors_section.SponsorsSection.styles,
     ..._staff_section.StaffSection.styles,
+    ..._timetable_archive.TimetableArchive.styles,
     ..._timetable_section.TimetableSection.styles,
     ..._event_info_card.EventInfoCard.styles,
     ..._news_card.NewsCard.styles,

@@ -68,4 +68,4 @@ export 'src/repository/timeline_event_repository.dart' show FirestoreTimelineEve
 export 'src/repository/user_profile_repository.dart' show FirestoreUserProfileRepository, UserProfileRepository;
 export 'src/repository/venue_repository.dart' show FirestoreVenueRepository, VenueRepository;
 
-export 'src/youtube_archive_url.dart' show youtubeArchiveUri;
+export 'src/youtube_archive_url.dart' show youtubeArchiveEmbedUri, youtubeArchiveUri;

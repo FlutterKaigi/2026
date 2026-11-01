@@ -37,6 +37,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   webview_flutter: ^4.14.1
+  webview_flutter_wkwebview: ^3.27.2
   web: ^1.1.1
   cached_network_image: ^3.4.1
   country_flags: ^4.1.2

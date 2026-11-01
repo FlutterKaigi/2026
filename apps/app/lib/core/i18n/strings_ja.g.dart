@@ -346,6 +346,12 @@ class Translations$sessionDetails$ja {
 	/// ja: 'Sessionize'
 	String get sessionize => 'Sessionize';
 
+	/// ja: 'YouTubeで開く'
+	String get openYoutube => 'YouTubeで開く';
+
+	/// ja: 'アーカイブを再生できません。YouTubeで開いてください。'
+	String get archivePlaybackError => 'アーカイブを再生できません。YouTubeで開いてください。';
+
 	/// ja: 'アーカイブを見る'
 	String get archive => 'アーカイブを見る';
 
@@ -2963,6 +2969,8 @@ extension on Translations {
 			'sessionDetails.speakers' => '登壇者',
 			'sessionDetails.links' => 'リンク',
 			'sessionDetails.sessionize' => 'Sessionize',
+			'sessionDetails.openYoutube' => 'YouTubeで開く',
+			'sessionDetails.archivePlaybackError' => 'アーカイブを再生できません。YouTubeで開いてください。',
 			'sessionDetails.archive' => 'アーカイブを見る',
 			'sessionDetails.feedback' => 'セッションのフィードバックを送る',
 			'sessionDetails.feedbackDescription' => 'このセッションの感想をお聞かせください',
@@ -3406,10 +3414,10 @@ extension on Translations {
 			'supportLt.rateLimited' => '試行回数が多すぎます。しばらくしてからもう一度お試しください',
 			'supportLt.networkError' => '通信に失敗しました。通信状況を確認してもう一度お試しください',
 			'supportLt.sessionExpired' => 'サインインの有効期限が切れました。もう一度サインインしてください',
-			'supportLt.permissionDenied' => '参加登録が許可されていません。運営に確認してください',
-			'supportLt.registrationFailed' => '参加登録できませんでした。もう一度お試しください',
 			_ => null,
 		} ?? switch (path) {
+			'supportLt.permissionDenied' => '参加登録が許可されていません。運営に確認してください',
+			'supportLt.registrationFailed' => '参加登録できませんでした。もう一度お試しください',
 			'countryRegion.asia' => 'アジア',
 			'countryRegion.oceania' => 'オセアニア',
 			'countryRegion.americas' => '北米・中南米',
