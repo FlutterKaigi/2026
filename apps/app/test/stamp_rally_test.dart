@@ -5,6 +5,7 @@ import 'package:app/feature/sponsor/data/provider/sponsor_repository.dart';
 import 'package:app/feature/stamp_rally/data/stamp_rally_provider.dart';
 import 'package:app/feature/stamp_rally/ui/page/stamp_rally_link_page.dart';
 import 'package:app/feature/stamp_rally/ui/page/stamp_rally_page.dart';
+import 'package:app/feature/stamp_rally/ui/page/stamp_rally_sponsors_page.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:data/data.dart';
 import 'package:flutter/material.dart';
@@ -49,7 +50,13 @@ void main() {
     stamps = FakeStampRallyRepository(sponsorIds: {'s1', 's2'});
   });
 
-  Widget subject(String location, {ProviderContainer? container}) {
+  Widget subject(
+    String location, {
+    ProviderContainer? container,
+    AppLocale locale = AppLocale.ja,
+    Stream<StampRallySettings> Function()? watchSettings,
+  }) {
+    LocaleSettings.setLocaleSync(locale);
     final router = GoRouter(
       initialLocation: location,
       routes: [
@@ -57,7 +64,11 @@ void main() {
           path: '/s/:token',
           builder: (_, state) => StampRallyLinkPage(token: state.pathParameters['token']!),
         ),
-        GoRoute(path: '/account/stamp-rally', builder: (_, _) => const StampRallyPage()),
+        GoRoute(
+          path: '/account/stamp-rally',
+          builder: (_, _) => const StampRallyPage(),
+          routes: [GoRoute(path: 'sponsors', builder: (_, _) => const StampRallySponsorsPage())],
+        ),
       ],
     );
     addTearDown(router.dispose);
@@ -66,10 +77,11 @@ void main() {
       stampRallyRepositoryProvider.overrideWithValue(stamps),
       sponsorRepositoryProvider.overrideWithValue(_FakeSponsorRepository()),
       appleSignInAvailabilityProvider.overrideWithValue(false),
+      if (watchSettings != null) stampRallySettingsProvider.overrideWith((ref) => watchSettings()),
     ];
     final app = MaterialApp.router(
       routerConfig: router,
-      locale: AppLocale.ja.flutterLocale,
+      locale: locale.flutterLocale,
       supportedLocales: AppLocaleUtils.supportedLocales,
       localizationsDelegates: GlobalMaterialLocalizations.delegates,
     );
@@ -98,6 +110,77 @@ void main() {
     expect(find.text('未達成'), findsOneWidget);
     expect(find.textContaining('スポンサーA'), findsNothing);
   });
+
+  testWidgets('opens sponsor stamp status from the app bar and returns to the roadmap', (tester) async {
+    stamps.card = StampRallyCard(stamps: {'s1': DateTime.utc(2026, 11, 13, 1)}, rewardsRedeemedAt: const {});
+    await tester.pumpWidget(subject('/account/stamp-rally'));
+    await tester.pumpAndSettle();
+
+    final action = find.descendant(of: find.byType(AppBar), matching: find.text(t.stampRally.sponsorsTitle));
+    expect(action, findsOneWidget);
+    await tester.tap(action);
+    await tester.pumpAndSettle();
+
+    expect(find.byType(StampRallySponsorsPage), findsOneWidget);
+    expect(find.text('スポンサーA'), findsOneWidget);
+    expect(find.text('獲得済み'), findsOneWidget);
+    expect(find.text('スポンサーB'), findsOneWidget);
+    expect(find.text('未獲得'), findsOneWidget);
+
+    await tester.tap(find.byType(BackButton));
+    await tester.pumpAndSettle();
+    expect(find.byType(StampRallyPage), findsOneWidget);
+    expect(find.text('1 / 2'), findsOneWidget);
+  });
+
+  testWidgets('sponsor stamp status stays reachable while roadmap settings are loading', (tester) async {
+    await tester.pumpWidget(subject('/account/stamp-rally', watchSettings: () => const Stream.empty()));
+    await tester.pump();
+    await tester.pump();
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+
+    final action = find.descendant(of: find.byType(AppBar), matching: find.text(t.stampRally.sponsorsTitle));
+    expect(action, findsOneWidget);
+    await tester.tap(action);
+    await tester.pumpAndSettle();
+    expect(find.byType(StampRallySponsorsPage), findsOneWidget);
+    expect(find.text('スポンサーA'), findsOneWidget);
+  });
+
+  testWidgets('sponsor stamp status stays reachable when roadmap settings fail', (tester) async {
+    await tester.pumpWidget(
+      subject('/account/stamp-rally', watchSettings: () => Stream.error(Exception('Settings unavailable'))),
+    );
+    await tester.pumpAndSettle();
+
+    final action = find.descendant(of: find.byType(AppBar), matching: find.text(t.stampRally.sponsorsTitle));
+    expect(action, findsOneWidget);
+    await tester.tap(action);
+    await tester.pumpAndSettle();
+    expect(find.byType(StampRallySponsorsPage), findsOneWidget);
+    expect(find.text('スポンサーA'), findsOneWidget);
+  });
+
+  for (final locale in AppLocale.values) {
+    testWidgets('sponsor stamp status action fits a narrow screen in ${locale.languageCode}', (tester) async {
+      tester.view.physicalSize = const Size(320, 640);
+      tester.view.devicePixelRatio = 1;
+      tester.platformDispatcher.textScaleFactorTestValue = 1.5;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+      await tester.runAsync(() => LocaleSettings.setLocale(locale));
+      await tester.pumpWidget(
+        subject('/account/stamp-rally', locale: locale, watchSettings: () => const Stream.empty()),
+      );
+      await tester.pump();
+      await tester.pump();
+
+      final action = find.descendant(of: find.byType(AppBar), matching: find.text(t.stampRally.sponsorsTitle));
+      expect(action.hitTestable(), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+  }
 
   testWidgets('a stamp link scans once and announces a new checkpoint', (tester) async {
     stamps.scanResult = StampRallyStampResult(
