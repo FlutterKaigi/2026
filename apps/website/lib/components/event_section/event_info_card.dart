@@ -50,11 +50,20 @@ class EventInfoCard extends StatelessComponent {
           .text(strings.eventInfoTicketsLabel),
         ]),
         div(classes: 'event-info-card__cta-row', [
-          // 開催終了後はチケット購入・セッション応募の導線を出さず、終了表示のみ。
           button(
             [
               span(classes: 'event-info-card__cta-label', [
                 .text(strings.eventInfoEventEnded),
+              ]),
+            ],
+            classes: 'event-info-card__cta',
+            type: ButtonType.button,
+            disabled: true,
+          ),
+          button(
+            [
+              span(classes: 'event-info-card__cta-label', [
+                .text(strings.eventInfoSessionClosed),
               ]),
             ],
             classes: 'event-info-card__cta',

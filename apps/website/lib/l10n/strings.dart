@@ -121,6 +121,11 @@ class Strings {
     AppLocale.en => 'The Event Has Ended',
   };
 
+  String get eventInfoSessionClosed => switch (locale) {
+    AppLocale.ja => 'セッション募集は終了しました',
+    AppLocale.en => 'Session Submissions Closed',
+  };
+
   String get roadmapCardTitle => switch (locale) {
     AppLocale.ja => 'Roadmap',
     AppLocale.en => 'Roadmap',
