@@ -87,12 +87,6 @@ class Strings {
   String get eventSurveyUrl =>
       'https://docs.google.com/forms/d/e/1FAIpQLSf6f2B9XicSeqIsOYZW4IvxiSuP2piyZFi6uQMZMxhZI1F55g/viewform?usp=header';
 
-  /// Ticket-sales announcement on Medium for the EventInformation ticket button.
-  String get ticketsCtaUrl => switch (locale) {
-    AppLocale.ja => 'https://medium.com/flutterkaigi/flutterkaigi-2026のチケットを販売開始しました-99035b658a7b',
-    AppLocale.en => 'https://medium.com/flutterkaigi/ticket-sales-for-flutterkaigi-2026-are-now-open-1d7c809a3c72',
-  };
-
   // ── Header ──────────────────────────────────────────────────────────
 
   String get navMenuAriaLabel => switch (locale) {
@@ -122,14 +116,9 @@ class Strings {
     AppLocale.en => 'TICKETS',
   };
 
-  String get eventInfoGetTicketsCta => switch (locale) {
-    AppLocale.ja => 'チケットを購入',
-    AppLocale.en => 'Get Tickets',
-  };
-
-  String get eventInfoSessionClosed => switch (locale) {
-    AppLocale.ja => 'セッション募集は終了しました',
-    AppLocale.en => 'Session Submissions Closed',
+  String get eventInfoEventEnded => switch (locale) {
+    AppLocale.ja => '開催は終了しました',
+    AppLocale.en => 'The Event Has Ended',
   };
 
   String get roadmapCardTitle => switch (locale) {
