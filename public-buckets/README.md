@@ -1,6 +1,6 @@
 # FlutterKaigi 2026 Public Buckets
 
-R2 公開バケット `2026-public-production` への公開ファイル（スポンサーロゴ等）アップロードを管理します。
+R2 公開バケット `2026-public-production` への公開ファイル（スポンサーロゴ・個人スポンサー写真・公式写真アルバム）アップロードを管理します。
 
 バケットとカスタムドメインは Terraform (`terraform/cloudflare`) で構築済みです。
 **ファイルの投入は rclone** で行います。
@@ -14,16 +14,22 @@ public-buckets/
 │   ├── logos/                     # ロゴ画像を置く（画像本体は Git 管理外）
 │   ├── upload-sponsor-logos.sh    # アップロードスクリプト
 │   └── README.md                  # ★ ロゴの置き方・形式・使い方
-└── individual-photos/             # 個人スポンサー写真 アップロードツール（→ individual/ プレフィックス）
-    ├── photos/                    # 写真を置く（画像本体は Git 管理外）
-    ├── upload-individual-photos.sh # アップロードスクリプト
+├── individual-photos/             # 個人スポンサー写真 アップロードツール（→ individual/ プレフィックス）
+│   ├── photos/                    # 写真を置く（画像本体は Git 管理外）
+│   ├── upload-individual-photos.sh # アップロードスクリプト
+│   └── README.md                  # ★ 写真の置き方・形式・使い方
+└── album-photos/                  # 公式写真アルバム（トップの写真ゾーン）アップロードツール（→ album/ プレフィックス）
+    ├── source/                    # 元写真を置く（画像本体は Git 管理外）
+    ├── photos/                    # 変換後の webp を出力（画像本体は Git 管理外）
+    ├── convert-album-photos.sh    # 変換スクリプト
+    ├── upload-album-photos.sh     # アップロードスクリプト
     └── README.md                  # ★ 写真の置き方・形式・使い方
 ```
 
-企業スポンサーと個人スポンサーは同じバケットを使いますが、R2 上のプレフィックスを
-`logos/` と `individual/` に分けて独立して管理しています。
+企業スポンサー・個人スポンサー・公式写真アルバムは同じバケットを使いますが、R2 上のプレフィックスを
+`logos/`・`individual/`・`album/` に分けて独立して管理しています。
 置き方・形式・公開URL・アップロード手順は、ツール直下の
-[`sponsor-logos/README.md`](sponsor-logos/README.md) / [`individual-photos/README.md`](individual-photos/README.md)
+[`sponsor-logos/README.md`](sponsor-logos/README.md) / [`individual-photos/README.md`](individual-photos/README.md) / [`album-photos/README.md`](album-photos/README.md)
 にまとめています。
 
 ## rclone のセットアップ
@@ -70,9 +76,12 @@ rclone ls r2:2026-public-production
 # プロジェクトルートから
 ./public-buckets/sponsor-logos/upload-sponsor-logos.sh        # 企業スポンサー → logos/
 ./public-buckets/individual-photos/upload-individual-photos.sh # 個人スポンサー → individual/
+./public-buckets/album-photos/upload-album-photos.sh           # 公式写真アルバム → album/
 ```
 
 - `sponsor-logos/logos/` 配下の画像が `r2:2026-public-production/logos/` にアップロードされます。
   数分で `https://2026-bucket.flutterkaigi.jp/logos/<ファイル名>` から取得可能です。
 - `individual-photos/photos/` 配下の画像が `r2:2026-public-production/individual/` にアップロードされます。
   数分で `https://2026-bucket.flutterkaigi.jp/individual/<ファイル名>` から取得可能です。
+- `album-photos/photos/` 配下の `01〜10.webp` と `bg.webp` が `r2:2026-public-production/album/` にアップロードされます。
+  数分で `https://2026-bucket.flutterkaigi.jp/album/<名前>.webp` から取得可能です。
