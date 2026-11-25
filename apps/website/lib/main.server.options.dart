@@ -28,7 +28,6 @@ import 'package:website/components/timetable_archive.dart'
     as _timetable_archive;
 import 'package:website/components/timetable_section.dart'
     as _timetable_section;
-import 'package:website/pages/home.dart' as _home;
 import 'package:website/pages/share_link_fallback.dart' as _share_link_fallback;
 import 'package:website/pages/sponsor_detail.dart' as _sponsor_detail;
 import 'package:website/app.dart' as _app;
@@ -69,7 +68,6 @@ ServerOptions get defaultServerOptions => ServerOptions(
     ..._roadmap_card.RoadmapCard.styles,
     ..._social_link_card.SocialLinkCard.styles,
     ..._staff_card.StaffCard.styles,
-    ..._home.Home.styles,
     ..._share_link_fallback.ShareLinkFallbackPage.styles,
     ..._sponsor_detail.SponsorDetailPage.styles,
   ],

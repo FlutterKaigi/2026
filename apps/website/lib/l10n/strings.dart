@@ -65,18 +65,6 @@ class Strings {
 
   final AppLocale locale;
 
-  String get venue => switch (locale) {
-    AppLocale.ja => '浜松町コンベンションホール',
-    AppLocale.en => 'Hamamatsucho Convention Hall',
-  };
-
-  String get heroTagline => switch (locale) {
-    AppLocale.ja => '会って、話して、熱くなる。',
-    AppLocale.en => 'Connect, Converse, Ignite.',
-  };
-
-  String get heroThemeName => '〜Assemble〜';
-
   /// Hero CTA label — invites attendees to complete the event survey.
   String get heroSurveyCta => switch (locale) {
     AppLocale.ja => '全体アンケートのお願い',
