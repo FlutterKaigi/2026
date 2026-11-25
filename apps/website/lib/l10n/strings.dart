@@ -146,6 +146,31 @@ class Strings {
     AppLocale.en => 'Show Less',
   };
 
+  // ── Photo album hero ────────────────────────────────────────────────
+
+  /// 見出しの 1 行目 / 2 行目（ja は「あの瞬間を」「もう一度」、en は "Relive" "that moment"）。
+  /// 句読点は付けない。
+  String get photoAlbumHeadlineLine1 => switch (locale) {
+    AppLocale.ja => 'あの瞬間を',
+    AppLocale.en => 'Relive',
+  };
+
+  String get photoAlbumHeadlineLine2 => switch (locale) {
+    AppLocale.ja => 'もう一度',
+    AppLocale.en => 'that moment',
+  };
+
+  String get photoAlbumCta => switch (locale) {
+    AppLocale.ja => 'アルバムを見る',
+    AppLocale.en => 'View the Album',
+  };
+
+  /// アルバム公開前（URL 未設定）に出す無効ボタンのラベル。
+  String get photoAlbumCtaUpcoming => switch (locale) {
+    AppLocale.ja => '近日公開',
+    AppLocale.en => 'Coming Soon',
+  };
+
   String get latestUpdatesCta => switch (locale) {
     AppLocale.ja => 'FlutterKaigi 2026 スポンサー募集について',
     AppLocale.en => 'FlutterKaigi 2026 Sponsorship Opportunities',

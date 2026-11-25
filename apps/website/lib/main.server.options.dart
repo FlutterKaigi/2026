@@ -21,6 +21,7 @@ import 'package:website/components/exchange_counter_section.dart'
 import 'package:website/components/footer.dart' as _footer;
 import 'package:website/components/header.dart' as _header;
 import 'package:website/components/hiring_section.dart' as _hiring_section;
+import 'package:website/components/photo_album_hero.dart' as _photo_album_hero;
 import 'package:website/components/sponsors_section.dart' as _sponsors_section;
 import 'package:website/components/staff_section.dart' as _staff_section;
 import 'package:website/components/timetable_archive.dart'
@@ -58,6 +59,7 @@ ServerOptions get defaultServerOptions => ServerOptions(
     ..._footer.Footer.styles,
     ..._header.Header.styles,
     ..._hiring_section.HiringSection.styles,
+    ..._photo_album_hero.PhotoAlbumHero.styles,
     ..._sponsors_section.SponsorsSection.styles,
     ..._staff_section.StaffSection.styles,
     ..._timetable_archive.TimetableArchive.styles,
